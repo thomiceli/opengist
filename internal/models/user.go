@@ -1,5 +1,7 @@
 package models
 
+import "gorm.io/gorm"
+
 type User struct {
 	ID        uint   `gorm:"primaryKey"`
 	Username  string `form:"username" gorm:"uniqueIndex" validate:"required,max=24,alphanum,notreserved"`
@@ -46,6 +48,21 @@ func CreateUser(user *User) error {
 }
 
 func DeleteUserByID(userid string) error {
+	// Decrement likes counter for all gists liked by this user
+	// The likes will be automatically deleted by the foreign key constraint
+	err := db.Model(&Gist{}).
+		Omit("updated_at").
+		Where("id IN (?)", db.
+			Select("gist_id").
+			Table("likes").
+			Where("user_id = ?", userid),
+		).
+		UpdateColumn("nb_likes", gorm.Expr("nb_likes - 1")).
+		Error
+	if err != nil {
+		return err
+	}
+
 	return db.Delete(&User{}, "id = ?", userid).Error
 }
 

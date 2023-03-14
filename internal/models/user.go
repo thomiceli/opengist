@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"strconv"
+)
 
 type User struct {
 	ID        uint   `gorm:"primaryKey"`
@@ -12,6 +15,34 @@ type User struct {
 	Gists   []Gist   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys []SSHKey `gorm:"foreignKey:UserID"`
 	Liked   []Gist   `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+}
+
+func (u *User) BeforeDelete(tx *gorm.DB) error {
+	// Decrement likes counter for all gists liked by this user
+	// The likes will be automatically deleted by the foreign key constraint
+	err := tx.Model(&Gist{}).
+		Omit("updated_at").
+		Where("id IN (?)", tx.
+			Select("gist_id").
+			Table("likes").
+			Where("user_id = ?", u.ID),
+		).
+		UpdateColumn("nb_likes", gorm.Expr("nb_likes - 1")).
+		Error
+	if err != nil {
+		return err
+	}
+
+	// Decrement forks counter for all gists forked by this user
+	return tx.Model(&Gist{}).
+		Omit("updated_at").
+		Where("id IN (?)", tx.
+			Select("forked_id").
+			Table("gists").
+			Where("user_id = ?", u.ID),
+		).
+		UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).
+		Error
 }
 
 func DoesUserExists(userName string, count *int64) error {
@@ -47,23 +78,14 @@ func CreateUser(user *User) error {
 	return db.Create(&user).Error
 }
 
-func DeleteUserByID(userid string) error {
-	// Decrement likes counter for all gists liked by this user
-	// The likes will be automatically deleted by the foreign key constraint
-	err := db.Model(&Gist{}).
-		Omit("updated_at").
-		Where("id IN (?)", db.
-			Select("gist_id").
-			Table("likes").
-			Where("user_id = ?", userid),
-		).
-		UpdateColumn("nb_likes", gorm.Expr("nb_likes - 1")).
-		Error
+func DeleteUser(userid string) error {
+	// trigger hook with a user ID
+	intId, err := strconv.ParseUint(userid, 10, 64)
 	if err != nil {
 		return err
 	}
-
-	return db.Delete(&User{}, "id = ?", userid).Error
+	var user = &User{ID: uint(intId)}
+	return db.Where("id = ?", userid).Delete(&user).Error
 }
 
 func SetAdminUser(user *User) error {

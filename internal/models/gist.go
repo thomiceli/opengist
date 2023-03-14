@@ -1,6 +1,7 @@
 package models
 
 import (
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -39,6 +40,15 @@ type Commit struct {
 	Timestamp string
 	Changed   string
 	Files     []File
+}
+
+func (g *Gist) BeforeDelete(tx *gorm.DB) error {
+	// Decrement fork counter if the gist was forked
+	err := tx.Model(&Gist{}).
+		Omit("updated_at").
+		Where("id = ?", g.ForkedID).
+		UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).Error
+	return err
 }
 
 func GetGist(user string, gistUuid string) (*Gist, error) {
@@ -139,10 +149,6 @@ func RemoveUserLike(gist *Gist, user *User) error {
 
 func IncrementGistForkCount(gist *Gist) error {
 	return db.Model(&gist).Omit("updated_at").Update("nb_forks", gist.NbForks+1).Error
-}
-
-func DecrementGistForkCount(gist *Gist) error {
-	return db.Model(&gist).Omit("updated_at").Update("nb_forks", gist.NbForks-1).Error
 }
 
 func GetForkedGist(gist *Gist, user *User) (*Gist, error) {

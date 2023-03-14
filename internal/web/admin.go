@@ -78,7 +78,7 @@ func adminGists(ctx echo.Context) error {
 }
 
 func adminUserDelete(ctx echo.Context) error {
-	if err := models.DeleteUserByID(ctx.Param("user")); err != nil {
+	if err := models.DeleteUser(ctx.Param("user")); err != nil {
 		return errorRes(500, "Cannot delete this user", err)
 	}
 

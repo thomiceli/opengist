@@ -159,6 +159,8 @@ func Start() {
 			g3.POST("/edit", processCreate, logged, writePermission)
 			g3.POST("/like", like, logged)
 			g3.GET("/likes", likes)
+			g3.POST("/fork", fork, logged)
+			g3.GET("/forks", forks)
 		}
 	}
 

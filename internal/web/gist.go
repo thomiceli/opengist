@@ -3,8 +3,10 @@ package web
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 	"html/template"
 	"net/url"
 	"opengist/internal/config"
@@ -413,6 +415,49 @@ func like(ctx echo.Context) error {
 	return redirect(ctx, redirectTo)
 }
 
+func fork(ctx echo.Context) error {
+	var gist = getData(ctx, "gist").(*models.Gist)
+	currentUser := getUserLogged(ctx)
+
+	alreadyForked, err := models.GetForkedGist(gist, currentUser)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return errorRes(500, "Error checking if gist is already forked", err)
+	}
+
+	if alreadyForked.ID != 0 {
+		return redirect(ctx, "/"+alreadyForked.User.Username+"/"+alreadyForked.Uuid)
+	}
+
+	uuidGist, err := uuid.NewRandom()
+	if err != nil {
+		return errorRes(500, "Error creating an UUID", err)
+	}
+
+	newGist := &models.Gist{
+		Uuid:            strings.Replace(uuidGist.String(), "-", "", -1),
+		Title:           gist.Title,
+		Preview:         gist.Preview,
+		PreviewFilename: gist.PreviewFilename,
+		Description:     gist.Description,
+		Private:         gist.Private,
+		UserID:          currentUser.ID,
+		ForkedID:        gist.ID,
+	}
+
+	if err = models.CreateForkedGist(newGist); err != nil {
+		return errorRes(500, "Error forking the gist in database", err)
+	}
+
+	if err = git.ForkClone(gist.User.Username, gist.Uuid, currentUser.Username, newGist.Uuid); err != nil {
+		return errorRes(500, "Error cloning the repository while forking", err)
+	}
+	if err = models.IncrementGistForkCount(gist); err != nil {
+		return errorRes(500, "Error incrementing the fork count", err)
+	}
+
+	return redirect(ctx, "/"+currentUser.Username+"/"+newGist.Uuid)
+}
+
 func rawFile(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*models.Gist)
 	fileContent, err := git.GetFileContent(
@@ -505,7 +550,7 @@ func likes(ctx echo.Context) error {
 
 	pageInt := getPage(ctx)
 
-	likers, err := models.GetUsersLikesForGists(gist, pageInt-1)
+	likers, err := models.GetUsersLikesForGist(gist, pageInt-1)
 	if err != nil {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}
@@ -517,4 +562,28 @@ func likes(ctx echo.Context) error {
 	setData(ctx, "htmlTitle", "Likes for "+gist.Title)
 	setData(ctx, "revision", "HEAD")
 	return html(ctx, "likes.html")
+}
+
+func forks(ctx echo.Context) error {
+	var gist = getData(ctx, "gist").(*models.Gist)
+	pageInt := getPage(ctx)
+
+	currentUser := getUserLogged(ctx)
+	var fromUserID uint = 0
+	if currentUser != nil {
+		fromUserID = currentUser.ID
+	}
+
+	forks, err := models.GetUsersForksForGist(gist, fromUserID, pageInt-1)
+	if err != nil {
+		return errorRes(500, "Error getting users who liked this gist", err)
+	}
+
+	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Uuid+"/forks"); err != nil {
+		return errorRes(404, "Page not found", nil)
+	}
+
+	setData(ctx, "htmlTitle", "Forks for "+gist.Title)
+	setData(ctx, "revision", "HEAD")
+	return html(ctx, "forks.html")
 }

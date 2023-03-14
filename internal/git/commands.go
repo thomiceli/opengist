@@ -10,28 +10,21 @@ import (
 	"strings"
 )
 
-func GetRepositoryPath(user string, gist string) (string, error) {
-	return filepath.Join(config.GetHomeDir(), "repos", strings.ToLower(user), gist), nil
+func RepositoryPath(user string, gist string) string {
+	return filepath.Join(config.GetHomeDir(), "repos", strings.ToLower(user), gist)
 }
 
-func getTmpRepositoryPath(gistId string) (string, error) {
-	dirname, err := getTmpRepositoriesPath()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(dirname, gistId), nil
+func TmpRepositoryPath(gistId string) string {
+	dirname := TmpRepositoriesPath()
+	return filepath.Join(dirname, gistId)
 }
 
-func getTmpRepositoriesPath() (string, error) {
-	return filepath.Join(config.GetHomeDir(), "tmp", "repos"), nil
+func TmpRepositoriesPath() string {
+	return filepath.Join(config.GetHomeDir(), "tmp", "repos")
 }
 
 func InitRepository(user string, gist string) error {
-	repositoryPath, err := GetRepositoryPath(user, gist)
-
-	if err != nil {
-		return err
-	}
+	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
 		"git",
@@ -40,7 +33,7 @@ func InitRepository(user string, gist string) error {
 		repositoryPath,
 	)
 
-	_, err = cmd.Output()
+	_, err := cmd.Output()
 	if err != nil {
 		return err
 	}
@@ -69,10 +62,7 @@ func InitRepository(user string, gist string) error {
 }
 
 func GetNumberOfCommitsOfRepository(user string, gist string) (string, error) {
-	repositoryPath, err := GetRepositoryPath(user, gist)
-	if err != nil {
-		return "", err
-	}
+	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
 		"git",
@@ -87,10 +77,7 @@ func GetNumberOfCommitsOfRepository(user string, gist string) (string, error) {
 }
 
 func GetFilesOfRepository(user string, gist string, commit string) ([]string, error) {
-	repositoryPath, err := GetRepositoryPath(user, gist)
-	if err != nil {
-		return nil, err
-	}
+	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
 		"git",
@@ -110,10 +97,7 @@ func GetFilesOfRepository(user string, gist string, commit string) ([]string, er
 }
 
 func GetFileContent(user string, gist string, commit string, filename string) (string, error) {
-	repositoryPath, err := GetRepositoryPath(user, gist)
-	if err != nil {
-		return "", err
-	}
+	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
 		"git",
@@ -128,10 +112,7 @@ func GetFileContent(user string, gist string, commit string, filename string) (s
 }
 
 func GetLog(user string, gist string, skip string) (string, error) {
-	repositoryPath, err := GetRepositoryPath(user, gist)
-	if err != nil {
-		return "", err
-	}
+	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
 		"git",
@@ -156,19 +137,13 @@ func GetLog(user string, gist string, skip string) (string, error) {
 }
 
 func CloneTmp(user string, gist string, gistTmpId string) error {
-	repositoryPath, err := GetRepositoryPath(user, gist)
-	if err != nil {
-		return err
-	}
+	repositoryPath := RepositoryPath(user, gist)
 
-	tmpPath, err := getTmpRepositoriesPath()
-	if err != nil {
-		return err
-	}
+	tmpPath := TmpRepositoriesPath()
 
 	tmpRepositoryPath := path.Join(tmpPath, gistTmpId)
 
-	err = os.RemoveAll(tmpRepositoryPath)
+	err := os.RemoveAll(tmpRepositoryPath)
 	if err != nil {
 		return err
 	}
@@ -191,25 +166,33 @@ func CloneTmp(user string, gist string, gistTmpId string) error {
 	return cmd.Run()
 }
 
-func SetFileContent(gistTmpId string, filename string, content string) error {
-	repositoryPath, err := getTmpRepositoryPath(gistTmpId)
-	if err != nil {
+func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) error {
+	repositoryPathSrc := RepositoryPath(userSrc, gistSrc)
+	repositoryPathDst := RepositoryPath(userDst, gistDst)
+
+	cmd := exec.Command("git", "clone", "--bare", repositoryPathSrc, repositoryPathDst)
+	if err := cmd.Run(); err != nil {
 		return err
 	}
+
+	cmd = exec.Command("git", "config", "user.name", userDst)
+	cmd.Dir = repositoryPathDst
+	return cmd.Run()
+}
+
+func SetFileContent(gistTmpId string, filename string, content string) error {
+	repositoryPath := TmpRepositoryPath(gistTmpId)
 
 	return os.WriteFile(filepath.Join(repositoryPath, filename), []byte(content), 0644)
 }
 
 func AddAll(gistTmpId string) error {
-	tmpPath, err := getTmpRepositoryPath(gistTmpId)
-	if err != nil {
-		return err
-	}
+	tmpPath := TmpRepositoryPath(gistTmpId)
 
 	// in case of a change where only a file name has its case changed
 	cmd := exec.Command("git", "rm", "-r", "--cached", "--ignore-unmatch", ".")
 	cmd.Dir = tmpPath
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		return err
 	}
@@ -222,27 +205,21 @@ func AddAll(gistTmpId string) error {
 
 func Commit(gistTmpId string) error {
 	cmd := exec.Command("git", "commit", "--allow-empty", "-m", `"Opengist commit"`)
-	tmpPath, err := getTmpRepositoryPath(gistTmpId)
-	if err != nil {
-		return err
-	}
+	tmpPath := TmpRepositoryPath(gistTmpId)
 	cmd.Dir = tmpPath
 
 	return cmd.Run()
 }
 
 func Push(gistTmpId string) error {
-	tmpRepositoryPath, err := getTmpRepositoryPath(gistTmpId)
-	if err != nil {
-		return err
-	}
+	tmpRepositoryPath := TmpRepositoryPath(gistTmpId)
 	cmd := exec.Command(
 		"git",
 		"push",
 	)
 	cmd.Dir = tmpRepositoryPath
 
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		return err
 	}
@@ -255,10 +232,7 @@ func DeleteRepository(user string, gist string) error {
 }
 
 func UpdateServerInfo(user string, gist string) error {
-	repositoryPath, err := GetRepositoryPath(user, gist)
-	if err != nil {
-		return err
-	}
+	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command("git", "update-server-info")
 	cmd.Dir = repositoryPath
@@ -266,10 +240,7 @@ func UpdateServerInfo(user string, gist string) error {
 }
 
 func RPCRefs(user string, gist string, service string) ([]byte, error) {
-	repositoryPath, err := GetRepositoryPath(user, gist)
-	if err != nil {
-		return nil, err
-	}
+	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command("git", service, "--stateless-rpc", "--advertise-refs", ".")
 	cmd.Dir = repositoryPath

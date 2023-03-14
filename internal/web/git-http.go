@@ -50,12 +50,9 @@ func gitHttp(ctx echo.Context) error {
 				strings.HasSuffix(ctx.Request().URL.Path, "git-upload-pack") ||
 				ctx.Request().Method == "GET"
 
-			repositoryPath, err := git.GetRepositoryPath(gist.User.Username, gist.Uuid)
-			if err != nil {
-				return errorRes(500, "Cannot get repository path", err)
-			}
+			repositoryPath := git.RepositoryPath(gist.User.Username, gist.Uuid)
 
-			if _, err = os.Stat(repositoryPath); os.IsNotExist(err) {
+			if _, err := os.Stat(repositoryPath); os.IsNotExist(err) {
 				if err != nil {
 					return errorRes(500, "Repository does not exist", err)
 				}

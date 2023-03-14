@@ -59,12 +59,19 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1 inline-flex">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
                                     </svg>
+                                    <span>{{ $gist.NbForks }} forks</span>
+                                </div>
+                                <div class="flex items-center float-right text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1 inline-flex">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                                    </svg>
                                     <span>{{ $gist.NbFiles }} files</span>
                                 </div>
                             </div>
 
                         </div>
                         <h5 class="text-sm text-slate-500 pb-1">Last active <span class="moment-timestamp">{{ $gist.UpdatedAt }}</span>
+                            {{ if $gist.Forked }} • Forked from <a href="/{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Uuid }}">{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Title }}</a> {{ end }}
                             {{ if $gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-slate-300"> Unlisted </span>{{ end }}</h5>
                         <h5 class="text-xs text-slate-300 py-1">{{ $gist.Description }}</h5>
                         <a href="/{{ $gist.User.Username }}/{{ $gist.Uuid }}" class="hover:text-slate-300">

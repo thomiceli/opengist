@@ -53,11 +53,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint) error {
 
 	_ = models.SSHKeyLastUsedNow(keyID)
 
-	repositoryPath, err := git.GetRepositoryPath(gist.User.Username, gist.Uuid)
-	if err != nil {
-		errorSsh("Failed to get repository path", err)
-		return errors.New("internal server error")
-	}
+	repositoryPath := git.RepositoryPath(gist.User.Username, gist.Uuid)
 
 	cmd := exec.Command("git", verb, repositoryPath)
 	cmd.Dir = repositoryPath

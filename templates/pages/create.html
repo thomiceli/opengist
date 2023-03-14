@@ -1,0 +1,49 @@
+{{ template "header" .}}
+<div class="py-10">
+    <header>
+
+        <h1 class="text-2xl font-bold leading-tight text-slate-300">
+            New Gist
+        </h1>
+
+    </header>
+    <main class="mt-4">
+        <form id="create" class="space-y-4" method="post" action="/">
+            <div class="grid grid-cols-12 gap-x-4">
+                <div class="col-span-4">
+                    <div class="mt-1">
+                        <input type="text" placeholder="Title" name="title" id="title" class="bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-700 rounded-md">
+                    </div>
+                </div>
+                <div class="col-span-8">
+                    <div class="mt-1">
+                        <input type="text" placeholder="Description" name="description" id="description" class="bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-700 rounded-md">
+                    </div>
+                </div>
+
+            </div>
+            <div id="editors" class="space-y-4">
+                <div class="rounded-md border border-1 border-gray-700 editor">
+                    <div class="border-b-1 border-gray-700 bg-gray-800 my-auto">
+                        <p class="mx-2 my-2 inline-flex">
+                            <input type="text" name="name" placeholder="Filename with extension" style="line-height: 0.05em" class="form-filename bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-700 rounded-md">
+                        </p>
+                    </div>
+                    <input type="hidden" value="" name="content" class="form-filecontent">
+                </div>
+            </div>
+
+            <div class="flex">
+                <button type="button" id="add-file" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Add file</button>
+                <button type="submit" name="private" value="1" class="ml-auto inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Create unlisted gist</button>
+                <button type="submit" name="private" value="0" class="ml-2 inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Create public gist</button>
+            </div>
+            {{ .csrfHtml }}
+        </form>
+
+    </main>
+</div>
+
+<script type="module" src="http://localhost:3000/editor.js"></script>
+
+{{ template "footer" .}}

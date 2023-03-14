@@ -1,0 +1,55 @@
+{{ template "header" .}}
+{{ template "admin_header" .}}
+
+<div class="sm:flex sm:space-x-4 space-y-4 sm:space-y-0">
+    <div class="sm:overflow-hidden ">
+        <div class="space-y-2 bg-gray-800 py-6 px-6 rounded-md border border-gray-700">
+            <div>
+                <span class="text-base font-bold leading-6 text-slate-300">Versions</span>
+            </div>
+            <table class="table-fixed">
+                <tbody>
+                    <tr>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-300 ">Opengist</td>
+                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-300">{{ .opengistVersion }}</td>
+                    </tr>
+                    <tr>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-300 ">Go</td>
+                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-300">{{ .goVersion }}</td>
+                    </tr>
+                    <tr>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-300 ">Git</td>
+                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-300">{{ .gitVersion }} </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="sm:overflow-hidden ">
+        <div class="space-y-2 bg-gray-800 py-6 px-6 rounded-md border border-gray-700">
+            <div>
+                <span class="text-base font-bold leading-6 text-slate-300">Stats</span>
+            </div>
+            <table class="table-fixed">
+                <tbody>
+                    <tr>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-300 ">Users</td>
+                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-300">{{ .countUsers }}</td>
+                    </tr>
+                    <tr>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-300 ">Gists</td>
+                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-300">{{ .countGists }}</td>
+                    </tr>
+                    <tr>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-300 ">SSH keys</td>
+                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-300">{{ .countKeys }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{ template "admin_footer" .}}
+{{ template "footer" .}}

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+disallowed_files=()
+
+while read old_rev new_rev ref
+do
+  for file in $(git diff --name-only $old_rev $new_rev)
+  do
+    if [[ $file =~ / ]]; then
+      disallowed_files+=($file)
+    fi
+  done
+done
+
+if [ ${#disallowed_files[@]} -gt 0 ]; then
+  echo "Pushing files in folders is not allowed:"
+  for file in "${disallowed_files[@]}"; do
+    echo "  $file"
+  done
+  exit 1
+fi

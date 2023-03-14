@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    ul, ol {
+        list-style: revert;
+    }
+}
+
+a:hover {
+    @apply text-primary-400;
+}
+
+input {
+    @apply placeholder-gray-400;
+}
+
+:not(pre) > code[class*="language-"], pre[class*="language-"] {
+    @apply bg-gray-900 mt-1 pt-1 !important;
+}
+
+pre {
+    font-size: 0.8em !important;
+}
+
+.code {
+    font-family: Menlo,Consolas,Liberation Mono,monospace;
+}
+
+.code .line-num {
+    width: 4%;
+    text-align: right;
+}
+
+.red-diff {
+    background-color: rgba(255, 0, 0, .1);
+}
+
+.green-diff {
+    background-color: rgba(0, 255, 128, .1);
+}
+
+.gray-diff {
+    background-color: rgba(143, 143, 143, 0.38);
+    @apply py-4 !important
+}
+
+#logged-button:hover .username {
+    @apply hidden !important
+}
+
+#logged-button:hover .logout {
+    @apply block !important
+}
+
+.cm-line, .cm-gutter {
+    @apply bg-gray-900 !important;
+    caret-color: white !important;
+    padding: 0 !important;
+}
+
+.cm-activeLine, .cm-activeLineGutter {
+    @apply bg-gray-800 !important;
+}
+
+.cm-gutters {
+    border: none !important;
+}
+
+.cm-gutterElement {
+    @apply text-gray-300 px-4 !important
+}
+
+.code td {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.code tbody {
+    line-height: 18.2px;
+}
+
+#editor {
+    height: 337px;
+    max-height: 337px;
+}
+
+.cm-editor {
+    height: 337px;
+    max-height: 337px;
+}
+
+.hljs {
+    background: none !important;
+}
+
+.line-code.selected {
+    background-color: rgba(65, 25, 63, 0.46) !important;
+    box-shadow: inset 4px 0 0 rgb(107, 38, 102) !important;
+}
+
+.line-code {
+    @apply pl-2;
+}
+
+.line-num {
+    @apply cursor-pointer text-slate-400 hover:text-white;
+}

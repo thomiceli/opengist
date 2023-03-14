@@ -1,0 +1,58 @@
+{{ template "header" .}}
+<div class="py-10">
+    <header>
+
+        <h1 class="text-2xl font-bold leading-tight text-slate-300">
+            {{ .title }}
+        </h1>
+
+    </header>
+    <main class="mt-4">
+        {{ if and .signupDisabled (ne .title "Login") }}
+        <p class="italic">Administrator has disabled signing up</p>
+        {{ else }}
+        <div class="sm:col-span-6">
+            <div class="mt-8  sm:w-full sm:max-w-md">
+                <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <form class="space-y-6" action="#" method="post">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-slate-300"> Username </label>
+                            <div class="mt-1">
+                                <input id="username" name="username" type="text" required class="bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <label for="password" class="block text-sm font-medium text-slate-300"> Password </label>
+                            <div class="mt-1">
+                                <input id="password" name="password" type="password" autocomplete="current-password" required class="bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                            </div>
+                        </div>
+                        {{ if eq .title "Login" }}
+                        <div class="flex">
+                            <div class="flex-auto">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Login</button>
+                            </div>
+                            {{ if not .signupDisabled }}
+                            <span class="float-right text-sm py-2 underline"><a href="/register">Register instead →</a></span>
+                            {{ end }}
+                        </div>
+                        {{ else }}
+                        <div class="flex">
+                            <div class="flex-auto">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Register</button>
+                            </div>
+                            <span class="float-right text-sm py-2 underline"><a href="/login">Login instead →</a></span>
+
+                        </div>
+                        {{ end }}
+                        {{ .csrfHtml }}
+                    </form>
+                </div>
+            </div>
+        </div>
+        {{ end }}
+    </main>
+</div>
+
+{{ template "footer" .}}

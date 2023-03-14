@@ -1,0 +1,45 @@
+{{ template "header" .}}
+{{ template "gist_header" .}}
+    {{ if .files }}
+        <div class="grid gap-y-4">
+        {{ range $filename, $content := .files }}
+        <div class="rounded-md border border-1 border-gray-700 overflow-auto">
+            <div class="border-b-1 border-gray-700 bg-gray-800 my-auto block">
+                <div class="ml-4 py-1.5 flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    <span class="flex-auto ml-2 text-sm text-slate-300 filename" id="file-{{ slug $filename }}"><a href="#file-{{ slug $filename }}">{{ $filename }}</a></span>
+
+                    <button class="float-right mx-2 px-2.5 py-0.5 leading-4 rounded-full text-xs font-medium bg-gray-600 border border-gray-500 hover:bg-gray-700 hover:text-slate-300 select-none copy-gist-btn"> Copy </button>
+                    <a href="/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$filename}}" class="float-right mr-2 px-2.5 py-0.5 leading-4 rounded-full text-xs font-medium bg-gray-600 border border-gray-500 hover:bg-gray-700 hover:text-slate-300 select-none"> Raw </a>
+                    <div class="hidden gist-content">{{ $content }}</div>
+                </div>
+            </div>
+            <div class="code overflow-auto">
+                {{ if isMarkdown $filename }}
+                    <div class="markdown markdown-body p-8">{{ $content }}</div>
+                {{ else }}
+                    {{ $fileslug := slug $filename }}
+                    <table class="table-code w-full whitespace-pre" data-filename-slug="{{ $fileslug }}" data-filename="{{ $filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
+                        <tbody>
+                        {{ $ii := "1" }}
+                        {{ $i := toInt $ii }}
+                        {{ range $line := lines $content }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code">{{ $line }}</td></tr>{{ $i = inc $i }}{{ end }}
+                        </tbody>
+                    </table>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+        </div>
+    {{ else }}
+        <div class="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-slate-300">No content</h3>
+        </div>
+    {{ end }}
+{{ template "gist_footer" .}}
+{{ template "footer" .}}

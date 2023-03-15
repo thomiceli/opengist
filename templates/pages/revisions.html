@@ -8,7 +8,7 @@
             <div class="flex">
             <h3 class="text-sm py-2 flex-auto"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-            </svg><span class="font-bold">{{ $commit.Author }}</span> revised this gist <span class="moment-timestamp font-bold">{{ $commit.Timestamp }}</span>. <a class="underline" href="/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/rev/{{ $commit.Hash }}">Go to revision</a></h3>
+            </svg><span class="font-bold">{{ $commit.Author }}</span> revised this gist <span class="moment-timestamp font-bold">{{ $commit.Timestamp }}</span>. <a href="/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/rev/{{ $commit.Hash }}">Go to revision</a></h3>
                 {{ if ne $commit.Changed "" }}
                     <p class="text-sm float-right py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-flex">

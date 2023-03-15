@@ -74,7 +74,7 @@
                             {{ if $gist.Forked }} • Forked from <a href="/{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Uuid }}">{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Title }}</a> {{ end }}
                             {{ if $gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-slate-300"> Unlisted </span>{{ end }}</h5>
                         <h5 class="text-xs text-slate-300 py-1">{{ $gist.Description }}</h5>
-                        <a href="/{{ $gist.User.Username }}/{{ $gist.Uuid }}" class="hover:text-slate-300">
+                        <a href="/{{ $gist.User.Username }}/{{ $gist.Uuid }}" class="text-slate-300 hover:text-slate-300">
                             <div class="rounded-md border border-1 border-gray-700 overflow-auto hover:border-primary-600">
                                 <div class="code overflow-auto">
                                     {{ if isMarkdown $gist.PreviewFilename }}

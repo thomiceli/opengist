@@ -8,8 +8,12 @@
     }
 }
 
+a {
+    @apply text-primary-500;
+}
+
 a:hover {
-    @apply text-primary-400;
+    @apply text-primary-600;
 }
 
 input {

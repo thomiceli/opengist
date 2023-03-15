@@ -19,10 +19,13 @@ type config struct {
 	LogLevel      string `yaml:"log-level"`
 
 	HTTP struct {
-		Host   string `yaml:"host"`
-		Port   string `yaml:"port"`
-		Domain string `yaml:"domain"`
-		Git    bool   `yaml:"git-enabled"`
+		Host       string `yaml:"host"`
+		Port       string `yaml:"port"`
+		Domain     string `yaml:"domain"`
+		Git        bool   `yaml:"git-enabled"`
+		TLSEnabled bool   `yaml:"tls-enabled"`
+		CertFile   string `yaml:"cert-file"`
+		KeyFile    string `yaml:"key-file"`
 	} `yaml:"http"`
 
 	SSH struct {
@@ -50,6 +53,8 @@ func configWithDefaults() (*config, error) {
 	c.HTTP.Port = "6157"
 	c.HTTP.Domain = "localhost"
 	c.HTTP.Git = true
+
+	c.HTTP.TLSEnabled = false
 
 	c.SSH.Enabled = true
 	c.SSH.Host = "0.0.0.0"

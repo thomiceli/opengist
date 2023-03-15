@@ -102,7 +102,7 @@ func Start() {
 		}
 	}
 
-	e.Use(basicInit)
+	e.Use(sessionInit)
 
 	e.Validator = NewValidator()
 
@@ -168,16 +168,23 @@ func Start() {
 	// Git HTTP routes
 	if config.C.HTTP.Git {
 		e.Any("/:user/:gistname/*", gitHttp, gistInit)
-		debugStr = " (with Git HTTP support)"
+		debugStr = " (with Git over HTTP)"
 	}
 
 	e.Any("/*", noRouteFound)
 
 	addr := config.C.HTTP.Host + ":" + config.C.HTTP.Port
-	log.Info().Msg("Starting HTTP server on http://" + addr + debugStr)
 
-	if err := e.Start(addr); err != nil {
-		log.Fatal().Err(err).Msg("Failed to start HTTP server")
+	if config.C.HTTP.TLSEnabled {
+		log.Info().Msg("Starting HTTPS server on https://" + addr + debugStr)
+		if err := e.StartTLS(addr, config.C.HTTP.CertFile, config.C.HTTP.KeyFile); err != nil {
+			log.Fatal().Err(err).Msg("Failed to start HTTPS server")
+		}
+	} else {
+		log.Info().Msg("Starting HTTP server on http://" + addr + debugStr)
+		if err := e.Start(addr); err != nil {
+			log.Fatal().Err(err).Msg("Failed to start HTTP server")
+		}
 	}
 }
 
@@ -186,14 +193,14 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 		ctxValue := context.WithValue(ctx.Request().Context(), "data", echo.Map{})
 		ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 		setData(ctx, "loadStartTime", time.Now())
+		setData(ctx, "signupDisabled", config.C.DisableSignup)
+
 		return next(ctx)
 	}
 }
 
-func basicInit(next echo.HandlerFunc) echo.HandlerFunc {
+func sessionInit(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		setData(ctx, "signupDisabled", config.C.DisableSignup)
-
 		sess := getSession(ctx)
 		if sess.Values["user"] != nil {
 			user := &models.User{ID: sess.Values["user"].(uint)}

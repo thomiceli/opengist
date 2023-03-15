@@ -1,113 +1,98 @@
 {{ define "gist_header" }}
 <div class="py-10">
     <header>
-        <div class="flex">
-
-            <h1 class="text-2xl font-bold leading-tight break-all">
-                <a href="/{{ .gist.User.Username }}">{{ .gist.User.Username }}</a> <span class="text-slate-300">/</span> <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}">{{ .gist.Title }}</a>
-            </h1>
-            {{ if .userLogged }}
-                <form id="like" class="ml-auto flex items-center" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/like?redirecturl={{ .currentUrl }}">
-                    {{ .csrfHtml }}
-                    <button type="submit" class="ml-auto focus-within:z-10 text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
-                        {{ if not .hasLiked }}
+        <div class="flex flex-col lg:flex-row">
+            <div>
+                <h1 class="text-2xl font-bold leading-tight break-all">
+                    <a href="/{{ .gist.User.Username }}">{{ .gist.User.Username }}</a> <span class="text-slate-300">/</span> <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}">{{ .gist.Title }}</a>
+                </h1>
+            </div>
+            <div class="lg:flex-row flex py-2 lg:py-0 lg:ml-auto">
+                {{ if .userLogged }}
+                    <form id="like" class="flex items-center" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/like?redirecturl={{ .currentUrl }}">
+                        {{ .csrfHtml }}
+                        <button type="submit" class="focus-within:z-10 text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                            {{ if not .hasLiked }}
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                            Like
+                            {{ else }}
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-2">
+                                <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                            </svg>
+                            Unlike
+                            {{ end }}
+                        </button>
+                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-700 bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                           {{ .gist.NbLikes }}
+                        </a>
+                    </form>
+                    {{ if ne .userLogged.ID .gist.User.ID }}
+                    <form id="fork" class="ml-2 hidden md:flex items-center " method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/fork">
+                        {{ .csrfHtml }}
+                        <button type="submit" class="ml-auto focus-within:z-10 text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                            </svg>
+                            Fork
+                        </button>
+                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-700 bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                           {{ .gist.NbForks }}
+                        </a>
+                    </form>
+                    {{ end }}
+                {{ else }}
+                <div class="lg:flex-row flex lg:py-0 lg:ml-auto flex items-center">
+                    <a href="/login" type="submit" class="ml-auto focus-within:z-10 text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                         </svg>
                         Like
-                        {{ else }}
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-2">
-                            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                        </svg>
-                        Unlike
-                        {{ end }}
-                    </button>
-                    <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-700 bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                       {{ .gist.NbLikes }}
                     </a>
-                </form>
-                <form id="fork" class="ml-2 flex items-center" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/fork">
-                    {{ .csrfHtml }}
-                    <button type="submit" class="ml-auto focus-within:z-10 text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                    <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-700 bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        {{ .gist.NbLikes }}
+                    </a>
+                </div>
+                <div class="ml-2 flex items-center">
+                    <a href="/login" type="submit" class="ml-auto focus-within:z-10 text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                         </svg>
                         Fork
-                    </button>
-                    <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-700 bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                       {{ .gist.NbForks }}
                     </a>
+                    <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-700 bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        {{ .gist.NbForks }}
+                    </a>
+                </div>
+                {{ end }}
+                {{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}
+                <div class="ml-2 flex items-center">
+                    <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/edit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Edit
+                    </a>
+                </div>
+                <form id="delete" onsubmit="alert('Are you sure you want to delete this gist ?')" class="ml-2 flex items-center" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/delete">
+                    {{ .csrfHtml }}
+                    <button type="submit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-700 hover:border-rose-600 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                    </button>
                 </form>
-            {{ else }}
-            <div class="ml-auto flex items-center">
-                <a href="/login" type="submit" class="ml-auto focus-within:z-10 text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
-                    Like
-                </a>
-                <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-700 bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                    {{ .gist.NbLikes }}
-                </a>
-            </div>
-            <div class="ml-2 flex items-center">
-                <a href="/login" type="submit" class="ml-auto focus-within:z-10 text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                    </svg>
-                    Fork
-                </a>
-                <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-700 bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                    {{ .gist.NbForks }}
-                </a>
-            </div>
-            {{ end }}
-            {{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}
-            <form id="visibility" class="ml-2" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/visibility">
-                {{ .csrfHtml }}
-                <button type="submit" class="ml-auto text-slate-300 relative inline-flex items-center space-x-2 rounded-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
-                    {{ if .gist.Private }}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Make public
-                    {{ else }}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                    Make unlisted
-                    {{ end }}
-                </button>
-            </form>
+                {{ end }}{{ end }}
 
-            <!-- Small hack to avoid ugly button behavior -->
-            <form>
-                <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/edit" class="ml-2 relative inline-flex items-center space-x-2 rounded-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                    Edit
-                </a>
-            </form>
-            <form id="delete" onsubmit="alert('Are you sure you want to delete this gist ?')" class="ml-2" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/delete">
-                {{ .csrfHtml }}
-                <button type="submit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-700 hover:border-rose-600 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Delete
-                </button>
-            </form>
-            {{ end }}{{ end }}
-
+            </div>
         </div>
         {{ if .gist.Forked }}
             <p class="mt-1 max-w-2xl text-sm text-slate-500">Forked from <a href="/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Uuid }}">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a></p>
         {{ end }}
-        <p class="mt-1 max-w-2xl text-sm text-slate-500">Last active <span class="moment-timestamp"> {{ .gist.UpdatedAt }} </span> •
-            {{ if .gist.Private }}<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-slate-300"> Unlisted </span>
-            {{else}}<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-700 text-emerald-300"> Public </span>{{ end }}
+        <p class="mt-1 max-w-2xl text-sm text-slate-500">Last active <span class="moment-timestamp"> {{ .gist.UpdatedAt }} </span>
+            {{ if .gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-slate-300"> Unlisted </span>{{ end }}
 
         </p>
         <p class="mt-3 max-w-2xl text-slate-300">{{ .gist.Description }}</p>
@@ -144,7 +129,7 @@
                             <div class="flex rounded-md shadow-sm">
                                 <div class="relative">
                                     <button type="button" id="gist-menu-toggle" class="relative text-xs inline-flex items-center space-x-2 rounded-l-md border border-gray-600 bg-gray-800 px-2 py-1.5 text-sm font-medium text-slate-300 hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3 focus-within:z-10 -mr-px">
-                                        <span id="gist-menu-title"></span>
+                                        <span id="gist-menu-title" class="whitespace-nowrap"></span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                         </svg>
@@ -182,7 +167,7 @@
                             </div>
                         </div>
 
-                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/archive/{{ .revision }}" class="text-slate-300 rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/archive/{{ .revision }}" class="whitespace-nowrap text-slate-300 rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                             Download ZIP</a>
                     </div>
                 </div>

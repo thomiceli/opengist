@@ -171,7 +171,7 @@ func getPage(ctx echo.Context) int {
 	return pageInt
 }
 
-func paginate[T any](ctx echo.Context, data []*T, pageInt int, perPage int, templateDataName string, urlPage string, urlParams ...string) error {
+func paginate[T any](ctx echo.Context, data []*T, pageInt int, perPage int, templateDataName string, urlPage string, labels int, urlParams ...string) error {
 	lenData := len(data)
 	if lenData == 0 && pageInt != 1 {
 		return errors.New("page not found")
@@ -189,6 +189,15 @@ func paginate[T any](ctx echo.Context, data []*T, pageInt int, perPage int, temp
 
 	if len(urlParams) > 0 {
 		setData(ctx, "urlParams", template.URL(urlParams[0]))
+	}
+
+	switch labels {
+	case 1:
+		setData(ctx, "prevLabel", "Previous")
+		setData(ctx, "nextLabel", "Next")
+	case 2:
+		setData(ctx, "prevLabel", "Newer")
+		setData(ctx, "nextLabel", "Older")
 	}
 
 	setData(ctx, "urlPage", urlPage)

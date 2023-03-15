@@ -52,7 +52,7 @@ func adminUsers(ctx echo.Context) error {
 		return errorRes(500, "Cannot get users", err)
 	}
 
-	if err = paginate(ctx, data, pageInt, 10, "data", "admin/users"); err != nil {
+	if err = paginate(ctx, data, pageInt, 10, "data", "admin/users", 1); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -70,7 +70,7 @@ func adminGists(ctx echo.Context) error {
 		return errorRes(500, "Cannot get gists", err)
 	}
 
-	if err = paginate(ctx, data, pageInt, 10, "data", "admin/gists"); err != nil {
+	if err = paginate(ctx, data, pageInt, 10, "data", "admin/gists", 1); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 

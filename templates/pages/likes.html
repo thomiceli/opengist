@@ -14,6 +14,9 @@
                 </div>
             {{ end }}
         </div>
+        <div class="flex justify-center space-x-2 mt-4">
+            {{ template "pagination" . }}
+        </div>
     {{ else }}
         <div class="text-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mx-auto h-12 w-12 text-slate-400">

@@ -113,7 +113,7 @@ func allGists(ctx echo.Context) error {
 		return errorRes(500, "Error fetching gists", err)
 	}
 
-	if err = paginate(ctx, gists, pageInt, 10, "gists", fromUser, "&sort="+sort+"&order="+order); err != nil {
+	if err = paginate(ctx, gists, pageInt, 10, "gists", fromUser, 2, "&sort="+sort+"&order="+order); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -207,7 +207,7 @@ func revisions(ctx echo.Context) error {
 		}
 	}
 
-	if err := paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions"); err != nil {
+	if err := paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions", 2); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -562,7 +562,7 @@ func likes(ctx echo.Context) error {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}
 
-	if err = paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Uuid+"/likes"); err != nil {
+	if err = paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Uuid+"/likes", 1); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -586,7 +586,7 @@ func forks(ctx echo.Context) error {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}
 
-	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Uuid+"/forks"); err != nil {
+	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Uuid+"/forks", 2); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 

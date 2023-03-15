@@ -34,15 +34,38 @@ type config struct {
 	} `yaml:"ssh"`
 }
 
-func InitConfig(configPath string) error {
-	c := &config{}
-
+func configWithDefaults() (*config, error) {
 	homeDir, err := os.UserHomeDir()
+	c := &config{}
+	if err != nil {
+		return c, err
+	}
+
+	c.OpengistHome = filepath.Join(homeDir, ".opengist")
+	c.DBFilename = "opengist.db"
+	c.DisableSignup = false
+	c.LogLevel = "warn"
+
+	c.HTTP.Host = "0.0.0.0"
+	c.HTTP.Port = "6157"
+	c.HTTP.Domain = "localhost"
+	c.HTTP.Git = true
+
+	c.SSH.Enabled = true
+	c.SSH.Host = "0.0.0.0"
+	c.SSH.Port = "2222"
+	c.SSH.Domain = "localhost"
+	c.SSH.Keygen = "ssh-keygen"
+
+	return c, nil
+}
+
+func InitConfig(configPath string) error {
+	c, err := configWithDefaults()
 	if err != nil {
 		return err
 	}
-	c.OpengistHome = filepath.Join(homeDir, ".opengist")
-	c.LogLevel = "warn"
+
 	file, err := os.Open(configPath)
 	if err != nil {
 		return err

@@ -424,6 +424,11 @@ func fork(ctx echo.Context) error {
 		return errorRes(500, "Error checking if gist is already forked", err)
 	}
 
+	if gist.User.ID == currentUser.ID {
+		addFlash(ctx, "Unable to fork own gists", "error")
+		return redirect(ctx, "/"+gist.User.Username+"/"+gist.Uuid)
+	}
+
 	if alreadyForked.ID != 0 {
 		return redirect(ctx, "/"+alreadyForked.User.Username+"/"+alreadyForked.Uuid)
 	}
@@ -454,6 +459,8 @@ func fork(ctx echo.Context) error {
 	if err = models.IncrementGistForkCount(gist); err != nil {
 		return errorRes(500, "Error incrementing the fork count", err)
 	}
+
+	addFlash(ctx, "Gist has been forked", "success")
 
 	return redirect(ctx, "/"+currentUser.Username+"/"+newGist.Uuid)
 }

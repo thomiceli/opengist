@@ -92,6 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let gistmenubuttoncopy = document.getElementById('gist-menu-button-copy')
         let gistmenuinput = document.getElementById('gist-menu-input')
         let gistmenutitle = document.getElementById('gist-menu-title')
+        gistmenutitle.textContent = gistmenucopy.children[0].firstChild.textContent
+        gistmenuinput.value = gistmenucopy.children[0].dataset.link
+
         gistmenutoggle.onclick = () => {
             gistmenucopy.classList.toggle('hidden')
         }

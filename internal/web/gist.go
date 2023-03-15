@@ -31,14 +31,24 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		setData(ctx, "gist", gist)
 
-		if config.C.SSH.Port == "22" {
-			setData(ctx, "ssh_clone_url", config.C.SSH.Domain+":"+userName+"/"+gistName+".git")
-		} else {
-			setData(ctx, "ssh_clone_url", "ssh://"+config.C.SSH.Domain+":"+config.C.SSH.Port+"/"+userName+"/"+gistName+".git")
+		if config.C.SSH.Enabled {
+			if config.C.SSH.Port == "22" {
+				setData(ctx, "sshCloneUrl", config.C.SSH.Domain+":"+userName+"/"+gistName+".git")
+			} else {
+				setData(ctx, "sshCloneUrl", "ssh://"+config.C.SSH.Domain+":"+config.C.SSH.Port+"/"+userName+"/"+gistName+".git")
+			}
 		}
 
-		setData(ctx, "httpCloneUrl", "http://"+ctx.Request().Host+"/"+userName+"/"+gistName+".git")
-		setData(ctx, "httpCopyUrl", "http://"+ctx.Request().Host+"/"+userName+"/"+gistName)
+		httpProtocol := "http"
+		if ctx.Request().TLS != nil {
+			httpProtocol = "https"
+		}
+		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))
+
+		if config.C.HTTP.Git {
+			setData(ctx, "httpCloneUrl", httpProtocol+"://"+config.C.HTTP.Domain+":"+config.C.HTTP.Port+"/"+userName+"/"+gistName+".git")
+		}
+		setData(ctx, "httpCopyUrl", httpProtocol+"://"+config.C.HTTP.Domain+":"+config.C.HTTP.Port+"/"+userName+"/"+gistName)
 
 		setData(ctx, "currentUrl", template.URL(ctx.Request().URL.Path))
 

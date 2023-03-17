@@ -134,7 +134,7 @@ func pack(ctx echo.Context, serviceType string) error {
 
 	// updatedAt is updated only if serviceType is receive-pack
 	if serviceType == "receive-pack" {
-		_ = models.GistLastActiveNow(getData(ctx, "gist").(*models.Gist).ID)
+		_ = getData(ctx, "gist").(*models.Gist).SetLastActiveNow()
 	}
 	return nil
 }

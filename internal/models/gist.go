@@ -8,13 +8,13 @@ import (
 type Gist struct {
 	ID              uint `gorm:"primaryKey"`
 	Uuid            string
-	Title           string `validate:"max=50" form:"title"`
+	Title           string
 	Preview         string
 	PreviewFilename string
-	Description     string `validate:"max=150" form:"description"`
-	Private         bool   `form:"private"`
+	Description     string
+	Private         bool
 	UserID          uint
-	User            User `validate:"-"`
+	User            User
 	NbFiles         int
 	NbLikes         int
 	NbForks         int
@@ -25,7 +25,7 @@ type Gist struct {
 	Forked   *Gist  `gorm:"foreignKey:ForkedID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	ForkedID uint
 
-	Files []File `gorm:"-" validate:"min=1,dive"`
+	Files []File `gorm:"-"`
 }
 
 type File struct {
@@ -42,11 +42,11 @@ type Commit struct {
 	Files     []File
 }
 
-func (g *Gist) BeforeDelete(tx *gorm.DB) error {
+func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 	// Decrement fork counter if the gist was forked
 	err := tx.Model(&Gist{}).
 		Omit("updated_at").
-		Where("id = ?", g.ForkedID).
+		Where("id = ?", gist.ForkedID).
 		UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).Error
 	return err
 }
@@ -83,14 +83,14 @@ func GetAllGistsForCurrentUser(currentUserId uint, offset int, sort string, orde
 }
 
 func GetAllGists(offset int) ([]*Gist, error) {
-	var all []*Gist
+	var gists []*Gist
 	err := db.Preload("User").
 		Limit(11).
 		Offset(offset * 10).
 		Order("id asc").
-		Find(&all).Error
+		Find(&gists).Error
 
-	return all, err
+	return gists, err
 }
 
 func GetAllGistsFromUser(fromUser string, currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
@@ -106,30 +106,30 @@ func GetAllGistsFromUser(fromUser string, currentUserId uint, offset int, sort s
 	return gists, err
 }
 
-func CreateGist(gist *Gist) error {
+func (gist *Gist) Create() error {
 	// avoids foreign key constraint error because the default value in the struct is 0
 	return db.Omit("forked_id").Create(&gist).Error
 }
 
-func CreateForkedGist(gist *Gist) error {
+func (gist *Gist) CreateForked() error {
 	return db.Create(&gist).Error
 }
 
-func UpdateGist(gist *Gist) error {
+func (gist *Gist) Update() error {
 	return db.Omit("forked_id").Save(&gist).Error
 }
 
-func DeleteGist(gist *Gist) error {
+func (gist *Gist) Delete() error {
 	return db.Delete(&gist).Error
 }
 
-func GistLastActiveNow(gistID uint) error {
+func (gist *Gist) SetLastActiveNow() error {
 	return db.Model(&Gist{}).
-		Where("id = ?", gistID).
+		Where("id = ?", gist.ID).
 		Update("updated_at", time.Now().Unix()).Error
 }
 
-func AppendUserLike(gist *Gist, user *User) error {
+func (gist *Gist) AppendUserLike(user *User) error {
 	err := db.Model(&gist).Omit("updated_at").Update("nb_likes", gist.NbLikes+1).Error
 	if err != nil {
 		return err
@@ -138,7 +138,7 @@ func AppendUserLike(gist *Gist, user *User) error {
 	return db.Model(&gist).Omit("updated_at").Association("Likes").Append(user)
 }
 
-func RemoveUserLike(gist *Gist, user *User) error {
+func (gist *Gist) RemoveUserLike(user *User) error {
 	err := db.Model(&gist).Omit("updated_at").Update("nb_likes", gist.NbLikes-1).Error
 	if err != nil {
 		return err
@@ -147,11 +147,11 @@ func RemoveUserLike(gist *Gist, user *User) error {
 	return db.Model(&gist).Omit("updated_at").Association("Likes").Delete(user)
 }
 
-func IncrementGistForkCount(gist *Gist) error {
+func (gist *Gist) IncrementForkCount() error {
 	return db.Model(&gist).Omit("updated_at").Update("nb_forks", gist.NbForks+1).Error
 }
 
-func GetForkedGist(gist *Gist, user *User) (*Gist, error) {
+func (gist *Gist) GetForkParent(user *User) (*Gist, error) {
 	fork := new(Gist)
 	err := db.Preload("User").
 		Where("forked_id = ? and user_id = ?", gist.ID, user.ID).
@@ -159,7 +159,7 @@ func GetForkedGist(gist *Gist, user *User) (*Gist, error) {
 	return fork, err
 }
 
-func GetUsersLikesForGist(gist *Gist, offset int) ([]*User, error) {
+func (gist *Gist) GetUsersLikes(offset int) ([]*User, error) {
 	var users []*User
 	err := db.Model(&gist).
 		Where("gist_id = ?", gist.ID).
@@ -169,7 +169,7 @@ func GetUsersLikesForGist(gist *Gist, offset int) ([]*User, error) {
 	return users, err
 }
 
-func GetUsersForksForGist(gist *Gist, currentUserId uint, offset int) ([]*Gist, error) {
+func (gist *Gist) GetForks(currentUserId uint, offset int) ([]*Gist, error) {
 	var gists []*Gist
 	err := db.Model(&gist).Preload("User").
 		Where("forked_id = ?", gist.ID).
@@ -182,6 +182,32 @@ func GetUsersForksForGist(gist *Gist, currentUserId uint, offset int) ([]*Gist, 
 	return gists, err
 }
 
-func UserCanWrite(user *User, gist *Gist) bool {
+func (gist *Gist) CanWrite(user *User) bool {
 	return !(user == nil) && (gist.UserID == user.ID)
+}
+
+// -- DTO -- //
+
+type GistDTO struct {
+	Title       string `validate:"max=50" form:"title"`
+	Description string `validate:"max=150" form:"description"`
+	Private     bool   `form:"private"`
+	Files       []File `validate:"min=1,dive"`
+}
+
+func (dto *GistDTO) ToGist() *Gist {
+	return &Gist{
+		Title:       dto.Title,
+		Description: dto.Description,
+		Private:     dto.Private,
+		Files:       dto.Files,
+	}
+}
+
+func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
+	gist.Title = dto.Title
+	gist.Description = dto.Description
+	gist.Private = dto.Private
+	gist.Files = dto.Files
+	return gist
 }

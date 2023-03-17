@@ -22,15 +22,22 @@ func processRegister(ctx echo.Context) error {
 
 	sess := getSession(ctx)
 
-	var user = new(models.User)
-	if err := ctx.Bind(user); err != nil {
+	var dto = new(models.UserDTO)
+	if err := ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}
 
-	if err := ctx.Validate(user); err != nil {
+	if err := ctx.Validate(dto); err != nil {
 		addFlash(ctx, validationMessages(&err), "error")
 		return html(ctx, "auth_form.html")
 	}
+
+	if exists, err := models.UserExists(dto.Username); err != nil || exists {
+		addFlash(ctx, "Username already exists", "error")
+		return html(ctx, "auth_form.html")
+	}
+
+	user := dto.ToUser()
 
 	password, err := argon2id.hash(user.Password)
 	if err != nil {
@@ -38,19 +45,12 @@ func processRegister(ctx echo.Context) error {
 	}
 	user.Password = password
 
-	var count int64
-	if err = models.DoesUserExists(user.Username, &count); err != nil || count >= 1 {
-		addFlash(ctx, "Username already exists", "error")
-		return html(ctx, "auth_form.html")
-	}
-
-	if err = models.CreateUser(user); err != nil {
+	if err = user.Create(); err != nil {
 		return errorRes(500, "Cannot create user", err)
 	}
 
 	if user.ID == 1 {
-		user.IsAdmin = true
-		if err = models.SetAdminUser(user); err != nil {
+		if err = user.SetAdmin(); err != nil {
 			return errorRes(500, "Cannot set user admin", err)
 		}
 	}
@@ -68,15 +68,18 @@ func login(ctx echo.Context) error {
 }
 
 func processLogin(ctx echo.Context) error {
+	var err error
 	sess := getSession(ctx)
 
-	user := &models.User{}
-	if err := ctx.Bind(user); err != nil {
+	dto := &models.UserDTO{}
+	if err = ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}
-	password := user.Password
+	password := dto.Password
 
-	if err := models.GetLoginUser(user); err != nil {
+	var user *models.User
+
+	if user, err = models.GetUserByUsername(dto.Username); err != nil {
 		addFlash(ctx, "Invalid credentials", "error")
 		return redirect(ctx, "/login")
 	}

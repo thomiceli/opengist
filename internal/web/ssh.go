@@ -27,15 +27,16 @@ func sshKeysProcess(ctx echo.Context) error {
 
 	user := getUserLogged(ctx)
 
-	var key = new(models.SSHKey)
-	if err := ctx.Bind(key); err != nil {
+	var dto = new(models.SSHKeyDTO)
+	if err := ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}
 
-	if err := ctx.Validate(key); err != nil {
+	if err := ctx.Validate(dto); err != nil {
 		addFlash(ctx, validationMessages(&err), "error")
 		return redirect(ctx, "/ssh-keys")
 	}
+	key := dto.ToSSHKey()
 
 	key.UserID = user.ID
 
@@ -48,7 +49,7 @@ func sshKeysProcess(ctx echo.Context) error {
 	sha := sha256.Sum256(pubKey.Marshal())
 	key.SHA = base64.StdEncoding.EncodeToString(sha[:])
 
-	if err := models.AddSSHKey(key); err != nil {
+	if err := key.Create(); err != nil {
 		return errorRes(500, "Cannot add SSH key", err)
 	}
 
@@ -70,7 +71,7 @@ func sshKeysDelete(ctx echo.Context) error {
 		return redirect(ctx, "/ssh-keys")
 	}
 
-	if err := models.RemoveSSHKey(key); err != nil {
+	if err := key.Delete(); err != nil {
 		return errorRes(500, "Cannot delete SSH key", err)
 	}
 

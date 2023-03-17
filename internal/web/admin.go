@@ -6,6 +6,7 @@ import (
 	"opengist/internal/git"
 	"opengist/internal/models"
 	"runtime"
+	"strconv"
 )
 
 func adminIndex(ctx echo.Context) error {
@@ -78,7 +79,13 @@ func adminGists(ctx echo.Context) error {
 }
 
 func adminUserDelete(ctx echo.Context) error {
-	if err := models.DeleteUser(ctx.Param("user")); err != nil {
+	userId, _ := strconv.ParseUint(ctx.Param("user"), 10, 64)
+	user, err := models.GetUserById(uint(userId))
+	if err != nil {
+		return errorRes(500, "Cannot retrieve user", err)
+	}
+
+	if err := user.Delete(); err != nil {
 		return errorRes(500, "Cannot delete this user", err)
 	}
 
@@ -96,7 +103,7 @@ func adminGistDelete(ctx echo.Context) error {
 		return errorRes(500, "Cannot delete the repository", err)
 	}
 
-	if err = models.DeleteGist(gist); err != nil {
+	if err = gist.Delete(); err != nil {
 		return errorRes(500, "Cannot delete this gist", err)
 	}
 

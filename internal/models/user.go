@@ -2,13 +2,12 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"strconv"
 )
 
 type User struct {
 	ID        uint   `gorm:"primaryKey"`
-	Username  string `form:"username" gorm:"uniqueIndex" validate:"required,max=24,alphanum,notreserved"`
-	Password  string `form:"password" validate:"required"`
+	Username  string `gorm:"uniqueIndex"`
+	Password  string
 	IsAdmin   bool
 	CreatedAt int64
 
@@ -17,7 +16,7 @@ type User struct {
 	Liked   []Gist   `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
-func (u *User) BeforeDelete(tx *gorm.DB) error {
+func (user *User) BeforeDelete(tx *gorm.DB) error {
 	// Decrement likes counter for all gists liked by this user
 	// The likes will be automatically deleted by the foreign key constraint
 	err := tx.Model(&Gist{}).
@@ -25,7 +24,7 @@ func (u *User) BeforeDelete(tx *gorm.DB) error {
 		Where("id IN (?)", tx.
 			Select("gist_id").
 			Table("likes").
-			Where("user_id = ?", u.ID),
+			Where("user_id = ?", user.ID),
 		).
 		UpdateColumn("nb_likes", gorm.Expr("nb_likes - 1")).
 		Error
@@ -39,57 +38,43 @@ func (u *User) BeforeDelete(tx *gorm.DB) error {
 		Where("id IN (?)", tx.
 			Select("forked_id").
 			Table("gists").
-			Where("user_id = ?", u.ID),
+			Where("user_id = ?", user.ID),
 		).
 		UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).
 		Error
 }
 
-func DoesUserExists(userName string, count *int64) error {
-	return db.Table("users").
-		Where("username like ?", userName).
-		Count(count).Error
+func UserExists(username string) (bool, error) {
+	var count int64
+	err := db.Model(&User{}).Where("username like ?", username).Count(&count).Error
+	return count > 0, err
 }
 
 func GetAllUsers(offset int) ([]*User, error) {
-	var all []*User
+	var users []*User
 	err := db.
 		Limit(11).
 		Offset(offset * 10).
 		Order("id asc").
-		Find(&all).Error
+		Find(&users).Error
 
-	return all, err
+	return users, err
 }
 
-func GetLoginUser(user *User) error {
-	return db.
-		Where("username like ?", user.Username).
+func GetUserByUsername(username string) (*User, error) {
+	user := new(User)
+	err := db.
+		Where("username like ?", username).
 		First(&user).Error
+	return user, err
 }
 
-func GetLoginUserById(user *User) error {
-	return db.
-		Where("id = ?", user.ID).
+func GetUserById(userId uint) (*User, error) {
+	user := new(User)
+	err := db.
+		Where("id = ?", userId).
 		First(&user).Error
-}
-
-func CreateUser(user *User) error {
-	return db.Create(&user).Error
-}
-
-func DeleteUser(userid string) error {
-	// trigger hook with a user ID
-	intId, err := strconv.ParseUint(userid, 10, 64)
-	if err != nil {
-		return err
-	}
-	var user = &User{ID: uint(intId)}
-	return db.Where("id = ?", userid).Delete(&user).Error
-}
-
-func SetAdminUser(user *User) error {
-	return db.Model(&user).Update("is_admin", true).Error
+	return user, err
 }
 
 func GetUserBySSHKeyID(sshKeyId uint) (*User, error) {
@@ -103,7 +88,19 @@ func GetUserBySSHKeyID(sshKeyId uint) (*User, error) {
 	return user, err
 }
 
-func UserHasLikedGist(user *User, gist *Gist) (bool, error) {
+func (user *User) Create() error {
+	return db.Create(&user).Error
+}
+
+func (user *User) Delete() error {
+	return db.Delete(&user).Error
+}
+
+func (user *User) SetAdmin() error {
+	return db.Model(&user).Update("is_admin", true).Error
+}
+
+func (user *User) HasLiked(gist *Gist) (bool, error) {
 	association := db.Model(&gist).Where("user_id = ?", user.ID).Association("Likes")
 	if association.Error != nil {
 		return false, association.Error
@@ -113,4 +110,18 @@ func UserHasLikedGist(user *User, gist *Gist) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+// -- DTO -- //
+
+type UserDTO struct {
+	Username string `form:"username" validate:"required,max=24,alphanum,notreserved"`
+	Password string `form:"password" validate:"required"`
+}
+
+func (dto *UserDTO) ToUser() *User {
+	return &User{
+		Username: dto.Username,
+		Password: dto.Password,
+	}
 }

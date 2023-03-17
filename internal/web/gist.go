@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -59,7 +60,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		setData(ctx, "nbCommits", nbCommits)
 
 		if currUser := getUserLogged(ctx); currUser != nil {
-			hasLiked, err := models.UserHasLikedGist(currUser, gist)
+			hasLiked, err := currUser.HasLiked(gist)
 			if err != nil {
 				return errorRes(500, "Cannot get user like status", err)
 			}
@@ -108,12 +109,12 @@ func allGists(ctx echo.Context) error {
 		setData(ctx, "htmlTitle", "All gists from "+fromUser)
 		setData(ctx, "fromUser", fromUser)
 
-		var count int64
-		if err = models.DoesUserExists(fromUser, &count); err != nil {
+		var exists bool
+		if exists, err = models.UserExists(fromUser); err != nil {
 			return errorRes(500, "Error fetching user", err)
 		}
 
-		if count == 0 {
+		if !exists {
 			return notFound("User not found")
 		}
 
@@ -130,7 +131,7 @@ func allGists(ctx echo.Context) error {
 	return html(ctx, "all.html")
 }
 
-func gist(ctx echo.Context) error {
+func gistIndex(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*models.Gist)
 	userName := gist.User.Username
 	gistName := gist.Uuid
@@ -244,21 +245,22 @@ func processCreate(ctx echo.Context) error {
 		return errorRes(400, "Bad request", err)
 	}
 
+	dto := new(models.GistDTO)
 	var gist *models.Gist
 
 	if isCreate {
-		gist = new(models.Gist)
 		setData(ctx, "htmlTitle", "Create a new gist")
 	} else {
 		gist = getData(ctx, "gist").(*models.Gist)
 		setData(ctx, "htmlTitle", "Edit "+gist.Title)
 	}
 
-	if err := ctx.Bind(gist); err != nil {
+	if err := ctx.Bind(dto); err != nil {
+		fmt.Println(err)
 		return errorRes(400, "Cannot bind data", err)
 	}
 
-	gist.Files = make([]models.File, 0)
+	dto.Files = make([]models.File, 0)
 	for i := 0; i < len(ctx.Request().PostForm["content"]); i++ {
 		name := ctx.Request().PostForm["name"][i]
 		content := ctx.Request().PostForm["content"][i]
@@ -272,33 +274,13 @@ func processCreate(ctx echo.Context) error {
 			return errorRes(400, "Invalid character unescaped", err)
 		}
 
-		gist.Files = append(gist.Files, models.File{
+		dto.Files = append(dto.Files, models.File{
 			Filename: name,
 			Content:  escapedValue,
 		})
 	}
-	user := getUserLogged(ctx)
-	gist.NbFiles = len(gist.Files)
 
-	if isCreate {
-		uuidGist, err := uuid.NewRandom()
-		if err != nil {
-			return errorRes(500, "Error creating an UUID", err)
-		}
-		gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
-
-		gist.UserID = user.ID
-	}
-
-	if gist.Title == "" {
-		if ctx.Request().PostForm["name"][0] == "" {
-			gist.Title = "gist:" + gist.Uuid
-		} else {
-			gist.Title = ctx.Request().PostForm["name"][0]
-		}
-	}
-
-	err = ctx.Validate(gist)
+	err = ctx.Validate(dto)
 	if err != nil {
 		addFlash(ctx, validationMessages(&err), "error")
 		if isCreate {
@@ -318,6 +300,33 @@ func processCreate(ctx echo.Context) error {
 
 			setData(ctx, "files", files)
 			return html(ctx, "edit.html")
+		}
+	}
+
+	if isCreate {
+		gist = dto.ToGist()
+	} else {
+		gist = dto.ToExistingGist(gist)
+	}
+
+	user := getUserLogged(ctx)
+	gist.NbFiles = len(gist.Files)
+
+	if isCreate {
+		uuidGist, err := uuid.NewRandom()
+		if err != nil {
+			return errorRes(500, "Error creating an UUID", err)
+		}
+		gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
+
+		gist.UserID = user.ID
+	}
+
+	if gist.Title == "" {
+		if ctx.Request().PostForm["name"][0] == "" {
+			gist.Title = "gist:" + gist.Uuid
+		} else {
+			gist.Title = ctx.Request().PostForm["name"][0]
 		}
 	}
 
@@ -359,11 +368,11 @@ func processCreate(ctx echo.Context) error {
 	}
 
 	if isCreate {
-		if err = models.CreateGist(gist); err != nil {
+		if err = gist.Create(); err != nil {
 			return errorRes(500, "Error creating the gist", err)
 		}
 	} else {
-		if err = models.UpdateGist(gist); err != nil {
+		if err = gist.Update(); err != nil {
 			return errorRes(500, "Error updating the gist", err)
 		}
 	}
@@ -375,7 +384,7 @@ func toggleVisibility(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*models.Gist)
 
 	gist.Private = !gist.Private
-	if err := models.UpdateGist(gist); err != nil {
+	if err := gist.Update(); err != nil {
 		return errorRes(500, "Error updating this gist", err)
 	}
 
@@ -391,7 +400,7 @@ func deleteGist(ctx echo.Context) error {
 		return errorRes(500, "Error deleting the repository", err)
 	}
 
-	if err := models.DeleteGist(gist); err != nil {
+	if err := gist.Delete(); err != nil {
 		return errorRes(500, "Error deleting this gist", err)
 	}
 
@@ -403,15 +412,15 @@ func like(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*models.Gist)
 	currentUser := getUserLogged(ctx)
 
-	hasLiked, err := models.UserHasLikedGist(currentUser, gist)
+	hasLiked, err := currentUser.HasLiked(gist)
 	if err != nil {
 		return errorRes(500, "Error checking if user has liked a gist", err)
 	}
 
 	if hasLiked {
-		err = models.RemoveUserLike(gist, getUserLogged(ctx))
+		err = gist.RemoveUserLike(getUserLogged(ctx))
 	} else {
-		err = models.AppendUserLike(gist, getUserLogged(ctx))
+		err = gist.AppendUserLike(getUserLogged(ctx))
 	}
 
 	if err != nil {
@@ -429,7 +438,7 @@ func fork(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*models.Gist)
 	currentUser := getUserLogged(ctx)
 
-	alreadyForked, err := models.GetForkedGist(gist, currentUser)
+	alreadyForked, err := gist.GetForkParent(currentUser)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return errorRes(500, "Error checking if gist is already forked", err)
 	}
@@ -459,14 +468,14 @@ func fork(ctx echo.Context) error {
 		ForkedID:        gist.ID,
 	}
 
-	if err = models.CreateForkedGist(newGist); err != nil {
+	if err = newGist.CreateForked(); err != nil {
 		return errorRes(500, "Error forking the gist in database", err)
 	}
 
 	if err = git.ForkClone(gist.User.Username, gist.Uuid, currentUser.Username, newGist.Uuid); err != nil {
 		return errorRes(500, "Error cloning the repository while forking", err)
 	}
-	if err = models.IncrementGistForkCount(gist); err != nil {
+	if err = gist.IncrementForkCount(); err != nil {
 		return errorRes(500, "Error incrementing the fork count", err)
 	}
 
@@ -567,7 +576,7 @@ func likes(ctx echo.Context) error {
 
 	pageInt := getPage(ctx)
 
-	likers, err := models.GetUsersLikesForGist(gist, pageInt-1)
+	likers, err := gist.GetUsersLikes(pageInt - 1)
 	if err != nil {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}
@@ -591,7 +600,7 @@ func forks(ctx echo.Context) error {
 		fromUserID = currentUser.ID
 	}
 
-	forks, err := models.GetUsersForksForGist(gist, fromUserID, pageInt-1)
+	forks, err := gist.GetForks(fromUserID, pageInt-1)
 	if err != nil {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}

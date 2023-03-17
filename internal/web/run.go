@@ -51,7 +51,7 @@ func Start() {
 			return nil
 		},
 	}))
-	e.Use(middleware.Recover())
+	//e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 
 	e.Renderer = &Template{
@@ -148,8 +148,8 @@ func Start() {
 		g3 := g1.Group("/:user/:gistname")
 		{
 			g3.Use(gistInit)
-			g3.GET("", gist)
-			g3.GET("/rev/:revision", gist)
+			g3.GET("", gistIndex)
+			g3.GET("/rev/:revision", gistIndex)
 			g3.GET("/revisions", revisions)
 			g3.GET("/archive/:revision", downloadZip)
 			g3.POST("/visibility", toggleVisibility, logged, writePermission)
@@ -203,8 +203,10 @@ func sessionInit(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		sess := getSession(ctx)
 		if sess.Values["user"] != nil {
-			user := &models.User{ID: sess.Values["user"].(uint)}
-			if err := models.GetLoginUserById(user); err != nil {
+			var err error
+			var user *models.User
+
+			if user, err = models.GetUserById(sess.Values["user"].(uint)); err != nil {
 				sess.Values["user"] = nil
 				saveSession(sess, ctx)
 				setData(ctx, "userLogged", nil)
@@ -232,7 +234,7 @@ func writePermission(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		gist := getData(ctx, "gist")
 		user := getUserLogged(ctx)
-		if !models.UserCanWrite(user, gist.(*models.Gist)) {
+		if !gist.(*models.Gist).CanWrite(user) {
 			return redirect(ctx, "/"+gist.(*models.Gist).User.Username+"/"+gist.(*models.Gist).Uuid)
 		}
 		return next(ctx)

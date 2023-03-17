@@ -3,9 +3,9 @@ package models
 import "time"
 
 type SSHKey struct {
-	ID         uint   `gorm:"primaryKey"`
-	Title      string `form:"title" validate:"required,max=50"`
-	Content    string `form:"content" validate:"required"`
+	ID         uint `gorm:"primaryKey"`
+	Title      string
+	Content    string
 	SHA        string
 	CreatedAt  int64
 	LastUsedAt int64
@@ -41,11 +41,11 @@ func GetSSHKeyByContent(sshKeyContent string) (*SSHKey, error) {
 	return sshKey, err
 }
 
-func AddSSHKey(sshKey *SSHKey) error {
+func (sshKey *SSHKey) Create() error {
 	return db.Create(&sshKey).Error
 }
 
-func RemoveSSHKey(sshKey *SSHKey) error {
+func (sshKey *SSHKey) Delete() error {
 	return db.Delete(&sshKey).Error
 }
 
@@ -53,4 +53,18 @@ func SSHKeyLastUsedNow(sshKeyID uint) error {
 	return db.Model(&SSHKey{}).
 		Where("id = ?", sshKeyID).
 		Update("last_used_at", time.Now().Unix()).Error
+}
+
+// -- DTO -- //
+
+type SSHKeyDTO struct {
+	Title   string `form:"title" validate:"required,max=50"`
+	Content string `form:"content" validate:"required"`
+}
+
+func (dto *SSHKeyDTO) ToSSHKey() *SSHKey {
+	return &SSHKey{
+		Title:   dto.Title,
+		Content: dto.Content,
+	}
 }

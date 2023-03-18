@@ -26,13 +26,15 @@
                     <div class="markdown markdown-body p-8">{{ $file.Content }}</div>
                 {{ else }}
                     {{ $fileslug := slug $file.Filename }}
-                    <table class="table-code w-full whitespace-pre" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
-                        <tbody>
-                        {{ $ii := "1" }}
-                        {{ $i := toInt $ii }}
-                        {{ range $line := lines $file.Content }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code">{{ $line }}</td></tr>{{ $i = inc $i }}{{ end }}
-                        </tbody>
-                    </table>
+                    {{ if ne $file.Content "" }}
+                        <table class="table-code w-full whitespace-pre" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
+                            <tbody>
+                            {{ $ii := "1" }}
+                            {{ $i := toInt $ii }}
+                            {{ range $line := lines $file.Content }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code">{{ $line }}</td></tr>{{ $i = inc $i }}{{ end }}
+                            </tbody>
+                        </table>
+                    {{ end }}
                 {{ end }}
             </div>
         </div>

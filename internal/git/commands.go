@@ -121,7 +121,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 	return truncateCommandOutput(stdout, maxBytes)
 }
 
-func GetLog(user string, gist string, skip string) (string, error) {
+func GetLog(user string, gist string, skip string) ([]*Commit, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
@@ -130,20 +130,22 @@ func GetLog(user string, gist string, skip string) (string, error) {
 		"log",
 		"-n",
 		"11",
-		"--no-prefix",
 		"--no-color",
 		"-p",
 		"--skip",
 		skip,
-		"--format=format:%n=commit %H:%aN:%at",
+		"--format=format:c %H%na %aN%nt %at",
 		"--shortstat",
-		"--ignore-missing", // avoid errors if a wrong hash is given
 		"HEAD",
 	)
 	cmd.Dir = repositoryPath
+	stdout, _ := cmd.StdoutPipe()
+	err := cmd.Start()
+	if err != nil {
+		return nil, err
+	}
 
-	stdout, err := cmd.Output()
-	return string(stdout), err
+	return parseLog(stdout), nil
 }
 
 func CloneTmp(user string, gist string, gistTmpId string) error {
@@ -213,7 +215,7 @@ func AddAll(gistTmpId string) error {
 	return cmd.Run()
 }
 
-func Commit(gistTmpId string) error {
+func CommitRepository(gistTmpId string) error {
 	cmd := exec.Command("git", "commit", "--allow-empty", "-m", `"Opengist commit"`)
 	tmpPath := TmpRepositoryPath(gistTmpId)
 	cmd.Dir = tmpPath

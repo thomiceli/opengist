@@ -1,9 +1,28 @@
 package git
 
 import (
+	"bufio"
 	"bytes"
 	"io"
+	"regexp"
 )
+
+type File struct {
+	Filename    string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
+	OldFilename string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
+	Content     string `validate:"required"`
+	Truncated   bool
+	IsCreated   bool
+	IsDeleted   bool
+}
+
+type Commit struct {
+	Hash      string
+	Author    string
+	Timestamp string
+	Changed   string
+	Files     []File
+}
 
 func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) {
 	var buf []byte
@@ -30,4 +49,97 @@ func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) 
 	}
 
 	return string(buf), truncated, nil
+}
+
+func parseLog(out io.Reader) []*Commit {
+	scanner := bufio.NewScanner(out)
+
+	var commits []*Commit
+	var currentCommit *Commit
+	var currentFile *File
+	var isContent bool
+
+	for scanner.Scan() {
+		// new commit found
+		currentFile = nil
+		currentCommit = &Commit{Hash: string(scanner.Bytes()[2:]), Files: []File{}}
+
+		scanner.Scan()
+		currentCommit.Author = string(scanner.Bytes()[2:])
+
+		scanner.Scan()
+		currentCommit.Timestamp = string(scanner.Bytes()[2:])
+
+		scanner.Scan()
+		changed := scanner.Bytes()[1:]
+		changed = bytes.ReplaceAll(changed, []byte("(+)"), []byte(""))
+		changed = bytes.ReplaceAll(changed, []byte("(-)"), []byte(""))
+		currentCommit.Changed = string(changed)
+
+		// twice because --shortstat adds a new line
+		scanner.Scan()
+		scanner.Scan()
+		// commit header parsed
+
+		// files changes inside the commit
+		for {
+			line := scanner.Bytes()
+
+			// end of content of file
+			if len(line) == 0 {
+				isContent = false
+				if currentFile != nil {
+					currentCommit.Files = append(currentCommit.Files, *currentFile)
+				}
+				break
+			}
+
+			// new file found
+			if bytes.HasPrefix(line, []byte("diff --git")) {
+				// current file is finished, we can add it to the commit
+				if currentFile != nil {
+					currentCommit.Files = append(currentCommit.Files, *currentFile)
+				}
+
+				// create a new file
+				isContent = false
+				currentFile = &File{}
+				filenameRegex := regexp.MustCompile(`^diff --git a/(.+) b/(.+)$`)
+				matches := filenameRegex.FindStringSubmatch(string(line))
+				if len(matches) == 3 {
+					currentFile.Filename = matches[2]
+					if matches[1] != matches[2] {
+						currentFile.OldFilename = matches[1]
+					}
+				}
+				scanner.Scan()
+				continue
+			}
+
+			if bytes.HasPrefix(line, []byte("new")) {
+				currentFile.IsCreated = true
+			}
+
+			if bytes.HasPrefix(line, []byte("deleted")) {
+				currentFile.IsDeleted = true
+			}
+
+			// file content found
+			if line[0] == '@' {
+				isContent = true
+			}
+
+			if isContent {
+				currentFile.Content += string(line) + "\n"
+			}
+
+			scanner.Scan()
+		}
+
+		if currentCommit != nil {
+			commits = append(commits, currentCommit)
+		}
+	}
+
+	return commits
 }

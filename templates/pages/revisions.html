@@ -27,24 +27,22 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
-                                {{ if eq $file.Filename $file.OldFilename }}
-                                    <span class="flex text-sm ml-2 text-slate-300">{{ $file.Filename }}</span>
+                                {{ if $file.IsCreated }}
+                                     <span class="flex text-sm ml-2 text-slate-300">{{ $file.Filename }}<span class="italic text-gray-400 ml-1">(file created)</span></span>
+                                {{ else if $file.IsDeleted }}
+                                    <span class="flex text-sm ml-2 text-slate-300">{{ $file.Filename }} <span class="italic text-gray-400 ml-1">(file deleted)</span></span>
+                                {{ else if ne $file.OldFilename "" }}
+                                    <span class="flex text-sm ml-2 text-slate-300">{{ $file.OldFilename }} <span class="italic text-gray-400 mx-1">renamed to</span> {{ $file.Filename }}</span>
                                 {{ else }}
-                                    {{ if eq $file.OldFilename "/dev/null" }}
-                                         <span class="flex text-sm ml-2 text-slate-300">{{ $file.Filename }}<span class="italic text-gray-400 ml-1">(file created)</span></span>
-                                    {{ else if eq $file.Filename "/dev/null" }}
-                                        <span class="flex text-sm ml-2 text-slate-300">{{ $file.OldFilename }} <span class="italic text-gray-400 ml-1">(file deleted)</span></span>
-                                    {{ else }}
-                                        <span class="flex text-sm ml-2 text-slate-300">{{ $file.OldFilename }} <span class="italic text-gray-400 mx-1">renamed to</span> {{ $file.Filename }}</span>
-                                    {{ end }}
+                                    <span class="flex text-sm ml-2 text-slate-300">{{ $file.Filename }}</span>
                                 {{ end }}
                             </p>
                         </div>
                         <div class="code overflow-auto">
-                            {{ if eq $file.Content "" }}
-                                <p class="m-2 ml-4 text-sm">
-                                    File renamed without changes.
-                                </p>
+                            {{ if and (eq $file.Content "") (ne $file.OldFilename "") }}
+                                <p class="m-2 ml-4 text-xs">File renamed without changes</p>
+                            {{ else if eq $file.Content "" }}
+                                <p class="m-2 ml-4 text-xs">Empty file</p>
                             {{ else }}
                             <table class="table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
                                 <tbody>
@@ -52,7 +50,6 @@
                                 {{ $right := 0 }}
                                     {{ range $line := split $file.Content "\n" }}
                                     {{ if ne $line "" }}{{ if ne (index $line 0) 92 }}
-
                                         {{ if eq (index $line 0) 64 }}
                                             {{ $left  = toInt (index (splitGit (index (split $line "-") 1)) 0) }}
                                             {{ $right = toInt (index (splitGit (index (split $line "+") 1)) 0) }}

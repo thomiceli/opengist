@@ -162,50 +162,9 @@ func revisions(ctx echo.Context) error {
 
 	pageInt := getPage(ctx)
 
-	nbCommits := getData(ctx, "nbCommits")
-	commits := make([]*models.Commit, 0)
-	if nbCommits != "0" {
-		gitlogStr, err := git.GetLog(userName, gistName, strconv.Itoa((pageInt-1)*10))
-		if err != nil {
-			return errorRes(500, "Error fetching commits log", err)
-		}
-
-		gitlog := strings.Split(gitlogStr, "\n=commit ")
-		for _, commitStr := range gitlog[1:] {
-			logContent := strings.SplitN(commitStr, "\n", 3)
-
-			header := strings.Split(logContent[0], ":")
-			commitStruct := models.Commit{
-				Hash:      header[0],
-				Author:    header[1],
-				Timestamp: header[2],
-				Files:     make([]models.File, 0),
-			}
-
-			if len(logContent) > 2 {
-				changed := strings.ReplaceAll(logContent[1], "(+)", "")
-				changed = strings.ReplaceAll(changed, "(-)", "")
-				commitStruct.Changed = changed
-			}
-
-			files := strings.Split(logContent[len(logContent)-1], "diff --git ")
-			if len(files) > 1 {
-				for _, fileStr := range files {
-					content := strings.SplitN(fileStr, "\n@@", 2)
-					if len(content) > 1 {
-						header := strings.Split(content[0], "\n")
-						commitStruct.Files = append(commitStruct.Files, models.File{Content: "@@" + content[1], Filename: header[len(header)-1][4:], OldFilename: header[len(header)-2][4:]})
-					} else {
-						// in case there is no content but a file renamed
-						header := strings.Split(content[0], "\n")
-						if len(header) > 3 {
-							commitStruct.Files = append(commitStruct.Files, models.File{Content: "", Filename: header[3][10:], OldFilename: header[2][12:]})
-						}
-					}
-				}
-			}
-			commits = append(commits, &commitStruct)
-		}
+	commits, err := gist.Log(strconv.Itoa((pageInt - 1) * 10))
+	if err != nil {
+		return errorRes(500, "Error fetching commits log", err)
 	}
 
 	if err := paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions", 2); err != nil {
@@ -249,7 +208,7 @@ func processCreate(ctx echo.Context) error {
 		return errorRes(400, "Cannot bind data", err)
 	}
 
-	dto.Files = make([]models.File, 0)
+	dto.Files = make([]git.File, 0)
 	for i := 0; i < len(ctx.Request().PostForm["content"]); i++ {
 		name := ctx.Request().PostForm["name"][i]
 		content := ctx.Request().PostForm["content"][i]
@@ -263,7 +222,7 @@ func processCreate(ctx echo.Context) error {
 			return errorRes(400, "Invalid character unescaped", err)
 		}
 
-		dto.Files = append(dto.Files, models.File{
+		dto.Files = append(dto.Files, git.File{
 			Filename: name,
 			Content:  escapedValue,
 		})

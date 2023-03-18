@@ -28,21 +28,6 @@ type Gist struct {
 	ForkedID uint
 }
 
-type File struct {
-	Filename    string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
-	OldFilename string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
-	Content     string `validate:"required"`
-	Truncated   bool
-}
-
-type Commit struct {
-	Hash      string
-	Author    string
-	Timestamp string
-	Changed   string
-	Files     []File
-}
-
 func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 	// Decrement fork counter if the gist was forked
 	err := tx.Model(&Gist{}).
@@ -195,8 +180,8 @@ func (gist *Gist) DeleteRepository() error {
 	return git.DeleteRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) Files(revision string) ([]*File, error) {
-	var files []*File
+func (gist *Gist) Files(revision string) ([]*git.File, error) {
+	var files []*git.File
 	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
 	if err != nil {
 		// if the revision or the file do not exist
@@ -218,7 +203,7 @@ func (gist *Gist) Files(revision string) ([]*File, error) {
 	return files, err
 }
 
-func (gist *Gist) File(revision string, filename string, truncate bool) (*File, error) {
+func (gist *Gist) File(revision string, filename string, truncate bool) (*git.File, error) {
 	content, truncated, err := git.GetFileContent(gist.User.Username, gist.Uuid, revision, filename, truncate)
 
 	// if the revision or the file do not exist
@@ -226,24 +211,22 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*File, 
 		return nil, nil
 	}
 
-	return &File{
+	return &git.File{
 		Filename:  filename,
 		Content:   content,
 		Truncated: truncated,
 	}, err
 }
 
-func (gist *Gist) Log(skip string) error {
-	_, err := git.GetLog(gist.User.Username, gist.Uuid, skip)
-
-	return err
+func (gist *Gist) Log(skip string) ([]*git.Commit, error) {
+	return git.GetLog(gist.User.Username, gist.Uuid, skip)
 }
 
 func (gist *Gist) NbCommits() (string, error) {
 	return git.GetNumberOfCommitsOfRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) AddAndCommitFiles(files *[]File) error {
+func (gist *Gist) AddAndCommitFiles(files *[]git.File) error {
 	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid); err != nil {
 		return err
 	}
@@ -258,7 +241,7 @@ func (gist *Gist) AddAndCommitFiles(files *[]File) error {
 		return err
 	}
 
-	if err := git.Commit(gist.Uuid); err != nil {
+	if err := git.CommitRepository(gist.Uuid); err != nil {
 		return err
 	}
 
@@ -280,10 +263,10 @@ func (gist *Gist) RPC(service string) ([]byte, error) {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string `validate:"max=50" form:"title"`
-	Description string `validate:"max=150" form:"description"`
-	Private     bool   `form:"private"`
-	Files       []File `validate:"min=1,dive"`
+	Title       string     `validate:"max=50" form:"title"`
+	Description string     `validate:"max=150" form:"description"`
+	Private     bool       `form:"private"`
+	Files       []git.File `validate:"min=1,dive"`
 }
 
 func (dto *GistDTO) ToGist() *Gist {

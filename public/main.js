@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.table-code').forEach((el) => {
         let ext = el.dataset.filename.split('.').pop()
-        if (ext!== 'txt') {
-        
+
+        if (hljs.autoDetection(ext) && ext !== 'txt') {
             el.querySelectorAll('td.line-code').forEach((ell) => {
                 ell.classList.add('language-'+ext)
                 hljs.highlightElement(ell);

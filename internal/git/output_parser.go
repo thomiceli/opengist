@@ -58,6 +58,7 @@ func parseLog(out io.Reader) []*Commit {
 	var currentCommit *Commit
 	var currentFile *File
 	var isContent bool
+	var bytesRead = 0
 
 	for scanner.Scan() {
 		// new commit found
@@ -103,6 +104,7 @@ func parseLog(out io.Reader) []*Commit {
 
 				// create a new file
 				isContent = false
+				bytesRead = 0
 				currentFile = &File{}
 				filenameRegex := regexp.MustCompile(`^diff --git a/(.+) b/(.+)$`)
 				matches := filenameRegex.FindStringSubmatch(string(line))
@@ -131,6 +133,13 @@ func parseLog(out io.Reader) []*Commit {
 
 			if isContent {
 				currentFile.Content += string(line) + "\n"
+
+				bytesRead += len(line)
+				if bytesRead > 2<<18 {
+					currentFile.Truncated = true
+					currentFile.Content = ""
+					isContent = false
+				}
 			}
 
 			scanner.Scan()

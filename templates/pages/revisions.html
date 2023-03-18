@@ -39,7 +39,9 @@
                             </p>
                         </div>
                         <div class="code overflow-auto">
-                            {{ if and (eq $file.Content "") (ne $file.OldFilename "") }}
+                            {{ if $file.Truncated }}
+                                <p class="m-2 ml-4 text-xs">Diff truncated because its too large to be shown</p>
+                            {{ else if and (eq $file.Content "") (ne $file.OldFilename "") }}
                                 <p class="m-2 ml-4 text-xs">File renamed without changes</p>
                             {{ else if eq $file.Content "" }}
                                 <p class="m-2 ml-4 text-xs">Empty file</p>

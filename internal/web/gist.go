@@ -388,6 +388,7 @@ func fork(ctx echo.Context) error {
 		Private:         gist.Private,
 		UserID:          currentUser.ID,
 		ForkedID:        gist.ID,
+		NbFiles:         gist.NbFiles,
 	}
 
 	if err = newGist.CreateForked(); err != nil {

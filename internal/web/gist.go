@@ -10,7 +10,6 @@ import (
 	"html/template"
 	"net/url"
 	"opengist/internal/config"
-	"opengist/internal/git"
 	"opengist/internal/models"
 	"strconv"
 	"strings"
@@ -208,7 +207,7 @@ func processCreate(ctx echo.Context) error {
 		return errorRes(400, "Cannot bind data", err)
 	}
 
-	dto.Files = make([]git.File, 0)
+	dto.Files = make([]models.FileDTO, 0)
 	for i := 0; i < len(ctx.Request().PostForm["content"]); i++ {
 		name := ctx.Request().PostForm["name"][i]
 		content := ctx.Request().PostForm["content"][i]
@@ -222,7 +221,7 @@ func processCreate(ctx echo.Context) error {
 			return errorRes(400, "Invalid character unescaped", err)
 		}
 
-		dto.Files = append(dto.Files, git.File{
+		dto.Files = append(dto.Files, models.FileDTO{
 			Filename: name,
 			Content:  escapedValue,
 		})

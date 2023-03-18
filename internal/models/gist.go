@@ -226,7 +226,7 @@ func (gist *Gist) NbCommits() (string, error) {
 	return git.GetNumberOfCommitsOfRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) AddAndCommitFiles(files *[]git.File) error {
+func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
 	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid); err != nil {
 		return err
 	}
@@ -263,10 +263,15 @@ func (gist *Gist) RPC(service string) ([]byte, error) {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string     `validate:"max=50" form:"title"`
-	Description string     `validate:"max=150" form:"description"`
-	Private     bool       `form:"private"`
-	Files       []git.File `validate:"min=1,dive"`
+	Title       string    `validate:"max=50" form:"title"`
+	Description string    `validate:"max=150" form:"description"`
+	Private     bool      `form:"private"`
+	Files       []FileDTO `validate:"min=1,dive"`
+}
+
+type FileDTO struct {
+	Filename string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
+	Content  string `validate:"required"`
 }
 
 func (dto *GistDTO) ToGist() *Gist {

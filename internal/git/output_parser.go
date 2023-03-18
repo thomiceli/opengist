@@ -8,9 +8,9 @@ import (
 )
 
 type File struct {
-	Filename    string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
-	OldFilename string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
-	Content     string `validate:"required"`
+	Filename    string
+	OldFilename string
+	Content     string
 	Truncated   bool
 	IsCreated   bool
 	IsDeleted   bool

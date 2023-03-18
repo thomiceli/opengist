@@ -51,7 +51,7 @@ func Start() {
 			return nil
 		},
 	}))
-	//e.Use(middleware.Recover())
+	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 
 	e.Renderer = &Template{

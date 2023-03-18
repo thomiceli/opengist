@@ -33,32 +33,12 @@ func InitRepository(user string, gist string) error {
 		repositoryPath,
 	)
 
-	_, err := cmd.Output()
+	err := cmd.Run()
 	if err != nil {
 		return err
 	}
 
-	f1, err := os.OpenFile(filepath.Join(repositoryPath, "git-daemon-export-ok"), os.O_RDONLY|os.O_CREATE, 0644)
-	defer f1.Close()
-
-	preReceiveDst, err := os.OpenFile(filepath.Join(repositoryPath, "hooks", "pre-receive"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0744)
-	if err != nil {
-		return err
-	}
-
-	preReceiveSrc, err := os.OpenFile(filepath.Join("internal", "resources", "pre-receive"), os.O_RDONLY, os.ModeAppend)
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(preReceiveDst, preReceiveSrc)
-	if err != nil {
-		return err
-	}
-
-	defer preReceiveDst.Close()
-	defer preReceiveSrc.Close()
-
-	return err
+	return copyFiles(repositoryPath)
 }
 
 func GetNumberOfCommitsOfRepository(user string, gist string) (string, error) {
@@ -189,7 +169,12 @@ func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) e
 
 	cmd = exec.Command("git", "config", "user.name", userDst)
 	cmd.Dir = repositoryPathDst
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return copyFiles(repositoryPathDst)
 }
 
 func SetFileContent(gistTmpId string, filename string, content string) error {
@@ -273,4 +258,28 @@ func GetGitVersion() (string, error) {
 	}
 
 	return versionFields[2], nil
+}
+
+func copyFiles(repositoryPath string) error {
+	f1, err := os.OpenFile(filepath.Join(repositoryPath, "git-daemon-export-ok"), os.O_RDONLY|os.O_CREATE, 0644)
+	defer f1.Close()
+
+	preReceiveDst, err := os.OpenFile(filepath.Join(repositoryPath, "hooks", "pre-receive"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0744)
+	if err != nil {
+		return err
+	}
+
+	preReceiveSrc, err := os.OpenFile(filepath.Join("internal", "resources", "pre-receive"), os.O_RDONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(preReceiveDst, preReceiveSrc)
+	if err != nil {
+		return err
+	}
+
+	defer preReceiveDst.Close()
+	defer preReceiveSrc.Close()
+
+	return nil
 }

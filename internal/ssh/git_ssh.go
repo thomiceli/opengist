@@ -83,6 +83,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint) error {
 	// updatedAt is updated only if serviceType is receive-pack
 	if verb == "receive-pack" {
 		_ = gist.SetLastActiveNow()
+		_ = gist.UpdatePreviewAndCount()
 	}
 
 	return nil

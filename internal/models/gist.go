@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"opengist/internal/git"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -258,6 +259,36 @@ func (gist *Gist) UpdateServerInfo() error {
 
 func (gist *Gist) RPC(service string) ([]byte, error) {
 	return git.RPC(gist.User.Username, gist.Uuid, service)
+}
+
+func (gist *Gist) UpdatePreviewAndCount() error {
+	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, "HEAD")
+	if err != nil {
+		return err
+	}
+	gist.NbFiles = len(filesStr)
+
+	if len(filesStr) == 0 {
+		gist.Preview = ""
+		gist.PreviewFilename = ""
+	} else {
+		file, err := gist.File("HEAD", filesStr[0], true)
+		if err != nil {
+			return err
+		}
+
+		split := strings.Split(file.Content, "\n")
+		if len(split) > 10 {
+			gist.Preview = strings.Join(split[:10], "\n")
+		} else {
+			gist.Preview = file.Content
+		}
+
+		gist.Preview = file.Content
+		gist.PreviewFilename = file.Filename
+	}
+
+	return gist.Update()
 }
 
 // -- DTO -- //

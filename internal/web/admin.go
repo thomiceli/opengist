@@ -99,7 +99,7 @@ func adminGistDelete(ctx echo.Context) error {
 		return errorRes(500, "Cannot retrieve gist", err)
 	}
 
-	if err = git.DeleteRepository(gist.User.Username, gist.Uuid); err != nil {
+	if err = gist.DeleteRepository(); err != nil {
 		return errorRes(500, "Cannot delete the repository", err)
 	}
 

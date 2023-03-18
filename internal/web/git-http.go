@@ -152,13 +152,13 @@ func infoRefs(ctx echo.Context) error {
 	service = strings.TrimPrefix(serviceType, "git-")
 
 	if service != "upload-pack" && service != "receive-pack" {
-		if err := git.UpdateServerInfo(gist.User.Username, gist.Uuid); err != nil {
+		if err := gist.UpdateServerInfo(); err != nil {
 			return errorRes(500, "Cannot update server info", err)
 		}
 		return sendFile(ctx, "text/plain; charset=utf-8")
 	}
 
-	refs, err := git.RPCRefs(gist.User.Username, gist.Uuid, service)
+	refs, err := gist.RPC(service)
 	if err != nil {
 		return errorRes(500, "Cannot run git "+service, err)
 	}

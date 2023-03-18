@@ -2,6 +2,8 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"opengist/internal/git"
+	"os/exec"
 	"time"
 )
 
@@ -24,14 +26,13 @@ type Gist struct {
 	Likes    []User `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Forked   *Gist  `gorm:"foreignKey:ForkedID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	ForkedID uint
-
-	Files []File `gorm:"-"`
 }
 
 type File struct {
 	Filename    string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
 	OldFilename string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
 	Content     string `validate:"required"`
+	Truncated   bool
 }
 
 type Commit struct {
@@ -186,6 +187,96 @@ func (gist *Gist) CanWrite(user *User) bool {
 	return !(user == nil) && (gist.UserID == user.ID)
 }
 
+func (gist *Gist) InitRepository() error {
+	return git.InitRepository(gist.User.Username, gist.Uuid)
+}
+
+func (gist *Gist) DeleteRepository() error {
+	return git.DeleteRepository(gist.User.Username, gist.Uuid)
+}
+
+func (gist *Gist) Files(revision string) ([]*File, error) {
+	var files []*File
+	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
+	if err != nil {
+		// if the revision or the file do not exist
+
+		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	for _, fileStr := range filesStr {
+		file, err := gist.File(revision, fileStr, true)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, file)
+	}
+	return files, err
+}
+
+func (gist *Gist) File(revision string, filename string, truncate bool) (*File, error) {
+	content, truncated, err := git.GetFileContent(gist.User.Username, gist.Uuid, revision, filename, truncate)
+
+	// if the revision or the file do not exist
+	if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
+		return nil, nil
+	}
+
+	return &File{
+		Filename:  filename,
+		Content:   content,
+		Truncated: truncated,
+	}, err
+}
+
+func (gist *Gist) Log(skip string) error {
+	_, err := git.GetLog(gist.User.Username, gist.Uuid, skip)
+
+	return err
+}
+
+func (gist *Gist) NbCommits() (string, error) {
+	return git.GetNumberOfCommitsOfRepository(gist.User.Username, gist.Uuid)
+}
+
+func (gist *Gist) AddAndCommitFiles(files *[]File) error {
+	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid); err != nil {
+		return err
+	}
+
+	for _, file := range *files {
+		if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
+			return err
+		}
+	}
+
+	if err := git.AddAll(gist.Uuid); err != nil {
+		return err
+	}
+
+	if err := git.Commit(gist.Uuid); err != nil {
+		return err
+	}
+
+	return git.Push(gist.Uuid)
+}
+
+func (gist *Gist) ForkClone(username string, uuid string) error {
+	return git.ForkClone(gist.User.Username, gist.Uuid, username, uuid)
+}
+
+func (gist *Gist) UpdateServerInfo() error {
+	return git.UpdateServerInfo(gist.User.Username, gist.Uuid)
+}
+
+func (gist *Gist) RPC(service string) ([]byte, error) {
+	return git.RPC(gist.User.Username, gist.Uuid, service)
+}
+
 // -- DTO -- //
 
 type GistDTO struct {
@@ -200,7 +291,6 @@ func (dto *GistDTO) ToGist() *Gist {
 		Title:       dto.Title,
 		Description: dto.Description,
 		Private:     dto.Private,
-		Files:       dto.Files,
 	}
 }
 
@@ -208,6 +298,5 @@ func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Title = dto.Title
 	gist.Description = dto.Description
 	gist.Private = dto.Private
-	gist.Files = dto.Files
 	return gist
 }

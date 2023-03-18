@@ -76,13 +76,13 @@ func GetNumberOfCommitsOfRepository(user string, gist string) (string, error) {
 	return strings.TrimSuffix(string(stdout), "\n"), err
 }
 
-func GetFilesOfRepository(user string, gist string, commit string) ([]string, error) {
+func GetFilesOfRepository(user string, gist string, revision string) ([]string, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
 		"git",
 		"ls-tree",
-		commit,
+		revision,
 		"--name-only",
 	)
 	cmd.Dir = repositoryPath
@@ -96,19 +96,29 @@ func GetFilesOfRepository(user string, gist string, commit string) ([]string, er
 	return slice[:len(slice)-1], nil
 }
 
-func GetFileContent(user string, gist string, commit string, filename string) (string, error) {
+func GetFileContent(user string, gist string, revision string, filename string, truncate bool) (string, bool, error) {
 	repositoryPath := RepositoryPath(user, gist)
+
+	var maxBytes int64 = -1
+	if truncate {
+		maxBytes = 2 << 18
+	}
 
 	cmd := exec.Command(
 		"git",
 		"--no-pager",
 		"show",
-		commit+":"+filename,
+		revision+":"+filename,
 	)
 	cmd.Dir = repositoryPath
 
-	stdout, err := cmd.Output()
-	return string(stdout), err
+	stdout, _ := cmd.StdoutPipe()
+	err := cmd.Start()
+	if err != nil {
+		return "", false, err
+	}
+
+	return truncateCommandOutput(stdout, maxBytes)
 }
 
 func GetLog(user string, gist string, skip string) (string, error) {
@@ -228,7 +238,7 @@ func Push(gistTmpId string) error {
 }
 
 func DeleteRepository(user string, gist string) error {
-	return os.RemoveAll(filepath.Join(config.GetHomeDir(), "repos", strings.ToLower(user), gist))
+	return os.RemoveAll(RepositoryPath(user, gist))
 }
 
 func UpdateServerInfo(user string, gist string) error {
@@ -239,7 +249,7 @@ func UpdateServerInfo(user string, gist string) error {
 	return cmd.Run()
 }
 
-func RPCRefs(user string, gist string, service string) ([]byte, error) {
+func RPC(user string, gist string, service string) ([]byte, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command("git", service, "--stateless-rpc", "--advertise-refs", ".")

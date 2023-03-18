@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -53,7 +52,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 
 		setData(ctx, "currentUrl", template.URL(ctx.Request().URL.Path))
 
-		nbCommits, err := git.GetNumberOfCommitsOfRepository(userName, gistName)
+		nbCommits, err := gist.NbCommits()
 		if err != nil {
 			return errorRes(500, "Error fetching number of commits", err)
 		}
@@ -133,27 +132,19 @@ func allGists(ctx echo.Context) error {
 
 func gistIndex(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*models.Gist)
-	userName := gist.User.Username
-	gistName := gist.Uuid
 	revision := ctx.Param("revision")
 
 	if revision == "" {
 		revision = "HEAD"
 	}
 
-	nbCommits := getData(ctx, "nbCommits")
-	files := make(map[string]string)
-	if nbCommits != "0" {
-		filesStr, err := git.GetFilesOfRepository(userName, gistName, revision)
-		if err != nil {
-			return errorRes(500, "Error fetching files from repository", err)
-		}
-		for _, file := range filesStr {
-			files[file], err = git.GetFileContent(userName, gistName, revision, file)
-			if err != nil {
-				return errorRes(500, "Error fetching file content from file "+file, err)
-			}
-		}
+	files, err := gist.Files(revision)
+	if err != nil {
+		return errorRes(500, "Error fetching files", err)
+	}
+
+	if len(files) == 0 {
+		return notFound("Revision not found")
 	}
 
 	setData(ctx, "page", "code")
@@ -161,7 +152,6 @@ func gistIndex(ctx echo.Context) error {
 	setData(ctx, "files", files)
 	setData(ctx, "revision", revision)
 	setData(ctx, "htmlTitle", gist.Title)
-
 	return html(ctx, "gist.html")
 }
 
@@ -256,7 +246,6 @@ func processCreate(ctx echo.Context) error {
 	}
 
 	if err := ctx.Bind(dto); err != nil {
-		fmt.Println(err)
 		return errorRes(400, "Cannot bind data", err)
 	}
 
@@ -286,18 +275,10 @@ func processCreate(ctx echo.Context) error {
 		if isCreate {
 			return html(ctx, "create.html")
 		} else {
-			files := make(map[string]string)
-			filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, "HEAD")
+			files, err := gist.Files("HEAD")
 			if err != nil {
-				return errorRes(500, "Error fetching files from repository", err)
+				return errorRes(500, "Error fetching files", err)
 			}
-			for _, file := range filesStr {
-				files[file], err = git.GetFileContent(gist.User.Username, gist.Uuid, "HEAD", file)
-				if err != nil {
-					return errorRes(500, "Error fetching file content from file "+file, err)
-				}
-			}
-
 			setData(ctx, "files", files)
 			return html(ctx, "edit.html")
 		}
@@ -310,7 +291,7 @@ func processCreate(ctx echo.Context) error {
 	}
 
 	user := getUserLogged(ctx)
-	gist.NbFiles = len(gist.Files)
+	gist.NbFiles = len(dto.Files)
 
 	if isCreate {
 		uuidGist, err := uuid.NewRandom()
@@ -320,6 +301,7 @@ func processCreate(ctx echo.Context) error {
 		gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
 
 		gist.UserID = user.ID
+		gist.User = *user
 	}
 
 	if gist.Title == "" {
@@ -330,41 +312,23 @@ func processCreate(ctx echo.Context) error {
 		}
 	}
 
-	if len(gist.Files) > 0 {
-		split := strings.Split(gist.Files[0].Content, "\n")
+	if len(dto.Files) > 0 {
+		split := strings.Split(dto.Files[0].Content, "\n")
 		if len(split) > 10 {
 			gist.Preview = strings.Join(split[:10], "\n")
 		} else {
-			gist.Preview = gist.Files[0].Content
+			gist.Preview = dto.Files[0].Content
 		}
 
-		gist.PreviewFilename = gist.Files[0].Filename
+		gist.PreviewFilename = dto.Files[0].Filename
 	}
 
-	if err = git.InitRepository(user.Username, gist.Uuid); err != nil {
+	if err = gist.InitRepository(); err != nil {
 		return errorRes(500, "Error creating the repository", err)
 	}
 
-	if err = git.CloneTmp(user.Username, gist.Uuid, gist.Uuid); err != nil {
-		return errorRes(500, "Error cloning the repository", err)
-	}
-
-	for _, file := range gist.Files {
-		if err = git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
-			return errorRes(500, "Error setting file content for file "+file.Filename, err)
-		}
-	}
-
-	if err = git.AddAll(gist.Uuid); err != nil {
-		return errorRes(500, "Error adding files to the repository", err)
-	}
-
-	if err = git.Commit(gist.Uuid); err != nil {
-		return errorRes(500, "Error committing files to the local repository", err)
-	}
-
-	if err = git.Push(gist.Uuid); err != nil {
-		return errorRes(500, "Error pushing the local repository", err)
+	if err = gist.AddAndCommitFiles(&dto.Files); err != nil {
+		return errorRes(500, "Error adding and commiting files", err)
 	}
 
 	if isCreate {
@@ -395,7 +359,7 @@ func toggleVisibility(ctx echo.Context) error {
 func deleteGist(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*models.Gist)
 
-	err := git.DeleteRepository(gist.User.Username, gist.Uuid)
+	err := gist.DeleteRepository()
 	if err != nil {
 		return errorRes(500, "Error deleting the repository", err)
 	}
@@ -472,7 +436,7 @@ func fork(ctx echo.Context) error {
 		return errorRes(500, "Error forking the gist in database", err)
 	}
 
-	if err = git.ForkClone(gist.User.Username, gist.Uuid, currentUser.Username, newGist.Uuid); err != nil {
+	if err = gist.ForkClone(currentUser.Username, newGist.Uuid); err != nil {
 		return errorRes(500, "Error cloning the repository while forking", err)
 	}
 	if err = gist.IncrementForkCount(); err != nil {
@@ -486,37 +450,25 @@ func fork(ctx echo.Context) error {
 
 func rawFile(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*models.Gist)
-	fileContent, err := git.GetFileContent(
-		gist.User.Username,
-		gist.Uuid,
-		ctx.Param("revision"),
-		ctx.Param("file"))
+	file, err := gist.File(ctx.Param("revision"), ctx.Param("file"), false)
+
 	if err != nil {
 		return errorRes(500, "Error getting file content", err)
 	}
 
-	filebytes := []byte(fileContent)
-
-	if len(filebytes) == 0 {
+	if file == nil {
 		return notFound("File not found")
 	}
 
-	return plainText(ctx, 200, string(filebytes))
+	return plainText(ctx, 200, file.Content)
 }
 
 func edit(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*models.Gist)
 
-	files := make(map[string]string)
-	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, "HEAD")
+	files, err := gist.Files("HEAD")
 	if err != nil {
 		return errorRes(500, "Error fetching files from repository", err)
-	}
-	for _, file := range filesStr {
-		files[file], err = git.GetFileContent(gist.User.Username, gist.Uuid, "HEAD", file)
-		if err != nil {
-			return errorRes(500, "Error fetching file content from file "+file, err)
-		}
 	}
 
 	setData(ctx, "files", files)
@@ -529,29 +481,24 @@ func downloadZip(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*models.Gist)
 	var revision = ctx.Param("revision")
 
-	files := make(map[string]string)
-	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
+	files, err := gist.Files(revision)
 	if err != nil {
 		return errorRes(500, "Error fetching files from repository", err)
 	}
-
-	for _, file := range filesStr {
-		files[file], err = git.GetFileContent(gist.User.Username, gist.Uuid, revision, file)
-		if err != nil {
-			return errorRes(500, "Error fetching file content from file "+file, err)
-		}
+	if len(files) == 0 {
+		return notFound("No files found in this revision")
 	}
 
 	zipFile := new(bytes.Buffer)
 
 	zipWriter := zip.NewWriter(zipFile)
 
-	for fileName, fileContent := range files {
-		f, err := zipWriter.Create(fileName)
+	for _, file := range files {
+		f, err := zipWriter.Create(file.Filename)
 		if err != nil {
 			return errorRes(500, "Error adding a file the to the zip archive", err)
 		}
-		_, err = f.Write([]byte(fileContent))
+		_, err = f.Write([]byte(file.Content))
 		if err != nil {
 			return errorRes(500, "Error adding file content the to the zip archive", err)
 		}

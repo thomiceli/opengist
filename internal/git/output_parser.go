@@ -6,34 +6,28 @@ import (
 )
 
 func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) {
-	var (
-		buf []byte
-		err error
-	)
+	var buf []byte
+	var err error
 
 	if maxBytes < 0 {
-		// read entire output
 		buf, err = io.ReadAll(out)
-		if err != nil {
-			return "", false, err
-		}
-		return string(buf), false, nil
+	} else {
+		buf, err = io.ReadAll(io.LimitReader(out, maxBytes))
 	}
-
-	// read up to maxBytes bytes
-	buf = make([]byte, maxBytes)
-	n, err := io.ReadFull(out, buf)
-	if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
+	if err != nil {
 		return "", false, err
 	}
-	bytesRead := int64(n)
+	truncated := len(buf) >= int(maxBytes)
+	// Remove the last line if it's truncated
+	if truncated {
+		// Find the index of the last newline character
+		lastNewline := bytes.LastIndexByte(buf, '\n')
 
-	// find index of last newline character
-	lastNewline := bytes.LastIndexByte(buf, '\n')
-	if lastNewline >= 0 {
-		// truncate buffer to exclude last line
-		buf = buf[:lastNewline]
+		if lastNewline > 0 {
+			// Trim the data buffer up to the last newline character
+			buf = buf[:lastNewline]
+		}
 	}
 
-	return string(buf), bytesRead == maxBytes, nil
+	return string(buf), truncated, nil
 }

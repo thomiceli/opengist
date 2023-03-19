@@ -93,6 +93,15 @@ func GetAllGistsFromUser(fromUser string, currentUserId uint, offset int, sort s
 	return gists, err
 }
 
+func GetAllGistsRows() ([]*Gist, error) {
+	var gists []*Gist
+	err := db.Table("gists").
+		Preload("User").
+		Find(&gists).Error
+
+	return gists, err
+}
+
 func (gist *Gist) Create() error {
 	// avoids foreign key constraint error because the default value in the struct is 0
 	return db.Omit("forked_id").Create(&gist).Error

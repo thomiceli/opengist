@@ -140,6 +140,8 @@ func Start() {
 			g2.POST("/users/:user/delete", adminUserDelete)
 			g2.GET("/gists", adminGists)
 			g2.POST("/gists/:gist/delete", adminGistDelete)
+			g2.POST("/sync-fs", adminSyncReposFromFS)
+			g2.POST("/sync-db", adminSyncReposFromDB)
 		}
 
 		g1.GET("/all", allGists)

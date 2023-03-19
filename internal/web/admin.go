@@ -2,11 +2,20 @@ package web
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
 	"opengist/internal/config"
 	"opengist/internal/git"
 	"opengist/internal/models"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
+)
+
+var (
+	syncReposFromFS = false
+	syncReposFromDB = false
 )
 
 func adminIndex(ctx echo.Context) error {
@@ -39,6 +48,8 @@ func adminIndex(ctx echo.Context) error {
 	}
 	setData(ctx, "countKeys", countKeys)
 
+	setData(ctx, "syncReposFromFS", syncReposFromFS)
+	setData(ctx, "syncReposFromDB", syncReposFromDB)
 	return html(ctx, "admin_index.html")
 }
 
@@ -109,5 +120,65 @@ func adminGistDelete(ctx echo.Context) error {
 
 	addFlash(ctx, "Gist has been deleted", "success")
 	return redirect(ctx, "/admin/gists")
+}
 
+func adminSyncReposFromFS(ctx echo.Context) error {
+	addFlash(ctx, "Syncing repositories from filesystem...", "success")
+	go func() {
+		if syncReposFromFS {
+			return
+		}
+		syncReposFromFS = true
+
+		gists, err := models.GetAllGistsRows()
+		if err != nil {
+			log.Error().Err(err).Msg("Cannot get gists")
+			syncReposFromFS = false
+			return
+		}
+		for _, gist := range gists {
+			// if repository does not exist, delete gist from database
+			if _, err := os.Stat(git.RepositoryPath(gist.User.Username, gist.Uuid)); err != nil && !os.IsExist(err) {
+				if err2 := gist.Delete(); err2 != nil {
+					log.Error().Err(err2).Msg("Cannot delete gist")
+					syncReposFromFS = false
+					return
+				}
+			}
+		}
+		syncReposFromFS = false
+	}()
+	return redirect(ctx, "/admin")
+}
+
+func adminSyncReposFromDB(ctx echo.Context) error {
+	addFlash(ctx, "Syncing repositories from database...", "success")
+	go func() {
+		if syncReposFromDB {
+			return
+		}
+		syncReposFromDB = true
+		entries, err := filepath.Glob(filepath.Join(config.GetHomeDir(), "repos", "*", "*"))
+		if err != nil {
+			log.Error().Err(err).Msg("Cannot read repos directories")
+			syncReposFromDB = false
+			return
+		}
+
+		for _, e := range entries {
+			path := strings.Split(e, string(os.PathSeparator))
+			gist, _ := models.GetGist(path[len(path)-2], path[len(path)-1])
+
+			if gist.ID == 0 {
+				if err := git.DeleteRepository(path[len(path)-2], path[len(path)-1]); err != nil {
+					log.Error().Err(err).Msg("Cannot delete repository")
+					syncReposFromDB = false
+					return
+				}
+			}
+		}
+		syncReposFromDB = false
+		return
+	}()
+	return redirect(ctx, "/admin")
 }

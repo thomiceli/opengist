@@ -10,6 +10,8 @@ type User struct {
 	Password  string
 	IsAdmin   bool
 	CreatedAt int64
+	Email     string
+	MD5Hash   string // for gravatar, if no Email is specified, the value is random
 
 	Gists   []Gist   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys []SSHKey `gorm:"foreignKey:UserID"`
@@ -90,6 +92,10 @@ func GetUserBySSHKeyID(sshKeyId uint) (*User, error) {
 
 func (user *User) Create() error {
 	return db.Create(&user).Error
+}
+
+func (user *User) Update() error {
+	return db.Save(&user).Error
 }
 
 func (user *User) Delete() error {

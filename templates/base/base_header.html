@@ -58,7 +58,7 @@
                         {{ if .userLogged.IsAdmin }}
                             <a href="/admin" class="hidden sm:block text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Admin</a>
                         {{ end }}
-                        <a href="/ssh-keys" class="hidden sm:block text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">SSH Keys</a>
+                        <a href="/settings" class="hidden sm:block text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Config</a>
 
                         <a href="/logout" id="logged-button" class="inline-flex text-slate-300 hover:bg-rose-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                                 <p class="text-slate-300 mr-1 username">{{ .userLogged.Username }}</p>
@@ -90,7 +90,7 @@
                     <a href="/all" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium" aria-current="page">All</a>
                     {{ if .userLogged }}
                         <a href="/{{ .userLogged.Username }}" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">My gists</a>
-                        <a href="/ssh-keys" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">SSH Keys</a>
+                        <a href="/settings" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Config</a>
 
                     {{ if .userLogged.IsAdmin }}
                             <a href="/admin" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Admin</a>

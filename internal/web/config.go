@@ -1,15 +1,19 @@
 package web
 
 import (
+	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/ssh"
 	"opengist/internal/models"
 	"strconv"
+	"strings"
+	"time"
 )
 
-func sshKeys(ctx echo.Context) error {
+func userSettings(ctx echo.Context) error {
 	user := getUserLogged(ctx)
 
 	keys, err := models.GetSSHKeysByUserID(user.ID)
@@ -17,14 +21,48 @@ func sshKeys(ctx echo.Context) error {
 		return errorRes(500, "Cannot get SSH keys", err)
 	}
 
+	setData(ctx, "email", user.Email)
 	setData(ctx, "sshKeys", keys)
-	setData(ctx, "htmlTitle", "Manage SSH keys")
-	return html(ctx, "ssh_keys.html")
+	setData(ctx, "htmlTitle", "Settings")
+	return html(ctx, "settings.html")
+}
+
+func emailProcess(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+	email := ctx.FormValue("email")
+	var hash string
+
+	fmt.Println()
+
+	if email == "" {
+		// generate random md5 string
+		hash = fmt.Sprintf("%x", md5.Sum([]byte(time.Now().String())))
+	} else {
+		hash = fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email)))))
+	}
+
+	user.Email = email
+	user.MD5Hash = hash
+
+	if err := user.Update(); err != nil {
+		return errorRes(500, "Cannot update email", err)
+	}
+
+	addFlash(ctx, "Email updated", "success")
+	return redirect(ctx, "/settings")
+}
+
+func accountDeleteProcess(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+
+	if err := user.Delete(); err != nil {
+		return errorRes(500, "Cannot delete this user", err)
+	}
+
+	return redirect(ctx, "/all")
 }
 
 func sshKeysProcess(ctx echo.Context) error {
-	setData(ctx, "htmlTitle", "Manage SSH keys")
-
 	user := getUserLogged(ctx)
 
 	var dto = new(models.SSHKeyDTO)
@@ -34,7 +72,7 @@ func sshKeysProcess(ctx echo.Context) error {
 
 	if err := ctx.Validate(dto); err != nil {
 		addFlash(ctx, validationMessages(&err), "error")
-		return redirect(ctx, "/ssh-keys")
+		return redirect(ctx, "/settings")
 	}
 	key := dto.ToSSHKey()
 
@@ -43,7 +81,7 @@ func sshKeysProcess(ctx echo.Context) error {
 	pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(key.Content))
 	if err != nil {
 		addFlash(ctx, "Invalid SSH key", "error")
-		return redirect(ctx, "/ssh-keys")
+		return redirect(ctx, "/settings")
 	}
 
 	sha := sha256.Sum256(pubKey.Marshal())
@@ -54,7 +92,7 @@ func sshKeysProcess(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "SSH key added", "success")
-	return redirect(ctx, "/ssh-keys")
+	return redirect(ctx, "/settings")
 }
 
 func sshKeysDelete(ctx echo.Context) error {
@@ -62,13 +100,13 @@ func sshKeysDelete(ctx echo.Context) error {
 	keyId, err := strconv.Atoi(ctx.Param("id"))
 
 	if err != nil {
-		return redirect(ctx, "/ssh-keys")
+		return redirect(ctx, "/settings")
 	}
 
 	key, err := models.GetSSHKeyByID(uint(keyId))
 
 	if err != nil || key.UserID != user.ID {
-		return redirect(ctx, "/ssh-keys")
+		return redirect(ctx, "/settings")
 	}
 
 	if err := key.Delete(); err != nil {
@@ -76,5 +114,5 @@ func sshKeysDelete(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "SSH key deleted", "success")
-	return redirect(ctx, "/ssh-keys")
+	return redirect(ctx, "/settings")
 }

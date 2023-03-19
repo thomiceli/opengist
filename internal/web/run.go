@@ -100,6 +100,9 @@ func Start() {
 				"slug": func(s string) string {
 					return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
 				},
+				"avatarUrl": func(user *models.User) string {
+					return "https://www.gravatar.com/avatar/" + user.MD5Hash + "?d=identicon&s=200"
+				},
 			}).ParseGlob("templates/*/*.html")),
 	}
 
@@ -144,9 +147,11 @@ func Start() {
 		g1.POST("/login", processLogin)
 		g1.GET("/logout", logout)
 
-		g1.GET("/ssh-keys", sshKeys, logged)
-		g1.POST("/ssh-keys", sshKeysProcess, logged)
-		g1.DELETE("/ssh-keys/:id", sshKeysDelete, logged)
+		g1.GET("/settings", userSettings, logged)
+		g1.POST("/settings/email", emailProcess, logged)
+		g1.DELETE("/settings/account", accountDeleteProcess, logged)
+		g1.POST("/settings/ssh-keys", sshKeysProcess, logged)
+		g1.DELETE("/settings/ssh-keys/:id", sshKeysDelete, logged)
 
 		g2 := g1.Group("/admin")
 		{

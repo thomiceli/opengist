@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"opengist/internal/config"
+	"opengist/internal/git"
 	"opengist/internal/models"
 	"path/filepath"
 	"regexp"
@@ -76,6 +77,21 @@ func Start() {
 				},
 				"isMarkdown": func(i string) bool {
 					return ".md" == strings.ToLower(filepath.Ext(i))
+				},
+				"isCsv": func(i string) bool {
+					return ".csv" == strings.ToLower(filepath.Ext(i))
+				},
+				"csvFile": func(file *git.File) *git.CsvFile {
+					if ".csv" != strings.ToLower(filepath.Ext(file.Filename)) {
+						return nil
+					}
+
+					csvFile, err := git.ParseCsv(file)
+					if err != nil {
+						return nil
+					}
+
+					return csvFile
 				},
 				"httpStatusText": http.StatusText,
 				"loadedTime": func(startTime time.Time) string {

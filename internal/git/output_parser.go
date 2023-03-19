@@ -3,8 +3,11 @@ package git
 import (
 	"bufio"
 	"bytes"
+	"encoding/csv"
+	"fmt"
 	"io"
 	"regexp"
+	"strings"
 )
 
 type File struct {
@@ -14,6 +17,12 @@ type File struct {
 	Truncated   bool
 	IsCreated   bool
 	IsDeleted   bool
+}
+
+type CsvFile struct {
+	File
+	Header []string
+	Rows   [][]string
 }
 
 type Commit struct {
@@ -151,4 +160,28 @@ func parseLog(out io.Reader) []*Commit {
 	}
 
 	return commits
+}
+
+func ParseCsv(file *File) (*CsvFile, error) {
+
+	reader := csv.NewReader(strings.NewReader(file.Content))
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	header := records[0]
+	numColumns := len(header)
+
+	for i := 1; i < len(records); i++ {
+		if len(records[i]) != numColumns {
+			return nil, fmt.Errorf("CSV file has invalid row at index %d", i)
+		}
+	}
+
+	return &CsvFile{
+		File:   *file,
+		Header: header,
+		Rows:   records[1:],
+	}, nil
 }

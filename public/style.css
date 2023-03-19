@@ -111,3 +111,23 @@ pre {
 .line-num {
     @apply cursor-pointer text-slate-400 hover:text-white;
 }
+
+table.csv-table {
+    @apply w-full whitespace-pre text-xs;
+}
+
+table.csv-table thead {
+    text-align: left;
+}
+
+table.csv-table thead tr {
+    @apply bg-slate-800;
+}
+
+table.csv-table thead tr th {
+    @apply border py-2 px-1 border-slate-700;
+}
+
+table.csv-table tbody td {
+    @apply border py-1.5 px-1 border-slate-800;
+}

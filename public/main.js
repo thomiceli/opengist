@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let rev = document.querySelector('.revision-text')
     if (rev) {
         let fullRev = rev.innerHTML
-        let smallRev = fullRev.substring(0, 8)
+        let smallRev = fullRev.substring(0, 7)
         rev.innerHTML = smallRev
 
         rev.onmouseover = () => {

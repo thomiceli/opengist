@@ -209,12 +209,14 @@ func processCreate(ctx echo.Context) error {
 	}
 
 	dto.Files = make([]models.FileDTO, 0)
+	fileCounter := 0
 	for i := 0; i < len(ctx.Request().PostForm["content"]); i++ {
 		name := ctx.Request().PostForm["name"][i]
 		content := ctx.Request().PostForm["content"][i]
 
 		if name == "" {
-			name = "gistfile" + strconv.Itoa(i+1) + ".txt"
+			fileCounter += 1
+			name = "gistfile" + strconv.Itoa(fileCounter) + ".txt"
 		}
 
 		escapedValue, err := url.QueryUnescape(content)

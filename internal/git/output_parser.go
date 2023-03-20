@@ -69,8 +69,16 @@ func parseLog(out io.Reader) []*Commit {
 	var currentFile *File
 	var isContent bool
 	var bytesRead = 0
+	scanNext := true
 
-	for scanner.Scan() {
+	for {
+		if scanNext && !scanner.Scan() {
+			break
+		}
+		scanNext = true
+
+		fmt.Println("> " + string(scanner.Bytes()))
+
 		// new commit found
 		currentFile = nil
 		currentCommit = &Commit{Hash: string(scanner.Bytes()[2:]), Files: []File{}}
@@ -85,6 +93,16 @@ func parseLog(out io.Reader) []*Commit {
 		currentCommit.Timestamp = string(scanner.Bytes()[2:])
 
 		scanner.Scan()
+
+		// if there is no shortstat, it means that the commit is empty, we add it and move onto the next one
+		if scanner.Bytes()[0] != ' ' {
+			commits = append(commits, currentCommit)
+
+			// avoid scanning the next line, as we already did it
+			scanNext = false
+			continue
+		}
+
 		changed := scanner.Bytes()[1:]
 		changed = bytes.ReplaceAll(changed, []byte("(+)"), []byte(""))
 		changed = bytes.ReplaceAll(changed, []byte("(-)"), []byte(""))
@@ -158,9 +176,8 @@ func parseLog(out io.Reader) []*Commit {
 			scanner.Scan()
 		}
 
-		if currentCommit != nil {
-			commits = append(commits, currentCommit)
-		}
+		commits = append(commits, currentCommit)
+
 	}
 
 	return commits

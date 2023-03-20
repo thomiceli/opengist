@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
@@ -100,8 +101,11 @@ func Start() {
 				"slug": func(s string) string {
 					return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
 				},
-				"avatarUrl": func(user *models.User) string {
-					return "https://www.gravatar.com/avatar/" + user.MD5Hash + "?d=identicon&s=200"
+				"avatarUrl": func(userHash string) string {
+					return "https://www.gravatar.com/avatar/" + userHash + "?d=identicon&s=200"
+				},
+				"emailToMD5": func(email string) string {
+					return fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email)))))
 				},
 			}).ParseGlob("templates/*/*.html")),
 	}

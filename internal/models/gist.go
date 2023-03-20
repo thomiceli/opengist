@@ -251,7 +251,7 @@ func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
 		return err
 	}
 
-	if err := git.CommitRepository(gist.Uuid); err != nil {
+	if err := git.CommitRepository(gist.Uuid, gist.User.Username, gist.User.Email); err != nil {
 		return err
 	}
 

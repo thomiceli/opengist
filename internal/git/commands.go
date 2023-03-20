@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	"io"
 	"opengist/internal/config"
 	"os"
@@ -114,7 +115,7 @@ func GetLog(user string, gist string, skip string) ([]*Commit, error) {
 		"-p",
 		"--skip",
 		skip,
-		"--format=format:c %H%na %aN%nt %at",
+		"--format=format:c %H%na %aN%nm %ae%nt %at",
 		"--shortstat",
 		"HEAD",
 	)
@@ -146,12 +147,6 @@ func CloneTmp(user string, gist string, gistTmpId string) error {
 		return err
 	}
 
-	cmd = exec.Command("git", "config", "user.name", user)
-	cmd.Dir = tmpRepositoryPath
-	if err = cmd.Run(); err != nil {
-		return err
-	}
-
 	// remove every file (and not the .git directory!)
 	cmd = exec.Command("find", ".", "-maxdepth", "1", "-type", "f", "-delete")
 	cmd.Dir = tmpRepositoryPath
@@ -164,13 +159,6 @@ func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) e
 
 	cmd := exec.Command("git", "clone", "--bare", repositoryPathSrc, repositoryPathDst)
 	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	cmd = exec.Command("git", "config", "user.name", userDst)
-	cmd.Dir = repositoryPathDst
-	err := cmd.Run()
-	if err != nil {
 		return err
 	}
 
@@ -200,8 +188,15 @@ func AddAll(gistTmpId string) error {
 	return cmd.Run()
 }
 
-func CommitRepository(gistTmpId string) error {
-	cmd := exec.Command("git", "commit", "--allow-empty", "-m", `"Opengist commit"`)
+func CommitRepository(gistTmpId string, authorName string, authorEmail string) error {
+	cmd := exec.Command("git",
+		"commit",
+		"--allow-empty",
+		"-m",
+		"Opengist commit",
+		"--author",
+		fmt.Sprintf("%s <%s>", authorName, authorEmail),
+	)
 	tmpPath := TmpRepositoryPath(gistTmpId)
 	cmd.Dir = tmpPath
 

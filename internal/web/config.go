@@ -32,8 +32,6 @@ func emailProcess(ctx echo.Context) error {
 	email := ctx.FormValue("email")
 	var hash string
 
-	fmt.Println()
-
 	if email == "" {
 		// generate random md5 string
 		hash = fmt.Sprintf("%x", md5.Sum([]byte(time.Now().String())))

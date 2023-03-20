@@ -71,7 +71,8 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 
 func allGists(ctx echo.Context) error {
 	var err error
-	fromUser := ctx.Param("user")
+	fromUserStr := ctx.Param("user")
+
 	userLogged := getUserLogged(ctx)
 
 	pageInt := getPage(ctx)
@@ -99,30 +100,30 @@ func allGists(ctx echo.Context) error {
 	} else {
 		currentUserId = 0
 	}
-	if fromUser == "" {
+	if fromUserStr == "" {
 		setData(ctx, "htmlTitle", "All gists")
-		fromUser = "all"
+		fromUserStr = "all"
 		gists, err = models.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
 	} else {
-		setData(ctx, "htmlTitle", "All gists from "+fromUser)
-		setData(ctx, "fromUser", fromUser)
+		setData(ctx, "htmlTitle", "All gists from "+fromUserStr)
 
-		var exists bool
-		if exists, err = models.UserExists(fromUser); err != nil {
+		fromUser, err := models.GetUserByUsername(fromUserStr)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return notFound("User not found")
+			}
 			return errorRes(500, "Error fetching user", err)
 		}
+		setData(ctx, "fromUser", fromUser)
 
-		if !exists {
-			return notFound("User not found")
-		}
-
-		gists, err = models.GetAllGistsFromUser(fromUser, currentUserId, pageInt-1, sort, order)
+		gists, err = models.GetAllGistsFromUser(fromUserStr, currentUserId, pageInt-1, sort, order)
 	}
+
 	if err != nil {
 		return errorRes(500, "Error fetching gists", err)
 	}
 
-	if err = paginate(ctx, gists, pageInt, 10, "gists", fromUser, 2, "&sort="+sort+"&order="+order); err != nil {
+	if err = paginate(ctx, gists, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 

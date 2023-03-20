@@ -26,11 +26,12 @@ type CsvFile struct {
 }
 
 type Commit struct {
-	Hash      string
-	Author    string
-	Timestamp string
-	Changed   string
-	Files     []File
+	Hash        string
+	AuthorName  string
+	AuthorEmail string
+	Timestamp   string
+	Changed     string
+	Files       []File
 }
 
 func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) {
@@ -75,7 +76,10 @@ func parseLog(out io.Reader) []*Commit {
 		currentCommit = &Commit{Hash: string(scanner.Bytes()[2:]), Files: []File{}}
 
 		scanner.Scan()
-		currentCommit.Author = string(scanner.Bytes()[2:])
+		currentCommit.AuthorName = string(scanner.Bytes()[2:])
+
+		scanner.Scan()
+		currentCommit.AuthorEmail = string(scanner.Bytes()[2:])
 
 		scanner.Scan()
 		currentCommit.Timestamp = string(scanner.Bytes()[2:])

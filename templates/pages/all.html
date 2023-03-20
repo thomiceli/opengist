@@ -2,7 +2,19 @@
 <div class="py-10">
     <header class="pb-4 flex ">
         <div class="flex-auto">
-            <h1 class="text-2xl font-bold leading-tight">All gists {{if .fromUser}} from {{.fromUser}} {{end}}</h1>
+            {{if .fromUser}}
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <img class="h-12 w-12 rounded-md mr-2 border border-gray-700" src="{{ avatarUrl .fromUser.MD5Hash }}" alt="">
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>
+                    <p class="text-sm text-slate-500">Joined <span class="moment-timestamp">{{.fromUser.CreatedAt}}</span></p>
+                </div>
+            </div>
+            {{ else }}
+            <h1 class="text-2xl font-bold leading-tight">All gists</h1>
+            {{ end }}
         </div>
         <div class="float-right">
             <div class="relative inline-block text-left">
@@ -16,21 +28,21 @@
                 </div>
                 <div id="sort-gists-dropdown" class="hidden absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-700 rounded-md rounded border border-gray-600 bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                     <div class="" role="none">
-                        <a href="/{{if .fromUser}}{{.fromUser}}{{else}}all{{end}}?sort=created&order=desc" class="text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-700 hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
+                        <a href="/{{if .fromUser}}{{.fromUser.Username}}{{else}}all{{end}}?sort=created&order=desc" class="text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-700 hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
                             Recently created
                         </a>
                     </div>
                     <div class="" role="none">
-                        <a href="/{{if .fromUser}}{{.fromUser}}{{else}}all{{end}}?sort=created&order=asc" class="text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-700 hover:text-white hover:bg-primary-500" role="menuitem">
+                        <a href="/{{if .fromUser}}{{.fromUser.Username}}{{else}}all{{end}}?sort=created&order=asc" class="text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-700 hover:text-white hover:bg-primary-500" role="menuitem">
                             Least recently created
                         </a>
                     </div><div class="" role="none">
-                        <a href="/{{if .fromUser}}{{.fromUser}}{{else}}all{{end}}?sort=updated&order=desc" class="text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-700 hover:text-white hover:bg-primary-500" role="menuitem">
+                        <a href="/{{if .fromUser}}{{.fromUser.Username}}{{else}}all{{end}}?sort=updated&order=desc" class="text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-700 hover:text-white hover:bg-primary-500" role="menuitem">
                             Recently updated
                         </a>
                     </div>
                     <div class="" role="none">
-                        <a href="/{{if .fromUser}}{{.fromUser}}{{else}}all{{end}}?sort=updated&order=asc" class="text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-700 hover:text-white hover:bg-primary-500 hover:rounded-b-md" role="menuitem">
+                        <a href="/{{if .fromUser}}{{.fromUser.Username}}{{else}}all{{end}}?sort=updated&order=asc" class="text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-700 hover:text-white hover:bg-primary-500 hover:rounded-b-md" role="menuitem">
                             Least recently updated
                         </a>
                     </div>

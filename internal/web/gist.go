@@ -465,7 +465,11 @@ func downloadZip(ctx echo.Context) error {
 	zipWriter := zip.NewWriter(zipFile)
 
 	for _, file := range files {
-		f, err := zipWriter.Create(file.Filename)
+		fh := &zip.FileHeader{
+			Name:   file.Filename,
+			Method: zip.Deflate,
+		}
+		f, err := zipWriter.CreateHeader(fh)
 		if err != nil {
 			return errorRes(500, "Error adding a file the to the zip archive", err)
 		}

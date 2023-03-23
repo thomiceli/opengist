@@ -19,9 +19,12 @@ const newEditor = (dom, value = '') => {
     })
 }
 
+const eventOnDrop = (e) => {
+    e.preventDefault(); // prevent the browser from opening the dropped file
+    e.target.closest('.editor').querySelector('input.form-filename').value = e.dataTransfer.files[0].name
+}
 
 document.onsubmit = () => {
-    console.log('onsubmit');
     window.onbeforeunload = null;
 }
 
@@ -39,6 +42,8 @@ arr.forEach(el => {
             return 'Are you sure you want to quit?';
         }
     });
+
+    currEditor.dom.addEventListener("drop", eventOnDrop);
 
     // remove editor on delete
     let deleteBtns = el.querySelector('button.delete-file')
@@ -65,6 +70,8 @@ document.getElementById('add-file').onclick = () => {
     // creating the new codemirror editor and append it in the editor div
     editorsjs.push(newEditor(newEditorDom))
     editorsParentdom.append(newEditorDom)
+    editorsParentdom.addEventListener("drop", eventOnDrop);
+
 }
 
 document.querySelector('form#create').onsubmit = () => {

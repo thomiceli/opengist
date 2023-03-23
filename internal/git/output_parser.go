@@ -77,8 +77,6 @@ func parseLog(out io.Reader) []*Commit {
 		}
 		scanNext = true
 
-		fmt.Println("> " + string(scanner.Bytes()))
-
 		// new commit found
 		currentFile = nil
 		currentCommit = &Commit{Hash: string(scanner.Bytes()[2:]), Files: []File{}}

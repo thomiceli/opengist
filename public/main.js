@@ -1,5 +1,6 @@
 import './style.css'
 import './markdown.css'
+import './favicon.svg'
 import 'highlight.js/styles/tokyo-night-dark.css'
 import moment from 'moment'
 import md from 'markdown-it'

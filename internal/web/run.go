@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
@@ -14,6 +15,7 @@ import (
 	"opengist/internal/config"
 	"opengist/internal/git"
 	"opengist/internal/models"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -23,6 +25,59 @@ import (
 
 var store *sessions.CookieStore
 var re = regexp.MustCompile("[^a-z0-9]+")
+var fm = template.FuncMap{
+	"split":     strings.Split,
+	"indexByte": strings.IndexByte,
+	"toInt": func(i string) int64 {
+		val, _ := strconv.ParseInt(i, 10, 64)
+		return val
+	},
+	"inc": func(i int64) int64 {
+		return i + 1
+	},
+	"splitGit": func(i string) []string {
+		return strings.FieldsFunc(i, func(r rune) bool {
+			return r == ',' || r == ' '
+		})
+	},
+	"lines": func(i string) []string {
+		return strings.Split(i, "\n")
+	},
+	"isMarkdown": func(i string) bool {
+		return ".md" == strings.ToLower(filepath.Ext(i))
+	},
+	"isCsv": func(i string) bool {
+		return ".csv" == strings.ToLower(filepath.Ext(i))
+	},
+	"csvFile": func(file *git.File) *git.CsvFile {
+		if ".csv" != strings.ToLower(filepath.Ext(file.Filename)) {
+			return nil
+		}
+
+		csvFile, err := git.ParseCsv(file)
+		if err != nil {
+			return nil
+		}
+
+		return csvFile
+	},
+	"httpStatusText": http.StatusText,
+	"loadedTime": func(startTime time.Time) string {
+		return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
+	},
+	"slug": func(s string) string {
+		return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
+	},
+	"avatarUrl": func(userHash string) string {
+		return "https://www.gravatar.com/avatar/" + userHash + "?d=identicon&s=200"
+	},
+	"emailToMD5": func(email string) string {
+		return fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email)))))
+	},
+	"asset": func(jsfile string) string {
+		return "/" + manifestEntries[jsfile].File
+	},
+}
 
 type Template struct {
 	templates *template.Template
@@ -34,6 +89,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Con
 
 func Start() {
 	store = sessions.NewCookieStore([]byte("opengist"))
+	parseManifestEntries()
 
 	e := echo.New()
 	e.HideBanner = true
@@ -57,57 +113,7 @@ func Start() {
 	e.Use(middleware.Secure())
 
 	e.Renderer = &Template{
-		templates: template.Must(template.New("t").Funcs(
-			template.FuncMap{
-				"split":     strings.Split,
-				"indexByte": strings.IndexByte,
-				"toInt": func(i string) int64 {
-					val, _ := strconv.ParseInt(i, 10, 64)
-					return val
-				},
-				"inc": func(i int64) int64 {
-					return i + 1
-				},
-				"splitGit": func(i string) []string {
-					return strings.FieldsFunc(i, func(r rune) bool {
-						return r == ',' || r == ' '
-					})
-				},
-				"lines": func(i string) []string {
-					return strings.Split(i, "\n")
-				},
-				"isMarkdown": func(i string) bool {
-					return ".md" == strings.ToLower(filepath.Ext(i))
-				},
-				"isCsv": func(i string) bool {
-					return ".csv" == strings.ToLower(filepath.Ext(i))
-				},
-				"csvFile": func(file *git.File) *git.CsvFile {
-					if ".csv" != strings.ToLower(filepath.Ext(file.Filename)) {
-						return nil
-					}
-
-					csvFile, err := git.ParseCsv(file)
-					if err != nil {
-						return nil
-					}
-
-					return csvFile
-				},
-				"httpStatusText": http.StatusText,
-				"loadedTime": func(startTime time.Time) string {
-					return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
-				},
-				"slug": func(s string) string {
-					return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
-				},
-				"avatarUrl": func(userHash string) string {
-					return "https://www.gravatar.com/avatar/" + userHash + "?d=identicon&s=200"
-				},
-				"emailToMD5": func(email string) string {
-					return fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email)))))
-				},
-			}).ParseGlob("templates/*/*.html")),
+		templates: template.Must(template.New("t").Funcs(fm).ParseGlob("templates/*/*.html")),
 	}
 
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
@@ -290,4 +296,26 @@ func logged(next echo.HandlerFunc) echo.HandlerFunc {
 
 func noRouteFound(echo.Context) error {
 	return notFound("Page not found")
+}
+
+// ---
+
+type Asset struct {
+	File string `json:"file"`
+}
+
+var manifestEntries map[string]Asset
+
+func parseManifestEntries() {
+	file, err := os.Open("public/manifest.json")
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to open manifest.json")
+	}
+	byteValue, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to read manifest.json")
+	}
+	if err = json.Unmarshal(byteValue, &manifestEntries); err != nil {
+		log.Fatal().Err(err).Msg("Failed to unmarshal manifest.json")
+	}
 }

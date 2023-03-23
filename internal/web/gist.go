@@ -45,9 +45,18 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))
 
 		if config.C.HTTP.Git {
-			setData(ctx, "httpCloneUrl", httpProtocol+"://"+config.C.HTTP.Domain+":"+config.C.HTTP.Port+"/"+userName+"/"+gistName+".git")
+			if config.C.HTTP.Port == "80" || config.C.HTTP.Port == "443" {
+				setData(ctx, "httpCloneUrl", httpProtocol+"://"+config.C.HTTP.Domain+"/"+userName+"/"+gistName+".git")
+			} else {
+				setData(ctx, "httpCloneUrl", httpProtocol+"://"+config.C.HTTP.Domain+":"+config.C.HTTP.Port+"/"+userName+"/"+gistName+".git")
+			}
 		}
-		setData(ctx, "httpCopyUrl", httpProtocol+"://"+config.C.HTTP.Domain+":"+config.C.HTTP.Port+"/"+userName+"/"+gistName)
+
+		if config.C.HTTP.Port == "80" || config.C.HTTP.Port == "443" {
+			setData(ctx, "httpCopyUrl", httpProtocol+"://"+config.C.HTTP.Domain+"/"+userName+"/"+gistName)
+		} else {
+			setData(ctx, "httpCopyUrl", httpProtocol+"://"+config.C.HTTP.Domain+":"+config.C.HTTP.Port+"/"+userName+"/"+gistName)
+		}
 
 		setData(ctx, "currentUrl", template.URL(ctx.Request().URL.Path))
 

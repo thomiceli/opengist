@@ -3,14 +3,10 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="http://localhost:3000/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="{{ asset "favicon.svg" }}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-        html {
-            background-color: #0d1117;
-        }
-    </style>
-    <script type="module" src="http://localhost:3000/main.js"></script>
+    <link rel="stylesheet" href="{{ asset "main.css" }}" />
+    <script type="module" src="{{ asset "main.js" }}"></script>
 
     {{ if .htmlTitle }}
         <title>{{ .htmlTitle }} - Opengist</title>

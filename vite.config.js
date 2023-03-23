@@ -9,7 +9,6 @@ export default defineConfig({
         assetsDir: 'assets',
         manifest: true,
         rollupOptions: {
-            // overwrite default .html entry
             input: ['./public/main.js', './public/editor.js']
         }
     }

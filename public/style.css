@@ -8,6 +8,10 @@
     }
 }
 
+html {
+    @apply bg-gray-800;
+}
+
 a {
     @apply text-primary-500;
 }

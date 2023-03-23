@@ -41,15 +41,15 @@
                                 {{ end }}
                             </p>
                         </div>
-                        <div class="code overflow-auto">
+                        <div class="overflow-auto">
                             {{ if $file.Truncated }}
-                                <p class="m-2 ml-4 text-xs">Diff truncated because its too large to be shown</p>
+                                <p class="m-2 ml-4 text-sm">Diff truncated because its too large to be shown</p>
                             {{ else if and (eq $file.Content "") (ne $file.OldFilename "") }}
-                                <p class="m-2 ml-4 text-xs">File renamed without changes</p>
+                                <p class="m-2 ml-4 text-sm">File renamed without changes</p>
                             {{ else if eq $file.Content "" }}
-                                <p class="m-2 ml-4 text-xs">Empty file</p>
+                                <p class="m-2 ml-4 text-sm">Empty file</p>
                             {{ else }}
-                            <table class="table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
+                            <table class="code table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
                                 <tbody>
                                 {{ $left  := 0 }}
                                 {{ $right := 0 }}

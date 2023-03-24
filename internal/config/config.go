@@ -1,11 +1,14 @@
 package config
 
 import (
+	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 var OpengistVersion = "0.0.1"
@@ -103,6 +106,27 @@ func InitLog() {
 	}
 
 	log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
+}
+
+func CheckGitVersion(version string) (bool, error) {
+	versionParts := strings.Split(version, ".")
+	if len(versionParts) < 2 {
+		return false, fmt.Errorf("invalid version string")
+	}
+	major, err := strconv.Atoi(versionParts[0])
+	if err != nil {
+		return false, fmt.Errorf("invalid major version number")
+	}
+	minor, err := strconv.Atoi(versionParts[1])
+	if err != nil {
+		return false, fmt.Errorf("invalid minor version number")
+	}
+
+	// Check if version is prior to 2.20
+	if major < 2 || (major == 2 && minor < 20) {
+		return false, nil
+	}
+	return true, nil
 }
 
 func GetHomeDir() string {

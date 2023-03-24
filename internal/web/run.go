@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"crypto/md5"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/sessions"
@@ -15,7 +16,6 @@ import (
 	"opengist/internal/config"
 	"opengist/internal/git"
 	"opengist/internal/models"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -79,6 +79,8 @@ var fm = template.FuncMap{
 	},
 }
 
+var EmbedFS embed.FS
+
 type Template struct {
 	templates *template.Template
 }
@@ -89,7 +91,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Con
 
 func Start() {
 	store = sessions.NewCookieStore([]byte("opengist"))
-	parseManifestEntries()
+	assetsFS := echo.MustSubFS(EmbedFS, "public/assets")
 
 	e := echo.New()
 	e.HideBanner = true
@@ -113,9 +115,8 @@ func Start() {
 	e.Use(middleware.Secure())
 
 	e.Renderer = &Template{
-		templates: template.Must(template.New("t").Funcs(fm).ParseGlob("templates/*/*.html")),
+		templates: template.Must(template.New("t").Funcs(fm).ParseFS(EmbedFS, "templates/*/*.html")),
 	}
-
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
 		if err, ok := er.(*echo.HTTPError); ok {
 			if err.Code >= 500 {
@@ -135,7 +136,8 @@ func Start() {
 
 	e.Validator = NewValidator()
 
-	e.Static("/assets", "./public/assets")
+	parseManifestEntries()
+	e.GET("/assets/*", cacheControl(echo.WrapHandler(http.StripPrefix("/assets", http.FileServer(http.FS(assetsFS))))))
 
 	// Web based routes
 	g1 := e.Group("")
@@ -294,6 +296,13 @@ func logged(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func cacheControl(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
+		return next(c)
+	}
+}
+
 func noRouteFound(echo.Context) error {
 	return notFound("Page not found")
 }
@@ -307,7 +316,7 @@ type Asset struct {
 var manifestEntries map[string]Asset
 
 func parseManifestEntries() {
-	file, err := os.Open("public/manifest.json")
+	file, err := EmbedFS.Open("public/manifest.json")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to open manifest.json")
 	}

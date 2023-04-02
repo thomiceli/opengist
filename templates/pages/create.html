@@ -24,10 +24,31 @@
             </div>
             <div id="editors" class="space-y-4">
                 <div class="rounded-md border border-1 border-gray-700 editor">
-                    <div class="border-b-1 border-gray-700 bg-gray-800 my-auto">
+                    <div class="border-b-1 border-gray-700 bg-gray-800 my-auto flex">
                         <p class="mx-2 my-2 inline-flex">
                             <input type="text" name="name" placeholder="Filename with extension" style="line-height: 0.05em" class="form-filename bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-700 rounded-md">
                         </p>
+                        <div class="mx-2 my-2 inline-flex ml-auto space-x-2">
+                            <select class="editor-indent-type whitespace-nowrap text-slate-300 rounded border border-gray-600 bg-gray-900 pr-8 text-xs font-medium shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500">
+                                <optgroup label="Indent mode">
+                                    <option value="space">Space</option>
+                                    <option value="tab">Tabs</option>
+                                </optgroup>
+                            </select>
+                            <select class="editor-indent-size whitespace-nowrap text-slate-300 rounded border border-gray-600 bg-gray-900 pr-8 text-xs font-medium shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500">
+                                <optgroup label="Indent size">
+                                    <option value="2">2</option>
+                                    <option value="4">4</option>
+                                    <option value="8">8</option>
+                                </optgroup>
+                            </select>
+                            <select class="editor-wrap-mode whitespace-nowrap text-slate-300 rounded border border-gray-600 bg-gray-900 pr-8  text-xs font-medium shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500">
+                                <optgroup label="Wrap mode">
+                                    <option value="no">No wrap</option>
+                                    <option value="soft">Soft wrap</option>
+                                </optgroup>
+                            </select>
+                        </div>
                     </div>
                     <input type="hidden" value="" name="content" class="form-filecontent">
                 </div>

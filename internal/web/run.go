@@ -16,6 +16,7 @@ import (
 	"opengist/internal/config"
 	"opengist/internal/git"
 	"opengist/internal/models"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -23,6 +24,7 @@ import (
 	"time"
 )
 
+var devAssets = os.Getenv("DEV_ASSETS") == "1"
 var store *sessions.CookieStore
 var re = regexp.MustCompile("[^a-z0-9]+")
 var fm = template.FuncMap{
@@ -75,6 +77,9 @@ var fm = template.FuncMap{
 		return fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email)))))
 	},
 	"asset": func(jsfile string) string {
+		if devAssets {
+			return "http://localhost:16157/" + jsfile
+		}
 		return "/" + manifestEntries[jsfile].File
 	},
 }

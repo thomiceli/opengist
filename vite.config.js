@@ -9,7 +9,7 @@ export default defineConfig({
         assetsDir: 'assets',
         manifest: true,
         rollupOptions: {
-            input: ['./public/main.js', './public/editor.js']
+            input: ['./public/main.ts', './public/editor.ts']
         }
     }
 })

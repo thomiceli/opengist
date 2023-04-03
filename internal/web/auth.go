@@ -1,7 +1,10 @@
 package web
 
 import (
+	"errors"
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 	"opengist/internal/config"
 	"opengist/internal/models"
 )
@@ -80,6 +83,10 @@ func processLogin(ctx echo.Context) error {
 	var user *models.User
 
 	if user, err = models.GetUserByUsername(dto.Username); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return errorRes(500, "Cannot get user", err)
+		}
+		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
 		addFlash(ctx, "Invalid credentials", "error")
 		return redirect(ctx, "/login")
 	}
@@ -88,6 +95,7 @@ func processLogin(ctx echo.Context) error {
 		if err != nil {
 			return errorRes(500, "Cannot check for password", err)
 		}
+		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
 		addFlash(ctx, "Invalid credentials", "error")
 		return redirect(ctx, "/login")
 	}

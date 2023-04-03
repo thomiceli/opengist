@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"opengist/internal/git"
 	"opengist/internal/models"
@@ -84,6 +85,7 @@ func gitHttp(ctx echo.Context) error {
 				if err != nil {
 					return errorRes(500, "Cannot verify password", err)
 				}
+				log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
 				return errorRes(403, "Unauthorized", nil)
 			}
 

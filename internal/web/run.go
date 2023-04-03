@@ -107,11 +107,12 @@ func Start() {
 		Getter: middleware.MethodFromForm("_method"),
 	}))
 	e.Pre(middleware.RemoveTrailingSlash())
-	e.Use(middleware.CORS())
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+	e.Pre(middleware.CORS())
+	e.Pre(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI: true, LogStatus: true, LogMethod: true,
 		LogValuesFunc: func(ctx echo.Context, v middleware.RequestLoggerValues) error {
 			log.Info().Str("URI", v.URI).Int("status", v.Status).Str("method", v.Method).
+				Str("ip", ctx.RealIP()).
 				Msg("HTTP")
 			return nil
 		},

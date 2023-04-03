@@ -25,8 +25,13 @@ func Start() {
 	sshConfig := &ssh.ServerConfig{
 		PublicKeyCallback: func(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
 			pkey, err := models.GetSSHKeyByContent(strings.TrimSpace(string(ssh.MarshalAuthorizedKey(key))))
-			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, err
+			if err != nil {
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
+					return nil, err
+				}
+
+				log.Warn().Msg("Invalid SSH authentication attempt from " + conn.RemoteAddr().String())
+				return nil, errors.New("unknown public key")
 			}
 			return &ssh.Permissions{Extensions: map[string]string{"key-id": strconv.Itoa(int(pkey.ID))}}, nil
 		},
@@ -67,12 +72,12 @@ func listen(serverConfig *ssh.ServerConfig) {
 
 			go ssh.DiscardRequests(reqs)
 			keyID, _ := strconv.Atoi(sConn.Permissions.Extensions["key-id"])
-			go handleConnexion(channels, uint(keyID))
+			go handleConnexion(channels, uint(keyID), sConn.RemoteAddr().String())
 		}()
 	}
 }
 
-func handleConnexion(channels <-chan ssh.NewChannel, keyID uint) {
+func handleConnexion(channels <-chan ssh.NewChannel, keyID uint, ip string) {
 	for channel := range channels {
 		if channel.ChannelType() != "session" {
 			_ = channel.Reject(ssh.UnknownChannelType, "Unknown channel type")
@@ -104,7 +109,7 @@ func handleConnexion(channels <-chan ssh.NewChannel, keyID uint) {
 						payloadCmd = payloadCmd[i:]
 					}
 
-					if err = runGitCommand(ch, payloadCmd, keyID); err != nil {
+					if err = runGitCommand(ch, payloadCmd, keyID, ip); err != nil {
 						_, _ = ch.Stderr().Write([]byte("Opengist: " + err.Error() + "\r\n"))
 					}
 					_, _ = ch.SendRequest("exit-status", false, []byte{0, 0, 0, 0})

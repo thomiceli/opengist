@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"errors"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
 	"io"
@@ -11,7 +12,7 @@ import (
 	"strings"
 )
 
-func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint) error {
+func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint, ip string) error {
 	verb, args := parseCommand(gitCmd)
 	if !strings.HasPrefix(verb, "git-") {
 		verb = ""
@@ -40,6 +41,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint) error {
 		user, err := models.GetUserBySSHKeyID(keyID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
 				return errors.New("unauthorized")
 			}
 			errorSsh("Failed to get user by SSH key id", err)
@@ -47,6 +49,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint) error {
 		}
 
 		if user.ID != gist.UserID {
+			log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
 			return errors.New("unauthorized")
 		}
 	}

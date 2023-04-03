@@ -1,2 +1,2 @@
 templates/**/* linguist-vendored
-public/**/* linguist-vendored
+public/**/*.css linguist-vendored

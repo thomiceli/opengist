@@ -237,7 +237,7 @@ func (gist *Gist) NbCommits() (string, error) {
 }
 
 func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
-	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid); err != nil {
+	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email); err != nil {
 		return err
 	}
 

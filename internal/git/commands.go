@@ -129,7 +129,7 @@ func GetLog(user string, gist string, skip string) ([]*Commit, error) {
 	return parseLog(stdout), nil
 }
 
-func CloneTmp(user string, gist string, gistTmpId string) error {
+func CloneTmp(user string, gist string, gistTmpId string, email string) error {
 	repositoryPath := RepositoryPath(user, gist)
 
 	tmpPath := TmpRepositoriesPath()
@@ -149,6 +149,18 @@ func CloneTmp(user string, gist string, gistTmpId string) error {
 
 	// remove every file (and not the .git directory!)
 	cmd = exec.Command("find", ".", "-maxdepth", "1", "-type", "f", "-delete")
+	cmd.Dir = tmpRepositoryPath
+	if err = cmd.Run(); err != nil {
+		return err
+	}
+
+	cmd = exec.Command("git", "config", "--local", "user.name", user)
+	cmd.Dir = tmpRepositoryPath
+	if err = cmd.Run(); err != nil {
+		return err
+	}
+
+	cmd = exec.Command("git", "config", "--local", "user.email", email)
 	cmd.Dir = tmpRepositoryPath
 	return cmd.Run()
 }

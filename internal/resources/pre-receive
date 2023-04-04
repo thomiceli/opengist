@@ -1,20 +1,24 @@
 #!/bin/sh
 
-disallowed_files=()
+disallowed_files=""
 
-while read old_rev new_rev ref
+while read -r old_rev new_rev ref
 do
-  for file in $(git diff --name-only $old_rev $new_rev)
+  while IFS= read -r file
   do
-    if [[ $file =~ / ]]; then
-      disallowed_files+=($file)
-    fi
-  done
+    case $file in
+      */*)
+        disallowed_files="${disallowed_files}${file} "
+        ;;
+    esac
+  done <<EOF
+$(git diff --name-only "$old_rev" "$new_rev")
+EOF
 done
 
-if [ ${#disallowed_files[@]} -gt 0 ]; then
+if [ -n "$disallowed_files" ]; then
   echo "Pushing files in folders is not allowed:"
-  for file in "${disallowed_files[@]}"; do
+  for file in $disallowed_files; do
     echo "  $file"
   done
   exit 1

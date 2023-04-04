@@ -1,4 +1,4 @@
-.PHONY: all install_deps build_frontend build_backend clean
+.PHONY: all install_deps build_frontend build_backend build_docker clean clean_docker
 
 # Specify the name of your Go binary output
 BINARY_NAME := opengist
@@ -19,8 +19,15 @@ build_backend:
 	@echo "Building Opengist binary..."
 	go build -o $(BINARY_NAME) opengist.go
 
+build_docker:
+	@echo "Building Docker image..."
+	docker build -t opengist .
+
 clean:
 	@echo "Cleaning up build artifacts..."
 	@rm -f $(BINARY_NAME) public/manifest.json
 	@rm -rf node_modules public/assets
 
+clean_docker:
+	@echo "Cleaning up Docker image..."
+	@docker rmi opengist

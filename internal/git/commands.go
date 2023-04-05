@@ -126,7 +126,7 @@ func GetLog(user string, gist string, skip string) ([]*Commit, error) {
 		return nil, err
 	}
 
-	return parseLog(stdout), nil
+	return parseLog(stdout, 2<<18), nil
 }
 
 func CloneTmp(user string, gist string, gistTmpId string, email string) error {

@@ -61,7 +61,7 @@ func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) 
 	return string(buf), truncated, nil
 }
 
-func parseLog(out io.Reader) []*Commit {
+func parseLog(out io.Reader, maxBytes int) []*Commit {
 	scanner := bufio.NewScanner(out)
 
 	var commits []*Commit
@@ -164,7 +164,7 @@ func parseLog(out io.Reader) []*Commit {
 				currentFile.Content += string(line) + "\n"
 
 				bytesRead += len(line)
-				if bytesRead > 2<<18 {
+				if bytesRead > maxBytes {
 					currentFile.Truncated = true
 					currentFile.Content = ""
 					isContent = false

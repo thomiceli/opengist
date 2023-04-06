@@ -14,6 +14,8 @@ import (
 )
 
 func initialize() {
+	fmt.Println("Opengist v" + config.OpengistVersion)
+
 	configPath := flag.String("config", "config.yml", "Path to a config file in YML format")
 	flag.Parse()
 	absolutePath, _ := filepath.Abs(*configPath)
@@ -26,9 +28,6 @@ func initialize() {
 	}
 
 	config.InitLog()
-
-	fmt.Println("Opengist v" + config.OpengistVersion)
-	fmt.Println("Using config file: " + absolutePath)
 
 	gitVersion, err := git.GetGitVersion()
 	if err != nil {

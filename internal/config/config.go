@@ -15,29 +15,27 @@ var OpengistVersion = "0.0.1"
 
 var C *config
 
+// Not using nested structs because the library
+// doesn't support dot notation in this case sadly
 type config struct {
+	LogLevel      string `yaml:"log-level"`
+	ExternalUrl   string `yaml:"external-url"`
+	DisableSignup bool   `yaml:"disable-signup"`
 	OpengistHome  string `yaml:"opengist-home"`
 	DBFilename    string `yaml:"db-filename"`
-	DisableSignup bool   `yaml:"disable-signup"`
-	LogLevel      string `yaml:"log-level"`
 
-	HTTP struct {
-		Host       string `yaml:"host"`
-		Port       string `yaml:"port"`
-		Domain     string `yaml:"domain"`
-		Git        bool   `yaml:"git-enabled"`
-		TLSEnabled bool   `yaml:"tls-enabled"`
-		CertFile   string `yaml:"cert-file"`
-		KeyFile    string `yaml:"key-file"`
-	} `yaml:"http"`
+	HttpHost       string `yaml:"http.host"`
+	HttpPort       string `yaml:"http.port"`
+	HttpGit        bool   `yaml:"http.git-enabled"`
+	HttpTLSEnabled bool   `yaml:"http.tls-enabled"`
+	HttpCertFile   string `yaml:"http.cert-file"`
+	HttpKeyFile    string `yaml:"http.key-file"`
 
-	SSH struct {
-		Enabled bool   `yaml:"enabled"`
-		Host    string `yaml:"host"`
-		Port    string `yaml:"port"`
-		Domain  string `yaml:"domain"`
-		Keygen  string `yaml:"keygen-executable"`
-	} `yaml:"ssh"`
+	SshGit            bool   `yaml:"ssh.git-enabled"`
+	SshHost           string `yaml:"ssh.host"`
+	SshPort           string `yaml:"ssh.port"`
+	SshExternalDomain string `yaml:"ssh.external-domain"`
+	SshKeygen         string `yaml:"ssh.keygen-executable"`
 }
 
 func configWithDefaults() (*config, error) {
@@ -47,43 +45,53 @@ func configWithDefaults() (*config, error) {
 		return c, err
 	}
 
+	c.LogLevel = "warn"
+	c.DisableSignup = false
 	c.OpengistHome = filepath.Join(homeDir, ".opengist")
 	c.DBFilename = "opengist.db"
-	c.DisableSignup = false
-	c.LogLevel = "warn"
 
-	c.HTTP.Host = "0.0.0.0"
-	c.HTTP.Port = "6157"
-	c.HTTP.Domain = "localhost"
-	c.HTTP.Git = true
+	c.HttpHost = "0.0.0.0"
+	c.HttpPort = "6157"
+	c.HttpGit = true
+	c.HttpTLSEnabled = false
 
-	c.HTTP.TLSEnabled = false
-
-	c.SSH.Enabled = true
-	c.SSH.Host = "0.0.0.0"
-	c.SSH.Port = "2222"
-	c.SSH.Domain = "localhost"
-	c.SSH.Keygen = "ssh-keygen"
+	c.SshGit = true
+	c.SshHost = "0.0.0.0"
+	c.SshPort = "2222"
+	c.SshKeygen = "ssh-keygen"
 
 	return c, nil
 }
 
 func InitConfig(configPath string) error {
+	// Default values
 	c, err := configWithDefaults()
 	if err != nil {
 		return err
 	}
 
 	file, err := os.Open(configPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+	if err == nil {
+		fmt.Println("Using config file: " + configPath)
 
-	d := yaml.NewDecoder(file)
-	if err = d.Decode(&c); err != nil {
-		return err
+		// Override default values with values from config.yml
+		d := yaml.NewDecoder(file)
+		if err = d.Decode(&c); err != nil {
+			return err
+		}
+		defer file.Close()
 	}
+
+	// Override default values with environment variables (as yaml)
+	configEnv := os.Getenv("CONFIG")
+	if configEnv != "" {
+		fmt.Println("Using config from environment variable: CONFIG")
+		d := yaml.NewDecoder(strings.NewReader(configEnv))
+		if err = d.Decode(&c); err != nil {
+			return err
+		}
+	}
+
 	C = c
 
 	return nil

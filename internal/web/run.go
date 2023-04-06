@@ -209,18 +209,18 @@ func Start() {
 
 	debugStr := ""
 	// Git HTTP routes
-	if config.C.HTTP.Git {
+	if config.C.HttpGit {
 		e.Any("/:user/:gistname/*", gitHttp, gistInit)
 		debugStr = " (with Git over HTTP)"
 	}
 
 	e.Any("/*", noRouteFound)
 
-	addr := config.C.HTTP.Host + ":" + config.C.HTTP.Port
+	addr := config.C.HttpHost + ":" + config.C.HttpPort
 
-	if config.C.HTTP.TLSEnabled {
+	if config.C.HttpTLSEnabled {
 		log.Info().Msg("Starting HTTPS server on https://" + addr + debugStr)
-		if err := e.StartTLS(addr, config.C.HTTP.CertFile, config.C.HTTP.KeyFile); err != nil {
+		if err := e.StartTLS(addr, config.C.HttpCertFile, config.C.HttpKeyFile); err != nil {
 			log.Fatal().Err(err).Msg("Failed to start HTTPS server")
 		}
 	} else {

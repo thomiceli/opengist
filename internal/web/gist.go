@@ -30,11 +30,19 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		setData(ctx, "gist", gist)
 
-		if config.C.SSH.Enabled {
-			if config.C.SSH.Port == "22" {
-				setData(ctx, "sshCloneUrl", config.C.SSH.Domain+":"+userName+"/"+gistName+".git")
+		if config.C.SshGit {
+			var sshDomain string
+
+			if config.C.SshExternalDomain != "" {
+				sshDomain = config.C.SshExternalDomain
 			} else {
-				setData(ctx, "sshCloneUrl", "ssh://"+config.C.SSH.Domain+":"+config.C.SSH.Port+"/"+userName+"/"+gistName+".git")
+				sshDomain = strings.Split(ctx.Request().Host, ":")[0]
+			}
+
+			if config.C.SshPort == "22" {
+				setData(ctx, "sshCloneUrl", sshDomain+":"+userName+"/"+gistName+".git")
+			} else {
+				setData(ctx, "sshCloneUrl", "ssh://"+sshDomain+":"+config.C.SshPort+"/"+userName+"/"+gistName+".git")
 			}
 		}
 
@@ -44,20 +52,19 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))
 
-		if config.C.HTTP.Git {
-			if config.C.HTTP.Port == "80" || config.C.HTTP.Port == "443" {
-				setData(ctx, "httpCloneUrl", httpProtocol+"://"+config.C.HTTP.Domain+"/"+userName+"/"+gistName+".git")
-			} else {
-				setData(ctx, "httpCloneUrl", httpProtocol+"://"+config.C.HTTP.Domain+":"+config.C.HTTP.Port+"/"+userName+"/"+gistName+".git")
-			}
-		}
-
-		if config.C.HTTP.Port == "80" || config.C.HTTP.Port == "443" {
-			setData(ctx, "httpCopyUrl", httpProtocol+"://"+config.C.HTTP.Domain+"/"+userName+"/"+gistName)
+		var baseHttpUrl string
+		// if a custom external url is set, use it
+		if config.C.ExternalUrl != "" {
+			baseHttpUrl = config.C.ExternalUrl
 		} else {
-			setData(ctx, "httpCopyUrl", httpProtocol+"://"+config.C.HTTP.Domain+":"+config.C.HTTP.Port+"/"+userName+"/"+gistName)
+			baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
 		}
 
+		if config.C.HttpGit {
+			setData(ctx, "httpCloneUrl", baseHttpUrl+"/"+userName+"/"+gistName+".git")
+		}
+
+		setData(ctx, "httpCopyUrl", baseHttpUrl+"/"+userName+"/"+gistName)
 		setData(ctx, "currentUrl", template.URL(ctx.Request().URL.Path))
 
 		nbCommits, err := gist.NbCommits()

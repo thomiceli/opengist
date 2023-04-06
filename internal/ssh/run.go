@@ -18,7 +18,7 @@ import (
 )
 
 func Start() {
-	if !config.C.SSH.Enabled {
+	if !config.C.SshGit {
 		return
 	}
 
@@ -47,8 +47,8 @@ func Start() {
 }
 
 func listen(serverConfig *ssh.ServerConfig) {
-	log.Info().Msg("Starting SSH server on ssh://" + config.C.SSH.Host + ":" + config.C.SSH.Port)
-	listener, err := net.Listen("tcp", config.C.SSH.Host+":"+config.C.SSH.Port)
+	log.Info().Msg("Starting SSH server on ssh://" + config.C.SshHost + ":" + config.C.SshPort)
+	listener, err := net.Listen("tcp", config.C.SshHost+":"+config.C.SshPort)
 	if err != nil {
 		log.Fatal().Err(err).Msg("SSH: Failed to start SSH server")
 	}
@@ -129,7 +129,7 @@ func setupHostKey() (ssh.Signer, error) {
 
 	keyPath := filepath.Join(dir, "opengist-ed25519")
 	if _, err := os.Stat(keyPath); err != nil && !os.IsExist(err) {
-		cmd := exec.Command(config.C.SSH.Keygen,
+		cmd := exec.Command(config.C.SshKeygen,
 			"-t", "ssh-ed25519",
 			"-f", keyPath,
 			"-m", "PEM",

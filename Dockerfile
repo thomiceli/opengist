@@ -33,8 +33,8 @@ COPY . .
 # Build the application
 RUN make
 
-# Expose the port for the webserver
-EXPOSE 6157
+# Expose the ports
+EXPOSE 6157 2222
 
 # Mount the .opengist volume
 VOLUME /root/.opengist

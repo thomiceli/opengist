@@ -1,11 +1,11 @@
-.PHONY: all install_deps build_frontend build_backend build_docker clean clean_docker
+.PHONY: all install build_frontend build_backend build build_docker watch_frontend watch_backend watch clean clean_docker
 
 # Specify the name of your Go binary output
 BINARY_NAME := opengist
 
-all: install_deps build_frontend build_backend
+all: install build
 
-install_deps:
+install:
 	@echo "Installing NPM dependencies..."
 	@npm ci || (echo "Error: Failed to install NPM dependencies." && exit 1)
 	@echo "Installing Go dependencies..."
@@ -17,17 +17,30 @@ build_frontend:
 
 build_backend:
 	@echo "Building Opengist binary..."
-	go build -o $(BINARY_NAME) opengist.go
+	go build -tags fs_embed -o $(BINARY_NAME) .
+
+build: build_frontend build_backend
 
 build_docker:
 	@echo "Building Docker image..."
-	docker build -t opengist .
+	docker build -t $(BINARY_NAME):latest .
+
+watch_frontend:
+	@echo "Building frontend assets..."
+	./node_modules/.bin/vite dev --port 16157
+
+watch_backend:
+	@echo "Building Opengist binary..."
+	DEV=1 ./node_modules/.bin/nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go' run .
+
+watch:
+	@bash ./watch.sh
 
 clean:
 	@echo "Cleaning up build artifacts..."
 	@rm -f $(BINARY_NAME) public/manifest.json
-	@rm -rf node_modules public/assets
+	@rm -rf public/assets
 
 clean_docker:
 	@echo "Cleaning up Docker image..."
-	@docker rmi opengist
+	@docker rmi $(BINARY_NAME)

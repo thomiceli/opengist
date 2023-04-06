@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"flag"
 	"fmt"
 	"github.com/rs/zerolog/log"
@@ -13,9 +12,6 @@ import (
 	"os"
 	"path/filepath"
 )
-
-//go:embed templates/*/*.html public/manifest.json public/assets/*.js public/assets/*.css public/assets/*.svg
-var embedFS embed.FS
 
 func initialize() {
 	configPath := flag.String("config", "config.yml", "Path to a config file in YML format")
@@ -61,7 +57,7 @@ func initialize() {
 		log.Fatal().Err(err).Msg("Failed to initialize database")
 	}
 
-	web.EmbedFS = embedFS
+	web.EmbedFS = dirFS
 }
 
 func main() {

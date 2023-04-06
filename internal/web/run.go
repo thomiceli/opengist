@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"crypto/md5"
-	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/sessions"
@@ -12,6 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"html/template"
 	"io"
+	"io/fs"
 	"net/http"
 	"opengist/internal/config"
 	"opengist/internal/git"
@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-var devAssets = os.Getenv("DEV_ASSETS") == "1"
+var dev = os.Getenv("DEV") == "1"
 var store *sessions.CookieStore
 var re = regexp.MustCompile("[^a-z0-9]+")
 var fm = template.FuncMap{
@@ -77,14 +77,14 @@ var fm = template.FuncMap{
 		return fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email)))))
 	},
 	"asset": func(jsfile string) string {
-		if devAssets {
+		if dev {
 			return "http://localhost:16157/" + jsfile
 		}
 		return "/" + manifestEntries[jsfile].File
 	},
 }
 
-var EmbedFS embed.FS
+var EmbedFS fs.FS
 
 type Template struct {
 	templates *template.Template
@@ -142,8 +142,10 @@ func Start() {
 
 	e.Validator = NewValidator()
 
-	parseManifestEntries()
-	e.GET("/assets/*", cacheControl(echo.WrapHandler(http.StripPrefix("/assets", http.FileServer(http.FS(assetsFS))))))
+	if !dev {
+		parseManifestEntries()
+		e.GET("/assets/*", cacheControl(echo.WrapHandler(http.StripPrefix("/assets", http.FileServer(http.FS(assetsFS))))))
+	}
 
 	// Web based routes
 	g1 := e.Group("")

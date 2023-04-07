@@ -16,11 +16,10 @@ import (
 func initialize() {
 	fmt.Println("Opengist v" + config.OpengistVersion)
 
-	configPath := flag.String("config", "config.yml", "Path to a config file in YML format")
+	configPath := flag.String("config", "", "Path to a config file in YML format")
 	flag.Parse()
-	absolutePath, _ := filepath.Abs(*configPath)
-	absolutePath = filepath.Clean(absolutePath)
-	if err := config.InitConfig(absolutePath); err != nil {
+
+	if err := config.InitConfig(*configPath); err != nil {
 		panic(err)
 	}
 	if err := os.MkdirAll(filepath.Join(config.GetHomeDir()), 0755); err != nil {

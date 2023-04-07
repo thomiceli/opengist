@@ -70,16 +70,27 @@ func InitConfig(configPath string) error {
 		return err
 	}
 
-	file, err := os.Open(configPath)
-	if err == nil {
-		fmt.Println("Using config file: " + configPath)
+	if configPath != "" {
+		absolutePath, _ := filepath.Abs(configPath)
+		absolutePath = filepath.Clean(absolutePath)
+		file, err := os.Open(absolutePath)
+		if err != nil {
+			if !os.IsNotExist(err) {
+				return err
+			}
+			fmt.Println("No YML config file found at " + absolutePath)
+		} else {
+			fmt.Println("Using config file: " + absolutePath)
 
-		// Override default values with values from config.yml
-		d := yaml.NewDecoder(file)
-		if err = d.Decode(&c); err != nil {
-			return err
+			// Override default values with values from config.yml
+			d := yaml.NewDecoder(file)
+			if err = d.Decode(&c); err != nil {
+				return err
+			}
+			defer file.Close()
 		}
-		defer file.Close()
+	} else {
+		fmt.Println("No config file specified. Using default values.")
 	}
 
 	// Override default values with environment variables (as yaml)
@@ -105,7 +116,6 @@ func InitLog() {
 	if err != nil {
 		panic(err)
 	}
-	multi := zerolog.MultiLevelWriter(zerolog.NewConsoleWriter(), file)
 
 	var level zerolog.Level
 	level, err = zerolog.ParseLevel(C.LogLevel)
@@ -113,7 +123,12 @@ func InitLog() {
 		level = zerolog.InfoLevel
 	}
 
-	log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
+	if os.Getenv("DEV") == "1" {
+		multi := zerolog.MultiLevelWriter(zerolog.NewConsoleWriter(), file)
+		log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
+	} else {
+		log.Logger = zerolog.New(file).Level(level).With().Timestamp().Logger()
+	}
 }
 
 func CheckGitVersion(version string) (bool, error) {

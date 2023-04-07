@@ -20,7 +20,7 @@ COPY --from=golang:1.19-alpine /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Install Node.js
-COPY --from=node:16-alpine /usr/local/ /usr/local/
+COPY --from=node:18-alpine /usr/local/ /usr/local/
 ENV NODE_PATH="/usr/local/lib/node_modules"
 ENV PATH="/usr/local/bin:${PATH}"
 

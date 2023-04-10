@@ -44,6 +44,7 @@
                             <div class="flex space-x-4">
                                 <a href="/all" class="text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">All</a>
                                 {{ if .userLogged }}
+                                    <a href="/" class="text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">New</a>
                                     <a href="/{{ .userLogged.Username }}" class="text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">My gists</a>
                                 {{ end }}
                             </div>
@@ -85,6 +86,7 @@
                 <div class="px-2 pt-2 pb-3 space-y-1">
                     <a href="/all" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium" aria-current="page">All</a>
                     {{ if .userLogged }}
+                        <a href="/" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">New</a>
                         <a href="/{{ .userLogged.Username }}" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">My gists</a>
                         <a href="/settings" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Settings</a>
 

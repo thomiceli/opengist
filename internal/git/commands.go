@@ -2,7 +2,6 @@ package git
 
 import (
 	"fmt"
-	"io"
 	"opengist/internal/config"
 	"os"
 	"os/exec"
@@ -276,17 +275,37 @@ func copyFiles(repositoryPath string) error {
 		return err
 	}
 
-	preReceiveSrc, err := os.OpenFile(filepath.Join("internal", "resources", "pre-receive"), os.O_RDONLY, os.ModeAppend)
-	if err != nil {
+	if _, err = preReceiveDst.WriteString(preReceive); err != nil {
 		return err
 	}
-	_, err = io.Copy(preReceiveDst, preReceiveSrc)
-	if err != nil {
-		return err
-	}
-
 	defer preReceiveDst.Close()
-	defer preReceiveSrc.Close()
 
 	return nil
 }
+
+const preReceive = `#!/bin/sh
+
+disallowed_files=""
+
+while read -r old_rev new_rev ref
+do
+  while IFS= read -r file
+  do
+    case $file in
+      */*)
+        disallowed_files="${disallowed_files}${file} "
+        ;;
+    esac
+  done <<EOF
+$(git diff --name-only "$old_rev" "$new_rev")
+EOF
+done
+
+if [ -n "$disallowed_files" ]; then
+  echo "Pushing files in folders is not allowed:"
+  for file in $disallowed_files; do
+    echo "  $file"
+  done
+  exit 1
+fi
+`

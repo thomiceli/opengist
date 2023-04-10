@@ -47,7 +47,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		httpProtocol := "http"
-		if ctx.Request().TLS != nil {
+		if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
 			httpProtocol = "https"
 		}
 		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))

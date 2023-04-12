@@ -300,7 +300,7 @@ func logged(next echo.HandlerFunc) echo.HandlerFunc {
 		if user != nil {
 			return next(ctx)
 		}
-		return redirect(ctx, "/all")
+		return redirect(ctx, "/login")
 	}
 }
 

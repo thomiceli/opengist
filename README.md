@@ -55,7 +55,7 @@ docker pull ghcr.io/thomiceli/opengist:1
 It can be used in a `docker-compose.yml` file :
 
 1. Create a `docker-compose.yml` file with the following content
-2. Run `docker-compose up -d`
+2. Run `docker compose up -d`
 3. Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ```yml

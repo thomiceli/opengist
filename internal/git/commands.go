@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -62,8 +63,9 @@ func GetFilesOfRepository(user string, gist string, revision string) ([]string, 
 	cmd := exec.Command(
 		"git",
 		"ls-tree",
-		revision,
 		"--name-only",
+		"--",
+		revision,
 	)
 	cmd.Dir = repositoryPath
 
@@ -101,7 +103,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 	return truncateCommandOutput(stdout, maxBytes)
 }
 
-func GetLog(user string, gist string, skip string) ([]*Commit, error) {
+func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
@@ -113,7 +115,7 @@ func GetLog(user string, gist string, skip string) ([]*Commit, error) {
 		"--no-color",
 		"-p",
 		"--skip",
-		skip,
+		strconv.Itoa(skip),
 		"--format=format:c %H%na %aN%nm %ae%nt %at",
 		"--shortstat",
 		"HEAD",

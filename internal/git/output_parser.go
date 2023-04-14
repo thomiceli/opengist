@@ -46,7 +46,7 @@ func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) 
 	if err != nil {
 		return "", false, err
 	}
-	truncated := len(buf) >= int(maxBytes)
+	truncated := maxBytes > 0 && len(buf) >= int(maxBytes)
 	// Remove the last line if it's truncated
 	if truncated {
 		// Find the index of the last newline character

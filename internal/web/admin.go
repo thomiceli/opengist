@@ -101,7 +101,7 @@ func adminUserDelete(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "User has been deleted", "success")
-	return redirect(ctx, "/admin/users")
+	return redirect(ctx, "/admin-panel/users")
 }
 
 func adminGistDelete(ctx echo.Context) error {
@@ -119,7 +119,7 @@ func adminGistDelete(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "Gist has been deleted", "success")
-	return redirect(ctx, "/admin/gists")
+	return redirect(ctx, "/admin-panel/gists")
 }
 
 func adminSyncReposFromFS(ctx echo.Context) error {
@@ -148,7 +148,7 @@ func adminSyncReposFromFS(ctx echo.Context) error {
 		}
 		syncReposFromFS = false
 	}()
-	return redirect(ctx, "/admin")
+	return redirect(ctx, "/admin-panel")
 }
 
 func adminSyncReposFromDB(ctx echo.Context) error {
@@ -180,5 +180,5 @@ func adminSyncReposFromDB(ctx echo.Context) error {
 		syncReposFromDB = false
 		return
 	}()
-	return redirect(ctx, "/admin")
+	return redirect(ctx, "/admin-panel")
 }

@@ -173,7 +173,7 @@ func Start() {
 		g1.POST("/settings/ssh-keys", sshKeysProcess, logged)
 		g1.DELETE("/settings/ssh-keys/:id", sshKeysDelete, logged)
 
-		g2 := g1.Group("/admin")
+		g2 := g1.Group("/admin-panel")
 		{
 			g2.Use(adminPermission)
 			g2.GET("", adminIndex)

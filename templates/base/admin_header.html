@@ -9,11 +9,11 @@
         <div class="mb-4">
             <div class="">
                 <nav class="flex space-x-4" aria-label="Tabs">
-                    <a href="/admin" class="{{ if eq .adminHeaderPage "index" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    <a href="/admin-panel" class="{{ if eq .adminHeaderPage "index" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
                     {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}">General</a>
-                    <a href="/admin/users" class="{{ if eq .adminHeaderPage "users" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    <a href="/admin-panel/users" class="{{ if eq .adminHeaderPage "users" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
                     {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Users</a>
-                    <a href="/admin/gists" class="{{ if eq .adminHeaderPage "gists" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    <a href="/admin-panel/gists" class="{{ if eq .adminHeaderPage "gists" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
                     {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Gists</a>
                 </nav>
             </div>

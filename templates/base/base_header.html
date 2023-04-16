@@ -53,7 +53,7 @@
                     <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         {{ if .userLogged }}
                         {{ if .userLogged.IsAdmin }}
-                            <a href="/admin" class="hidden sm:block text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Admin</a>
+                            <a href="/admin-panel" class="hidden sm:block text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Admin</a>
                         {{ end }}
                         <a href="/settings" class="hidden sm:block text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Settings</a>
 
@@ -91,7 +91,7 @@
                         <a href="/settings" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Settings</a>
 
                     {{ if .userLogged.IsAdmin }}
-                            <a href="/admin" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Admin</a>
+                            <a href="/admin-panel" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Admin</a>
                         {{ end }}
                     {{ end }}
                 </div>

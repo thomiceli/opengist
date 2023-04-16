@@ -56,13 +56,13 @@
                 <span class="text-base font-bold leading-6 text-slate-300">Actions</span>
             </div>
             <div class="space-y-2">
-                <form action="/admin/sync-fs" method="POST">
+                <form action="/admin-panel/sync-fs" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .syncReposFromFS }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                         Synchorize gists from filesystem
                     </button>
                 </form>
-                <form action="/admin/sync-db" method="POST">
+                <form action="/admin-panel/sync-db" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .syncReposFromDB }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-300{{ if .syncReposFromDB }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                         Synchorize gists from database

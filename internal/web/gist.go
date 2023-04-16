@@ -178,7 +178,7 @@ func revisions(ctx echo.Context) error {
 
 	pageInt := getPage(ctx)
 
-	commits, err := gist.Log(strconv.Itoa((pageInt - 1) * 10))
+	commits, err := gist.Log((pageInt - 1) * 10)
 	if err != nil {
 		return errorRes(500, "Error fetching commits log", err)
 	}

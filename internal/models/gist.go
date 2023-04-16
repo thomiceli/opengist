@@ -228,7 +228,7 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 	}, err
 }
 
-func (gist *Gist) Log(skip string) ([]*git.Commit, error) {
+func (gist *Gist) Log(skip int) ([]*git.Commit, error) {
 	return git.GetLog(gist.User.Username, gist.Uuid, skip)
 }
 

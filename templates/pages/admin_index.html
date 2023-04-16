@@ -56,13 +56,13 @@
                 <span class="text-base font-bold leading-6 text-slate-300">Actions</span>
             </div>
             <div class="space-y-2">
-                <form action="/admin/sync-fs" method="POST">
+                <form action="/admin-panel/sync-fs" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .syncReposFromFS }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                         Synchorize gists from filesystem
                     </button>
                 </form>
-                <form action="/admin/sync-db" method="POST">
+                <form action="/admin-panel/sync-db" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .syncReposFromDB }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-300{{ if .syncReposFromDB }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                         Synchorize gists from database
@@ -71,7 +71,24 @@
             </div>
         </div>
     </div>
+
+    <div class="sm:overflow-hidden ">
+        <div class="space-y-2 bg-gray-800 py-6 px-6 rounded-md border border-gray-700">
+            <div>
+                <span class="text-base font-bold leading-6 text-slate-300">Settings</span>
+            </div>
+            {{ .csrfHtml }}
+            <div class="space-y-2">
+                <div>
+                    <label for="disable-signup" class="text-sm text-slate-300">Disable signup</label>
+                    <input type="checkbox" id="disable-signup" name="disable-signup" {{ if .signupDisabled }}checked="checked"{{ end }} class="ml-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600" />
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script type="module" src="{{ asset "admin.ts" }}"></script>
 
 {{ template "admin_footer" .}}
 {{ template "footer" .}}

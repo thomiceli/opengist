@@ -64,7 +64,7 @@ func adminUsers(ctx echo.Context) error {
 		return errorRes(500, "Cannot get users", err)
 	}
 
-	if err = paginate(ctx, data, pageInt, 10, "data", "admin/users", 1); err != nil {
+	if err = paginate(ctx, data, pageInt, 10, "data", "admin-panel/users", 1); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -82,7 +82,7 @@ func adminGists(ctx echo.Context) error {
 		return errorRes(500, "Cannot get gists", err)
 	}
 
-	if err = paginate(ctx, data, pageInt, 10, "data", "admin/gists", 1); err != nil {
+	if err = paginate(ctx, data, pageInt, 10, "data", "admin-panel/gists", 1); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -101,7 +101,7 @@ func adminUserDelete(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "User has been deleted", "success")
-	return redirect(ctx, "/admin/users")
+	return redirect(ctx, "/admin-panel/users")
 }
 
 func adminGistDelete(ctx echo.Context) error {
@@ -119,7 +119,7 @@ func adminGistDelete(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "Gist has been deleted", "success")
-	return redirect(ctx, "/admin/gists")
+	return redirect(ctx, "/admin-panel/gists")
 }
 
 func adminSyncReposFromFS(ctx echo.Context) error {
@@ -148,7 +148,7 @@ func adminSyncReposFromFS(ctx echo.Context) error {
 		}
 		syncReposFromFS = false
 	}()
-	return redirect(ctx, "/admin")
+	return redirect(ctx, "/admin-panel")
 }
 
 func adminSyncReposFromDB(ctx echo.Context) error {
@@ -180,5 +180,18 @@ func adminSyncReposFromDB(ctx echo.Context) error {
 		syncReposFromDB = false
 		return
 	}()
-	return redirect(ctx, "/admin")
+	return redirect(ctx, "/admin-panel")
+}
+
+func adminSetSetting(ctx echo.Context) error {
+	key := ctx.FormValue("key")
+	value := ctx.FormValue("value")
+
+	if err := models.UpdateSetting(key, value); err != nil {
+		return errorRes(500, "Cannot set setting", err)
+	}
+
+	return ctx.JSON(200, map[string]interface{}{
+		"success": true,
+	})
 }

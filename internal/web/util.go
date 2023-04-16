@@ -148,7 +148,7 @@ func validateReservedKeywords(fl validator.FieldLevel) bool {
 	name := fl.Field().String()
 
 	restrictedNames := map[string]struct{}{}
-	for _, restrictedName := range []string{"assets", "register", "login", "logout", "config", "admin", "all"} {
+	for _, restrictedName := range []string{"assets", "register", "login", "logout", "config", "admin-panel", "all"} {
 		restrictedNames[restrictedName] = struct{}{}
 	}
 

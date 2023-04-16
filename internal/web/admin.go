@@ -182,3 +182,16 @@ func adminSyncReposFromDB(ctx echo.Context) error {
 	}()
 	return redirect(ctx, "/admin-panel")
 }
+
+func adminSetSetting(ctx echo.Context) error {
+	key := ctx.FormValue("key")
+	value := ctx.FormValue("value")
+
+	if err := models.UpdateSetting(key, value); err != nil {
+		return errorRes(500, "Cannot set setting", err)
+	}
+
+	return ctx.JSON(200, map[string]interface{}{
+		"success": true,
+	})
+}

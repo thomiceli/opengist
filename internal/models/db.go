@@ -17,11 +17,14 @@ func Setup(dbpath string) error {
 		return err
 	}
 
-	if err = db.AutoMigrate(&User{}, &SSHKey{}, &Gist{}); err != nil {
+	if err = db.AutoMigrate(&User{}, &SSHKey{}, &Gist{}, &AdminSetting{}); err != nil {
 		return err
 	}
 
-	return nil
+	// Default admin setting values
+	return initAdminSettings(map[string]string{
+		SettingDisableSignup: "0",
+	})
 }
 
 func CountAll(table interface{}) (int64, error) {

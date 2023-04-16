@@ -5,9 +5,6 @@ log-level: warn
 # If not set, uses the URL from the request
 external-url:
 
-# Prevents the creation of new accounts (either `true` or `false`). Default: false
-disable-signup: false
-
 # Directory where Opengist will store its data. Default: ~/.opengist/
 opengist-home:
 

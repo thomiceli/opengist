@@ -18,11 +18,10 @@ var C *config
 // Not using nested structs because the library
 // doesn't support dot notation in this case sadly
 type config struct {
-	LogLevel      string `yaml:"log-level"`
-	ExternalUrl   string `yaml:"external-url"`
-	DisableSignup bool   `yaml:"disable-signup"`
-	OpengistHome  string `yaml:"opengist-home"`
-	DBFilename    string `yaml:"db-filename"`
+	LogLevel     string `yaml:"log-level"`
+	ExternalUrl  string `yaml:"external-url"`
+	OpengistHome string `yaml:"opengist-home"`
+	DBFilename   string `yaml:"db-filename"`
 
 	HttpHost       string `yaml:"http.host"`
 	HttpPort       string `yaml:"http.port"`
@@ -46,7 +45,6 @@ func configWithDefaults() (*config, error) {
 	}
 
 	c.LogLevel = "warn"
-	c.DisableSignup = false
 	c.OpengistHome = filepath.Join(homeDir, ".opengist")
 	c.DBFilename = "opengist.db"
 

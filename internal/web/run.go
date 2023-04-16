@@ -183,6 +183,7 @@ func Start() {
 			g2.POST("/gists/:gist/delete", adminGistDelete)
 			g2.POST("/sync-fs", adminSyncReposFromFS)
 			g2.POST("/sync-db", adminSyncReposFromDB)
+			g2.PUT("/set-setting", adminSetSetting)
 		}
 
 		g1.GET("/all", allGists)
@@ -236,7 +237,12 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 		ctxValue := context.WithValue(ctx.Request().Context(), "data", echo.Map{})
 		ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 		setData(ctx, "loadStartTime", time.Now())
-		setData(ctx, "signupDisabled", config.C.DisableSignup)
+
+		disableSignup, err := models.GetSetting(models.SettingDisableSignup)
+		if err != nil {
+			return errorRes(500, "Cannot read setting from database", err)
+		}
+		setData(ctx, "signupDisabled", disableSignup == "1")
 
 		return next(ctx)
 	}

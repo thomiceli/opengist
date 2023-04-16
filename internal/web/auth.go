@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
-	"opengist/internal/config"
 	"opengist/internal/models"
 )
 
@@ -16,7 +15,7 @@ func register(ctx echo.Context) error {
 }
 
 func processRegister(ctx echo.Context) error {
-	if config.C.DisableSignup {
+	if getData(ctx, "signupDisabled") == true {
 		return errorRes(403, "Signing up is disabled", nil)
 	}
 

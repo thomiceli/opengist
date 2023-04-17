@@ -162,6 +162,10 @@ func oauthCallback(ctx echo.Context) error {
 		}
 
 		if err = userDB.Create(); err != nil {
+			if getData(ctx, "signupDisabled") == true {
+				return errorRes(403, "Signing up is disabled", nil)
+			}
+
 			if models.IsUniqueConstraintViolation(err) {
 				addFlash(ctx, "Username "+user.NickName+" already exists in Opengist", "error")
 				return redirect(ctx, "/login")

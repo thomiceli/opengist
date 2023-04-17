@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+	"github.com/mattn/go-sqlite3"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -31,4 +33,12 @@ func CountAll(table interface{}) (int64, error) {
 	var count int64
 	err := db.Model(table).Count(&count).Error
 	return count, err
+}
+
+func IsUniqueConstraintViolation(err error) bool {
+	var sqliteErr sqlite3.Error
+	if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+		return true
+	}
+	return false
 }

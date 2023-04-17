@@ -1,8 +1,6 @@
 package models
 
 import (
-	"errors"
-	"github.com/mattn/go-sqlite3"
 	"gorm.io/gorm/clause"
 )
 
@@ -38,19 +36,11 @@ func setSetting(key string, value string) error {
 func initAdminSettings(settings map[string]string) error {
 	for key, value := range settings {
 		if err := setSetting(key, value); err != nil {
-			if !isUniqueConstraintViolation(err) {
+			if !IsUniqueConstraintViolation(err) {
 				return err
 			}
 		}
 	}
 
 	return nil
-}
-
-func isUniqueConstraintViolation(err error) bool {
-	var sqliteErr sqlite3.Error
-	if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
-		return true
-	}
-	return false
 }

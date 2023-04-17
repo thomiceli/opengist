@@ -48,6 +48,25 @@
                         {{ end }}
                         {{ .csrfHtml }}
                     </form>
+
+                    <div class="relative my-4">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div class="w-full border-t border-gray-700"></div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="">
+                        {{ if .githubOauth }}
+                            <a href="/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                Continue with GitHub account
+                            </a>
+                        {{ end }}
+                        {{ if .giteaOauth }}
+                            <a href="/oauth/gitea" class="block w-full mb-2 text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                Continue with Gitea account
+                            </a>
+                        {{ end }}
+                    </div>
                 </div>
             </div>
         </div>

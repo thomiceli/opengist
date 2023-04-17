@@ -7,7 +7,7 @@
     </header>
     <main>
         <div class="space-y-4">
-            <div class="sm:grid grid-cols-2 gap-x-4 md:gap-x-16">
+            <div class="sm:grid {{ if or .githubOauth .giteaOauth }}grid-cols-3{{else}}grid-cols-2{{end}} gap-x-4 md:gap-x-8">
                 <div class="w-full">
                     <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-300">
@@ -27,6 +27,42 @@
                         </form>
                     </div>
                 </div>
+                {{ if or .githubOauth .giteaOauth }}
+                <div class="w-full">
+                    <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        <h2 class="text-md font-bold text-slate-300 mb-2">
+                            Link accounts
+                        </h2>
+                        <div class="gap-y-2">
+
+                                {{ if .githubOauth }}
+                                    {{ if .userLogged.GithubID }}
+                                        <a href="/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                            Unlink GitHub account
+                                        </a>
+                                    {{ else }}
+                                        <a href="/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                            Link GitHub account
+                                        </a>
+                                    {{ end }}
+                                {{ end }}
+
+                                {{ if .giteaOauth }}
+                                    {{ if .userLogged.GiteaID }}
+                                        <a href="/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                            Unlink Gitea account
+                                        </a>
+                                        {{ else }}
+                                        <a href="/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                            Link Gitea account
+                                        </a>
+                                    {{ end }}
+                                {{ end }}
+
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
                 <div class="w-full">
                     <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-300">
@@ -40,7 +76,7 @@
                     </div>
                 </div>
             </div>
-            <div class="sm:grid grid-cols-2 gap-x-4 md:gap-x-16">
+            <div class="sm:grid grid-cols-2 gap-x-4 md:gap-x-8">
                 <div class="w-full">
                     <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-300">

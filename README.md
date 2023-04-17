@@ -13,6 +13,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 * [Administration](#administration)
     * [Use Nginx as a reverse proxy](#use-nginx-as-a-reverse-proxy)
     * [Use Fail2ban](#use-fail2ban)
+* [Configure OAuth](#configure-oauth)
 * [License](#license)
 
 ## Features
@@ -170,6 +171,37 @@ Then run
 ```shell
 service fail2ban restart 
 ```
+
+## Configure OAuth
+
+Opengist can be configured to use OAuth to authenticate users, with GitHub or Gitea.
+
+<details>
+<summary>Integrate Github</summary>
+
+* Add a new OAuth app in your [Github account settings](https://github.com/settings/applications/new)
+* Set 'Authorization callback URL' to `http://opengist.domain/oauth/github/callback`
+* Copy the 'Client ID' and 'Client Secret' and add them to the `config.yml` file :
+  ```yaml
+  github.client-key: <key>
+  github.secret: <secret>
+  ```
+</details>
+
+<details>
+<summary>Integrate Gitea</summary>
+
+* Add a new OAuth app in Application settings from the [Gitea instance](https://gitea.com/user/settings/applications)
+* Set 'Redirect URI' to `http://opengist.domain/oauth/gitea/callback`
+* Copy the 'Client ID' and 'Client Secret' and add them to the `config.yml` file :
+  ```yaml
+  gitea.client-key: <key>
+  gitea.secret: <secret>
+  # URL of the Gitea instance. Default: https://gitea.com/
+  gitea.url: http://localhost:3000
+  ```
+</details>
+
 ## License
 
 Opengist is licensed under the [AGPL-3.0 license](LICENSE).

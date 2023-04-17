@@ -1,6 +1,12 @@
 package models
 
-import "time"
+import (
+	"crypto/sha256"
+	"encoding/base64"
+	"golang.org/x/crypto/ssh"
+	"gorm.io/gorm"
+	"time"
+)
 
 type SSHKey struct {
 	ID         uint `gorm:"primaryKey"`
@@ -11,6 +17,16 @@ type SSHKey struct {
 	LastUsedAt int64
 	UserID     uint
 	User       User `validate:"-" `
+}
+
+func (sshKey *SSHKey) BeforeCreate(tx *gorm.DB) error {
+	pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(sshKey.Content))
+	if err != nil {
+		return err
+	}
+	sha := sha256.Sum256(pubKey.Marshal())
+	sshKey.SHA = base64.StdEncoding.EncodeToString(sha[:])
+	return nil
 }
 
 func GetSSHKeysByUserID(userId uint) ([]*SSHKey, error) {

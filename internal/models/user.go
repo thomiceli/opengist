@@ -12,6 +12,8 @@ type User struct {
 	CreatedAt int64
 	Email     string
 	MD5Hash   string // for gravatar, if no Email is specified, the value is random
+	GithubID  string
+	GiteaID   string
 
 	Gists   []Gist   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys []SSHKey `gorm:"foreignKey:UserID"`
@@ -90,6 +92,19 @@ func GetUserBySSHKeyID(sshKeyId uint) (*User, error) {
 	return user, err
 }
 
+func GetUserByProvider(id string, provider string) (*User, error) {
+	user := new(User)
+	var err error
+	switch provider {
+	case "github":
+		err = db.Where("github_id = ?", id).First(&user).Error
+	case "gitea":
+		err = db.Where("gitea_id = ?", id).First(&user).Error
+	}
+
+	return user, err
+}
+
 func (user *User) Create() error {
 	return db.Create(&user).Error
 }
@@ -116,6 +131,17 @@ func (user *User) HasLiked(gist *Gist) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (user *User) DeleteProviderID(provider string) error {
+	switch provider {
+	case "github":
+		return db.Model(&user).Update("github_id", nil).Error
+	case "gitea":
+		return db.Model(&user).Update("gitea_id", nil).Error
+	}
+
+	return nil
 }
 
 // -- DTO -- //

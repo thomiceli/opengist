@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/markbates/goth/gothic"
 	"github.com/rs/zerolog/log"
 	"html/template"
 	"io"
@@ -96,6 +97,8 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Con
 
 func Start() {
 	store = sessions.NewCookieStore([]byte("opengist"))
+	gothic.Store = store
+
 	assetsFS := echo.MustSubFS(EmbedFS, "public/assets")
 
 	e := echo.New()
@@ -166,6 +169,8 @@ func Start() {
 		g1.GET("/login", login)
 		g1.POST("/login", processLogin)
 		g1.GET("/logout", logout)
+		g1.GET("/oauth/:provider", oauth)
+		g1.GET("/oauth/:provider/callback", oauthCallback)
 
 		g1.GET("/settings", userSettings, logged)
 		g1.POST("/settings/email", emailProcess, logged)
@@ -243,6 +248,9 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 			return errorRes(500, "Cannot read setting from database", err)
 		}
 		setData(ctx, "signupDisabled", disableSignup == "1")
+
+		setData(ctx, "githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
+		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
 
 		return next(ctx)
 	}

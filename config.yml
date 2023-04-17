@@ -53,3 +53,17 @@ ssh.external-domain:
 
 # Path or alias to ssh-keygen executable. Default: ssh-keygen
 ssh.keygen-executable: ssh-keygen
+
+
+# OAuth2 configuration
+# The callback/redirect URL must be http://opengist.domain/oauth/<github|gitea>/callback
+
+# To create a new OAuth2 application using GitHub : https://github.com/settings/applications/new
+github.client-key:
+github.secret:
+
+# To create a new OAuth2 application using Gitea : https://gitea.domain/user/settings/applications
+gitea.client-key:
+gitea.secret:
+# URL of the Gitea instance. Default: https://gitea.com/
+gitea.url: https://gitea.com/

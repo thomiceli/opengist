@@ -63,7 +63,7 @@ github.client-key:
 github.secret:
 
 # To create a new OAuth2 application using Gitea : https://gitea.domain/user/settings/applications
-gitea.client-key: 
+gitea.client-key:
 gitea.secret:
-# URL of your Gitea instance. Default: https://gitea.com/
+# URL of the Gitea instance. Default: https://gitea.com/
 gitea.url: https://gitea.com/

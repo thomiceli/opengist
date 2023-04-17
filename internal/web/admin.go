@@ -20,6 +20,7 @@ var (
 
 func adminIndex(ctx echo.Context) error {
 	setData(ctx, "title", "Admin panel")
+	setData(ctx, "htmlTitle", "Admin panel")
 	setData(ctx, "adminHeaderPage", "index")
 
 	setData(ctx, "opengistVersion", config.OpengistVersion)
@@ -55,6 +56,7 @@ func adminIndex(ctx echo.Context) error {
 
 func adminUsers(ctx echo.Context) error {
 	setData(ctx, "title", "Users")
+	setData(ctx, "htmlTitle", "Users - Admin panel")
 	setData(ctx, "adminHeaderPage", "users")
 	pageInt := getPage(ctx)
 
@@ -72,7 +74,8 @@ func adminUsers(ctx echo.Context) error {
 }
 
 func adminGists(ctx echo.Context) error {
-	setData(ctx, "title", "Users")
+	setData(ctx, "title", "Gists")
+	setData(ctx, "htmlTitle", "Gists - Admin panel")
 	setData(ctx, "adminHeaderPage", "gists")
 	pageInt := getPage(ctx)
 

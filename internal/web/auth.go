@@ -6,11 +6,15 @@ import (
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/gitea"
+	"github.com/markbates/goth/providers/github"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
+	"opengist/internal/config"
 	"opengist/internal/models"
 	"strings"
 )
@@ -213,6 +217,39 @@ func oauthCallback(ctx echo.Context) error {
 func oauth(ctx echo.Context) error {
 	provider := ctx.Param("provider")
 
+	httpProtocol := "http"
+	if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
+		httpProtocol = "https"
+	}
+
+	httpDomain := httpProtocol + "://" + ctx.Request().Host
+	giteaUrl := config.C.GiteaUrl
+	// remove trailing slash
+	if giteaUrl[len(giteaUrl)-1] == '/' {
+		giteaUrl = giteaUrl[:len(giteaUrl)-1]
+	}
+
+	switch provider {
+	case "github":
+		goth.UseProviders(
+			github.New(
+				config.C.GithubClientKey,
+				config.C.GithubSecret,
+				httpDomain+"/oauth/github/callback"),
+		)
+
+	case "gitea":
+		goth.UseProviders(
+			gitea.NewCustomisedURL(
+				config.C.GiteaClientKey,
+				config.C.GiteaSecret,
+				httpDomain+"/oauth/gitea/callback",
+				giteaUrl+"/login/oauth/authorize",
+				giteaUrl+"/login/oauth/access_token",
+				giteaUrl+"/api/v1/user"),
+		)
+	}
+
 	currUser := getUserLogged(ctx)
 	if currUser != nil {
 		isDelete := false
@@ -221,12 +258,12 @@ func oauth(ctx echo.Context) error {
 		case "github":
 			if currUser.GithubID != "" {
 				isDelete = true
-				err = currUser.DeleteProvider(provider)
+				err = currUser.DeleteProviderID(provider)
 			}
 		case "gitea":
 			if currUser.GiteaID != "" {
 				isDelete = true
-				err = currUser.DeleteProvider(provider)
+				err = currUser.DeleteProviderID(provider)
 			}
 		}
 

@@ -8,10 +8,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/gitea"
-	"github.com/markbates/goth/providers/github"
 	"github.com/rs/zerolog/log"
 	"html/template"
 	"io"
@@ -101,16 +98,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Con
 func Start() {
 	store = sessions.NewCookieStore([]byte("opengist"))
 	gothic.Store = store
-	goth.UseProviders(
-		github.New("d92c7e165383b2804407", "ffc450216b9776a752cdb0e533f953f65ce632a3", "http://localhost:6157/oauth/github/callback"),
-		gitea.NewCustomisedURL(
-			"efdd0fed-6972-42ce-8f9f-e65b9fd0ca09",
-			"gto_dwilh6ia4nic4f4dt5owv4h7rvuss5ajw2ctqqa44xcpwevyg6wq",
-			"http://localhost:6157/oauth/gitea/callback",
-			"http://localhost:3000/login/oauth/authorize",
-			"http://localhost:3000/login/oauth/access_token",
-			"http://localhost:3000/api/v1/user"),
-	)
+
 	assetsFS := echo.MustSubFS(EmbedFS, "public/assets")
 
 	e := echo.New()

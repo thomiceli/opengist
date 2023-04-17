@@ -133,7 +133,7 @@ func (user *User) HasLiked(gist *Gist) (bool, error) {
 	return true, nil
 }
 
-func (user *User) DeleteProvider(provider string) error {
+func (user *User) DeleteProviderID(provider string) error {
 	switch provider {
 	case "github":
 		return db.Model(&user).Update("github_id", nil).Error

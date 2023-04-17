@@ -35,6 +35,13 @@ type config struct {
 	SshPort           string `yaml:"ssh.port"`
 	SshExternalDomain string `yaml:"ssh.external-domain"`
 	SshKeygen         string `yaml:"ssh.keygen-executable"`
+
+	GithubClientKey string `yaml:"github.client-key"`
+	GithubSecret    string `yaml:"github.secret"`
+
+	GiteaClientKey string `yaml:"gitea.client-key"`
+	GiteaSecret    string `yaml:"gitea.secret"`
+	GiteaUrl       string `yaml:"gitea.url"`
 }
 
 func configWithDefaults() (*config, error) {
@@ -57,6 +64,8 @@ func configWithDefaults() (*config, error) {
 	c.SshHost = "0.0.0.0"
 	c.SshPort = "2222"
 	c.SshKeygen = "ssh-keygen"
+
+	c.GiteaUrl = "http://gitea.com"
 
 	return c, nil
 }

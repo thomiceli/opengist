@@ -179,7 +179,7 @@ func oauthCallback(ctx echo.Context) error {
 		case "github":
 			resp, err = http.Get("https://github.com/" + user.NickName + ".keys")
 		case "gitea":
-			resp, err = http.Get("https://gitea.com/" + user.NickName + ".keys")
+			resp, err = http.Get(trimGiteaUrl() + "/" + user.NickName + ".keys")
 		}
 
 		if err == nil {
@@ -226,12 +226,8 @@ func oauth(ctx echo.Context) error {
 		httpProtocol = "https"
 	}
 
+	giteaUrl := trimGiteaUrl()
 	httpDomain := httpProtocol + "://" + ctx.Request().Host
-	giteaUrl := config.C.GiteaUrl
-	// remove trailing slash
-	if giteaUrl[len(giteaUrl)-1] == '/' {
-		giteaUrl = giteaUrl[:len(giteaUrl)-1]
-	}
 
 	switch provider {
 	case "github":
@@ -295,4 +291,14 @@ func logout(ctx echo.Context) error {
 	deleteSession(ctx)
 	deleteCsrfCookie(ctx)
 	return redirect(ctx, "/all")
+}
+
+func trimGiteaUrl() string {
+	giteaUrl := config.C.GiteaUrl
+	// remove trailing slash
+	if giteaUrl[len(giteaUrl)-1] == '/' {
+		giteaUrl = giteaUrl[:len(giteaUrl)-1]
+	}
+
+	return giteaUrl
 }

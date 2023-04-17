@@ -181,7 +181,7 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub or Gi
 
 * Add a new OAuth app in your [Github account settings](https://github.com/settings/applications/new)
 * Set 'Authorization callback URL' to `http://opengist.domain/oauth/github/callback`
-* Copy the 'Client ID' and 'Client Secret' and add them to the `config.yml` file :
+* Copy the 'Client ID' and 'Client Secret' and add them to the configuration :
   ```yaml
   github.client-key: <key>
   github.secret: <secret>
@@ -193,7 +193,7 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub or Gi
 
 * Add a new OAuth app in Application settings from the [Gitea instance](https://gitea.com/user/settings/applications)
 * Set 'Redirect URI' to `http://opengist.domain/oauth/gitea/callback`
-* Copy the 'Client ID' and 'Client Secret' and add them to the `config.yml` file :
+* Copy the 'Client ID' and 'Client Secret' and add them to the configuration :
   ```yaml
   gitea.client-key: <key>
   gitea.secret: <secret>

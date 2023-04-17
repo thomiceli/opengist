@@ -1,11 +1,18 @@
 package web
 
 import (
+	"context"
+	"crypto/md5"
 	"errors"
+	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/markbates/goth/gothic"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
+	"io"
+	"net/http"
 	"opengist/internal/models"
+	"strings"
 )
 
 func register(ctx echo.Context) error {
@@ -104,6 +111,143 @@ func processLogin(ctx echo.Context) error {
 	deleteCsrfCookie(ctx)
 
 	return redirect(ctx, "/")
+}
+
+func oauthCallback(ctx echo.Context) error {
+	user, err := gothic.CompleteUserAuth(ctx.Response(), ctx.Request())
+	if err != nil {
+		return errorRes(400, "Cannot complete user auth", err)
+	}
+
+	currUser := getUserLogged(ctx)
+	if currUser != nil {
+		// if user is logged in, link account to user
+		switch user.Provider {
+		case "github":
+			currUser.GithubID = user.UserID
+		case "gitea":
+			currUser.GiteaID = user.UserID
+		}
+
+		if err = currUser.Update(); err != nil {
+			return errorRes(500, "Cannot update user "+strings.Title(user.Provider)+" id", err)
+		}
+
+		addFlash(ctx, "Account linked to "+strings.Title(user.Provider), "success")
+		return redirect(ctx, "/settings")
+	}
+
+	// if user is not in database, create it
+	userDB, err := models.GetUserByProvider(user.UserID, user.Provider)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return errorRes(500, "Cannot get user", err)
+		}
+
+		userDB = &models.User{
+			Username: user.NickName,
+			Email:    user.Email,
+			MD5Hash:  fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(user.Email))))),
+		}
+
+		switch user.Provider {
+		case "github":
+			userDB.GithubID = user.UserID
+		case "gitea":
+			userDB.GiteaID = user.UserID
+		}
+
+		if err = userDB.Create(); err != nil {
+			if models.IsUniqueConstraintViolation(err) {
+				addFlash(ctx, "Username "+user.NickName+" already exists in opengist", "error")
+				return redirect(ctx, "/login")
+			}
+
+			return errorRes(500, "Cannot create user", err)
+		}
+
+		var resp *http.Response
+		switch user.Provider {
+		case "github":
+			resp, err = http.Get("https://github.com/" + user.NickName + ".keys")
+		case "gitea":
+			resp, err = http.Get("https://gitea.com/" + user.NickName + ".keys")
+		}
+
+		if err == nil {
+			defer resp.Body.Close()
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				addFlash(ctx, "Could not get user keys", "error")
+				log.Error().Err(err).Msg("Could not get user keys")
+			}
+
+			keys := strings.Split(string(body), "\n")
+			if len(keys[len(keys)-1]) == 0 {
+				keys = keys[:len(keys)-1]
+			}
+			for _, key := range keys {
+				sshKey := models.SSHKey{
+					Title:   "Added from " + user.Provider,
+					Content: key,
+					User:    *userDB,
+				}
+
+				if err = sshKey.Create(); err != nil {
+					addFlash(ctx, "Could not create ssh key", "error")
+					log.Error().Err(err).Msg("Could not create ssh key")
+				}
+			}
+		}
+	}
+
+	sess := getSession(ctx)
+	sess.Values["user"] = userDB.ID
+	saveSession(sess, ctx)
+	deleteCsrfCookie(ctx)
+
+	return redirect(ctx, "/")
+}
+
+func oauth(ctx echo.Context) error {
+	provider := ctx.Param("provider")
+
+	currUser := getUserLogged(ctx)
+	if currUser != nil {
+		isDelete := false
+		var err error
+		switch provider {
+		case "github":
+			if currUser.GithubID != "" {
+				isDelete = true
+				err = currUser.DeleteProvider(provider)
+			}
+		case "gitea":
+			if currUser.GiteaID != "" {
+				isDelete = true
+				err = currUser.DeleteProvider(provider)
+			}
+		}
+
+		if err != nil {
+			return errorRes(500, "Cannot unlink account from "+strings.Title(provider), err)
+		}
+
+		if isDelete {
+			addFlash(ctx, "Account unlinked from "+strings.Title(provider), "success")
+			return redirect(ctx, "/settings")
+		}
+	}
+
+	ctxValue := context.WithValue(ctx.Request().Context(), "provider", provider)
+	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
+	if provider != "github" && provider != "gitea" {
+		return errorRes(400, "Unsupported provider", nil)
+	}
+
+	gothic.BeginAuthHandler(ctx.Response(), ctx.Request())
+	return nil
 }
 
 func logout(ctx echo.Context) error {

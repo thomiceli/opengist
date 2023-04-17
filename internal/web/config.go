@@ -2,8 +2,6 @@ package web
 
 import (
 	"crypto/md5"
-	"crypto/sha256"
-	"encoding/base64"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/ssh"
@@ -76,14 +74,11 @@ func sshKeysProcess(ctx echo.Context) error {
 
 	key.UserID = user.ID
 
-	pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(key.Content))
+	_, _, _, _, err := ssh.ParseAuthorizedKey([]byte(key.Content))
 	if err != nil {
 		addFlash(ctx, "Invalid SSH key", "error")
 		return redirect(ctx, "/settings")
 	}
-
-	sha := sha256.Sum256(pubKey.Marshal())
-	key.SHA = base64.StdEncoding.EncodeToString(sha[:])
 
 	if err := key.Create(); err != nil {
 		return errorRes(500, "Cannot add SSH key", err)

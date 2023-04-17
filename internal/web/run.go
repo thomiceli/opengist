@@ -249,6 +249,9 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		setData(ctx, "signupDisabled", disableSignup == "1")
 
+		setData(ctx, "githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
+		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
+
 		return next(ctx)
 	}
 }

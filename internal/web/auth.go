@@ -163,7 +163,7 @@ func oauthCallback(ctx echo.Context) error {
 
 		if err = userDB.Create(); err != nil {
 			if models.IsUniqueConstraintViolation(err) {
-				addFlash(ctx, "Username "+user.NickName+" already exists in opengist", "error")
+				addFlash(ctx, "Username "+user.NickName+" already exists in Opengist", "error")
 				return redirect(ctx, "/login")
 			}
 

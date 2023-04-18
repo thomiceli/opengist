@@ -23,6 +23,8 @@ func Setup(dbpath string) error {
 		return err
 	}
 
+	ApplyMigrations(db)
+
 	// Default admin setting values
 	return initAdminSettings(map[string]string{
 		SettingDisableSignup: "0",

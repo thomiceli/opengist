@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-var OpengistVersion = "1.0.1"
+var OpengistVersion = "1.1.0"
 
 var C *config
 

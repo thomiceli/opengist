@@ -26,6 +26,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 * Search for all snippets or for certain users snippets
 * Editor with indentation mode & size ; drag and drop files
 * Download raw files or as a ZIP archive
+* OAuth2 login with GitHub and Gitea
 * Avatars
 * Responsive UI
 * Enable or disable signups

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.1](https://github.com/thomiceli/opengist/compare/v1.1.0...v1.1.1) - 2023-04-20
+### Fixed
+- Git processes are now correctly killed
+
 ## [1.1.0](https://github.com/thomiceli/opengist/compare/v1.0.1...v1.1.0) - 2023-04-18
 ### Added
 - GitHub and Gitea OAuth2 login

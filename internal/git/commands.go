@@ -99,6 +99,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 	if err != nil {
 		return "", false, err
 	}
+	defer cmd.Wait()
 
 	return truncateCommandOutput(stdout, maxBytes)
 }
@@ -126,6 +127,7 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer cmd.Wait()
 
 	return parseLog(stdout, 2<<18), nil
 }

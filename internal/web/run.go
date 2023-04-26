@@ -47,13 +47,13 @@ var fm = template.FuncMap{
 		return strings.Split(i, "\n")
 	},
 	"isMarkdown": func(i string) bool {
-		return ".md" == strings.ToLower(filepath.Ext(i))
+		return strings.ToLower(filepath.Ext(i)) == ".md"
 	},
 	"isCsv": func(i string) bool {
-		return ".csv" == strings.ToLower(filepath.Ext(i))
+		return strings.ToLower(filepath.Ext(i)) == ".csv"
 	},
 	"csvFile": func(file *git.File) *git.CsvFile {
-		if ".csv" != strings.ToLower(filepath.Ext(file.Filename)) {
+		if strings.ToLower(filepath.Ext(file.Filename)) != ".csv" {
 			return nil
 		}
 
@@ -239,7 +239,7 @@ func Start() {
 
 func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		ctxValue := context.WithValue(ctx.Request().Context(), "data", echo.Map{})
+		ctxValue := context.WithValue(ctx.Request().Context(), dataKey, echo.Map{})
 		ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 		setData(ctx, "loadStartTime", time.Now())
 

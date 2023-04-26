@@ -18,15 +18,21 @@ import (
 	"strings"
 )
 
+type providerKeyType string
+type dataTypeKey string
+
+const providerKey providerKeyType = "provider"
+const dataKey dataTypeKey = "data"
+
 func setData(ctx echo.Context, key string, value any) {
-	data := ctx.Request().Context().Value("data").(echo.Map)
+	data := ctx.Request().Context().Value(dataKey).(echo.Map)
 	data[key] = value
-	ctxValue := context.WithValue(ctx.Request().Context(), "data", data)
+	ctxValue := context.WithValue(ctx.Request().Context(), dataKey, data)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 }
 
 func getData(ctx echo.Context, key string) any {
-	data := ctx.Request().Context().Value("data").(echo.Map)
+	data := ctx.Request().Context().Value(dataKey).(echo.Map)
 	return data[key]
 }
 
@@ -36,7 +42,7 @@ func html(ctx echo.Context, template string) error {
 
 func htmlWithCode(ctx echo.Context, code int, template string) error {
 	setErrorFlashes(ctx)
-	return ctx.Render(code, template, ctx.Request().Context().Value("data"))
+	return ctx.Render(code, template, ctx.Request().Context().Value(dataKey))
 }
 
 func redirect(ctx echo.Context, location string) error {

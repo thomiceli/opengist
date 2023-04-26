@@ -11,6 +11,8 @@ import (
 	"github.com/markbates/goth/providers/gitea"
 	"github.com/markbates/goth/providers/github"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
@@ -18,6 +20,8 @@ import (
 	"opengist/internal/models"
 	"strings"
 )
+
+var title = cases.Title(language.English)
 
 func register(ctx echo.Context) error {
 	setData(ctx, "title", "New account")
@@ -134,10 +138,10 @@ func oauthCallback(ctx echo.Context) error {
 		}
 
 		if err = currUser.Update(); err != nil {
-			return errorRes(500, "Cannot update user "+strings.Title(user.Provider)+" id", err)
+			return errorRes(500, "Cannot update user "+title.String(user.Provider)+" id", err)
 		}
 
-		addFlash(ctx, "Account linked to "+strings.Title(user.Provider), "success")
+		addFlash(ctx, "Account linked to "+title.String(user.Provider), "success")
 		return redirect(ctx, "/settings")
 	}
 
@@ -268,16 +272,16 @@ func oauth(ctx echo.Context) error {
 		}
 
 		if err != nil {
-			return errorRes(500, "Cannot unlink account from "+strings.Title(provider), err)
+			return errorRes(500, "Cannot unlink account from "+title.String(provider), err)
 		}
 
 		if isDelete {
-			addFlash(ctx, "Account unlinked from "+strings.Title(provider), "success")
+			addFlash(ctx, "Account unlinked from "+title.String(provider), "success")
 			return redirect(ctx, "/settings")
 		}
 	}
 
-	ctxValue := context.WithValue(ctx.Request().Context(), "provider", provider)
+	ctxValue := context.WithValue(ctx.Request().Context(), providerKey, provider)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 	if provider != "github" && provider != "gitea" {
 		return errorRes(400, "Unsupported provider", nil)

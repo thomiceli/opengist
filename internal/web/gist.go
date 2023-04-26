@@ -20,9 +20,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		userName := ctx.Param("user")
 		gistName := ctx.Param("gistname")
 
-		if strings.HasSuffix(gistName, ".git") {
-			gistName = strings.TrimSuffix(gistName, ".git")
-		}
+		gistName = strings.TrimSuffix(gistName, ".git")
 
 		gist, err := models.GetGist(userName, gistName)
 		if err != nil {
@@ -123,7 +121,8 @@ func allGists(ctx echo.Context) error {
 	} else {
 		setData(ctx, "htmlTitle", "All gists from "+fromUserStr)
 
-		fromUser, err := models.GetUserByUsername(fromUserStr)
+		var fromUser *models.User
+		fromUser, err = models.GetUserByUsername(fromUserStr)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return notFound("User not found")

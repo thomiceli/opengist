@@ -272,6 +272,9 @@ func GetGitVersion() (string, error) {
 
 func copyFiles(repositoryPath string) error {
 	f1, err := os.OpenFile(filepath.Join(repositoryPath, "git-daemon-export-ok"), os.O_RDONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
 	defer f1.Close()
 
 	preReceiveDst, err := os.OpenFile(filepath.Join(repositoryPath, "hooks", "pre-receive"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0744)

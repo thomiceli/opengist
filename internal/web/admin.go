@@ -181,7 +181,6 @@ func adminSyncReposFromDB(ctx echo.Context) error {
 			}
 		}
 		syncReposFromDB = false
-		return
 	}()
 	return redirect(ctx, "/admin-panel")
 }

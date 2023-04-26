@@ -2,6 +2,7 @@
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/thomiceli/opengist?sort=semver)
 ![License](https://img.shields.io/github/license/thomiceli/opengist?color=blue)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/thomiceli/opengist/go.yml)
 
 A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomice.li).
 

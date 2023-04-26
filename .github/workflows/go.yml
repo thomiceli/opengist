@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Set up Go ${{ matrix.go }}
         uses: WillAbides/setup-go-faster@v1.8.0

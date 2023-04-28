@@ -240,7 +240,7 @@ func processCreate(ctx echo.Context) error {
 		}
 
 		dto.Files = append(dto.Files, models.FileDTO{
-			Filename: name,
+			Filename: strings.Trim(name, " "),
 			Content:  escapedValue,
 		})
 	}

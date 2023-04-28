@@ -11,6 +11,7 @@ type AdminSetting struct {
 
 const (
 	SettingDisableSignup = "disable-signup"
+	SettingRequireLogin  = "require-login"
 )
 
 func GetSetting(key string) (string, error) {
@@ -19,9 +20,24 @@ func GetSetting(key string) (string, error) {
 	return setting.Value, err
 }
 
+func GetSettings() (map[string]string, error) {
+	var settings []AdminSetting
+	err := db.Find(&settings).Error
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]string)
+	for _, setting := range settings {
+		result[setting.Key] = setting.Value
+	}
+
+	return result, nil
+}
+
 func UpdateSetting(key string, value string) error {
 	return db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "key"}}, // key colume
+		Columns:   []clause.Column{{Name: "key"}}, // key column
 		DoUpdates: clause.AssignmentColumns([]string{"value"}),
 	}).Create(&AdminSetting{
 		Key:   key,

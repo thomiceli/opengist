@@ -191,12 +191,12 @@ func Start() {
 			g2.PUT("/set-setting", adminSetSetting)
 		}
 
-		g1.GET("/all", allGists)
-		g1.GET("/:user", allGists)
+		g1.GET("/all", allGists, checkRequireLogin)
+		g1.GET("/:user", allGists, checkRequireLogin)
 
 		g3 := g1.Group("/:user/:gistname")
 		{
-			g3.Use(gistInit)
+			g3.Use(checkRequireLogin, gistInit)
 			g3.GET("", gistIndex)
 			g3.GET("/rev/:revision", gistIndex)
 			g3.GET("/revisions", revisions)
@@ -243,11 +243,9 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 		ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 		setData(ctx, "loadStartTime", time.Now())
 
-		disableSignup, err := models.GetSetting(models.SettingDisableSignup)
-		if err != nil {
-			return errorRes(500, "Cannot read setting from database", err)
+		if err := loadSettings(ctx); err != nil {
+			return errorRes(500, "Cannot read settings from database", err)
 		}
-		setData(ctx, "signupDisabled", disableSignup == "1")
 
 		setData(ctx, "githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
 		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
@@ -315,6 +313,21 @@ func logged(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(ctx)
 		}
 		return redirect(ctx, "/login")
+	}
+}
+
+func checkRequireLogin(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		if user := getUserLogged(ctx); user != nil {
+			return next(ctx)
+		}
+
+		require := getData(ctx, "RequireLogin")
+		if require == true {
+			addFlash(ctx, "You must be logged in to access gists", "error")
+			return redirect(ctx, "/login")
+		}
+		return next(ctx)
 	}
 }
 

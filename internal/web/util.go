@@ -18,10 +18,8 @@ import (
 	"strings"
 )
 
-type providerKeyType string
 type dataTypeKey string
 
-const providerKey providerKeyType = "provider"
 const dataKey dataTypeKey = "data"
 
 func setData(ctx echo.Context, key string, value any) {
@@ -108,6 +106,20 @@ func setCsrfHtmlForm(ctx echo.Context) {
 
 func deleteCsrfCookie(ctx echo.Context) {
 	ctx.SetCookie(&http.Cookie{Name: "_csrf", Path: "/", MaxAge: -1})
+}
+
+func loadSettings(ctx echo.Context) error {
+	settings, err := models.GetSettings()
+	if err != nil {
+		return err
+	}
+
+	for key, value := range settings {
+		s := strings.ReplaceAll(key, "-", " ")
+		s = title.String(s)
+		setData(ctx, strings.ReplaceAll(s, " ", ""), value == "1")
+	}
+	return nil
 }
 
 type OpengistValidator struct {

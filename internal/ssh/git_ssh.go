@@ -37,7 +37,12 @@ func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint, ip string) error {
 		return errors.New("gist not found")
 	}
 
-	if verb == "receive-pack" {
+	requireLogin, err := models.GetSetting(models.SettingRequireLogin)
+	if err != nil {
+		return errors.New("internal server error")
+	}
+
+	if verb == "receive-pack" || requireLogin == "1" {
 		user, err := models.GetUserBySSHKeyID(keyID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {

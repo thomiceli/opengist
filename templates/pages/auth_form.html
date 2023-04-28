@@ -8,7 +8,7 @@
 
     </header>
     <main class="mt-4">
-        {{ if and .signupDisabled (ne .title "Login") }}
+        {{ if and .DisableSignup (ne .title "Login") }}
         <p class="italic">Administrator has disabled signing up</p>
         {{ else }}
         <div class="sm:col-span-6">
@@ -33,7 +33,7 @@
                             <div class="flex-auto">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Login</button>
                             </div>
-                            {{ if not .signupDisabled }}
+                            {{ if not .DisableSignup }}
                             <span class="float-right text-sm py-2 underline"><a href="/register">Register instead →</a></span>
                             {{ end }}
                         </div>

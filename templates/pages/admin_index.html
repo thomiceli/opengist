@@ -81,7 +81,11 @@
             <div class="space-y-2">
                 <div>
                     <label for="disable-signup" class="text-sm text-slate-300">Disable signup</label>
-                    <input type="checkbox" id="disable-signup" name="disable-signup" {{ if .signupDisabled }}checked="checked"{{ end }} class="ml-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600" />
+                    <input type="checkbox" id="disable-signup" name="disable-signup" {{ if .DisableSignup }}checked="checked"{{ end }} class="ml-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600" />
+                </div>
+                <div>
+                    <label for="disable-signup" class="text-sm text-slate-300">Login required</label>
+                    <input type="checkbox" id="require-login" name="require-login" {{ if .RequireLogin }}checked="checked"{{ end }} class="ml-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600" />
                 </div>
             </div>
         </div>

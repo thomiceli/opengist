@@ -31,6 +31,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 * Avatars
 * Responsive UI
 * Enable or disable signups
+* Restrict or unrestrict snippets visibility to anonymous users
 * Admin panel : delete users/gists; clean database/filesystem by syncing gists
 * SQLite database
 * Logging

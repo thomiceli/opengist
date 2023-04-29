@@ -30,7 +30,7 @@ func register(ctx echo.Context) error {
 }
 
 func processRegister(ctx echo.Context) error {
-	if getData(ctx, "signupDisabled") == true {
+	if getData(ctx, "DisableSignup") == true {
 		return errorRes(403, "Signing up is disabled", nil)
 	}
 
@@ -148,6 +148,10 @@ func oauthCallback(ctx echo.Context) error {
 	// if user is not in database, create it
 	userDB, err := models.GetUserByProvider(user.UserID, user.Provider)
 	if err != nil {
+		if getData(ctx, "DisableSignup") == true {
+			return errorRes(403, "Signing up is disabled", nil)
+		}
+
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return errorRes(500, "Cannot get user", err)
 		}
@@ -166,10 +170,6 @@ func oauthCallback(ctx echo.Context) error {
 		}
 
 		if err = userDB.Create(); err != nil {
-			if getData(ctx, "signupDisabled") == true {
-				return errorRes(403, "Signing up is disabled", nil)
-			}
-
 			if models.IsUniqueConstraintViolation(err) {
 				addFlash(ctx, "Username "+user.NickName+" already exists in Opengist", "error")
 				return redirect(ctx, "/login")
@@ -281,7 +281,7 @@ func oauth(ctx echo.Context) error {
 		}
 	}
 
-	ctxValue := context.WithValue(ctx.Request().Context(), providerKey, provider)
+	ctxValue := context.WithValue(ctx.Request().Context(), gothic.ProviderParamKey, provider)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 	if provider != "github" && provider != "gitea" {
 		return errorRes(400, "Unsupported provider", nil)

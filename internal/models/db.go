@@ -28,6 +28,7 @@ func Setup(dbpath string) error {
 	// Default admin setting values
 	return initAdminSettings(map[string]string{
 		SettingDisableSignup: "0",
+		SettingRequireLogin:  "0",
 	})
 }
 

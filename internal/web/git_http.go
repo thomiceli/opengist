@@ -47,9 +47,10 @@ func gitHttp(ctx echo.Context) error {
 
 			gist := getData(ctx, "gist").(*models.Gist)
 
-			noAuth := ctx.QueryParam("service") == "git-upload-pack" ||
+			noAuth := (ctx.QueryParam("service") == "git-upload-pack" ||
 				strings.HasSuffix(ctx.Request().URL.Path, "git-upload-pack") ||
-				ctx.Request().Method == "GET"
+				ctx.Request().Method == "GET") &&
+				!getData(ctx, "RequireLogin").(bool)
 
 			repositoryPath := git.RepositoryPath(gist.User.Username, gist.Uuid)
 

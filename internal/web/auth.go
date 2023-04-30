@@ -231,7 +231,13 @@ func oauth(ctx echo.Context) error {
 	}
 
 	giteaUrl := trimGiteaUrl()
-	httpDomain := httpProtocol + "://" + ctx.Request().Host
+
+	var opengistUrl string
+	if config.C.ExternalUrl != "" {
+		opengistUrl = config.C.ExternalUrl
+	} else {
+		opengistUrl = httpProtocol + "://" + ctx.Request().Host
+	}
 
 	switch provider {
 	case "github":
@@ -239,7 +245,7 @@ func oauth(ctx echo.Context) error {
 			github.New(
 				config.C.GithubClientKey,
 				config.C.GithubSecret,
-				httpDomain+"/oauth/github/callback"),
+				opengistUrl+"/oauth/github/callback"),
 		)
 
 	case "gitea":
@@ -247,7 +253,7 @@ func oauth(ctx echo.Context) error {
 			gitea.NewCustomisedURL(
 				config.C.GiteaClientKey,
 				config.C.GiteaSecret,
-				httpDomain+"/oauth/gitea/callback",
+				opengistUrl+"/oauth/gitea/callback",
 				giteaUrl+"/login/oauth/authorize",
 				giteaUrl+"/login/oauth/access_token",
 				giteaUrl+"/api/v1/user"),

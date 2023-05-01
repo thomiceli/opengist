@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint, ip string) error {
+func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 	verb, args := parseCommand(gitCmd)
 	if !strings.HasPrefix(verb, "git-") {
 		verb = ""
@@ -43,7 +43,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint, ip string) error {
 	}
 
 	if verb == "receive-pack" || requireLogin == "1" {
-		user, err := models.GetUserBySSHKeyID(keyID)
+		pubKey, err := models.SSHKeyExistsForUser(key, gist.UserID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
@@ -52,14 +52,8 @@ func runGitCommand(ch ssh.Channel, gitCmd string, keyID uint, ip string) error {
 			errorSsh("Failed to get user by SSH key id", err)
 			return errors.New("internal server error")
 		}
-
-		if user.ID != gist.UserID {
-			log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
-			return errors.New("unauthorized")
-		}
+		_ = models.SSHKeyLastUsedNow(pubKey.Content)
 	}
-
-	_ = models.SSHKeyLastUsedNow(keyID)
 
 	repositoryPath := git.RepositoryPath(gist.User.Username, gist.Uuid)
 

@@ -81,15 +81,14 @@ func GetUserById(userId uint) (*User, error) {
 	return user, err
 }
 
-func GetUserBySSHKeyID(sshKeyId uint) (*User, error) {
-	user := new(User)
+func SSHKeyExistsForUser(sshKey string, userId uint) (*SSHKey, error) {
+	key := new(SSHKey)
 	err := db.
-		Preload("SSHKeys").
-		Joins("join ssh_keys on users.id = ssh_keys.user_id").
-		Where("ssh_keys.id = ?", sshKeyId).
-		First(&user).Error
+		Where("content = ?", sshKey).
+		Where("user_id = ?", userId).
+		First(&key).Error
 
-	return user, err
+	return key, err
 }
 
 func GetUserByProvider(id string, provider string) (*User, error) {

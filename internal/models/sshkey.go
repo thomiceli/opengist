@@ -48,7 +48,7 @@ func GetSSHKeyByID(sshKeyId uint) (*SSHKey, error) {
 	return sshKey, err
 }
 
-func GetSSHKeyByContent(sshKeyContent string) (*SSHKey, error) {
+func SSHKeyDoesExists(sshKeyContent string) (*SSHKey, error) {
 	sshKey := new(SSHKey)
 	err := db.
 		Where("content like ?", sshKeyContent+"%").
@@ -65,9 +65,9 @@ func (sshKey *SSHKey) Delete() error {
 	return db.Delete(&sshKey).Error
 }
 
-func SSHKeyLastUsedNow(sshKeyID uint) error {
+func SSHKeyLastUsedNow(sshKeyContent string) error {
 	return db.Model(&SSHKey{}).
-		Where("id = ?", sshKeyID).
+		Where("content = ?", sshKeyContent).
 		Update("last_used_at", time.Now().Unix()).Error
 }
 

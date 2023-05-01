@@ -74,11 +74,12 @@ func sshKeysProcess(ctx echo.Context) error {
 
 	key.UserID = user.ID
 
-	_, _, _, _, err := ssh.ParseAuthorizedKey([]byte(key.Content))
+	pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(key.Content))
 	if err != nil {
 		addFlash(ctx, "Invalid SSH key", "error")
 		return redirect(ctx, "/settings")
 	}
+	key.Content = strings.TrimSpace(string(ssh.MarshalAuthorizedKey(pubKey)))
 
 	if err := key.Create(); err != nil {
 		return errorRes(500, "Cannot add SSH key", err)

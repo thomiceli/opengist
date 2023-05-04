@@ -178,6 +178,12 @@ func oauthCallback(ctx echo.Context) error {
 			return errorRes(500, "Cannot create user", err)
 		}
 
+		if userDB.ID == 1 {
+			if err = userDB.SetAdmin(); err != nil {
+				return errorRes(500, "Cannot set user admin", err)
+			}
+		}
+
 		var resp *http.Response
 		switch user.Provider {
 		case "github":

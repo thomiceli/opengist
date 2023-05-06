@@ -26,12 +26,17 @@ var title = cases.Title(language.English)
 func register(ctx echo.Context) error {
 	setData(ctx, "title", "New account")
 	setData(ctx, "htmlTitle", "New account")
+	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	return html(ctx, "auth_form.html")
 }
 
 func processRegister(ctx echo.Context) error {
 	if getData(ctx, "DisableSignup") == true {
 		return errorRes(403, "Signing up is disabled", nil)
+	}
+
+	if getData(ctx, "DisableLoginForm") == true {
+		return errorRes(403, "Signing up via registration form is disabled", nil)
 	}
 
 	setData(ctx, "title", "New account")
@@ -81,10 +86,15 @@ func processRegister(ctx echo.Context) error {
 func login(ctx echo.Context) error {
 	setData(ctx, "title", "Login")
 	setData(ctx, "htmlTitle", "Login")
+	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	return html(ctx, "auth_form.html")
 }
 
 func processLogin(ctx echo.Context) error {
+	if getData(ctx, "DisableLoginForm") == true {
+		return errorRes(403, "Logging in via login form is disabled", nil)
+	}
+
 	var err error
 	sess := getSession(ctx)
 

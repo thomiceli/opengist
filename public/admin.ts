@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     registerDomSetting(document.getElementById('disable-signup') as HTMLInputElement);
     registerDomSetting(document.getElementById('require-login') as HTMLInputElement);
+    registerDomSetting(document.getElementById('disable-login-form') as HTMLInputElement);
 });
 
 const setSetting = (key: string, value: string) => {

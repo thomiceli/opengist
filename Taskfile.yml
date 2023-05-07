@@ -66,9 +66,9 @@ tasks:
       - DEV=1 ./node_modules/.bin/nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
 
   watch:
-    desc: Starts both frontend and backend (with ./watch.sh)
+    desc: Starts both frontend and backend, watching for changes
     cmds:
-      - bash ./watch.sh task
+      - task -p watch_frontend watch_backend
 
   clean:
     desc: Clean up build artifacts

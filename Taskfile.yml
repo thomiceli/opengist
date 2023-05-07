@@ -66,16 +66,19 @@ tasks:
       - DEV=1 ./node_modules/.bin/nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
 
   watch:
+    desc: Starts both frontend and backend (with ./watch.sh)
     cmds:
       - bash ./watch.sh task
 
   clean:
+    desc: Clean up build artifacts
     cmds:
       - echo "Cleaning up build artifacts..."
       - rm -f {{.BINARY_NAME}} public/manifest.json
       - rm -rf public/assets
 
   clean_docker:
+    desc: Remove Docker image
     cmds:
       - echo "Cleaning up Docker image..."
       - docker rmi {{.BINARY_NAME}}

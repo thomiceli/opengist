@@ -1,7 +1,7 @@
+import 'highlight.js/styles/tokyo-night-dark.css';
 import './style.css';
 import './markdown.css';
 import './favicon.svg';
-import 'highlight.js/styles/tokyo-night-dark.css';
 import moment from 'moment';
 import md from 'markdown-it';
 import hljs from 'highlight.js';
@@ -31,7 +31,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.querySelectorAll('.markdown').forEach((e: HTMLElement) => {
-        e.innerHTML = md().render(e.innerHTML);
+        e.innerHTML = md({
+            html: true,
+            highlight: function (str, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        console.log(str)
+                        console.log(hljs.highlight(str, {language: lang, ignoreIllegals: false}, false));
+                        return '<pre class="hljs"><code>' +
+                            hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+                            '</code></pre>';
+                    } catch (__) {}
+                }
+
+                return '<pre class="hljs"><code>' + md().utils.escapeHtml(str) + '</code></pre>';
+            }
+        }).render(e.textContent);
     });
 
     document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {

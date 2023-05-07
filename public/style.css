@@ -99,8 +99,8 @@ pre {
     max-height: 337px;
 }
 
-.hljs {
-    background: none !important;
+.hljs{
+    color: #c9d1d9;
 }
 
 .line-code.selected {

@@ -1,0 +1,81 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  # Specify the name of your Go binary output or Docker image
+  BINARY_NAME: opengist
+
+# Prevent the full commands from being logged (https://taskfile.dev/usage/#silent-mode)
+silent: true
+
+tasks:
+  default:
+    desc: List available tasks. Same as running `task` without arguments
+    cmds:
+      - task --list-all
+
+  all:
+    desc: Install dependencies and build
+    cmds:
+      - task: install
+      - task: build
+
+  install:
+    desc: Install NPM and Go dependencies
+    cmds:
+      - echo "Installing NPM dependencies..."
+      - 'npm ci || (echo "Error: Failed to install NPM dependencies." && exit 1)'
+      - echo "Installing Go dependencies..."
+      - 'go mod download || (echo "Error: Failed to install Go dependencies." && exit 1)'
+
+  build_frontend:
+    desc: Build the frontend assets
+    cmds:
+      - echo "Building frontend assets..."
+      - ./node_modules/.bin/vite build
+
+  build_backend:
+    desc: Build the backend binary
+    cmds:
+      - echo "Building Opengist binary..."
+      - go build -tags fs_embed -o {{.BINARY_NAME}} .
+
+  build:
+    desc: Build both the frontend and backend
+    cmds:
+      - task: build_frontend
+      - task: build_backend
+
+  build_docker:
+    desc: Build Docker image
+    cmds:
+      - echo "Building Docker image..."
+      - docker build -t {{.BINARY_NAME}}:latest .
+
+  watch_frontend:
+    desc: Start frontend in dev mode, watching for changes
+    cmds:
+      - echo "Building frontend assets..."
+      - ./node_modules/.bin/vite dev --port 16157
+
+  watch_backend:
+    desc: Start backend and watch for changes
+    cmds:
+      - echo "Building Opengist binary..."
+      - DEV=1 ./node_modules/.bin/nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
+
+  watch:
+    cmds:
+      - bash ./watch.sh task
+
+  clean:
+    cmds:
+      - echo "Cleaning up build artifacts..."
+      - rm -f {{.BINARY_NAME}} public/manifest.json
+      - rm -rf public/assets
+
+  clean_docker:
+    cmds:
+      - echo "Cleaning up Docker image..."
+      - docker rmi {{.BINARY_NAME}}

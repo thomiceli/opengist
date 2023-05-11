@@ -185,6 +185,14 @@ func adminSyncReposFromDB(ctx echo.Context) error {
 	return redirect(ctx, "/admin-panel")
 }
 
+func adminSettings(ctx echo.Context) error {
+	setData(ctx, "title", "Admin Settings")
+	setData(ctx, "htmlTitle", "Admin Settings - Admin panel")
+	setData(ctx, "adminHeaderPage", "settings")
+
+	return html(ctx, "admin_settings.html")
+}
+
 func adminSetSetting(ctx echo.Context) error {
 	key := ctx.FormValue("key")
 	value := ctx.FormValue("value")

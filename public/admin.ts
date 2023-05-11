@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    registerDomSetting(document.getElementById('disable-signup') as HTMLInputElement);
-    registerDomSetting(document.getElementById('require-login') as HTMLInputElement);
-    registerDomSetting(document.getElementById('disable-login-form') as HTMLInputElement);
+    let elems = Array.from(document.getElementsByClassName("toggle-button"));
+    for (let elem of elems) {
+        elem.addEventListener('click', () => {
+            registerDomSetting(elem as HTMLElement)
+        })
+    }
 });
 
 const setSetting = (key: string, value: string) => {
@@ -9,16 +12,21 @@ const setSetting = (key: string, value: string) => {
     data.append('key', key);
     data.append('value', value);
     data.append('_csrf', ((document.getElementsByName('_csrf')[0] as HTMLInputElement).value));
-    fetch('/admin-panel/set-setting', {
+    return fetch('/admin-panel/set-setting', {
         method: 'PUT',
         credentials: 'same-origin',
         body: data,
     });
 };
 
-const registerDomSetting = (el: HTMLInputElement) => {
-    el.addEventListener('change', () => {
-        setSetting(el.id, el.checked ? '1' : '0');
-    });
+const registerDomSetting = (el: HTMLElement) => {
+    // @ts-ignore
+    el.dataset["bool"] = !(el.dataset["bool"] === 'true');
+    setSetting(el.id, el.dataset["bool"] === 'true' ? '1' : '0')
+        .then(() => {
+            el.classList.toggle("bg-primary-600");
+            el.classList.toggle("bg-gray-400");
+            (el.childNodes.item(1) as HTMLElement).classList.toggle("translate-x-5");
+        });
 };
 

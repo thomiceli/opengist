@@ -15,6 +15,8 @@
                     {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Users</a>
                     <a href="/admin-panel/gists" class="{{ if eq .adminHeaderPage "gists" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
                     {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Gists</a>
+                    <a href="/admin-panel/settings" class="{{ if eq .adminHeaderPage "settings" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Admin settings</a>
                 </nav>
             </div>
         </div>

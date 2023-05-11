@@ -188,6 +188,7 @@ func Start() {
 			g2.POST("/gists/:gist/delete", adminGistDelete)
 			g2.POST("/sync-fs", adminSyncReposFromFS)
 			g2.POST("/sync-db", adminSyncReposFromDB)
+			g2.GET("/settings", adminSettings)
 			g2.PUT("/set-setting", adminSetSetting)
 		}
 

@@ -71,32 +71,7 @@
             </div>
         </div>
     </div>
-
-    <div class="sm:overflow-hidden ">
-        <div class="space-y-2 bg-gray-800 py-6 px-6 rounded-md border border-gray-700">
-            <div>
-                <span class="text-base font-bold leading-6 text-slate-300">Settings</span>
-            </div>
-            {{ .csrfHtml }}
-            <div class="space-y-2">
-                <div>
-                    <label for="disable-signup" class="text-sm text-slate-300">Disable signup</label>
-                    <input type="checkbox" id="disable-signup" name="disable-signup" {{ if .DisableSignup }}checked="checked"{{ end }} class="ml-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600" />
-                </div>
-                <div>
-                    <label for="require-login" class="text-sm text-slate-300">Require login</label>
-                    <input type="checkbox" id="require-login" name="require-login" {{ if .RequireLogin }}checked="checked"{{ end }} class="ml-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600" />
-                </div>
-                <div>
-                    <label for="disable-login-form" class="text-sm text-slate-300">Disable login form</label>
-                    <input type="checkbox" id="disable-login-form" name="disable-login-form" {{ if .DisableLoginForm }}checked="checked"{{ end }} class="ml-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600" />
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-
-<script type="module" src="{{ asset "admin.ts" }}"></script>
 
 {{ template "admin_footer" .}}
 {{ template "footer" .}}

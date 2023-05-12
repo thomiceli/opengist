@@ -107,7 +107,6 @@ environment:
   CONFIG: |
     log-level: info
     ssh.git-enabled: false
-    disable-signup: true
     # ...
 ```
 

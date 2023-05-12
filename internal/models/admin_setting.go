@@ -10,8 +10,9 @@ type AdminSetting struct {
 }
 
 const (
-	SettingDisableSignup = "disable-signup"
-	SettingRequireLogin  = "require-login"
+	SettingDisableSignup    = "disable-signup"
+	SettingRequireLogin     = "require-login"
+	SettingDisableLoginForm = "disable-login-form"
 )
 
 func GetSetting(key string) (string, error) {

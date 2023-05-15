@@ -6,11 +6,11 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/models"
 	"gorm.io/gorm"
 	"html/template"
 	"net/url"
-	"opengist/internal/config"
-	"opengist/internal/models"
 	"strconv"
 	"strings"
 )

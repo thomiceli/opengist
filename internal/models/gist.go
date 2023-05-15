@@ -1,8 +1,8 @@
 package models
 
 import (
+	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
-	"opengist/internal/git"
 	"os/exec"
 	"strings"
 	"time"

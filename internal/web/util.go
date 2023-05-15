@@ -10,10 +10,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
+	"github.com/thomiceli/opengist/internal/models"
 	"golang.org/x/crypto/argon2"
 	"html/template"
 	"net/http"
-	"opengist/internal/models"
 	"strconv"
 	"strings"
 )

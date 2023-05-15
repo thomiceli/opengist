@@ -3,11 +3,11 @@ package ssh
 import (
 	"errors"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/models"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
 	"io"
-	"opengist/internal/git"
-	"opengist/internal/models"
 	"os/exec"
 	"strings"
 )

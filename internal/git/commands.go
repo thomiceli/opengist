@@ -2,7 +2,7 @@ package git
 
 import (
 	"fmt"
-	"opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/config"
 	"os"
 	"os/exec"
 	"path"

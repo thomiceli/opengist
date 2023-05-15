@@ -3,9 +3,9 @@ package web
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
-	"opengist/internal/config"
-	"opengist/internal/git"
-	"opengist/internal/models"
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/models"
 	"os"
 	"path/filepath"
 	"runtime"

@@ -11,13 +11,13 @@ import (
 	"github.com/markbates/goth/providers/gitea"
 	"github.com/markbates/goth/providers/github"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/models"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
-	"opengist/internal/config"
-	"opengist/internal/models"
 	"strings"
 )
 

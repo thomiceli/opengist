@@ -1,4 +1,4 @@
-module opengist
+module github.com/thomiceli/opengist
 
 go 1.19
 

@@ -18,6 +18,7 @@ import (
 	"gorm.io/gorm"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -261,7 +262,7 @@ func oauth(ctx echo.Context) error {
 			github.New(
 				config.C.GithubClientKey,
 				config.C.GithubSecret,
-				opengistUrl+"/oauth/github/callback"),
+				url.JoinPath(opengistUrl, "/oauth/github/callback")),
 		)
 
 	case "gitea":
@@ -269,10 +270,10 @@ func oauth(ctx echo.Context) error {
 			gitea.NewCustomisedURL(
 				config.C.GiteaClientKey,
 				config.C.GiteaSecret,
-				opengistUrl+"/oauth/gitea/callback",
-				giteaUrl+"/login/oauth/authorize",
-				giteaUrl+"/login/oauth/access_token",
-				giteaUrl+"/api/v1/user"),
+				url.JoinPath(opengistUrl, "/oauth/gitea/callback"),
+				url.JoinPath(giteaUrl, "/login/oauth/authorize"),
+				url.JoinPath(giteaUrl, "/login/oauth/access_token"),
+				url.JoinPath(giteaUrl, "/api/v1/user")),
 		)
 	}
 

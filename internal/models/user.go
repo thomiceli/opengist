@@ -12,6 +12,7 @@ type User struct {
 	CreatedAt int64
 	Email     string
 	MD5Hash   string // for gravatar, if no Email is specified, the value is random
+	AvatarURL string
 	GithubID  string
 	GiteaID   string
 
@@ -79,6 +80,21 @@ func GetUserById(userId uint) (*User, error) {
 		Where("id = ?", userId).
 		First(&user).Error
 	return user, err
+}
+
+func GetUsersFromEmails(emails []string) (map[string]*User, error) {
+	var users []*User
+	userMap := make(map[string]*User)
+
+	err := db.
+		Where("email IN ?", emails).
+		Find(&users).Error
+
+	for _, user := range users {
+		userMap[user.Email] = user
+	}
+
+	return userMap, err
 }
 
 func SSHKeyExistsForUser(sshKey string, userId uint) (*SSHKey, error) {

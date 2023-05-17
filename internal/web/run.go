@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/sessions"
@@ -71,11 +70,19 @@ var fm = template.FuncMap{
 	"slug": func(s string) string {
 		return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
 	},
-	"avatarUrl": func(userHash string) string {
-		return "https://www.gravatar.com/avatar/" + userHash + "?d=identicon&s=200"
-	},
-	"emailToMD5": func(email string) string {
-		return fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email)))))
+	"avatarUrl": func(user *models.User, noGravatar bool) string {
+		if user.AvatarURL != "" {
+			return user.AvatarURL
+		}
+
+		if user.MD5Hash != "" && !noGravatar {
+			return "https://www.gravatar.com/avatar/" + user.MD5Hash + "?d=identicon&s=200"
+		}
+
+		if dev {
+			return "http://localhost:16157/default.png"
+		}
+		return "/" + manifestEntries["default.png"].File
 	},
 	"asset": func(jsfile string) string {
 		if dev {

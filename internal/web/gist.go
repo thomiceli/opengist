@@ -177,7 +177,7 @@ func revisions(ctx echo.Context) error {
 
 	pageInt := getPage(ctx)
 
-	commits, err := gist.Log((pageInt - 1) * 10)
+	commits, emails, err := gist.Log((pageInt - 1) * 10)
 	if err != nil {
 		return errorRes(500, "Error fetching commits log", err)
 	}
@@ -186,8 +186,14 @@ func revisions(ctx echo.Context) error {
 		return errorRes(404, "Page not found", nil)
 	}
 
+	emailsUsers, err := models.GetUsersFromEmails(emails)
+	if err != nil {
+		return errorRes(500, "Error fetching users emails", err)
+	}
+
 	setData(ctx, "page", "revisions")
 	setData(ctx, "revision", "HEAD")
+	setData(ctx, "emails", emailsUsers)
 	setData(ctx, "htmlTitle", "Revision of "+gist.Title)
 
 	return html(ctx, "revisions.html")

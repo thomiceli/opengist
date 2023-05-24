@@ -130,12 +130,8 @@ func InitLog() {
 		level = zerolog.InfoLevel
 	}
 
-	if os.Getenv("DEV") == "1" {
-		multi := zerolog.MultiLevelWriter(zerolog.NewConsoleWriter(), file)
-		log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
-	} else {
-		log.Logger = zerolog.New(file).Level(level).With().Timestamp().Logger()
-	}
+	multi := zerolog.MultiLevelWriter(zerolog.NewConsoleWriter(), file)
+	log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
 }
 
 func CheckGitVersion(version string) (bool, error) {

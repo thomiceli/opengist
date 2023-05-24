@@ -160,9 +160,15 @@ func (user *User) HasLiked(gist *Gist) (bool, error) {
 func (user *User) DeleteProviderID(provider string) error {
 	switch provider {
 	case "github":
-		return db.Model(&user).Update("github_id", nil).Error
+		return db.Model(&user).
+			Update("github_id", nil).
+			Update("avatar_url", nil).
+			Error
 	case "gitea":
-		return db.Model(&user).Update("gitea_id", nil).Error
+		return db.Model(&user).
+			Update("gitea_id", nil).
+			Update("avatar_url", nil).
+			Error
 	}
 
 	return nil

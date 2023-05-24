@@ -82,19 +82,28 @@ func GetUserById(userId uint) (*User, error) {
 	return user, err
 }
 
-func GetUsersFromEmails(emails []string) (map[string]*User, error) {
+func GetUsersFromEmails(emailsSet map[string]struct{}) (map[string]*User, error) {
 	var users []*User
-	userMap := make(map[string]*User)
+
+	emails := make([]string, 0, len(emailsSet))
+	for email := range emailsSet {
+		emails = append(emails, email)
+	}
 
 	err := db.
 		Where("email IN ?", emails).
 		Find(&users).Error
 
+	if err != nil {
+		return nil, err
+	}
+
+	userMap := make(map[string]*User)
 	for _, user := range users {
 		userMap[user.Email] = user
 	}
 
-	return userMap, err
+	return userMap, nil
 }
 
 func SSHKeyExistsForUser(sshKey string, userId uint) (*SSHKey, error) {

@@ -104,7 +104,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 	return truncateCommandOutput(stdout, maxBytes)
 }
 
-func GetLog(user string, gist string, skip int) ([]*Commit, []string, error) {
+func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
@@ -125,12 +125,11 @@ func GetLog(user string, gist string, skip int) ([]*Commit, []string, error) {
 	stdout, _ := cmd.StdoutPipe()
 	err := cmd.Start()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer cmd.Wait()
 
-	commits, emails := parseLog(stdout, 2<<18)
-	return commits, emails, nil
+	return parseLog(stdout, 2<<18), nil
 }
 
 func CloneTmp(user string, gist string, gistTmpId string, email string) error {

@@ -61,11 +61,10 @@ func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) 
 	return string(buf), truncated, nil
 }
 
-func parseLog(out io.Reader, maxBytes int) ([]*Commit, []string) {
+func parseLog(out io.Reader, maxBytes int) []*Commit {
 	scanner := bufio.NewScanner(out)
 
 	var commits []*Commit
-	var emails []string
 	var currentCommit *Commit
 	var currentFile *File
 	var isContent bool
@@ -87,7 +86,6 @@ func parseLog(out io.Reader, maxBytes int) ([]*Commit, []string) {
 
 		scanner.Scan()
 		currentCommit.AuthorEmail = string(scanner.Bytes()[2:])
-		emails = append(emails, currentCommit.AuthorEmail)
 
 		scanner.Scan()
 		currentCommit.Timestamp = string(scanner.Bytes()[2:])
@@ -180,7 +178,7 @@ func parseLog(out io.Reader, maxBytes int) ([]*Commit, []string) {
 
 	}
 
-	return commits, emails
+	return commits
 }
 
 func ParseCsv(file *File) (*CsvFile, error) {

@@ -191,7 +191,7 @@ func revisions(ctx echo.Context) error {
 		if commit.AuthorEmail == "" {
 			continue
 		}
-		emailsSet[commit.AuthorEmail] = struct{}{}
+		emailsSet[strings.ToLower(commit.AuthorEmail)] = struct{}{}
 	}
 
 	emailsUsers, err := models.GetUsersFromEmails(emailsSet)

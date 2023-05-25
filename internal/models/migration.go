@@ -28,6 +28,7 @@ func ApplyMigrations(db *gorm.DB) error {
 		Func    func(*gorm.DB) error
 	}{
 		{1, v1_modifyConstraintToSSHKeys},
+		{2, v2_lowercaseEmails},
 		// Add more migrations here as needed
 	}
 
@@ -93,4 +94,10 @@ func v1_modifyConstraintToSSHKeys(db *gorm.DB) error {
 	// Rename the new table to the original table name
 	renameSQL := `ALTER TABLE ssh_keys_temp RENAME TO ssh_keys;`
 	return db.Exec(renameSQL).Error
+}
+
+func v2_lowercaseEmails(db *gorm.DB) error {
+	// Copy the lowercase emails into the new column
+	copySQL := `UPDATE users SET email = lower(email);`
+	return db.Exec(copySQL).Error
 }

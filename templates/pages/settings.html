@@ -9,39 +9,39 @@
         <div class="space-y-4">
             <div class="sm:grid {{ if or .githubOauth .giteaOauth }}grid-cols-3{{else}}grid-cols-2{{end}} gap-x-4 md:gap-x-8">
                 <div class="w-full">
-                    <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                        <h2 class="text-md font-bold text-slate-300">
+                    <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
                             Email
                         </h2>
-                        <h3 class="text-sm text-gray-400 italic mb-4">
+                        <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
                             Used for commits and Gravatar
                         </h3>
                         <form class="space-y-6" action="/settings/email" method="post">
                             <div>
                                 <div class="mt-1">
-                                    <input id="email" name="email" value="{{ .userLogged.Email }}" type="email" required autocomplete="off" class="bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <input id="email" name="email" value="{{ .userLogged.Email }}" type="email" required autocomplete="off" class="bg-gray-50 dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 </div>
                             </div>
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Set email</button>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Set email</button>
                             {{ .csrfHtml }}
                         </form>
                     </div>
                 </div>
                 {{ if or .githubOauth .giteaOauth }}
                 <div class="w-full">
-                    <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                        <h2 class="text-md font-bold text-slate-300 mb-2">
+                    <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        <h2 class="text-md font-bold text-slate-700 dark:text-slate-300 mb-2">
                             Link accounts
                         </h2>
                         <div class="gap-y-2">
 
                                 {{ if .githubOauth }}
                                     {{ if .userLogged.GithubID }}
-                                        <a href="/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                        <a href="/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                                             Unlink GitHub account
                                         </a>
                                     {{ else }}
-                                        <a href="/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                        <a href="/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                                             Link GitHub account
                                         </a>
                                     {{ end }}
@@ -49,11 +49,11 @@
 
                                 {{ if .giteaOauth }}
                                     {{ if .userLogged.GiteaID }}
-                                        <a href="/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                        <a href="/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                                             Unlink Gitea account
                                         </a>
                                         {{ else }}
-                                        <a href="/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-600 bg-gray-800 px-2.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-gray-700 hover:border-gray-500 hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                        <a href="/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                                             Link Gitea account
                                         </a>
                                     {{ end }}
@@ -64,13 +64,13 @@
                 </div>
                 {{ end }}
                 <div class="w-full">
-                    <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                        <h2 class="text-md font-bold text-slate-300">
+                    <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
                             Delete account
                         </h2>
                         <form class="space-y-6" action="/settings/account" method="post" onsubmit="return confirm('Are you sure you want to delete your account ?')">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 mt-2">Delete account</button>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 mt-2">Delete account</button>
                             {{ .csrfHtml }}
                         </form>
                     </div>
@@ -78,35 +78,35 @@
             </div>
             <div class="sm:grid grid-cols-2 gap-x-4 md:gap-x-8">
                 <div class="w-full">
-                    <div class="bg-gray-900 rounded-md border border-1 border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                        <h2 class="text-md font-bold text-slate-300">
+                    <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
                             Add SSH Key
                         </h2>
-                        <h3 class="text-sm text-gray-400 italic mb-4">
+                        <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
                             Used only to pull/push gists using Git via SSH
                         </h3>
                         <form class="space-y-6" action="/settings/ssh-keys" method="post">
                             <div>
-                                <label for="title" class="block text-sm font-medium text-slate-300"> Title </label>
+                                <label for="title" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> Title </label>
                                 <div class="mt-1">
-                                    <input id="title" name="title" type="text" required autocomplete="off" class="bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <input id="title" name="title" type="text" required autocomplete="off" class="bg-gray-50 dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 </div>
                             </div>
 
                             <div class="mt-8">
-                                <label for="sshkey" class="block text-sm font-medium text-slate-300"> Key </label>
+                                <label for="sshkey" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> Key </label>
                                 <div class="mt-1">
-                                    <textarea id="sshkey" required autocomplete="off" name="content" class="bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"></textarea>
+                                    <textarea id="sshkey" required autocomplete="off" name="content" class="bg-gray-50 dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"></textarea>
                                 </div>
                             </div>
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-700 text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Add key</button>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Add key</button>
                             {{ .csrfHtml }}
                         </form>
                     </div>
                 </div>
                 <div>
                     <div class="mt-6 flow-root">
-                        <ul role="list" class="-my-5 divide-y divide-gray-700 list-none">
+                        <ul role="list" class="-my-5 divide-y divide-gray-300 dark:divide-gray-700 list-none">
                             {{ if .sshKeys }}
                                 {{ range $key := .sshKeys }}
                                     <li class="py-5">
@@ -115,8 +115,8 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                                             </svg>
                                             <div>
-                                                <h3 class="text-sm font-semibold text-slate-300">{{ .Title }}</h3>
-                                                <p class="mt-1 text-xs text-slate-400 line-clamp-2 code" style="overflow-wrap: anywhere">SHA256:{{.SHA}}</p>
+                                                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ .Title }}</h3>
+                                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400 line-clamp-2 code" style="overflow-wrap: anywhere">SHA256:{{.SHA}}</p>
                                                 <p class="text-xs text-gray-500 line-clamp-2">Added <span class="moment-timestamp-date">{{ .CreatedAt }}</span></p>
                                                 {{ if eq .LastUsedAt 0 }}
                                                     <p class="text-xs text-gray-500 line-clamp-2">Never used</p>
@@ -128,7 +128,7 @@
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 {{ $.csrfHtml }}
 
-                                                <button type="submit" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-700 text-xs font-medium rounded-md shadow-sm text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">Delete</button>
+                                                <button type="submit" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">Delete</button>
                                             </form>
                                         </div>
                                     </li>

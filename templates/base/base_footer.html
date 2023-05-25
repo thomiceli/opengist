@@ -1,8 +1,13 @@
+{{ if false }}
+{{/* prevent IDE errors */}}
+<html lang="en"><body><div><div>
+{{ end }}
+
 {{ define "footer" }}
-<p class="text-slate-400 py-8 [&>*]:mx-1.5 flex">
+<p class="text-slate-600 dark:text-slate-400 py-8 [&>*]:mx-1.5 flex">
     <span>
-        <a target="_blank" style="margin-left: 0 !important;" class="text-slate-400 hover:text-slate-200 inline-flex" href="https://github.com/thomiceli/opengist">
-            <span class="mr-1">Powered by <span class="font-bold underline">Opengist</span></span>
+        <a target="_blank" style="margin-left: 0 !important;" class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 inline-flex" href="https://github.com/thomiceli/opengist">
+            <span class="mr-1">Powered by <span class="font-bold">Opengist</span></span>
         </a>
     </span> ⋅
     <span>Load: <span class="font-bold">{{ loadedTime .loadStartTime }}</span></span>

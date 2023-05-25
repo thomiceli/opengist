@@ -9,16 +9,20 @@
         <div class="mb-4">
             <div class="">
                 <nav class="flex space-x-4" aria-label="Tabs">
-                    <a href="/admin-panel" class="{{ if eq .adminHeaderPage "index" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
-                    {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}">General</a>
-                    <a href="/admin-panel/users" class="{{ if eq .adminHeaderPage "users" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
-                    {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Users</a>
-                    <a href="/admin-panel/gists" class="{{ if eq .adminHeaderPage "gists" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
-                    {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Gists</a>
-                    <a href="/admin-panel/settings" class="{{ if eq .adminHeaderPage "settings" }}bg-gray-700 text-slate-300 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
-                    {{ else }} text-gray-400 hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Admin settings</a>
+                    <a href="/admin-panel" class="{{ if eq .adminHeaderPage "index" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}">General</a>
+                    <a href="/admin-panel/users" class="{{ if eq .adminHeaderPage "users" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Users</a>
+                    <a href="/admin-panel/gists" class="{{ if eq .adminHeaderPage "gists" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Gists</a>
+                    <a href="/admin-panel/settings" class="{{ if eq .adminHeaderPage "settings" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Admin settings</a>
                 </nav>
             </div>
         </div>
+{{ end }}
 
+{{ if false }}
+{{/* prevent IDE errors */}}
+</main></div>
 {{ end }}

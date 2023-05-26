@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"crypto/md5"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
@@ -139,12 +140,14 @@ func oauthCallback(ctx echo.Context) error {
 
 	currUser := getUserLogged(ctx)
 	if currUser != nil {
-		// if user is logged in, link account to user
+		// if user is logged in, link account to user and update its avatar URL
 		switch user.Provider {
 		case "github":
 			currUser.GithubID = user.UserID
+			currUser.AvatarURL = getAvatarUrlFromProvider("github", user.UserID)
 		case "gitea":
 			currUser.GiteaID = user.UserID
+			currUser.AvatarURL = getAvatarUrlFromProvider("gitea", user.NickName)
 		}
 
 		if err = currUser.Update(); err != nil {
@@ -172,11 +175,14 @@ func oauthCallback(ctx echo.Context) error {
 			MD5Hash:  fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(user.Email))))),
 		}
 
+		// set provider id and avatar URL
 		switch user.Provider {
 		case "github":
 			userDB.GithubID = user.UserID
+			userDB.AvatarURL = getAvatarUrlFromProvider("github", user.UserID)
 		case "gitea":
 			userDB.GiteaID = user.UserID
+			userDB.AvatarURL = getAvatarUrlFromProvider("gitea", user.NickName)
 		}
 
 		if err = userDB.Create(); err != nil {
@@ -327,4 +333,40 @@ func trimGiteaUrl() string {
 	}
 
 	return giteaUrl
+}
+
+func getAvatarUrlFromProvider(provider string, identifier string) string {
+	fmt.Println("getAvatarUrlFromProvider", provider, identifier)
+	switch provider {
+	case "github":
+		return "https://avatars.githubusercontent.com/u/" + identifier + "?v=4"
+	case "gitea":
+		resp, err := http.Get("https://gitea.com/api/v1/users/" + identifier)
+		if err != nil {
+			log.Error().Err(err).Msg("Cannot get user from Gitea")
+			return ""
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Error().Err(err).Msg("Cannot read Gitea response body")
+			return ""
+		}
+
+		var result map[string]interface{}
+		err = json.Unmarshal(body, &result)
+		if err != nil {
+			log.Error().Err(err).Msg("Cannot unmarshal Gitea response body")
+			return ""
+		}
+
+		field, ok := result["avatar_url"]
+		if !ok {
+			log.Error().Msg("Field 'avatar_url' not found in Gitea JSON response")
+			return ""
+		}
+		return field.(string)
+	}
+	return ""
 }

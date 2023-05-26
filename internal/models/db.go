@@ -30,6 +30,7 @@ func Setup(dbpath string) error {
 		SettingDisableSignup:    "0",
 		SettingRequireLogin:     "0",
 		SettingDisableLoginForm: "0",
+		SettingDisableGravatar:  "0",
 	})
 }
 

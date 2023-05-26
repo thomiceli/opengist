@@ -28,7 +28,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 * Editor with indentation mode & size ; drag and drop files
 * Download raw files or as a ZIP archive
 * OAuth2 login with GitHub and Gitea
-* Avatars
+* Avatars via Gravatar or OAuth2 providers
 * Responsive UI
 * Enable or disable signups
 * Restrict or unrestrict snippets visibility to anonymous users

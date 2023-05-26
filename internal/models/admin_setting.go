@@ -13,6 +13,7 @@ const (
 	SettingDisableSignup    = "disable-signup"
 	SettingRequireLogin     = "require-login"
 	SettingDisableLoginForm = "disable-login-form"
+	SettingDisableGravatar  = "disable-gravatar"
 )
 
 func GetSetting(key string) (string, error) {

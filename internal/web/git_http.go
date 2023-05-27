@@ -151,10 +151,9 @@ func infoRefs(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*models.Gist)
 
 	serviceType := ctx.QueryParam("service")
-	if !strings.HasPrefix(serviceType, "git-") {
-		service = ""
+	if strings.HasPrefix(serviceType, "git-") {
+		service = strings.TrimPrefix(serviceType, "git-")
 	}
-	service = strings.TrimPrefix(serviceType, "git-")
 
 	if service != "upload-pack" && service != "receive-pack" {
 		if err := gist.UpdateServerInfo(); err != nil {

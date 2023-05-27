@@ -8,7 +8,7 @@
                 {{ range $gist := .forks }}
                 <li class="flex py-4">
                     <a href="/{{ $gist.User.Username }}">
-                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl $gist.User.MD5Hash }}" alt="">
+                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl $gist.User $.DisableGravatar }}" alt="">
                     </a>
                     <div>
                         <a href="/{{ $gist.User.Username }}" class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $gist.User.Username }}</a>

@@ -186,8 +186,22 @@ func revisions(ctx echo.Context) error {
 		return errorRes(404, "Page not found", nil)
 	}
 
+	emailsSet := map[string]struct{}{}
+	for _, commit := range commits {
+		if commit.AuthorEmail == "" {
+			continue
+		}
+		emailsSet[strings.ToLower(commit.AuthorEmail)] = struct{}{}
+	}
+
+	emailsUsers, err := models.GetUsersFromEmails(emailsSet)
+	if err != nil {
+		return errorRes(500, "Error fetching users emails", err)
+	}
+
 	setData(ctx, "page", "revisions")
 	setData(ctx, "revision", "HEAD")
+	setData(ctx, "emails", emailsUsers)
 	setData(ctx, "htmlTitle", "Revision of "+gist.Title)
 
 	return html(ctx, "revisions.html")

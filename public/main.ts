@@ -1,6 +1,7 @@
 import './style.css';
 import './hljs.scss';
 import './favicon.svg';
+import './default.png';
 import moment from 'moment';
 import md from 'markdown-it';
 import hljs from 'highlight.js';

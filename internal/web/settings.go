@@ -37,7 +37,7 @@ func emailProcess(ctx echo.Context) error {
 		hash = fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email)))))
 	}
 
-	user.Email = email
+	user.Email = strings.ToLower(email)
 	user.MD5Hash = hash
 
 	if err := user.Update(); err != nil {

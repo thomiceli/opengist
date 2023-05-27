@@ -12,6 +12,7 @@ type User struct {
 	CreatedAt int64
 	Email     string
 	MD5Hash   string // for gravatar, if no Email is specified, the value is random
+	AvatarURL string
 	GithubID  string
 	GiteaID   string
 
@@ -81,6 +82,30 @@ func GetUserById(userId uint) (*User, error) {
 	return user, err
 }
 
+func GetUsersFromEmails(emailsSet map[string]struct{}) (map[string]*User, error) {
+	var users []*User
+
+	emails := make([]string, 0, len(emailsSet))
+	for email := range emailsSet {
+		emails = append(emails, email)
+	}
+
+	err := db.
+		Where("email IN ?", emails).
+		Find(&users).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	userMap := make(map[string]*User)
+	for _, user := range users {
+		userMap[user.Email] = user
+	}
+
+	return userMap, nil
+}
+
 func SSHKeyExistsForUser(sshKey string, userId uint) (*SSHKey, error) {
 	key := new(SSHKey)
 	err := db.
@@ -135,9 +160,15 @@ func (user *User) HasLiked(gist *Gist) (bool, error) {
 func (user *User) DeleteProviderID(provider string) error {
 	switch provider {
 	case "github":
-		return db.Model(&user).Update("github_id", nil).Error
+		return db.Model(&user).
+			Update("github_id", nil).
+			Update("avatar_url", nil).
+			Error
 	case "gitea":
-		return db.Model(&user).Update("gitea_id", nil).Error
+		return db.Model(&user).
+			Update("gitea_id", nil).
+			Update("avatar_url", nil).
+			Error
 	}
 
 	return nil

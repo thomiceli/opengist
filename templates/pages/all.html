@@ -5,7 +5,7 @@
             {{if .fromUser}}
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser.MD5Hash }}" alt="">
+                    <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="">
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>

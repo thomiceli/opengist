@@ -1,6 +1,5 @@
-import 'highlight.js/styles/tokyo-night-dark.css';
 import './style.css';
-import './markdown.css';
+import './hljs.scss';
 import './favicon.svg';
 import './default.png';
 import moment from 'moment';
@@ -8,6 +7,50 @@ import md from 'markdown-it';
 import hljs from 'highlight.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    const themeMenu = document.getElementById('theme-menu')!;
+
+    const checkTheme = () => {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    }
+
+    checkTheme()
+
+    window.matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change',({ matches }) => {
+            checkTheme()
+        }
+    )
+
+    document.getElementById('light-mode')!.onclick = (e) => {
+        e.stopPropagation()
+        localStorage.theme = 'light';
+        themeMenu.classList.toggle('hidden');
+        checkTheme()
+    }
+
+    document.getElementById('dark-mode')!.onclick = (e) => {
+        e.stopPropagation()
+        localStorage.theme = 'dark';
+        themeMenu.classList.toggle('hidden');
+        checkTheme()
+    }
+
+    document.getElementById('system-mode')!.onclick = (e) => {
+        e.stopPropagation()
+        localStorage.removeItem('theme');
+        themeMenu.classList.toggle('hidden');
+        checkTheme();
+    }
+
+    document.getElementById('theme-btn')!.onclick = (e) => {
+        themeMenu.classList.toggle('hidden');
+    }
+
     document.querySelectorAll('.moment-timestamp').forEach((e: HTMLElement) => {
         e.title = moment.unix(parseInt(e.innerHTML)).format('LLLL');
         e.innerHTML = moment.unix(parseInt(e.innerHTML)).fromNow();
@@ -37,8 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
             highlight: function (str, lang) {
                 if (lang && hljs.getLanguage(lang)) {
                     try {
-                        console.log(str)
-                        console.log(hljs.highlight(str, {language: lang, ignoreIllegals: false}, false));
                         return '<pre class="hljs"><code>' +
                             hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
                             '</code></pre>';

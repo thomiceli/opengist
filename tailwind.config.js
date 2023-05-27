@@ -22,7 +22,6 @@ module.exports = {
         800: "#232429",
         900: "#131316"
       },
-      emerald: colors.emerald,
       rose: colors.rose,
       primary: colors.sky,
       slate: colors.slate
@@ -34,4 +33,5 @@ module.exports = {
     },
   },
   plugins: [require("@tailwindcss/typography"),require('@tailwindcss/forms')],
+  darkMode: 'class',
 }

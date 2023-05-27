@@ -29,6 +29,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 * Download raw files or as a ZIP archive
 * OAuth2 login with GitHub and Gitea
 * Avatars via Gravatar or OAuth2 providers
+* Light/Dark mode
 * Responsive UI
 * Enable or disable signups
 * Restrict or unrestrict snippets visibility to anonymous users
@@ -39,7 +40,6 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 
 #### Todo
 
-- [ ] Light mode
 - [ ] Tests
 - [ ] Search for snippets
 - [ ] Embed snippets

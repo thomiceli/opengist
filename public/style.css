@@ -9,23 +9,23 @@
 }
 
 html {
-    @apply bg-gray-800;
+    @apply bg-gray-50 dark:bg-gray-800;
 }
 
 a {
     @apply text-primary-500;
 }
 
-a:hover {
-    @apply text-primary-600;
+p a:hover, h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover {
+    @apply underline;
 }
 
 input {
-    @apply placeholder-gray-400;
+    @apply placeholder-gray-300 dark:placeholder-gray-400;
 }
 
 :not(pre) > code[class*="language-"], pre[class*="language-"] {
-    @apply bg-gray-900 mt-1 pt-1 !important;
+    @apply bg-white dark:bg-gray-900 mt-1 pt-1 !important;
 }
 
 pre {
@@ -63,13 +63,12 @@ pre {
 }
 
 .cm-line, .cm-gutter {
-    @apply bg-gray-900 !important;
-    caret-color: white !important;
+    @apply bg-white dark:bg-gray-900 dark:caret-white caret-slate-700 !important;
     padding: 0 !important;
 }
 
 .cm-activeLine, .cm-activeLineGutter {
-    @apply bg-gray-800 !important;
+    @apply bg-gray-50 dark:bg-gray-800 !important;
 }
 
 .cm-gutters {
@@ -77,7 +76,7 @@ pre {
 }
 
 .cm-gutterElement {
-    @apply text-gray-300 px-4 !important
+    @apply text-gray-700 dark:text-gray-300 px-4 !important
 }
 
 .code td {
@@ -99,21 +98,27 @@ pre {
     max-height: 337px;
 }
 
-.hljs{
+.hljs {
     color: #c9d1d9;
 }
 
 .line-code.selected {
-    background-color: rgba(65, 25, 63, 0.46) !important;
-    box-shadow: inset 4px 0 0 rgb(107, 38, 102) !important;
+    background-color: rgb(255, 247, 190) !important;
+    box-shadow: inset 4px 0 0 rgb(255, 213, 65) !important;
+}
+
+.dark .line-code.selected {
+    background-color: rgb(54, 49, 32) !important;
+    box-shadow: inset 4px 0 0 rgb(161, 128, 21) !important;
 }
 
 .line-code {
     @apply pl-2;
+    background: none !important;
 }
 
 .line-num {
-    @apply cursor-pointer text-slate-400 hover:text-white;
+    @apply cursor-pointer text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white;
 }
 
 table.csv-table {
@@ -125,13 +130,13 @@ table.csv-table thead {
 }
 
 table.csv-table thead tr {
-    @apply bg-slate-800;
+    @apply bg-slate-100 dark:bg-slate-800;
 }
 
 table.csv-table thead tr th {
-    @apply border py-2 px-1 border-slate-700;
+    @apply border py-2 px-1 border-slate-300 dark:border-slate-700;
 }
 
 table.csv-table tbody td {
-    @apply border py-1.5 px-1 border-slate-800;
+    @apply border py-1.5 px-1 border-slate-200 dark:border-slate-800;
 }

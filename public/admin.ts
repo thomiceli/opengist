@@ -25,7 +25,8 @@ const registerDomSetting = (el: HTMLElement) => {
     setSetting(el.id, el.dataset["bool"] === 'true' ? '1' : '0')
         .then(() => {
             el.classList.toggle("bg-primary-600");
-            el.classList.toggle("bg-gray-400");
+            el.classList.toggle("dark:bg-gray-400");
+            el.classList.toggle("bg-gray-300");
             (el.childNodes.item(1) as HTMLElement).classList.toggle("translate-x-5");
         });
 };

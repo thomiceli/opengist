@@ -1,9 +1,13 @@
-{{ define "admin_footer" }}
-{{ if .urlPage }}
-<div class="flex mt-4 justify-center space-x-2">
-    {{ template "pagination" . }}
-</div>
+{{ if false }}{{/* prevent IDE errors */}}
+<div><main>
 {{ end }}
-</main>
-</div>
+
+{{ define "admin_footer" }}
+    {{ if .urlPage }}
+    <div class="flex mt-4 justify-center space-x-2">
+        {{ template "pagination" . }}
+    </div>
+    {{ end }}
+    </main>
+    </div>
 {{ end }}

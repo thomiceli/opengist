@@ -15,14 +15,14 @@
     {{ end }}
 </head>
 <body class="h-full">
-<div id="app" class="text-white min-h-full bg-gray-900">
+<div id="app" class="text-gray-700 dark:text-white min-h-full bg-white dark:bg-gray-900">
     <div class="min-h-full">
-        <nav class="bg-gray-800">
+        <nav class="dark:bg-gray-800 bg-gray-50">
             <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="relative flex items-center justify-between h-16">
                     <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
                         <!-- Mobile menu button-->
-                        <button id="main-menu-button" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                        <button id="main-menu-button" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
                             <span class="sr-only">Open main menu</span>
                             <svg id="main-menu-open" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -32,6 +32,7 @@
                             </svg>
                         </button>
                     </div>
+
                     <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
                         <div class="flex-shrink-0 flex items-center">
                             <a href="/">
@@ -42,10 +43,10 @@
                         </div>
                         <div class="hidden sm:block sm:ml-6">
                             <div class="flex space-x-4">
-                                <a href="/all" class="text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">All</a>
-                                <a href="/" class="text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">New</a>
+                                <a href="/all" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">All</a>
+                                <a href="/" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">New</a>
                                 {{ if .userLogged }}
-                                    <a href="/{{ .userLogged.Username }}" class="text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">My gists</a>
+                                    <a href="/{{ .userLogged.Username }}" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">My gists</a>
                                 {{ end }}
                             </div>
                         </div>
@@ -53,30 +54,66 @@
                     <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         {{ if .userLogged }}
                         {{ if .userLogged.IsAdmin }}
-                            <a href="/admin-panel" class="hidden sm:block text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Admin</a>
+                            <a href="/admin-panel" class="hidden sm:block text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Admin</a>
                         {{ end }}
-                        <a href="/settings" class="hidden sm:block text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Settings</a>
+                        <a href="/settings" class="hidden sm:block text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Settings</a>
 
-                        <a href="/logout" id="logged-button" class="inline-flex text-slate-300 hover:bg-rose-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                                <p class="text-slate-300 mr-1 username">{{ .userLogged.Username }}</p>
-                                <p class="text-slate-300 mr-1 logout hidden">Logout</p>
+                        <a href="/logout" id="logged-button" class="inline-flex text-slate-700 dark:text-slate-300 hover:bg-rose-500 hover:text-white dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                <p class="mr-1 username">{{ .userLogged.Username }}</p>
+                                <p class="mr-1 logout hidden">Logout</p>
                                 <span class="sr-only">User</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </a>
                         {{ else }}
                             {{ if not .DisableSignup }}
-                            <a href="/register" class="inline-flex text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                                <p class="text-slate-300 mr-1">Register</p>
+                            <a href="/register" class="inline-flex text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                <p class="text-slate-700 dark:text-slate-300 mr-1">Register</p>
                             </a>
                             {{ end }}
-                            <a href="/login" class="inline-flex text-slate-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                                <p class="text-slate-300 mr-1">Login</p>
+                            <a href="/login" class="inline-flex text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                <p class="text-slate-700 dark:text-slate-300 mr-1">Login</p>
                             </a>
                         {{ end }}
 
+                        <div class="ml-2 border-l-1 border-gray-200 dark:border-gray-600 rounded-md"><br /></div>
+                        <div id="theme-btn" class="hidden sm:flex items-center ml-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md px-3 py-2">
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-primary-500 dark:hidden">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-primary-500 hidden dark:block">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                                </svg>
+                            </div>
+                            <div class="hidden relative sm:inline-block text-left">
+                            <div id="theme-menu" class="hidden font-medium absolute right-0 z-10 mt-12 origin-top-right divide-y dark:divide-gray-900 divide-gray-100 rounded-md dark:bg-gray-800 bg-white shadow-lg ring-1 ring-gray-50 dark:ring-gray-700 focus:outline-none">
+                                <div class="py-1" role="none">
+                                    <!-- Active: "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900", Not Active: "text-gray-300 dark:text-gray-700" -->
+                                    <button id="light-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-3 h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-500">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                                        </svg>
+                                        Light
+                                    </button>
+                                    <button id="dark-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-3 h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-500">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                                        </svg>
+                                        Dark
+                                    </button>
+                                    <button id="system-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-3 h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-500">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+                                        </svg>
+                                        System
+                                    </button>
+                                </div>
+                            </div>
+                            </div>
 
+                        </div>
                     </div>
                 </div>
             </div>
@@ -84,14 +121,14 @@
             <!-- Mobile menu -->
             <div class="sm:hidden hidden" id="mobile-menu">
                 <div class="px-2 pt-2 pb-3 space-y-1">
-                    <a href="/all" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium" aria-current="page">All</a>
-                    <a href="/" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">New</a>
+                    <a href="/all" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">All</a>
+                    <a href="/" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">New</a>
                     {{ if .userLogged }}
-                        <a href="/{{ .userLogged.Username }}" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">My gists</a>
-                        <a href="/settings" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Settings</a>
+                        <a href="/{{ .userLogged.Username }}" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">My gists</a>
+                        <a href="/settings" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Settings</a>
 
                     {{ if .userLogged.IsAdmin }}
-                            <a href="/admin-panel" class="text-slate-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Admin</a>
+                            <a href="/admin-panel" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Admin</a>
                         {{ end }}
                     {{ end }}
                 </div>
@@ -103,38 +140,41 @@
 
 
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-300">
-
-
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-700 dark:text-slate-300">
         <div>
             {{range .flashErrors}}
-                <div class="mt-4 rounded-md bg-gray-800 border-l-4 border-rose-400 p-4">
+                <div class="mt-4 rounded-md bg-gray-50 dark:bg-gray-800 border-l-4 border-rose-400 p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-rose-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg class="h-5 w-5 text-rose-600 dark:text-rose-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm text-rose-400">{{.}}</p>
+                            <p class="text-sm text-rose-600 dark:text-rose-400">{{.}}</p>
                         </div>
                     </div>
                 </div>
             {{end}}
             {{range .flashSuccess}}
-                <div class="mt-4 rounded-md bg-gray-800 border-l-4 border-primary-400 p-4">
+                <div class="mt-4 rounded-md bg-gray-50 dark:bg-gray-800 border-l-4 border-primary-500 dark:border-primary-400 p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-400" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500 dark:text-primary-400" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm text-primary-400">{{.}}</p>
+                            <p class="text-sm text-primary-500 dark:text-primary-400">{{.}}</p>
                         </div>
                     </div>
                 </div>
             {{end}}
         </div>
 
-        {{ end }}
+{{ end }}
+
+{{ if false }}
+{{/* prevent IDE errors */}}
+</div></div></body></html>
+{{ end }}

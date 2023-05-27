@@ -318,7 +318,7 @@ func processCreate(ctx echo.Context) error {
 	}
 
 	if err = gist.AddAndCommitFiles(&dto.Files); err != nil {
-		return errorRes(500, "Error adding and commiting files", err)
+		return errorRes(500, "Error adding and committing files", err)
 	}
 
 	if isCreate {

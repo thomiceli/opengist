@@ -19,6 +19,7 @@ import (
 	"gorm.io/gorm"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -252,8 +253,6 @@ func oauth(ctx echo.Context) error {
 		httpProtocol = "https"
 	}
 
-	giteaUrl := trimGiteaUrl()
-
 	var opengistUrl string
 	if config.C.ExternalUrl != "" {
 		opengistUrl = config.C.ExternalUrl
@@ -267,7 +266,8 @@ func oauth(ctx echo.Context) error {
 			github.New(
 				config.C.GithubClientKey,
 				config.C.GithubSecret,
-				opengistUrl+"/oauth/github/callback"),
+				urlJoin(opengistUrl, "/oauth/github/callback"),
+			),
 		)
 
 	case "gitea":
@@ -275,10 +275,11 @@ func oauth(ctx echo.Context) error {
 			gitea.NewCustomisedURL(
 				config.C.GiteaClientKey,
 				config.C.GiteaSecret,
-				opengistUrl+"/oauth/gitea/callback",
-				giteaUrl+"/login/oauth/authorize",
-				giteaUrl+"/login/oauth/access_token",
-				giteaUrl+"/api/v1/user"),
+				urlJoin(opengistUrl, "/oauth/gitea/callback"),
+				urlJoin(config.C.GiteaUrl, "/login/oauth/authorize"),
+				urlJoin(config.C.GiteaUrl, "/login/oauth/access_token"),
+				urlJoin(config.C.GiteaUrl, "/api/v1/user"),
+			),
 		)
 	}
 
@@ -333,6 +334,15 @@ func trimGiteaUrl() string {
 	}
 
 	return giteaUrl
+}
+
+func urlJoin(base string, elem ...string) string {
+	joined, err := url.JoinPath(base, elem...)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot join url")
+	}
+
+	return joined
 }
 
 func getAvatarUrlFromProvider(provider string, identifier string) string {

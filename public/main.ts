@@ -6,25 +6,9 @@ import moment from 'moment';
 import md from 'markdown-it';
 import hljs from 'highlight.js';
 
+
 document.addEventListener('DOMContentLoaded', () => {
-
     const themeMenu = document.getElementById('theme-menu')!;
-
-    const checkTheme = () => {
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-    }
-
-    checkTheme()
-
-    window.matchMedia('(prefers-color-scheme: dark)')
-        .addEventListener('change',({ matches }) => {
-            checkTheme()
-        }
-    )
 
     document.getElementById('light-mode')!.onclick = (e) => {
         e.stopPropagation()
@@ -81,9 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (lang && hljs.getLanguage(lang)) {
                     try {
                         return '<pre class="hljs"><code>' +
-                            hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+                            hljs.highlight(str, {language: lang, ignoreIllegals: true}).value +
                             '</code></pre>';
-                    } catch (__) {}
+                    } catch (__) {
+                    }
                 }
 
                 return '<pre class="hljs"><code>' + md().utils.escapeHtml(str) + '</code></pre>';

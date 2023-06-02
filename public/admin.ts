@@ -12,7 +12,7 @@ const setSetting = (key: string, value: string) => {
     data.append('key', key);
     data.append('value', value);
     data.append('_csrf', ((document.getElementsByName('_csrf')[0] as HTMLInputElement).value));
-    return fetch('/admin-panel/set-setting', {
+    return fetch('/admin-panel/set-config', {
         method: 'PUT',
         credentials: 'same-origin',
         body: data,

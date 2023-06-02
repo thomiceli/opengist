@@ -1,0 +1,115 @@
+{{ template "header" .}}
+{{ template "admin_header" .}}
+
+<div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+    <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+        <dl class="dl-config">
+            <div class="relative col-span-3">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">General</span>
+                </div>
+            </div>
+            <dt>Log level</dt><dd>{{ .c.LogLevel }}</dd>
+            <dt>External URL</dt><dd>{{ .c.ExternalUrl }}</dd>
+            <dt>Opengist home</dt><dd>{{ .c.OpengistHome }}</dd>
+            <dt>DB filename</dt><dd>{{ .c.DBFilename }}</dd>
+            <div class="relative col-span-3 mt-4">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">HTTP</span>
+                </div>
+            </div>
+            <dt>HTTP host</dt><dd>{{ .c.HttpHost }}</dd>
+            <dt>HTTP port</dt><dd>{{ .c.HttpPort }}</dd>
+            <dt>HTTP Git enabled</dt><dd>{{ .c.HttpGit }}</dd>
+            <dt>HTTP TLS enabled</dt><dd>{{ .c.HttpTLSEnabled }}</dd>
+            <dt>HTTP Cert file</dt><dd>{{ .c.HttpCertFile }}</dd>
+            <dt>HTTP Key file</dt><dd>{{ .c.HttpKeyFile }}</dd>
+            <div class="relative col-span-3 mt-4">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">SSH</span>
+                </div>
+            </div>
+            <dt>SSH Git enabled</dt><dd>{{ .c.SshGit }}</dd>
+            <dt>SSH host</dt><dd>{{ .c.SshHost }}</dd>
+            <dt>SSH port</dt><dd>{{ .c.SshPort }}</dd>
+            <dt>SSH external domain</dt><dd>{{ .c.SshExternalDomain }}</dd>
+            <dt>SSH Keygen</dt><dd>{{ .c.SshKeygen }}</dd>
+            <div class="relative col-span-3 mt-4">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">OAuth</span>
+                </div>
+            </div>
+            <dt>Github Client key</dt><dd>{{ .c.GithubClientKey }}</dd>
+            <dt>Github Secret</dt><dd>{{ .c.GithubSecret }}</dd>
+            <dt>Gitea client Key</dt><dd>{{ .c.GiteaClientKey }}</dd>
+            <dt>Gitea Secret</dt><dd>{{ .c.GiteaSecret }}</dd>
+            <dt>Gitea URL</dt><dd>{{ .c.GiteaUrl }}</dd>
+        </dl>
+    </div>
+    <div>
+        <ul role="list" class="divide-y divide-slate-300 dark:divide-gray-200 px-4 py-2 sm:px-6 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+            <li class="list-none gap-x-4 py-5">
+                <div class="flex items-center justify-between">
+                    <span class="flex flex-grow flex-col">
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">Disable signup</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">Forbid the creation of new accounts.</span>
+                    </span>
+                    <button type="button" id="disable-signup" data-bool="{{ .DisableSignup }}" class="toggle-button {{ if .DisableSignup }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
+                        <span aria-hidden="true" class="{{ if .DisableSignup }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                    </button>
+                </div>
+            </li>
+            <li class="list-none gap-x-4 py-5">
+                <div class="flex items-center justify-between">
+                    <span class="flex flex-grow flex-col">
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">Require login</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">Enforce users to be logged in to see gists.</span>
+                    </span>
+                    <button type="button" id="require-login" data-bool="{{ .RequireLogin }}" class="toggle-button {{ if .RequireLogin }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
+                        <span aria-hidden="true" class="{{ if .RequireLogin }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                    </button>
+                </div>
+            </li>
+            <li class="list-none gap-x-4 py-5">
+                <div class="flex items-center justify-between">
+                    <span class="flex flex-grow flex-col">
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">Disable login form</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">Forbid logging in via the login form to force using OAuth providers instead.</span>
+                    </span>
+                    <button type="button" id="disable-login-form" data-bool="{{ .DisableLoginForm }}" class="toggle-button {{ if .DisableLoginForm }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
+                        <span aria-hidden="true" class="{{ if .DisableLoginForm }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                    </button>
+                </div>
+            </li>
+            <li class="list-none gap-x-4 py-5">
+                <div class="flex items-center justify-between">
+                    <span class="flex flex-grow flex-col">
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">Disable Gravatar</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">Disable the usage of Gravatar as an avatar provider.</span>
+                    </span>
+                    <button type="button" id="disable-gravatar" data-bool="{{ .DisableGravatar }}" class="toggle-button {{ if .DisableGravatar }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
+                        <span aria-hidden="true" class="{{ if .DisableGravatar }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                    </button>
+                </div>
+            </li>
+        </ul>
+        {{ .csrfHtml }}
+    </div>
+</div>
+
+<script type="module" src="{{ asset "admin.ts" }}"></script>
+
+{{ template "admin_footer" .}}
+{{ template "footer" .}}

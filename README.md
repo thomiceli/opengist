@@ -55,7 +55,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 
 A Docker [image](https://github.com/users/thomiceli/packages/container/package/opengist), available for each release, can be pulled
 
-```
+```shell
 docker pull ghcr.io/thomiceli/opengist:1
 ```
 
@@ -103,17 +103,17 @@ You would only need to specify the configuration options you want to change — 
 
 | YAML Config Key       | Environment Variable     | Default value        | Description                                                                                                                       | 
 |-----------------------|--------------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| log-level             | OG_LOG_LEVEL             | `warn`               | Set the log level to one of the following: trace, debug, info, warn, error, fatal, panic.                                         |
+| log-level             | OG_LOG_LEVEL             | `warn`               | Set the log level to one of the following: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`.                           |
 | external-url          | OG_EXTERNAL_URL          | none                 | Public URL for the Git HTTP/SSH connection. If not set, uses the URL from the request.                                            |
 | opengist-home         | OG_OPENGIST_HOME         | home directory       | Path to the directory where Opengist stores its data.                                                                             |
 | db-filename           | OG_DB_FILENAME           | `opengist.db`        | Name of the SQLite database file.                                                                                                 |
 | http.host             | OG_HTTP_HOST             | `0.0.0.0`            | The host on which the HTTP server should bind.                                                                                    |
 | http.port             | OG_HTTP_PORT             | `6157`               | The port on which the HTTP server should listen.                                                                                  |
-| http.git-enabled      | OG_HTTP_GIT_ENABLED      | `true`               | Enable or disable git operations (clone, pull, push) via HTTP                                                                     |
-| http.tls-enabled      | OG_HTTP_TLS_ENABLED      | `false`              | Enable or disable TLS for the HTTP server.                                                                                        |
+| http.git-enabled      | OG_HTTP_GIT_ENABLED      | `true`               | Enable or disable git operations (clone, pull, push) via HTTP. (`true` or `false`)                                                |
+| http.tls-enabled      | OG_HTTP_TLS_ENABLED      | `false`              | Enable or disable TLS for the HTTP server. (`true` or `false`)                                                                    |
 | http.cert-file        | OG_HTTP_CERT_FILE        | none                 | Path to the TLS certificate file if TLS is enabled.                                                                               |
 | http.key-file         | OG_HTTP_KEY_FILE         | none                 | Path to the TLS key file if TLS is enabled.                                                                                       |
-| ssh.git-enabled       | OG_SSH_GIT_ENABLED       | `true`               | Enable or disable git operations (clone, pull, push) via SSH                                                                      |
+| ssh.git-enabled       | OG_SSH_GIT_ENABLED       | `true`               | Enable or disable git operations (clone, pull, push) via SSH. (`true` or `false`)                                                 |
 | ssh.host              | OG_SSH_HOST              | `0.0.0.0`            | The host on which the SSH server should bind.                                                                                     |
 | ssh.port              | OG_SSH_PORT              | `2222`               | The port on which the SSH server should listen.                                                                                   |
 | ssh.external-domain   | OG_SSH_EXTERNAL_DOMAIN   | none                 | Public domain for the Git SSH connection, if it has to be different from the HTTP one. If not set, uses the URL from the request. |

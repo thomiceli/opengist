@@ -86,7 +86,7 @@ Requirements : [Git](https://git-scm.com/downloads) (2.20+), [Go](https://go.dev
 
 ```shell
 git clone https://github.com/thomiceli/opengist
-cd opengist 
+cd opengist
 make
 ./opengist
 ```
@@ -176,7 +176,7 @@ server {
 
 Then run :
 ```shell
-service nginx restart 
+service nginx restart
 ```
 
 ### Use Fail2ban
@@ -206,7 +206,7 @@ port = anyport
 
 Then run
 ```shell
-service fail2ban restart 
+service fail2ban restart
 ```
 
 ## Configure OAuth

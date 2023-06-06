@@ -12,6 +12,8 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
     * [With Docker](#with-docker)
     * [From source](#from-source)
 * [Configuration](#configuration)
+    * [Via YAML file](#configuration-via-yaml-file)
+    * [Via Environment Variables](#configuration-via-environment-variables)
 * [Administration](#administration)
     * [Use Nginx as a reverse proxy](#use-nginx-as-a-reverse-proxy)
     * [Use Fail2ban](#use-fail2ban)
@@ -76,9 +78,6 @@ services:
       - "2222:2222" # SSH port, can be removed if you don't use SSH
     volumes:
       - "$HOME/.opengist:/root/.opengist"
-    environment:
-      CONFIG: |
-        log-level: info
 ```
 
 ### From source
@@ -87,7 +86,7 @@ Requirements : [Git](https://git-scm.com/downloads) (2.20+), [Go](https://go.dev
 
 ```shell
 git clone https://github.com/thomiceli/opengist
-cd opengist
+cd opengist 
 make
 ./opengist
 ```
@@ -96,29 +95,64 @@ Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ## Configuration
 
-Opengist can be configured using YAML. The full configuration file is [config.yml](config.yml), each default key/value
-pair can be overridden.
+Opengist provides flexible configuration options through either a YAML file and/or environment variables. 
+You would only need to specify the configuration options you want to change — for any config option left untouched, Opengist will simply apply the default values.
 
-### With docker
+<details>
+<summary>Configuration option list</summary>
 
-Add a `CONFIG` environment variable in the `docker-compose.yml` file to the `opengist` service :
+| YAML Config Key       | Environment Variable     | Default value        | Description                                                                                                                       | 
+|-----------------------|--------------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| log-level             | OG_LOG_LEVEL             | `warn`               | Set the log level to one of the following: trace, debug, info, warn, error, fatal, panic.                                         |
+| external-url          | OG_EXTERNAL_URL          | none                 | Public URL for the Git HTTP/SSH connection. If not set, uses the URL from the request.                                            |
+| opengist-home         | OG_OPENGIST_HOME         | home directory       | Path to the directory where Opengist stores its data.                                                                             |
+| db-filename           | OG_DB_FILENAME           | `opengist.db`        | Name of the SQLite database file.                                                                                                 |
+| http.host             | OG_HTTP_HOST             | `0.0.0.0`            | The host on which the HTTP server should bind.                                                                                    |
+| http.port             | OG_HTTP_PORT             | `6157`               | The port on which the HTTP server should listen.                                                                                  |
+| http.git-enabled      | OG_HTTP_GIT_ENABLED      | `true`               | Enable or disable git operations (clone, pull, push) via HTTP                                                                     |
+| http.tls-enabled      | OG_HTTP_TLS_ENABLED      | `false`              | Enable or disable TLS for the HTTP server.                                                                                        |
+| http.cert-file        | OG_HTTP_CERT_FILE        | none                 | Path to the TLS certificate file if TLS is enabled.                                                                               |
+| http.key-file         | OG_HTTP_KEY_FILE         | none                 | Path to the TLS key file if TLS is enabled.                                                                                       |
+| ssh.git-enabled       | OG_SSH_GIT_ENABLED       | `true`               | Enable or disable git operations (clone, pull, push) via SSH                                                                      |
+| ssh.host              | OG_SSH_HOST              | `0.0.0.0`            | The host on which the SSH server should bind.                                                                                     |
+| ssh.port              | OG_SSH_PORT              | `2222`               | The port on which the SSH server should listen.                                                                                   |
+| ssh.external-domain   | OG_SSH_EXTERNAL_DOMAIN   | none                 | Public domain for the Git SSH connection, if it has to be different from the HTTP one. If not set, uses the URL from the request. |
+| ssh.keygen-executable | OG_SSH_KEYGEN_EXECUTABLE | `ssh-keygen`         | Path to the SSH key generation executable.                                                                                        |
+| github.client-key     | OG_GITHUB_CLIENT_KEY     | none                 | The client key for the GitHub OAuth application.                                                                                  |
+| github.secret         | OG_GITHUB_SECRET         | none                 | The secret for the GitHub OAuth application.                                                                                      |
+| gitea.client-key      | OG_GITEA_CLIENT_KEY      | none                 | The client key for the Gitea OAuth application.                                                                                   |
+| gitea.secret          | OG_GITEA_SECRET          | none                 | The secret for the Gitea OAuth application.                                                                                       |
+| gitea.url             | OG_GITEA_URL             | `https://gitea.com/` | The URL of the Gitea instance.                                                                                                    |
 
-```diff
-environment:
-  CONFIG: |
-    log-level: info
-    ssh.git-enabled: false
-    # ...
-```
+</details>
 
-### With binary
+### Configuration via YAML file
 
-Create a `config.yml` file (you can reuse this [one](config.yml)) and run Opengist binary with the `--config` flag :
+The configuration file must be specified when launching the application, using the `--config` flag followed by the path to your YAML file.
 
 ```shell
 ./opengist --config /path/to/config.yml
 ```
 
+You can start by copying and/or modifying the provided [config.yml](config.yml) file.
+
+### Configuration via Environment Variables
+
+Usage with Docker Compose :
+
+```yml
+services:
+  opengist:
+    # ...
+    environment:
+      OG_LOG_LEVEL: "info"
+      # etc.
+```
+Usage via command line :
+
+```shell
+OG_LOG_LEVEL=info ./opengist
+```
 
 ## Administration
 

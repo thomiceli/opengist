@@ -145,9 +145,9 @@ func loadConfigFromYaml(c *config, configPath string) error {
 			if !os.IsNotExist(err) {
 				return err
 			}
-			fmt.Println("No YML config file found at " + absolutePath)
+			fmt.Println("No YAML config file found at " + absolutePath)
 		} else {
-			fmt.Println("Using config file: " + absolutePath)
+			fmt.Println("Using YAML config file: " + absolutePath)
 
 			// Override default values with values from config.yml
 			d := yaml.NewDecoder(file)
@@ -157,7 +157,7 @@ func loadConfigFromYaml(c *config, configPath string) error {
 			defer file.Close()
 		}
 	} else {
-		fmt.Println("No config file specified. Using default values.")
+		fmt.Println("No YAML config file specified.")
 	}
 
 	// Override default values with environment variables (as yaml)
@@ -175,6 +175,7 @@ func loadConfigFromYaml(c *config, configPath string) error {
 
 func loadConfigFromEnv(c *config) error {
 	v := reflect.ValueOf(c).Elem()
+	var envVars []string
 
 	for i := 0; i < v.NumField(); i++ {
 		tag := v.Type().Field(i).Tag.Get("env")
@@ -198,6 +199,14 @@ func loadConfigFromEnv(c *config) error {
 			}
 			v.Field(i).SetBool(boolVal)
 		}
+
+		envVars = append(envVars, tag)
+	}
+
+	if len(envVars) > 0 {
+		fmt.Println("Using environment variables config: " + strings.Join(envVars, ", "))
+	} else {
+		fmt.Println("No environment variables config specified.")
 	}
 
 	return nil

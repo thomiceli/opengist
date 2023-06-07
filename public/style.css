@@ -140,3 +140,15 @@ table.csv-table thead tr th {
 table.csv-table tbody td {
     @apply border py-1.5 px-1 border-slate-200 dark:border-slate-800;
 }
+
+dl.dl-config {
+    @apply grid grid-cols-3 text-sm;
+}
+
+dl.dl-config dt {
+    @apply col-span-1 text-gray-700 dark:text-slate-300 font-bold;
+}
+
+dl.dl-config dd {
+    @apply ml-1 col-span-2 break-words;
+}

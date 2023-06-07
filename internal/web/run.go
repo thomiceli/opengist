@@ -193,8 +193,8 @@ func Start() {
 			g2.POST("/gists/:gist/delete", adminGistDelete)
 			g2.POST("/sync-fs", adminSyncReposFromFS)
 			g2.POST("/sync-db", adminSyncReposFromDB)
-			g2.GET("/settings", adminSettings)
-			g2.PUT("/set-setting", adminSetSetting)
+			g2.GET("/configuration", adminConfig)
+			g2.PUT("/set-config", adminSetConfig)
 		}
 
 		g1.GET("/all", allGists, checkRequireLogin)

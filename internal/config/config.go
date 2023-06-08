@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/utils"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
@@ -23,6 +24,8 @@ type config struct {
 	ExternalUrl  string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
 	OpengistHome string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
 	DBFilename   string `yaml:"db-filename" env:"OG_DB_FILENAME"`
+
+	SqliteJournalMode string `yaml:"sqlite.journal-mode" env:"OG_SQLITE_JOURNAL_MODE"`
 
 	HttpHost       string `yaml:"http.host" env:"OG_HTTP_HOST"`
 	HttpPort       string `yaml:"http.port" env:"OG_HTTP_PORT"`
@@ -55,6 +58,8 @@ func configWithDefaults() (*config, error) {
 	c.LogLevel = "warn"
 	c.OpengistHome = filepath.Join(homeDir, ".opengist")
 	c.DBFilename = "opengist.db"
+
+	c.SqliteJournalMode = "WAL"
 
 	c.HttpHost = "0.0.0.0"
 	c.HttpPort = "6157"
@@ -108,6 +113,10 @@ func InitLog() {
 
 	multi := zerolog.MultiLevelWriter(zerolog.NewConsoleWriter(), file)
 	log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
+
+	if !utils.SliceContains([]string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}, strings.ToLower(C.LogLevel)) {
+		log.Warn().Msg("Invalid log level: " + C.LogLevel)
+	}
 }
 
 func CheckGitVersion(version string) (bool, error) {

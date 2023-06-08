@@ -11,6 +11,10 @@ opengist-home:
 # Name of the SQLite database file. Default: opengist.db
 db-filename: opengist.db
 
+# Set the journal mode for SQLite. Default: WAL
+# See https://www.sqlite.org/pragma.html#pragma_journal_mode
+sqlite.journal-mode: WAL
+
 
 # HTTP server configuration
 # Host to bind to. Default: 0.0.0.0

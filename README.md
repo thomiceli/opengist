@@ -109,6 +109,7 @@ You would only need to specify the configuration options you want to change — 
 | external-url          | OG_EXTERNAL_URL          | none                 | Public URL for the Git HTTP/SSH connection. If not set, uses the URL from the request.                                            |
 | opengist-home         | OG_OPENGIST_HOME         | home directory       | Path to the directory where Opengist stores its data.                                                                             |
 | db-filename           | OG_DB_FILENAME           | `opengist.db`        | Name of the SQLite database file.                                                                                                 |
+| sqlite.journal-mode   | OG_SQLITE_JOURNAL_MODE   | `WAL`                | Set the journal mode for SQLite. More info [here](https://www.sqlite.org/pragma.html#pragma_journal_mode)                         |
 | http.host             | OG_HTTP_HOST             | `0.0.0.0`            | The host on which the HTTP server should bind.                                                                                    |
 | http.port             | OG_HTTP_PORT             | `6157`               | The port on which the HTTP server should listen.                                                                                  |
 | http.git-enabled      | OG_HTTP_GIT_ENABLED      | `true`               | Enable or disable git operations (clone, pull, push) via HTTP. (`true` or `false`)                                                |

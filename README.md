@@ -53,10 +53,12 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 
 ### With Docker
 
-A Docker [image](https://github.com/users/thomiceli/packages/container/package/opengist), available for each release, can be pulled
+A Docker [image](https://github.com/thomiceli/opengist/pkgs/container/opengist), available for each release, can be pulled
 
 ```shell
-docker pull ghcr.io/thomiceli/opengist:1
+docker pull ghcr.io/thomiceli/opengist:1.3    # most recent release
+
+docker pull ghcr.io/thomiceli/opengist:latest # latest development version
 ```
 
 It can be used in a `docker-compose.yml` file :
@@ -70,7 +72,7 @@ version: "3"
 
 services:
   opengist:
-    image: ghcr.io/thomiceli/opengist:1
+    image: ghcr.io/thomiceli/opengist:1.3
     container_name: opengist
     restart: unless-stopped
     ports:

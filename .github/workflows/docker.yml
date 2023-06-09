@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  docker:
+  docker-build-release:
     runs-on: ubuntu-latest
     permissions:
       contents: read

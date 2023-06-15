@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 	"html/template"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -85,10 +86,10 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 
 func allGists(ctx echo.Context) error {
 	var err error
+	var urlPage string
+
 	fromUserStr := ctx.Param("user")
-
 	userLogged := getUserLogged(ctx)
-
 	pageInt := getPage(ctx)
 
 	sort := "created"
@@ -114,14 +115,28 @@ func allGists(ctx echo.Context) error {
 	} else {
 		currentUserId = 0
 	}
+
 	if fromUserStr == "" {
 		setData(ctx, "htmlTitle", "All gists")
-		fromUserStr = "all"
+		setData(ctx, "mode", "all")
+		urlPage = "all"
 		gists, err = models.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
 	} else {
-		setData(ctx, "htmlTitle", "All gists from "+fromUserStr)
+		liked := false
+		forked := false
+
+		liked, err = regexp.MatchString(`/[^/]*/liked`, ctx.Request().URL.Path)
+		if err != nil {
+			return errorRes(500, "Error matching regexp", err)
+		}
+
+		forked, err = regexp.MatchString(`/[^/]*/forked`, ctx.Request().URL.Path)
+		if err != nil {
+			return errorRes(500, "Error matching regexp", err)
+		}
 
 		var fromUser *models.User
+
 		fromUser, err = models.GetUserByUsername(fromUserStr)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -131,7 +146,40 @@ func allGists(ctx echo.Context) error {
 		}
 		setData(ctx, "fromUser", fromUser)
 
-		gists, err = models.GetAllGistsFromUser(fromUserStr, currentUserId, pageInt-1, sort, order)
+		if countFromUser, err := models.CountAllGistsFromUser(fromUser.ID, currentUserId); err != nil {
+			return errorRes(500, "Error counting gists", err)
+		} else {
+			setData(ctx, "countFromUser", countFromUser)
+		}
+
+		if countLiked, err := models.CountAllGistsLikedByUser(fromUser.ID, currentUserId); err != nil {
+			return errorRes(500, "Error counting liked gists", err)
+		} else {
+			setData(ctx, "countLiked", countLiked)
+		}
+
+		if countForked, err := models.CountAllGistsForkedByUser(fromUser.ID, currentUserId); err != nil {
+			return errorRes(500, "Error counting forked gists", err)
+		} else {
+			setData(ctx, "countForked", countForked)
+		}
+
+		if liked {
+			urlPage = fromUserStr + "/liked"
+			setData(ctx, "htmlTitle", "All gists liked by "+fromUserStr)
+			setData(ctx, "mode", "liked")
+			gists, err = models.GetAllGistsLikedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+		} else if forked {
+			urlPage = fromUserStr + "/forked"
+			setData(ctx, "htmlTitle", "All gists forked by "+fromUserStr)
+			setData(ctx, "mode", "forked")
+			gists, err = models.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+		} else {
+			urlPage = fromUserStr
+			setData(ctx, "htmlTitle", "All gists from "+fromUserStr)
+			setData(ctx, "mode", "fromUser")
+			gists, err = models.GetAllGistsFromUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+		}
 	}
 
 	if err != nil {
@@ -142,6 +190,7 @@ func allGists(ctx echo.Context) error {
 		return errorRes(404, "Page not found", nil)
 	}
 
+	setData(ctx, "urlPage", urlPage)
 	return html(ctx, "all.html")
 }
 
@@ -527,7 +576,7 @@ func likes(ctx echo.Context) error {
 		return errorRes(404, "Page not found", nil)
 	}
 
-	setData(ctx, "htmlTitle", "Likes for "+gist.Title)
+	setData(ctx, "htmlTitle", "Like for "+gist.Title)
 	setData(ctx, "revision", "HEAD")
 	return html(ctx, "likes.html")
 }

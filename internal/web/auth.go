@@ -351,7 +351,7 @@ func getAvatarUrlFromProvider(provider string, identifier string) string {
 	case "github":
 		return "https://avatars.githubusercontent.com/u/" + identifier + "?v=4"
 	case "gitea":
-		resp, err := http.Get("https://gitea.com/api/v1/users/" + identifier)
+		resp, err := http.Get(trimGiteaUrl() + "/api/v1/users/" + identifier)
 		if err != nil {
 			log.Error().Err(err).Msg("Cannot get user from Gitea")
 			return ""

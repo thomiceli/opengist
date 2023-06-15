@@ -6,6 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -17,10 +22,6 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
-	"io"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 var title = cases.Title(language.English)
@@ -46,7 +47,7 @@ func processRegister(ctx echo.Context) error {
 
 	sess := getSession(ctx)
 
-	var dto = new(models.UserDTO)
+	dto := new(models.UserDTO)
 	if err := ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}

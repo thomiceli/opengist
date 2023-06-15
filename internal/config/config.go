@@ -170,9 +170,9 @@ func loadConfigFromYaml(c *config, configPath string) error {
 	}
 
 	// Override default values with environment variables (as yaml)
-	configEnv := os.Getenv("CONFIG")
+	configEnv := os.Getenv("OG_CONFIG")
 	if configEnv != "" {
-		fmt.Println("Using config from environment variable: CONFIG")
+		fmt.Println("Using config from environment variable: OG_CONFIG")
 		d := yaml.NewDecoder(strings.NewReader(configEnv))
 		if err := d.Decode(&c); err != nil {
 			return err

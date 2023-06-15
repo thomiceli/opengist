@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-var dev = os.Getenv("DEV") == "1"
+var dev = os.Getenv("OG_DEV") == "1"
 var store *sessions.CookieStore
 var re = regexp.MustCompile("[^a-z0-9]+")
 var fm = template.FuncMap{

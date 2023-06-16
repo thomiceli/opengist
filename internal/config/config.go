@@ -2,15 +2,16 @@ package config
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/utils"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/utils"
+	"gopkg.in/yaml.v3"
 )
 
 var OpengistVersion = "1.4.0-dev"
@@ -170,9 +171,10 @@ func loadConfigFromYaml(c *config, configPath string) error {
 	}
 
 	// Override default values with environment variables (as yaml)
-	configEnv := os.Getenv("OG_CONFIG")
+	configEnv := os.Getenv("CONFIG")
 	if configEnv != "" {
-		fmt.Println("Using config from environment variable: OG_CONFIG")
+		fmt.Println("Using config from environment variable: CONFIG")
+		fmt.Println("!! This method of setting the config is deprecated and will be removed in a future version of Opengist")
 		d := yaml.NewDecoder(strings.NewReader(configEnv))
 		if err := d.Decode(&c); err != nil {
 			return err

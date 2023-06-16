@@ -1,10 +1,10 @@
 #!/bin/sh
 
 export USER=opengist
-PUID=${PUID:-1000}
-PGID=${PGID:-1000}
-groupmod -o -g "$PGID" $USER
-usermod -o -u "$PUID" $USER
+PID=${PID:-1000}
+GID=${GID:-1000}
+groupmod -o -g "$GID" $USER
+usermod -o -u "$PID" $USER
 
 chown -R "$USER:$USER" /opengist
 

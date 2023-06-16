@@ -56,9 +56,9 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 A Docker [image](https://github.com/thomiceli/opengist/pkgs/container/opengist), available for each release, can be pulled
 
 ```shell
-docker pull ghcr.io/thomiceli/opengist:1.3    # most recent release
+docker pull ghcr.io/thomiceli/opengist:1.3    # most recent release, stable
 
-docker pull ghcr.io/thomiceli/opengist:latest # latest development version
+docker pull ghcr.io/thomiceli/opengist:latest # latest development version, unstable
 ```
 
 It can be used in a `docker-compose.yml` file :
@@ -79,7 +79,18 @@ services:
       - "6157:6157" # HTTP port
       - "2222:2222" # SSH port, can be removed if you don't use SSH
     volumes:
-      - "$HOME/.opengist:/root/.opengist"
+      - "$HOME/.opengist:/opengist"
+```
+
+You can define which user/group should run the container and own the files by setting the `UID` and `GID` environment variables :
+
+```yml
+services:
+  opengist:
+    # ...
+    environment:
+      UID: 1001
+      GID: 1001
 ```
 
 ### From source

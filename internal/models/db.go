@@ -2,14 +2,15 @@ package models
 
 import (
 	"errors"
-	"github.com/mattn/go-sqlite3"
+	"strings"
+
+	"github.com/glebarez/sqlite"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/utils"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"strings"
+	msqlite "modernc.org/sqlite"
 )
 
 var db *gorm.DB
@@ -50,8 +51,8 @@ func CountAll(table interface{}) (int64, error) {
 }
 
 func IsUniqueConstraintViolation(err error) bool {
-	var sqliteErr sqlite3.Error
-	if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+	var sqliteErr *msqlite.Error
+	if errors.As(err, &sqliteErr) && sqliteErr.Code() == 2067 {
 		return true
 	}
 	return false

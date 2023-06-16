@@ -207,7 +207,7 @@ func oauthCallback(ctx echo.Context) error {
 		case "github":
 			resp, err = http.Get("https://github.com/" + user.NickName + ".keys")
 		case "gitea":
-			resp, err = http.Get(trimGiteaUrl() + "/" + user.NickName + ".keys")
+			resp, err = http.Get(urlJoin(config.C.GiteaUrl, user.NickName+".keys"))
 		}
 
 		if err == nil {
@@ -327,16 +327,6 @@ func logout(ctx echo.Context) error {
 	return redirect(ctx, "/all")
 }
 
-func trimGiteaUrl() string {
-	giteaUrl := config.C.GiteaUrl
-	// remove trailing slash
-	if giteaUrl[len(giteaUrl)-1] == '/' {
-		giteaUrl = giteaUrl[:len(giteaUrl)-1]
-	}
-
-	return giteaUrl
-}
-
 func urlJoin(base string, elem ...string) string {
 	joined, err := url.JoinPath(base, elem...)
 	if err != nil {
@@ -352,7 +342,7 @@ func getAvatarUrlFromProvider(provider string, identifier string) string {
 	case "github":
 		return "https://avatars.githubusercontent.com/u/" + identifier + "?v=4"
 	case "gitea":
-		resp, err := http.Get(trimGiteaUrl() + "/api/v1/users/" + identifier)
+		resp, err := http.Get(urlJoin(config.C.GiteaUrl, "/api/v1/users/", identifier))
 		if err != nil {
 			log.Error().Err(err).Msg("Cannot get user from Gitea")
 			return ""

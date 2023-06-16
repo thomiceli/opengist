@@ -21,10 +21,11 @@ COPY . .
 RUN make
 
 
-FROM alpine:3.17
+FROM alpine:3.17 as run
 
 RUN apk update && \
     apk add --no-cache \
+    shadow \
     openssl \
     openssh \
     curl \
@@ -36,10 +37,14 @@ RUN apk update && \
     musl-dev \
     libstdc++
 
-WORKDIR /opengist
+RUN addgroup -S opengist && \
+    adduser -S -G opengist -H -s /bin/ash -g 'Opengist User' opengist
 
-COPY --from=build /opengist/opengist .
+WORKDIR /app/opengist
+
+COPY --from=build --chown=opengist:opengist /opengist/opengist .
+COPY --from=build --chown=opengist:opengist /opengist/docker ./docker
 
 EXPOSE 6157 2222
-VOLUME /root/.opengist
-CMD ["./opengist"]
+VOLUME /opengist
+ENTRYPOINT ["./docker/entrypoint.sh"]

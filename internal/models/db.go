@@ -4,13 +4,13 @@ import (
 	"errors"
 	"strings"
 
+	msqlite "github.com/glebarez/go-sqlite"
 	"github.com/glebarez/sqlite"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	msqlite "modernc.org/sqlite"
 )
 
 var db *gorm.DB

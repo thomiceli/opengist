@@ -56,9 +56,9 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 A Docker [image](https://github.com/thomiceli/opengist/pkgs/container/opengist), available for each release, can be pulled
 
 ```shell
-docker pull ghcr.io/thomiceli/opengist:1.3    # most recent release, stable
+docker pull ghcr.io/thomiceli/opengist       # most recent release
 
-docker pull ghcr.io/thomiceli/opengist:latest # latest development version, unstable
+docker pull ghcr.io/thomiceli/opengist:dev   # latest development version
 ```
 
 It can be used in a `docker-compose.yml` file :

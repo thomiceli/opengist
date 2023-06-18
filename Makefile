@@ -31,7 +31,7 @@ watch_frontend:
 
 watch_backend:
 	@echo "Building Opengist binary..."
-	DEV=1 ./node_modules/.bin/nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
+	OG_DEV=1 ./node_modules/.bin/nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
 
 watch:
 	@bash ./watch.sh

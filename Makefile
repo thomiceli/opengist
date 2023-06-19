@@ -13,7 +13,7 @@ install:
 
 build_frontend:
 	@echo "Building frontend assets..."
-	./node_modules/.bin/vite build
+	npx vite build
 
 build_backend:
 	@echo "Building Opengist binary..."
@@ -27,11 +27,11 @@ build_docker:
 
 watch_frontend:
 	@echo "Building frontend assets..."
-	./node_modules/.bin/vite dev --port 16157
+	npx vite dev --port 16157
 
 watch_backend:
 	@echo "Building Opengist binary..."
-	OG_DEV=1 ./node_modules/.bin/nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
+	OG_DEV=1 npx nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
 
 watch:
 	@bash ./watch.sh

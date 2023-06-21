@@ -198,6 +198,7 @@ func Start() {
 		}
 
 		g1.GET("/all", allGists, checkRequireLogin)
+		g1.GET("/search", allGists, checkRequireLogin)
 		g1.GET("/:user", allGists, checkRequireLogin)
 		g1.GET("/:user/liked", allGists, checkRequireLogin)
 		g1.GET("/:user/forked", allGists, checkRequireLogin)

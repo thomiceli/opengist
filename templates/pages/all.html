@@ -29,22 +29,22 @@
                     </div>
                     <div id="sort-gists-dropdown" class="hidden absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-200 dark:divide-gray-700 rounded-md rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 shadow-lg ring-1 ring-white dark:ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                         <div class="" role="none">
-                            <a href="/{{ .urlPage }}?sort=created&order=desc" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
+                            <a href="/{{ .urlPage }}?sort=created&order=desc{{.searchQuery}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
                                 Recently created
                             </a>
                         </div>
                         <div class="" role="none">
-                            <a href="/{{ .urlPage }}?sort=created&order=asc" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
+                            <a href="/{{ .urlPage }}?sort=created&order=asc{{.searchQuery}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
                                 Least recently created
                             </a>
                         </div>
                         <div class="" role="none">
-                            <a href="/{{ .urlPage }}?sort=updated&order=desc" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
+                            <a href="/{{ .urlPage }}?sort=updated&order=desc{{.searchQuery}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
                                 Recently updated
                             </a>
                         </div>
                         <div class="" role="none">
-                            <a href="/{{ .urlPage }}?sort=updated&order=asc" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-b-md" role="menuitem">
+                            <a href="/{{ .urlPage }}?sort=updated&order=asc{{.searchQuery}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-b-md" role="menuitem">
                                 Least recently updated
                             </a>
                         </div>
@@ -54,11 +54,10 @@
             </div>
 
         </div>
-        {{ if ne .mode "all" }}
+        {{ if and (ne .mode "all") (ne .mode "search") }}
         <div class="mt-4">
             <div class="sm:hidden">
                 <label for="tabs" class="sr-only">Select a tab</label>
-                <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
                 <select id="gist-tabs" name="tabs" class="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:bg-gray-800 dark:border-gray-700">
                     <option {{if eq .mode "fromUser"}}selected {{end}}data-url="/{{ .fromUser.Username }}">All gists ({{ .countFromUser }})</option>
                     {{ if ne .countLiked 0 }}<option {{if eq .mode "liked"}}selected {{end}}data-url="/{{ .fromUser.Username }}/liked">Liked ({{ .countLiked }})</option>{{end}}

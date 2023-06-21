@@ -117,10 +117,19 @@ func allGists(ctx echo.Context) error {
 	}
 
 	if fromUserStr == "" {
-		setData(ctx, "htmlTitle", "All gists")
-		setData(ctx, "mode", "all")
-		urlPage = "all"
-		gists, err = models.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
+		urlctx := ctx.Request().URL.Path
+		if strings.HasSuffix(urlctx, "search") {
+			setData(ctx, "htmlTitle", "Search results")
+			setData(ctx, "mode", "search")
+			setData(ctx, "searchQuery", template.URL("&q="+ctx.QueryParam("q")))
+			urlPage = "search"
+			gists, err = models.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order)
+		} else if strings.HasSuffix(urlctx, "all") {
+			setData(ctx, "htmlTitle", "All gists")
+			setData(ctx, "mode", "all")
+			urlPage = "all"
+			gists, err = models.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
+		}
 	} else {
 		liked := false
 		forked := false

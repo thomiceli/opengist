@@ -29,6 +29,12 @@ type Gist struct {
 	ForkedID uint
 }
 
+type Like struct {
+	UserID    uint `gorm:"primaryKey"`
+	GistID    uint `gorm:"primaryKey"`
+	CreatedAt int64
+}
+
 func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 	// Decrement fork counter if the gist was forked
 	err := tx.Model(&Gist{}).
@@ -80,17 +86,85 @@ func GetAllGists(offset int) ([]*Gist, error) {
 	return gists, err
 }
 
-func GetAllGistsFromUser(fromUser string, currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
+func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort string, order string) ([]*Gist, error) {
 	var gists []*Gist
 	err := db.Preload("User").Preload("Forked.User").
-		Where("users.username = ? and ((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", fromUser, currentUserId).
-		Joins("join users on gists.user_id = users.id").
+		Where("((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", currentUserId).
+		Where("gists.title like ? or gists.description like ?", "%"+query+"%", "%"+query+"%").
 		Limit(11).
 		Offset(offset * 10).
 		Order("gists." + sort + "_at " + order).
 		Find(&gists).Error
 
 	return gists, err
+}
+
+func gistsFromUserStatement(fromUserId uint, currentUserId uint) *gorm.DB {
+	return db.Preload("User").Preload("Forked.User").
+		Where("((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", currentUserId).
+		Where("users.id = ?", fromUserId).
+		Joins("join users on gists.user_id = users.id")
+}
+
+func GetAllGistsFromUser(fromUserId uint, currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
+	var gists []*Gist
+	err := gistsFromUserStatement(fromUserId, currentUserId).Limit(11).
+		Offset(offset * 10).
+		Order("gists." + sort + "_at " + order).
+		Find(&gists).Error
+
+	return gists, err
+}
+
+func CountAllGistsFromUser(fromUserId uint, currentUserId uint) (int64, error) {
+	var count int64
+	err := gistsFromUserStatement(fromUserId, currentUserId).Model(&Gist{}).Count(&count).Error
+	return count, err
+}
+
+func likedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
+	return db.Preload("User").Preload("Forked.User").
+		Where("((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", currentUserId).
+		Where("likes.user_id = ?", fromUserId).
+		Joins("join likes on gists.id = likes.gist_id").
+		Joins("join users on likes.user_id = users.id")
+}
+
+func GetAllGistsLikedByUser(fromUserId uint, currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
+	var gists []*Gist
+	err := likedStatement(fromUserId, currentUserId).Limit(11).
+		Offset(offset * 10).
+		Order("gists." + sort + "_at " + order).
+		Find(&gists).Error
+	return gists, err
+}
+
+func CountAllGistsLikedByUser(fromUserId uint, currentUserId uint) (int64, error) {
+	var count int64
+	err := likedStatement(fromUserId, currentUserId).Model(&Gist{}).Count(&count).Error
+	return count, err
+}
+
+func forkedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
+	return db.Preload("User").Preload("Forked.User").
+		Where("gists.forked_id is not null and ((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", currentUserId).
+		Where("gists.user_id = ?", fromUserId).
+		Joins("join users on gists.user_id = users.id")
+}
+
+func GetAllGistsForkedByUser(fromUserId uint, currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
+	var gists []*Gist
+	err := forkedStatement(fromUserId, currentUserId).Limit(11).
+		Offset(offset * 10).
+		Order("gists." + sort + "_at " + order).
+		Find(&gists).Error
+	return gists, err
+}
+
+func CountAllGistsForkedByUser(fromUserId uint, currentUserId uint) (int64, error) {
+	var count int64
+	err := forkedStatement(fromUserId, currentUserId).Model(&Gist{}).Count(&count).Error
+	return count, err
 }
 
 func GetAllGistsRows() ([]*Gist, error) {

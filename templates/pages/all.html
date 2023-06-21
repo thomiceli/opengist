@@ -1,56 +1,104 @@
 {{ template "header" .}}
 <div class="py-10">
-    <header class="pb-4 flex ">
-        <div class="flex-auto">
-            {{if .fromUser}}
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="">
+    <header class="pb-4 ">
+        <div class="flex">
+            <div class="flex-auto">
+                {{if .fromUser}}
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>
+                        <p class="text-sm text-slate-500">Joined <span class="moment-timestamp">{{.fromUser.CreatedAt}}</span></p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>
-                    <p class="text-sm text-slate-500">Joined <span class="moment-timestamp">{{.fromUser.CreatedAt}}</span></p>
-                </div>
+                {{ else }}
+                <h1 class="text-2xl font-bold leading-tight">All gists</h1>
+                {{ end }}
             </div>
-            {{ else }}
-            <h1 class="text-2xl font-bold leading-tight">All gists</h1>
-            {{ end }}
-        </div>
-        <div class="float-right">
-            <div class="relative inline-block text-left">
-                <div>
-                    <button type="button" class="whitespace-nowrap inline-flex text-slate-700 dark:text-slate-300 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 leading-3" id="sort-gists-button">
-                        <span class="text-gray-700 dark:text-gray-300">Sort : <span class="text-slate-700 dark:text-slate-300">{{.order}} {{.sort}}</span></span>
-                        <svg class="-mr-1 ml-2 h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-                <div id="sort-gists-dropdown" class="hidden absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-300 dark:divide-gray-700 rounded-md rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 shadow-lg ring-1 ring-white dark:ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                    <div class="" role="none">
-                        <a href="/{{if .fromUser}}{{.fromUser.Username}}{{else}}all{{end}}?sort=created&order=desc" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
-                            Recently created
-                        </a>
+            <div class="align-middle inline-flex items-center">
+                <div class="relative text-left">
+                    <div>
+                        <button type="button" class="whitespace-nowrap inline-flex text-slate-700 dark:text-slate-300 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 leading-3" id="sort-gists-button">
+                            <span class="text-gray-700 dark:text-gray-300">Sort : <span class="text-slate-700 dark:text-slate-300">{{.order}} {{.sort}}</span></span>
+                            <svg class="-mr-1 ml-2 h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
                     </div>
-                    <div class="" role="none">
-                        <a href="/{{if .fromUser}}{{.fromUser.Username}}{{else}}all{{end}}?sort=created&order=asc" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
-                            Least recently created
-                        </a>
-                    </div>
-                    <div class="" role="none">
-                        <a href="/{{if .fromUser}}{{.fromUser.Username}}{{else}}all{{end}}?sort=updated&order=desc" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
-                            Recently updated
-                        </a>
-                    </div>
-                    <div class="" role="none">
-                        <a href="/{{if .fromUser}}{{.fromUser.Username}}{{else}}all{{end}}?sort=updated&order=asc" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-b-md" role="menuitem">
-                            Least recently updated
-                        </a>
+                    <div id="sort-gists-dropdown" class="hidden absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-200 dark:divide-gray-700 rounded-md rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 shadow-lg ring-1 ring-white dark:ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                        <div class="" role="none">
+                            <a href="/{{ .urlPage }}?sort=created&order=desc{{.searchQuery}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
+                                Recently created
+                            </a>
+                        </div>
+                        <div class="" role="none">
+                            <a href="/{{ .urlPage }}?sort=created&order=asc{{.searchQuery}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
+                                Least recently created
+                            </a>
+                        </div>
+                        <div class="" role="none">
+                            <a href="/{{ .urlPage }}?sort=updated&order=desc{{.searchQuery}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
+                                Recently updated
+                            </a>
+                        </div>
+                        <div class="" role="none">
+                            <a href="/{{ .urlPage }}?sort=updated&order=asc{{.searchQuery}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-b-md" role="menuitem">
+                                Least recently updated
+                            </a>
+                        </div>
                     </div>
                 </div>
+
             </div>
 
         </div>
+        {{ if and (ne .mode "all") (ne .mode "search") }}
+        <div class="mt-4">
+            <div class="sm:hidden">
+                <label for="tabs" class="sr-only">Select a tab</label>
+                <select id="gist-tabs" name="tabs" class="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:bg-gray-800 dark:border-gray-700">
+                    <option {{if eq .mode "fromUser"}}selected {{end}}data-url="/{{ .fromUser.Username }}">All gists ({{ .countFromUser }})</option>
+                    {{ if ne .countLiked 0 }}<option {{if eq .mode "liked"}}selected {{end}}data-url="/{{ .fromUser.Username }}/liked">Liked ({{ .countLiked }})</option>{{end}}
+                    {{ if ne .countForked 0 }}<option {{if eq .mode "forked"}}selected {{end}}data-url="/{{ .fromUser.Username }}/forked">Forked ({{ .countForked }})</option>{{end}}
+                </select>
+            </div>
+            <div class="hidden sm:block">
+                <div class="border-b border-gray-200 dark:border-gray-700 flex">
+                    <div class="flex-auto">
+                        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                            <a href="/{{ .fromUser.Username }}" class="{{if eq .mode "fromUser"}}border-primary-500 font-bold {{else}}border-transparent hover:border-gray-200 hover:text-gray-700{{end}} text-slate-700 dark:text-slate-300 inline-flex items-center whitespace-nowrap border-b-2 py-2 px-1 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                                </svg>
+                                All gists
+                                <span class="bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-slate-300 ml-2 hidden rounded-full py-0.5 px-2.5 text-xs font-medium md:inline-block">{{ .countFromUser }}</span>
+                            </a>
+                            {{ if ne .countLiked 0 }}
+                            <a href="/{{ .fromUser.Username }}/liked" class="{{if eq .mode "liked"}}border-primary-500 font-bold {{else}}border-transparent hover:border-gray-200 hover:text-gray-700{{end}} text-slate-700 dark:text-slate-300 inline-flex items-center whitespace-nowrap border-b-2 py-2 px-1 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-1">
+                                    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                                </svg>
+                                Liked
+                                <span class="bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-slate-300 ml-2 hidden rounded-full py-0.5 px-2.5 text-xs font-medium md:inline-block">{{ .countLiked }}</span>
+                            </a>
+                            {{ end }}
+                            {{ if ne .countForked 0 }}
+                            <a href="/{{ .fromUser.Username }}/forked" class="{{if eq .mode "forked"}}border-primary-500 font-bold {{else}}border-transparent hover:border-gray-200 hover:text-gray-700{{end}} text-slate-700 dark:text-slate-300 inline-flex items-center whitespace-nowrap border-b-2 py-2 px-1 text-sm" aria-current="page">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                                </svg>
+                                Forked
+                                <span class="bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-slate-300 ml-2 hidden rounded-full py-0.5 px-2.5 text-xs font-medium md:inline-block">{{ .countForked }}</span>
+                            </a>
+                            {{ end }}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ end }}
     </header>
     <main>
         <div>

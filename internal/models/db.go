@@ -28,7 +28,15 @@ func Setup(dbPath string) error {
 		return err
 	}
 
-	if err = db.AutoMigrate(&User{}, &SSHKey{}, &Gist{}, &AdminSetting{}); err != nil {
+	if err = db.SetupJoinTable(&Gist{}, "Likes", &Like{}); err != nil {
+		return err
+	}
+
+	if err = db.SetupJoinTable(&User{}, "Liked", &Like{}); err != nil {
+		return err
+	}
+
+	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}); err != nil {
 		return err
 	}
 

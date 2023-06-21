@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         themeMenu.classList.toggle('hidden');
     }
 
+    document.getElementById('user-btn')?.addEventListener("click" , (e) => {
+        document.getElementById('user-menu').classList.toggle('hidden');
+    })
+
     document.querySelectorAll('.moment-timestamp').forEach((e: HTMLElement) => {
         e.title = moment.unix(parseInt(e.innerHTML)).format('LLLL');
         e.innerHTML = moment.unix(parseInt(e.innerHTML)).fromNow();

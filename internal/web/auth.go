@@ -337,7 +337,6 @@ func urlJoin(base string, elem ...string) string {
 }
 
 func getAvatarUrlFromProvider(provider string, identifier string) string {
-	fmt.Println("getAvatarUrlFromProvider", provider, identifier)
 	switch provider {
 	case "github":
 		return "https://avatars.githubusercontent.com/u/" + identifier + "?v=4"

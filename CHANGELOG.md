@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.4.0](https://github.com/thomiceli/opengist/compare/v1.3.0...v1.4.0) - 2023-06-23
+### ⚠️ Docker users ⚠️
+Opengist Docker volume has been changed from `/root/.opengist` to `/opengist`, do not forget to update your
+`docker-compose.yml` file or any other Docker related configuration.
+
+Please make a backup of your Opengist data directory before updating.
+
+### Added
+- Search gists, browse users snippets, likes and forks (#68)
+- SQLite WAL journal mode by default (#54)
+- Change SQLite journal mode via configuration (#54)
+- Configuration via environment variables (#50)
+- Docker dev image (#56)
+- Choose Docker container/volumes owner via UID/GID (#63)
+
+### Changed
+- Docker volume changed from `/root/.opengist` to `/opengist` (#63)
+- `DEV` environment variable renamed to `OG_DEV` (#64)
+- Use `npx` in Makefile instead of `./node_modules/.bin` (#66)
+- DEPRECATED: `OG_CONFIG` environment variable (#64)
+
+### Fixed
+- Gitea URL joins (#43, #61)
+- Dark mode flickering (#44)
+- Typos (#42)
+
 ## [1.3.0](https://github.com/thomiceli/opengist/compare/v1.2.0...v1.3.0) - 2023-05-27
 ### Added
 - Disable login form via admin panel

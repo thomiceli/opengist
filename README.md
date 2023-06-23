@@ -27,7 +27,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 * Revisions history
 * Syntax highlighting ; markdown & CSV support
 * Like / Fork snippets
-* Search for all snippets or for certain users snippets
+* Search for snippets ; browse users snippets, likes and forks
 * Editor with indentation mode & size ; drag and drop files
 * Download raw files or as a ZIP archive
 * OAuth2 login with GitHub and Gitea
@@ -43,9 +43,10 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 
 #### Todo
 
-- [ ] Tests
-- [ ] Search for snippets
+- [ ] Translation
+- [ ] Code/text search
 - [ ] Embed snippets
+- [ ] Tests
 - [ ] Filesystem/Redis support for user sessions
 - [ ] Have a cool logo
 
@@ -53,7 +54,8 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 
 ### With Docker
 
-A Docker [image](https://github.com/thomiceli/opengist/pkgs/container/opengist), available for each release, can be pulled
+Docker [images](https://github.com/thomiceli/opengist/pkgs/container/opengist) are available for each release (`latest`)
+and last development commit (`dev`) :
 
 ```shell
 docker pull ghcr.io/thomiceli/opengist       # most recent release
@@ -72,7 +74,7 @@ version: "3"
 
 services:
   opengist:
-    image: ghcr.io/thomiceli/opengist:1.3
+    image: ghcr.io/thomiceli/opengist:1.4
     container_name: opengist
     restart: unless-stopped
     ports:

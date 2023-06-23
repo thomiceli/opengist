@@ -73,7 +73,7 @@
                                                 </svg>
                                             </div>
                                             <form action="/search" method="GET">
-                                                <input id="search" name="q" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Search" type="search">
+                                                <input id="search" name="q" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Search" type="search" value="{{ .searchQuery }}">
                                                 <input type="submit" hidden="hidden">
                                             </form>
                                         </div>
@@ -191,7 +191,7 @@
             <!-- Mobile menu -->
             <div class="sm:hidden hidden" id="mobile-menu">
                 <div class="mx-2">
-                    <label for="search" class="sr-only">Search</label>
+                    <label for="searchmobile" class="sr-only">Search</label>
                     <div class="relative">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -199,7 +199,7 @@
                             </svg>
                         </div>
                         <form action="/search" method="GET">
-                            <input id="search" name="q" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Search" type="search">
+                            <input id="searchmobile" name="q" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Search" type="search" value="{{.searchQuery}}">
                             <input type="submit" hidden="hidden">
                         </form>
                     </div>

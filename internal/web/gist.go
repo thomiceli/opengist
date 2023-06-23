@@ -121,7 +121,8 @@ func allGists(ctx echo.Context) error {
 		if strings.HasSuffix(urlctx, "search") {
 			setData(ctx, "htmlTitle", "Search results")
 			setData(ctx, "mode", "search")
-			setData(ctx, "searchQuery", template.URL("&q="+ctx.QueryParam("q")))
+			setData(ctx, "searchQuery", ctx.QueryParam("q"))
+			setData(ctx, "searchQueryUrl", template.URL("&q="+ctx.QueryParam("q")))
 			urlPage = "search"
 			gists, err = models.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order)
 		} else if strings.HasSuffix(urlctx, "all") {

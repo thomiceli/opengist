@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.1](https://github.com/thomiceli/opengist/compare/v1.4.0...v1.4.1) - 2023-06-25
+### ⚠️ Docker users ⚠️
+Opengist Docker volume has been changed from `/root/.opengist` to `/opengist`, do not forget to update your
+`docker-compose.yml` file or any other Docker related configuration.
+
+Please make a backup of your Opengist data directory before updating.
+
+### Fixed
+- Git message remote: `warning: unable to access '/root/.config/git/attributes': Permission denied` (#71)
+
 ## [1.4.0](https://github.com/thomiceli/opengist/compare/v1.3.0...v1.4.0) - 2023-06-23
 ### ⚠️ Docker users ⚠️
 Opengist Docker volume has been changed from `/root/.opengist` to `/opengist`, do not forget to update your

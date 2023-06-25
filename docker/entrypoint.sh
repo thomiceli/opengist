@@ -8,6 +8,4 @@ usermod -o -u "$UID" $USER
 
 chown -R "$USER:$USER" /opengist
 
-export OG_OPENGIST_HOME=/opengist
-
-su -m $USER -c "/app/opengist/opengist"
+exec su $USER -c "OG_OPENGIST_HOME=/opengist /app/opengist/opengist"

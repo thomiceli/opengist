@@ -85,7 +85,7 @@ var fm = template.FuncMap{
 		if dev {
 			return "http://localhost:16157/" + jsfile
 		}
-		return "/" + manifestEntries[jsfile].File
+		return config.C.ExternalUrl + "/" + manifestEntries[jsfile].File
 	},
 	"defaultAvatar": defaultAvatar,
 }
@@ -379,5 +379,5 @@ func defaultAvatar() string {
 	if dev {
 		return "http://localhost:16157/default.png"
 	}
-	return "/" + manifestEntries["default.png"].File
+	return config.C.ExternalUrl + "/" + manifestEntries["default.png"].File
 }

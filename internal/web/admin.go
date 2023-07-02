@@ -189,7 +189,6 @@ func adminConfig(ctx echo.Context) error {
 	setData(ctx, "title", "Configuration")
 	setData(ctx, "htmlTitle", "Configuration - Admin panel")
 	setData(ctx, "adminHeaderPage", "config")
-	setData(ctx, "c", config.C)
 
 	return html(ctx, "admin_config.html")
 }

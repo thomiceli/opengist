@@ -256,6 +256,8 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 			return errorRes(500, "Cannot read settings from database", err)
 		}
 
+		setData(ctx, "c", config.C)
+
 		setData(ctx, "githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
 		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
 

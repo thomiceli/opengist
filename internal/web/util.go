@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/models"
 	"golang.org/x/crypto/argon2"
 	"html/template"
@@ -44,7 +45,7 @@ func htmlWithCode(ctx echo.Context, code int, template string) error {
 }
 
 func redirect(ctx echo.Context, location string) error {
-	return ctx.Redirect(302, location)
+	return ctx.Redirect(302, config.C.ExternalUrl+location)
 }
 
 func plainText(ctx echo.Context, code int, message string) error {

@@ -10,15 +10,15 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                     </svg>
-                    <span class="flex-auto ml-2 text-sm text-slate-700 dark:text-slate-300 filename" id="file-{{ slug $file.Filename }}"><a href="#file-{{ slug $file.Filename }}" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white">{{ $file.Filename }}</a></span>
+                    <span class="flex-auto ml-2 text-sm text-slate-700 dark:text-slate-300 filename" id="file-{{ slug $file.Filename }}"><a href="{{ $.c.ExternalUrl }}#file-{{ slug $file.Filename }}" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white">{{ $file.Filename }}</a></span>
 
                     <button class="float-right mx-2 px-2.5 py-0.5 leading-4 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-600 border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none copy-gist-btn"> Copy </button>
-                    <a href="/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}" class="text-slate-700 dark:text-slate-300 float-right mr-2 px-2.5 py-0.5 leading-4 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-600 border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none"> Raw </a>
+                    <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}" class="text-slate-700 dark:text-slate-300 float-right mr-2 px-2.5 py-0.5 leading-4 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-600 border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none"> Raw </a>
                     <div class="hidden gist-content">{{ $file.Content }}</div>
                 </div>
                 {{ if $file.Truncated }}
                 <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
-                    This file has been truncated. <a href="/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}">View the full file.</a>
+                    This file has been truncated. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}">View the full file.</a>
                 </div>
                 {{ end }}
                 {{ if and (not $csv) (isCsv $file.Filename) }}

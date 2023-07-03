@@ -36,7 +36,7 @@
                                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Login</button>
                             </div>
                             {{ if not .DisableSignup }}
-                            <span class="float-right text-sm py-2 underline"><a href="/register">Register instead →</a></span>
+                            <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/register">Register instead →</a></span>
                             {{ end }}
                         </div>
                         {{ else }}
@@ -44,7 +44,7 @@
                             <div class="flex-auto">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Register</button>
                             </div>
-                            <span class="float-right text-sm py-2 underline"><a href="/login">Login instead →</a></span>
+                            <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/login">Login instead →</a></span>
 
                         </div>
                         {{ end }}
@@ -62,12 +62,12 @@
                         {{ end }}
                         <div>
                             {{ if .githubOauth }}
-                                <a href="/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                <a href="{{ $.c.ExternalUrl }}/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                                     Continue with GitHub account
                                 </a>
                             {{ end }}
                             {{ if .giteaOauth }}
-                                <a href="/oauth/gitea" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                <a href="{{ $.c.ExternalUrl }}/oauth/gitea" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                                     Continue with Gitea account
                                 </a>
                             {{ end }}

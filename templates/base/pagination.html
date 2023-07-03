@@ -1,7 +1,7 @@
 {{ define "pagination" }}
 <div class="flex justify-center space-x-2">
     {{ if .prevPage }}
-    <a href="/{{ .urlPage }}?page={{ .prevPage }}{{ .urlParams }}" class="relative inline-flex items-center space-x-2 rounded-md border border-white dark:border-gray-900 bg-white dark:bg-gray-900 px-2 py-1.5 font-medium text-slate-700 dark:text-slate-300 hover:border-gray-200 dark:hover:border-gray-400 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm leading-4">
+    <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?page={{ .prevPage }}{{ .urlParams }}" class="relative inline-flex items-center space-x-2 rounded-md border border-white dark:border-gray-900 bg-white dark:bg-gray-900 px-2 py-1.5 font-medium text-slate-700 dark:text-slate-300 hover:border-gray-200 dark:hover:border-gray-400 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm leading-4">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mr-1 w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
@@ -15,7 +15,7 @@
                             {{ .prevLabel }}</span>
     {{ end }}
     {{ if .nextPage }}
-    <a href="/{{ .urlPage }}?page={{ .nextPage }}{{ .urlParams }}" class="relative inline-flex items-center space-x-2 rounded-md border border-white dark:border-gray-900 bg-white dark:bg-gray-900 px-2 py-1.5 font-medium text-slate-700 dark:text-slate-300 hover:border-gray-200 dark:hover:border-gray-400 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm leading-4">{{ .nextLabel }}
+    <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?page={{ .nextPage }}{{ .urlParams }}" class="relative inline-flex items-center space-x-2 rounded-md border border-white dark:border-gray-900 bg-white dark:bg-gray-900 px-2 py-1.5 font-medium text-slate-700 dark:text-slate-300 hover:border-gray-200 dark:hover:border-gray-400 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm leading-4">{{ .nextLabel }}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ml-1 w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>

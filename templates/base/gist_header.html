@@ -4,7 +4,7 @@
         <div class="flex flex-col lg:flex-row">
             <div>
                 <h1 class="text-2xl font-bold leading-tight break-all">
-                    <a href="/{{ .gist.User.Username }}">{{ .gist.User.Username }}</a> <span class="text-slate-700 dark:text-slate-300">/</span> <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}">{{ .gist.Title }}</a>
+                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}">{{ .gist.User.Username }}</a> <span class="text-slate-700 dark:text-slate-300">/</span> <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}">{{ .gist.Title }}</a>
                 </h1>
             </div>
             <div class="lg:flex-row flex py-2 lg:py-0 lg:ml-auto">
@@ -24,7 +24,7 @@
                             Unlike
                             {{ end }}
                         </button>
-                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                            {{ .gist.NbLikes }}
                         </a>
                     </form>
@@ -37,38 +37,38 @@
                             </svg>
                             Fork
                         </button>
-                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                            {{ .gist.NbForks }}
                         </a>
                     </form>
                     {{ end }}
                 {{ else }}
                 <div class="lg:flex-row flex lg:py-0 lg:ml-auto flex items-center">
-                    <a href="/login" type="submit" class="ml-auto focus-within:z-10 text-slate-700 dark:text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                    <a href="{{ $.c.ExternalUrl }}/login" type="submit" class="ml-auto focus-within:z-10 text-slate-700 dark:text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                         </svg>
                         Like
                     </a>
-                    <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                         {{ .gist.NbLikes }}
                     </a>
                 </div>
                 <div class="ml-2 flex items-center">
-                    <a href="/login" type="submit" class="ml-auto focus-within:z-10 text-slate-700 dark:text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                    <a href="{{ $.c.ExternalUrl }}/login" type="submit" class="ml-auto focus-within:z-10 text-slate-700 dark:text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                         </svg>
                         Fork
                     </a>
-                    <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                         {{ .gist.NbForks }}
                     </a>
                 </div>
                 {{ end }}
                 {{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}
                 <div class="ml-2 flex items-center">
-                    <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/edit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/edit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
@@ -89,7 +89,7 @@
             </div>
         </div>
         {{ if .gist.Forked }}
-            <p class="mt-1 max-w-2xl text-sm text-slate-500">Forked from <a href="/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Uuid }}">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a></p>
+            <p class="mt-1 max-w-2xl text-sm text-slate-500">Forked from <a href="{{ $.c.ExternalUrl }}/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Uuid }}">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a></p>
         {{ end }}
         <p class="mt-1 max-w-2xl text-sm text-slate-500">Last active <span class="moment-timestamp"> {{ .gist.UpdatedAt }} </span>
             {{ if .gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> Unlisted </span>{{ end }}
@@ -110,13 +110,13 @@
             <div class="hidden sm:block">
                 <div class="border-b flex border-gray-200 dark:border-gray-700">
                     <nav class="-mb-px flex-auto space-x-4" aria-label="Tabs">
-                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}" class="inline-flex items-center text-slate-700 dark:text-slate-300 {{ if eq .page "code"}}border-slate-500 dark:border-slate-300 {{else}}border-transparent hover:border-gray-700 dark:hover:border-gray-200{{end}} hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" aria-current="page">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}" class="inline-flex items-center text-slate-700 dark:text-slate-300 {{ if eq .page "code"}}border-slate-500 dark:border-slate-300 {{else}}border-transparent hover:border-gray-700 dark:hover:border-gray-200{{end}} hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" aria-current="page">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
                             </svg>
                             Code
                         </a>
-                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/revisions" class="inline-flex items-center text-slate-700 dark:text-slate-300 {{ if eq .page "revisions"}}border-slate-500 dark:border-slate-300 {{else}}border-transparent hover:border-gray-700 dark:hover:border-gray-200{{end}} hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/revisions" class="inline-flex items-center text-slate-700 dark:text-slate-300 {{ if eq .page "revisions"}}border-slate-500 dark:border-slate-300 {{else}}border-transparent hover:border-gray-700 dark:hover:border-gray-200{{end}} hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                             </svg>
@@ -164,7 +164,7 @@
                             </div>
                         </div>
 
-                        <a href="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/archive/{{ .revision }}" class="whitespace-nowrap text-slate-700 dark:text-slate-300 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/archive/{{ .revision }}" class="whitespace-nowrap text-slate-700 dark:text-slate-300 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                             Download ZIP</a>
                     </div>
                 </div>

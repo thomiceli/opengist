@@ -85,7 +85,7 @@ var fm = template.FuncMap{
 		if dev {
 			return "http://localhost:16157/" + jsfile
 		}
-		return "/" + manifestEntries[jsfile].File
+		return config.C.ExternalUrl + "/" + manifestEntries[jsfile].File
 	},
 	"defaultAvatar": defaultAvatar,
 }
@@ -256,6 +256,8 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 			return errorRes(500, "Cannot read settings from database", err)
 		}
 
+		setData(ctx, "c", config.C)
+
 		setData(ctx, "githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
 		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
 
@@ -377,5 +379,5 @@ func defaultAvatar() string {
 	if dev {
 		return "http://localhost:16157/default.png"
 	}
-	return "/" + manifestEntries["default.png"].File
+	return config.C.ExternalUrl + "/" + manifestEntries["default.png"].File
 }

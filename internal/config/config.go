@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -89,6 +90,10 @@ func InitConfig(configPath string) error {
 	}
 
 	if err = loadConfigFromEnv(c); err != nil {
+		return err
+	}
+
+	if err = checks(c); err != nil {
 		return err
 	}
 
@@ -218,6 +223,18 @@ func loadConfigFromEnv(c *config) error {
 		fmt.Println("Using environment variables config: " + strings.Join(envVars, ", "))
 	} else {
 		fmt.Println("No environment variables config specified.")
+	}
+
+	return nil
+}
+
+func checks(c *config) error {
+	if _, err := url.Parse(c.ExternalUrl); err != nil {
+		return err
+	}
+
+	if _, err := url.Parse(c.GiteaUrl); err != nil {
+		return err
 	}
 
 	return nil

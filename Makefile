@@ -1,6 +1,6 @@
 .PHONY: all install build_frontend build_backend build build_docker watch_frontend watch_backend watch clean clean_docker
 
-# Specify the name of your Go binary output
+# Specify the name of your Go binary output or Docker image
 BINARY_NAME := opengist
 
 all: install build

@@ -1,2 +1,3 @@
 templates/**/* linguist-vendored
 public/**/*.css linguist-vendored
+*.sh text eol=lf

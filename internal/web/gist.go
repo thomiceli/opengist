@@ -80,6 +80,10 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 			setData(ctx, "hasLiked", hasLiked)
 		}
 
+		if gist.Private {
+			setData(ctx, "NoIndex", true)
+		}
+
 		return next(ctx)
 	}
 }

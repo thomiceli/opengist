@@ -3,6 +3,10 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8" />
+    {{ if .NoIndex }}
+        <meta name="robots" content="noindex, follow">
+    {{ end }}
+
     <script>
         const checkTheme = () => {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {

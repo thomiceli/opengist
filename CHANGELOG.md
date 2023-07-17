@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.2](https://github.com/thomiceli/opengist/compare/v1.4.1...v1.4.2) - 2023-07-17
+### Added
+- External url to HTML links & redirects (#75)
+- Make unlisted gists not SEO crawlable (#78)
+- Warning message on OAuth unlink (#79)
+
+### Changed
+- Redirect to `/all` when not logged in (#76)
+- Removed Dev Docker image (#80)
+
 ## [1.4.1](https://github.com/thomiceli/opengist/compare/v1.4.0...v1.4.1) - 2023-06-25
 ### ⚠️ Docker users ⚠️
 Opengist Docker volume has been changed from `/root/.opengist` to `/opengist`, do not forget to update your

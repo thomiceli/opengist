@@ -39,7 +39,6 @@
     </header>
     <main class="mt-4">
         <form id="create" class="space-y-4" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/edit">
-            <input type="hidden" name="private" value="{{ .gist.Private }}"/>
             <div class="grid grid-cols-12 gap-x-4">
                 <div class="col-span-8 sm:col-span-4">
                     <div class="mt-1">

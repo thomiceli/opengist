@@ -399,6 +399,5 @@ func (dto *GistDTO) ToGist() *Gist {
 func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Title = dto.Title
 	gist.Description = dto.Description
-	gist.Private = dto.Private
 	return gist
 }

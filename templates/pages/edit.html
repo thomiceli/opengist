@@ -93,8 +93,8 @@
 
             <div class="flex">
                 <button type="button" id="add-file" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Add file</button>
-                <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}" type="submit" name="private" value="1" class="ml-auto inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 text-rose-600 dark:text-rose-400 hover:text-rose-700">Cancel</a>
-                <button type="submit" name="private" value="0" class="ml-2 inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Save</button>
+                <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}" class="ml-auto inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 text-rose-600 dark:text-rose-400 hover:text-rose-700">Cancel</a>
+                <button type="submit" class="ml-2 inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Save</button>
             </div>
             {{ .csrfHtml }}
         </form>

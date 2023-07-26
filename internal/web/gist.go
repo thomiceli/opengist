@@ -517,6 +517,30 @@ func rawFile(ctx echo.Context) error {
 	return plainText(ctx, 200, file.Content)
 }
 
+func downloadFile(ctx echo.Context) error {
+	gist := getData(ctx, "gist").(*models.Gist)
+	file, err := gist.File(ctx.Param("revision"), ctx.Param("file"), false)
+
+	if err != nil {
+		return errorRes(500, "Error getting file content", err)
+	}
+
+	if file == nil {
+		return notFound("File not found")
+	}
+
+	ctx.Response().Header().Set("Content-Type", "text/plain")
+	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+file.Filename)
+	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(file.Content)))
+	_, err = ctx.Response().Write([]byte(file.Content))
+
+	if err != nil {
+		return errorRes(500, "Error downloading the file", err)
+	}
+
+	return nil
+}
+
 func edit(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*models.Gist)
 

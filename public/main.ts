@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.copy-gist-btn').forEach((e: HTMLElement) => {
         e.onclick = () => {
-            navigator.clipboard.writeText(e.parentNode!.querySelector<HTMLElement>('.gist-content')!.textContent || '').catch((err) => {
+            navigator.clipboard.writeText(e.parentNode!.parentNode!.querySelector<HTMLElement>('.gist-content')!.textContent || '').catch((err) => {
                 console.error('Could not copy text: ', err);
             });
         };

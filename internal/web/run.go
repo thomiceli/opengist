@@ -213,6 +213,7 @@ func Start() {
 			g3.POST("/visibility", toggleVisibility, logged, writePermission)
 			g3.POST("/delete", deleteGist, logged, writePermission)
 			g3.GET("/raw/:revision/:file", rawFile)
+			g3.GET("/download/:revision/:file", downloadFile)
 			g3.GET("/edit", edit, logged, writePermission)
 			g3.POST("/edit", processCreate, logged, writePermission)
 			g3.POST("/like", like, logged)

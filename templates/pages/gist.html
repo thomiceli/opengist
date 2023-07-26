@@ -7,13 +7,29 @@
         <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto">
             <div class="border-b-1 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 my-auto block">
                 <div class="ml-4 py-1.5 flex">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                    </svg>
-                    <span class="flex-auto ml-2 text-sm text-slate-700 dark:text-slate-300 filename" id="file-{{ slug $file.Filename }}"><a href="{{ $.c.ExternalUrl }}#file-{{ slug $file.Filename }}" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white">{{ $file.Filename }}</a></span>
 
-                    <button class="float-right mx-2 px-2.5 py-0.5 leading-4 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-600 border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none copy-gist-btn"> Copy </button>
-                    <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}" class="text-slate-700 dark:text-slate-300 float-right mr-2 px-2.5 py-0.5 leading-4 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-600 border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none"> Raw </a>
+                    <span class="flex-auto inline-flex items-center text-sm text-slate-700 dark:text-slate-300 filename" id="file-{{ slug $file.Filename }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                        <a href="{{ $.c.ExternalUrl }}#file-{{ slug $file.Filename }}" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white ml-2">{{ $file.Filename }}</a></span>
+
+                    <span class="isolate inline-flex rounded-md shadow-sm mr-2">
+                      <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}" class="relative inline-flex items-center rounded-l-md bg-white text-gray-500 dark:text-slate-300 float-right px-2.5 py-1 leading-4 text-xs font-medium dark:bg-gray-600 border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none">
+                        Raw
+                      </a>
+                      <button type="button" class="relative -ml-px inline-flex items-center bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700 copy-gist-btn">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                          </svg>
+                      </button>
+                        <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/download/{{ $.commit }}/{{$file.Filename}}" class="relative -ml-px inline-flex items-center rounded-r-md bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                          </svg>
+                        </a>
+                    </span>
+
                     <div class="hidden gist-content">{{ $file.Content }}</div>
                 </div>
                 {{ if $file.Truncated }}

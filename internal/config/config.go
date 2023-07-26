@@ -15,7 +15,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var OpengistVersion = "1.4.2"
+var OpengistVersion = "1.5-dev"
 
 var C *config
 
@@ -173,17 +173,6 @@ func loadConfigFromYaml(c *config, configPath string) error {
 		}
 	} else {
 		fmt.Println("No YAML config file specified.")
-	}
-
-	// Override default values with environment variables (as yaml)
-	configEnv := os.Getenv("CONFIG")
-	if configEnv != "" {
-		fmt.Println("Using config from environment variable: CONFIG")
-		fmt.Println("!! This method of setting the config is deprecated and will be removed in a future version of Opengist")
-		d := yaml.NewDecoder(strings.NewReader(configEnv))
-		if err := d.Decode(&c); err != nil {
-			return err
-		}
 	}
 
 	return nil

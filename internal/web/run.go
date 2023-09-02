@@ -10,11 +10,12 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/models"
+	"github.com/thomiceli/opengist/public"
+	"github.com/thomiceli/opengist/templates"
 	"html/template"
 	"io"
-	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -70,7 +71,7 @@ var fm = template.FuncMap{
 	"slug": func(s string) string {
 		return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
 	},
-	"avatarUrl": func(user *models.User, noGravatar bool) string {
+	"avatarUrl": func(user *db.User, noGravatar bool) string {
 		if user.AvatarURL != "" {
 			return user.AvatarURL
 		}
@@ -104,8 +105,6 @@ var fm = template.FuncMap{
 	},
 }
 
-var EmbedFS fs.FS
-
 type Template struct {
 	templates *template.Template
 }
@@ -117,8 +116,6 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Con
 func Start() {
 	store = sessions.NewCookieStore([]byte("opengist"))
 	gothic.Store = store
-
-	assetsFS := echo.MustSubFS(EmbedFS, "public/assets")
 
 	e := echo.New()
 	e.HideBanner = true
@@ -143,7 +140,7 @@ func Start() {
 	e.Use(middleware.Secure())
 
 	e.Renderer = &Template{
-		templates: template.Must(template.New("t").Funcs(fm).ParseFS(EmbedFS, "templates/*/*.html")),
+		templates: template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html")),
 	}
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
 		if err, ok := er.(*echo.HTTPError); ok {
@@ -166,7 +163,7 @@ func Start() {
 
 	if !dev {
 		parseManifestEntries()
-		e.GET("/assets/*", cacheControl(echo.WrapHandler(http.StripPrefix("/assets", http.FileServer(http.FS(assetsFS))))))
+		e.GET("/assets/*", cacheControl(echo.WrapHandler(http.FileServer(http.FS(public.Files)))))
 	}
 
 	// Web based routes
@@ -285,9 +282,9 @@ func sessionInit(next echo.HandlerFunc) echo.HandlerFunc {
 		sess := getSession(ctx)
 		if sess.Values["user"] != nil {
 			var err error
-			var user *models.User
+			var user *db.User
 
-			if user, err = models.GetUserById(sess.Values["user"].(uint)); err != nil {
+			if user, err = db.GetUserById(sess.Values["user"].(uint)); err != nil {
 				sess.Values["user"] = nil
 				saveSession(sess, ctx)
 				setData(ctx, "userLogged", nil)
@@ -315,8 +312,8 @@ func writePermission(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		gist := getData(ctx, "gist")
 		user := getUserLogged(ctx)
-		if !gist.(*models.Gist).CanWrite(user) {
-			return redirect(ctx, "/"+gist.(*models.Gist).User.Username+"/"+gist.(*models.Gist).Uuid)
+		if !gist.(*db.Gist).CanWrite(user) {
+			return redirect(ctx, "/"+gist.(*db.Gist).User.Username+"/"+gist.(*db.Gist).Uuid)
 		}
 		return next(ctx)
 	}
@@ -377,7 +374,7 @@ type Asset struct {
 var manifestEntries map[string]Asset
 
 func parseManifestEntries() {
-	file, err := EmbedFS.Open("public/manifest.json")
+	file, err := public.Files.Open("manifest.json")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to open manifest.json")
 	}

@@ -18,7 +18,7 @@ import (
 	"github.com/markbates/goth/providers/github"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/models"
+	"github.com/thomiceli/opengist/internal/db"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
@@ -47,7 +47,7 @@ func processRegister(ctx echo.Context) error {
 
 	sess := getSession(ctx)
 
-	dto := new(models.UserDTO)
+	dto := new(db.UserDTO)
 	if err := ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}
@@ -57,7 +57,7 @@ func processRegister(ctx echo.Context) error {
 		return html(ctx, "auth_form.html")
 	}
 
-	if exists, err := models.UserExists(dto.Username); err != nil || exists {
+	if exists, err := db.UserExists(dto.Username); err != nil || exists {
 		addFlash(ctx, "Username already exists", "error")
 		return html(ctx, "auth_form.html")
 	}
@@ -101,15 +101,15 @@ func processLogin(ctx echo.Context) error {
 	var err error
 	sess := getSession(ctx)
 
-	dto := &models.UserDTO{}
+	dto := &db.UserDTO{}
 	if err = ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}
 	password := dto.Password
 
-	var user *models.User
+	var user *db.User
 
-	if user, err = models.GetUserByUsername(dto.Username); err != nil {
+	if user, err = db.GetUserByUsername(dto.Username); err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return errorRes(500, "Cannot get user", err)
 		}
@@ -161,7 +161,7 @@ func oauthCallback(ctx echo.Context) error {
 	}
 
 	// if user is not in database, create it
-	userDB, err := models.GetUserByProvider(user.UserID, user.Provider)
+	userDB, err := db.GetUserByProvider(user.UserID, user.Provider)
 	if err != nil {
 		if getData(ctx, "DisableSignup") == true {
 			return errorRes(403, "Signing up is disabled", nil)
@@ -171,7 +171,7 @@ func oauthCallback(ctx echo.Context) error {
 			return errorRes(500, "Cannot get user", err)
 		}
 
-		userDB = &models.User{
+		userDB = &db.User{
 			Username: user.NickName,
 			Email:    user.Email,
 			MD5Hash:  fmt.Sprintf("%x", md5.Sum([]byte(strings.ToLower(strings.TrimSpace(user.Email))))),
@@ -188,7 +188,7 @@ func oauthCallback(ctx echo.Context) error {
 		}
 
 		if err = userDB.Create(); err != nil {
-			if models.IsUniqueConstraintViolation(err) {
+			if db.IsUniqueConstraintViolation(err) {
 				addFlash(ctx, "Username "+user.NickName+" already exists in Opengist", "error")
 				return redirect(ctx, "/login")
 			}
@@ -224,7 +224,7 @@ func oauthCallback(ctx echo.Context) error {
 				keys = keys[:len(keys)-1]
 			}
 			for _, key := range keys {
-				sshKey := models.SSHKey{
+				sshKey := db.SSHKey{
 					Title:   "Added from " + user.Provider,
 					Content: key,
 					User:    *userDB,

@@ -1,2 +1,4 @@
 templates/**/* linguist-vendored
 public/**/*.css linguist-vendored
+public/**/*.scss linguist-vendored
+*.config.js linguist-vendored

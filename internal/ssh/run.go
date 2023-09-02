@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/models"
+	"github.com/thomiceli/opengist/internal/db"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
 	"io"
@@ -24,7 +24,7 @@ func Start() {
 	sshConfig := &ssh.ServerConfig{
 		PublicKeyCallback: func(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
 			strKey := strings.TrimSpace(string(ssh.MarshalAuthorizedKey(key)))
-			_, err := models.SSHKeyDoesExists(strKey)
+			_, err := db.SSHKeyDoesExists(strKey)
 			if err != nil {
 				if !errors.Is(err, gorm.ErrRecordNotFound) {
 					return nil, err

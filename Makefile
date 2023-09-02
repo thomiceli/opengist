@@ -3,7 +3,7 @@
 # Specify the name of your Go binary output
 BINARY_NAME := opengist
 
-all: install build
+all: clean install build
 
 install:
 	@echo "Installing NPM dependencies..."

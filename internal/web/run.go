@@ -30,11 +30,11 @@ var re = regexp.MustCompile("[^a-z0-9]+")
 var fm = template.FuncMap{
 	"split":     strings.Split,
 	"indexByte": strings.IndexByte,
-	"toInt": func(i string) int64 {
-		val, _ := strconv.ParseInt(i, 10, 64)
+	"toInt": func(i string) int {
+		val, _ := strconv.Atoi(i)
 		return val
 	},
-	"inc": func(i int64) int64 {
+	"inc": func(i int) int {
 		return i + 1
 	},
 	"splitGit": func(i string) []string {
@@ -88,6 +88,20 @@ var fm = template.FuncMap{
 		return config.C.ExternalUrl + "/" + manifestEntries[jsfile].File
 	},
 	"defaultAvatar": defaultAvatar,
+	"visibilityStr": func(visibility int, lowercase bool) string {
+		s := "Public"
+		switch visibility {
+		case 1:
+			s = "Unlisted"
+		case 2:
+			s = "Private"
+		}
+
+		if lowercase {
+			return strings.ToLower(s)
+		}
+		return s
+	},
 }
 
 var EmbedFS fs.FS
@@ -226,7 +240,7 @@ func Start() {
 	debugStr := ""
 	// Git HTTP routes
 	if config.C.HttpGit {
-		e.Any("/:user/:gistname/*", gitHttp, gistInit)
+		e.Any("/:user/:gistname/*", gitHttp, gistSoftInit)
 		debugStr = " (with Git over HTTP)"
 	}
 

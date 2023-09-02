@@ -22,7 +22,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 
 ## Features
 
-* Create public or unlisted snippets
+* Create public, unlisted or private snippets
 * Clone / Pull / Push snippets **via Git** over HTTP or SSH
 * Revisions history
 * Syntax highlighting ; markdown & CSV support

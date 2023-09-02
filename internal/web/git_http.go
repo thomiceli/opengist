@@ -47,16 +47,23 @@ func gitHttp(ctx echo.Context) error {
 
 			gist := getData(ctx, "gist").(*models.Gist)
 
+			// Shows basic auth if :
+			// - user wants to push the gist
+			// - user wants to clone a private gist
+			// - gist is not found (obfuscation)
+			// - admin setting to require login is set to true
 			noAuth := (ctx.QueryParam("service") == "git-upload-pack" ||
 				strings.HasSuffix(ctx.Request().URL.Path, "git-upload-pack") ||
 				ctx.Request().Method == "GET") &&
+				gist.Private != 2 &&
+				gist.ID != 0 &&
 				!getData(ctx, "RequireLogin").(bool)
 
 			repositoryPath := git.RepositoryPath(gist.User.Username, gist.Uuid)
 
 			if _, err := os.Stat(repositoryPath); os.IsNotExist(err) {
 				if err != nil {
-					return errorRes(500, "Repository does not exist", err)
+					return errorRes(404, "Repository directory does not exist", err)
 				}
 			}
 
@@ -82,12 +89,16 @@ func gitHttp(ctx echo.Context) error {
 				return basicAuth(ctx)
 			}
 
+			if gist.ID == 0 {
+				return errorRes(404, "Not found", nil)
+			}
+
 			if ok, err := argon2id.verify(authPassword, gist.User.Password); !ok || gist.User.Username != authUsername {
 				if err != nil {
 					return errorRes(500, "Cannot verify password", err)
 				}
 				log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-				return errorRes(403, "Unauthorized", nil)
+				return errorRes(404, "Not found", nil)
 			}
 
 			return route.handler(ctx)

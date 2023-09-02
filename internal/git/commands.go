@@ -159,9 +159,7 @@ func CloneTmp(user string, gist string, gistTmpId string, email string) error {
 	}
 
 	// remove every file (and not the .git directory!)
-	cmd = exec.Command("find", ".", "-maxdepth", "1", "-type", "f", "-delete")
-	cmd.Dir = tmpRepositoryPath
-	if err = cmd.Run(); err != nil {
+	if err = removeFilesExceptGit(tmpRepositoryPath); err != nil {
 		return err
 	}
 
@@ -296,6 +294,21 @@ func copyFiles(repositoryPath string) error {
 	defer preReceiveDst.Close()
 
 	return nil
+}
+
+func removeFilesExceptGit(dir string) error {
+	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() && filepath.Base(path) == ".git" {
+			return filepath.SkipDir
+		}
+		if !d.IsDir() {
+			return os.Remove(path)
+		}
+		return nil
+	})
 }
 
 const preReceive = `#!/bin/sh

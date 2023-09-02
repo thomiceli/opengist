@@ -15,7 +15,7 @@ type Gist struct {
 	Preview         string
 	PreviewFilename string
 	Description     string
-	Private         bool
+	Private         int // 0: public, 1: unlisted, 2: private
 	UserID          uint
 	User            User
 	NbFiles         int
@@ -379,7 +379,7 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 type GistDTO struct {
 	Title       string    `validate:"max=50" form:"title"`
 	Description string    `validate:"max=150" form:"description"`
-	Private     bool      `form:"private"`
+	Private     int       `validate:"number,min=0,max=2" form:"private"`
 	Files       []FileDTO `validate:"min=1,dive"`
 }
 

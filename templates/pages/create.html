@@ -56,8 +56,26 @@
 
             <div class="flex">
                 <button type="button" id="add-file" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Add file</button>
-                <button type="submit" name="private" value="1" class="ml-auto inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Create unlisted gist</button>
-                <button type="submit" name="private" value="0" class="ml-2 inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Create public gist</button>
+
+                <div class="ml-auto inline-flex ">
+                    <button id="submit-gist" type="submit" name="private" value="0" class="ml-2 items-center px-4 py-2 border border-transparent border-primary-200 dark:border-primary-700 text-sm font-medium rounded-l-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 z-20">Create public gist</button>
+                    <div class="relative -ml-px block">
+                        <button type="button" class="relative inline-flex items-center rounded-r-md bg-primary-500 hover:bg-primary-600 px-2 py-2 text-gray-400 border border-transparent border-primary-200 dark:border-primary-700 focus:z-10" id="gist-visibility-menu-button">
+                            <span class="sr-only">Open options</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="white" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div id="gist-menu-visibility" class="hidden absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="gist-visibility-menu-button">
+                            <div class="rounded-md dark:bg-gray-800 bg-white shadow-lg ring-1 ring-gray-50 dark:ring-gray-700 focus:outline-none" role="none">
+                                <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400  gist-visibility-option" data-visibility="0" role="menuitem">Public</span>
+                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400  gist-visibility-option" data-visibility="1" role="menuitem">Unlisted</span>
+                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400  gist-visibility-option" data-visibility="2" role="menuitem">Private</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             {{ .csrfHtml }}
         </form>

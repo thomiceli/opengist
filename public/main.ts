@@ -183,4 +183,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
     });
+
+    const gistmenuvisibility = document.getElementById('gist-menu-visibility');
+    if (gistmenuvisibility) {
+        let submitgistbutton = (document.getElementById('submit-gist') as HTMLInputElement);
+        document.getElementById('gist-visibility-menu-button')!.onclick = () => {
+            console.log("z");
+            gistmenuvisibility!.classList.toggle('hidden');
+        }
+        Array.from(document.querySelectorAll('.gist-visibility-option')).forEach((el) => {
+            (el as HTMLElement).onclick = () => {
+                submitgistbutton.textContent = "Create " + el.textContent.toLowerCase() + " gist";
+                submitgistbutton!.value = (el as HTMLElement).dataset.visibility || '0';
+                gistmenuvisibility!.classList.add('hidden');
+            }
+        });
+    }
 });

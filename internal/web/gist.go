@@ -80,7 +80,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 			setData(ctx, "hasLiked", hasLiked)
 		}
 
-		if gist.Private {
+		if gist.Private > 0 {
 			setData(ctx, "NoIndex", true)
 		}
 
@@ -400,7 +400,7 @@ func processCreate(ctx echo.Context) error {
 func toggleVisibility(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*models.Gist)
 
-	gist.Private = !gist.Private
+	gist.Private = (gist.Private + 1) % 3
 	if err := gist.Update(); err != nil {
 		return errorRes(500, "Error updating this gist", err)
 	}

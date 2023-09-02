@@ -88,6 +88,22 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+// gistSoftInit try to load a gist (same as gistInit) but does not return a 404 if the gist is not found
+// useful for git clients using HTTP to obfuscate the existence of a private gist
+func gistSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		userName := ctx.Param("user")
+		gistName := ctx.Param("gistname")
+
+		gistName = strings.TrimSuffix(gistName, ".git")
+
+		gist, _ := models.GetGist(userName, gistName)
+		setData(ctx, "gist", gist)
+
+		return next(ctx)
+	}
+}
+
 func allGists(ctx echo.Context) error {
 	var err error
 	var urlPage string

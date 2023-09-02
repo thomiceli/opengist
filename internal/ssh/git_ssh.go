@@ -42,12 +42,21 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 		return errors.New("internal server error")
 	}
 
-	if verb == "receive-pack" || requireLogin == "1" {
+	// Check for the key if :
+	// - user wants to push the gist
+	// - user wants to clone a private gist
+	// - gist is not found (obfuscation)
+	// - admin setting to require login is set to true
+	if verb == "receive-pack" ||
+		gist.Private == 2 ||
+		gist.ID == 0 ||
+		requireLogin == "1" {
+
 		pubKey, err := models.SSHKeyExistsForUser(key, gist.UserID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
-				return errors.New("unauthorized")
+				return errors.New("gist not found")
 			}
 			errorSsh("Failed to get user by SSH key id", err)
 			return errors.New("internal server error")

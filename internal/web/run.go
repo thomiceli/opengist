@@ -240,7 +240,7 @@ func Start() {
 	debugStr := ""
 	// Git HTTP routes
 	if config.C.HttpGit {
-		e.Any("/:user/:gistname/*", gitHttp, gistInit)
+		e.Any("/:user/:gistname/*", gitHttp, gistSoftInit)
 		debugStr = " (with Git over HTTP)"
 	}
 

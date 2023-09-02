@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/models"
 	"net/http"
 	"os"
 	"os/exec"
@@ -45,7 +45,7 @@ func gitHttp(ctx echo.Context) error {
 				continue
 			}
 
-			gist := getData(ctx, "gist").(*models.Gist)
+			gist := getData(ctx, "gist").(*db.Gist)
 
 			// Shows basic auth if :
 			// - user wants to push the gist
@@ -148,7 +148,7 @@ func pack(ctx echo.Context, serviceType string) error {
 
 	// updatedAt is updated only if serviceType is receive-pack
 	if serviceType == "receive-pack" {
-		gist := getData(ctx, "gist").(*models.Gist)
+		gist := getData(ctx, "gist").(*db.Gist)
 		_ = gist.SetLastActiveNow()
 		_ = gist.UpdatePreviewAndCount()
 	}
@@ -159,7 +159,7 @@ func infoRefs(ctx echo.Context) error {
 	noCacheHeaders(ctx)
 	var service string
 
-	gist := getData(ctx, "gist").(*models.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	serviceType := ctx.QueryParam("service")
 	if strings.HasPrefix(serviceType, "git-") {

@@ -1,5 +1,5 @@
 import './style.css';
-import './hljs.scss';
+import './style.scss';
 import './favicon.svg';
 import './default.png';
 import moment from 'moment';
@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation()
         localStorage.theme = 'light';
         themeMenu.classList.toggle('hidden');
+        // @ts-ignore
         checkTheme()
     }
 
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation()
         localStorage.theme = 'dark';
         themeMenu.classList.toggle('hidden');
+        // @ts-ignore
         checkTheme()
     }
 
@@ -28,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation()
         localStorage.removeItem('theme');
         themeMenu.classList.toggle('hidden');
+        // @ts-ignore
         checkTheme();
     }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/models"
+	"github.com/thomiceli/opengist/internal/db"
 	"golang.org/x/crypto/argon2"
 	"html/template"
 	"net/http"
@@ -60,10 +60,10 @@ func errorRes(code int, message string, err error) error {
 	return &echo.HTTPError{Code: code, Message: message, Internal: err}
 }
 
-func getUserLogged(ctx echo.Context) *models.User {
+func getUserLogged(ctx echo.Context) *db.User {
 	user := getData(ctx, "userLogged")
 	if user != nil {
-		return user.(*models.User)
+		return user.(*db.User)
 	}
 	return nil
 }
@@ -110,7 +110,7 @@ func deleteCsrfCookie(ctx echo.Context) {
 }
 
 func loadSettings(ctx echo.Context) error {
-	settings, err := models.GetSettings()
+	settings, err := db.GetSettings()
 	if err != nil {
 		return err
 	}

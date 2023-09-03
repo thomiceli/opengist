@@ -16,6 +16,7 @@ import (
 var (
 	syncReposFromFS = false
 	syncReposFromDB = false
+	gitGcRepos      = false
 )
 
 func adminIndex(ctx echo.Context) error {
@@ -51,6 +52,7 @@ func adminIndex(ctx echo.Context) error {
 
 	setData(ctx, "syncReposFromFS", syncReposFromFS)
 	setData(ctx, "syncReposFromDB", syncReposFromDB)
+	setData(ctx, "gitGcRepos", gitGcRepos)
 	return html(ctx, "admin_index.html")
 }
 
@@ -181,6 +183,23 @@ func adminSyncReposFromDB(ctx echo.Context) error {
 			}
 		}
 		syncReposFromDB = false
+	}()
+	return redirect(ctx, "/admin-panel")
+}
+
+func adminGcRepos(ctx echo.Context) error {
+	addFlash(ctx, "Garbage collecting repositories...", "success")
+	go func() {
+		if gitGcRepos {
+			return
+		}
+		gitGcRepos = true
+		if err := git.GcRepos(); err != nil {
+			log.Error().Err(err).Msg("Error garbage collecting repositories")
+			gitGcRepos = false
+			return
+		}
+		gitGcRepos = false
 	}()
 	return redirect(ctx, "/admin-panel")
 }

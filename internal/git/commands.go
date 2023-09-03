@@ -263,6 +263,39 @@ func RPC(user string, gist string, service string) ([]byte, error) {
 	return stdout, err
 }
 
+func GcRepos() error {
+	subdirs, err := os.ReadDir(filepath.Join(config.GetHomeDir(), "repos"))
+	if err != nil {
+		return err
+	}
+
+	for _, subdir := range subdirs {
+		if subdir.IsDir() {
+			subRoot := filepath.Join(config.GetHomeDir(), "repos", subdir.Name())
+
+			gitRepos, err := os.ReadDir(subRoot)
+			if err != nil {
+				continue
+			}
+
+			for _, repo := range gitRepos {
+				if repo.IsDir() {
+					repoPath := filepath.Join(subRoot, repo.Name())
+
+					cmd := exec.Command("git", "gc")
+					cmd.Dir = repoPath
+					err = cmd.Run()
+					if err != nil {
+						return nil
+					}
+				}
+			}
+		}
+	}
+
+	return err
+}
+
 func GetGitVersion() (string, error) {
 	cmd := exec.Command("git", "--version")
 	stdout, err := cmd.Output()

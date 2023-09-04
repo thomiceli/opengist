@@ -2,10 +2,12 @@ import './style.css';
 import './style.scss';
 import './favicon.svg';
 import './default.png';
-import moment from 'moment';
-import md from 'markdown-it';
-import hljs from 'highlight.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 
+dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
 
 document.addEventListener('DOMContentLoaded', () => {
     const themeMenu = document.getElementById('theme-menu')!;
@@ -43,12 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     document.querySelectorAll('.moment-timestamp').forEach((e: HTMLElement) => {
-        e.title = moment.unix(parseInt(e.innerHTML)).format('LLLL');
-        e.innerHTML = moment.unix(parseInt(e.innerHTML)).fromNow();
+        e.title = dayjs.unix(parseInt(e.innerHTML)).format('LLLL');
+        e.innerHTML = dayjs.unix(parseInt(e.innerHTML)).fromNow();
     });
 
     document.querySelectorAll('.moment-timestamp-date').forEach((e: HTMLElement) => {
-        e.innerHTML = moment.unix(parseInt(e.innerHTML)).format('DD/MM/YYYY HH:mm');
+        e.innerHTML = dayjs.unix(parseInt(e.innerHTML)).format('DD/MM/YYYY HH:mm');
     });
 
     const rev = document.querySelector<HTMLElement>('.revision-text');

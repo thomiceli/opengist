@@ -27,8 +27,15 @@
     </script>
     <link rel="icon" type="image/svg+xml" href="{{ asset "favicon.svg" }}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{{ asset "main.css" }}" />
-    <script type="module" src="{{ asset "main.ts" }}"></script>
+
+    {{ if dev }}
+        <script type="module" src="{{ asset "@vite/client" }}"></script>
+        <link rel="stylesheet" href="{{ asset "style.css" }}" />
+        <script type="module" src="{{ asset "main.ts" }}"></script>
+    {{ else }}
+        <link rel="stylesheet" href="{{ asset "main.css" }}" />
+        <script type="module" src="{{ asset "main.ts" }}"></script>
+    {{ end }}
 
     {{ if .htmlTitle }}
         <title>{{ .htmlTitle }} - Opengist</title>

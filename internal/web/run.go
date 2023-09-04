@@ -82,11 +82,14 @@ var fm = template.FuncMap{
 
 		return defaultAvatar()
 	},
-	"asset": func(jsfile string) string {
+	"asset": func(file string) string {
 		if dev {
-			return "http://localhost:16157/" + jsfile
+			return "http://localhost:16157/" + file
 		}
-		return config.C.ExternalUrl + "/" + manifestEntries[jsfile].File
+		return config.C.ExternalUrl + "/" + manifestEntries[file].File
+	},
+	"dev": func() bool {
+		return dev
 	},
 	"defaultAvatar": defaultAvatar,
 	"visibilityStr": func(visibility int, lowercase bool) string {

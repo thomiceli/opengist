@@ -2,6 +2,7 @@ package git
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"os"
 	"os/exec"
@@ -270,25 +271,33 @@ func GcRepos() error {
 	}
 
 	for _, subdir := range subdirs {
-		if subdir.IsDir() {
-			subRoot := filepath.Join(config.GetHomeDir(), "repos", subdir.Name())
+		if !subdir.IsDir() {
+			continue
+		}
 
-			gitRepos, err := os.ReadDir(subRoot)
-			if err != nil {
+		subRoot := filepath.Join(config.GetHomeDir(), "repos", subdir.Name())
+
+		gitRepos, err := os.ReadDir(subRoot)
+		if err != nil {
+			log.Warn().Err(err).Msg("Cannot read directory")
+			continue
+		}
+
+		for _, repo := range gitRepos {
+			if !repo.IsDir() {
 				continue
 			}
 
-			for _, repo := range gitRepos {
-				if repo.IsDir() {
-					repoPath := filepath.Join(subRoot, repo.Name())
+			repoPath := filepath.Join(subRoot, repo.Name())
 
-					cmd := exec.Command("git", "gc")
-					cmd.Dir = repoPath
-					err = cmd.Run()
-					if err != nil {
-						return nil
-					}
-				}
+			log.Info().Msg("Running git gc for repository " + repoPath)
+
+			cmd := exec.Command("git", "gc")
+			cmd.Dir = repoPath
+			err = cmd.Run()
+			if err != nil {
+				log.Warn().Err(err).Msg("Cannot run git gc for repository " + repoPath)
+				continue
 			}
 		}
 	}

@@ -23,7 +23,20 @@ module.exports = {
         900: "#131316"
       },
       rose: colors.rose,
-      primary: colors.sky,
+      primary: {
+        50: '#d6e1ff',
+        100: '#d1dfff',
+        200: '#b9d2fe',
+        300: '#84b1fb',
+        400: '#74a4f6',
+        500: '#588fee',
+        600: '#3c79e2',
+        700: '#356fc0',
+        800: '#2d6195',
+        900: '#2a5574',
+        950: '#173040',
+      },
+
       slate: colors.slate
     },
     extend: {

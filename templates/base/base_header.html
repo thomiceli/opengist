@@ -47,7 +47,7 @@
 <div id="app" class="text-gray-700 dark:text-white min-h-full bg-white dark:bg-gray-900">
     <div class="min-h-full">
         <nav class="dark:bg-gray-800 bg-gray-50">
-            <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            <div class="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8">
                 <div class="relative flex items-center justify-between h-16">
                     <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
                         <!-- Mobile menu button-->
@@ -73,7 +73,7 @@
                         <div class="hidden sm:block sm:ml-6">
                             <div class="flex space-x-4">
                                 <a href="{{ $.c.ExternalUrl }}/all" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">All</a>
-                                <a href="{{ $.c.ExternalUrl }}/" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">New</a>
+                                <a href="{{ $.c.ExternalUrl }}/{{ if not .userLogged }}login{{ end }}" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">New</a>
                                 <div class="flex flex-1 items-center justify-center px-2 lg:ml-6 lg:justify-end">
                                     <div class="w-full max-w-lg lg:max-w-xs">
                                         <label for="search" class="sr-only">Search</label>
@@ -217,7 +217,7 @@
                 </div>
                 <div class="px-2 pt-2 pb-3 space-y-1">
                     <a href="{{ $.c.ExternalUrl }}/all" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">All</a>
-                    <a href="{{ $.c.ExternalUrl }}/" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">New</a>
+                    <a href="{{ $.c.ExternalUrl }}/{{ if not .userLogged }}login{{ end }}" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">New</a>
                     {{ if .userLogged }}
                         <a href="{{ $.c.ExternalUrl }}/{{ .userLogged.Username }}" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">My gists</a>
                         <a href="{{ $.c.ExternalUrl }}/settings" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">Settings</a>
@@ -235,7 +235,7 @@
 
 
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-700 dark:text-slate-300">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-slate-700 dark:text-slate-300">
         <div>
             {{range .flashErrors}}
                 <div class="mt-4 rounded-md bg-gray-50 dark:bg-gray-800 border-l-4 border-rose-400 p-4">

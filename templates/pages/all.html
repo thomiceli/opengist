@@ -6,7 +6,7 @@
                 {{if .fromUser}}
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="">
+                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="{{ .fromuser.Username }}'s Avatar">
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>
@@ -109,36 +109,45 @@
             {{ if ne (len .gists) 0 }}
                 {{ range $gist := .gists }}
                     <div class="mb-8">
-                        <div class="flex flex-col lg:flex-row">
-                            <h4 class="text-md leading-tight break-all py-1 flex-auto">
-                                <a href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}">{{ $gist.User.Username }}</a> <span class="text-slate-700 dark:text-slate-300">/</span> <a class="font-bold" href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}/{{ $gist.Uuid }}">{{ $gist.Title }}</a>
-                            </h4>
-                            <div class="flex space-x-4 lg:flex-row flex py-1 lg:py-0 lg:ml-auto text-slate-500">
-                                <div class="flex items-center float-right text-xs">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                                    </svg>
-                                    <span class="whitespace-nowrap">{{ $gist.NbLikes }} likes</span>
-                                </div>
-                                <div class="flex items-center float-right text-xs">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-                                    </svg>
-                                    <span class="whitespace-nowrap">{{ $gist.NbForks }} forks</span>
-                                </div>
-                                <div class="flex items-center float-right text-xs">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-                                    </svg>
-                                    <span class="whitespace-nowrap">{{ $gist.NbFiles }} files</span>
-                                </div>
+                        <div class="flex ">
+                            <div class="div">
+                                <a href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}">
+                                    <img class="h-10 w-10 rounded-md mr-2 border border-gray-200 dark:border-gray-700 my-1" src="{{ avatarUrl $gist.User $.DisableGravatar }}" alt="{{ $gist.User.Username }}'s Avatar">
+                                </a>
                             </div>
+                            <div class="flex-auto">
+                                <div class="flex flex-col lg:flex-row">
+                                    <h4 class="text-md leading-tight break-all py-1 flex-auto">
+                                        <a href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}">{{ $gist.User.Username }}</a> <span class="text-slate-700 dark:text-slate-300">/</span> <a class="font-bold" href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}/{{ $gist.Uuid }}">{{ $gist.Title }}</a>
+                                    </h4>
+                                    <div class="flex space-x-4 lg:flex-row flex py-1 lg:py-0 lg:ml-auto text-slate-500">
+                                        <div class="flex items-center float-right text-xs">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                            </svg>
+                                            <span class="whitespace-nowrap">{{ $gist.NbLikes }} likes</span>
+                                        </div>
+                                        <div class="flex items-center float-right text-xs">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                                            </svg>
+                                            <span class="whitespace-nowrap">{{ $gist.NbForks }} forks</span>
+                                        </div>
+                                        <div class="flex items-center float-right text-xs">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                                            </svg>
+                                            <span class="whitespace-nowrap">{{ $gist.NbFiles }} files</span>
+                                        </div>
+                                    </div>
 
+                                </div>
+                                <h5 class="text-sm text-slate-500 pb-1">Last active <span class="moment-timestamp">{{ $gist.UpdatedAt }}</span>
+                                    {{ if $gist.Forked }} • Forked from <a href="{{ $.c.ExternalUrl }}/{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Uuid }}">{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Title }}</a> {{ end }}
+                                    {{ if $gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> {{ visibilityStr $gist.Private false }} </span>{{ end }}</h5>
+                                <h6 class="text-xs text-slate-700 dark:text-slate-300 py-1">{{ $gist.Description }}</h6>
+                            </div>
                         </div>
-                        <h5 class="text-sm text-slate-500 pb-1">Last active <span class="moment-timestamp">{{ $gist.UpdatedAt }}</span>
-                            {{ if $gist.Forked }} • Forked from <a href="{{ $.c.ExternalUrl }}/{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Uuid }}">{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Title }}</a> {{ end }}
-                            {{ if $gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> {{ visibilityStr $gist.Private false }} </span>{{ end }}</h5>
-                        <h5 class="text-xs text-slate-700 dark:text-slate-300 py-1">{{ $gist.Description }}</h5>
                         <a href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}/{{ $gist.Uuid }}" class="text-slate-700 dark:text-slate-300">
                             <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto hover:border-primary-600">
                                 <div class="code overflow-auto">

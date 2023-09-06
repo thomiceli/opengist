@@ -6,7 +6,7 @@
                 {{if .fromUser}}
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="">
+                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="{{ .fromuser.Username }}'s Avatar">
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>
@@ -109,6 +109,7 @@
             {{ if ne (len .gists) 0 }}
                 {{ range $gist := .gists }}
                     <div class="mb-8">
+                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl $gist.User $.DisableGravatar }}" alt="{{ $gist.User.Username }}'s Avatar">
                         <div class="flex flex-col lg:flex-row">
                             <h4 class="text-md leading-tight break-all py-1 flex-auto">
                                 <a href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}">{{ $gist.User.Username }}</a> <span class="text-slate-700 dark:text-slate-300">/</span> <a class="font-bold" href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}/{{ $gist.Uuid }}">{{ $gist.Title }}</a>

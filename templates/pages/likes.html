@@ -6,7 +6,7 @@
             {{ range $user := .likers }}
                 <div class="relative flex items-center space-x-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-6 py-5 shadow-sm focus-within:ring-1 focus-within:border-primary-500 focus-within:ring-primary-500 hover:border-gray-600 dark:hover:border-gray-400">
                     <div class="min-w-0 flex">
-                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl $user $.DisableGravatar }}" alt="">
+                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl $user $.DisableGravatar }}" alt="{{ $user.Username }}'s Avatar">
                         <a href="{{ $.c.ExternalUrl }}/{{ $user.Username }}" class="focus:outline-none">
                             <span class="absolute inset-0" aria-hidden="true"></span>
                             <p class="text-sm font-medium text-slate-700 dark:text-slate-300 align-middle">{{ $user.Username }}</p>

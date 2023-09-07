@@ -57,7 +57,7 @@ func initialize() {
 	}
 
 	if err := memdb.Setup(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to in memory database")
+		log.Fatal().Err(err).Msg("Failed to initialize in memory database")
 	}
 }
 

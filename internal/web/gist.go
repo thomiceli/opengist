@@ -104,6 +104,14 @@ func gistSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+// gistNewPushInit has the same behavior as gistSoftInit but create a new gist empty instead
+func gistNewPushSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		setData(c, "gist", new(db.Gist))
+		return next(c)
+	}
+}
+
 func allGists(ctx echo.Context) error {
 	var err error
 	var urlPage string

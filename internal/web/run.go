@@ -212,6 +212,10 @@ func Start() {
 			g2.PUT("/set-config", adminSetConfig)
 		}
 
+		if config.C.HttpGit {
+			e.Any("/push/*", gitHttp, gistNewPushSoftInit)
+		}
+
 		g1.GET("/all", allGists, checkRequireLogin)
 		g1.GET("/search", allGists, checkRequireLogin)
 		g1.GET("/:user", allGists, checkRequireLogin)

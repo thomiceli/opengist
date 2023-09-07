@@ -7,6 +7,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/memdb"
 	"github.com/thomiceli/opengist/internal/ssh"
 	"github.com/thomiceli/opengist/internal/web"
 	"os"
@@ -53,6 +54,10 @@ func initialize() {
 	log.Info().Msg("Database file: " + filepath.Join(homePath, config.C.DBFilename))
 	if err := db.Setup(filepath.Join(homePath, config.C.DBFilename)); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")
+	}
+
+	if err := memdb.Setup(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to in memory database")
 	}
 }
 

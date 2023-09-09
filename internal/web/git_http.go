@@ -133,8 +133,8 @@ func gitHttp(ctx echo.Context) error {
 					gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
 					gist.Title = "gist:" + gist.Uuid
 
-					if err = gist.InitRepository(); err != nil {
-						return errorRes(500, "Cannot init repository in file system", err)
+					if err = gist.InitRepositoryViaNewPush(ctx); err != nil {
+						return errorRes(500, "Cannot init repository in the file system", err)
 					}
 
 					if err = gist.Create(); err != nil {
@@ -205,6 +205,15 @@ func pack(ctx echo.Context, serviceType string) error {
 	// updatedAt is updated only if serviceType is receive-pack
 	if serviceType == "receive-pack" {
 		gist := getData(ctx, "gist").(*db.Gist)
+
+		if hasNoCommits, err := git.HasNoCommits(gist.User.Username, gist.Uuid); err != nil {
+			return err
+		} else if hasNoCommits {
+			if err = gist.Delete(); err != nil {
+				return err
+			}
+		}
+
 		_ = gist.SetLastActiveNow()
 		_ = gist.UpdatePreviewAndCount()
 	}

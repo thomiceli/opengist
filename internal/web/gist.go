@@ -436,11 +436,6 @@ func toggleVisibility(ctx echo.Context) error {
 func deleteGist(ctx echo.Context) error {
 	var gist = getData(ctx, "gist").(*db.Gist)
 
-	err := gist.DeleteRepository()
-	if err != nil {
-		return errorRes(500, "Error deleting the repository", err)
-	}
-
 	if err := gist.Delete(); err != nil {
 		return errorRes(500, "Error deleting this gist", err)
 	}

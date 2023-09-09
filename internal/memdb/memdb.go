@@ -6,10 +6,8 @@ import ogdb "github.com/thomiceli/opengist/internal/db"
 var db *memdb.MemDB
 
 type GistPush struct {
-	UserID         uint
-	GistUUID       string
-	RepositoryPath string
-	Gist           *ogdb.Gist
+	UserID uint
+	Gist   *ogdb.Gist
 }
 
 func Setup() error {
@@ -37,13 +35,11 @@ func Setup() error {
 	return nil
 }
 
-func InsertGistPush(userId uint, gistUuid string, repositoryPath string, gist *ogdb.Gist) error {
+func InsertGistPush(userId uint, gist *ogdb.Gist) error {
 	txn := db.Txn(true)
 	if err := txn.Insert("gist_push", &GistPush{
-		UserID:         userId,
-		GistUUID:       gistUuid,
-		RepositoryPath: repositoryPath,
-		Gist:           gist,
+		UserID: userId,
+		Gist:   gist,
 	}); err != nil {
 		txn.Abort()
 		return err

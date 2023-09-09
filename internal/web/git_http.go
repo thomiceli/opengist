@@ -141,7 +141,7 @@ func gitHttp(ctx echo.Context) error {
 						return errorRes(500, "Cannot init repository in database", err)
 					}
 
-					if err := memdb.InsertGistPush(user.ID, gist.Uuid, git.RepositoryPath(user.Username, gist.Uuid), gist); err != nil {
+					if err := memdb.InsertGistPush(user.ID, gist); err != nil {
 						return errorRes(500, "Cannot save the URL for the new Gist", err)
 					}
 
@@ -152,8 +152,9 @@ func gitHttp(ctx echo.Context) error {
 						return errorRes(500, "Cannot get the gist link from the in memory database", err)
 					}
 
-					setData(ctx, "gist", gistFromMemdb.Gist)
-					setData(ctx, "repositoryPath", gistFromMemdb.RepositoryPath)
+					gist := gistFromMemdb.Gist
+					setData(ctx, "gist", gist)
+					setData(ctx, "repositoryPath", git.RepositoryPath(gist.User.Username, gist.Uuid))
 				}
 			}
 

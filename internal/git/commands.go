@@ -1,7 +1,9 @@
 package git
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"os"
@@ -14,6 +16,23 @@ import (
 
 func RepositoryPath(user string, gist string) string {
 	return filepath.Join(config.GetHomeDir(), "repos", strings.ToLower(user), gist)
+}
+
+func RepositoryUrl(ctx echo.Context, user string, gist string) string {
+	httpProtocol := "http"
+	if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
+		httpProtocol = "https"
+	}
+
+	var baseHttpUrl string
+	// if a custom external url is set, use it
+	if config.C.ExternalUrl != "" {
+		baseHttpUrl = config.C.ExternalUrl
+	} else {
+		baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
+	}
+
+	return fmt.Sprintf("%s/%s/%s", baseHttpUrl, user, gist)
 }
 
 func TmpRepositoryPath(gistId string) string {
@@ -40,7 +59,17 @@ func InitRepository(user string, gist string) error {
 		return err
 	}
 
-	return copyFiles(repositoryPath)
+	return createDotGitFiles(repositoryPath)
+}
+
+func InitRepositoryViaNewPush(user string, gist string, ctx echo.Context) error {
+	repositoryPath := RepositoryPath(user, gist)
+
+	if err := InitRepository(user, gist); err != nil {
+		return err
+	}
+	repositoryUrl := RepositoryUrl(ctx, user, gist)
+	return createDotGitHookFile(repositoryPath, "post-receive", fmt.Sprintf(postReceive, repositoryUrl, repositoryUrl))
 }
 
 func GetNumberOfCommitsOfRepository(user string, gist string) (string, error) {
@@ -186,7 +215,7 @@ func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) e
 		return err
 	}
 
-	return copyFiles(repositoryPathDst)
+	return createDotGitFiles(repositoryPathDst)
 }
 
 func SetFileContent(gistTmpId string, filename string, content string) error {
@@ -305,6 +334,26 @@ func GcRepos() error {
 	return err
 }
 
+func HasNoCommits(user string, gist string) (bool, error) {
+	repositoryPath := RepositoryPath(user, gist)
+
+	cmd := exec.Command("git", "rev-parse", "--all")
+	cmd.Dir = repositoryPath
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		return false, err
+	}
+
+	if out.String() == "" {
+		return true, nil // No commits exist
+	}
+
+	return false, nil // Commits exist
+}
+
 func GetGitVersion() (string, error) {
 	cmd := exec.Command("git", "--version")
 	stdout, err := cmd.Output()
@@ -320,19 +369,27 @@ func GetGitVersion() (string, error) {
 	return versionFields[2], nil
 }
 
-func copyFiles(repositoryPath string) error {
+func createDotGitFiles(repositoryPath string) error {
 	f1, err := os.OpenFile(filepath.Join(repositoryPath, "git-daemon-export-ok"), os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
 	defer f1.Close()
 
-	preReceiveDst, err := os.OpenFile(filepath.Join(repositoryPath, "hooks", "pre-receive"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0744)
+	if err = createDotGitHookFile(repositoryPath, "pre-receive", preReceive); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createDotGitHookFile(repositoryPath string, hook string, content string) error {
+	preReceiveDst, err := os.OpenFile(filepath.Join(repositoryPath, "hooks", hook), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0744)
 	if err != nil {
 		return err
 	}
 
-	if _, err = preReceiveDst.WriteString(preReceive); err != nil {
+	if _, err = preReceiveDst.WriteString(content); err != nil {
 		return err
 	}
 	defer preReceiveDst.Close()
@@ -346,6 +403,14 @@ disallowed_files=""
 
 while read -r old_rev new_rev ref
 do
+  if [ "$old_rev" = "0000000000000000000000000000000000000000" ]; then
+    # This is the first commit, so we check all the files in that commit
+    changed_files=$(git ls-tree -r --name-only "$new_rev")
+  else
+    # This is not the first commit, so we compare it with its predecessor
+    changed_files=$(git diff --name-only "$old_rev" "$new_rev")
+  fi
+
   while IFS= read -r file
   do
     case $file in
@@ -354,15 +419,29 @@ do
         ;;
     esac
   done <<EOF
-$(git diff --name-only "$old_rev" "$new_rev")
+$changed_files
 EOF
 done
 
 if [ -n "$disallowed_files" ]; then
+  echo ""
   echo "Pushing files in folders is not allowed:"
   for file in $disallowed_files; do
     echo "  $file"
   done
+  echo ""
   exit 1
 fi
+`
+
+const postReceive = `#!/bin/sh
+
+echo ""
+echo "Your new repository has been created here: %s"
+echo ""
+echo "If you want to keep working with your gist, you could set the remote URL via:"
+echo "git remote set-url origin %s"
+echo ""
+
+rm -f $0
 `

@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/memdb"
+	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"os/exec"
@@ -47,8 +51,9 @@ func gitHttp(ctx echo.Context) error {
 
 			gist := getData(ctx, "gist").(*db.Gist)
 
+			isPushNew := strings.HasPrefix(ctx.Request().URL.Path, "/push/info/refs")
+			isPushReceive := strings.HasPrefix(ctx.Request().URL.Path, "/push/git-receive-pack")
 			isInfoRefs := strings.HasSuffix(route.gitUrl, "/info/refs$")
-
 			isPull := ctx.QueryParam("service") == "git-upload-pack" ||
 				strings.HasSuffix(ctx.Request().URL.Path, "git-upload-pack") ||
 				ctx.Request().Method == "GET" && !isInfoRefs
@@ -61,7 +66,7 @@ func gitHttp(ctx echo.Context) error {
 				}
 			}
 
-			ctx.Set("repositoryPath", repositoryPath)
+			setData(ctx, "repositoryPath", repositoryPath)
 
 			// Shows basic auth if :
 			// - user wants to push the gist
@@ -87,16 +92,70 @@ func gitHttp(ctx echo.Context) error {
 				return basicAuth(ctx)
 			}
 
-			if gist.ID == 0 {
-				return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
-			}
-
-			if ok, err := argon2id.verify(authPassword, gist.User.Password); !ok || gist.User.Username != authUsername {
-				if err != nil {
-					return errorRes(500, "Cannot verify password", err)
+			if !isPushNew && !isPushReceive {
+				if gist.ID == 0 {
+					return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
 				}
-				log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-				return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
+
+				if ok, err := argon2id.verify(authPassword, gist.User.Password); !ok || gist.User.Username != authUsername {
+					if err != nil {
+						return errorRes(500, "Cannot verify password", err)
+					}
+					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
+					return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
+				}
+			} else {
+				var user *db.User
+				if user, err = db.GetUserByUsername(authUsername); err != nil {
+					if !errors.Is(err, gorm.ErrRecordNotFound) {
+						return errorRes(500, "Cannot get user", err)
+					}
+					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
+					return errorRes(401, "Invalid credentials", nil)
+				}
+
+				if ok, err := argon2id.verify(authPassword, user.Password); !ok {
+					if err != nil {
+						return errorRes(500, "Cannot check for password", err)
+					}
+					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
+					return errorRes(401, "Invalid credentials", nil)
+				}
+
+				if isPushNew {
+					gist = new(db.Gist)
+					gist.UserID = user.ID
+					gist.User = *user
+					uuidGist, err := uuid.NewRandom()
+					if err != nil {
+						return errorRes(500, "Error creating an UUID", err)
+					}
+					gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
+					gist.Title = "gist:" + gist.Uuid
+
+					if err = gist.InitRepositoryViaNewPush(ctx); err != nil {
+						return errorRes(500, "Cannot init repository in the file system", err)
+					}
+
+					if err = gist.Create(); err != nil {
+						return errorRes(500, "Cannot init repository in database", err)
+					}
+
+					if err := memdb.InsertGistPush(user.ID, gist); err != nil {
+						return errorRes(500, "Cannot save the URL for the new Gist", err)
+					}
+
+					setData(ctx, "gist", gist)
+				} else {
+					gistFromMemdb, err := memdb.GetGistPushAndDelete(user.ID)
+					if err != nil {
+						return errorRes(500, "Cannot get the gist link from the in memory database", err)
+					}
+
+					gist := gistFromMemdb.Gist
+					setData(ctx, "gist", gist)
+					setData(ctx, "repositoryPath", git.RepositoryPath(gist.User.Username, gist.Uuid))
+				}
 			}
 
 			return route.handler(ctx)
@@ -132,7 +191,7 @@ func pack(ctx echo.Context, serviceType string) error {
 		}
 	}
 
-	repositoryPath := ctx.Get("repositoryPath").(string)
+	repositoryPath := getData(ctx, "repositoryPath").(string)
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("git", serviceType, "--stateless-rpc", repositoryPath)
@@ -147,6 +206,15 @@ func pack(ctx echo.Context, serviceType string) error {
 	// updatedAt is updated only if serviceType is receive-pack
 	if serviceType == "receive-pack" {
 		gist := getData(ctx, "gist").(*db.Gist)
+
+		if hasNoCommits, err := git.HasNoCommits(gist.User.Username, gist.Uuid); err != nil {
+			return err
+		} else if hasNoCommits {
+			if err = gist.Delete(); err != nil {
+				return err
+			}
+		}
+
 		_ = gist.SetLastActiveNow()
 		_ = gist.UpdatePreviewAndCount()
 	}
@@ -241,7 +309,7 @@ func basicAuthDecode(encoded string) (string, string, error) {
 
 func sendFile(ctx echo.Context, contentType string) error {
 	gitFile := "/" + strings.Join(strings.Split(ctx.Request().URL.Path, "/")[3:], "/")
-	gitFile = path.Join(ctx.Get("repositoryPath").(string), gitFile)
+	gitFile = path.Join(getData(ctx, "repositoryPath").(string), gitFile)
 	fi, err := os.Stat(gitFile)
 	if os.IsNotExist(err) {
 		return errorRes(404, "File not found", nil)

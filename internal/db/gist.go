@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 	"os/exec"
@@ -190,6 +191,11 @@ func (gist *Gist) Update() error {
 }
 
 func (gist *Gist) Delete() error {
+	err := gist.DeleteRepository()
+	if err != nil {
+		return err
+	}
+
 	return db.Delete(&gist).Error
 }
 
@@ -258,6 +264,10 @@ func (gist *Gist) CanWrite(user *User) bool {
 
 func (gist *Gist) InitRepository() error {
 	return git.InitRepository(gist.User.Username, gist.Uuid)
+}
+
+func (gist *Gist) InitRepositoryViaNewPush(ctx echo.Context) error {
+	return git.InitRepositoryViaNewPush(gist.User.Username, gist.Uuid, ctx)
 }
 
 func (gist *Gist) DeleteRepository() error {

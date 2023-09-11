@@ -317,7 +317,7 @@ func (gist *Gist) Log(skip int) ([]*git.Commit, error) {
 }
 
 func (gist *Gist) NbCommits() (string, error) {
-	return git.GetNumberOfCommitsOfRepository(gist.User.Username, gist.Uuid)
+	return git.CountCommits(gist.User.Username, gist.Uuid)
 }
 
 func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {

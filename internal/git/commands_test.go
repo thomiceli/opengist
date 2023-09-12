@@ -202,7 +202,9 @@ func TestFork(t *testing.T) {
 	require.NoError(t, err, "Could not fork repository")
 
 	files1, err := GetFilesOfRepository("thomas", "gist1", "HEAD")
+	require.NoError(t, err, "Could not get files of repository")
 	files2, err := GetFilesOfRepository("thomas", "gist2", "HEAD")
+	require.NoError(t, err, "Could not get files of repository")
 
 	require.Equal(t, files1, files2, "Files are not the same")
 

@@ -1,8 +1,12 @@
 package git
 
 import (
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path"
@@ -16,10 +20,7 @@ func setup(t *testing.T) {
 	require.NoError(t, err, "Could not init config")
 
 	err = os.MkdirAll(path.Join(config.GetHomeDir(), "tests"), 0755)
-	reposDirectory = path.Join("tests")
-	require.NoError(t, err)
-
-	err = os.MkdirAll(filepath.Join(config.GetHomeDir(), "repos"), 0755)
+	ReposDirectory = path.Join("tests")
 	require.NoError(t, err)
 
 	err = os.MkdirAll(filepath.Join(config.GetHomeDir(), "tmp", "repos"), 0755)
@@ -245,6 +246,32 @@ func TestTruncate(t *testing.T) {
 	require.NoError(t, err, "Could not get content")
 	require.True(t, truncated, "Content should be truncated")
 	require.Equal(t, 2, len(content), "Content size is not correct")
+}
+
+func TestInitViaNewPush(t *testing.T) {
+	setup(t)
+	defer teardown(t)
+
+	e := echo.New()
+
+	// Create a mock HTTP request
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+
+	// Create a mock HTTP response recorder
+	rec := httptest.NewRecorder()
+
+	// Create a new Echo context
+	c := e.NewContext(req, rec)
+
+	// Define your user and gist
+	user := "testUser"
+	gist := "testGist"
+
+	// Call InitRepositoryViaNewPush
+	err := InitRepositoryViaNewPush(user, gist, c)
+
+	// Perform assertions
+	assert.NoError(t, err)
 }
 
 func commitToBare(t *testing.T, user string, gist string, files map[string]string) {

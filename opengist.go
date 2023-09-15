@@ -52,7 +52,7 @@ func initialize() {
 	}
 
 	log.Info().Msg("Database file: " + filepath.Join(homePath, config.C.DBFilename))
-	if err := db.Setup(filepath.Join(homePath, config.C.DBFilename)); err != nil {
+	if err := db.Setup(filepath.Join(homePath, config.C.DBFilename), false); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")
 	}
 
@@ -64,7 +64,7 @@ func initialize() {
 func main() {
 	initialize()
 
-	go web.Start()
+	go web.NewServer(os.Getenv("OG_DEV") == "1").Start()
 	go ssh.Start()
 
 	select {}

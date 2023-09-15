@@ -14,7 +14,7 @@ import (
 
 var db *gorm.DB
 
-func Setup(dbPath string) error {
+func Setup(dbPath string, sharedCache bool) error {
 	var err error
 	journalMode := strings.ToUpper(config.C.SqliteJournalMode)
 
@@ -22,7 +22,12 @@ func Setup(dbPath string) error {
 		log.Warn().Msg("Invalid SQLite journal mode: " + journalMode)
 	}
 
-	if db, err = gorm.Open(sqlite.Open(dbPath+"?_fk=true&_journal_mode="+journalMode), &gorm.Config{
+	sharedCacheStr := ""
+	if sharedCache {
+		sharedCacheStr = "&cache=shared"
+	}
+
+	if db, err = gorm.Open(sqlite.Open(dbPath+"?_fk=true&_journal_mode="+journalMode+sharedCacheStr), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	}); err != nil {
 		return err
@@ -49,6 +54,14 @@ func Setup(dbPath string) error {
 		SettingDisableLoginForm: "0",
 		SettingDisableGravatar:  "0",
 	})
+}
+
+func Close() error {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return err
+	}
+	return sqlDB.Close()
 }
 
 func CountAll(table interface{}) (int64, error) {

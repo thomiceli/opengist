@@ -15,13 +15,13 @@ import (
 )
 
 var (
-	reposDirectory = "repos"
+	ReposDirectory = "repos"
 )
 
 const truncateLimit = 2 << 18
 
 func RepositoryPath(user string, gist string) string {
-	return filepath.Join(config.GetHomeDir(), reposDirectory, strings.ToLower(user), gist)
+	return filepath.Join(config.GetHomeDir(), ReposDirectory, strings.ToLower(user), gist)
 }
 
 func RepositoryUrl(ctx echo.Context, user string, gist string) string {
@@ -299,7 +299,7 @@ func RPC(user string, gist string, service string) ([]byte, error) {
 }
 
 func GcRepos() error {
-	subdirs, err := os.ReadDir(filepath.Join(config.GetHomeDir(), reposDirectory))
+	subdirs, err := os.ReadDir(filepath.Join(config.GetHomeDir(), ReposDirectory))
 	if err != nil {
 		return err
 	}
@@ -309,7 +309,7 @@ func GcRepos() error {
 			continue
 		}
 
-		subRoot := filepath.Join(config.GetHomeDir(), reposDirectory, subdir.Name())
+		subRoot := filepath.Join(config.GetHomeDir(), ReposDirectory, subdir.Name())
 
 		gitRepos, err := os.ReadDir(subRoot)
 		if err != nil {

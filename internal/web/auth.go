@@ -216,7 +216,7 @@ func oauthCallback(ctx echo.Context) error {
 		case "gitea":
 			resp, err = http.Get(urlJoin(config.C.GiteaUrl, user.NickName+".keys"))
 		case "openid-connect":
-			err = errors.New("Cannot get keys from OIDC provider")
+			err = errors.New("cannot get keys from OIDC provider")
 		}
 
 		if err == nil {

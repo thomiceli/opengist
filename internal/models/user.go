@@ -15,6 +15,7 @@ type User struct {
 	AvatarURL string
 	GithubID  string
 	GiteaID   string
+	OIDCID    string `gorm:"column:oidc_id"`
 
 	Gists   []Gist   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys []SSHKey `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
@@ -124,6 +125,8 @@ func GetUserByProvider(id string, provider string) (*User, error) {
 		err = db.Where("github_id = ?", id).First(&user).Error
 	case "gitea":
 		err = db.Where("gitea_id = ?", id).First(&user).Error
+	case "openid-connect":
+		err = db.Where("oidc_id = ?", id).First(&user).Error
 	}
 
 	return user, err
@@ -167,6 +170,11 @@ func (user *User) DeleteProviderID(provider string) error {
 	case "gitea":
 		return db.Model(&user).
 			Update("gitea_id", nil).
+			Update("avatar_url", nil).
+			Error
+	case "openid-connect":
+		return db.Model(&user).
+			Update("oidc_id", nil).
 			Update("avatar_url", nil).
 			Error
 	}

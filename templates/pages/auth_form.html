@@ -51,7 +51,7 @@
                         {{ .csrfHtml }}
                     </form>
                     {{ end }}
-                    {{ if or .githubOauth .giteaOauth }}
+                    {{ if or .githubOauth .giteaOauth .oidcOauth }}
                         {{ if not .disableForm }}
                             <div class="relative my-4">
                                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
@@ -69,6 +69,11 @@
                             {{ if .giteaOauth }}
                                 <a href="{{ $.c.ExternalUrl }}/oauth/gitea" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                                     Continue with Gitea account
+                                </a>
+                            {{ end }}
+                            {{ if .oidcOauth }}
+                                <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                    Continue with OpenID account
                                 </a>
                             {{ end }}
                         </div>

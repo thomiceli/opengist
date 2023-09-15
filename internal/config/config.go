@@ -48,6 +48,10 @@ type config struct {
 	GiteaClientKey string `yaml:"gitea.client-key" env:"OG_GITEA_CLIENT_KEY"`
 	GiteaSecret    string `yaml:"gitea.secret" env:"OG_GITEA_SECRET"`
 	GiteaUrl       string `yaml:"gitea.url" env:"OG_GITEA_URL"`
+
+	OIDCClientKey    string `yaml:"oidc.client-key" env:"OG_OIDC_CLIENT_KEY"`
+	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
+	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
 }
 
 func configWithDefaults() (*config, error) {
@@ -234,6 +238,10 @@ func checks(c *config) error {
 	}
 
 	if _, err := url.Parse(c.GiteaUrl); err != nil {
+		return err
+	}
+
+    if _, err := url.Parse(c.OIDCDiscoveryUrl); err != nil {
 		return err
 	}
 

@@ -30,7 +30,7 @@ A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomic
 * Search for snippets ; browse users snippets, likes and forks
 * Editor with indentation mode & size ; drag and drop files
 * Download raw files or as a ZIP archive
-* OAuth2 login with GitHub and Gitea
+* OAuth2 login with GitHub, Gitea, and OpenID Connect
 * Avatars via Gravatar or OAuth2 providers
 * Light/Dark mode
 * Responsive UI
@@ -113,8 +113,8 @@ You would only need to specify the configuration options you want to change — 
 <details>
 <summary>Configuration option list</summary>
 
-| YAML Config Key       | Environment Variable     | Default value        | Description                                                                                                                       | 
-|-----------------------|--------------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| YAML Config Key       | Environment Variable     | Default value        | Description                                                                                                                       |
+| --------------------- | ------------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | log-level             | OG_LOG_LEVEL             | `warn`               | Set the log level to one of the following: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`.                           |
 | external-url          | OG_EXTERNAL_URL          | none                 | Public URL for the Git HTTP/SSH connection. If not set, uses the URL from the request.                                            |
 | opengist-home         | OG_OPENGIST_HOME         | home directory       | Path to the directory where Opengist stores its data.                                                                             |
@@ -136,6 +136,9 @@ You would only need to specify the configuration options you want to change — 
 | gitea.client-key      | OG_GITEA_CLIENT_KEY      | none                 | The client key for the Gitea OAuth application.                                                                                   |
 | gitea.secret          | OG_GITEA_SECRET          | none                 | The secret for the Gitea OAuth application.                                                                                       |
 | gitea.url             | OG_GITEA_URL             | `https://gitea.com/` | The URL of the Gitea instance.                                                                                                    |
+| oidc.client-key       | OG_OIDC_CLIENT_KEY       | none                 | The client key for the OpenID application.                                                                                        |
+| oidc.secret           | OG_OIDC_SECRET           | none                 | The secret for the OpenID application.                                                                                            |
+| oidc.discovery-url    | OG_OIDC_DISCOVERY_URL    | none                 | Discovery endpoint of the OpenID provider.                                                                                        |
 
 </details>
 
@@ -224,7 +227,7 @@ service fail2ban restart
 
 ## Configure OAuth
 
-Opengist can be configured to use OAuth to authenticate users, with GitHub or Gitea.
+Opengist can be configured to use OAuth to authenticate users, with GitHub, Gitea, or OpenID Connect.
 
 <details>
 <summary>Integrate Github</summary>
@@ -249,6 +252,20 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub or Gi
   gitea.secret: <secret>
   # URL of the Gitea instance. Default: https://gitea.com/
   gitea.url: http://localhost:3000
+  ```
+</details>
+
+<details>
+<summary>Integrate OpenID</summary>
+
+* Add a new OAuth app in Application settings of your OIDC provider
+* Set 'Redirect URI' to `http://opengist.domain/oauth/openid-connect/callback`
+* Copy the 'Client ID', 'Client Secret', and the discovery endpoint, and add them to the configuration :
+  ```yaml
+  oidc.client-key: <key>
+  oidc.secret: <secret>
+  # Discovery endpoint of the OpenID provider
+  oidc.url: http://auth.example.com/.well-known/openid-configuration
   ```
 </details>
 

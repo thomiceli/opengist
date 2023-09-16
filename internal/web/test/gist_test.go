@@ -33,6 +33,7 @@ func TestGists(t *testing.T) {
 	require.NoError(t, err)
 
 	gist1db, err := db.GetGistByID("1")
+	require.NoError(t, err)
 	require.Equal(t, gist1.Title, gist1db.Title)
 	require.Equal(t, gist1.Description, gist1db.Description)
 	require.Regexp(t, "[a-f0-9]{32}", gist1db.Uuid)
@@ -53,6 +54,7 @@ func TestGists(t *testing.T) {
 		Content:     []string{"", "yeah\ncool", "yeah\ncool gist actually"},
 	}
 	err = s.request("POST", "/", gist2, 200)
+	require.NoError(t, err)
 
 	gist3 := db.GistDTO{
 		Title:       "gist3",
@@ -68,6 +70,7 @@ func TestGists(t *testing.T) {
 	require.NoError(t, err)
 
 	gist3files, err := git.GetFilesOfRepository(gist3db.User.Username, gist3db.Uuid, "HEAD")
+	require.NoError(t, err)
 	require.Equal(t, "gistfile1.txt", gist3files[0])
 }
 

@@ -95,6 +95,7 @@ func TestGists(t *testing.T) {
 	require.Equal(t, 1, len(gist1files))
 
 	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/delete", nil, 302)
+	require.NoError(t, err)
 }
 
 func TestVisibility(t *testing.T) {

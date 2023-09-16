@@ -18,6 +18,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -65,10 +66,10 @@ func (s *testServer) request(method, uri string, data interface{}, expectedCode 
 	s.server.ServeHTTP(w, req)
 
 	if w.Code != expectedCode {
-		return errors.New(fmt.Sprintf("unexpected status code %d, expected %d", w.Code, expectedCode))
+		return fmt.Errorf("unexpected status code %d, expected %d", w.Code, expectedCode)
 	}
 
-	if method == "POST" {
+	if method == http.MethodPost {
 		if strings.Contains(uri, "/login") || strings.Contains(uri, "/register") {
 			cookie := ""
 			h := w.Header().Get("Set-Cookie")
@@ -106,8 +107,18 @@ func structToURLValues(s interface{}) url.Values {
 		field := rValue.Type().Field(i)
 		tag := field.Tag.Get("form")
 		if tag != "" {
-			fieldValue := rValue.Field(i).String()
-			v.Add(tag, fieldValue)
+			if field.Type.Kind() == reflect.Int {
+				fieldValue := rValue.Field(i).Int()
+				v.Add(tag, strconv.FormatInt(fieldValue, 10))
+			} else if field.Type.Kind() == reflect.Slice {
+				fieldValue := rValue.Field(i).Interface().([]string)
+				for _, va := range fieldValue {
+					v.Add(tag, va)
+				}
+			} else {
+				fieldValue := rValue.Field(i).String()
+				v.Add(tag, fieldValue)
+			}
 		}
 	}
 	return v
@@ -145,4 +156,7 @@ func teardown(t *testing.T, s *testServer) {
 
 	err := db.Close()
 	require.NoError(t, err, "Could not close database")
+
+	err = os.RemoveAll(path.Join(config.C.OpengistHome, "tests"))
+	require.NoError(t, err, "Could not remove repos directory")
 }

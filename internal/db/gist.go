@@ -391,6 +391,8 @@ type GistDTO struct {
 	Description string    `validate:"max=150" form:"description"`
 	Private     int       `validate:"number,min=0,max=2" form:"private"`
 	Files       []FileDTO `validate:"min=1,dive"`
+	Name        []string  `form:"name"`
+	Content     []string  `form:"content"`
 }
 
 type FileDTO struct {

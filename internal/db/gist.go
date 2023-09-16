@@ -317,7 +317,7 @@ func (gist *Gist) Log(skip int) ([]*git.Commit, error) {
 }
 
 func (gist *Gist) NbCommits() (string, error) {
-	return git.GetNumberOfCommitsOfRepository(gist.User.Username, gist.Uuid)
+	return git.CountCommits(gist.User.Username, gist.Uuid)
 }
 
 func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
@@ -391,6 +391,8 @@ type GistDTO struct {
 	Description string    `validate:"max=150" form:"description"`
 	Private     int       `validate:"number,min=0,max=2" form:"private"`
 	Files       []FileDTO `validate:"min=1,dive"`
+	Name        []string  `form:"name"`
+	Content     []string  `form:"content"`
 }
 
 type FileDTO struct {

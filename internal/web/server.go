@@ -17,7 +17,6 @@ import (
 	"html/template"
 	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -25,7 +24,7 @@ import (
 	"time"
 )
 
-var dev = os.Getenv("OG_DEV") == "1"
+var dev bool
 var store *sessions.CookieStore
 var re = regexp.MustCompile("[^a-z0-9]+")
 var fm = template.FuncMap{
@@ -116,7 +115,13 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func Start() {
+type Server struct {
+	echo *echo.Echo
+	dev  bool
+}
+
+func NewServer(isDev bool) *Server {
+	dev = isDev
 	store = sessions.NewCookieStore([]byte("opengist"))
 	gothic.Store = store
 
@@ -172,13 +177,15 @@ func Start() {
 	// Web based routes
 	g1 := e.Group("")
 	{
-		g1.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-			TokenLookup:    "form:_csrf",
-			CookiePath:     "/",
-			CookieHTTPOnly: true,
-			CookieSameSite: http.SameSiteStrictMode,
-		}))
-		g1.Use(csrfInit)
+		if !dev {
+			g1.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+				TokenLookup:    "form:_csrf",
+				CookiePath:     "/",
+				CookieHTTPOnly: true,
+				CookieSameSite: http.SameSiteStrictMode,
+			}))
+			g1.Use(csrfInit)
+		}
 
 		g1.GET("/", create, logged)
 		g1.POST("/", processCreate, logged)
@@ -242,28 +249,33 @@ func Start() {
 		}
 	}
 
-	debugStr := ""
 	// Git HTTP routes
 	if config.C.HttpGit {
 		e.Any("/:user/:gistname/*", gitHttp, gistSoftInit)
-		debugStr = " (with Git over HTTP)"
 	}
 
 	e.Any("/*", noRouteFound)
 
+	return &Server{echo: e, dev: dev}
+}
+
+func (s *Server) Start() {
 	addr := config.C.HttpHost + ":" + config.C.HttpPort
 
-	if config.C.HttpTLSEnabled {
-		log.Info().Msg("Starting HTTPS server on https://" + addr + debugStr)
-		if err := e.StartTLS(addr, config.C.HttpCertFile, config.C.HttpKeyFile); err != nil {
-			log.Fatal().Err(err).Msg("Failed to start HTTPS server")
-		}
-	} else {
-		log.Info().Msg("Starting HTTP server on http://" + addr + debugStr)
-		if err := e.Start(addr); err != nil {
-			log.Fatal().Err(err).Msg("Failed to start HTTP server")
-		}
+	log.Info().Msg("Starting HTTP server on http://" + addr)
+	if err := s.echo.Start(addr); err != nil && err != http.ErrServerClosed {
+		log.Fatal().Err(err).Msg("Failed to start HTTP server")
 	}
+}
+
+func (s *Server) Stop() {
+	if err := s.echo.Close(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to stop HTTP server")
+	}
+}
+
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.echo.ServeHTTP(w, r)
 }
 
 func dataInit(next echo.HandlerFunc) echo.HandlerFunc {

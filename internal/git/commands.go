@@ -14,8 +14,14 @@ import (
 	"strings"
 )
 
+var (
+	ReposDirectory = "repos"
+)
+
+const truncateLimit = 2 << 18
+
 func RepositoryPath(user string, gist string) string {
-	return filepath.Join(config.GetHomeDir(), "repos", strings.ToLower(user), gist)
+	return filepath.Join(config.GetHomeDir(), ReposDirectory, strings.ToLower(user), gist)
 }
 
 func RepositoryUrl(ctx echo.Context, user string, gist string) string {
@@ -54,8 +60,7 @@ func InitRepository(user string, gist string) error {
 		repositoryPath,
 	)
 
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 
@@ -72,7 +77,7 @@ func InitRepositoryViaNewPush(user string, gist string, ctx echo.Context) error 
 	return createDotGitHookFile(repositoryPath, "post-receive", fmt.Sprintf(postReceive, repositoryUrl, repositoryUrl))
 }
 
-func GetNumberOfCommitsOfRepository(user string, gist string) (string, error) {
+func CountCommits(user string, gist string) (string, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
@@ -113,7 +118,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 
 	var maxBytes int64 = -1
 	if truncate {
-		maxBytes = 2 << 18
+		maxBytes = truncateLimit
 	}
 
 	cmd := exec.Command(
@@ -167,7 +172,7 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	}
 	defer cmd.Wait()
 
-	return parseLog(stdout, 2<<18), nil
+	return parseLog(stdout, truncateLimit), nil
 }
 
 func CloneTmp(user string, gist string, gistTmpId string, email string) error {
@@ -294,7 +299,7 @@ func RPC(user string, gist string, service string) ([]byte, error) {
 }
 
 func GcRepos() error {
-	subdirs, err := os.ReadDir(filepath.Join(config.GetHomeDir(), "repos"))
+	subdirs, err := os.ReadDir(filepath.Join(config.GetHomeDir(), ReposDirectory))
 	if err != nil {
 		return err
 	}
@@ -304,7 +309,7 @@ func GcRepos() error {
 			continue
 		}
 
-		subRoot := filepath.Join(config.GetHomeDir(), "repos", subdir.Name())
+		subRoot := filepath.Join(config.GetHomeDir(), ReposDirectory, subdir.Name())
 
 		gitRepos, err := os.ReadDir(subRoot)
 		if err != nil {

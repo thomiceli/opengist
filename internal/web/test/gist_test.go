@@ -22,6 +22,9 @@ func TestGists(t *testing.T) {
 	err = s.request("GET", "/all", nil, 200)
 	require.NoError(t, err)
 
+	err = s.request("POST", "/", nil, 200)
+	require.NoError(t, err)
+
 	gist1 := db.GistDTO{
 		Title:       "gist1",
 		Description: "my first gist",
@@ -34,13 +37,18 @@ func TestGists(t *testing.T) {
 
 	gist1db, err := db.GetGistByID("1")
 	require.NoError(t, err)
+	require.Equal(t, uint(1), gist1db.ID)
 	require.Equal(t, gist1.Title, gist1db.Title)
 	require.Equal(t, gist1.Description, gist1db.Description)
 	require.Regexp(t, "[a-f0-9]{32}", gist1db.Uuid)
+	require.Equal(t, user1.Username, gist1db.User.Username)
+
+	err = s.request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 200)
+	require.NoError(t, err)
 
 	gist1files, err := git.GetFilesOfRepository(gist1db.User.Username, gist1db.Uuid, "HEAD")
 	require.NoError(t, err)
-	require.Equal(t, len(gist1.Name), len(gist1files))
+	require.Equal(t, 3, len(gist1files))
 
 	gist1fileContent, _, err := git.GetFileContent(gist1db.User.Username, gist1db.Uuid, "HEAD", gist1.Name[0], false)
 	require.NoError(t, err)
@@ -72,6 +80,21 @@ func TestGists(t *testing.T) {
 	gist3files, err := git.GetFilesOfRepository(gist3db.User.Username, gist3db.Uuid, "HEAD")
 	require.NoError(t, err)
 	require.Equal(t, "gistfile1.txt", gist3files[0])
+
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/edit", nil, 200)
+	require.NoError(t, err)
+
+	gist1.Name = []string{"gist1.txt"}
+	gist1.Content = []string{"only want one gist"}
+
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/edit", gist1, 302)
+	require.NoError(t, err)
+
+	gist1files, err = git.GetFilesOfRepository(gist1db.User.Username, gist1db.Uuid, "HEAD")
+	require.NoError(t, err)
+	require.Equal(t, 1, len(gist1files))
+
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/delete", nil, 302)
 }
 
 func TestVisibility(t *testing.T) {
@@ -114,4 +137,63 @@ func TestVisibility(t *testing.T) {
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
 	require.Equal(t, 1, gist1db.Private)
+}
+
+func TestLikeFork(t *testing.T) {
+	setup(t)
+	s, err := newTestServer()
+	require.NoError(t, err, "Failed to create test server")
+	defer teardown(t, s)
+
+	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
+	register(t, s, user1)
+
+	gist1 := db.GistDTO{
+		Title:       "gist1",
+		Description: "my first gist",
+		Private:     1,
+		Name:        []string{""},
+		Content:     []string{"yeah"},
+	}
+	err = s.request("POST", "/", gist1, 302)
+	require.NoError(t, err)
+
+	s.sessionCookie = ""
+
+	user2 := db.UserDTO{Username: "kaguya", Password: "kaguya"}
+	register(t, s, user2)
+
+	gist1db, err := db.GetGistByID("1")
+	require.NoError(t, err)
+	require.Equal(t, 0, gist1db.NbLikes)
+	likeCount, err := db.CountAll(db.Like{})
+	require.NoError(t, err)
+	require.Equal(t, int64(0), likeCount)
+
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/like", nil, 302)
+	require.NoError(t, err)
+	gist1db, err = db.GetGistByID("1")
+	require.NoError(t, err)
+	require.Equal(t, 1, gist1db.NbLikes)
+	likeCount, err = db.CountAll(db.Like{})
+	require.NoError(t, err)
+	require.Equal(t, int64(1), likeCount)
+
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/like", nil, 302)
+	require.NoError(t, err)
+	gist1db, err = db.GetGistByID("1")
+	require.NoError(t, err)
+	require.Equal(t, 0, gist1db.NbLikes)
+	likeCount, err = db.CountAll(db.Like{})
+	require.NoError(t, err)
+	require.Equal(t, int64(0), likeCount)
+
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/fork", nil, 302)
+	require.NoError(t, err)
+	gist2db, err := db.GetGistByID("2")
+	require.NoError(t, err)
+	require.Equal(t, gist1db.Title, gist2db.Title)
+	require.Equal(t, gist1db.Description, gist2db.Description)
+	require.Equal(t, gist1db.Private, gist2db.Private)
+	require.Equal(t, user2.Username, gist2db.User.Username)
 }

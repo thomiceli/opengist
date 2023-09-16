@@ -1,4 +1,4 @@
-.PHONY: all install build_frontend build_backend build build_docker watch_frontend watch_backend watch clean clean_docker
+.PHONY: all install build_frontend build_backend build build_docker watch_frontend watch_backend watch clean clean_docker check_changes go_mod fmt test
 
 # Specify the name of your Go binary output
 BINARY_NAME := opengist
@@ -44,3 +44,17 @@ clean:
 clean_docker:
 	@echo "Cleaning up Docker image..."
 	@docker rmi $(BINARY_NAME)
+
+check_changes:
+	@echo "Checking for changes..."
+	@git --no-pager diff --exit-code || (echo "There are unstaged changes detected." && exit 1)
+
+go_mod:
+	@go mod download
+	@go mod tidy
+
+fmt:
+	@go fmt ./...
+
+test:
+	@go test ./... -p 1

@@ -45,7 +45,9 @@ func Setup(dbPath string, sharedCache bool) error {
 		return err
 	}
 
-	ApplyMigrations(db)
+	if err = ApplyMigrations(db); err != nil {
+		return err
+	}
 
 	// Default admin setting values
 	return initAdminSettings(map[string]string{

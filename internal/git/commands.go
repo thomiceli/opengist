@@ -170,9 +170,14 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer cmd.Wait()
+	defer func(cmd *exec.Cmd) {
+		waitErr := cmd.Wait()
+		if waitErr != nil {
+			err = waitErr
+		}
+	}(cmd)
 
-	return parseLog(stdout, truncateLimit), nil
+	return parseLog(stdout, truncateLimit), err
 }
 
 func CloneTmp(user string, gist string, gistTmpId string, email string) error {

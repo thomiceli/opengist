@@ -1,6 +1,6 @@
 module github.com/thomiceli/opengist
 
-go 1.19
+go 1.20
 
 require (
 	github.com/glebarez/go-sqlite v1.21.2

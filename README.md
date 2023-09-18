@@ -123,9 +123,6 @@ You would only need to specify the configuration options you want to change — 
 | http.host             | OG_HTTP_HOST             | `0.0.0.0`            | The host on which the HTTP server should bind.                                                                                    |
 | http.port             | OG_HTTP_PORT             | `6157`               | The port on which the HTTP server should listen.                                                                                  |
 | http.git-enabled      | OG_HTTP_GIT_ENABLED      | `true`               | Enable or disable git operations (clone, pull, push) via HTTP. (`true` or `false`)                                                |
-| http.tls-enabled      | OG_HTTP_TLS_ENABLED      | `false`              | Enable or disable TLS for the HTTP server. (`true` or `false`)                                                                    |
-| http.cert-file        | OG_HTTP_CERT_FILE        | none                 | Path to the TLS certificate file if TLS is enabled.                                                                               |
-| http.key-file         | OG_HTTP_KEY_FILE         | none                 | Path to the TLS key file if TLS is enabled.                                                                                       |
 | ssh.git-enabled       | OG_SSH_GIT_ENABLED       | `true`               | Enable or disable git operations (clone, pull, push) via SSH. (`true` or `false`)                                                 |
 | ssh.host              | OG_SSH_HOST              | `0.0.0.0`            | The host on which the SSH server should bind.                                                                                     |
 | ssh.port              | OG_SSH_PORT              | `2222`               | The port on which the SSH server should listen.                                                                                   |

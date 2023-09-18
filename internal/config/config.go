@@ -29,12 +29,9 @@ type config struct {
 
 	SqliteJournalMode string `yaml:"sqlite.journal-mode" env:"OG_SQLITE_JOURNAL_MODE"`
 
-	HttpHost       string `yaml:"http.host" env:"OG_HTTP_HOST"`
-	HttpPort       string `yaml:"http.port" env:"OG_HTTP_PORT"`
-	HttpGit        bool   `yaml:"http.git-enabled" env:"OG_HTTP_GIT_ENABLED"`
-	HttpTLSEnabled bool   `yaml:"http.tls-enabled" env:"OG_HTTP_TLS_ENABLED"`
-	HttpCertFile   string `yaml:"http.cert-file" env:"OG_HTTP_CERT_FILE"`
-	HttpKeyFile    string `yaml:"http.key-file" env:"OG_HTTP_KEY_FILE"`
+	HttpHost string `yaml:"http.host" env:"OG_HTTP_HOST"`
+	HttpPort string `yaml:"http.port" env:"OG_HTTP_PORT"`
+	HttpGit  bool   `yaml:"http.git-enabled" env:"OG_HTTP_GIT_ENABLED"`
 
 	SshGit            bool   `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"`
 	SshHost           string `yaml:"ssh.host" env:"OG_SSH_HOST"`
@@ -66,7 +63,6 @@ func configWithDefaults() (*config, error) {
 	c.HttpHost = "0.0.0.0"
 	c.HttpPort = "6157"
 	c.HttpGit = true
-	c.HttpTLSEnabled = false
 
 	c.SshGit = true
 	c.SshHost = "0.0.0.0"

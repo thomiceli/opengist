@@ -26,15 +26,6 @@ http.port: 6157
 # Enable or disable git operations (clone, pull, push) via HTTP (either `true` or `false`). Default: true
 http.git-enabled: true
 
-# Enable or disable TLS (either `true` or `false`). Default: false
-http.tls-enabled: false
-
-# Path to the TLS certificate file if TLS is enabled
-http.cert-file:
-
-# Path to the TLS key file if TLS is enabled
-http.key-file:
-
 # SSH built-in server configuration
 # Note: it is not using the SSH daemon from your machine (yet)
 

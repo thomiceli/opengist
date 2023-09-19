@@ -10,6 +10,7 @@ export default defineConfig({
         manifest: true,
         rollupOptions: {
             input: ['./public/main.ts', './public/editor.ts', './public/admin.ts', './public/hljs.ts']
-        }
+        },
+        assetsInlineLimit: 0,
     }
 })

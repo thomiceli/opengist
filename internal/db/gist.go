@@ -377,7 +377,6 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 			gist.Preview = file.Content
 		}
 
-		gist.Preview = file.Content
 		gist.PreviewFilename = file.Filename
 	}
 

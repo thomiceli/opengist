@@ -11,7 +11,9 @@ const setSetting = (key: string, value: string) => {
     const data = new URLSearchParams();
     data.append('key', key);
     data.append('value', value);
-    data.append('_csrf', ((document.getElementsByName('_csrf')[0] as HTMLInputElement).value));
+    if (document.getElementsByName('_csrf').length !== 0) {
+        data.append('_csrf', ((document.getElementsByName('_csrf')[0] as HTMLInputElement).value));
+    }
     return fetch('/admin-panel/set-config', {
         method: 'PUT',
         credentials: 'same-origin',

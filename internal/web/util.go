@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/i18n"
 	"golang.org/x/crypto/argon2"
 	"html/template"
 	"net/http"
@@ -212,16 +213,21 @@ func paginate[T any](ctx echo.Context, data []*T, pageInt int, perPage int, temp
 
 	switch labels {
 	case 1:
-		setData(ctx, "prevLabel", "Previous")
-		setData(ctx, "nextLabel", "Next")
+		setData(ctx, "prevLabel", tr(ctx, "pagination.previous"))
+		setData(ctx, "nextLabel", tr(ctx, "pagination.next"))
 	case 2:
-		setData(ctx, "prevLabel", "Newer")
-		setData(ctx, "nextLabel", "Older")
+		setData(ctx, "prevLabel", tr(ctx, "pagination.newer"))
+		setData(ctx, "nextLabel", tr(ctx, "pagination.older"))
 	}
 
 	setData(ctx, "urlPage", urlPage)
 	setData(ctx, templateDataName, data)
 	return nil
+}
+
+func tr(ctx echo.Context, key string) template.HTML {
+	l := getData(ctx, "locale").(*i18n.Locale)
+	return l.Tr(key)
 }
 
 type Argon2ID struct {

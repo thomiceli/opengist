@@ -10,14 +10,14 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>
-                        <p class="text-sm text-slate-500">Joined <span class="moment-timestamp">{{.fromUser.CreatedAt}}</span></p>
+                        <p class="text-sm text-slate-500">{{ .locale.Tr "gist.list.joined" }} <span class="moment-timestamp">{{.fromUser.CreatedAt}}</span></p>
                     </div>
                 </div>
                 {{ else }}
                     {{ if eq .mode "all" }}
-                        <h1 class="text-2xl font-bold leading-tight">All gists</h1>
+                        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "gist.list.all" }}</h1>
                     {{ else if eq .mode "search" }}
-                        <h1 class="text-2xl font-bold leading-tight">Search results</h1>
+                        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "gist.list.search-results" }}</h1>
                     {{ end }}
                 {{ end }}
             </div>
@@ -25,7 +25,7 @@
                 <div class="relative text-left">
                     <div>
                         <button type="button" class="whitespace-nowrap inline-flex text-slate-700 dark:text-slate-300 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 leading-3" id="sort-gists-button">
-                            <span class="text-gray-700 dark:text-gray-300">Sort : <span class="text-slate-700 dark:text-slate-300">{{.order}} {{.sort}}</span></span>
+                            <span class="text-gray-700 dark:text-gray-300">{{ .locale.Tr "gist.list.sort" }} : <span class="text-slate-700 dark:text-slate-300">{{.order}} {{.sort}}</span></span>
                             <svg class="-mr-1 ml-2 h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                             </svg>
@@ -34,22 +34,22 @@
                     <div id="sort-gists-dropdown" class="hidden absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-200 dark:divide-gray-700 rounded-md rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 shadow-lg ring-1 ring-white dark:ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                         <div class="" role="none">
                             <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=created&order=desc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
-                                Recently created
+                                {{ .locale.Tr "gist.list.order-by-desc" }} {{ .locale.Tr "gist.list.sort-by-created" }}
                             </a>
                         </div>
                         <div class="" role="none">
                             <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=created&order=asc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
-                                Least recently created
+                                {{ .locale.Tr "gist.list.order-by-asc" }} {{ .locale.Tr "gist.list.sort-by-created" }}
                             </a>
                         </div>
                         <div class="" role="none">
                             <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=updated&order=desc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
-                                Recently updated
+                                {{ .locale.Tr "gist.list.order-by-desc" }} {{ .locale.Tr "gist.list.sort-by-updated" }}
                             </a>
                         </div>
                         <div class="" role="none">
                             <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=updated&order=asc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-b-md" role="menuitem">
-                                Least recently updated
+                                {{ .locale.Tr "gist.list.order-by-asc" }} {{ .locale.Tr "gist.list.sort-by-updated" }}
                             </a>
                         </div>
                     </div>
@@ -61,11 +61,11 @@
         {{ if and (ne .mode "all") (ne .mode "search") }}
         <div class="mt-4">
             <div class="sm:hidden">
-                <label for="tabs" class="sr-only">Select a tab</label>
+                <label for="tabs" class="sr-only">{{ .locale.Tr "gist.list.select-tab" }}</label>
                 <select id="gist-tabs" name="tabs" class="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:bg-gray-800 dark:border-gray-700">
-                    <option {{if eq .mode "fromUser"}}selected {{end}}data-url="/{{ .fromUser.Username }}">All gists ({{ .countFromUser }})</option>
-                    {{ if ne .countLiked 0 }}<option {{if eq .mode "liked"}}selected {{end}}data-url="/{{ .fromUser.Username }}/liked">Liked ({{ .countLiked }})</option>{{end}}
-                    {{ if ne .countForked 0 }}<option {{if eq .mode "forked"}}selected {{end}}data-url="/{{ .fromUser.Username }}/forked">Forked ({{ .countForked }})</option>{{end}}
+                    <option {{if eq .mode "fromUser"}}selected {{end}}data-url="/{{ .fromUser.Username }}">{{ .locale.Tr "gist.list.all" }} ({{ .countFromUser }})</option>
+                    {{ if ne .countLiked 0 }}<option {{if eq .mode "liked"}}selected {{end}}data-url="/{{ .fromUser.Username }}/liked">{{ .locale.Tr "gist.list.liked" }} ({{ .countLiked }})</option>{{end}}
+                    {{ if ne .countForked 0 }}<option {{if eq .mode "forked"}}selected {{end}}data-url="/{{ .fromUser.Username }}/forked">{{ .locale.Tr "gist.list.forked" }} ({{ .countForked }})</option>{{end}}
                 </select>
             </div>
             <div class="hidden sm:block">
@@ -76,7 +76,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
                                 </svg>
-                                All gists
+                                {{ .locale.Tr "gist.list.all" }}
                                 <span class="bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-slate-300 ml-2 hidden rounded-full py-0.5 px-2.5 text-xs font-medium md:inline-block">{{ .countFromUser }}</span>
                             </a>
                             {{ if ne .countLiked 0 }}
@@ -84,7 +84,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-1">
                                     <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
                                 </svg>
-                                Liked
+                                {{ .locale.Tr "gist.list.liked" }}
                                 <span class="bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-slate-300 ml-2 hidden rounded-full py-0.5 px-2.5 text-xs font-medium md:inline-block">{{ .countLiked }}</span>
                             </a>
                             {{ end }}
@@ -93,7 +93,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                                 </svg>
-                                Forked
+                                {{ .locale.Tr "gist.list.forked" }}
                                 <span class="bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-slate-300 ml-2 hidden rounded-full py-0.5 px-2.5 text-xs font-medium md:inline-block">{{ .countForked }}</span>
                             </a>
                             {{ end }}
@@ -125,25 +125,25 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                             </svg>
-                                            <span class="whitespace-nowrap">{{ $gist.NbLikes }} likes</span>
+                                            <span class="whitespace-nowrap">{{ $gist.NbLikes }} {{ $.locale.Tr "gist.list.likes" }}</span>
                                         </div>
                                         <div class="flex items-center float-right text-xs">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                                             </svg>
-                                            <span class="whitespace-nowrap">{{ $gist.NbForks }} forks</span>
+                                            <span class="whitespace-nowrap">{{ $gist.NbForks }} {{ $.locale.Tr "gist.list.forks" }}</span>
                                         </div>
                                         <div class="flex items-center float-right text-xs">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 inline-flex">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
                                             </svg>
-                                            <span class="whitespace-nowrap">{{ $gist.NbFiles }} files</span>
+                                            <span class="whitespace-nowrap">{{ $gist.NbFiles }} {{ $.locale.Tr "gist.list.files" }}</span>
                                         </div>
                                     </div>
 
                                 </div>
-                                <h5 class="text-sm text-slate-500 pb-1">Last active <span class="moment-timestamp">{{ $gist.UpdatedAt }}</span>
-                                    {{ if $gist.Forked }} • Forked from <a href="{{ $.c.ExternalUrl }}/{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Uuid }}">{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Title }}</a> {{ end }}
+                                <h5 class="text-sm text-slate-500 pb-1">{{ $.locale.Tr "gist.list.last-active" }} <span class="moment-timestamp">{{ $gist.UpdatedAt }}</span>
+                                    {{ if $gist.Forked }} • {{ $.locale.Tr "gist.list.forked-from" }} <a href="{{ $.c.ExternalUrl }}/{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Uuid }}">{{ $gist.Forked.User.Username }}/{{ $gist.Forked.Title }}</a> {{ end }}
                                     {{ if $gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> {{ visibilityStr $gist.Private false }} </span>{{ end }}</h5>
                                 <h6 class="text-xs text-slate-700 dark:text-slate-300 py-1">{{ $gist.Description }}</h6>
                             </div>
@@ -181,7 +181,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
                     </svg>
-                    <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">No gists</h3>
+                    <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "gist.list.no-gists" }}</h3>
                 </div>
             {{ end }}
         </div>

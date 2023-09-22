@@ -1,0 +1,177 @@
+gist.public: Public
+gist.unlisted: Unlisted
+gist.private: Private
+
+gist.header.like: Like
+gist.header.unlike: Unlike
+gist.header.fork: Fork
+gist.header.edit: Edit
+gist.header.delete: Delete
+gist.header.forked-from: Forked from
+gist.header.last-active: Last active
+gist.header.select-tab: Select a tab
+gist.header.code: Code
+gist.header.revisions: Revisions
+gist.header.revision: Revision
+gist.header.clone-http: Clone via %s
+gist.header.clone-http-help: Clone with Git using HTTP basic authentication.
+gist.header.clone-ssh: Clone via SSH
+gist.header.clone-ssh-help: Clone with Git using an SSH key.
+gist.header.share: Share
+gist.header.share-help: Copy shareable link for this gist.
+gist.header.download-zip: Download ZIP
+
+gist.raw: Raw
+gist.file-truncated: This file has been truncated.
+gist.watch-full-file: View the full file.
+gist.file-not-valid: This file is not a valid CSV file.
+gist.no-content: No content
+
+gist.new.new_gist: New gist
+gist.new.title: Title
+gist.new.description: Description
+gist.new.filename-with-extension: Filename with extension
+gist.new.indent-mode: Indent mode
+gist.new.indent-mode-space: Space
+gist.new.indent-mode-tab: Tab
+gist.new.indent-size: Indent size
+gist.new.wrap-mode: Wrap mode
+gist.new.wrap-mode-no: No wrap
+gist.new.wrap-mode-soft: Soft wrap
+gist.new.add-file: Add file
+gist.new.create-public-button: Create public gist
+gist.new.create-unlisted-button: Create unlisted gist
+gist.new.create-private-button: Create private gist
+
+gist.edit.editing: Editing
+gist.edit.change-visibility: Make
+gist.edit.delete: Delete
+gist.edit.cancel: Cancel
+gist.edit.save: Save
+
+gist.list.joined: Joined
+gist.list.all: All gists
+gist.list.search-results: Search results
+gist.list.sort: Sort
+gist.list.sort-by-created: created
+gist.list.sort-by-updated: updated
+gist.list.order-by-asc: Least recently
+gist.list.order-by-desc: Recently
+gist.list.select-tab: Select a tab
+gist.list.liked: Liked
+gist.list.likes: likes
+gist.list.forked: Forked
+gist.list.forked-from: Forked from
+gist.list.forks: forks
+gist.list.files: files
+gist.list.last-active: Last active
+gist.list.no-gists: No gists
+
+gist.forks: Forks
+gist.forks.view: View fork
+gist.forks.no: No public forks
+
+gist.likes: Likes
+gist.likes.no: No likes yet
+
+gist.revisions: Revisions
+gist.revision.revised: revised this gist
+gist.revision.go-to-revision: Go to revision
+gist.revision.file-created: file created
+gist.revision.file-deleted: file deleted
+gist.revision.file-renamed: renamed to
+gist.revision.diff-truncated: Diff truncated because it's too large to be shown
+gist.revision.file-renamed-no-changes: File renamed without changes
+gist.revision.empty-file: Empty file
+gist.revision.no-changes: No changes
+gist.revision.no-revisions: No revisions to show
+
+settings: Settings
+settings.email: Email
+settings.email-help: Used for commits and Gravatar
+settings.email-set: Set email
+settings.link-accounts: Link accounts
+settings.link-github-account: Link GitHub account
+settings.link-gitea-account: Link Gitea account
+settings.unlink-github-account: Unlink GitHub account
+settings.unlink-gitea-account: Unlink Gitea account
+settings.delete-account: Delete account
+settings.delete-account-confirm: Are you sure you want to delete your account ?
+settings.add-ssh-key: Add SSH key
+settings.add-ssh-key-help: Used only to pull/push gists using Git via SSH
+settings.add-ssh-key-title: Title
+settings.add-ssh-key-content: Key
+settings.delete-ssh-key: Delete
+settings.delete-ssh-key-confirm: Confirm deletion of SSH key
+settings.ssh-key-added-at: Added
+settings.ssh-key-never-used: Never used
+settings.ssh-key-last-used: Last used
+
+auth.signup-disabled: Administrator has disabled signing up
+auth.login: Login
+auth.signup: Register
+auth.new-account: New account
+auth.username: Username
+auth.password: Password
+auth.register-instead: Register instead
+auth.login-instead: Login instead
+auth.github-oauth: Continue with GitHub account
+auth.gitea-oauth: Continue with Gitea account
+
+error: Error
+
+header.menu.all: All
+header.menu.new: New
+header.menu.search: Search
+header.menu.my-gists: My gists
+header.menu.liked: Liked
+header.menu.admin: Admin
+header.menu.settings: Settings
+header.menu.logout: Logout
+header.menu.register: Register
+header.menu.login: Login
+header.menu.light: Light
+header.menu.dark: Dark
+header.menu.system: System
+footer.powered-by: Powered by %s
+
+pagination.older: Older
+pagination.newer: Newer
+pagination.previous: Previous
+pagination.next: Next
+
+admin.admin_panel: Admin panel
+admin.general: General
+admin.users: Users
+admin.gists: Gists
+admin.configuration: Configuration
+admin.versions: Versions
+admin.ssh_keys: SSH keys
+admin.stats: Stats
+admin.actions: Actions
+admin.actions.sync-fs: Synchronize gists from filesystem
+admin.actions.sync-db: Synchronize gists from database
+admin.actions.git-gc: Garbage collect git repositories
+admin.id: ID
+admin.user: User
+admin.delete: Delete
+admin.created_at: Created
+
+admin.config-link: This configuration can be %s by a YAML config file and/or environment variables.
+admin.config-link-overriden: overridden
+admin.disable-signup: Disable signup
+admin.disable-signup_help: Forbid the creation of new accounts.
+admin.require-login: Require login
+admin.require-login_help: Enforce users to be logged in to see gists.
+admin.disable-login: Disable login form
+admin.disable-login_help: Forbid logging in via the login form to force using OAuth providers instead.
+admin.disable-gravatar: Disable Gravatar
+admin.disable-gravatar_help: Disable the usage of Gravatar as an avatar provider.
+
+admin.users.delete_confirm: Do you want to delete this user ?
+
+admin.gists.title: Title
+admin.gists.private: Private ?
+admin.gists.nb-files: Nb. files
+admin.gists.nb-likes: Nb. likes
+admin.gists.delete_confirm: Do you want to delete this gist ?

@@ -2,7 +2,7 @@
 <div class="py-10">
     <header class="pb-4">
         <div>
-            <h1 class="text-2xl font-bold leading-tight">Admin panel</h1>
+            <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "admin.admin_panel" }}</h1>
         </div>
     </header>
     <main>
@@ -10,13 +10,13 @@
             <div class="">
                 <nav class="flex space-x-4" aria-label="Tabs">
                     <a href="{{ $.c.ExternalUrl }}/admin-panel" class="{{ if eq .adminHeaderPage "index" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
-                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}">General</a>
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}">{{ .locale.Tr "admin.general" }} </a>
                     <a href="{{ $.c.ExternalUrl }}/admin-panel/users" class="{{ if eq .adminHeaderPage "users" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
-                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Users</a>
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">{{ .locale.Tr "admin.users" }}</a>
                     <a href="{{ $.c.ExternalUrl }}/admin-panel/gists" class="{{ if eq .adminHeaderPage "gists" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
-                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Gists</a>
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">{{ .locale.Tr "admin.gists" }}</a>
                     <a href="{{ $.c.ExternalUrl }}/admin-panel/configuration" class="{{ if eq .adminHeaderPage "config" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
-                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">Configuration</a>
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">{{ .locale.Tr "admin.configuration" }}</a>
                 </nav>
             </div>
         </div>

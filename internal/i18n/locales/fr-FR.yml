@@ -1,0 +1,177 @@
+gist.public: Public
+gist.unlisted: Non répertorié
+gist.private: Privé
+
+gist.header.like: J'aime
+gist.header.unlike: Je n'aime plus
+gist.header.fork: Fork
+gist.header.edit: Éditer
+gist.header.delete: Supprimer
+gist.header.forked-from: Forké de
+gist.header.last-active: Dernière activité
+gist.header.select-tab: Sélectionner un onglet
+gist.header.code: Code
+gist.header.revisions: Révisions
+gist.header.revision: Révision
+gist.header.clone-http: Cloner via %s
+gist.header.clone-http-help: Cloner avec Git en utilisant l'authentification HTTP basic.
+gist.header.clone-ssh: Cloner via SSH
+gist.header.clone-ssh-help: Cloner avec Git en utilisant une clé SSH.
+gist.header.share: Partager
+gist.header.share-help: Copier le lien partageable de ce gist.
+gist.header.download-zip: Télécharger en ZIP
+
+gist.raw: Brut
+gist.file-truncated: Ce fichier a été tronqué.
+gist.watch-full-file: Voir le fichier complet.
+gist.file-not-valid: Ce fichier n'est pas un fichier CSV valide.
+gist.no-content: Pas de contenu
+
+gist.new.new_gist: Nouveau gist
+gist.new.title: Titre
+gist.new.description: Description
+gist.new.filename-with-extension: Nom de fichier avec extension
+gist.new.indent-mode: Mode d'indentation
+gist.new.indent-mode-space: Espace
+gist.new.indent-mode-tab: Tabulation
+gist.new.indent-size: Taille d'indentation
+gist.new.wrap-mode: Mode d'enroulement
+gist.new.wrap-mode-no: Sans enroulement
+gist.new.wrap-mode-soft: Enroulement doux
+gist.new.add-file: Ajouter un fichier
+gist.new.create-public-button: Créer un gist public
+gist.new.create-unlisted-button: Créer un gist non repertorié
+gist.new.create-private-button: Créer un gist privé
+
+gist.edit.editing: Édition de
+gist.edit.change-visibility: Rendre
+gist.edit.delete: Supprimer
+gist.edit.cancel: Annuler
+gist.edit.save: Sauvegarder
+
+gist.list.joined: Inscrit
+gist.list.all: Tous les gists
+gist.list.search-results: Résultats de recherche
+gist.list.sort: Trier
+gist.list.sort-by-created: créé
+gist.list.sort-by-updated: mis à jour
+gist.list.order-by-asc: Le moins récemment
+gist.list.order-by-desc: Récemment
+gist.list.select-tab: Sélectionner un onglet
+gist.list.liked: Aimé
+gist.list.likes: j'aimes
+gist.list.forked: Forké
+gist.list.forked-from: Forké de
+gist.list.forks: forks
+gist.list.files: fichiers
+gist.list.last-active: Dernière activité
+gist.list.no-gists: Aucun gist
+
+gist.forks: Forks
+gist.forks.view: Voir le fork
+gist.forks.no: Pas de forks publics
+
+gist.likes: J'aime
+gist.likes.no: Aucun j'aime pour le moment
+
+gist.revisions: Révisions
+gist.revision.revised: a révisé ce gist
+gist.revision.go-to-revision: Aller à la révision
+gist.revision.file-created: fichier créé
+gist.revision.file-deleted: fichier supprimé
+gist.revision.file-renamed: renommé en
+gist.revision.diff-truncated: Révision tronquée car trop volumineuse pour être affichée
+gist.revision.file-renamed-no-changes: Fichier renommé sans modifications
+gist.revision.empty-file: Fichier vide
+gist.revision.no-changes: Aucun changement
+gist.revision.no-revisions: Aucune révision à afficher
+
+settings: Paramètres
+settings.email: Email
+settings.email-help: Utilisé pour les commits et Gravatar
+settings.email-set: Définir l'email
+settings.link-accounts: Lier les comptes
+settings.link-github-account: Lier le compte GitHub
+settings.link-gitea-account: Lier le compte Gitea
+settings.unlink-github-account: Détacher le compte GitHub
+settings.unlink-gitea-account: Détacher le compte Gitea
+settings.delete-account: Supprimer le compte
+settings.delete-account-confirm: Êtes-vous sûr de vouloir supprimer votre compte ?
+settings.add-ssh-key: Ajouter une clé SSH
+settings.add-ssh-key-help: Utilisé uniquement pour pull/push des gists avec Git via SSH
+settings.add-ssh-key-title: Titre
+settings.add-ssh-key-content: Clé
+settings.delete-ssh-key: Supprimer
+settings.delete-ssh-key-confirm: Confirmer la suppression de la clé SSH
+settings.ssh-key-added-at: Ajouté
+settings.ssh-key-never-used: Jamais utilisé
+settings.ssh-key-last-used: Dernière utilisation
+
+auth.signup-disabled: L'administrateur a désactivé l'inscription
+auth.login: Connexion
+auth.signup: Inscription
+auth.new-account: Nouveau compte
+auth.username: Nom d'utilisateur
+auth.password: Mot de passe
+auth.register-instead: Je préfère m'inscrire
+auth.login-instead: Je préfère me connecter
+auth.github-oauth: Continuer avec un compte GitHub
+auth.gitea-oauth: Continuer avec un compte Gitea
+
+error: Erreur
+
+header.menu.all: Tous
+header.menu.new: Nouveau
+header.menu.search: Recherche
+header.menu.my-gists: Mes gists
+header.menu.liked: Aimés
+header.menu.admin: Admin
+header.menu.settings: Paramètres
+header.menu.logout: Déconnexion
+header.menu.register: Inscription
+header.menu.login: Connexion
+header.menu.light: Clair
+header.menu.dark: Sombre
+header.menu.system: Système
+footer.powered-by: Propulsé par %s
+
+pagination.older: Plus ancien
+pagination.newer: Plus récent
+pagination.previous: Précédent
+pagination.next: Suivant
+
+admin.admin_panel: Panneau d'administration
+admin.general: Général
+admin.users: Utilisateurs
+admin.gists: Gists
+admin.configuration: Configuration
+admin.versions: Versions
+admin.ssh_keys: Clés SSH
+admin.stats: Statistiques
+admin.actions: Actions
+admin.actions.sync-fs: Synchroniser les gists depuis le système de fichiers
+admin.actions.sync-db: Synchroniser les gists depuis la base de données
+admin.actions.git-gc: Nettoyage des dépôts git
+admin.id: ID
+admin.user: Utilisateur
+admin.delete: Supprimer
+admin.created_at: Créé
+
+admin.config-link: Cette configuration peut être %s par un fichier de configuration YAML et/ou des variables d'environnement.
+admin.config-link-overriden: remplacée
+admin.disable-signup: Désactiver l'inscription
+admin.disable-signup_help: Interdire la création de nouveaux comptes.
+admin.require-login: Exiger la connexion
+admin.require-login_help: Obliger les utilisateurs à être connectés pour voir les gists.
+admin.disable-login: Désactiver le formulaire de connexion
+admin.disable-login_help: Interdire la connexion via le formulaire de connexion pour forcer l'utilisation des fournisseurs OAuth à la place.
+admin.disable-gravatar: Désactiver Gravatar
+admin.disable-gravatar_help: Désactiver l'utilisation de Gravatar comme fournisseur d'avatar.
+
+admin.users.delete_confirm: Voulez-vous supprimer cet utilisateur ?
+
+admin.gists.title: Titre
+admin.gists.private: Privé ?
+admin.gists.nb-files: Nb. de fichiers
+admin.gists.nb-likes: Nb. de j'aime
+admin.gists.delete_confirm: Voulez-vous supprimer ce gist ?

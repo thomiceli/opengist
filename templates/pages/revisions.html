@@ -12,7 +12,7 @@
                 </svg>
                 {{ $user := (index $.emails $commit.AuthorEmail) }}
                 <img class="h-5 w-5 rounded-full inline" src="{{if $user }}{{ avatarUrl $user $.DisableGravatar }}{{else}}{{defaultAvatar}}{{end}}" {{if $user }}alt="{{ $user.Username }}'s Avatar"{{end}} />
-                <span class="font-bold">{{if $user}}<a href="{{ $.c.ExternalUrl }}/{{$user.Username}}" class="text-slate-300 hover:text-slate-300 hover:underline">{{ $commit.AuthorName }}</a>{{else}}{{ $commit.AuthorName }}{{end}}</span> revised this gist <span class="moment-timestamp font-bold">{{ $commit.Timestamp }}</span>. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/rev/{{ $commit.Hash }}">Go to revision</a></h3>
+                <span class="font-bold">{{if $user}}<a href="{{ $.c.ExternalUrl }}/{{$user.Username}}" class="text-slate-300 hover:text-slate-300 hover:underline">{{ $commit.AuthorName }}</a>{{else}}{{ $commit.AuthorName }}{{end}}</span> {{ $.locale.Tr "gist.revision.revised" }} <span class="moment-timestamp font-bold">{{ $commit.Timestamp }}</span>. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/rev/{{ $commit.Hash }}">{{ $.locale.Tr "gist.revision.go-to-revision" }}</a></h3>
                 {{ if ne $commit.Changed "" }}
                     <p class="text-sm float-right py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-flex">
@@ -32,11 +32,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
                                 {{ if $file.IsCreated }}
-                                     <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }}<span class="italic text-gray-600 dark:text-gray-400 ml-1">(file created)</span></span>
+                                     <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }}<span class="italic text-gray-600 dark:text-gray-400 ml-1">({{ $.locale.Tr "gist.revision.file-created" }})</span></span>
                                 {{ else if $file.IsDeleted }}
-                                    <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }} <span class="italic text-gray-600 dark:text-gray-400 ml-1">(file deleted)</span></span>
+                                    <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }} <span class="italic text-gray-600 dark:text-gray-400 ml-1">({{ $.locale.Tr "gist.revision.file-deleted" }})</span></span>
                                 {{ else if ne $file.OldFilename "" }}
-                                    <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.OldFilename }} <span class="italic text-gray-600 dark:text-gray-400 mx-1">renamed to</span> {{ $file.Filename }}</span>
+                                    <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.OldFilename }} <span class="italic text-gray-600 dark:text-gray-400 mx-1">{{ $.locale.Tr "gist.revision.file-renamed" }}</span> {{ $file.Filename }}</span>
                                 {{ else }}
                                     <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }}</span>
                                 {{ end }}
@@ -44,11 +44,11 @@
                         </div>
                         <div class="overflow-auto">
                             {{ if $file.Truncated }}
-                                <p class="m-2 ml-4 text-sm">Diff truncated because it's too large to be shown</p>
+                                <p class="m-2 ml-4 text-sm">{{ .locale.Tr "gist.revision.diff-truncated" }}</p>
                             {{ else if and (eq $file.Content "") (ne $file.OldFilename "") }}
-                                <p class="m-2 ml-4 text-sm">File renamed without changes</p>
+                                <p class="m-2 ml-4 text-sm">{{ .locale.Tr "gist.revision.file-renamed-no-changes" }}</p>
                             {{ else if eq $file.Content "" }}
-                                <p class="m-2 ml-4 text-sm">Empty file</p>
+                                <p class="m-2 ml-4 text-sm">{{ .locale.Tr "gist.revision.empty-file" }}</p>
                             {{ else }}
                             <table class="code table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
                                 <tbody>
@@ -91,7 +91,7 @@
                     </div>
                     {{end}}
                 {{else}}
-                    <p class="text-left text-sm text-slate-700 dark:text-slate-300 italic">No changes</p>
+                    <p class="text-left text-sm text-slate-700 dark:text-slate-300 italic">{{ .locale.Tr "gist.revision.no-changes" }}</p>
                 {{end}}
             </div>
         </div>
@@ -105,7 +105,7 @@
     <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
     </svg>
-    <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">No revisions to show</h3>
+    <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "gist.revision.no-revisions" }}</h3>
 </div>
 {{ end }}
 

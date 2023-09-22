@@ -135,6 +135,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    document.getElementById('language-btn')!.onclick = () => {
+        document.getElementById('language-list')!.classList.toggle('hidden');
+    };
+
+
     document.querySelectorAll('.copy-gist-btn').forEach((e: HTMLElement) => {
         e.onclick = () => {
             navigator.clipboard.writeText(e.parentNode!.parentNode!.querySelector<HTMLElement>('.gist-content')!.textContent || '').catch((err) => {
@@ -151,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         Array.from(document.querySelectorAll('.gist-visibility-option')).forEach((el) => {
             (el as HTMLElement).onclick = () => {
-                submitgistbutton.textContent = "Create " + el.textContent.toLowerCase() + " gist";
+                submitgistbutton.textContent = (el as HTMLElement).dataset.btntext;
                 submitgistbutton!.value = (el as HTMLElement).dataset.visibility || '0';
                 gistmenuvisibility!.classList.add('hidden');
             }

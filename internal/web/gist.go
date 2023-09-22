@@ -121,19 +121,21 @@ func allGists(ctx echo.Context) error {
 	pageInt := getPage(ctx)
 
 	sort := "created"
+	sortText := tr(ctx, "gist.list.sort-by-created")
 	order := "desc"
-	orderText := "Recently"
+	orderText := tr(ctx, "gist.list.order-by-desc")
 
 	if ctx.QueryParam("sort") == "updated" {
 		sort = "updated"
+		sortText = tr(ctx, "gist.list.sort-by-updated")
 	}
 
 	if ctx.QueryParam("order") == "asc" {
 		order = "asc"
-		orderText = "Least recently"
+		orderText = tr(ctx, "gist.list.order-by-asc")
 	}
 
-	setData(ctx, "sort", sort)
+	setData(ctx, "sort", sortText)
 	setData(ctx, "order", orderText)
 
 	var gists []*db.Gist

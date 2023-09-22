@@ -159,14 +159,14 @@ admin.created_at: Créé
 
 admin.config-link: Cette configuration peut être %s par un fichier de configuration YAML et/ou des variables d'environnement.
 admin.config-link-overriden: remplacée
-admin.disable_signup: Désactiver l'inscription
-admin.disable_signup_help: Interdire la création de nouveaux comptes.
-admin.require_login: Exiger la connexion
-admin.require_login_help: Obliger les utilisateurs à être connectés pour voir les gists.
-admin.disable_login: Désactiver le formulaire de connexion
-admin.disable_login_help: Interdire la connexion via le formulaire de connexion pour forcer l'utilisation des fournisseurs OAuth à la place.
-admin.disable_gravatar: Désactiver Gravatar
-admin.disable_gravatar_help: Désactiver l'utilisation de Gravatar comme fournisseur d'avatar.
+admin.disable-signup: Désactiver l'inscription
+admin.disable-signup_help: Interdire la création de nouveaux comptes.
+admin.require-login: Exiger la connexion
+admin.require-login_help: Obliger les utilisateurs à être connectés pour voir les gists.
+admin.disable-login: Désactiver le formulaire de connexion
+admin.disable-login_help: Interdire la connexion via le formulaire de connexion pour forcer l'utilisation des fournisseurs OAuth à la place.
+admin.disable-gravatar: Désactiver Gravatar
+admin.disable-gravatar_help: Désactiver l'utilisation de Gravatar comme fournisseur d'avatar.
 
 admin.users.delete_confirm: Voulez-vous supprimer cet utilisateur ?
 

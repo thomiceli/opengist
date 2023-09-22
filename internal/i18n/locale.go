@@ -3,7 +3,9 @@ package i18n
 import (
 	"fmt"
 	"github.com/thomiceli/opengist/locales"
+	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"golang.org/x/text/language/display"
 	"gopkg.in/yaml.v3"
 	"html/template"
 	"io"
@@ -12,15 +14,17 @@ import (
 	"strings"
 )
 
+var title = cases.Title(language.English)
 var Locales = NewLocaleStore()
-
-type Locale struct {
-	Name     string
-	Messages map[string]string
-}
 
 type LocaleStore struct {
 	Locales map[string]*Locale
+}
+
+type Locale struct {
+	Code     string
+	Name     string
+	Messages map[string]string
 }
 
 // NewLocaleStore creates a new LocaleStore
@@ -31,7 +35,7 @@ func NewLocaleStore() *LocaleStore {
 }
 
 // loadLocaleFromYAML loads a single Locale from a given YAML file
-func (store *LocaleStore) loadLocaleFromYAML(localeKey, path string) error {
+func (store *LocaleStore) loadLocaleFromYAML(localeCode, path string) error {
 	a, err := locales.Files.Open(path)
 	if err != nil {
 		return err
@@ -41,13 +45,28 @@ func (store *LocaleStore) loadLocaleFromYAML(localeKey, path string) error {
 		return err
 	}
 
-	locale := &Locale{Name: localeKey, Messages: make(map[string]string)}
+	tag, err := language.Parse(localeCode)
+	if err != nil {
+		return err
+	}
+
+	name := display.Self.Name(tag)
+	if tag == language.AmericanEnglish {
+		name = "English"
+	}
+
+	locale := &Locale{
+		Code:     localeCode,
+		Name:     title.String(name),
+		Messages: make(map[string]string),
+	}
+
 	err = yaml.Unmarshal(data, &locale.Messages)
 	if err != nil {
 		return err
 	}
 
-	store.Locales[localeKey] = locale
+	store.Locales[localeCode] = locale
 	return nil
 }
 
@@ -65,35 +84,6 @@ func (store *LocaleStore) LoadAll() error {
 		}
 		return nil
 	})
-}
-
-// Tr translates a message key into a message for a given locale
-func (store *LocaleStore) Tr(localeKey, messageKey string) (string, error) {
-	locale, ok := store.Locales[localeKey]
-	if !ok {
-		return "", fmt.Errorf("locale '%s' not found", localeKey)
-	}
-
-	message, ok := locale.Messages[messageKey]
-	if !ok {
-		return "", fmt.Errorf("message key '%s' not found in locale '%s'", messageKey, localeKey)
-	}
-
-	return message, nil
-}
-
-func (l *Locale) Tr(key string, args ...any) template.HTML {
-	message := l.Messages[key]
-
-	if message == "" {
-		return Locales.Locales["en-US"].Tr(key, args...)
-	}
-
-	if len(args) == 0 {
-		return template.HTML(message)
-	}
-
-	return template.HTML(fmt.Sprintf(message, args...))
 }
 
 func (store *LocaleStore) GetLocale(lang string) (*Locale, error) {
@@ -118,4 +108,18 @@ func (store *LocaleStore) MatchTag(langs []language.Tag) string {
 	}
 
 	return "en-US"
+}
+
+func (l *Locale) Tr(key string, args ...any) template.HTML {
+	message := l.Messages[key]
+
+	if message == "" {
+		return Locales.Locales["en-US"].Tr(key, args...)
+	}
+
+	if len(args) == 0 {
+		return template.HTML(message)
+	}
+
+	return template.HTML(fmt.Sprintf(message, args...))
 }

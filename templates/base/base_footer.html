@@ -4,15 +4,31 @@
 {{ end }}
 
 {{ define "footer" }}
-<p class="text-slate-600 dark:text-slate-400 py-8 [&>*]:mx-1.5 flex">
-    <span>
-        <a target="_blank" style="margin-left: 0 !important;" class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 inline-flex" href="https://github.com/thomiceli/opengist">
-            <span class="mr-1">{{ .locale.Tr "footer.powered-by" "<span class=\"font-bold\">Opengist</span>" }} </span>
-        </a>
-    </span> ⋅
-    <span>Load: <span class="font-bold">{{ loadedTime .loadStartTime }}</span></span>
+    <div class="inline-flex py-8">
+        <p class="text-slate-600 dark:text-slate-400 [&>*]:mx-1.5 flex">
+            <span>
+                <a target="_blank" style="margin-left: 0 !important;" class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 inline-flex" href="https://github.com/thomiceli/opengist">
+                    <span class="mr-1">{{ .locale.Tr "footer.powered-by" "<span class=\"font-bold dark:text-slate-300\">Opengist</span>" }} </span>
+                </a>
+            </span>⋅
+            <span>Load: <span class="font-bold dark:text-slate-300">{{ loadedTime .loadStartTime }}</span></span>⋅
+        </p>
+        <div class="ml-1.5 cursor-pointer relative inline-block">
+            <span id="language-btn" class="text-slate-600 font-bold dark:text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mb-1 w-5 h-5 inline-flex">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+            </svg>
+            {{ .localeName }}
+            </span>
 
-</p>
+            <div id="language-list" class="hidden absolute bottom-0 z-10 mb-10 mt-2 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                <div class="py-1" role="none">
+                    {{ range .allLocales }}
+                        <a href="?lang={{ .Code }}" class="dark:text-slate-300 text-slate-700 group flex items-center px-4 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1" id="menu-item-0">{{ .Name }}</a>
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script type="module" src="{{ asset "hljs.ts" }}"></script>

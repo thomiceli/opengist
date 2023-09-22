@@ -134,6 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    document.getElementById('language-btn')!.onclick = () => {
+        document.getElementById('language-list')!.classList.toggle('hidden');
+    };
+
+
     document.querySelectorAll('.copy-gist-btn').forEach((e: HTMLElement) => {
         e.onclick = () => {
             navigator.clipboard.writeText(e.parentNode!.parentNode!.querySelector<HTMLElement>('.gist-content')!.textContent || '').catch((err) => {

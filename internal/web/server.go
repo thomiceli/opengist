@@ -343,14 +343,14 @@ func locale(next echo.HandlerFunc) echo.HandlerFunc {
 			ctx.SetCookie(&http.Cookie{Name: "lang", Value: lang, Path: "/", MaxAge: 1<<31 - 1})
 		}
 
-		fmt.Println("lang", lang)
-
 		localeUsed, err := i18n.Locales.GetLocale(lang)
 		if err != nil {
 			return errorRes(500, "Cannot get locale", err)
 		}
 
+		setData(ctx, "localeName", localeUsed.Name)
 		setData(ctx, "locale", localeUsed)
+		setData(ctx, "allLocales", i18n.Locales.Locales)
 
 		return next(ctx)
 	}

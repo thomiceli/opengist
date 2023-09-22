@@ -12,8 +12,11 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/public"
 	"github.com/thomiceli/opengist/templates"
+	"golang.org/x/text/language"
+	htmlpkg "html"
 	"html/template"
 	"io"
 	"net/http"
@@ -105,6 +108,13 @@ var fm = template.FuncMap{
 		}
 		return s
 	},
+	"unescape": htmlpkg.UnescapeString,
+	"join": func(s ...string) string {
+		return strings.Join(s, "")
+	},
+	"toStr": func(i interface{}) string {
+		return fmt.Sprint(i)
+	},
 }
 
 type Template struct {
@@ -129,7 +139,12 @@ func NewServer(isDev bool) *Server {
 	e.HideBanner = true
 	e.HidePort = true
 
+	if err := i18n.Locales.LoadAll(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to load locales")
+	}
+
 	e.Use(dataInit)
+	e.Use(locale)
 	e.Pre(middleware.MethodOverrideWithConfig(middleware.MethodOverrideConfig{
 		Getter: middleware.MethodFromForm("_method"),
 	}))
@@ -292,6 +307,50 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 
 		setData(ctx, "githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
 		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
+
+		return next(ctx)
+	}
+}
+
+func locale(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+
+		// Check URL arguments
+		lang := ctx.Request().URL.Query().Get("lang")
+		changeLang := lang != ""
+
+		// Then check cookies
+		if len(lang) == 0 {
+			cookie, _ := ctx.Request().Cookie("lang")
+			if cookie != nil {
+				lang = cookie.Value
+			}
+		}
+
+		// Check again in case someone changes the supported language list.
+		if lang != "" && !i18n.Locales.HasLocale(lang) {
+			lang = ""
+			changeLang = false
+		}
+
+		//3.Then check from 'Accept-Language' header.
+		if len(lang) == 0 {
+			tags, _, _ := language.ParseAcceptLanguage(ctx.Request().Header.Get("Accept-Language"))
+			lang = i18n.Locales.MatchTag(tags)
+		}
+
+		if changeLang {
+			ctx.SetCookie(&http.Cookie{Name: "lang", Value: lang, Path: "/", MaxAge: 1<<31 - 1})
+		}
+
+		fmt.Println("lang", lang)
+
+		localeUsed, err := i18n.Locales.GetLocale(lang)
+		if err != nil {
+			return errorRes(500, "Cannot get locale", err)
+		}
+
+		setData(ctx, "locale", localeUsed)
 
 		return next(ctx)
 	}

@@ -3,7 +3,7 @@
 
 <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
     <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
-        <p class="italic text-xs text-gray-400 dark:text-gray-400 mb-4">This configuration can be <a target="_blank" href="https://github.com/thomiceli/opengist#configuration">overridden</a> by a YAML config file and/or environment variables.</p>
+        <p class="italic text-xs text-gray-400 dark:text-gray-400 mb-4">{{ .locale.Tr "admin.config-link" (join "<a target=\"_blank\" href=\"https://github.com/thomiceli/opengist#configuration\">" (toStr (.locale.Tr "admin.config-link-overriden")) "</a>") }}</p>
         <dl class="dl-config">
             <div class="relative col-span-3">
                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
@@ -29,9 +29,6 @@
             <dt>HTTP host</dt><dd>{{ .c.HttpHost }}</dd>
             <dt>HTTP port</dt><dd>{{ .c.HttpPort }}</dd>
             <dt>HTTP Git enabled</dt><dd>{{ .c.HttpGit }}</dd>
-            <dt>HTTP TLS enabled</dt><dd>{{ .c.HttpTLSEnabled }}</dd>
-            <dt>HTTP Cert file</dt><dd>{{ .c.HttpCertFile }}</dd>
-            <dt>HTTP Key file</dt><dd>{{ .c.HttpKeyFile }}</dd>
             <div class="relative col-span-3 mt-4">
                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
                     <div class="w-full border-t border-gray-300"></div>
@@ -65,8 +62,8 @@
             <li class="list-none gap-x-4 py-5">
                 <div class="flex items-center justify-between">
                     <span class="flex flex-grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">Disable signup</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">Forbid the creation of new accounts.</span>
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.disable_signup" }}</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.disable_signup_help" }}</span>
                     </span>
                     <button type="button" id="disable-signup" data-bool="{{ .DisableSignup }}" class="toggle-button {{ if .DisableSignup }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
                         <span aria-hidden="true" class="{{ if .DisableSignup }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
@@ -76,8 +73,8 @@
             <li class="list-none gap-x-4 py-5">
                 <div class="flex items-center justify-between">
                     <span class="flex flex-grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">Require login</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">Enforce users to be logged in to see gists.</span>
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.require_login" }}</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.require_login_help" }}</span>
                     </span>
                     <button type="button" id="require-login" data-bool="{{ .RequireLogin }}" class="toggle-button {{ if .RequireLogin }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
                         <span aria-hidden="true" class="{{ if .RequireLogin }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
@@ -87,8 +84,8 @@
             <li class="list-none gap-x-4 py-5">
                 <div class="flex items-center justify-between">
                     <span class="flex flex-grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">Disable login form</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">Forbid logging in via the login form to force using OAuth providers instead.</span>
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.disable_login" }}</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.disable_login_help" }}</span>
                     </span>
                     <button type="button" id="disable-login-form" data-bool="{{ .DisableLoginForm }}" class="toggle-button {{ if .DisableLoginForm }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
                         <span aria-hidden="true" class="{{ if .DisableLoginForm }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
@@ -98,8 +95,8 @@
             <li class="list-none gap-x-4 py-5">
                 <div class="flex items-center justify-between">
                     <span class="flex flex-grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">Disable Gravatar</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">Disable the usage of Gravatar as an avatar provider.</span>
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.disable_gravatar" }}</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.disable_gravatar_help" }}</span>
                     </span>
                     <button type="button" id="disable-gravatar" data-bool="{{ .DisableGravatar }}" class="toggle-button {{ if .DisableGravatar }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
                         <span aria-hidden="true" class="{{ if .DisableGravatar }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>

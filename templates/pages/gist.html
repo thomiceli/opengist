@@ -16,7 +16,7 @@
 
                     <span class="isolate inline-flex rounded-md shadow-sm mr-2">
                       <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}" class="relative inline-flex items-center rounded-l-md bg-white text-gray-500 dark:text-slate-300 float-right px-2.5 py-1 leading-4 text-xs font-medium dark:bg-gray-600 border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none">
-                        Raw
+                        {{ $.locale.Tr "gist.raw" }}
                       </a>
                       <button type="button" class="relative -ml-px inline-flex items-center bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700 copy-gist-btn">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -34,12 +34,12 @@
                 </div>
                 {{ if $file.Truncated }}
                 <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
-                    This file has been truncated. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}">View the full file.</a>
+                    {{ .locale.Tr "gist.file-truncated" }} <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}">{{ .locale.Tr "gist.watch-full-file" }}.</a>
                 </div>
                 {{ end }}
                 {{ if and (not $csv) (isCsv $file.Filename) }}
                 <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
-                    This file is not a valid CSV file.
+                    {{ .locale.Tr "gist.file-not-valid" }}
                 </div>
                 {{ end }}
             </div>
@@ -87,7 +87,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">No content</h3>
+            <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "gist.no-content" }}</h3>
         </div>
     {{ end }}
 {{ template "gist_footer" .}}

@@ -27,7 +27,7 @@ import (
 var title = cases.Title(language.English)
 
 func register(ctx echo.Context) error {
-	setData(ctx, "title", "New account")
+	setData(ctx, "title", tr(ctx, "auth.new-account"))
 	setData(ctx, "htmlTitle", "New account")
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	return html(ctx, "auth_form.html")
@@ -87,7 +87,7 @@ func processRegister(ctx echo.Context) error {
 }
 
 func login(ctx echo.Context) error {
-	setData(ctx, "title", "Login")
+	setData(ctx, "title", tr(ctx, "auth.login"))
 	setData(ctx, "htmlTitle", "Login")
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	return html(ctx, "auth_form.html")

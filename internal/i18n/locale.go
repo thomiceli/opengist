@@ -2,7 +2,7 @@ package i18n
 
 import (
 	"fmt"
-	"github.com/thomiceli/opengist/locales"
+	"github.com/thomiceli/opengist/internal/i18n/locales"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"

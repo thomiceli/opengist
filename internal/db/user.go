@@ -39,7 +39,7 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 	}
 
 	// Decrement forks counter for all gists forked by this user
-	return tx.Model(&Gist{}).
+	err = tx.Model(&Gist{}).
 		Omit("updated_at").
 		Where("id IN (?)", tx.
 			Select("forked_id").
@@ -48,6 +48,12 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		).
 		UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).
 		Error
+	if err != nil {
+		return err
+	}
+
+	// Delete all gists created by this user
+	return tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 }
 
 func UserExists(username string) (bool, error) {

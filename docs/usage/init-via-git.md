@@ -38,3 +38,5 @@ remote:
 To http://localhost:6157/init
  * [new branch]      master -> master
 ```
+
+https://github.com/thomiceli/opengist/assets/27960254/3fe1a0ba-b638-4928-83a1-f38e46fea066

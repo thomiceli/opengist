@@ -16,6 +16,7 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/gitea"
 	"github.com/markbates/goth/providers/github"
+	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
@@ -150,6 +151,9 @@ func oauthCallback(ctx echo.Context) error {
 		case "gitea":
 			currUser.GiteaID = user.UserID
 			currUser.AvatarURL = getAvatarUrlFromProvider("gitea", user.NickName)
+		case "openid-connect":
+			currUser.OIDCID = user.UserID
+			currUser.AvatarURL = user.AvatarURL
 		}
 
 		if err = currUser.Update(); err != nil {
@@ -185,6 +189,9 @@ func oauthCallback(ctx echo.Context) error {
 		case "gitea":
 			userDB.GiteaID = user.UserID
 			userDB.AvatarURL = getAvatarUrlFromProvider("gitea", user.NickName)
+		case "openid-connect":
+			userDB.OIDCID = user.UserID
+			userDB.AvatarURL = user.AvatarURL
 		}
 
 		if err = userDB.Create(); err != nil {
@@ -208,6 +215,8 @@ func oauthCallback(ctx echo.Context) error {
 			resp, err = http.Get("https://github.com/" + user.NickName + ".keys")
 		case "gitea":
 			resp, err = http.Get(urlJoin(config.C.GiteaUrl, user.NickName+".keys"))
+		case "openid-connect":
+			err = errors.New("cannot get keys from OIDC provider")
 		}
 
 		if err == nil {
@@ -282,6 +291,22 @@ func oauth(ctx echo.Context) error {
 				urlJoin(config.C.GiteaUrl, "/api/v1/user"),
 			),
 		)
+	case "openid-connect":
+		oidcProvider, err := openidConnect.New(
+			config.C.OIDCClientKey,
+			config.C.OIDCSecret,
+			urlJoin(opengistUrl, "/oauth/openid-connect/callback"),
+			config.C.OIDCDiscoveryUrl,
+			"openid",
+			"email",
+			"profile",
+		)
+
+		if err != nil {
+			return errorRes(500, "Cannot create OIDC provider", err)
+		}
+
+		goth.UseProviders(oidcProvider)
 	}
 
 	currUser := getUserLogged(ctx)
@@ -299,6 +324,11 @@ func oauth(ctx echo.Context) error {
 				isDelete = true
 				err = currUser.DeleteProviderID(provider)
 			}
+		case "openid-connect":
+			if currUser.OIDCID != "" {
+				isDelete = true
+				err = currUser.DeleteProviderID(provider)
+			}
 		}
 
 		if err != nil {
@@ -313,7 +343,7 @@ func oauth(ctx echo.Context) error {
 
 	ctxValue := context.WithValue(ctx.Request().Context(), gothic.ProviderParamKey, provider)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
-	if provider != "github" && provider != "gitea" {
+	if provider != "github" && provider != "gitea" && provider != "openid-connect" {
 		return errorRes(400, "Unsupported provider", nil)
 	}
 

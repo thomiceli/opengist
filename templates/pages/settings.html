@@ -7,7 +7,7 @@
     </header>
     <main>
         <div class="space-y-4">
-            <div class="sm:grid {{ if or .githubOauth .giteaOauth }}grid-cols-3{{else}}grid-cols-2{{end}} gap-x-4 md:gap-x-8">
+            <div class="sm:grid {{ if or .githubOauth .giteaOauth .oidcOauth }}grid-cols-3{{else}}grid-cols-2{{end}} gap-x-4 md:gap-x-8">
                 <div class="w-full">
                     <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
@@ -27,7 +27,7 @@
                         </form>
                     </div>
                 </div>
-                {{ if or .githubOauth .giteaOauth }}
+                {{ if or .githubOauth .giteaOauth .oidcOauth }}
                 <div class="w-full">
                     <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-700 dark:text-slate-300 mb-2">
@@ -57,6 +57,18 @@
                                         {{ else }}
                                         <a href="{{ $.c.ExternalUrl }}/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                                             {{ .locale.Tr "settings.link-gitea-account" }}
+                                        </a>
+                                    {{ end }}
+                                {{ end }}
+                                {{ if .oidcOauth }}
+                                    {{ if .userLogged.OIDCID }}
+                                        <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
+                                        onclick="return confirm('Are you sure you want to unlink your OpenID account? You may lose access to Opengist if it\'s your only way to log in.')">
+                                            Unlink OpenID account
+                                        </a>
+                                        {{ else }}
+                                        <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                            Link OpenID account
                                         </a>
                                     {{ end }}
                                 {{ end }}

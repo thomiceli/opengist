@@ -226,7 +226,7 @@ func checks(c *config) error {
 		return err
 	}
 
-    if _, err := url.Parse(c.OIDCDiscoveryUrl); err != nil {
+	if _, err := url.Parse(c.OIDCDiscoveryUrl); err != nil {
 		return err
 	}
 

@@ -266,8 +266,8 @@ func (gist *Gist) InitRepository() error {
 	return git.InitRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) InitRepositoryViaNewPush(ctx echo.Context) error {
-	return git.InitRepositoryViaNewPush(gist.User.Username, gist.Uuid, ctx)
+func (gist *Gist) InitRepositoryViaInit(ctx echo.Context) error {
+	return git.InitRepositoryViaInit(gist.User.Username, gist.Uuid, ctx)
 }
 
 func (gist *Gist) DeleteRepository() error {

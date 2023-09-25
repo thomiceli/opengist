@@ -51,8 +51,8 @@ func gitHttp(ctx echo.Context) error {
 
 			gist := getData(ctx, "gist").(*db.Gist)
 
-			isPushNew := strings.HasPrefix(ctx.Request().URL.Path, "/push/info/refs")
-			isPushReceive := strings.HasPrefix(ctx.Request().URL.Path, "/push/git-receive-pack")
+			isInit := strings.HasPrefix(ctx.Request().URL.Path, "/init/info/refs")
+			isInitReceive := strings.HasPrefix(ctx.Request().URL.Path, "/init/git-receive-pack")
 			isInfoRefs := strings.HasSuffix(route.gitUrl, "/info/refs$")
 			isPull := ctx.QueryParam("service") == "git-upload-pack" ||
 				strings.HasSuffix(ctx.Request().URL.Path, "git-upload-pack") ||
@@ -92,7 +92,7 @@ func gitHttp(ctx echo.Context) error {
 				return basicAuth(ctx)
 			}
 
-			if !isPushNew && !isPushReceive {
+			if !isInit && !isInitReceive {
 				if gist.ID == 0 {
 					return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
 				}
@@ -122,7 +122,7 @@ func gitHttp(ctx echo.Context) error {
 					return errorRes(401, "Invalid credentials", nil)
 				}
 
-				if isPushNew {
+				if isInit {
 					gist = new(db.Gist)
 					gist.UserID = user.ID
 					gist.User = *user
@@ -133,7 +133,7 @@ func gitHttp(ctx echo.Context) error {
 					gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
 					gist.Title = "gist:" + gist.Uuid
 
-					if err = gist.InitRepositoryViaNewPush(ctx); err != nil {
+					if err = gist.InitRepositoryViaInit(ctx); err != nil {
 						return errorRes(500, "Cannot init repository in the file system", err)
 					}
 
@@ -141,13 +141,13 @@ func gitHttp(ctx echo.Context) error {
 						return errorRes(500, "Cannot init repository in database", err)
 					}
 
-					if err := memdb.InsertGistPush(user.ID, gist); err != nil {
+					if err := memdb.InsertGistInit(user.ID, gist); err != nil {
 						return errorRes(500, "Cannot save the URL for the new Gist", err)
 					}
 
 					setData(ctx, "gist", gist)
 				} else {
-					gistFromMemdb, err := memdb.GetGistPushAndDelete(user.ID)
+					gistFromMemdb, err := memdb.GetGistInitAndDelete(user.ID)
 					if err != nil {
 						return errorRes(500, "Cannot get the gist link from the in memory database", err)
 					}

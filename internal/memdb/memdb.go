@@ -5,7 +5,7 @@ import ogdb "github.com/thomiceli/opengist/internal/db"
 
 var db *memdb.MemDB
 
-type GistPush struct {
+type GistInit struct {
 	UserID uint
 	Gist   *ogdb.Gist
 }
@@ -14,8 +14,8 @@ func Setup() error {
 	var err error
 	schema := &memdb.DBSchema{
 		Tables: map[string]*memdb.TableSchema{
-			"gist_push": {
-				Name: "gist_push",
+			"gist_init": {
+				Name: "gist_init",
 				Indexes: map[string]*memdb.IndexSchema{
 					"id": {
 						Name:    "id",
@@ -35,9 +35,9 @@ func Setup() error {
 	return nil
 }
 
-func InsertGistPush(userId uint, gist *ogdb.Gist) error {
+func InsertGistInit(userId uint, gist *ogdb.Gist) error {
 	txn := db.Txn(true)
-	if err := txn.Insert("gist_push", &GistPush{
+	if err := txn.Insert("gist_init", &GistInit{
 		UserID: userId,
 		Gist:   gist,
 	}); err != nil {
@@ -49,11 +49,11 @@ func InsertGistPush(userId uint, gist *ogdb.Gist) error {
 	return nil
 }
 
-func GetGistPushAndDelete(userId uint) (*GistPush, error) {
+func GetGistInitAndDelete(userId uint) (*GistInit, error) {
 	txn := db.Txn(true)
 	defer txn.Abort()
 
-	raw, err := txn.First("gist_push", "id", userId)
+	raw, err := txn.First("gist_init", "id", userId)
 	if err != nil {
 		return nil, err
 	}
@@ -62,11 +62,11 @@ func GetGistPushAndDelete(userId uint) (*GistPush, error) {
 		return nil, nil
 	}
 
-	gistPush := raw.(*GistPush)
-	if err := txn.Delete("gist_push", gistPush); err != nil {
+	gistInit := raw.(*GistInit)
+	if err := txn.Delete("gist_init", gistInit); err != nil {
 		return nil, err
 	}
 
 	txn.Commit()
-	return gistPush, nil
+	return gistInit, nil
 }

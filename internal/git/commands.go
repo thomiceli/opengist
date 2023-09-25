@@ -67,7 +67,7 @@ func InitRepository(user string, gist string) error {
 	return createDotGitFiles(repositoryPath)
 }
 
-func InitRepositoryViaNewPush(user string, gist string, ctx echo.Context) error {
+func InitRepositoryViaInit(user string, gist string, ctx echo.Context) error {
 	repositoryPath := RepositoryPath(user, gist)
 
 	if err := InitRepository(user, gist); err != nil {

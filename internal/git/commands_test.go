@@ -2,7 +2,6 @@ package git
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
 	"net/http"
@@ -248,7 +247,7 @@ func TestTruncate(t *testing.T) {
 	require.Equal(t, 2, len(content), "Content size is not correct")
 }
 
-func TestInitViaNewPush(t *testing.T) {
+func TestInitViaGitInit(t *testing.T) {
 	setup(t)
 	defer teardown(t)
 
@@ -267,11 +266,9 @@ func TestInitViaNewPush(t *testing.T) {
 	user := "testUser"
 	gist := "testGist"
 
-	// Call InitRepositoryViaNewPush
-	err := InitRepositoryViaNewPush(user, gist, c)
+	err := InitRepositoryViaInit(user, gist, c)
 
-	// Perform assertions
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func commitToBare(t *testing.T, user string, gist string, files map[string]string) {

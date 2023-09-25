@@ -159,7 +159,7 @@ func NewServer(isDev bool) *Server {
 			return nil
 		},
 	}))
-	e.Use(middleware.Recover())
+	//e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 
 	e.Renderer = &Template{
@@ -235,7 +235,7 @@ func NewServer(isDev bool) *Server {
 		}
 
 		if config.C.HttpGit {
-			e.Any("/push/*", gitHttp, gistNewPushSoftInit)
+			e.Any("/init/*", gitHttp, gistNewPushSoftInit)
 		}
 
 		g1.GET("/all", allGists, checkRequireLogin)

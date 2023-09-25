@@ -261,7 +261,7 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub, Gite
   ```yaml
   oidc.client-key: <key>
   oidc.secret: <secret>
-  # Discovery endpoint of the OpenID provider
+  # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
   oidc.discovery-url: http://auth.example.com/.well-known/openid-configuration
   ```
 </details>

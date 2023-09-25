@@ -66,5 +66,5 @@ gitea.url: https://gitea.com/
 # To create a new OAuth2 application using OpenID Connect:
 oidc.client-key:
 oidc.secret:
-# Discovery endpoint of the OpenID provider
+# Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
 oidc.discovery-url:

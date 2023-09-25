@@ -1,24 +1,19 @@
 # Opengist
 
+<img height="72px" src="https://raw.githubusercontent.com/thomiceli/opengist/a9dd531f676d01b93bb6bd70751a69382ca563b0/public/opengist.svg" alt="Opengist" align="right" />
+
+Opengist is a **self-hosted** pastebin **powered by Git**. All snippets are stored in a Git repository and can be
+read and/or modified using standard Git commands, or with the web interface.
+It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and could be self-hosted.
+
+[Documentation](/docs) • [Demo](https://opengist.thomice.li)
+
+
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/thomiceli/opengist?sort=semver)
 ![License](https://img.shields.io/github/license/thomiceli/opengist?color=blue)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/thomiceli/opengist/go.yml)
+[![Go CI](https://github.com/thomiceli/opengist/actions/workflows/go.yml/badge.svg)](https://github.com/thomiceli/opengist/actions/workflows/go.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thomiceli/opengist)](https://goreportcard.com/report/github.com/thomiceli/opengist)
 
-A self-hosted pastebin **powered by Git**. [Try it here](https://opengist.thomice.li).
-
-* [Features](#features)
-* [Install](#install)
-    * [With Docker](#with-docker)
-    * [From source](#from-source)
-* [Configuration](#configuration)
-    * [Via YAML file](#configuration-via-yaml-file)
-    * [Via Environment Variables](#configuration-via-environment-variables)
-* [Administration](#administration)
-    * [Use Nginx as a reverse proxy](#use-nginx-as-a-reverse-proxy)
-    * [Use Fail2ban](#use-fail2ban)
-* [Configure OAuth](#configure-oauth)
-* [License](#license)
 
 ## Features
 

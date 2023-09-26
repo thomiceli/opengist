@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.5.0](https://github.com/thomiceli/opengist/compare/v1.4.2...v1.5.0) - 2023-09-26
+### Added
+- Private Gist visibility (#87)
+- Create gists from a special Git HTTP server remote URL (#95)
+- OIDC provider integration (#98)
+- Translation system (#104)
+- Run `git gc` on all repositories as admin (#90)
+- Unit and integration tests (#97)
+- Documentation (#110, #111)
+- New logo (#103)
+
+### Changed
+- Use Non-CGO SQLite instead of CGO SQLite (#100)
+- Various UI changes (#84, #93)
+- Improved CI/CD pipeline (#99, #113)
+- Improved git http semantics and repo obfuscation (#94)
+- Updated Go deps (#102)
+
+### Fixed
+- Find command for Windows users (#89)
+- Retain visibility when editing a gist (#83)
+- Typo on admin index page (#85)
+- ViteJS dev server (#91)
+- Bugs (#105)
+
+### Breaking changes
+- Removed CONFIG env var
+- Removed TLS server (#101)
+
 ## [1.4.2](https://github.com/thomiceli/opengist/compare/v1.4.1...v1.4.2) - 2023-07-17
 ### Added
 - External url to HTML links & redirects (#75)

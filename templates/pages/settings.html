@@ -2,19 +2,19 @@
 <div class="py-10">
     <header class="pb-4">
         <div>
-            <h1 class="text-2xl font-bold leading-tight">Settings</h1>
+            <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "settings" }}</h1>
         </div>
     </header>
     <main>
         <div class="space-y-4">
-            <div class="sm:grid {{ if or .githubOauth .giteaOauth }}grid-cols-3{{else}}grid-cols-2{{end}} gap-x-4 md:gap-x-8">
+            <div class="sm:grid {{ if or .githubOauth .giteaOauth .oidcOauth }}grid-cols-3{{else}}grid-cols-2{{end}} gap-x-4 md:gap-x-8">
                 <div class="w-full">
                     <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
-                            Email
+                            {{ .locale.Tr "settings.email" }}
                         </h2>
                         <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
-                            Used for commits and Gravatar
+                            {{ .locale.Tr "settings.email-help" }}
                         </h3>
                         <form class="space-y-6" action="/settings/email" method="post">
                             <div>
@@ -22,16 +22,16 @@
                                     <input id="email" name="email" value="{{ .userLogged.Email }}" type="email" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 </div>
                             </div>
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Set email</button>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "settings.email-set" }}</button>
                             {{ .csrfHtml }}
                         </form>
                     </div>
                 </div>
-                {{ if or .githubOauth .giteaOauth }}
+                {{ if or .githubOauth .giteaOauth .oidcOauth }}
                 <div class="w-full">
                     <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Link accounts
+                            {{ .locale.Tr "settings.link-accounts" }}
                         </h2>
                         <div class="gap-y-2">
 
@@ -39,11 +39,11 @@
                                     {{ if .userLogged.GithubID }}
                                         <a href="{{ $.c.ExternalUrl }}/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
                                            onclick="return confirm('Are you sure you want to unlink your GitHub account? You may lose access to Opengist if it\'s your only way to log in.')">
-                                            Unlink GitHub account
+                                            {{ .locale.Tr "settings.unlink-github-account" }}
                                         </a>
                                     {{ else }}
                                         <a href="{{ $.c.ExternalUrl }}/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                                            Link GitHub account
+                                            {{ .locale.Tr "settings.link-github-account" }}
                                         </a>
                                     {{ end }}
                                 {{ end }}
@@ -52,11 +52,23 @@
                                     {{ if .userLogged.GiteaID }}
                                         <a href="{{ $.c.ExternalUrl }}/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
                                            onclick="return confirm('Are you sure you want to unlink your Gitea account? You may lose access to Opengist if it\'s your only way to log in.')">
-                                            Unlink Gitea account
+                                            {{ .locale.Tr "settings.unlink-gitea-account" }}
                                         </a>
                                         {{ else }}
                                         <a href="{{ $.c.ExternalUrl }}/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                                            Link Gitea account
+                                            {{ .locale.Tr "settings.link-gitea-account" }}
+                                        </a>
+                                    {{ end }}
+                                {{ end }}
+                                {{ if .oidcOauth }}
+                                    {{ if .userLogged.OIDCID }}
+                                        <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
+                                        onclick="return confirm('Are you sure you want to unlink your OpenID account? You may lose access to Opengist if it\'s your only way to log in.')">
+                                            Unlink OpenID account
+                                        </a>
+                                        {{ else }}
+                                        <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                            Link OpenID account
                                         </a>
                                     {{ end }}
                                 {{ end }}
@@ -68,11 +80,11 @@
                 <div class="w-full">
                     <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
-                            Delete account
+                            {{ .locale.Tr "settings.delete-account" }}
                         </h2>
-                        <form class="space-y-6" action="/settings/account" method="post" onsubmit="return confirm('Are you sure you want to delete your account ?')">
+                        <form class="space-y-6" action="/settings/account" method="post" onsubmit="return confirm('{{ .locale.Tr "settings.delete-account-confirm" }}')">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 mt-2">Delete account</button>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 mt-2">{{ .locale.Tr "settings.delete-account" }}</button>
                             {{ .csrfHtml }}
                         </form>
                     </div>
@@ -82,26 +94,26 @@
                 <div class="w-full">
                     <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
-                            Add SSH Key
+                            {{ .locale.Tr "settings.add-ssh-key" }}
                         </h2>
                         <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
-                            Used only to pull/push gists using Git via SSH
+                            {{ .locale.Tr "settings.add-ssh-key-help" }}
                         </h3>
                         <form class="space-y-6" action="/settings/ssh-keys" method="post">
                             <div>
-                                <label for="title" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> Title </label>
+                                <label for="title" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> {{ .locale.Tr "settings.add-ssh-key-title" }} </label>
                                 <div class="mt-1">
                                     <input id="title" name="title" type="text" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 </div>
                             </div>
 
                             <div class="mt-8">
-                                <label for="sshkey" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> Key </label>
+                                <label for="sshkey" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> {{ .locale.Tr "settings.add-ssh-key-content" }} </label>
                                 <div class="mt-1">
                                     <textarea id="sshkey" required autocomplete="off" name="content" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"></textarea>
                                 </div>
                             </div>
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Add key</button>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "settings.add-ssh-key" }}</button>
                             {{ .csrfHtml }}
                         </form>
                     </div>
@@ -119,18 +131,18 @@
                                             <div>
                                                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ .Title }}</h3>
                                                 <p class="mt-1 text-xs text-slate-600 dark:text-slate-400 line-clamp-2 code" style="overflow-wrap: anywhere">SHA256:{{.SHA}}</p>
-                                                <p class="text-xs text-gray-500 line-clamp-2">Added <span class="moment-timestamp-date">{{ .CreatedAt }}</span></p>
+                                                <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-added-at" }} <span class="moment-timestamp-date">{{ .CreatedAt }}</span></p>
                                                 {{ if eq .LastUsedAt 0 }}
-                                                    <p class="text-xs text-gray-500 line-clamp-2">Never used</p>
+                                                    <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-never-used" }}</p>
                                                 {{ else }}
-                                                    <p class="text-xs text-gray-500 line-clamp-2">Last used <span class="moment-timestamp">{{ .LastUsedAt }}</span></p>
+                                                    <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-last-used" }} <span class="moment-timestamp">{{ .LastUsedAt }}</span></p>
                                                 {{ end }}
                                             </div>
-                                            <form action="/settings/ssh-keys/{{.ID}}" method="post" class="inline-block" onsubmit="return confirm('Confirm deletion of SSH key')">
+                                            <form action="/settings/ssh-keys/{{.ID}}" method="post" class="inline-block" onsubmit="return confirm('{{ $.locale.Tr "settings.delete-ssh-key-confirm" }}')">
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 {{ $.csrfHtml }}
 
-                                                <button type="submit" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">Delete</button>
+                                                <button type="submit" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ $.locale.Tr "settings.delete-ssh-key" }}</button>
                                             </form>
                                         </div>
                                     </li>

@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/models"
+	"github.com/thomiceli/opengist/internal/db"
 	"gorm.io/gorm"
 	"html/template"
 	"net/url"
@@ -23,7 +23,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 
 		gistName = strings.TrimSuffix(gistName, ".git")
 
-		gist, err := models.GetGist(userName, gistName)
+		gist, err := db.GetGist(userName, gistName)
 		if err != nil {
 			return notFound("Gist not found")
 		}
@@ -80,11 +80,35 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 			setData(ctx, "hasLiked", hasLiked)
 		}
 
-		if gist.Private {
+		if gist.Private > 0 {
 			setData(ctx, "NoIndex", true)
 		}
 
 		return next(ctx)
+	}
+}
+
+// gistSoftInit try to load a gist (same as gistInit) but does not return a 404 if the gist is not found
+// useful for git clients using HTTP to obfuscate the existence of a private gist
+func gistSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		userName := ctx.Param("user")
+		gistName := ctx.Param("gistname")
+
+		gistName = strings.TrimSuffix(gistName, ".git")
+
+		gist, _ := db.GetGist(userName, gistName)
+		setData(ctx, "gist", gist)
+
+		return next(ctx)
+	}
+}
+
+// gistNewPushInit has the same behavior as gistSoftInit but create a new gist empty instead
+func gistNewPushSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		setData(c, "gist", new(db.Gist))
+		return next(c)
 	}
 }
 
@@ -97,22 +121,24 @@ func allGists(ctx echo.Context) error {
 	pageInt := getPage(ctx)
 
 	sort := "created"
+	sortText := tr(ctx, "gist.list.sort-by-created")
 	order := "desc"
-	orderText := "Recently"
+	orderText := tr(ctx, "gist.list.order-by-desc")
 
 	if ctx.QueryParam("sort") == "updated" {
 		sort = "updated"
+		sortText = tr(ctx, "gist.list.sort-by-updated")
 	}
 
 	if ctx.QueryParam("order") == "asc" {
 		order = "asc"
-		orderText = "Least recently"
+		orderText = tr(ctx, "gist.list.order-by-asc")
 	}
 
-	setData(ctx, "sort", sort)
+	setData(ctx, "sort", sortText)
 	setData(ctx, "order", orderText)
 
-	var gists []*models.Gist
+	var gists []*db.Gist
 	var currentUserId uint
 	if userLogged != nil {
 		currentUserId = userLogged.ID
@@ -128,12 +154,12 @@ func allGists(ctx echo.Context) error {
 			setData(ctx, "searchQuery", ctx.QueryParam("q"))
 			setData(ctx, "searchQueryUrl", template.URL("&q="+ctx.QueryParam("q")))
 			urlPage = "search"
-			gists, err = models.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order)
+			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order)
 		} else if strings.HasSuffix(urlctx, "all") {
 			setData(ctx, "htmlTitle", "All gists")
 			setData(ctx, "mode", "all")
 			urlPage = "all"
-			gists, err = models.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
 		}
 	} else {
 		liked := false
@@ -149,9 +175,9 @@ func allGists(ctx echo.Context) error {
 			return errorRes(500, "Error matching regexp", err)
 		}
 
-		var fromUser *models.User
+		var fromUser *db.User
 
-		fromUser, err = models.GetUserByUsername(fromUserStr)
+		fromUser, err = db.GetUserByUsername(fromUserStr)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return notFound("User not found")
@@ -160,19 +186,19 @@ func allGists(ctx echo.Context) error {
 		}
 		setData(ctx, "fromUser", fromUser)
 
-		if countFromUser, err := models.CountAllGistsFromUser(fromUser.ID, currentUserId); err != nil {
+		if countFromUser, err := db.CountAllGistsFromUser(fromUser.ID, currentUserId); err != nil {
 			return errorRes(500, "Error counting gists", err)
 		} else {
 			setData(ctx, "countFromUser", countFromUser)
 		}
 
-		if countLiked, err := models.CountAllGistsLikedByUser(fromUser.ID, currentUserId); err != nil {
+		if countLiked, err := db.CountAllGistsLikedByUser(fromUser.ID, currentUserId); err != nil {
 			return errorRes(500, "Error counting liked gists", err)
 		} else {
 			setData(ctx, "countLiked", countLiked)
 		}
 
-		if countForked, err := models.CountAllGistsForkedByUser(fromUser.ID, currentUserId); err != nil {
+		if countForked, err := db.CountAllGistsForkedByUser(fromUser.ID, currentUserId); err != nil {
 			return errorRes(500, "Error counting forked gists", err)
 		} else {
 			setData(ctx, "countForked", countForked)
@@ -182,17 +208,17 @@ func allGists(ctx echo.Context) error {
 			urlPage = fromUserStr + "/liked"
 			setData(ctx, "htmlTitle", "All gists liked by "+fromUserStr)
 			setData(ctx, "mode", "liked")
-			gists, err = models.GetAllGistsLikedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		} else if forked {
 			urlPage = fromUserStr + "/forked"
 			setData(ctx, "htmlTitle", "All gists forked by "+fromUserStr)
 			setData(ctx, "mode", "forked")
-			gists, err = models.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		} else {
 			urlPage = fromUserStr
 			setData(ctx, "htmlTitle", "All gists from "+fromUserStr)
 			setData(ctx, "mode", "fromUser")
-			gists, err = models.GetAllGistsFromUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsFromUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		}
 	}
 
@@ -209,7 +235,7 @@ func allGists(ctx echo.Context) error {
 }
 
 func gistIndex(ctx echo.Context) error {
-	gist := getData(ctx, "gist").(*models.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	revision := ctx.Param("revision")
 
 	if revision == "" {
@@ -234,7 +260,7 @@ func gistIndex(ctx echo.Context) error {
 }
 
 func revisions(ctx echo.Context) error {
-	gist := getData(ctx, "gist").(*models.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	userName := gist.User.Username
 	gistName := gist.Uuid
 
@@ -257,7 +283,7 @@ func revisions(ctx echo.Context) error {
 		emailsSet[strings.ToLower(commit.AuthorEmail)] = struct{}{}
 	}
 
-	emailsUsers, err := models.GetUsersFromEmails(emailsSet)
+	emailsUsers, err := db.GetUsersFromEmails(emailsSet)
 	if err != nil {
 		return errorRes(500, "Error fetching users emails", err)
 	}
@@ -286,13 +312,13 @@ func processCreate(ctx echo.Context) error {
 		return errorRes(400, "Bad request", err)
 	}
 
-	dto := new(models.GistDTO)
-	var gist *models.Gist
+	dto := new(db.GistDTO)
+	var gist *db.Gist
 
 	if isCreate {
 		setData(ctx, "htmlTitle", "Create a new gist")
 	} else {
-		gist = getData(ctx, "gist").(*models.Gist)
+		gist = getData(ctx, "gist").(*db.Gist)
 		setData(ctx, "htmlTitle", "Edit "+gist.Title)
 	}
 
@@ -300,7 +326,7 @@ func processCreate(ctx echo.Context) error {
 		return errorRes(400, "Cannot bind data", err)
 	}
 
-	dto.Files = make([]models.FileDTO, 0)
+	dto.Files = make([]db.FileDTO, 0)
 	fileCounter := 0
 	for i := 0; i < len(ctx.Request().PostForm["content"]); i++ {
 		name := ctx.Request().PostForm["name"][i]
@@ -316,7 +342,7 @@ func processCreate(ctx echo.Context) error {
 			return errorRes(400, "Invalid character unescaped", err)
 		}
 
-		dto.Files = append(dto.Files, models.FileDTO{
+		dto.Files = append(dto.Files, db.FileDTO{
 			Filename: strings.Trim(name, " "),
 			Content:  escapedValue,
 		})
@@ -398,9 +424,9 @@ func processCreate(ctx echo.Context) error {
 }
 
 func toggleVisibility(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*models.Gist)
+	var gist = getData(ctx, "gist").(*db.Gist)
 
-	gist.Private = !gist.Private
+	gist.Private = (gist.Private + 1) % 3
 	if err := gist.Update(); err != nil {
 		return errorRes(500, "Error updating this gist", err)
 	}
@@ -410,12 +436,7 @@ func toggleVisibility(ctx echo.Context) error {
 }
 
 func deleteGist(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*models.Gist)
-
-	err := gist.DeleteRepository()
-	if err != nil {
-		return errorRes(500, "Error deleting the repository", err)
-	}
+	var gist = getData(ctx, "gist").(*db.Gist)
 
 	if err := gist.Delete(); err != nil {
 		return errorRes(500, "Error deleting this gist", err)
@@ -426,7 +447,7 @@ func deleteGist(ctx echo.Context) error {
 }
 
 func like(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*models.Gist)
+	var gist = getData(ctx, "gist").(*db.Gist)
 	currentUser := getUserLogged(ctx)
 
 	hasLiked, err := currentUser.HasLiked(gist)
@@ -452,7 +473,7 @@ func like(ctx echo.Context) error {
 }
 
 func fork(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*models.Gist)
+	var gist = getData(ctx, "gist").(*db.Gist)
 	currentUser := getUserLogged(ctx)
 
 	alreadyForked, err := gist.GetForkParent(currentUser)
@@ -474,7 +495,7 @@ func fork(ctx echo.Context) error {
 		return errorRes(500, "Error creating an UUID", err)
 	}
 
-	newGist := &models.Gist{
+	newGist := &db.Gist{
 		Uuid:            strings.Replace(uuidGist.String(), "-", "", -1),
 		Title:           gist.Title,
 		Preview:         gist.Preview,
@@ -503,7 +524,7 @@ func fork(ctx echo.Context) error {
 }
 
 func rawFile(ctx echo.Context) error {
-	gist := getData(ctx, "gist").(*models.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	file, err := gist.File(ctx.Param("revision"), ctx.Param("file"), false)
 
 	if err != nil {
@@ -517,8 +538,32 @@ func rawFile(ctx echo.Context) error {
 	return plainText(ctx, 200, file.Content)
 }
 
+func downloadFile(ctx echo.Context) error {
+	gist := getData(ctx, "gist").(*db.Gist)
+	file, err := gist.File(ctx.Param("revision"), ctx.Param("file"), false)
+
+	if err != nil {
+		return errorRes(500, "Error getting file content", err)
+	}
+
+	if file == nil {
+		return notFound("File not found")
+	}
+
+	ctx.Response().Header().Set("Content-Type", "text/plain")
+	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+file.Filename)
+	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(file.Content)))
+	_, err = ctx.Response().Write([]byte(file.Content))
+
+	if err != nil {
+		return errorRes(500, "Error downloading the file", err)
+	}
+
+	return nil
+}
+
 func edit(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*models.Gist)
+	var gist = getData(ctx, "gist").(*db.Gist)
 
 	files, err := gist.Files("HEAD")
 	if err != nil {
@@ -532,7 +577,7 @@ func edit(ctx echo.Context) error {
 }
 
 func downloadZip(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*models.Gist)
+	var gist = getData(ctx, "gist").(*db.Gist)
 	var revision = ctx.Param("revision")
 
 	files, err := gist.Files(revision)
@@ -577,7 +622,7 @@ func downloadZip(ctx echo.Context) error {
 }
 
 func likes(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*models.Gist)
+	var gist = getData(ctx, "gist").(*db.Gist)
 
 	pageInt := getPage(ctx)
 
@@ -596,7 +641,7 @@ func likes(ctx echo.Context) error {
 }
 
 func forks(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*models.Gist)
+	var gist = getData(ctx, "gist").(*db.Gist)
 	pageInt := getPage(ctx)
 
 	currentUser := getUserLogged(ctx)

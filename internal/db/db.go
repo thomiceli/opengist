@@ -1,20 +1,21 @@
-package models
+package db
 
 import (
 	"errors"
-	"github.com/mattn/go-sqlite3"
+	"strings"
+
+	msqlite "github.com/glebarez/go-sqlite"
+	"github.com/glebarez/sqlite"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/utils"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"strings"
 )
 
 var db *gorm.DB
 
-func Setup(dbPath string) error {
+func Setup(dbPath string, sharedCache bool) error {
 	var err error
 	journalMode := strings.ToUpper(config.C.SqliteJournalMode)
 
@@ -22,7 +23,12 @@ func Setup(dbPath string) error {
 		log.Warn().Msg("Invalid SQLite journal mode: " + journalMode)
 	}
 
-	if db, err = gorm.Open(sqlite.Open(dbPath+"?_fk=true&_journal_mode="+journalMode), &gorm.Config{
+	sharedCacheStr := ""
+	if sharedCache {
+		sharedCacheStr = "&cache=shared"
+	}
+
+	if db, err = gorm.Open(sqlite.Open(dbPath+"?_fk=true&_journal_mode="+journalMode+sharedCacheStr), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	}); err != nil {
 		return err
@@ -40,7 +46,9 @@ func Setup(dbPath string) error {
 		return err
 	}
 
-	ApplyMigrations(db)
+	if err = ApplyMigrations(db); err != nil {
+		return err
+	}
 
 	// Default admin setting values
 	return initAdminSettings(map[string]string{
@@ -51,6 +59,14 @@ func Setup(dbPath string) error {
 	})
 }
 
+func Close() error {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return err
+	}
+	return sqlDB.Close()
+}
+
 func CountAll(table interface{}) (int64, error) {
 	var count int64
 	err := db.Model(table).Count(&count).Error
@@ -58,8 +74,8 @@ func CountAll(table interface{}) (int64, error) {
 }
 
 func IsUniqueConstraintViolation(err error) bool {
-	var sqliteErr sqlite3.Error
-	if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+	var sqliteErr *msqlite.Error
+	if errors.As(err, &sqliteErr) && sqliteErr.Code() == 2067 {
 		return true
 	}
 	return false

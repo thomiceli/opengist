@@ -9,7 +9,7 @@
     </header>
     <main class="mt-4">
         {{ if and .DisableSignup (ne .title "Login") }}
-        <p class="italic">Administrator has disabled signing up</p>
+        <p class="italic">{{ .locale.Tr "auth.signup-disabled" }}</p>
         {{ else }}
         <div class="sm:col-span-6">
             <div class="mt-8  sm:w-full sm:max-w-md">
@@ -18,14 +18,14 @@
                     {{ if not .disableForm }}
                     <form class="space-y-6" action="#" method="post">
                         <div>
-                            <label for="username" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> Username </label>
+                            <label for="username" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> {{ .locale.Tr "auth.username" }} </label>
                             <div class="mt-1">
                                 <input id="username" name="username" type="text" required class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                             </div>
                         </div>
 
                         <div class="mt-8">
-                            <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> Password </label>
+                            <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> {{ .locale.Tr "auth.password" }} </label>
                             <div class="mt-1">
                                 <input id="password" name="password" type="password" autocomplete="current-password" required class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                             </div>
@@ -33,25 +33,25 @@
                         {{ if eq .title "Login" }}
                         <div class="flex">
                             <div class="flex-auto">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Login</button>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.login" }}</button>
                             </div>
                             {{ if not .DisableSignup }}
-                            <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/register">Register instead →</a></span>
+                            <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/register">{{ .locale.Tr "auth.register-instead" }} →</a></span>
                             {{ end }}
                         </div>
                         {{ else }}
                         <div class="flex">
                             <div class="flex-auto">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Register</button>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.signup" }}</button>
                             </div>
-                            <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/login">Login instead →</a></span>
+                            <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/login">{{ .locale.Tr "auth.login-instead" }} →</a></span>
 
                         </div>
                         {{ end }}
                         {{ .csrfHtml }}
                     </form>
                     {{ end }}
-                    {{ if or .githubOauth .giteaOauth }}
+                    {{ if or .githubOauth .giteaOauth .oidcOauth }}
                         {{ if not .disableForm }}
                             <div class="relative my-4">
                                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
@@ -63,12 +63,17 @@
                         <div>
                             {{ if .githubOauth }}
                                 <a href="{{ $.c.ExternalUrl }}/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                                    Continue with GitHub account
+                                    {{ .locale.Tr "auth.github-oauth" }}
                                 </a>
                             {{ end }}
                             {{ if .giteaOauth }}
                                 <a href="{{ $.c.ExternalUrl }}/oauth/gitea" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                                    Continue with Gitea account
+                                    {{ .locale.Tr "auth.gitea-oauth" }}
+                                </a>
+                            {{ end }}
+                            {{ if .oidcOauth }}
+                                <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                                    Continue with OpenID account
                                 </a>
                             {{ end }}
                         </div>

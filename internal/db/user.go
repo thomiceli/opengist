@@ -1,4 +1,4 @@
-package models
+package db
 
 import (
 	"gorm.io/gorm"
@@ -15,6 +15,7 @@ type User struct {
 	AvatarURL string
 	GithubID  string
 	GiteaID   string
+	OIDCID    string `gorm:"column:oidc_id"`
 
 	Gists   []Gist   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys []SSHKey `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
@@ -38,7 +39,7 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 	}
 
 	// Decrement forks counter for all gists forked by this user
-	return tx.Model(&Gist{}).
+	err = tx.Model(&Gist{}).
 		Omit("updated_at").
 		Where("id IN (?)", tx.
 			Select("forked_id").
@@ -47,6 +48,12 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		).
 		UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).
 		Error
+	if err != nil {
+		return err
+	}
+
+	// Delete all gists created by this user
+	return tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 }
 
 func UserExists(username string) (bool, error) {
@@ -124,6 +131,8 @@ func GetUserByProvider(id string, provider string) (*User, error) {
 		err = db.Where("github_id = ?", id).First(&user).Error
 	case "gitea":
 		err = db.Where("gitea_id = ?", id).First(&user).Error
+	case "openid-connect":
+		err = db.Where("oidc_id = ?", id).First(&user).Error
 	}
 
 	return user, err
@@ -167,6 +176,11 @@ func (user *User) DeleteProviderID(provider string) error {
 	case "gitea":
 		return db.Model(&user).
 			Update("gitea_id", nil).
+			Update("avatar_url", nil).
+			Error
+	case "openid-connect":
+		return db.Model(&user).
+			Update("oidc_id", nil).
 			Update("avatar_url", nil).
 			Error
 	}

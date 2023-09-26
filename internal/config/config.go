@@ -15,7 +15,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var OpengistVersion = "1.4.2"
+var OpengistVersion = "1.5-dev"
 
 var C *config
 
@@ -29,12 +29,9 @@ type config struct {
 
 	SqliteJournalMode string `yaml:"sqlite.journal-mode" env:"OG_SQLITE_JOURNAL_MODE"`
 
-	HttpHost       string `yaml:"http.host" env:"OG_HTTP_HOST"`
-	HttpPort       string `yaml:"http.port" env:"OG_HTTP_PORT"`
-	HttpGit        bool   `yaml:"http.git-enabled" env:"OG_HTTP_GIT_ENABLED"`
-	HttpTLSEnabled bool   `yaml:"http.tls-enabled" env:"OG_HTTP_TLS_ENABLED"`
-	HttpCertFile   string `yaml:"http.cert-file" env:"OG_HTTP_CERT_FILE"`
-	HttpKeyFile    string `yaml:"http.key-file" env:"OG_HTTP_KEY_FILE"`
+	HttpHost string `yaml:"http.host" env:"OG_HTTP_HOST"`
+	HttpPort string `yaml:"http.port" env:"OG_HTTP_PORT"`
+	HttpGit  bool   `yaml:"http.git-enabled" env:"OG_HTTP_GIT_ENABLED"`
 
 	SshGit            bool   `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"`
 	SshHost           string `yaml:"ssh.host" env:"OG_SSH_HOST"`
@@ -48,6 +45,10 @@ type config struct {
 	GiteaClientKey string `yaml:"gitea.client-key" env:"OG_GITEA_CLIENT_KEY"`
 	GiteaSecret    string `yaml:"gitea.secret" env:"OG_GITEA_SECRET"`
 	GiteaUrl       string `yaml:"gitea.url" env:"OG_GITEA_URL"`
+
+	OIDCClientKey    string `yaml:"oidc.client-key" env:"OG_OIDC_CLIENT_KEY"`
+	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
+	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
 }
 
 func configWithDefaults() (*config, error) {
@@ -66,7 +67,6 @@ func configWithDefaults() (*config, error) {
 	c.HttpHost = "0.0.0.0"
 	c.HttpPort = "6157"
 	c.HttpGit = true
-	c.HttpTLSEnabled = false
 
 	c.SshGit = true
 	c.SshHost = "0.0.0.0"
@@ -175,17 +175,6 @@ func loadConfigFromYaml(c *config, configPath string) error {
 		fmt.Println("No YAML config file specified.")
 	}
 
-	// Override default values with environment variables (as yaml)
-	configEnv := os.Getenv("CONFIG")
-	if configEnv != "" {
-		fmt.Println("Using config from environment variable: CONFIG")
-		fmt.Println("!! This method of setting the config is deprecated and will be removed in a future version of Opengist")
-		d := yaml.NewDecoder(strings.NewReader(configEnv))
-		if err := d.Decode(&c); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -234,6 +223,10 @@ func checks(c *config) error {
 	}
 
 	if _, err := url.Parse(c.GiteaUrl); err != nil {
+		return err
+	}
+
+	if _, err := url.Parse(c.OIDCDiscoveryUrl); err != nil {
 		return err
 	}
 

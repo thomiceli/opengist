@@ -5,7 +5,7 @@
     <div class="sm:overflow-hidden ">
         <div class="space-y-2 bg-gray-50 dark:bg-gray-800 py-6 px-6 rounded-md border border-gray-200 dark:border-gray-700">
             <div>
-                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">Versions</span>
+                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.versions" }}</span>
             </div>
             <table class="table-fixed">
                 <tbody>
@@ -29,20 +29,20 @@
     <div class="sm:overflow-hidden ">
         <div class="space-y-2 bg-gray-50 dark:bg-gray-800 py-6 px-6 rounded-md border border-gray-200 dark:border-gray-700">
             <div>
-                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">Stats</span>
+                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.stats" }}</span>
             </div>
             <table class="table-fixed">
                 <tbody>
                     <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">Users</td>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">{{ .locale.Tr "admin.users" }}</td>
                         <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .countUsers }}</td>
                     </tr>
                     <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">Gists</td>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">{{ .locale.Tr "admin.gists" }}</td>
                         <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .countGists }}</td>
                     </tr>
                     <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">SSH keys</td>
+                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">{{ .locale.Tr "admin.ssh_keys" }}</td>
                         <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .countKeys }}</td>
                     </tr>
                 </tbody>
@@ -53,19 +53,25 @@
     <div class="sm:overflow-hidden ">
         <div class="space-y-2 bg-gray-50 dark:bg-gray-800 py-6 px-6 rounded-md border border-gray-200 dark:border-gray-700">
             <div>
-                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">Actions</span>
+                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.actions" }}</span>
             </div>
             <div class="space-y-2">
                 <form action="/admin-panel/sync-fs" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .syncReposFromFS }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        Synchorize gists from filesystem
+                        {{ .locale.Tr "admin.actions.sync-fs" }}
                     </button>
                 </form>
                 <form action="/admin-panel/sync-db" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .syncReposFromDB }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromDB }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        Synchorize gists from database
+                        {{ .locale.Tr "admin.actions.sync-db" }}
+                    </button>
+                </form>
+                <form action="/admin-panel/gc-repos" method="POST">
+                    {{ .csrfHtml }}
+                    <button type="submit" {{ if .gitGcRepos }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .gitGcRepos }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                        {{ .locale.Tr "admin.actions.git-gc" }}
                     </button>
                 </form>
             </div>

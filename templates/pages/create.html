@@ -3,7 +3,7 @@
     <header>
 
         <h1 class="text-2xl font-bold leading-tight text-slate-700 dark:text-slate-300">
-            New Gist
+            {{ .locale.Tr "gist.new.new_gist"}}
         </h1>
 
     </header>
@@ -12,12 +12,12 @@
             <div class="grid grid-cols-12 gap-x-4">
                 <div class="col-span-8 sm:col-span-4">
                     <div class="mt-1">
-                        <input type="text" placeholder="Title" name="title" id="title" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
+                        <input type="text" placeholder="{{ .locale.Tr "gist.new.title" }}" name="title" id="title" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-8">
                     <div class="mt-1">
-                        <input type="text" placeholder="Description" name="description" id="description" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
+                        <input type="text" placeholder="{{ .locale.Tr "gist.new.description" }}" name="description" id="description" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
                     </div>
                 </div>
 
@@ -26,26 +26,26 @@
                 <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 editor">
                     <div class="border-b-1 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 my-auto flex">
                         <p class="mx-2 my-2 inline-flex">
-                            <input type="text" name="name" placeholder="Filename with extension" style="line-height: 0.05em" class="form-filename bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
+                            <input type="text" name="name" placeholder="{{ .locale.Tr "gist.new.filename-with-extension" }}" style="line-height: 0.05em" class="form-filename bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
                         </p>
                         <div class="hidden mx-2 my-2 sm:inline-flex ml-auto space-x-2">
                             <select class="editor-indent-type whitespace-nowrap text-slate-700 dark:text-slate-300 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 pr-8 text-xs font-medium shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500">
-                                <optgroup label="Indent mode">
-                                    <option value="space">Space</option>
-                                    <option value="tab">Tabs</option>
+                                <optgroup label="{{ .locale.Tr "gist.new.indent-mode" }}">
+                                    <option value="space">{{ .locale.Tr "gist.new.indent-mode-space" }}</option>
+                                    <option value="tab">{{ .locale.Tr "gist.new.indent-mode-tab" }}</option>
                                 </optgroup>
                             </select>
                             <select class="editor-indent-size whitespace-nowrap text-slate-700 dark:text-slate-300 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 pr-8 text-xs font-medium shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500">
-                                <optgroup label="Indent size">
+                                <optgroup label="{{ .locale.Tr "gist.new.indent-size" }}">
                                     <option value="2">2</option>
                                     <option value="4">4</option>
                                     <option value="8">8</option>
                                 </optgroup>
                             </select>
                             <select class="editor-wrap-mode whitespace-nowrap text-slate-700 dark:text-slate-300 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 pr-8  text-xs font-medium shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500">
-                                <optgroup label="Wrap mode">
-                                    <option value="no">No wrap</option>
-                                    <option value="soft">Soft wrap</option>
+                                <optgroup label="{{ .locale.Tr "gist.new.wrap-mode" }}">
+                                    <option value="no">{{ .locale.Tr "gist.new.wrap-mode-no" }}</option>
+                                    <option value="soft">{{ .locale.Tr "gist.new.wrap-mode-soft" }}</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -55,9 +55,25 @@
             </div>
 
             <div class="flex">
-                <button type="button" id="add-file" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Add file</button>
-                <button type="submit" name="private" value="1" class="ml-auto inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Create unlisted gist</button>
-                <button type="submit" name="private" value="0" class="ml-2 inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Create public gist</button>
+                <button type="button" id="add-file" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">{{ .locale.Tr "gist.new.add-file" }}</button>
+
+                <div class="ml-auto inline-flex ">
+                    <button id="submit-gist" type="submit" name="private" value="0" class="ml-2 items-center px-4 py-2 border border-transparent border-primary-200 dark:border-primary-700 text-sm font-medium rounded-l-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 z-20">{{ .locale.Tr "gist.new.create-public-button" }}</button>
+                    <div class="relative -ml-px block">
+                        <button type="button" class="relative inline-flex items-center rounded-r-md bg-primary-500 hover:bg-primary-600 px-2 py-2 text-gray-400 border border-transparent border-primary-200 dark:border-primary-700 focus:z-10" id="gist-visibility-menu-button">
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="white" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div id="gist-menu-visibility" class="hidden absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="gist-visibility-menu-button">
+                            <div class="rounded-md dark:bg-gray-800 bg-white shadow-lg ring-1 ring-gray-50 dark:ring-gray-700 focus:outline-none" role="none">
+                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400 gist-visibility-option" data-btntext="{{ .locale.Tr "gist.new.create-public-button" }}" data-visibility="0" role="menuitem">{{ .locale.Tr "gist.public" }}</span>
+                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400 gist-visibility-option" data-btntext="{{ .locale.Tr "gist.new.create-unlisted-button" }}" data-visibility="1" role="menuitem">{{ .locale.Tr "gist.unlisted" }}</span>
+                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400 gist-visibility-option" data-btntext="{{ .locale.Tr "gist.new.create-private-button" }}" data-visibility="2" role="menuitem">{{ .locale.Tr "gist.private" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             {{ .csrfHtml }}
         </form>

@@ -4,7 +4,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/thomiceli/opengist/internal/models"
+	"github.com/thomiceli/opengist/internal/db"
 	"golang.org/x/crypto/ssh"
 	"strconv"
 	"strings"
@@ -14,7 +14,7 @@ import (
 func userSettings(ctx echo.Context) error {
 	user := getUserLogged(ctx)
 
-	keys, err := models.GetSSHKeysByUserID(user.ID)
+	keys, err := db.GetSSHKeysByUserID(user.ID)
 	if err != nil {
 		return errorRes(500, "Cannot get SSH keys", err)
 	}
@@ -61,7 +61,7 @@ func accountDeleteProcess(ctx echo.Context) error {
 func sshKeysProcess(ctx echo.Context) error {
 	user := getUserLogged(ctx)
 
-	var dto = new(models.SSHKeyDTO)
+	var dto = new(db.SSHKeyDTO)
 	if err := ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}
@@ -97,7 +97,7 @@ func sshKeysDelete(ctx echo.Context) error {
 		return redirect(ctx, "/settings")
 	}
 
-	key, err := models.GetSSHKeyByID(uint(keyId))
+	key, err := db.GetSSHKeyByID(uint(keyId))
 
 	if err != nil || key.UserID != user.ID {
 		return redirect(ctx, "/settings")

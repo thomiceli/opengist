@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/models"
+	"github.com/thomiceli/opengist/internal/memdb"
 	"github.com/thomiceli/opengist/internal/ssh"
 	"github.com/thomiceli/opengist/internal/web"
 	"os"
@@ -51,17 +52,19 @@ func initialize() {
 	}
 
 	log.Info().Msg("Database file: " + filepath.Join(homePath, config.C.DBFilename))
-	if err := models.Setup(filepath.Join(homePath, config.C.DBFilename)); err != nil {
+	if err := db.Setup(filepath.Join(homePath, config.C.DBFilename), false); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")
 	}
 
-	web.EmbedFS = dirFS
+	if err := memdb.Setup(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize in memory database")
+	}
 }
 
 func main() {
 	initialize()
 
-	go web.Start()
+	go web.NewServer(os.Getenv("OG_DEV") == "1").Start()
 	go ssh.Start()
 
 	select {}

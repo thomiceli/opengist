@@ -1,6 +1,7 @@
-package models
+package db
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 	"os/exec"
@@ -15,7 +16,7 @@ type Gist struct {
 	Preview         string
 	PreviewFilename string
 	Description     string
-	Private         bool
+	Private         int // 0: public, 1: unlisted, 2: private
 	UserID          uint
 	User            User
 	NbFiles         int
@@ -89,7 +90,7 @@ func GetAllGists(offset int) ([]*Gist, error) {
 func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort string, order string) ([]*Gist, error) {
 	var gists []*Gist
 	err := db.Preload("User").Preload("Forked.User").
-		Where("((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", currentUserId).
+		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("gists.title like ? or gists.description like ?", "%"+query+"%", "%"+query+"%").
 		Limit(11).
 		Offset(offset * 10).
@@ -101,7 +102,7 @@ func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort st
 
 func gistsFromUserStatement(fromUserId uint, currentUserId uint) *gorm.DB {
 	return db.Preload("User").Preload("Forked.User").
-		Where("((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", currentUserId).
+		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("users.id = ?", fromUserId).
 		Joins("join users on gists.user_id = users.id")
 }
@@ -124,7 +125,7 @@ func CountAllGistsFromUser(fromUserId uint, currentUserId uint) (int64, error) {
 
 func likedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
 	return db.Preload("User").Preload("Forked.User").
-		Where("((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", currentUserId).
+		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("likes.user_id = ?", fromUserId).
 		Joins("join likes on gists.id = likes.gist_id").
 		Joins("join users on likes.user_id = users.id")
@@ -147,7 +148,7 @@ func CountAllGistsLikedByUser(fromUserId uint, currentUserId uint) (int64, error
 
 func forkedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
 	return db.Preload("User").Preload("Forked.User").
-		Where("gists.forked_id is not null and ((gists.private = 0) or (gists.private = 1 and gists.user_id = ?))", currentUserId).
+		Where("gists.forked_id is not null and ((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("gists.user_id = ?", fromUserId).
 		Joins("join users on gists.user_id = users.id")
 }
@@ -190,6 +191,11 @@ func (gist *Gist) Update() error {
 }
 
 func (gist *Gist) Delete() error {
+	err := gist.DeleteRepository()
+	if err != nil {
+		return err
+	}
+
 	return db.Delete(&gist).Error
 }
 
@@ -243,7 +249,7 @@ func (gist *Gist) GetForks(currentUserId uint, offset int) ([]*Gist, error) {
 	var gists []*Gist
 	err := db.Model(&gist).Preload("User").
 		Where("forked_id = ?", gist.ID).
-		Where("(gists.private = 0) or (gists.private = 1 and gists.user_id = ?)", currentUserId).
+		Where("(gists.private = 0) or (gists.private > 0 and gists.user_id = ?)", currentUserId).
 		Limit(11).
 		Offset(offset * 10).
 		Order("updated_at desc").
@@ -258,6 +264,10 @@ func (gist *Gist) CanWrite(user *User) bool {
 
 func (gist *Gist) InitRepository() error {
 	return git.InitRepository(gist.User.Username, gist.Uuid)
+}
+
+func (gist *Gist) InitRepositoryViaInit(ctx echo.Context) error {
+	return git.InitRepositoryViaInit(gist.User.Username, gist.Uuid, ctx)
 }
 
 func (gist *Gist) DeleteRepository() error {
@@ -307,7 +317,7 @@ func (gist *Gist) Log(skip int) ([]*git.Commit, error) {
 }
 
 func (gist *Gist) NbCommits() (string, error) {
-	return git.GetNumberOfCommitsOfRepository(gist.User.Username, gist.Uuid)
+	return git.CountCommits(gist.User.Username, gist.Uuid)
 }
 
 func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
@@ -367,7 +377,6 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 			gist.Preview = file.Content
 		}
 
-		gist.Preview = file.Content
 		gist.PreviewFilename = file.Filename
 	}
 
@@ -379,8 +388,10 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 type GistDTO struct {
 	Title       string    `validate:"max=50" form:"title"`
 	Description string    `validate:"max=150" form:"description"`
-	Private     bool      `form:"private"`
+	Private     int       `validate:"number,min=0,max=2" form:"private"`
 	Files       []FileDTO `validate:"min=1,dive"`
+	Name        []string  `form:"name"`
+	Content     []string  `form:"content"`
 }
 
 type FileDTO struct {

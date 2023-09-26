@@ -4,8 +4,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/models"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -16,6 +16,7 @@ import (
 var (
 	syncReposFromFS = false
 	syncReposFromDB = false
+	gitGcRepos      = false
 )
 
 func adminIndex(ctx echo.Context) error {
@@ -31,19 +32,19 @@ func adminIndex(ctx echo.Context) error {
 	}
 	setData(ctx, "gitVersion", gitVersion)
 
-	countUsers, err := models.CountAll(&models.User{})
+	countUsers, err := db.CountAll(&db.User{})
 	if err != nil {
 		return errorRes(500, "Cannot count users", err)
 	}
 	setData(ctx, "countUsers", countUsers)
 
-	countGists, err := models.CountAll(&models.Gist{})
+	countGists, err := db.CountAll(&db.Gist{})
 	if err != nil {
 		return errorRes(500, "Cannot count gists", err)
 	}
 	setData(ctx, "countGists", countGists)
 
-	countKeys, err := models.CountAll(&models.SSHKey{})
+	countKeys, err := db.CountAll(&db.SSHKey{})
 	if err != nil {
 		return errorRes(500, "Cannot count SSH keys", err)
 	}
@@ -51,6 +52,7 @@ func adminIndex(ctx echo.Context) error {
 
 	setData(ctx, "syncReposFromFS", syncReposFromFS)
 	setData(ctx, "syncReposFromDB", syncReposFromDB)
+	setData(ctx, "gitGcRepos", gitGcRepos)
 	return html(ctx, "admin_index.html")
 }
 
@@ -60,9 +62,9 @@ func adminUsers(ctx echo.Context) error {
 	setData(ctx, "adminHeaderPage", "users")
 	pageInt := getPage(ctx)
 
-	var data []*models.User
+	var data []*db.User
 	var err error
-	if data, err = models.GetAllUsers(pageInt - 1); err != nil {
+	if data, err = db.GetAllUsers(pageInt - 1); err != nil {
 		return errorRes(500, "Cannot get users", err)
 	}
 
@@ -79,9 +81,9 @@ func adminGists(ctx echo.Context) error {
 	setData(ctx, "adminHeaderPage", "gists")
 	pageInt := getPage(ctx)
 
-	var data []*models.Gist
+	var data []*db.Gist
 	var err error
-	if data, err = models.GetAllGists(pageInt - 1); err != nil {
+	if data, err = db.GetAllGists(pageInt - 1); err != nil {
 		return errorRes(500, "Cannot get gists", err)
 	}
 
@@ -94,7 +96,7 @@ func adminGists(ctx echo.Context) error {
 
 func adminUserDelete(ctx echo.Context) error {
 	userId, _ := strconv.ParseUint(ctx.Param("user"), 10, 64)
-	user, err := models.GetUserById(uint(userId))
+	user, err := db.GetUserById(uint(userId))
 	if err != nil {
 		return errorRes(500, "Cannot retrieve user", err)
 	}
@@ -108,7 +110,7 @@ func adminUserDelete(ctx echo.Context) error {
 }
 
 func adminGistDelete(ctx echo.Context) error {
-	gist, err := models.GetGistByID(ctx.Param("gist"))
+	gist, err := db.GetGistByID(ctx.Param("gist"))
 	if err != nil {
 		return errorRes(500, "Cannot retrieve gist", err)
 	}
@@ -133,7 +135,7 @@ func adminSyncReposFromFS(ctx echo.Context) error {
 		}
 		syncReposFromFS = true
 
-		gists, err := models.GetAllGistsRows()
+		gists, err := db.GetAllGistsRows()
 		if err != nil {
 			log.Error().Err(err).Msg("Cannot get gists")
 			syncReposFromFS = false
@@ -170,7 +172,7 @@ func adminSyncReposFromDB(ctx echo.Context) error {
 
 		for _, e := range entries {
 			path := strings.Split(e, string(os.PathSeparator))
-			gist, _ := models.GetGist(path[len(path)-2], path[len(path)-1])
+			gist, _ := db.GetGist(path[len(path)-2], path[len(path)-1])
 
 			if gist.ID == 0 {
 				if err := git.DeleteRepository(path[len(path)-2], path[len(path)-1]); err != nil {
@@ -181,6 +183,23 @@ func adminSyncReposFromDB(ctx echo.Context) error {
 			}
 		}
 		syncReposFromDB = false
+	}()
+	return redirect(ctx, "/admin-panel")
+}
+
+func adminGcRepos(ctx echo.Context) error {
+	addFlash(ctx, "Garbage collecting repositories...", "success")
+	go func() {
+		if gitGcRepos {
+			return
+		}
+		gitGcRepos = true
+		if err := git.GcRepos(); err != nil {
+			log.Error().Err(err).Msg("Error garbage collecting repositories")
+			gitGcRepos = false
+			return
+		}
+		gitGcRepos = false
 	}()
 	return redirect(ctx, "/admin-panel")
 }
@@ -197,7 +216,7 @@ func adminSetConfig(ctx echo.Context) error {
 	key := ctx.FormValue("key")
 	value := ctx.FormValue("value")
 
-	if err := models.UpdateSetting(key, value); err != nil {
+	if err := db.UpdateSetting(key, value); err != nil {
 		return errorRes(500, "Cannot set setting", err)
 	}
 

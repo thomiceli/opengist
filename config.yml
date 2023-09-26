@@ -1,3 +1,7 @@
+# Learn more about Opengist configuration here:
+# https://github.com/thomiceli/opengist/blob/master/docs/configuration/index.md
+# https://github.com/thomiceli/opengist/blob/master/docs/configuration/cheat-sheet.md
+
 # Set the log level to one of the following: trace, debug, info, warn, error, fatal, panic. Default: warn
 log-level: warn
 
@@ -26,15 +30,6 @@ http.port: 6157
 # Enable or disable git operations (clone, pull, push) via HTTP (either `true` or `false`). Default: true
 http.git-enabled: true
 
-# Enable or disable TLS (either `true` or `false`). Default: false
-http.tls-enabled: false
-
-# Path to the TLS certificate file if TLS is enabled
-http.cert-file:
-
-# Path to the TLS key file if TLS is enabled
-http.key-file:
-
 # SSH built-in server configuration
 # Note: it is not using the SSH daemon from your machine (yet)
 
@@ -60,7 +55,7 @@ ssh.keygen-executable: ssh-keygen
 
 
 # OAuth2 configuration
-# The callback/redirect URL must be http://opengist.domain/oauth/<github|gitea>/callback
+# The callback/redirect URL must be http://opengist.domain/oauth/<github|gitea|openid-connect>/callback
 
 # To create a new OAuth2 application using GitHub : https://github.com/settings/applications/new
 github.client-key:
@@ -71,3 +66,9 @@ gitea.client-key:
 gitea.secret:
 # URL of the Gitea instance. Default: https://gitea.com/
 gitea.url: https://gitea.com/
+
+# To create a new OAuth2 application using OpenID Connect:
+oidc.client-key:
+oidc.secret:
+# Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
+oidc.discovery-url:

@@ -3,8 +3,8 @@ package ssh
 import (
 	"errors"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/models"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
 	"io"
@@ -32,27 +32,36 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 	userName := strings.ToLower(repoFields[0])
 	gistName := strings.TrimSuffix(strings.ToLower(repoFields[1]), ".git")
 
-	gist, err := models.GetGist(userName, gistName)
+	gist, err := db.GetGist(userName, gistName)
 	if err != nil {
 		return errors.New("gist not found")
 	}
 
-	requireLogin, err := models.GetSetting(models.SettingRequireLogin)
+	requireLogin, err := db.GetSetting(db.SettingRequireLogin)
 	if err != nil {
 		return errors.New("internal server error")
 	}
 
-	if verb == "receive-pack" || requireLogin == "1" {
-		pubKey, err := models.SSHKeyExistsForUser(key, gist.UserID)
+	// Check for the key if :
+	// - user wants to push the gist
+	// - user wants to clone a private gist
+	// - gist is not found (obfuscation)
+	// - admin setting to require login is set to true
+	if verb == "receive-pack" ||
+		gist.Private == 2 ||
+		gist.ID == 0 ||
+		requireLogin == "1" {
+
+		pubKey, err := db.SSHKeyExistsForUser(key, gist.UserID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
-				return errors.New("unauthorized")
+				return errors.New("gist not found")
 			}
 			errorSsh("Failed to get user by SSH key id", err)
 			return errors.New("internal server error")
 		}
-		_ = models.SSHKeyLastUsedNow(pubKey.Content)
+		_ = db.SSHKeyLastUsedNow(pubKey.Content)
 	}
 
 	repositoryPath := git.RepositoryPath(gist.User.Username, gist.Uuid)

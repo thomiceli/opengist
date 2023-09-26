@@ -1,9 +1,11 @@
-.PHONY: all install build_frontend build_backend build build_docker watch_frontend watch_backend watch clean clean_docker
+.PHONY: all all_crosscompile install build_frontend build_backend build build_crosscompile build_docker watch_frontend watch_backend watch clean clean_docker check_changes go_mod fmt test
 
 # Specify the name of your Go binary output
 BINARY_NAME := opengist
 
-all: install build
+all: clean install build
+
+all_crosscompile: clean install build_frontend build_crosscompile
 
 install:
 	@echo "Installing NPM dependencies..."
@@ -21,6 +23,9 @@ build_backend:
 
 build: build_frontend build_backend
 
+build_crosscompile:
+	@bash ./scripts/build-all.sh
+
 build_docker:
 	@echo "Building Docker image..."
 	docker build -t $(BINARY_NAME):latest .
@@ -34,13 +39,27 @@ watch_backend:
 	OG_DEV=1 npx nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
 
 watch:
-	@bash ./watch.sh
+	@bash ./scripts/watch.sh
 
 clean:
 	@echo "Cleaning up build artifacts..."
 	@rm -f $(BINARY_NAME) public/manifest.json
-	@rm -rf public/assets
+	@rm -rf public/assets build
 
 clean_docker:
 	@echo "Cleaning up Docker image..."
 	@docker rmi $(BINARY_NAME)
+
+check_changes:
+	@echo "Checking for changes..."
+	@git --no-pager diff --exit-code || (echo "There are unstaged changes detected." && exit 1)
+
+go_mod:
+	@go mod download
+	@go mod tidy
+
+fmt:
+	@go fmt ./...
+
+test:
+	@go test ./... -p 1

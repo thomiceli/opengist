@@ -37,7 +37,7 @@ Written in [Go](https://go.dev), Opengist aims to be fast and easy to deploy.
 [Git](https://git-scm.com/download) is obviously required to run Opengist, as it's the main feature of the app.
 Version **2.20** or later is recommended as the app has not been tested with older Git versions.
 
-[OpenSSH](https://www.openssh.com/) suite if you wish to use Git over SSH
+[OpenSSH](https://www.openssh.com/) suite if you wish to use Git over SSH.
 
 
 ## Components

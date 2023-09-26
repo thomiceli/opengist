@@ -6,3 +6,4 @@ gist.db
 public/assets/*
 public/manifest.json
 opengist
+build/

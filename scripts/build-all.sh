@@ -1,5 +1,6 @@
 #!/bin/sh
 
+CHECKSUMS_FILE="build/checksums.txt"
 BINARY_NAME="opengist"
 TARGETS="darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 linux/armv6 linux/armv7 linux/386 windows/amd64"
 VERSION=$(git describe --tags | sed 's/^v//')
@@ -52,9 +53,11 @@ for TARGET in $TARGETS; do
     if [ "$GOOS" = "windows" ]; then
         # ZIP for Windows
         cd $OUTPUT_PARENT_DIR && zip -r "../$BINARY_NAME$VERSION-$GOOS-$GOARCH${GOARM:+v$GOARM}.zip" "$BINARY_NAME/" && cd - > /dev/null
+        sha256sum "build/$BINARY_NAME$VERSION-$GOOS-$GOARCH${GOARM:+v$GOARM}.zip" | awk '{print $1 " " substr($2,7)}' >> $CHECKSUMS_FILE
     else
         # tar.gz for other platforms
         tar -czf "build/$BINARY_NAME$VERSION-$GOOS-$GOARCH${GOARM:+v$GOARM}.tar.gz" -C $OUTPUT_PARENT_DIR "$BINARY_NAME"
+        sha256sum "build/$BINARY_NAME$VERSION-$GOOS-$GOARCH${GOARM:+v$GOARM}.tar.gz" | awk '{print $1 " " substr($2,7)}' >> $CHECKSUMS_FILE
     fi
 done
 

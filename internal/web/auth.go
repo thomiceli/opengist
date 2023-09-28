@@ -31,6 +31,7 @@ func register(ctx echo.Context) error {
 	setData(ctx, "title", tr(ctx, "auth.new-account"))
 	setData(ctx, "htmlTitle", "New account")
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
+	setData(ctx, "isLoginPage", false)
 	return html(ctx, "auth_form.html")
 }
 
@@ -91,6 +92,7 @@ func login(ctx echo.Context) error {
 	setData(ctx, "title", tr(ctx, "auth.login"))
 	setData(ctx, "htmlTitle", "Login")
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
+	setData(ctx, "isLoginPage", true)
 	return html(ctx, "auth_form.html")
 }
 

@@ -21,8 +21,7 @@ document.querySelectorAll('.markdown').forEach((e: HTMLElement) => {
 
 document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {
     const ext = el.dataset.filename?.split('.').pop() || '';
-
-    if (hljs.autoDetection(ext) && ext !== 'txt') {
+    if (hljs.getLanguage(ext) && ext !== 'txt') {
         el.querySelectorAll<HTMLElement>('td.line-code').forEach((ell) => {
             ell.classList.add('language-' + ext);
             hljs.highlightElement(ell);

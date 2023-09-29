@@ -44,11 +44,11 @@
                         </div>
                         <div class="overflow-auto">
                             {{ if $file.Truncated }}
-                                <p class="m-2 ml-4 text-sm">{{ .locale.Tr "gist.revision.diff-truncated" }}</p>
+                                <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.diff-truncated" }}</p>
                             {{ else if and (eq $file.Content "") (ne $file.OldFilename "") }}
-                                <p class="m-2 ml-4 text-sm">{{ .locale.Tr "gist.revision.file-renamed-no-changes" }}</p>
+                                <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.file-renamed-no-changes" }}</p>
                             {{ else if eq $file.Content "" }}
-                                <p class="m-2 ml-4 text-sm">{{ .locale.Tr "gist.revision.empty-file" }}</p>
+                                <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.empty-file" }}</p>
                             {{ else }}
                             <table class="code table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
                                 <tbody>
@@ -91,7 +91,7 @@
                     </div>
                     {{end}}
                 {{else}}
-                    <p class="text-left text-sm text-slate-700 dark:text-slate-300 italic">{{ .locale.Tr "gist.revision.no-changes" }}</p>
+                    <p class="text-left text-sm text-slate-700 dark:text-slate-300 italic">{{ $.locale.Tr "gist.revision.no-changes" }}</p>
                 {{end}}
             </div>
         </div>

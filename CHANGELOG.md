@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.1](https://github.com/thomiceli/opengist/compare/v1.5.0...v1.5.1) - 2023-09-29
+### Added
+- Hungarian translations (#123)
+
+### Fixed
+- .c and .h syntax highlighting (#119)
+- Login page disabled depending on locale (#120)
+- Syntax error on templates when calling locale function (#122)
+
 ## [1.5.0](https://github.com/thomiceli/opengist/compare/v1.4.2...v1.5.0) - 2023-09-26
 ### Added
 - Private Gist visibility (#87)

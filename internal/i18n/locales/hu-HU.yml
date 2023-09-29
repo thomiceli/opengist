@@ -1,0 +1,177 @@
+gist.public: Nyilvános
+gist.unlisted: Nem listázott
+gist.private: Privát
+
+gist.header.like: Tetszik
+gist.header.unlike: Nem tetszik
+gist.header.fork: Fork
+gist.header.edit: Szerkesztés
+gist.header.delete: Törlés
+gist.header.forked-from: "Forkolva innen:"
+gist.header.last-active: Utoljára aktív
+gist.header.select-tab: Fül választása
+gist.header.code: Kód
+gist.header.revisions: Revíziók
+gist.header.revision: Revízió
+gist.header.clone-http: "Clone-ozás ezzel: %s"
+gist.header.clone-http-help: Clone-ozás Git HTTP basic hitelesítéssel.
+gist.header.clone-ssh: Clone-ozás SSH-n keresztül
+gist.header.clone-ssh-help: Clone-ozás SSH kulccsal
+gist.header.share: Megosztás
+gist.header.share-help: Másold ki ennek a gistnek a megosztható linkjét
+gist.header.download-zip: ZIP archívum letöltése
+
+gist.raw: Eredeti
+gist.file-truncated: Ennek a fájlnak nem az egész tartalma lett megjelenítve.
+gist.watch-full-file: Tekintsd meg a fájl egész tartalmát.
+gist.file-not-valid: Ez nem egy érvényes CSV fájl.
+gist.no-content: Nincs tartalom
+
+gist.new.new_gist: Új gist
+gist.new.title: Cím
+gist.new.description: Leírás
+gist.new.filename-with-extension: Fájlnév kiterjesztéssel
+gist.new.indent-mode: Indentáció típusa
+gist.new.indent-mode-space: Szóköz
+gist.new.indent-mode-tab: Tabulátor
+gist.new.indent-size: Indentáció méret
+gist.new.wrap-mode: Sortörés típusa
+gist.new.wrap-mode-no: Nincs sortörés
+gist.new.wrap-mode-soft: Csak megjelenítéskor
+gist.new.add-file: Fájl hozzáadása
+gist.new.create-public-button: Nyilvános gist létrehozása
+gist.new.create-unlisted-button: Nem listázott gist létrehozása
+gist.new.create-private-button: Privát gist létrehozása
+
+gist.edit.editing: Szerkesztés
+gist.edit.change-visibility: "Állítsd erre:"
+gist.edit.delete: Törlés
+gist.edit.cancel: Mégse
+gist.edit.save: Mentés
+
+gist.list.joined: Hozzáadva
+gist.list.all: Összes gist
+gist.list.search-results: Keresési erdemények
+gist.list.sort: Rendezés
+gist.list.sort-by-created: létrehozva
+gist.list.sort-by-updated: módosítva
+gist.list.order-by-asc: Utolsótól
+gist.list.order-by-desc: Újabbtól
+gist.list.select-tab: Fül választása
+gist.list.liked: Tetszik
+gist.list.likes: Kedvelések
+gist.list.forked: Forkolva
+gist.list.forked-from: "Forkolva innen:"
+gist.list.forks: forkok
+gist.list.files: fájlok
+gist.list.last-active: Utoljára aktív
+gist.list.no-gists: Nincsenek gistek
+
+gist.forks: Forkok
+gist.forks.view: Fork megtekintése
+gist.forks.no: Nincsenek nyilvános forkok
+
+gist.likes: Kedvelések
+gist.likes.no: Még nincsenek kedvelések
+
+gist.revisions: Revíziók
+gist.revision.revised: gist felülvizsgálása
+gist.revision.go-to-revision: Revízióhoz ugrás
+gist.revision.file-created: fájl létrehozva
+gist.revision.file-deleted: fájl törölve
+gist.revision.file-renamed: "fájl átnevezve erre: "
+gist.revision.diff-truncated: Nem a teljes Diff lett megjelítve, mert túl hosszú lenne
+gist.revision.file-renamed-no-changes: Fájl átnevezve változtatások nélkül
+gist.revision.empty-file: Üres fájl
+gist.revision.no-changes: Nincsenek változtatások
+gist.revision.no-revisions: Nincsenek megjeleníthető revíziók
+
+settings: Beállítások
+settings.email: Email
+settings.email-help: Commitoknál és Gravatarnál van használva
+settings.email-set: Email beállítása
+settings.link-accounts: Fiókok összekötése
+settings.link-github-account: GitHub fiók hozzáadása
+settings.link-gitea-account: Gitea fiók hozzáadása
+settings.unlink-github-account: GitHub fiók eltávolítása
+settings.unlink-gitea-account: Gitea fiók eltávolítása
+settings.delete-account: Fiók törlése
+settings.delete-account-confirm: Biztosan törölni szeretnéd a fiókod?
+settings.add-ssh-key: SSH kulcs hozzáadása
+settings.add-ssh-key-help: Csak SSH-n kersztül történő pull/push műveleteknél van használva
+settings.add-ssh-key-title: Cím
+settings.add-ssh-key-content: Kulcs
+settings.delete-ssh-key: Törlés
+settings.delete-ssh-key-confirm: Erősítsd meg az SSH kulcs törlését
+settings.ssh-key-added-at: "Hozzáadva:"
+settings.ssh-key-never-used: Sosem használt
+settings.ssh-key-last-used: "Utoljára használva:"
+
+auth.signup-disabled: Az adminisztrátor kikapcsolta a regisztrációkat
+auth.login: Bejelentkezés
+auth.signup: Regisztráció
+auth.new-account: Új fiók
+auth.username: Felhasználónév
+auth.password: Jelszó
+auth.register-instead: Vagy regisztrálj
+auth.login-instead: Vagy jelentkezz be
+auth.github-oauth: Folytatás GitHub fiókkal
+auth.gitea-oauth: Folytatás Gitea fiókkal
+
+error: Hiba
+
+header.menu.all: Minden
+header.menu.new: Új
+header.menu.search: Keresés
+header.menu.my-gists: Gistjeim
+header.menu.liked: Kedvelt
+header.menu.admin: Admin
+header.menu.settings: Beállítások
+header.menu.logout: Kijelentkezés
+header.menu.register: Regisztráció
+header.menu.login: Bejelentkezés
+header.menu.light: Világos
+header.menu.dark: Sötét
+header.menu.system: Rendszer
+footer.powered-by: Ez az oldal %s alapú
+
+pagination.older: Régebbi
+pagination.newer: Újabb
+pagination.previous: Előző
+pagination.next: Következő
+
+admin.admin_panel: Admin felület
+admin.general: Általános
+admin.users: Felhasználók
+admin.gists: Gistek
+admin.configuration: Konfiguráció
+admin.versions: Verziók
+admin.ssh_keys: SSH kulcsok
+admin.stats: Statisztikák
+admin.actions: Műveletek
+admin.actions.sync-fs: Gistek szinkronizálása a fájlrendszerrel
+admin.actions.sync-db: Gistek szinkronizálása az adatbázissal
+admin.actions.git-gc: Használatlan git repository-k eltávolítása
+admin.id: Azonosító
+admin.user: Felhasználó
+admin.delete: Törlés
+admin.created_at: Létrehozva
+
+admin.config-link: Ezt a konfigurációt %s a YAML alapú konfigurációs fájl és/vagy környezeti változók.
+admin.config-link-overriden: felülírhatja
+admin.disable-signup: Regisztrációk letiltása
+admin.disable-signup_help: Letiltja a regisztráció lehetőségét.
+admin.require-login: Bejelentkezés szükséges
+admin.require-login_help: Csak bejelentkezett felhasználók láthatják a gisteket.
+admin.disable-login: Bejelentkezés űrlap letiltása
+admin.disable-login_help: Letiltja a bejelentkezés űrlapon keresztüli bejelentkezéseket, OAuth szolgáltatókat ajánlva helyette.
+admin.disable-gravatar: Gravatar kikapcsolása
+admin.disable-gravatar_help: Tiltsd le a Gravatar-t mint profilkép szolgáltató.
+
+admin.users.delete_confirm: Biztosan törlöd ezt a felhasználót?
+
+admin.gists.title: Cím
+admin.gists.private: Privát ?
+admin.gists.nb-files: Fájlok száma
+admin.gists.nb-likes: Kedv. száma
+admin.gists.delete_confirm: Biztosan törlöd a gistet?

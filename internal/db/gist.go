@@ -386,8 +386,8 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string    `validate:"max=50" form:"title"`
-	Description string    `validate:"max=150" form:"description"`
+	Title       string    `validate:"max=250" form:"title"`
+	Description string    `validate:"max=1000" form:"description"`
 	Private     int       `validate:"number,min=0,max=2" form:"private"`
 	Files       []FileDTO `validate:"min=1,dive"`
 	Name        []string  `form:"name"`
@@ -395,7 +395,7 @@ type GistDTO struct {
 }
 
 type FileDTO struct {
-	Filename string `validate:"excludes=\x2f,excludes=\x5c,max=50"`
+	Filename string `validate:"excludes=\x2f,excludes=\x5c,max=255"`
 	Content  string `validate:"required"`
 }
 

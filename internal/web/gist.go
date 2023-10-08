@@ -18,6 +18,8 @@ import (
 
 func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
+		currUser := getUserLogged(ctx)
+
 		userName := ctx.Param("user")
 		gistName := ctx.Param("gistname")
 
@@ -27,6 +29,13 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return notFound("Gist not found")
 		}
+
+		if gist.Private == 2 {
+			if currUser == nil || currUser.ID != gist.UserID {
+				return notFound("Gist not found")
+			}
+		}
+
 		setData(ctx, "gist", gist)
 
 		if config.C.SshGit {
@@ -72,7 +81,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		setData(ctx, "nbCommits", nbCommits)
 
-		if currUser := getUserLogged(ctx); currUser != nil {
+		if currUser != nil {
 			hasLiked, err := currUser.HasLiked(gist)
 			if err != nil {
 				return errorRes(500, "Cannot get user like status", err)

@@ -265,7 +265,15 @@ func (a Argon2ID) hash(plain string) (string, error) {
 }
 
 func (a Argon2ID) verify(plain, hash string) (bool, error) {
+	if hash == "" {
+		return false, nil
+	}
+
 	hashParts := strings.Split(hash, "$")
+
+	if len(hashParts) != 6 {
+		return false, errors.New("invalid hash")
+	}
 
 	_, err := fmt.Sscanf(hashParts[3], "m=%d,t=%d,p=%d", &a.memory, &a.time, &a.threads)
 	if err != nil {

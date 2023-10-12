@@ -40,6 +40,8 @@ RUN apk update && \
 RUN addgroup -S opengist && \
     adduser -S -G opengist -H -s /bin/ash -g 'Opengist User' opengist
 
+COPY --from=build --chown=opengist:opengist /opengist/config.yml config.yml
+
 WORKDIR /app/opengist
 
 COPY --from=build --chown=opengist:opengist /opengist/opengist .

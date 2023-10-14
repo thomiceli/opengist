@@ -8,7 +8,7 @@ gist.header.fork: Создать форк
 gist.header.edit: Редактировать
 gist.header.delete: Удалить
 gist.header.forked-from: Форк с
-gist.header.last-active: Последние активные
+gist.header.last-active: Последняя активность
 gist.header.select-tab: Перейти
 gist.header.code: Код
 gist.header.revisions: Версии
@@ -49,7 +49,7 @@ gist.edit.delete: Удалить
 gist.edit.cancel: Отмена
 gist.edit.save: Сохранить
 
-gist.list.joined: Объединено
+gist.list.joined: Зарегистрирован
 gist.list.all: Все фрагменты
 gist.list.search-results: Результаты  поиска
 gist.list.sort: Сортировка
@@ -59,12 +59,12 @@ gist.list.order-by-asc: Свежие снизу
 gist.list.order-by-desc: Свежие сверху
 gist.list.select-tab: Перейти
 gist.list.liked: Понравившиеся
-gist.list.likes: по лайкам
+gist.list.likes: лайк(-ов)
 gist.list.forked: Форки
 gist.list.forked-from: Форки с
-gist.list.forks: форки
-gist.list.files: файлы
-gist.list.last-active: По активности
+gist.list.forks: форк(-ов)
+gist.list.files: файл(-ов)
+gist.list.last-active: Последняя активность
 gist.list.no-gists: Нет фрагментов
 
 gist.forks: Форки
@@ -121,7 +121,7 @@ auth.gitea-oauth: Войти с помощью доступа Gitea
 error: Ошибка
 
 header.menu.all: Все
-header.menu.new: Новые
+header.menu.new: Новый
 header.menu.search: Поиск
 header.menu.my-gists: Мои фрагменты
 header.menu.liked: Понравившиеся
@@ -132,7 +132,7 @@ header.menu.register: Регистрация
 header.menu.login: Войти
 header.menu.light: Светлая
 header.menu.dark: Тёмная
-header.menu.system: Как в системе
+header.menu.system: Системная
 footer.powered-by: Работает на %s
 
 pagination.older: Позже
@@ -144,7 +144,7 @@ admin.admin_panel: Панель управления
 admin.general: Общее
 admin.users: Пользователи
 admin.gists: Фрагменты
-admin.configuration: Configuration
+admin.configuration: Настройки
 admin.versions: Версии
 admin.ssh_keys: Ключи SSH
 admin.stats: Статистика

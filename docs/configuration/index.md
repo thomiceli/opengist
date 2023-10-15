@@ -12,6 +12,17 @@ The [configuration cheat sheet](cheat-sheet.md) lists all available configuratio
 The configuration file must be specified when launching the application, using the `--config` flag followed by the path 
 to your YAML file.
 
+Usage with Docker Compose :
+```yml
+services:
+  opengist:
+    # ...
+    volumes:
+    # ...
+    - "/path/to/config.yml:/config.yml"
+```
+
+Usage via command line :
 ```shell
 ./opengist --config /path/to/config.yml
 ```
@@ -22,7 +33,6 @@ You can start by copying and/or modifying the provided [config.yml](/config.yml)
 ## Configuration via Environment Variables
 
 Usage with Docker Compose :
-
 ```yml
 services:
   opengist:
@@ -31,8 +41,8 @@ services:
       OG_LOG_LEVEL: "info"
       # etc.
 ```
-Usage via command line :
 
+Usage via command line :
 ```shell
 OG_LOG_LEVEL=info ./opengist
 ```

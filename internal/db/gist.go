@@ -89,9 +89,17 @@ func GetAllGists(offset int) ([]*Gist, error) {
 
 func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort string, order string) ([]*Gist, error) {
 	var gists []*Gist
-	err := db.Preload("User").Preload("Forked.User").
-		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
-		Where("gists.title like ? or gists.description like ?", "%"+query+"%", "%"+query+"%").
+	like := "%" + query + "%"
+	err := db.
+		Preload("User").
+		Preload("Forked.User").
+		Where("((gists.private = 0)"+
+			" or (gists.private > 0 and gists.user_id = ?))", currentUserId).
+		Where("gists.title like ?"+
+			" or gists.description like ?"+
+			" or gists.preview like ?"+
+			" or gists.preview_filename like ?",
+			like, like, like, like).
 		Limit(11).
 		Offset(offset * 10).
 		Order("gists." + sort + "_at " + order).

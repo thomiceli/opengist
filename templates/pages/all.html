@@ -31,7 +31,7 @@
                             </svg>
                         </button>
                     </div>
-                    <div id="sort-gists-dropdown" class="hidden absolute right-0 z-10 mt-2 w-80 origin-top-right divide-y divide-gray-200 dark:divide-gray-700 rounded-md rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 shadow-lg ring-1 ring-white dark:ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                    <div id="sort-gists-dropdown" class="hidden absolute right-0 z-10 mt-2 w-max origin-top-right divide-y divide-gray-200 dark:divide-gray-700 rounded-md rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 shadow-lg ring-1 ring-white dark:ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                         <div class="" role="none">
                             <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=created&order=desc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
                                 {{ .locale.Tr "gist.list.order-by-desc" }} {{ .locale.Tr "gist.list.sort-by-created" }}

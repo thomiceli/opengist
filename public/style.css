@@ -152,3 +152,7 @@ dl.dl-config dt {
 dl.dl-config dd {
     @apply ml-1 col-span-2 break-words;
 }
+
+.markdown-body {
+    @apply dark:bg-gray-900 !important;
+}

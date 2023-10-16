@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.2](https://github.com/thomiceli/opengist/compare/v1.5.1...v1.5.2) - 2023-10-16
+### Added
+- zh-CN translation (#130)
+- ru-RU translation (#135)
+- config.yml usage in the Docker container (#131)
+- Longer title and description (#129)
+
+### Fixed
+- Private gist visibility (#128)
+- Dark background color in Markdown rendering (#137)
+- Error handling for password hashes (#132)
+
 ## [1.5.1](https://github.com/thomiceli/opengist/compare/v1.5.0...v1.5.1) - 2023-09-29
 ### Added
 - Hungarian translations (#123)

@@ -21,6 +21,7 @@ func userSettings(ctx echo.Context) error {
 
 	setData(ctx, "email", user.Email)
 	setData(ctx, "sshKeys", keys)
+	setData(ctx, "hasPassword", user.Password != "")
 	setData(ctx, "htmlTitle", "Settings")
 	return html(ctx, "settings.html")
 }
@@ -108,5 +109,33 @@ func sshKeysDelete(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "SSH key deleted", "success")
+	return redirect(ctx, "/settings")
+}
+
+func passwordProcess(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+
+	dto := new(db.UserDTO)
+	if err := ctx.Bind(dto); err != nil {
+		return errorRes(400, "Cannot bind data", err)
+	}
+	dto.Username = user.Username
+
+	if err := ctx.Validate(dto); err != nil {
+		addFlash(ctx, validationMessages(&err), "error")
+		return html(ctx, "settings.html")
+	}
+
+	password, err := argon2id.hash(dto.Password)
+	if err != nil {
+		return errorRes(500, "Cannot hash password", err)
+	}
+	user.Password = password
+
+	if err = user.Update(); err != nil {
+		return errorRes(500, "Cannot update password", err)
+	}
+
+	addFlash(ctx, "Password updated", "success")
 	return redirect(ctx, "/settings")
 }

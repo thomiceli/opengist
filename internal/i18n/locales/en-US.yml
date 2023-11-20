@@ -80,7 +80,7 @@ gist.revision.go-to-revision: Go to revision
 gist.revision.file-created: file created
 gist.revision.file-deleted: file deleted
 gist.revision.file-renamed: renamed to
-gist.revision.diff-truncated: Diff truncated because it's too large to be shown
+gist.revision.diff-truncated: Diff is too large to be shown
 gist.revision.file-renamed-no-changes: File renamed without changes
 gist.revision.empty-file: Empty file
 gist.revision.no-changes: No changes

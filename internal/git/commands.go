@@ -2,6 +2,7 @@ package git
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -121,7 +123,12 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 		maxBytes = truncateLimit
 	}
 
-	cmd := exec.Command(
+	// Set up a context with a timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel()
+
+	cmd := exec.CommandContext(
+		ctx,
 		"git",
 		"--no-pager",
 		"show",
@@ -129,22 +136,17 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 	)
 	cmd.Dir = repositoryPath
 
-	stdout, _ := cmd.StdoutPipe()
-	err := cmd.Start()
+	output, err := cmd.Output()
 	if err != nil {
 		return "", false, err
 	}
 
-	output, truncated, err := truncateCommandOutput(stdout, maxBytes)
+	content, truncated, err := truncateCommandOutput(bytes.NewReader(output), maxBytes)
 	if err != nil {
 		return "", false, err
 	}
 
-	if err := cmd.Wait(); err != nil {
-		return "", false, err
-	}
-
-	return output, truncated, nil
+	return content, truncated, nil
 }
 
 func GetLog(user string, gist string, skip int) ([]*Commit, error) {
@@ -458,6 +460,12 @@ fi
 `
 
 const postReceive = `#!/bin/sh
+
+while read oldrev newrev refname; do
+    if ! git rev-parse --verify --quiet HEAD &>/dev/null; then
+        git symbolic-ref HEAD "$refname"
+    fi
+done
 
 echo ""
 echo "Your new repository has been created here: %s"

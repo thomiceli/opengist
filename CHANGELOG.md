@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.3](https://github.com/thomiceli/opengist/compare/v1.5.2...v1.5.3) - 2023-11-20
+### Added
+- es-ES translation (#139)
+- Create/change account password (#156)
+- Display OAuth error messages when HTTP 400 (#159)
+
+### Fixed
+- Git bare repository branch name creation (#157)
+- Git file truncated output hanging (#157) 
+- Home user directory detection handling (#145)
+- UI changes (#158)
+
 ## [1.5.2](https://github.com/thomiceli/opengist/compare/v1.5.1...v1.5.2) - 2023-10-16
 ### Added
 - zh-CN translation (#130)

@@ -218,6 +218,7 @@ func NewServer(isDev bool) *Server {
 		g1.DELETE("/settings/account", accountDeleteProcess, logged)
 		g1.POST("/settings/ssh-keys", sshKeysProcess, logged)
 		g1.DELETE("/settings/ssh-keys/:id", sshKeysDelete, logged)
+		g1.PUT("/settings/password", passwordProcess, logged)
 
 		g2 := g1.Group("/admin-panel")
 		{

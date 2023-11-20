@@ -53,6 +53,8 @@ func (store *LocaleStore) loadLocaleFromYAML(localeCode, path string) error {
 	name := display.Self.Name(tag)
 	if tag == language.AmericanEnglish {
 		name = "English"
+	} else if tag == language.EuropeanSpanish {
+		name = "Español"
 	}
 
 	locale := &Locale{

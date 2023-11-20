@@ -80,7 +80,7 @@ gist.revision.go-to-revision: Aller à la révision
 gist.revision.file-created: fichier créé
 gist.revision.file-deleted: fichier supprimé
 gist.revision.file-renamed: renommé en
-gist.revision.diff-truncated: Révision tronquée car trop volumineuse pour être affichée
+gist.revision.diff-truncated: Révision trop volumineuse pour être affichée
 gist.revision.file-renamed-no-changes: Fichier renommé sans modifications
 gist.revision.empty-file: Fichier vide
 gist.revision.no-changes: Aucun changement

@@ -27,7 +27,7 @@ gist.watch-full-file: 查看完整檔案。
 gist.file-not-valid: 此檔案不是有效的 CSV 檔案。
 gist.no-content: 內容為空
 
-gist.new.new_gist: 新 Gist
+gist.new.new_gist: 新增 Gist
 gist.new.title: 標題
 gist.new.description: 描述
 gist.new.filename-with-extension: 含副檔名的檔案名稱
@@ -40,7 +40,7 @@ gist.new.wrap-mode-no: 不換行
 gist.new.wrap-mode-soft: 自動換行
 gist.new.add-file: 新增檔案
 gist.new.create-public-button: 創建公開 Gist
-gist.new.create-unlisted-button: 創建非公開的 Gist
+gist.new.create-unlisted-button: 創建非公開 Gist
 gist.new.create-private-button: 創建私人 Gist
 
 gist.edit.editing: 編輯中
@@ -115,7 +115,7 @@ settings.password-label-title: 密碼
 auth.signup-disabled: 管理員已禁用註冊
 auth.login: 登錄
 auth.signup: 註冊
-auth.new-account: 新帳號
+auth.new-account: 新增帳號
 auth.username: 使用者名稱
 auth.password: 密碼
 auth.register-instead: 註冊
@@ -129,8 +129,8 @@ header.menu.all: 全部
 header.menu.new: 新建
 header.menu.search: 搜索
 header.menu.my-gists: 我的 Gists
-header.menu.liked: 喜歡
-header.menu.admin: 管理員
+header.menu.liked: 喜歡的 Gists
+header.menu.admin: 管理
 header.menu.settings: 設定
 header.menu.logout: 登出
 header.menu.register: 註冊
@@ -145,7 +145,7 @@ pagination.newer: 上一頁
 pagination.previous: 上一頁
 pagination.next: 下一頁
 
-admin.admin_panel: 管理員面板
+admin.admin_panel: 管理儀表板
 admin.general: 一般
 admin.users: 使用者
 admin.gists: Gists
@@ -160,7 +160,7 @@ admin.actions.git-gc: 清理 git 儲存庫
 admin.id: ID
 admin.user: 使用者
 admin.delete: 刪除
-admin.created_at: 創建於
+admin.created_at: 創建時間
 
 admin.config-link: 這裡的設定可以通過 YAML 配置檔案或是環境變數 %s。
 admin.config-link-overriden: 覆蓋

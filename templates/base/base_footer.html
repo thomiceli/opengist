@@ -23,7 +23,7 @@
             <div id="language-list" class="hidden absolute bottom-0 z-10 mb-10 mt-2 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                 <div class="py-1" role="none">
                     {{ range .allLocales }}
-                        <a href="?lang={{ .Code }}" class="dark:text-slate-300 text-slate-700 group flex items-center px-4 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1" id="menu-item-0">{{ .Name }}</a>
+                        <a href="?lang={{ .Code }}" class="dark:text-slate-300 text-slate-700 group flex items-center px-4 py-1.5 text-sm w-max hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1" id="menu-item-0">{{ .Name }}</a>
                     {{ end }}
                 </div>
             </div>

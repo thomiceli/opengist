@@ -60,7 +60,7 @@ func InitRepository(user string, gist string) error {
 		"git",
 		"init",
 		"--initial-branch",
-		"main",
+		config.C.GitDefaultBranch,
 		"--bare",
 		repositoryPath,
 	)

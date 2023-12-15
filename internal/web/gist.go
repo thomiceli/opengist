@@ -4,16 +4,17 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/db"
-	"gorm.io/gorm"
 	"html/template"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
+	"gorm.io/gorm"
 )
 
 func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
@@ -30,7 +31,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 			return notFound("Gist not found")
 		}
 
-		if gist.Private == 2 {
+		if gist.Private == db.PrivateVisibility {
 			if currUser == nil || currUser.ID != gist.UserID {
 				return notFound("Gist not found")
 			}
@@ -433,7 +434,7 @@ func processCreate(ctx echo.Context) error {
 }
 
 func toggleVisibility(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	gist.Private = (gist.Private + 1) % 3
 	if err := gist.Update(); err != nil {
@@ -445,7 +446,7 @@ func toggleVisibility(ctx echo.Context) error {
 }
 
 func deleteGist(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	if err := gist.Delete(); err != nil {
 		return errorRes(500, "Error deleting this gist", err)
@@ -456,7 +457,7 @@ func deleteGist(ctx echo.Context) error {
 }
 
 func like(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	currentUser := getUserLogged(ctx)
 
 	hasLiked, err := currentUser.HasLiked(gist)
@@ -482,7 +483,7 @@ func like(ctx echo.Context) error {
 }
 
 func fork(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	currentUser := getUserLogged(ctx)
 
 	alreadyForked, err := gist.GetForkParent(currentUser)
@@ -535,7 +536,6 @@ func fork(ctx echo.Context) error {
 func rawFile(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 	file, err := gist.File(ctx.Param("revision"), ctx.Param("file"), false)
-
 	if err != nil {
 		return errorRes(500, "Error getting file content", err)
 	}
@@ -550,7 +550,6 @@ func rawFile(ctx echo.Context) error {
 func downloadFile(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 	file, err := gist.File(ctx.Param("revision"), ctx.Param("file"), false)
-
 	if err != nil {
 		return errorRes(500, "Error getting file content", err)
 	}
@@ -572,7 +571,7 @@ func downloadFile(ctx echo.Context) error {
 }
 
 func edit(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	files, err := gist.Files("HEAD")
 	if err != nil {
@@ -586,8 +585,8 @@ func edit(ctx echo.Context) error {
 }
 
 func downloadZip(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
-	var revision = ctx.Param("revision")
+	gist := getData(ctx, "gist").(*db.Gist)
+	revision := ctx.Param("revision")
 
 	files, err := gist.Files(revision)
 	if err != nil {
@@ -631,7 +630,7 @@ func downloadZip(ctx echo.Context) error {
 }
 
 func likes(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	pageInt := getPage(ctx)
 
@@ -650,7 +649,7 @@ func likes(ctx echo.Context) error {
 }
 
 func forks(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	pageInt := getPage(ctx)
 
 	currentUser := getUserLogged(ctx)

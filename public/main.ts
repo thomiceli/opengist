@@ -154,11 +154,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('gist-visibility-menu-button')!.onclick = () => {
             gistmenuvisibility!.classList.toggle('hidden');
         }
+        const lastVisibility = localStorage.getItem('visibility');
         Array.from(document.querySelectorAll('.gist-visibility-option')).forEach((el) => {
+            const visibility = (el as HTMLElement).dataset.visibility || '0';
             (el as HTMLElement).onclick = () => {
                 submitgistbutton.textContent = (el as HTMLElement).dataset.btntext;
-                submitgistbutton!.value = (el as HTMLElement).dataset.visibility || '0';
+                submitgistbutton!.value = visibility;
+                localStorage.setItem('visibility', visibility);
                 gistmenuvisibility!.classList.add('hidden');
+            }
+            if (lastVisibility === visibility) {
+                (el as HTMLElement).click();
             }
         });
     }

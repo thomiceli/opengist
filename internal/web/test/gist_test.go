@@ -1,10 +1,11 @@
 package test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"testing"
 )
 
 func TestGists(t *testing.T) {
@@ -110,7 +111,7 @@ func TestVisibility(t *testing.T) {
 	gist1 := db.GistDTO{
 		Title:       "gist1",
 		Description: "my first gist",
-		Private:     1,
+		Private:     db.UnlistedVisibility,
 		Name:        []string{""},
 		Content:     []string{"yeah"},
 	}
@@ -119,25 +120,25 @@ func TestVisibility(t *testing.T) {
 
 	gist1db, err := db.GetGistByID("1")
 	require.NoError(t, err)
-	require.Equal(t, 1, gist1db.Private)
+	require.Equal(t, db.UnlistedVisibility, gist1db.Private)
 
 	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
-	require.Equal(t, 2, gist1db.Private)
+	require.Equal(t, db.PrivateVisibility, gist1db.Private)
 
 	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
-	require.Equal(t, 0, gist1db.Private)
+	require.Equal(t, db.PublicVisibility, gist1db.Private)
 
 	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
-	require.Equal(t, 1, gist1db.Private)
+	require.Equal(t, db.UnlistedVisibility, gist1db.Private)
 }
 
 func TestLikeFork(t *testing.T) {

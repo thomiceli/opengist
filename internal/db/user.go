@@ -100,7 +100,6 @@ func GetUsersFromEmails(emailsSet map[string]struct{}) (map[string]*User, error)
 	err := db.
 		Where("email IN ?", emails).
 		Find(&users).Error
-
 	if err != nil {
 		return nil, err
 	}

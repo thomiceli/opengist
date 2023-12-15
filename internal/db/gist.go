@@ -1,13 +1,47 @@
 package db
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/thomiceli/opengist/internal/git"
-	"gorm.io/gorm"
+	"fmt"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/thomiceli/opengist/internal/git"
+	"gorm.io/gorm"
 )
+
+type Visibility int
+
+const (
+	PublicVisibility Visibility = iota
+	UnlistedVisibility
+	PrivateVisibility
+)
+
+func (v Visibility) Next() Visibility {
+	switch v {
+	case PublicVisibility:
+		return UnlistedVisibility
+	case UnlistedVisibility:
+		return PrivateVisibility
+	default:
+		return PublicVisibility
+	}
+}
+
+func ParseVisibility[T string | int](v T) (Visibility, error) {
+	switch s := fmt.Sprint(v); s {
+	case "0":
+		return PublicVisibility, nil
+	case "1":
+		return UnlistedVisibility, nil
+	case "2":
+		return PrivateVisibility, nil
+	default:
+		return -1, fmt.Errorf("unknown visibility %q", s)
+	}
+}
 
 type Gist struct {
 	ID              uint `gorm:"primaryKey"`
@@ -16,7 +50,7 @@ type Gist struct {
 	Preview         string
 	PreviewFilename string
 	Description     string
-	Private         int // 0: public, 1: unlisted, 2: private
+	Private         Visibility // 0: public, 1: unlisted, 2: private
 	UserID          uint
 	User            User
 	NbFiles         int
@@ -386,12 +420,12 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string    `validate:"max=250" form:"title"`
-	Description string    `validate:"max=1000" form:"description"`
-	Private     int       `validate:"number,min=0,max=2" form:"private"`
-	Files       []FileDTO `validate:"min=1,dive"`
-	Name        []string  `form:"name"`
-	Content     []string  `form:"content"`
+	Title       string     `validate:"max=250" form:"title"`
+	Description string     `validate:"max=1000" form:"description"`
+	Private     Visibility `validate:"number,min=0,max=2" form:"private"`
+	Files       []FileDTO  `validate:"min=1,dive"`
+	Name        []string   `form:"name"`
+	Content     []string   `form:"content"`
 }
 
 type FileDTO struct {

@@ -6,13 +6,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/memdb"
-	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"os/exec"
@@ -21,6 +14,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/memdb"
+	"gorm.io/gorm"
 )
 
 var routes = []struct {
@@ -73,7 +74,7 @@ func gitHttp(ctx echo.Context) error {
 			// - user wants to clone/pull a private gist
 			// - gist is not found (obfuscation)
 			// - admin setting to require login is set to true
-			if isPull && gist.Private != 2 && gist.ID != 0 && !getData(ctx, "RequireLogin").(bool) {
+			if isPull && gist.Private != db.PrivateVisibility && gist.ID != 0 && !getData(ctx, "RequireLogin").(bool) {
 				return route.handler(ctx)
 			}
 

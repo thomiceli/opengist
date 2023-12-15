@@ -1,0 +1,184 @@
+gist.public: Veřejný
+gist.unlisted: Neveřejný
+gist.private: Privátní
+
+gist.header.like: To se mi líbí
+gist.header.unlike: Už se mi nelíbí
+gist.header.fork: Fork
+gist.header.edit: Upravit
+gist.header.delete: Smazat
+gist.header.forked-from: Forkováno z
+gist.header.last-active: Naposledy aktivní
+gist.header.select-tab: Vyberte záložku
+gist.header.code: Kód
+gist.header.revisions: Revize
+gist.header.revision: Revize
+gist.header.clone-http: Klonovat pomocí %s
+gist.header.clone-http-help: Klonovat s pomocí Git pomocí základní autentizace HTTP.
+gist.header.clone-ssh: Klonovat pomocí SSH
+gist.header.clone-ssh-help: Klonovat s pomocí Git pomocí klíče SSH.
+gist.header.share: Sdílet
+gist.header.share-help: Zkopírovat sdílitelný odkaz na tento gist.
+gist.header.download-zip: Stáhnout ZIP
+
+gist.raw: Raw
+gist.file-truncated: Tento soubor byl zkrácen.
+gist.watch-full-file: Zobrazit celý soubor.
+gist.file-not-valid: Tento soubor není validní CSV.
+gist.no-content: Žádný obsah
+
+gist.new.new_gist: Nový gist
+gist.new.title: Titulek
+gist.new.description: Popis
+gist.new.filename-with-extension: Název s příponou
+gist.new.indent-mode: Režim odsazení
+gist.new.indent-mode-space: Mezery
+gist.new.indent-mode-tab: Tabulátory
+gist.new.indent-size: Velikost odsazení
+gist.new.wrap-mode: Režim zalamování
+gist.new.wrap-mode-no: Bez zalamování
+gist.new.wrap-mode-soft: Měkké zalamování
+gist.new.add-file: Přidat soubor
+gist.new.create-public-button: Vytvořit veřejný gist
+gist.new.create-unlisted-button: Vytvořit neveřejný gist
+gist.new.create-private-button: Vytvořit soukromý gist
+
+gist.edit.editing: Úprava
+gist.edit.change-visibility: Změnit viditelnost
+gist.edit.delete: Smazat
+gist.edit.cancel: Zrušit
+gist.edit.save: Uložit
+
+gist.list.joined: Připojeno
+gist.list.all: Všechny gisty
+gist.list.search-results: Výsledky hledání
+gist.list.sort: Seřadit
+gist.list.sort-by-created: Vytvořeno
+gist.list.sort-by-updated: Aktualizováno
+gist.list.order-by-asc: Nejméně nedávno
+gist.list.order-by-desc: Nedávno
+gist.list.select-tab: Vyberte záložku
+gist.list.liked: Líbí se
+gist.list.likes: Lajky
+gist.list.forked: Forkováno
+gist.list.forked-from: Forkováno z
+gist.list.forks: Forky
+gist.list.files: Soubory
+gist.list.last-active: Naposledy aktivní
+gist.list.no-gists: Žádné gisty
+
+gist.forks: Forky
+gist.forks.view: Zobrazit forky
+gist.forks.no: Žádné veřejné forky
+
+
+gist.likes: Lajky
+gist.likes.no: Zatím žádné lajky
+
+gist.revisions: Revize
+gist.revision.revised: revidoval tento gist
+gist.revision.go-to-revision: Přejít na revizi
+gist.revision.file-created: vytvořil soubor
+gist.revision.file-deleted: smazal soubor
+gist.revision.file-renamed: přejmenováno na
+gist.revision.diff-truncated: Diff je příliš velký na zobrazení
+gist.revision.file-renamed-no-changes: Soubor přejmenován beze změn
+gist.revision.empty-file: Prázdný soubor
+gist.revision.no-changes: Žádné změny
+gist.revision.no-revisions: Žádné revize k zobrazení
+
+
+settings: Nastavení
+settings.email: Email
+settings.email-help: Používá se pro commity a Gravatary
+settings.email-set: Nastavit email
+settings.link-accounts: Propojit účty
+settings.link-github-account: Propojit účet na GitHubu
+settings.link-gitea-account: Propojit účet na Gitea
+settings.unlink-github-account: Odpojit účet na GitHubu
+settings.unlink-gitea-account: Odpojit účet na Gitea
+settings.delete-account: Smazat účet
+settings.delete-account-confirm: Opravdu chcete smazat svůj účet?
+settings.add-ssh-key: Přidat SSH klíč
+settings.add-ssh-key-help: Používá se pouze k tahání/pushování gistů pomocí Gitu přes SSH
+settings.add-ssh-key-title: Titulek
+settings.add-ssh-key-content: Obsah
+settings.delete-ssh-key: Smazat
+settings.delete-ssh-key-confirm: Potvrdit smazání SSH klíče
+settings.ssh-key-added-at: Přidáno
+settings.ssh-key-never-used: Nikdy nepoužito
+settings.ssh-key-last-used: Naposledy použito
+settings.create-password: Vytvořit heslo
+settings.create-password-help: Vytvořte si heslo pro přihlášení do Opengist pomocí HTTP
+settings.change-password: Změnit heslo
+settings.change-password-help: Změňte své heslo pro přihlášení do Opengist pomocí HTTP
+settings.password-label-title: Heslo
+
+auth.signup-disabled: Správce zakázal registraci
+auth.login: Přihlásit se
+auth.signup: Registrovat
+auth.new-account: Nový účet
+auth.username: Uživatelské jméno
+auth.password: Heslo
+auth.register-instead: Raději se zaregistrovat
+auth.login-instead: Raději se přihlásit
+auth.github-oauth: Pokračovat s účtem na GitHubu
+auth.gitea-oauth: Pokračovat s účtem na Gitea
+
+error: Chyba
+
+header.menu.all: Všechno
+header.menu.new: Nové
+header.menu.search: Hledat
+header.menu.my-gists: Moje gisty
+header.menu.liked: Lajknuté
+header.menu.admin: Administrace
+header.menu.settings: Nastavení
+header.menu.logout: Odhlásit se
+header.menu.register: Registrovat
+header.menu.login: Přihlásit se
+header.menu.light: Světlý
+header.menu.dark: Tmavý
+header.menu.system: Systém
+footer.powered-by: Vytvořeno pomocí %s
+
+pagination.older: Starší
+pagination.newer: Novější
+pagination.previous: Předchozí
+pagination.next: Další
+
+admin.admin_panel: Administrační panel
+admin.general: Obecné
+admin.users: Uživatelé
+admin.gists: Gisty
+admin.configuration: Konfigurace
+admin.versions: Verze
+admin.ssh_keys: SSH klíče
+admin.stats: Statistiky
+admin.actions: Akce
+admin.actions.sync-fs: Synchronizovat gisty ze souborového systému
+admin.actions.sync-db: Synchronizovat gisty z databáze
+admin.actions.git-gc: Garbage collect git repozitářů
+admin.id: ID
+admin.user: Uživatel
+admin.delete: Smazat
+admin.created_at: Vytvořeno
+
+admin.config-link: Tato konfigurace může být %s pomocí YAML konfiguračního souboru a/nebo prostřednictvím proměnných prostředí.
+admin.config-link-overriden: přepsána
+admin.disable-signup: Zakázat registraci
+admin.disable-signup_help: Zakázat vytváření nových účtů.
+admin.require-login: Vyžadovat přihlášení
+admin.require-login_help: Vynutit, aby uživatelé byli přihlášeni k zobrazení gistů.
+admin.disable-login: Zakázat přihlášení
+admin.disable-login_help: Zakázat přihlašování pomocí formuláře pro přihlášení a vynutit používání OAuth poskytovatele.
+admin.disable-gravatar: Zakázat Gravatar
+admin.disable-gravatar_help: Zakázat použití Gravataru jako poskytovatele avatara.
+
+admin.users.delete_confirm: Opravdu chcete smazat tohoto uživatele?
+
+admin.gists.title: Titulek
+admin.gists.private: Soukromé?
+admin.gists.nb-files: Počet souborů
+admin.gists.nb-likes: Počet lajků
+admin.gists.delete_confirm: Opravdu chcete smazat tento gist?

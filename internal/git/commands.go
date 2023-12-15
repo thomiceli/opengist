@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/config"
 	"os"
 	"os/exec"
 	"path"
@@ -14,6 +11,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/config"
 )
 
 var (
@@ -58,6 +59,8 @@ func InitRepository(user string, gist string) error {
 	cmd := exec.Command(
 		"git",
 		"init",
+		"--initial-branch",
+		"main",
 		"--bare",
 		repositoryPath,
 	)

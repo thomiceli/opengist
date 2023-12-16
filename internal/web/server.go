@@ -208,6 +208,8 @@ func NewServer(isDev bool) *Server {
 		g1.GET("/", create, logged)
 		g1.POST("/", processCreate, logged)
 
+		g1.GET("/healthcheck", healthcheck)
+
 		g1.GET("/register", register)
 		g1.POST("/register", processRegister)
 		g1.GET("/login", login)

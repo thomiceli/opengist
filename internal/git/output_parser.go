@@ -12,8 +12,7 @@ import (
 
 type File struct {
 	Filename    string
-	FileType    string
-	FileSize    string
+	Size        string
 	OldFilename string
 	Content     string
 	Truncated   bool

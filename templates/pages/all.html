@@ -162,7 +162,7 @@
 
                                         <tr>
                                             <td class="select-none line-num px-4">{{$i}}</td>
-                                            <td class="line-code">{{ $line }}</td>
+                                            <td class="line-code">{{ $line | safe }}</td>
                                         </tr>
                                         {{ $i = inc $i }}
                                         {{ end }}

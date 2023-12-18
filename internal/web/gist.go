@@ -4,6 +4,8 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/render"
 	"html/template"
 	"net/url"
 	"regexp"
@@ -232,6 +234,14 @@ func allGists(ctx echo.Context) error {
 		}
 	}
 
+	for _, gist := range gists {
+		rendered, err := render.Code(gist.PreviewFilename, gist.Preview)
+		if err != nil {
+			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Uuid + " - " + gist.PreviewFilename)
+		}
+		gist.Preview = rendered
+	}
+
 	if err != nil {
 		return errorRes(500, "Error fetching gists", err)
 	}
@@ -261,9 +271,18 @@ func gistIndex(ctx echo.Context) error {
 		return notFound("Revision not found")
 	}
 
+	renderedFiles := make([]render.RenderedFile, 0, len(files))
+	for _, file := range files {
+		rendered, err := render.File(file)
+		if err != nil {
+			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Uuid + " - " + gist.PreviewFilename)
+		}
+		renderedFiles = append(renderedFiles, rendered)
+	}
+
 	setData(ctx, "page", "code")
 	setData(ctx, "commit", revision)
-	setData(ctx, "files", files)
+	setData(ctx, "files", renderedFiles)
 	setData(ctx, "revision", revision)
 	setData(ctx, "htmlTitle", gist.Title)
 	return html(ctx, "gist.html")

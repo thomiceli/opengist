@@ -234,19 +234,20 @@ func allGists(ctx echo.Context) error {
 		}
 	}
 
+	renderedFiles := make([]*render.RenderedGist, 0, len(gists))
 	for _, gist := range gists {
-		rendered, err := render.HighlightCode(gist.PreviewFilename, gist.Preview)
+		rendered, err := render.HighlightGistPreview(gist)
 		if err != nil {
 			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Uuid + " - " + gist.PreviewFilename)
 		}
-		gist.Preview = rendered
+		renderedFiles = append(renderedFiles, &rendered)
 	}
 
 	if err != nil {
 		return errorRes(500, "Error fetching gists", err)
 	}
 
-	if err = paginate(ctx, gists, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
+	if err = paginate(ctx, renderedFiles, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 

@@ -3,17 +3,26 @@ package render
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 )
 
 type RenderedFile struct {
-	File *git.File
-	Type string
-	HTML string
+	*git.File
+	Type  string
+	Lines []string
+	HTML  string
+}
+
+type RenderedGist struct {
+	*db.Gist
+	Lines []string
+	HTML  string
 }
 
 func HighlightFile(file *git.File) (RenderedFile, error) {
@@ -45,26 +54,38 @@ func HighlightFile(file *git.File) (RenderedFile, error) {
 	htmlbuf := bytes.Buffer{}
 	w := bufio.NewWriter(&htmlbuf)
 
-	if err = formatter.Format(w, style, iterator); err != nil {
-		return rendered, err
+	tokensLines := chroma.SplitTokensIntoLines(iterator.Tokens())
+	lines := make([]string, 0, len(tokensLines))
+	for _, tokens := range tokensLines {
+		iterator = chroma.Literator(tokens...)
+		err = formatter.Format(&htmlbuf, style, iterator)
+		if err != nil {
+			return rendered, fmt.Errorf("unable to format code: %w", err)
+		}
+		lines = append(lines, htmlbuf.String())
+		htmlbuf.Reset()
 	}
 
 	_ = w.Flush()
 
-	rendered.HTML = htmlbuf.String()
+	rendered.Lines = lines
 	rendered.Type = parseFileTypeName(*lexer.Config())
 
 	return rendered, err
 }
 
-func HighlightCode(filename, code string) (string, error) {
+func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {
+	rendered := RenderedGist{
+		Gist: gist,
+	}
+
 	var lexer chroma.Lexer
-	if lexer = lexers.Get(filename); lexer == nil {
+	if lexer = lexers.Get(gist.PreviewFilename); lexer == nil {
 		lexer = lexers.Fallback
 	}
 
 	if lexer.Config().Name == "markdown" {
-		return MarkdownCode(code)
+		return MarkdownGistPreview(gist)
 	}
 
 	style := styles.Get("catppuccin-latte")
@@ -74,21 +95,31 @@ func HighlightCode(filename, code string) (string, error) {
 
 	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))
 
-	iterator, err := lexer.Tokenise(nil, code)
+	iterator, err := lexer.Tokenise(nil, gist.Preview)
 	if err != nil {
-		return code, err
+		return rendered, err
 	}
 
 	htmlbuf := bytes.Buffer{}
 	w := bufio.NewWriter(&htmlbuf)
 
-	if err = formatter.Format(w, style, iterator); err != nil {
-		return code, err
+	tokensLines := chroma.SplitTokensIntoLines(iterator.Tokens())
+	lines := make([]string, 0, len(tokensLines))
+	for _, tokens := range tokensLines {
+		iterator = chroma.Literator(tokens...)
+		err = formatter.Format(&htmlbuf, style, iterator)
+		if err != nil {
+			return rendered, fmt.Errorf("unable to format code: %w", err)
+		}
+		lines = append(lines, htmlbuf.String())
+		htmlbuf.Reset()
 	}
 
 	_ = w.Flush()
 
-	return htmlbuf.String(), err
+	rendered.Lines = lines
+
+	return rendered, err
 }
 
 func parseFileTypeName(config chroma.Config) string {

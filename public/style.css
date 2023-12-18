@@ -156,3 +156,7 @@ dl.dl-config dd {
 .markdown-body {
     @apply dark:bg-gray-900 !important;
 }
+
+.mermaid {
+    background: #f6f8fa !important;
+}

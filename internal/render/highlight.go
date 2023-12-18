@@ -16,14 +16,18 @@ type RenderedFile struct {
 	HTML string
 }
 
-func File(file *git.File) (RenderedFile, error) {
-	colorFile := RenderedFile{
+func HighlightFile(file *git.File) (RenderedFile, error) {
+	rendered := RenderedFile{
 		File: file,
 	}
 
 	var lexer chroma.Lexer
 	if lexer = lexers.Get(file.Filename); lexer == nil {
 		lexer = lexers.Fallback
+	}
+
+	if lexer.Config().Name == "markdown" {
+		return MarkdownFile(file)
 	}
 
 	style := styles.Get("catppuccin-latte")
@@ -35,28 +39,32 @@ func File(file *git.File) (RenderedFile, error) {
 
 	iterator, err := lexer.Tokenise(nil, file.Content)
 	if err != nil {
-		return colorFile, err
+		return rendered, err
 	}
 
 	htmlbuf := bytes.Buffer{}
 	w := bufio.NewWriter(&htmlbuf)
 
 	if err = formatter.Format(w, style, iterator); err != nil {
-		return colorFile, err
+		return rendered, err
 	}
 
 	_ = w.Flush()
 
-	colorFile.HTML = htmlbuf.String()
-	colorFile.Type = parseFileTypeName(*lexer.Config())
+	rendered.HTML = htmlbuf.String()
+	rendered.Type = parseFileTypeName(*lexer.Config())
 
-	return colorFile, err
+	return rendered, err
 }
 
-func Code(filename, code string) (string, error) {
+func HighlightCode(filename, code string) (string, error) {
 	var lexer chroma.Lexer
 	if lexer = lexers.Get(filename); lexer == nil {
 		lexer = lexers.Fallback
+	}
+
+	if lexer.Config().Name == "markdown" {
+		return MarkdownCode(code)
 	}
 
 	style := styles.Get("catppuccin-latte")

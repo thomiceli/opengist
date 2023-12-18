@@ -1,12 +1,3 @@
-import md from 'markdown-it';
-
-document.querySelectorAll('.markdown').forEach((e: HTMLElement) => {
-    e.innerHTML = md({
-        html: true,
-
-    }).render(e.textContent);
-});
-
 document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {
     el.addEventListener('click', event => {
         if (event.target && (event.target as HTMLElement).matches('.line-num')) {

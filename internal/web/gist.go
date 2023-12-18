@@ -235,7 +235,7 @@ func allGists(ctx echo.Context) error {
 	}
 
 	for _, gist := range gists {
-		rendered, err := render.Code(gist.PreviewFilename, gist.Preview)
+		rendered, err := render.HighlightCode(gist.PreviewFilename, gist.Preview)
 		if err != nil {
 			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Uuid + " - " + gist.PreviewFilename)
 		}
@@ -273,7 +273,7 @@ func gistIndex(ctx echo.Context) error {
 
 	renderedFiles := make([]render.RenderedFile, 0, len(files))
 	for _, file := range files {
-		rendered, err := render.File(file)
+		rendered, err := render.HighlightFile(file)
 		if err != nil {
 			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Uuid + " - " + gist.PreviewFilename)
 		}

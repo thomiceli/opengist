@@ -16,6 +16,7 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/gitea"
 	"github.com/markbates/goth/providers/github"
+	"github.com/markbates/goth/providers/gitlab"
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
@@ -23,6 +24,13 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
+)
+
+const (
+	GitHubProvider = "github"
+	GitLabProvider = "gitlab"
+	GiteaProvider  = "gitea"
+	OpenIDConnect  = "openid-connect"
 )
 
 var title = cases.Title(language.English)
@@ -146,17 +154,7 @@ func oauthCallback(ctx echo.Context) error {
 	currUser := getUserLogged(ctx)
 	if currUser != nil {
 		// if user is logged in, link account to user and update its avatar URL
-		switch user.Provider {
-		case "github":
-			currUser.GithubID = user.UserID
-			currUser.AvatarURL = getAvatarUrlFromProvider("github", user.UserID)
-		case "gitea":
-			currUser.GiteaID = user.UserID
-			currUser.AvatarURL = getAvatarUrlFromProvider("gitea", user.NickName)
-		case "openid-connect":
-			currUser.OIDCID = user.UserID
-			currUser.AvatarURL = user.AvatarURL
-		}
+		updateUserProviderInfo(currUser, user.Provider, user)
 
 		if err = currUser.Update(); err != nil {
 			return errorRes(500, "Cannot update user "+title.String(user.Provider)+" id", err)
@@ -184,17 +182,7 @@ func oauthCallback(ctx echo.Context) error {
 		}
 
 		// set provider id and avatar URL
-		switch user.Provider {
-		case "github":
-			userDB.GithubID = user.UserID
-			userDB.AvatarURL = getAvatarUrlFromProvider("github", user.UserID)
-		case "gitea":
-			userDB.GiteaID = user.UserID
-			userDB.AvatarURL = getAvatarUrlFromProvider("gitea", user.NickName)
-		case "openid-connect":
-			userDB.OIDCID = user.UserID
-			userDB.AvatarURL = user.AvatarURL
-		}
+		updateUserProviderInfo(userDB, user.Provider, user)
 
 		if err = userDB.Create(); err != nil {
 			if db.IsUniqueConstraintViolation(err) {
@@ -213,11 +201,13 @@ func oauthCallback(ctx echo.Context) error {
 
 		var resp *http.Response
 		switch user.Provider {
-		case "github":
+		case GitHubProvider:
 			resp, err = http.Get("https://github.com/" + user.NickName + ".keys")
-		case "gitea":
+		case GitLabProvider:
+			resp, err = http.Get(urlJoin(config.C.GitlabUrl, user.NickName+".keys"))
+		case GiteaProvider:
 			resp, err = http.Get(urlJoin(config.C.GiteaUrl, user.NickName+".keys"))
-		case "openid-connect":
+		case OpenIDConnect:
 			err = errors.New("cannot get keys from OIDC provider")
 		}
 
@@ -273,7 +263,7 @@ func oauth(ctx echo.Context) error {
 	}
 
 	switch provider {
-	case "github":
+	case GitHubProvider:
 		goth.UseProviders(
 			github.New(
 				config.C.GithubClientKey,
@@ -282,7 +272,19 @@ func oauth(ctx echo.Context) error {
 			),
 		)
 
-	case "gitea":
+	case GitLabProvider:
+		goth.UseProviders(
+			gitlab.NewCustomisedURL(
+				config.C.GitlabClientKey,
+				config.C.GitlabSecret,
+				urlJoin(opengistUrl, "/oauth/gitlab/callback"),
+				urlJoin(config.C.GitlabUrl, "/oauth/authorize"),
+				urlJoin(config.C.GitlabUrl, "/oauth/token"),
+				urlJoin(config.C.GitlabUrl, "/api/v4/user"),
+			),
+		)
+
+	case GiteaProvider:
 		goth.UseProviders(
 			gitea.NewCustomisedURL(
 				config.C.GiteaClientKey,
@@ -293,7 +295,7 @@ func oauth(ctx echo.Context) error {
 				urlJoin(config.C.GiteaUrl, "/api/v1/user"),
 			),
 		)
-	case "openid-connect":
+	case OpenIDConnect:
 		oidcProvider, err := openidConnect.New(
 			config.C.OIDCClientKey,
 			config.C.OIDCSecret,
@@ -313,31 +315,21 @@ func oauth(ctx echo.Context) error {
 
 	currUser := getUserLogged(ctx)
 	if currUser != nil {
-		isDelete := false
-		var err error
-		switch provider {
-		case "github":
-			if currUser.GithubID != "" {
-				isDelete = true
-				err = currUser.DeleteProviderID(provider)
-			}
-		case "gitea":
-			if currUser.GiteaID != "" {
-				isDelete = true
-				err = currUser.DeleteProviderID(provider)
-			}
-		case "openid-connect":
-			if currUser.OIDCID != "" {
-				isDelete = true
-				err = currUser.DeleteProviderID(provider)
-			}
+		// Map each provider to a function that checks the relevant ID in currUser
+		providerIDCheckMap := map[string]func() bool{
+			GitHubProvider: func() bool { return currUser.GithubID != "" },
+			GitLabProvider: func() bool { return currUser.GitlabID != "" },
+			GiteaProvider:  func() bool { return currUser.GiteaID != "" },
+			OpenIDConnect:  func() bool { return currUser.OIDCID != "" },
 		}
 
-		if err != nil {
-			return errorRes(500, "Cannot unlink account from "+title.String(provider), err)
-		}
+		// Check if the provider is valid and if the user has a linked ID
+		// Means that the user wants to unlink the account
+		if checkFunc, exists := providerIDCheckMap[provider]; exists && checkFunc() {
+			if err := currUser.DeleteProviderID(provider); err != nil {
+				return errorRes(500, "Cannot unlink account from "+title.String(provider), err)
+			}
 
-		if isDelete {
 			addFlash(ctx, "Account unlinked from "+title.String(provider), "success")
 			return redirect(ctx, "/settings")
 		}
@@ -345,7 +337,7 @@ func oauth(ctx echo.Context) error {
 
 	ctxValue := context.WithValue(ctx.Request().Context(), gothic.ProviderParamKey, provider)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
-	if provider != "github" && provider != "gitea" && provider != "openid-connect" {
+	if provider != GitHubProvider && provider != GitLabProvider && provider != GiteaProvider && provider != OpenIDConnect {
 		return errorRes(400, "Unsupported provider", nil)
 	}
 
@@ -368,11 +360,28 @@ func urlJoin(base string, elem ...string) string {
 	return joined
 }
 
+func updateUserProviderInfo(userDB *db.User, provider string, user goth.User) {
+	userDB.AvatarURL = getAvatarUrlFromProvider(provider, user.UserID)
+	switch provider {
+	case GitHubProvider:
+		userDB.GithubID = user.UserID
+	case GitLabProvider:
+		userDB.GitlabID = user.UserID
+	case GiteaProvider:
+		userDB.GiteaID = user.UserID
+	case OpenIDConnect:
+		userDB.OIDCID = user.UserID
+		userDB.AvatarURL = user.AvatarURL
+	}
+}
+
 func getAvatarUrlFromProvider(provider string, identifier string) string {
 	switch provider {
-	case "github":
+	case GitHubProvider:
 		return "https://avatars.githubusercontent.com/u/" + identifier + "?v=4"
-	case "gitea":
+	case GitLabProvider:
+		return urlJoin(config.C.GitlabUrl, "/uploads/-/system/user/avatar/", identifier, "/avatar.png") + "?width=400"
+	case GiteaProvider:
 		resp, err := http.Get(urlJoin(config.C.GiteaUrl, "/api/v1/users/", identifier))
 		if err != nil {
 			log.Error().Err(err).Msg("Cannot get user from Gitea")

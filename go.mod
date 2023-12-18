@@ -3,6 +3,8 @@ module github.com/thomiceli/opengist
 go 1.20
 
 require (
+	github.com/alecthomas/chroma/v2 v2.12.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/glebarez/go-sqlite v1.21.2
 	github.com/glebarez/sqlite v1.9.0
 	github.com/go-playground/validator/v10 v10.15.4
@@ -20,10 +22,8 @@ require (
 )
 
 require (
-	github.com/alecthomas/chroma/v2 v2.12.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
-	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

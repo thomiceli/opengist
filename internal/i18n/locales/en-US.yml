@@ -92,8 +92,10 @@ settings.email-help: Used for commits and Gravatar
 settings.email-set: Set email
 settings.link-accounts: Link accounts
 settings.link-github-account: Link GitHub account
+settings.link-gitlab-account: Link Gitlab account
 settings.link-gitea-account: Link Gitea account
 settings.unlink-github-account: Unlink GitHub account
+settings.unlink-gitlab-account: Unlink Gitlab account
 settings.unlink-gitea-account: Unlink Gitea account
 settings.delete-account: Delete account
 settings.delete-account-confirm: Are you sure you want to delete your account ?
@@ -121,6 +123,7 @@ auth.password: Password
 auth.register-instead: Register instead
 auth.login-instead: Login instead
 auth.github-oauth: Continue with GitHub account
+auth.gitlab-oauth: Continue with Gitlab account
 auth.gitea-oauth: Continue with Gitea account
 
 error: Error

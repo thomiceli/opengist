@@ -92,8 +92,10 @@ settings.email-help: 用於提交和 Gravatar
 settings.email-set: 設定電子郵件
 settings.link-accounts: 連結帳號
 settings.link-github-account: 連結 GitHub 帳號
+settings.link-gitlab-account: 連結 Gitlab 帳號
 settings.link-gitea-account: 連結 Gitea 帳號
 settings.unlink-github-account: 取消連結 GitHub 帳號
+settings.unlink-gitlab-account: 取消連結 GitLab 帳號
 settings.unlink-gitea-account: 取消連結 Gitea 帳號
 settings.delete-account: 刪除帳號
 settings.delete-account-confirm: 確定要刪除您的帳號嗎？
@@ -121,6 +123,7 @@ auth.password: 密碼
 auth.register-instead: 註冊
 auth.login-instead: 登錄
 auth.github-oauth: 用 GitHub 帳號繼續
+auth.gitlab-oauth: 用 GitLab 帳號繼續
 auth.gitea-oauth: 用 Gitea 帳號繼續
 
 error: 錯誤

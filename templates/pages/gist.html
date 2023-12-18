@@ -12,7 +12,9 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                         </svg>
-                        <a href="{{ $.c.ExternalUrl }}#file-{{ slug $file.Filename }}" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white ml-2">{{ $file.Filename }}</a></span>
+                        <a href="{{ $.c.ExternalUrl }}#file-{{ slug $file.Filename }}" class="hover:text-primary-600 ml-2 mr-1">{{ $file.Filename }}</a>
+                        <span class="text-gray-400"> · {{ $file.FileSize }} · {{ $file.FileType }}</span>
+                    </span>
 
                     <span class="isolate inline-flex rounded-md shadow-sm mr-2">
                       <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/{{ $.commit }}/{{$file.Filename}}" class="relative inline-flex items-center rounded-l-md bg-white text-gray-500 dark:text-slate-300 float-right px-2.5 py-1 leading-4 text-xs font-medium dark:bg-gray-600 border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none">
@@ -68,11 +70,11 @@
                     <div class="code">
                         {{ $fileslug := slug $file.Filename }}
                         {{ if ne $file.Content "" }}
-                            <table class="table-code w-full whitespace-pre" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
+                            <table class="chroma table-code w-full whitespace-pre" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
                                 <tbody>
                                 {{ $ii := "1" }}
                                 {{ $i := toInt $ii }}
-                                {{ range $line := lines $file.Content }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code">{{ $line }}</td></tr>{{ $i = inc $i }}{{ end }}
+                                {{ range $line := lines $file.Content }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code">{{ $line | safe }}</td></tr>{{ $i = inc $i }}{{ end }}
                                 </tbody>
                             </table>
                         {{ end }}

@@ -149,6 +149,25 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 	return content, truncated, nil
 }
 
+func GetFileSize(user string, gist string, revision string, filename string) (int64, error) {
+	repositoryPath := RepositoryPath(user, gist)
+
+	cmd := exec.Command(
+		"git",
+		"cat-file",
+		"-s",
+		revision+":"+filename,
+	)
+	cmd.Dir = repositoryPath
+
+	stdout, err := cmd.Output()
+	if err != nil {
+		return 0, err
+	}
+
+	return strconv.ParseInt(strings.TrimSuffix(string(stdout), "\n"), 10, 64)
+}
+
 func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	repositoryPath := RepositoryPath(user, gist)
 

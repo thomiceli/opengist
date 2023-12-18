@@ -154,7 +154,7 @@
                                     {{ if isMarkdown $gist.PreviewFilename }}
                                     <div class="markdown markdown-body p-8">{{ $gist.Preview }}</div>
                                     {{ else }}
-                                    <table class="table-code w-full whitespace-pre" data-filename="{{ $gist.PreviewFilename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
+                                    <table class="chroma table-code w-full whitespace-pre" data-filename="{{ $gist.PreviewFilename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
                                         <tbody>
                                         {{ $ii := "1" }}
                                         {{ $i := toInt $ii }}

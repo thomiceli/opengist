@@ -117,6 +117,9 @@ var (
 		"toStr": func(i interface{}) string {
 			return fmt.Sprint(i)
 		},
+		"safe": func(s string) template.HTML {
+			return template.HTML(s)
+		},
 	}
 )
 

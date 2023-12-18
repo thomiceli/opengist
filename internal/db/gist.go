@@ -1,12 +1,19 @@
 package db
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/formatters/html"
+	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v2/styles"
+	"github.com/dustin/go-humanize"
+	"github.com/labstack/echo/v4"
 	"os/exec"
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 )
@@ -339,9 +346,42 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 		return nil, nil
 	}
 
+	size, err := git.GetFileSize(gist.User.Username, gist.Uuid, revision, filename)
+	if err != nil {
+		return nil, err
+	}
+
+	var lexer chroma.Lexer
+	if lexer = lexers.Get(filename); lexer == nil {
+		lexer = lexers.Fallback
+	}
+
+	style := styles.Get("catppuccin-latte")
+	if style == nil {
+		style = styles.Fallback
+	}
+
+	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))
+
+	iterator, err := lexer.Tokenise(nil, content)
+	if err != nil {
+		return nil, err
+	}
+
+	htmlbuf := bytes.Buffer{}
+	w := bufio.NewWriter(&htmlbuf)
+
+	if err = formatter.Format(w, style, iterator); err != nil {
+		return nil, err
+	}
+
+	_ = w.Flush()
+
 	return &git.File{
 		Filename:  filename,
-		Content:   content,
+		FileType:  lexer.Config().Name,
+		FileSize:  humanize.IBytes(uint64(size)),
+		Content:   htmlbuf.String(),
 		Truncated: truncated,
 	}, err
 }

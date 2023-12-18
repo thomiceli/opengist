@@ -50,7 +50,7 @@
                             {{ else if eq $file.Content "" }}
                                 <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.empty-file" }}</p>
                             {{ else }}
-                            <table class="code table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
+                            <table class="code chroma table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
                                 <tbody>
                                 {{ $left  := 0 }}
                                 {{ $right := 0 }}

@@ -21,7 +21,7 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub, Gite
   ```yaml
   gitlab.client-key: <key>
   gitlab.secret: <secret>
-  # URL of the Gitlab instance. Default: https://gitlab.com/
+  # URL of the GitLab instance. Default: https://gitlab.com/
   gitlab.url: https://gitlab.com/
   ```
 

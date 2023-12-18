@@ -128,7 +128,7 @@
                             <div class="flex rounded-md shadow-sm">
                                 <div class="relative">
                                     <button type="button" id="gist-menu-toggle" class="relative text-xs inline-flex items-center space-x-2 rounded-l-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3 focus-within:z-10 -mr-px">
-                                        <span id="gist-menu-title" class="whitespace-nowrap"></span>
+                                        <span id="gist-menu-title" class="whitespace-nowrap">{{if .httpCloneUrl}}{{ .locale.Tr "gist.header.clone-http" .httpProtocol }}{{ else if .sshCloneUrl }}{{ .locale.Tr "gist.header.clone-ssh" }}{{else}}{{ .locale.Tr "gist.header.share" }}{{end}}</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                         </svg>
@@ -152,7 +152,7 @@
                                     </div>
                                 </div>
                                 <div class="relative flex flex-grow items-stretch focus-within:z-10">
-                                    <input id="gist-menu-input" value="" class="block code bg-white dark:bg-gray-900 w-full rounded-none border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-primary-500 focus:outline-none focus:ring-1 text-xs px-2">
+                                    <input id="gist-menu-input" value="{{if .httpCloneUrl}}{{.httpCloneUrl}}{{ else if .sshCloneUrl }}{{.sshCloneUrl}}{{else}}{{.httpCopyUrl}}{{end}}" class="block code bg-white dark:bg-gray-900 w-full rounded-none border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-primary-500 focus:outline-none focus:ring-1 text-xs px-2">
                                 </div>
                                 <button id="gist-menu-button-copy" type="button" class="relative text-xs -ml-px inline-flex items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

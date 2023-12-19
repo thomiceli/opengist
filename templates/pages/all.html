@@ -152,7 +152,7 @@
                             <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto hover:border-primary-600">
                                 <div class="code overflow-auto">
                                     {{ if isMarkdown $gist.PreviewFilename }}
-                                    <div class="chroma markdown markdown-body p-8">{{ $gist.HTML | safe }}</div>
+                                    <div class="chroma preview markdown markdown-body p-8">{{ $gist.HTML | safe }}</div>
                                     {{ else }}
                                     <table class="chroma table-code w-full whitespace-pre" data-filename="{{ $gist.PreviewFilename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
                                         <tbody>

@@ -156,3 +156,23 @@ dl.dl-config dd {
 .markdown-body {
     @apply dark:bg-gray-900 !important;
 }
+
+.markdown-body pre {
+    @apply flex relative items-start p-0 !important;
+}
+
+.markdown-body .code-div {
+    @apply p-4 max-w-full overflow-x-auto !important;
+}
+
+.markdown-body code {
+    @apply overflow-auto whitespace-pre !important;
+}
+
+.chroma.preview.markdown code {
+    @apply p-4 !important;
+}
+
+.mermaid {
+    background: #f6f8fa !important;
+}

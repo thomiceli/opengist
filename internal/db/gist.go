@@ -2,11 +2,12 @@ package db
 
 import (
 	"fmt"
+	"github.com/dustin/go-humanize"
+	"github.com/labstack/echo/v4"
 	"os/exec"
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 )
@@ -339,8 +340,16 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 		return nil, nil
 	}
 
+	var size int64
+
+	size, err = git.GetFileSize(gist.User.Username, gist.Uuid, revision, filename)
+	if err != nil {
+		return nil, err
+	}
+
 	return &git.File{
 		Filename:  filename,
+		Size:      humanize.IBytes(uint64(size)),
 		Content:   content,
 		Truncated: truncated,
 	}, err

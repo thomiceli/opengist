@@ -13,19 +13,8 @@ import (
 )
 
 func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
-	markdown := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			highlighting.NewHighlighting(
-				highlighting.WithStyle("catppuccin-latte"),
-				highlighting.WithFormatOptions(html.WithClasses(true))),
-			emoji.Emoji,
-			&mermaid.Extender{},
-		),
-	)
-
 	var buf bytes.Buffer
-	err := markdown.Convert([]byte(gist.Preview), &buf)
+	err := newMarkdown().Convert([]byte(gist.Preview), &buf)
 
 	return RenderedGist{
 		Gist: gist,
@@ -34,7 +23,18 @@ func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
 }
 
 func MarkdownFile(file *git.File) (RenderedFile, error) {
-	markdown := goldmark.New(
+	var buf bytes.Buffer
+	err := newMarkdown().Convert([]byte(file.Content), &buf)
+
+	return RenderedFile{
+		File: file,
+		HTML: buf.String(),
+		Type: "Markdown",
+	}, err
+}
+
+func newMarkdown() goldmark.Markdown {
+	return goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
 			highlighting.NewHighlighting(
@@ -44,13 +44,4 @@ func MarkdownFile(file *git.File) (RenderedFile, error) {
 			&mermaid.Extender{},
 		),
 	)
-
-	var buf bytes.Buffer
-	err := markdown.Convert([]byte(file.Content), &buf)
-
-	return RenderedFile{
-		File: file,
-		HTML: buf.String(),
-		Type: "Markdown",
-	}, err
 }

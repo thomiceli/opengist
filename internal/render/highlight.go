@@ -30,18 +30,10 @@ func HighlightFile(file *git.File) (RenderedFile, error) {
 		File: file,
 	}
 
-	var lexer chroma.Lexer
-	if lexer = lexers.Get(file.Filename); lexer == nil {
-		lexer = lexers.Fallback
-	}
-
+	style := newStyle()
+	lexer := newLexer(file.Filename)
 	if lexer.Config().Name == "markdown" {
 		return MarkdownFile(file)
-	}
-
-	style := styles.Get("catppuccin-latte")
-	if style == nil {
-		style = styles.Fallback
 	}
 
 	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))
@@ -79,18 +71,10 @@ func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {
 		Gist: gist,
 	}
 
-	var lexer chroma.Lexer
-	if lexer = lexers.Get(gist.PreviewFilename); lexer == nil {
-		lexer = lexers.Fallback
-	}
-
+	style := newStyle()
+	lexer := newLexer(gist.PreviewFilename)
 	if lexer.Config().Name == "markdown" {
 		return MarkdownGistPreview(gist)
-	}
-
-	style := styles.Get("catppuccin-latte")
-	if style == nil {
-		style = styles.Fallback
 	}
 
 	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))
@@ -129,4 +113,22 @@ func parseFileTypeName(config chroma.Config) string {
 	}
 
 	return fileType
+}
+
+func newLexer(filename string) chroma.Lexer {
+	var lexer chroma.Lexer
+	if lexer = lexers.Get(filename); lexer == nil {
+		lexer = lexers.Fallback
+	}
+
+	return lexer
+}
+
+func newStyle() *chroma.Style {
+	var style *chroma.Style
+	if style = styles.Get("catppuccin-latte"); style == nil {
+		style = styles.Fallback
+	}
+
+	return style
 }

@@ -3,6 +3,8 @@ module github.com/thomiceli/opengist
 go 1.20
 
 require (
+	github.com/alecthomas/chroma/v2 v2.12.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/glebarez/go-sqlite v1.21.2
 	github.com/glebarez/sqlite v1.9.0
 	github.com/go-playground/validator/v10 v10.15.4
@@ -13,6 +15,10 @@ require (
 	github.com/markbates/goth v1.78.0
 	github.com/rs/zerolog v1.30.0
 	github.com/stretchr/testify v1.8.4
+	github.com/yuin/goldmark v1.6.0
+	github.com/yuin/goldmark-emoji v1.0.2
+	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
+	go.abhg.dev/goldmark/mermaid v0.5.0
 	golang.org/x/crypto v0.13.0
 	golang.org/x/text v0.13.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -21,7 +27,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

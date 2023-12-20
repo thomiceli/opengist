@@ -1,0 +1,13 @@
+
+
+    @import "github-markdown-css/github-markdown-light";
+    @import './catppuccin-latte';
+
+
+    .dark {
+        @import "github-markdown-css/github-markdown-dark";
+        @import './catppuccin-macchiato';
+    }
+
+    @import './embed.css';
+

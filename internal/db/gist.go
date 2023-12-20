@@ -44,6 +44,19 @@ func ParseVisibility[T string | int](v T) (Visibility, error) {
 	}
 }
 
+func VisibilityToString(v Visibility) string {
+	switch v {
+	case PublicVisibility:
+		return "public"
+	case UnlistedVisibility:
+		return "unlisted"
+	case PrivateVisibility:
+		return "private"
+	default:
+		return ""
+	}
+}
+
 type Gist struct {
 	ID              uint `gorm:"primaryKey"`
 	Uuid            string
@@ -340,7 +353,7 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 		return nil, nil
 	}
 
-	var size int64
+	var size uint64
 
 	size, err = git.GetFileSize(gist.User.Username, gist.Uuid, revision, filename)
 	if err != nil {
@@ -349,7 +362,8 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 
 	return &git.File{
 		Filename:  filename,
-		Size:      humanize.IBytes(uint64(size)),
+		Size:      size,
+		HumanSize: humanize.IBytes(size),
 		Content:   content,
 		Truncated: truncated,
 	}, err

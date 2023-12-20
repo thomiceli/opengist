@@ -11,13 +11,14 @@ import (
 )
 
 type File struct {
-	Filename    string
-	Size        string
-	OldFilename string
-	Content     string
-	Truncated   bool
-	IsCreated   bool
-	IsDeleted   bool
+	Filename    string `json:"filename"`
+	Size        uint64 `json:"size"`
+	HumanSize   string `json:"human_size"`
+	OldFilename string `json:"-"`
+	Content     string `json:"content"`
+	Truncated   bool   `json:"truncated"`
+	IsCreated   bool   `json:"-"`
+	IsDeleted   bool   `json:"-"`
 }
 
 type CsvFile struct {

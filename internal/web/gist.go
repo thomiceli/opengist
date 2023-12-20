@@ -2,15 +2,19 @@ package web
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/render"
 	"html/template"
 	"net/url"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -26,7 +30,17 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		userName := ctx.Param("user")
 		gistName := ctx.Param("gistname")
 
-		gistName = strings.TrimSuffix(gistName, ".git")
+		switch filepath.Ext(gistName) {
+		case ".js":
+			setData(ctx, "gistpage", "js")
+			gistName = strings.TrimSuffix(gistName, ".js")
+		case ".json":
+			setData(ctx, "gistpage", "json")
+			gistName = strings.TrimSuffix(gistName, ".json")
+		case ".git":
+			setData(ctx, "gistpage", "git")
+			gistName = strings.TrimSuffix(gistName, ".git")
+		}
 
 		gist, err := db.GetGist(userName, gistName)
 		if err != nil {
@@ -70,6 +84,8 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		} else {
 			baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
 		}
+
+		setData(ctx, "baseHttpUrl", baseHttpUrl)
 
 		if config.C.HttpGit {
 			setData(ctx, "httpCloneUrl", baseHttpUrl+"/"+userName+"/"+gistName+".git")
@@ -256,6 +272,12 @@ func allGists(ctx echo.Context) error {
 }
 
 func gistIndex(ctx echo.Context) error {
+	if getData(ctx, "gistpage") == "js" {
+		return gistJs(ctx)
+	} else if getData(ctx, "gistpage") == "json" {
+		return gistJson(ctx)
+	}
+
 	gist := getData(ctx, "gist").(*db.Gist)
 	revision := ctx.Param("revision")
 
@@ -272,13 +294,9 @@ func gistIndex(ctx echo.Context) error {
 		return notFound("Revision not found")
 	}
 
-	renderedFiles := make([]render.RenderedFile, 0, len(files))
-	for _, file := range files {
-		rendered, err := render.HighlightFile(file)
-		if err != nil {
-			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Uuid + " - " + gist.PreviewFilename)
-		}
-		renderedFiles = append(renderedFiles, rendered)
+	renderedFiles, err := render.HighlightFiles(files)
+	if err != nil {
+		return errorRes(500, "Error rendering files", err)
 	}
 
 	setData(ctx, "page", "code")
@@ -287,6 +305,82 @@ func gistIndex(ctx echo.Context) error {
 	setData(ctx, "revision", revision)
 	setData(ctx, "htmlTitle", gist.Title)
 	return html(ctx, "gist.html")
+}
+
+func gistJson(ctx echo.Context) error {
+	gist := getData(ctx, "gist").(*db.Gist)
+	files, err := gist.Files("HEAD")
+	if err != nil {
+		return errorRes(500, "Error fetching files", err)
+	}
+
+	renderedFiles, err := render.HighlightFiles(files)
+	if err != nil {
+		return errorRes(500, "Error rendering files", err)
+	}
+
+	setData(ctx, "files", renderedFiles)
+
+	htmlbuf := bytes.Buffer{}
+	w := bufio.NewWriter(&htmlbuf)
+	if err = ctx.Echo().Renderer.Render(w, "gist_embed.html", dataMap(ctx), ctx); err != nil {
+		return err
+	}
+	_ = w.Flush()
+
+	jsUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), gist.User.Username, gist.Uuid+".js")
+
+	return ctx.JSON(200, map[string]interface{}{
+		"owner":       gist.User.Username,
+		"id":          gist.Uuid,
+		"title":       gist.Title,
+		"description": gist.Description,
+		"created_at":  time.Unix(gist.CreatedAt, 0).Format(time.RFC3339),
+		"visibility":  db.VisibilityToString(gist.Private),
+		"files":       renderedFiles,
+		"embed": map[string]string{
+			"html":    htmlbuf.String(),
+			"css":     asset("embed.scss"), // TODO: prod assets
+			"js":      jsUrl,
+			"js_dark": jsUrl + "?dark",
+		},
+	})
+}
+
+func gistJs(ctx echo.Context) error {
+	dark := ""
+	if _, exists := ctx.QueryParams()["dark"]; exists {
+		dark = "dark"
+	}
+	setData(ctx, "dark", dark)
+
+	gist := getData(ctx, "gist").(*db.Gist)
+	files, err := gist.Files("HEAD")
+	if err != nil {
+		return errorRes(500, "Error fetching files", err)
+	}
+
+	renderedFiles, err := render.HighlightFiles(files)
+	if err != nil {
+		return errorRes(500, "Error rendering files", err)
+	}
+
+	setData(ctx, "files", renderedFiles)
+
+	htmlbuf := bytes.Buffer{}
+	w := bufio.NewWriter(&htmlbuf)
+	if err = ctx.Echo().Renderer.Render(w, "gist_embed.html", dataMap(ctx), ctx); err != nil {
+		return err
+	}
+	_ = w.Flush()
+
+	js := `document.write('<link rel="stylesheet" href="%s">')
+document.write('%s')
+`
+	// TODO: prod assets
+	js = fmt.Sprintf(js, "http://localhost:16157/embed.scss", strings.Replace(htmlbuf.String(), "\n", `\n`, -1))
+	ctx.Response().Header().Set("Content-Type", "application/javascript")
+	return plainText(ctx, 200, js)
 }
 
 func revisions(ctx echo.Context) error {

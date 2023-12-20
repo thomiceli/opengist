@@ -36,6 +36,10 @@ func getData(ctx echo.Context, key string) any {
 	return data[key]
 }
 
+func dataMap(ctx echo.Context) echo.Map {
+	return ctx.Request().Context().Value(dataKey).(echo.Map)
+}
+
 func html(ctx echo.Context, template string) error {
 	return htmlWithCode(ctx, 200, template)
 }

@@ -1,3 +1,5 @@
+@config "../tailwind.config.js";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,10 +98,6 @@ pre {
 .cm-editor {
     height: 337px;
     max-height: 337px;
-}
-
-.hljs {
-    color: #c9d1d9;
 }
 
 .line-code.selected {

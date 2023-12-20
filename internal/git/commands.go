@@ -149,7 +149,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 	return content, truncated, nil
 }
 
-func GetFileSize(user string, gist string, revision string, filename string) (int64, error) {
+func GetFileSize(user string, gist string, revision string, filename string) (uint64, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
@@ -165,7 +165,7 @@ func GetFileSize(user string, gist string, revision string, filename string) (in
 		return 0, err
 	}
 
-	return strconv.ParseInt(strings.TrimSuffix(string(stdout), "\n"), 10, 64)
+	return strconv.ParseUint(strings.TrimSuffix(string(stdout), "\n"), 10, 64)
 }
 
 func GetLog(user string, gist string, skip int) ([]*Commit, error) {

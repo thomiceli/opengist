@@ -329,6 +329,9 @@ func gistJson(ctx echo.Context) error {
 	_ = w.Flush()
 
 	jsUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), gist.User.Username, gist.Uuid+".js")
+	if err != nil {
+		return errorRes(500, "Error joining url", err)
+	}
 
 	return ctx.JSON(200, map[string]interface{}{
 		"owner":       gist.User.Username,

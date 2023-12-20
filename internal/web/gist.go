@@ -351,11 +351,9 @@ func gistJson(ctx echo.Context) error {
 }
 
 func gistJs(ctx echo.Context) error {
-	dark := ""
 	if _, exists := ctx.QueryParams()["dark"]; exists {
-		dark = "dark"
+		setData(ctx, "dark", "dark")
 	}
-	setData(ctx, "dark", dark)
 
 	gist := getData(ctx, "gist").(*db.Gist)
 	files, err := gist.Files("HEAD")

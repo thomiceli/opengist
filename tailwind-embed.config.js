@@ -6,6 +6,8 @@ module.exports = {
   ],
   theme: {
     colors: {
+      white: colors.white,
+      black: colors.black,
       gray: {
         50: "#EEEFF1",
         100: "#DEDFE3",
@@ -31,6 +33,8 @@ module.exports = {
         900: '#2a5574',
         950: '#173040',
       },
+
+      slate: colors.slate
     },
     extend: {
       borderWidth: {

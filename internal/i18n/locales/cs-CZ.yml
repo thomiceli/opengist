@@ -17,8 +17,8 @@ gist.header.clone-http: Klonovat pomocí %s
 gist.header.clone-http-help: Klonovat s pomocí Git pomocí základní autentizace HTTP.
 gist.header.clone-ssh: Klonovat pomocí SSH
 gist.header.clone-ssh-help: Klonovat s pomocí Git pomocí klíče SSH.
-gist.header.share: Sdílet
-gist.header.share-help: Zkopírovat sdílitelný odkaz na tento gist.
+gist.header.embed:
+gist.header.embed-help:
 gist.header.download-zip: Stáhnout ZIP
 
 gist.raw: Raw

@@ -93,6 +93,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 
 		setData(ctx, "httpCopyUrl", baseHttpUrl+"/"+userName+"/"+gistName)
 		setData(ctx, "currentUrl", template.URL(ctx.Request().URL.Path))
+		setData(ctx, "embedScript", fmt.Sprintf(`<script src="%s"></script>`, baseHttpUrl+"/"+userName+"/"+gistName+".js"))
 
 		nbCommits, err := gist.NbCommits()
 		if err != nil {

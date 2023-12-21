@@ -340,11 +340,11 @@ func gistJson(ctx echo.Context) error {
 		"title":       gist.Title,
 		"description": gist.Description,
 		"created_at":  time.Unix(gist.CreatedAt, 0).Format(time.RFC3339),
-		"visibility":  db.VisibilityToString(gist.Private),
+		"visibility":  gist.VisibilityStr(),
 		"files":       renderedFiles,
 		"embed": map[string]string{
 			"html":    htmlbuf.String(),
-			"css":     asset("embed.scss"), // TODO: prod assets
+			"css":     getData(ctx, "baseHttpUrl").(string) + asset("embed.css"),
 			"js":      jsUrl,
 			"js_dark": jsUrl + "?dark",
 		},
@@ -379,8 +379,8 @@ func gistJs(ctx echo.Context) error {
 	js := `document.write('<link rel="stylesheet" href="%s">')
 document.write('%s')
 `
-	// TODO: prod assets
-	js = fmt.Sprintf(js, "http://localhost:16157/embed.scss", strings.Replace(htmlbuf.String(), "\n", `\n`, -1))
+	js = fmt.Sprintf(js, getData(ctx, "baseHttpUrl").(string)+asset("embed.css"),
+		strings.Replace(htmlbuf.String(), "\n", `\n`, -1))
 	ctx.Response().Header().Set("Content-Type", "application/javascript")
 	return plainText(ctx, 200, js)
 }

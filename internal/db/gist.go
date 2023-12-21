@@ -44,19 +44,6 @@ func ParseVisibility[T string | int](v T) (Visibility, error) {
 	}
 }
 
-func VisibilityToString(v Visibility) string {
-	switch v {
-	case PublicVisibility:
-		return "public"
-	case UnlistedVisibility:
-		return "unlisted"
-	case PrivateVisibility:
-		return "private"
-	default:
-		return ""
-	}
-}
-
 type Gist struct {
 	ID              uint `gorm:"primaryKey"`
 	Uuid            string
@@ -438,6 +425,19 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 	}
 
 	return gist.Update()
+}
+
+func (gist *Gist) VisibilityStr() string {
+	switch gist.Private {
+	case PublicVisibility:
+		return "public"
+	case UnlistedVisibility:
+		return "unlisted"
+	case PrivateVisibility:
+		return "private"
+	default:
+		return ""
+	}
 }
 
 // -- DTO -- //

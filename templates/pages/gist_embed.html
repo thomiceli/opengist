@@ -1,51 +1,53 @@
-<div class="opengist-embed {{.dark}}" id="{{ .gist.Uuid }}">
-{{ range $file := .files }}
-    <div class="rounded-md border-1 border-gray-100 dark:border-gray-800 overflow-auto mb-4">
-        <div class="border-b-1 border-gray-100 dark:border-gray-700 text-xs p-2 pl-4 bg-gray-50 dark:bg-gray-800 text-gray-400">
-            <a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}#file-{{ slug $file.Filename }}"><span class="font-bold text-gray-700 dark:text-gray-200">{{ $file.Filename }}</span> · {{ $file.HumanSize }} · {{ $file.Type }}</a>
-            <span class="float-right"><a target="_blank" href="{{ $.baseHttpUrl }}">Hosted via Opengist</a> · <span class="text-gray-700 dark:text-gray-200 font-bold"><a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/HEAD/{{$file.Filename}}">view raw</a></span></span>
-        </div>
-        {{ if $file.Truncated }}
-            <div class="text-xs px-4 bg-gray-50 py-1.5 border-b-1 border-gray-100 dark:border-gray-700">
-                {{ $.locale.Tr "gist.file-truncated" }} <a target="_blank" class="text-primary-600" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/HEAD/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}.</a>
+<div class="opengist-embed" id="{{ .gist.Uuid }}">
+    <div class="html {{.dark}}">
+    {{ range $file := .files }}
+        <div class="rounded-md border-1 border-gray-100 dark:border-gray-800 overflow-auto mb-4">
+            <div class="border-b-1 border-gray-100 dark:border-gray-700 text-xs p-2 pl-4 bg-gray-50 dark:bg-gray-800 text-gray-400">
+                <a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}#file-{{ slug $file.Filename }}"><span class="font-bold text-gray-700 dark:text-gray-200">{{ $file.Filename }}</span> · {{ $file.HumanSize }} · {{ $file.Type }}</a>
+                <span class="float-right"><a target="_blank" href="{{ $.baseHttpUrl }}">Hosted via Opengist</a> · <span class="text-gray-700 dark:text-gray-200 font-bold"><a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/HEAD/{{$file.Filename}}">view raw</a></span></span>
             </div>
-        {{ end }}
-        {{ $csv := csvFile $file.File }}
-        {{ if $csv }}
-        <table class="csv-table">
-            <thead>
-            <tr>
-                {{ range $csv.Header }}
-                    <th>{{ . }}</th>
-                {{ end }}
-            </tr>
-            </thead>
-            <tbody>
-            {{ range $csv.Rows }}
+            {{ if $file.Truncated }}
+                <div class="text-xs px-4 bg-gray-50 py-1.5 border-b-1 border-gray-100 dark:border-gray-700">
+                    {{ $.locale.Tr "gist.file-truncated" }} <a target="_blank" class="text-primary-600" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/raw/HEAD/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}.</a>
+                </div>
+            {{ end }}
+            {{ $csv := csvFile $file.File }}
+            {{ if $csv }}
+            <table class="csv-table">
+                <thead>
                 <tr>
-                    {{ range . }}
-                        <td>{{ . }}</td>
+                    {{ range $csv.Header }}
+                        <th>{{ . }}</th>
                     {{ end }}
                 </tr>
-            {{ end }}
-        </table>
-        {{ else if isMarkdown $file.Filename }}
-        <div class="chroma markdown markdown-body p-8">{{ $file.HTML | safe }}</div>
-        {{ else }}
-        <div class="code dark:bg-gray-900">
-        {{ $fileslug := slug $file.Filename }}
-        {{ if ne $file.Content "" }}
-            <table class="chroma table-code w-full whitespace-pre" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
+                </thead>
                 <tbody>
-                    {{ $ii := "1" }}
-                    {{ $i := toInt $ii }}
-                    {{ range $line := $file.Lines }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code">{{ $line | safe }}</td></tr>{{ $i = inc $i }}{{ end }}
-                </tbody>
+                {{ range $csv.Rows }}
+                    <tr>
+                        {{ range . }}
+                            <td>{{ . }}</td>
+                        {{ end }}
+                    </tr>
+                {{ end }}
             </table>
-        {{ end }}
-        </div>
-        {{ end }}
+            {{ else if isMarkdown $file.Filename }}
+            <div class="chroma markdown markdown-body p-8">{{ $file.HTML | safe }}</div>
+            {{ else }}
+            <div class="code dark:bg-gray-900">
+            {{ $fileslug := slug $file.Filename }}
+            {{ if ne $file.Content "" }}
+                <table class="chroma table-code w-full whitespace-pre" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
+                    <tbody>
+                        {{ $ii := "1" }}
+                        {{ $i := toInt $ii }}
+                        {{ range $line := $file.Lines }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code">{{ $line | safe }}</td></tr>{{ $i = inc $i }}{{ end }}
+                    </tbody>
+                </table>
+            {{ end }}
+            </div>
+            {{ end }}
 
+        </div>
+    {{ end }}
     </div>
-{{ end }}
 </div>

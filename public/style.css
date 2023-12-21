@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@config "../tailwind.config.js";
+
 @layer base {
     ul, ol {
         list-style: revert;
@@ -96,10 +98,6 @@ pre {
 .cm-editor {
     height: 337px;
     max-height: 337px;
-}
-
-.hljs {
-    color: #c9d1d9;
 }
 
 .line-code.selected {

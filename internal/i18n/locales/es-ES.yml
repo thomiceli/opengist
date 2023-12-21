@@ -17,8 +17,8 @@ gist.header.clone-http: Clonar via %s
 gist.header.clone-http-help: Clonar con Git usando autenticación básica HTTP.
 gist.header.clone-ssh: Clonar via SSH
 gist.header.clone-ssh-help: Clonar con Git usando una clave SSH.
-gist.header.share: Compartir
-gist.header.share-help: Copiar enlace para compartir este gist.
+gist.header.embed:
+gist.header.embed-help:
 gist.header.download-zip: Descargar ZIP
 
 gist.raw: Sin formato

@@ -17,8 +17,8 @@ gist.header.clone-http: 透過 %s 複製
 gist.header.clone-http-help: 使用 HTTP 基本認證透過 Git 複製。
 gist.header.clone-ssh: 透過 SSH 複製
 gist.header.clone-ssh-help: 使用 SSH 金鑰透過 Git 複製。
-gist.header.share: 分享
-gist.header.share-help: 複製這個 Gist 的連結。
+gist.header.embed:
+gist.header.embed-help:
 gist.header.download-zip: 下載 ZIP
 
 gist.raw: 原始檔案

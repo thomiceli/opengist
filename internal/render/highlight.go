@@ -8,15 +8,16 @@ import (
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 )
 
 type RenderedFile struct {
 	*git.File
-	Type  string
-	Lines []string
-	HTML  string
+	Type  string   `json:"type"`
+	Lines []string `json:"-"`
+	HTML  string   `json:"-"`
 }
 
 type RenderedGist struct {
@@ -64,6 +65,19 @@ func HighlightFile(file *git.File) (RenderedFile, error) {
 	rendered.Type = parseFileTypeName(*lexer.Config())
 
 	return rendered, err
+}
+
+func HighlightFiles(files []*git.File) ([]RenderedFile, error) {
+	renderedFiles := make([]RenderedFile, 0, len(files))
+	for _, file := range files {
+		rendered, err := HighlightFile(file)
+		if err != nil {
+			log.Warn().Err(err).Msg("Error rendering gist preview for " + file.Filename)
+		}
+		renderedFiles = append(renderedFiles, rendered)
+	}
+
+	return renderedFiles, nil
 }
 
 func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {

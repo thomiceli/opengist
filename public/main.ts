@@ -1,4 +1,3 @@
-import './style.css';
 import './style.scss';
 import './favicon-32.png';
 import './opengist.svg';

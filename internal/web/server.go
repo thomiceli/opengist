@@ -86,12 +86,7 @@ var (
 
 			return defaultAvatar()
 		},
-		"asset": func(file string) string {
-			if dev {
-				return "http://localhost:16157/" + file
-			}
-			return config.C.ExternalUrl + "/" + manifestEntries[file].File
-		},
+		"asset": asset,
 		"dev": func() bool {
 			return dev
 		},
@@ -481,4 +476,11 @@ func defaultAvatar() string {
 		return "http://localhost:16157/default.png"
 	}
 	return config.C.ExternalUrl + "/" + manifestEntries["default.png"].File
+}
+
+func asset(file string) string {
+	if dev {
+		return "http://localhost:16157/" + file
+	}
+	return config.C.ExternalUrl + "/" + manifestEntries[file].File
 }

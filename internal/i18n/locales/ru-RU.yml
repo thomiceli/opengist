@@ -17,8 +17,8 @@ gist.header.clone-http: Клонировать с помощью %s
 gist.header.clone-http-help: Клонировать с помощью Git используя аутентификацию HTTP.
 gist.header.clone-ssh: Клонировать c помощью SSH
 gist.header.clone-ssh-help: Клонировать c помощью Git используя ключ SSH.
-gist.header.share: Поделиться
-gist.header.share-help: Скопировать ссылку на фрагмент.
+gist.header.embed:
+gist.header.embed-help:
 gist.header.download-zip: Скачать ZIP-архив
 
 gist.raw: Исходник

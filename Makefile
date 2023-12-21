@@ -16,6 +16,7 @@ install:
 build_frontend:
 	@echo "Building frontend assets..."
 	npx vite build
+	EMBED=1 npx postcss 'public/assets/embed-*.css' -c postcss.config.js --replace # until we can .nest { @tailwind } in Sass
 
 build_backend:
 	@echo "Building Opengist binary..."

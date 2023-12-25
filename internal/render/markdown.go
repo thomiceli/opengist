@@ -62,7 +62,7 @@ func newMarkdown() goldmark.Markdown {
 
 type CheckboxTransformer struct{}
 
-func (t *CheckboxTransformer) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
+func (t *CheckboxTransformer) Transform(node *ast.Document, _ text.Reader, _ parser.Context) {
 	i := 1
 	err := ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
@@ -77,7 +77,6 @@ func (t *CheckboxTransformer) Transform(node *ast.Document, reader text.Reader, 
 	if err != nil {
 		log.Err(err)
 	}
-	return
 }
 
 func Checkbox(content string, checkboxNb int) (string, error) {

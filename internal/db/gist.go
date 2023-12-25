@@ -365,7 +365,7 @@ func (gist *Gist) NbCommits() (string, error) {
 }
 
 func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
-	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email); err != nil {
+	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email, true); err != nil {
 		return err
 	}
 
@@ -373,6 +373,26 @@ func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
 		if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
 			return err
 		}
+	}
+
+	if err := git.AddAll(gist.Uuid); err != nil {
+		return err
+	}
+
+	if err := git.CommitRepository(gist.Uuid, gist.User.Username, gist.User.Email); err != nil {
+		return err
+	}
+
+	return git.Push(gist.Uuid)
+}
+
+func (gist *Gist) AddAndCommitFile(file *FileDTO) error {
+	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email, false); err != nil {
+		return err
+	}
+
+	if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
+		return err
 	}
 
 	if err := git.AddAll(gist.Uuid); err != nil {

@@ -272,7 +272,7 @@ func TestInitViaGitInit(t *testing.T) {
 }
 
 func commitToBare(t *testing.T, user string, gist string, files map[string]string) {
-	err := CloneTmp(user, gist, gist, "thomas@mail.com")
+	err := CloneTmp(user, gist, gist, "thomas@mail.com", true)
 	require.NoError(t, err, "Could not commit to repository")
 
 	if len(files) > 0 {

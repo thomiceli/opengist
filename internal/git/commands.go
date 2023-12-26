@@ -201,7 +201,7 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	return parseLog(stdout, truncateLimit), err
 }
 
-func CloneTmp(user string, gist string, gistTmpId string, email string) error {
+func CloneTmp(user string, gist string, gistTmpId string, email string, remove bool) error {
 	repositoryPath := RepositoryPath(user, gist)
 
 	tmpPath := TmpRepositoriesPath()
@@ -219,11 +219,13 @@ func CloneTmp(user string, gist string, gistTmpId string, email string) error {
 		return err
 	}
 
-	// remove every file (and not the .git directory!)
-	if err = removeFilesExceptGit(tmpRepositoryPath); err != nil {
-		return err
+	// remove every file (keep the .git directory)
+	// useful when user wants to edit multiple files from an existing gist
+	if remove {
+		if err = removeFilesExceptGit(tmpRepositoryPath); err != nil {
+			return err
+		}
 	}
-
 	cmd = exec.Command("git", "config", "--local", "user.name", user)
 	cmd.Dir = tmpRepositoryPath
 	if err = cmd.Run(); err != nil {

@@ -48,6 +48,7 @@ type Gist struct {
 	ID              uint `gorm:"primaryKey"`
 	Uuid            string
 	Title           string
+	URL             string
 	Preview         string
 	PreviewFilename string
 	Description     string
@@ -83,7 +84,7 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
 	err := db.Preload("User").Preload("Forked.User").
-		Where("gists.uuid = ? AND users.username like ?", gistUuid, user).
+		Where("(gists.uuid = ? OR gists.url = ?) AND users.username like ?", gistUuid, gistUuid, user).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
 
@@ -440,11 +441,19 @@ func (gist *Gist) VisibilityStr() string {
 	}
 }
 
+func (gist *Gist) Identifier() string {
+	if gist.URL != "" {
+		return gist.URL
+	}
+	return gist.Uuid
+}
+
 // -- DTO -- //
 
 type GistDTO struct {
 	Title       string     `validate:"max=250" form:"title"`
 	Description string     `validate:"max=1000" form:"description"`
+	URL         string     `validate:"max=32,alphanumdashorempty" form:"url"`
 	Private     Visibility `validate:"number,min=0,max=2" form:"private"`
 	Files       []FileDTO  `validate:"min=1,dive"`
 	Name        []string   `form:"name"`
@@ -461,11 +470,13 @@ func (dto *GistDTO) ToGist() *Gist {
 		Title:       dto.Title,
 		Description: dto.Description,
 		Private:     dto.Private,
+		URL:         dto.URL,
 	}
 }
 
 func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Title = dto.Title
 	gist.Description = dto.Description
+	gist.URL = dto.URL
 	return gist
 }

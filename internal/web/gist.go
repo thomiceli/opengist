@@ -255,7 +255,7 @@ func allGists(ctx echo.Context) error {
 	for _, gist := range gists {
 		rendered, err := render.HighlightGistPreview(gist)
 		if err != nil {
-			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Uuid + " - " + gist.PreviewFilename)
+			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
 		}
 		renderedFiles = append(renderedFiles, &rendered)
 	}
@@ -329,14 +329,15 @@ func gistJson(ctx echo.Context) error {
 	}
 	_ = w.Flush()
 
-	jsUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), gist.User.Username, gist.Uuid+".js")
+	jsUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
 	if err != nil {
 		return errorRes(500, "Error joining url", err)
 	}
 
 	return ctx.JSON(200, map[string]interface{}{
 		"owner":       gist.User.Username,
-		"id":          gist.Uuid,
+		"id":          gist.Identifier(),
+		"uuid":        gist.Uuid,
 		"title":       gist.Title,
 		"description": gist.Description,
 		"created_at":  time.Unix(gist.CreatedAt, 0).Format(time.RFC3339),
@@ -388,7 +389,7 @@ document.write('%s')
 func revisions(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 	userName := gist.User.Username
-	gistName := gist.Uuid
+	gistName := gist.Identifier()
 
 	pageInt := getPage(ctx)
 
@@ -546,7 +547,7 @@ func processCreate(ctx echo.Context) error {
 		}
 	}
 
-	return redirect(ctx, "/"+user.Username+"/"+gist.Uuid)
+	return redirect(ctx, "/"+user.Username+"/"+gist.Identifier())
 }
 
 func toggleVisibility(ctx echo.Context) error {
@@ -558,7 +559,7 @@ func toggleVisibility(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "Gist visibility has been changed", "success")
-	return redirect(ctx, "/"+gist.User.Username+"/"+gist.Uuid)
+	return redirect(ctx, "/"+gist.User.Username+"/"+gist.Identifier())
 }
 
 func deleteGist(ctx echo.Context) error {
@@ -591,7 +592,7 @@ func like(ctx echo.Context) error {
 		return errorRes(500, "Error liking/dislking this gist", err)
 	}
 
-	redirectTo := "/" + gist.User.Username + "/" + gist.Uuid
+	redirectTo := "/" + gist.User.Username + "/" + gist.Identifier()
 	if r := ctx.QueryParam("redirecturl"); r != "" {
 		redirectTo = r
 	}
@@ -609,11 +610,11 @@ func fork(ctx echo.Context) error {
 
 	if gist.User.ID == currentUser.ID {
 		addFlash(ctx, "Unable to fork own gists", "error")
-		return redirect(ctx, "/"+gist.User.Username+"/"+gist.Uuid)
+		return redirect(ctx, "/"+gist.User.Username+"/"+gist.Identifier())
 	}
 
 	if alreadyForked.ID != 0 {
-		return redirect(ctx, "/"+alreadyForked.User.Username+"/"+alreadyForked.Uuid)
+		return redirect(ctx, "/"+alreadyForked.User.Username+"/"+alreadyForked.Identifier())
 	}
 
 	uuidGist, err := uuid.NewRandom()
@@ -646,7 +647,7 @@ func fork(ctx echo.Context) error {
 
 	addFlash(ctx, "Gist has been forked", "success")
 
-	return redirect(ctx, "/"+currentUser.Username+"/"+newGist.Uuid)
+	return redirect(ctx, "/"+currentUser.Username+"/"+newGist.Identifier())
 }
 
 func rawFile(ctx echo.Context) error {
@@ -736,7 +737,7 @@ func downloadZip(ctx echo.Context) error {
 	}
 
 	ctx.Response().Header().Set("Content-Type", "application/zip")
-	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+gist.Uuid+".zip")
+	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+gist.Identifier()+".zip")
 	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(zipFile.Bytes())))
 	_, err = ctx.Response().Write(zipFile.Bytes())
 	if err != nil {
@@ -755,7 +756,7 @@ func likes(ctx echo.Context) error {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}
 
-	if err = paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Uuid+"/likes", 1); err != nil {
+	if err = paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Identifier()+"/likes", 1); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -779,7 +780,7 @@ func forks(ctx echo.Context) error {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}
 
-	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Uuid+"/forks", 2); err != nil {
+	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Identifier()+"/forks", 2); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 

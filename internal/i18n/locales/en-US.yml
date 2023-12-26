@@ -30,6 +30,7 @@ gist.no-content: No content
 gist.new.new_gist: New gist
 gist.new.title: Title
 gist.new.description: Description
+gist.new.url: URL
 gist.new.filename-with-extension: Filename with extension
 gist.new.indent-mode: Indent mode
 gist.new.indent-mode-space: Space

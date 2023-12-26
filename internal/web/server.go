@@ -398,7 +398,7 @@ func writePermission(next echo.HandlerFunc) echo.HandlerFunc {
 		gist := getData(ctx, "gist")
 		user := getUserLogged(ctx)
 		if !gist.(*db.Gist).CanWrite(user) {
-			return redirect(ctx, "/"+gist.(*db.Gist).User.Username+"/"+gist.(*db.Gist).Uuid)
+			return redirect(ctx, "/"+gist.(*db.Gist).User.Username+"/"+gist.(*db.Gist).Identifier())
 		}
 		return next(ctx)
 	}

@@ -265,6 +265,7 @@ func NewServer(isDev bool) *Server {
 			g3.GET("/likes", likes)
 			g3.POST("/fork", fork, logged)
 			g3.GET("/forks", forks)
+			g3.PUT("/checkbox", checkbox, logged, writePermission)
 		}
 	}
 

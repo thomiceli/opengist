@@ -1,5 +1,5 @@
 {{ define "gist_header" }}
-<div class="py-10">
+<div class="py-10" id="gist" data-own="{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}">
     <header>
         <div class="flex flex-col lg:flex-row">
             <div>

@@ -34,41 +34,43 @@ document.querySelectorAll('.md-code-copy-btn').forEach(button => {
 });
 
 let checkboxes = document.querySelectorAll('li[data-checkbox-nb] input[type=checkbox]');
-document.querySelectorAll<HTMLElement>('li[data-checkbox-nb]').forEach((el) => {
-    let input = el.firstElementChild;
-    (input as HTMLButtonElement).disabled = false;
-    let checkboxNb = (el as HTMLElement).dataset.checkboxNb;
-    let filename = input.parentElement.parentElement.parentElement.parentElement.parentElement.dataset.file;
+if (document.getElementById('gist').dataset.own) {
+    document.querySelectorAll<HTMLElement>('li[data-checkbox-nb]').forEach((el) => {
+        let input: HTMLButtonElement = el.querySelector('input[type=checkbox]');
+        input.disabled = false;
+        let checkboxNb = (el as HTMLElement).dataset.checkboxNb;
+        let filename = input.closest<HTMLElement>('div[data-file]').dataset.file;
 
-    input.addEventListener('change', function () {
-        const data = new URLSearchParams();
-        data.append('checkbox', checkboxNb);
-        data.append('file', filename);
-        if (document.getElementsByName('_csrf').length !== 0) {
-            data.append('_csrf', ((document.getElementsByName('_csrf')[0] as HTMLInputElement).value));
-        }
-        checkboxes.forEach((el: HTMLButtonElement) => {
-            el.disabled = true;
-            el.classList.add('text-gray-400')
-        });
-        fetch(window.location.href.split('#')[0] + '/checkbox', {
-            method: 'PUT',
-            credentials: 'same-origin',
-            body: data,
-        }).then((response) => {
-            if (response.status === 200) {
-                checkboxes.forEach((el: HTMLButtonElement) => {
-                    el.disabled = false;
-                    el.classList.remove('text-gray-400')
-                });
+        input.addEventListener('change', function () {
+            const data = new URLSearchParams();
+            data.append('checkbox', checkboxNb);
+            data.append('file', filename);
+            if (document.getElementsByName('_csrf').length !== 0) {
+                data.append('_csrf', ((document.getElementsByName('_csrf')[0] as HTMLInputElement).value));
             }
+            checkboxes.forEach((el: HTMLButtonElement) => {
+                el.disabled = true;
+                el.classList.add('text-gray-400')
+            });
+            fetch(window.location.href.split('#')[0] + '/checkbox', {
+                method: 'PUT',
+                credentials: 'same-origin',
+                body: data,
+            }).then((response) => {
+                if (response.status === 200) {
+                    checkboxes.forEach((el: HTMLButtonElement) => {
+                        el.disabled = false;
+                        el.classList.remove('text-gray-400')
+                    });
+                }
+            });
         });
-    })
-
-
-
-})
-
+    });
+} else {
+    checkboxes.forEach((el: HTMLButtonElement) => {
+        el.disabled = true;
+    });
+}
 
 
 

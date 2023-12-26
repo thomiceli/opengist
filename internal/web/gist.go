@@ -286,7 +286,7 @@ func gistIndex(ctx echo.Context) error {
 		revision = "HEAD"
 	}
 
-	files, err := gist.Files(revision)
+	files, err := gist.Files(revision, true)
 	if err != nil {
 		return errorRes(500, "Error fetching files", err)
 	}
@@ -310,7 +310,7 @@ func gistIndex(ctx echo.Context) error {
 
 func gistJson(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
-	files, err := gist.Files("HEAD")
+	files, err := gist.Files("HEAD", true)
 	if err != nil {
 		return errorRes(500, "Error fetching files", err)
 	}
@@ -358,7 +358,7 @@ func gistJs(ctx echo.Context) error {
 	}
 
 	gist := getData(ctx, "gist").(*db.Gist)
-	files, err := gist.Files("HEAD")
+	files, err := gist.Files("HEAD", true)
 	if err != nil {
 		return errorRes(500, "Error fetching files", err)
 	}
@@ -481,7 +481,7 @@ func processCreate(ctx echo.Context) error {
 		if isCreate {
 			return html(ctx, "create.html")
 		} else {
-			files, err := gist.Files("HEAD")
+			files, err := gist.Files("HEAD", false)
 			if err != nil {
 				return errorRes(500, "Error fetching files", err)
 			}
@@ -690,7 +690,7 @@ func downloadFile(ctx echo.Context) error {
 func edit(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 
-	files, err := gist.Files("HEAD")
+	files, err := gist.Files("HEAD", false)
 	if err != nil {
 		return errorRes(500, "Error fetching files from repository", err)
 	}
@@ -705,7 +705,7 @@ func downloadZip(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 	revision := ctx.Param("revision")
 
-	files, err := gist.Files(revision)
+	files, err := gist.Files(revision, true)
 	if err != nil {
 		return errorRes(500, "Error fetching files from repository", err)
 	}

@@ -317,7 +317,7 @@ func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
 		// if the revision or the file do not exist
 
 		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
-			return nil, nil
+			return nil, &git.RevisionNotFoundError{}
 		}
 
 		return nil, err

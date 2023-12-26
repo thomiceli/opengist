@@ -22,6 +22,12 @@ var (
 
 const truncateLimit = 2 << 18
 
+type RevisionNotFoundError struct{}
+
+func (m *RevisionNotFoundError) Error() string {
+	return "revision not found"
+}
+
 func RepositoryPath(user string, gist string) string {
 	return filepath.Join(config.GetHomeDir(), ReposDirectory, strings.ToLower(user), gist)
 }

@@ -25,7 +25,7 @@ gist.raw: Raw
 gist.file-truncated: This file has been truncated.
 gist.watch-full-file: View the full file.
 gist.file-not-valid: This file is not a valid CSV file.
-gist.no-content: No content
+gist.no-content: No files
 
 gist.new.new_gist: New gist
 gist.new.title: Title

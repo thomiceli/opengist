@@ -53,6 +53,11 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
+	err = tx.Where("user_id = ?", user.ID).Delete(&SSHKey{}).Error
+	if err != nil {
+		return err
+	}
+
 	// Delete all gists created by this user
 	return tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 }

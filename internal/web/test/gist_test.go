@@ -230,9 +230,11 @@ func TestCustomUrl(t *testing.T) {
 	require.Equal(t, user1.Username, gist1db.User.Username)
 
 	gist1dbUuid, err := db.GetGist(user1.Username, gist1db.Uuid)
+	require.NoError(t, err)
 	require.Equal(t, gist1db, gist1dbUuid)
 
 	gist1dbUrl, err := db.GetGist(user1.Username, gist1.URL)
+	require.NoError(t, err)
 	require.Equal(t, gist1db, gist1dbUrl)
 
 	require.Equal(t, gist1.URL, gist1db.Identifier())

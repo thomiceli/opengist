@@ -5,6 +5,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,6 +22,7 @@ const (
 	GitGcRepos       = iota
 	SyncGistPreviews = iota
 	ResetHooks       = iota
+	IndexGists       = iota
 )
 
 var (
@@ -69,6 +71,8 @@ func Run(actionType int) {
 		functionToRun = syncGistPreviews
 	case ResetHooks:
 		functionToRun = resetHooks
+	case IndexGists:
+		functionToRun = indexGists
 	default:
 		panic("unhandled default case")
 	}
@@ -150,6 +154,23 @@ func resetHooks() {
 		path := strings.Split(e, string(os.PathSeparator))
 		if err := git.CreateDotGitFiles(path[len(path)-2], path[len(path)-1]); err != nil {
 			log.Error().Err(err).Msgf("Cannot reset hooks for repository %s/%s", path[len(path)-2], path[len(path)-1])
+			return
+		}
+	}
+}
+
+func indexGists() {
+	log.Info().Msg("Indexing all Gists...")
+	gists, err := db.GetAllGistsRows()
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get gists")
+		return
+	}
+
+	for _, gist := range gists {
+		log.Info().Msgf("Indexing gist %d", gist.ID)
+		if err = index.Index(gist); err != nil {
+			log.Error().Err(err).Msgf("Cannot index gist %d", gist.ID)
 			return
 		}
 	}

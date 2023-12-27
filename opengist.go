@@ -7,6 +7,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/memdb"
 	"github.com/thomiceli/opengist/internal/ssh"
 	"github.com/thomiceli/opengist/internal/web"
@@ -58,6 +59,10 @@ func initialize() {
 
 	if err := memdb.Setup(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize in memory database")
+	}
+
+	if err := index.Open(filepath.Join(homePath, config.C.IndexFilename)); err != nil {
+		log.Fatal().Err(err).Msg("Failed to open index")
 	}
 }
 

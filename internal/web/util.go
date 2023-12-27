@@ -248,6 +248,28 @@ func tr(ctx echo.Context, key string) template.HTML {
 	return l.Tr(key)
 }
 
+func parseSearchQueryStr(query string) (string, map[string]string) {
+	words := strings.Fields(query)
+	metadata := make(map[string]string)
+	var contentBuilder strings.Builder
+
+	for _, word := range words {
+		if strings.Contains(word, ":") {
+			keyValue := strings.SplitN(word, ":", 2)
+			if len(keyValue) == 2 {
+				key := keyValue[0]
+				value := keyValue[1]
+				metadata[key] = value
+			}
+		} else {
+			contentBuilder.WriteString(word + " ")
+		}
+	}
+
+	content := strings.TrimSpace(contentBuilder.String())
+	return content, metadata
+}
+
 type Argon2ID struct {
 	format  string
 	version int

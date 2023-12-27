@@ -223,7 +223,7 @@ func NewServer(isDev bool) *Server {
 		g1.DELETE("/settings/ssh-keys/:id", sshKeysDelete, logged)
 		g1.PUT("/settings/password", passwordProcess, logged)
 		g1.PUT("/settings/username", usernameProcess, logged)
-
+		g1.GET("/bleve", bleve)
 		g2 := g1.Group("/admin-panel")
 		{
 			g2.Use(adminPermission)
@@ -237,6 +237,7 @@ func NewServer(isDev bool) *Server {
 			g2.POST("/gc-repos", adminGcRepos)
 			g2.POST("/sync-previews", adminSyncGistPreviews)
 			g2.POST("/reset-hooks", adminResetHooks)
+			g2.POST("/index-gists", adminIndexGists)
 			g2.GET("/configuration", adminConfig)
 			g2.PUT("/set-config", adminSetConfig)
 		}

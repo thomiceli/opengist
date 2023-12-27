@@ -213,6 +213,25 @@ func GetAllGistsRows() ([]*Gist, error) {
 	return gists, err
 }
 
+func GetAllGistsVisibleByUser(userId uint) ([]uint, error) {
+	var gists []uint
+
+	err := db.Table("gists").
+		Where("gists.private = 0 or gists.user_id = ?", userId).
+		Pluck("gists.id", &gists).Error
+
+	return gists, err
+}
+
+func GetAllGistsByIds(ids []uint) ([]*Gist, error) {
+	var gists []*Gist
+	err := db.Preload("User").Preload("Forked.User").
+		Where("id in ?", ids).
+		Find(&gists).Error
+
+	return gists, err
+}
+
 func (gist *Gist) Create() error {
 	// avoids foreign key constraint error because the default value in the struct is 0
 	return db.Omit("forked_id").Create(&gist).Error
@@ -359,6 +378,10 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 		Content:   content,
 		Truncated: truncated,
 	}, err
+}
+
+func (gist *Gist) FileNames(revision string) ([]string, error) {
+	return git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
 }
 
 func (gist *Gist) Log(skip int) ([]*git.Commit, error) {

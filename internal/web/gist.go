@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/render"
 	"html/template"
 	"net/url"
@@ -142,6 +143,45 @@ func gistNewPushSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func bleve(ctx echo.Context) error {
+	var currentUserId uint
+	content, meta := parseSearchQueryStr(ctx.QueryParam("q"))
+	userLogged := getUserLogged(ctx)
+	if userLogged != nil {
+		currentUserId = userLogged.ID
+	} else {
+		currentUserId = 0
+	}
+
+	gistsIds, err := index.SearchGists(content, index.SearchGistMetadata{
+		Username:  meta["username"],
+		Title:     meta["title"],
+		Filename:  meta["filename"],
+		Extension: meta["extension"],
+	}, currentUserId, 1)
+	if err != nil {
+		return errorRes(500, "Error searching gists", err)
+	}
+
+	gists, err := db.GetAllGistsByIds(gistsIds)
+	if err != nil {
+		return errorRes(500, "Error fetching gists", err)
+	}
+
+	renderedGists := make([]*render.RenderedGist, 0, len(gists))
+	for _, gist := range gists {
+		rendered, err := render.HighlightGistPreview(gist)
+		if err != nil {
+			log.Error().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
+		}
+		renderedGists = append(renderedGists, &rendered)
+	}
+
+	return ctx.JSON(200, map[string]interface{}{
+		"res": renderedGists,
+	})
+}
+
 func allGists(ctx echo.Context) error {
 	var err error
 	var urlPage string
@@ -252,20 +292,20 @@ func allGists(ctx echo.Context) error {
 		}
 	}
 
-	renderedFiles := make([]*render.RenderedGist, 0, len(gists))
+	renderedGists := make([]*render.RenderedGist, 0, len(gists))
 	for _, gist := range gists {
 		rendered, err := render.HighlightGistPreview(gist)
 		if err != nil {
-			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
+			log.Error().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
 		}
-		renderedFiles = append(renderedFiles, &rendered)
+		renderedGists = append(renderedGists, &rendered)
 	}
 
 	if err != nil {
 		return errorRes(500, "Error fetching gists", err)
 	}
 
-	if err = paginate(ctx, renderedFiles, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
+	if err = paginate(ctx, renderedGists, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 

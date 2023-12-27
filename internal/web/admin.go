@@ -46,6 +46,7 @@ func adminIndex(ctx echo.Context) error {
 	setData(ctx, "gitGcRepos", actions.IsRunning(actions.GitGcRepos))
 	setData(ctx, "syncGistPreviews", actions.IsRunning(actions.SyncGistPreviews))
 	setData(ctx, "resetHooks", actions.IsRunning(actions.ResetHooks))
+	setData(ctx, "indexGists", actions.IsRunning(actions.IndexGists))
 	return html(ctx, "admin_index.html")
 }
 
@@ -147,6 +148,12 @@ func adminSyncGistPreviews(ctx echo.Context) error {
 func adminResetHooks(ctx echo.Context) error {
 	addFlash(ctx, "Resetting Git server hooks for all repositories...", "success")
 	go actions.Run(actions.ResetHooks)
+	return redirect(ctx, "/admin-panel")
+}
+
+func adminIndexGists(ctx echo.Context) error {
+	addFlash(ctx, "Indexing all gists...", "success")
+	go actions.Run(actions.IndexGists)
 	return redirect(ctx, "/admin-panel")
 }
 

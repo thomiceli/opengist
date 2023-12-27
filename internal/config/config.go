@@ -29,6 +29,8 @@ type config struct {
 	OpengistHome string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
 	DBFilename   string `yaml:"db-filename" env:"OG_DB_FILENAME"`
 
+	GitDefaultBranch string `yaml:"git.default-branch" env:"OG_GIT_DEFAULT_BRANCH"`
+
 	SqliteJournalMode string `yaml:"sqlite.journal-mode" env:"OG_SQLITE_JOURNAL_MODE"`
 
 	HttpHost string `yaml:"http.host" env:"OG_HTTP_HOST"`
@@ -176,8 +178,8 @@ func CheckGitVersion(version string) (bool, error) {
 		return false, fmt.Errorf("invalid minor version number")
 	}
 
-	// Check if version is prior to 2.20
-	if major < 2 || (major == 2 && minor < 20) {
+	// Check if version is prior to 2.28
+	if major < 2 || (major == 2 && minor < 28) {
 		return false, nil
 	}
 	return true, nil

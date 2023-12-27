@@ -94,6 +94,11 @@ func parseLog(out io.Reader, maxBytes int) []*Commit {
 
 		scanner.Scan()
 
+		if len(scanner.Bytes()) == 0 {
+			commits = append(commits, currentCommit)
+			break
+		}
+
 		// if there is no shortstat, it means that the commit is empty, we add it and move onto the next one
 		if scanner.Bytes()[0] != ' ' {
 			commits = append(commits, currentCommit)

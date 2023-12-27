@@ -53,6 +53,11 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
+	err = tx.Where("user_id = ?", user.ID).Delete(&SSHKey{}).Error
+	if err != nil {
+		return err
+	}
+
 	// Delete all gists created by this user
 	return tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 }
@@ -189,7 +194,7 @@ func (user *User) DeleteProviderID(provider string) error {
 // -- DTO -- //
 
 type UserDTO struct {
-	Username string `form:"username" validate:"required,max=24,alphanum,notreserved"`
+	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
 	Password string `form:"password" validate:"required"`
 }
 

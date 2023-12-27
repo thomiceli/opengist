@@ -3,12 +3,13 @@ package web
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/thomiceli/opengist/internal/db"
-	"golang.org/x/crypto/ssh"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/thomiceli/opengist/internal/db"
+	"golang.org/x/crypto/ssh"
 )
 
 func userSettings(ctx echo.Context) error {
@@ -62,7 +63,7 @@ func accountDeleteProcess(ctx echo.Context) error {
 func sshKeysProcess(ctx echo.Context) error {
 	user := getUserLogged(ctx)
 
-	var dto = new(db.SSHKeyDTO)
+	dto := new(db.SSHKeyDTO)
 	if err := ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}
@@ -93,7 +94,6 @@ func sshKeysProcess(ctx echo.Context) error {
 func sshKeysDelete(ctx echo.Context) error {
 	user := getUserLogged(ctx)
 	keyId, err := strconv.Atoi(ctx.Param("id"))
-
 	if err != nil {
 		return redirect(ctx, "/settings")
 	}

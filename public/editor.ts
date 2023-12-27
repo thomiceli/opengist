@@ -165,6 +165,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+    document.getElementById('gist-metadata-btn')!.onclick = (el) => {
+        let metadata = document.getElementById('gist-metadata')!;
+        metadata.classList.toggle('hidden');
+
+        let btn = el.target as HTMLButtonElement;
+        if (btn.innerText.endsWith('▼')) {
+            btn.innerText = btn.innerText.replace('▼', '▲');
+        } else {
+            btn.innerText = btn.innerText.replace('▲', '▼');
+        }
+
+    }
+
     document.onsubmit = () => {
         window.onbeforeunload = null;
     };

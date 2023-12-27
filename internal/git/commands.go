@@ -23,6 +23,12 @@ var (
 
 const truncateLimit = 2 << 18
 
+type RevisionNotFoundError struct{}
+
+func (m *RevisionNotFoundError) Error() string {
+	return "revision not found"
+}
+
 func RepositoryPath(user string, gist string) string {
 	return filepath.Join(config.GetHomeDir(), ReposDirectory, strings.ToLower(user), gist)
 }
@@ -152,6 +158,25 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 	return content, truncated, nil
 }
 
+func GetFileSize(user string, gist string, revision string, filename string) (uint64, error) {
+	repositoryPath := RepositoryPath(user, gist)
+
+	cmd := exec.Command(
+		"git",
+		"cat-file",
+		"-s",
+		revision+":"+filename,
+	)
+	cmd.Dir = repositoryPath
+
+	stdout, err := cmd.Output()
+	if err != nil {
+		return 0, err
+	}
+
+	return strconv.ParseUint(strings.TrimSuffix(string(stdout), "\n"), 10, 64)
+}
+
 func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
@@ -185,7 +210,7 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	return parseLog(stdout, truncateLimit), err
 }
 
-func CloneTmp(user string, gist string, gistTmpId string, email string) error {
+func CloneTmp(user string, gist string, gistTmpId string, email string, remove bool) error {
 	repositoryPath := RepositoryPath(user, gist)
 
 	tmpPath := TmpRepositoriesPath()
@@ -203,11 +228,13 @@ func CloneTmp(user string, gist string, gistTmpId string, email string) error {
 		return err
 	}
 
-	// remove every file (and not the .git directory!)
-	if err = removeFilesExceptGit(tmpRepositoryPath); err != nil {
-		return err
+	// remove every file (keep the .git directory)
+	// useful when user wants to edit multiple files from an existing gist
+	if remove {
+		if err = removeFilesExceptGit(tmpRepositoryPath); err != nil {
+			return err
+		}
 	}
-
 	cmd = exec.Command("git", "config", "--local", "user.name", user)
 	cmd.Dir = tmpRepositoryPath
 	if err = cmd.Run(); err != nil {

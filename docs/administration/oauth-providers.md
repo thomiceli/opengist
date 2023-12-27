@@ -13,6 +13,19 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub, Gite
   ```
 
 
+## GitLab
+
+* Add a new OAuth app in Application settings from the [GitLab instance](https://gitlab.com/-/user_settings/applications)
+* Set 'Redirect URI' to `http://opengist.domain/oauth/gitlab/callback`
+* Copy the 'Client ID' and 'Client Secret' and add them to the [configuration](/docs/configuration/cheat-sheet.md) :
+  ```yaml
+  gitlab.client-key: <key>
+  gitlab.secret: <secret>
+  # URL of the GitLab instance. Default: https://gitlab.com/
+  gitlab.url: https://gitlab.com/
+  ```
+
+
 ## Gitea
 
 * Add a new OAuth app in Application settings from the [Gitea instance](https://gitea.com/user/settings/applications)

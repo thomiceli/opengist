@@ -17,8 +17,8 @@ gist.header.clone-http: "Clone-ozás ezzel: %s"
 gist.header.clone-http-help: Clone-ozás Git HTTP basic hitelesítéssel.
 gist.header.clone-ssh: Clone-ozás SSH-n keresztül
 gist.header.clone-ssh-help: Clone-ozás SSH kulccsal
-gist.header.share: Megosztás
-gist.header.share-help: Másold ki ennek a gistnek a megosztható linkjét
+gist.header.embed:
+gist.header.embed-help:
 gist.header.download-zip: ZIP archívum letöltése
 
 gist.raw: Eredeti

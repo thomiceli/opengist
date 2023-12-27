@@ -16,6 +16,7 @@ import (
 	"golang.org/x/crypto/argon2"
 	"html/template"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -34,6 +35,10 @@ func setData(ctx echo.Context, key string, value any) {
 func getData(ctx echo.Context, key string) any {
 	data := ctx.Request().Context().Value(dataKey).(echo.Map)
 	return data[key]
+}
+
+func dataMap(ctx echo.Context) echo.Map {
+	return ctx.Request().Context().Value(dataKey).(echo.Map)
 }
 
 func html(ctx echo.Context, template string) error {
@@ -131,6 +136,8 @@ type OpengistValidator struct {
 func NewValidator() *OpengistValidator {
 	v := validator.New()
 	_ = v.RegisterValidation("notreserved", validateReservedKeywords)
+	_ = v.RegisterValidation("alphanumdash", validateAlphaNumDash)
+	_ = v.RegisterValidation("alphanumdashorempty", validateAlphaNumDashOrEmpty)
 	return &OpengistValidator{v}
 }
 
@@ -154,6 +161,9 @@ func validationMessages(err *error) string {
 			messages[i] = e.Field() + " should not include a sub directory"
 		case "alphanum":
 			messages[i] = e.Field() + " should only contain alphanumeric characters"
+		case "alphanumdash":
+		case "alphanumdashorempty":
+			messages[i] = e.Field() + " should only contain alphanumeric characters and dashes"
 		case "min":
 			messages[i] = "Not enough " + e.Field()
 		case "notreserved":
@@ -168,13 +178,21 @@ func validateReservedKeywords(fl validator.FieldLevel) bool {
 	name := fl.Field().String()
 
 	restrictedNames := map[string]struct{}{}
-	for _, restrictedName := range []string{"assets", "register", "login", "logout", "settings", "admin-panel", "all", "search", "init"} {
+	for _, restrictedName := range []string{"assets", "register", "login", "logout", "settings", "admin-panel", "all", "search", "init", "healthcheck"} {
 		restrictedNames[restrictedName] = struct{}{}
 	}
 
 	// if the name is not in the restricted names, it is valid
 	_, ok := restrictedNames[name]
 	return !ok
+}
+
+func validateAlphaNumDash(fl validator.FieldLevel) bool {
+	return regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(fl.Field().String())
+}
+
+func validateAlphaNumDashOrEmpty(fl validator.FieldLevel) bool {
+	return regexp.MustCompile(`^$|^[a-zA-Z0-9-]+$`).MatchString(fl.Field().String())
 }
 
 func getPage(ctx echo.Context) int {

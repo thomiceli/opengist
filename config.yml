@@ -5,6 +5,9 @@
 # Set the log level to one of the following: trace, debug, info, warn, error, fatal, panic. Default: warn
 log-level: warn
 
+# Set the log output to one or more of the following: `stdout`, `file`. Default: stdout,file
+log-output: stdout,file
+
 # Public URL for the Git HTTP/SSH connection.
 # If not set, uses the URL from the request
 external-url:
@@ -59,11 +62,17 @@ ssh.keygen-executable: ssh-keygen
 
 
 # OAuth2 configuration
-# The callback/redirect URL must be http://opengist.domain/oauth/<github|gitea|openid-connect>/callback
+# The callback/redirect URL must be http://opengist.domain/oauth/<github|gitlab|gitea|openid-connect>/callback
 
 # To create a new OAuth2 application using GitHub : https://github.com/settings/applications/new
 github.client-key:
 github.secret:
+
+# To create a new OAuth2 application using Gitlab : https://gitlab.com/-/user_settings/applications
+gitlab.client-key:
+gitlab.secret:
+# URL of the Gitlab instance. Default: https://gitlab.com/
+gitlab.url: https://gitlab.com/
 
 # To create a new OAuth2 application using Gitea : https://gitea.domain/user/settings/applications
 gitea.client-key:

@@ -1,10 +1,11 @@
 package test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"testing"
 )
 
 func TestGists(t *testing.T) {
@@ -110,7 +111,7 @@ func TestVisibility(t *testing.T) {
 	gist1 := db.GistDTO{
 		Title:       "gist1",
 		Description: "my first gist",
-		Private:     1,
+		Private:     db.UnlistedVisibility,
 		Name:        []string{""},
 		Content:     []string{"yeah"},
 	}
@@ -119,25 +120,25 @@ func TestVisibility(t *testing.T) {
 
 	gist1db, err := db.GetGistByID("1")
 	require.NoError(t, err)
-	require.Equal(t, 1, gist1db.Private)
+	require.Equal(t, db.UnlistedVisibility, gist1db.Private)
 
 	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
-	require.Equal(t, 2, gist1db.Private)
+	require.Equal(t, db.PrivateVisibility, gist1db.Private)
 
 	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
-	require.Equal(t, 0, gist1db.Private)
+	require.Equal(t, db.PublicVisibility, gist1db.Private)
 
 	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
-	require.Equal(t, 1, gist1db.Private)
+	require.Equal(t, db.UnlistedVisibility, gist1db.Private)
 }
 
 func TestLikeFork(t *testing.T) {
@@ -197,4 +198,60 @@ func TestLikeFork(t *testing.T) {
 	require.Equal(t, gist1db.Description, gist2db.Description)
 	require.Equal(t, gist1db.Private, gist2db.Private)
 	require.Equal(t, user2.Username, gist2db.User.Username)
+}
+
+func TestCustomUrl(t *testing.T) {
+	setup(t)
+	s, err := newTestServer()
+	require.NoError(t, err, "Failed to create test server")
+	defer teardown(t, s)
+
+	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
+	register(t, s, user1)
+
+	gist1 := db.GistDTO{
+		Title:       "gist1",
+		URL:         "my-gist",
+		Description: "my first gist",
+		Private:     0,
+		Name:        []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content:     []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+	}
+	err = s.request("POST", "/", gist1, 302)
+	require.NoError(t, err)
+
+	gist1db, err := db.GetGistByID("1")
+	require.NoError(t, err)
+	require.Equal(t, uint(1), gist1db.ID)
+	require.Equal(t, gist1.Title, gist1db.Title)
+	require.Equal(t, gist1.Description, gist1db.Description)
+	require.Regexp(t, "[a-f0-9]{32}", gist1db.Uuid)
+	require.Equal(t, gist1.URL, gist1db.URL)
+	require.Equal(t, user1.Username, gist1db.User.Username)
+
+	gist1dbUuid, err := db.GetGist(user1.Username, gist1db.Uuid)
+	require.NoError(t, err)
+	require.Equal(t, gist1db, gist1dbUuid)
+
+	gist1dbUrl, err := db.GetGist(user1.Username, gist1.URL)
+	require.NoError(t, err)
+	require.Equal(t, gist1db, gist1dbUrl)
+
+	require.Equal(t, gist1.URL, gist1db.Identifier())
+
+	gist2 := db.GistDTO{
+		Title:       "gist2",
+		Description: "my second gist",
+		Private:     0,
+		Name:        []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content:     []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+	}
+	err = s.request("POST", "/", gist2, 302)
+	require.NoError(t, err)
+
+	gist2db, err := db.GetGistByID("2")
+	require.NoError(t, err)
+
+	require.Equal(t, gist2db.Uuid, gist2db.Identifier())
+	require.NotEqual(t, gist2db.URL, gist2db.Identifier())
 }

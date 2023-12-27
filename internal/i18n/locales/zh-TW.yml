@@ -1,0 +1,185 @@
+gist.public: 公開
+gist.unlisted: 非公開
+gist.private: 私人
+
+gist.header.like: 喜歡
+gist.header.unlike: 不喜歡
+gist.header.fork: 分支
+gist.header.edit: 編輯
+gist.header.delete: 刪除
+gist.header.forked-from: 分支自
+gist.header.last-active: 最後活躍
+gist.header.select-tab: 選擇分頁
+gist.header.code: 程式碼
+gist.header.revisions: 修訂記錄
+gist.header.revision: 修訂
+gist.header.clone-http: 透過 %s 複製
+gist.header.clone-http-help: 使用 HTTP 基本認證透過 Git 複製。
+gist.header.clone-ssh: 透過 SSH 複製
+gist.header.clone-ssh-help: 使用 SSH 金鑰透過 Git 複製。
+gist.header.embed:
+gist.header.embed-help:
+gist.header.download-zip: 下載 ZIP
+
+gist.raw: 原始檔案
+gist.file-truncated: 此檔案已被截斷。
+gist.watch-full-file: 查看完整檔案。
+gist.file-not-valid: 此檔案不是有效的 CSV 檔案。
+gist.no-content: 內容為空
+
+gist.new.new_gist: 新增 Gist
+gist.new.title: 標題
+gist.new.description: 描述
+gist.new.filename-with-extension: 含副檔名的檔案名稱
+gist.new.indent-mode: 縮排模式
+gist.new.indent-mode-space: 空格
+gist.new.indent-mode-tab: tab
+gist.new.indent-size: 縮排寬度
+gist.new.wrap-mode: 換行模式
+gist.new.wrap-mode-no: 不換行
+gist.new.wrap-mode-soft: 自動換行
+gist.new.add-file: 新增檔案
+gist.new.create-public-button: 創建公開 Gist
+gist.new.create-unlisted-button: 創建非公開 Gist
+gist.new.create-private-button: 創建私人 Gist
+
+gist.edit.editing: 編輯中
+gist.edit.change-visibility: 更改可見性
+gist.edit.delete: 刪除
+gist.edit.cancel: 取消
+gist.edit.save: 保存
+
+gist.list.joined: 加入
+gist.list.all: 所有 Gists
+gist.list.search-results: 搜索結果
+gist.list.sort: 排序
+gist.list.sort-by-created: 創建
+gist.list.sort-by-updated: 更新
+gist.list.order-by-asc: 順序排序
+gist.list.order-by-desc: 倒序排序
+gist.list.select-tab: 選擇分頁
+gist.list.liked: 喜歡的 Gists
+gist.list.likes: 喜歡
+gist.list.forked: 分支
+gist.list.forked-from: 分支自
+gist.list.forks: 分支
+gist.list.files: 檔案
+gist.list.last-active: 最後活躍
+gist.list.no-gists: 沒有任何的 Gist
+
+gist.forks: 分支
+gist.forks.view: 查看分支
+gist.forks.no: 沒有任何公開的分支
+
+gist.likes: 喜歡
+gist.likes.no: 目前還沒有任何人喜歡
+
+gist.revisions: 修訂版本
+gist.revision.revised: 已修改
+gist.revision.go-to-revision: 還原成這個修訂版本
+gist.revision.file-created: 檔案已創建
+gist.revision.file-deleted: 檔案已刪除
+gist.revision.file-renamed: 重命名為
+gist.revision.diff-truncated: 差異太大無法顯示
+gist.revision.file-renamed-no-changes: 檔案名稱與重新命名前相同
+gist.revision.empty-file: 檔案為空
+gist.revision.no-changes: 沒有任何變更
+gist.revision.no-revisions: 沒有任何修訂版可顯示
+
+settings: 設定
+settings.email: 電子郵件
+settings.email-help: 用於提交和 Gravatar
+settings.email-set: 設定電子郵件
+settings.link-accounts: 連結帳號
+settings.link-github-account: 連結 GitHub 帳號
+settings.link-gitlab-account: 連結 Gitlab 帳號
+settings.link-gitea-account: 連結 Gitea 帳號
+settings.unlink-github-account: 取消連結 GitHub 帳號
+settings.unlink-gitlab-account: 取消連結 GitLab 帳號
+settings.unlink-gitea-account: 取消連結 Gitea 帳號
+settings.delete-account: 刪除帳號
+settings.delete-account-confirm: 確定要刪除您的帳號嗎？
+settings.add-ssh-key: 添加 SSH 金鑰
+settings.add-ssh-key-help: 僅用於藉由 SSH 使用 Git 拉取/推送 Gist
+settings.add-ssh-key-title: 名稱
+settings.add-ssh-key-content: 金鑰
+settings.delete-ssh-key: 刪除
+settings.delete-ssh-key-confirm: 確認刪除 SSH 金鑰
+settings.ssh-key-added-at: 添加於
+settings.ssh-key-never-used: 從未使用
+settings.ssh-key-last-used: 最後使用
+settings.create-password: 創建密碼
+settings.create-password-help: 創建您的密碼以通過 HTTP 登錄到 Opengist
+settings.change-password: 更改密碼
+settings.change-password-help: 更改您的密碼以通過 HTTP 登錄到 Opengist
+settings.password-label-title: 密碼
+
+auth.signup-disabled: 管理員已禁用註冊
+auth.login: 登錄
+auth.signup: 註冊
+auth.new-account: 新增帳號
+auth.username: 使用者名稱
+auth.password: 密碼
+auth.register-instead: 註冊
+auth.login-instead: 登錄
+auth.github-oauth: 用 GitHub 帳號繼續
+auth.gitlab-oauth: 用 GitLab 帳號繼續
+auth.gitea-oauth: 用 Gitea 帳號繼續
+
+error: 錯誤
+
+header.menu.all: 全部
+header.menu.new: 新建
+header.menu.search: 搜索
+header.menu.my-gists: 我的 Gists
+header.menu.liked: 喜歡的 Gists
+header.menu.admin: 管理
+header.menu.settings: 設定
+header.menu.logout: 登出
+header.menu.register: 註冊
+header.menu.login: 登錄
+header.menu.light: 亮色
+header.menu.dark: 暗色
+header.menu.system: 系統
+footer.powered-by: 由 %s 提供支持
+
+pagination.older: 下一頁
+pagination.newer: 上一頁
+pagination.previous: 上一頁
+pagination.next: 下一頁
+
+admin.admin_panel: 管理儀表板
+admin.general: 一般
+admin.users: 使用者
+admin.gists: Gists
+admin.configuration: 設定
+admin.versions: 版本
+admin.ssh_keys: SSH 金鑰
+admin.stats: 統計
+admin.actions: 操作
+admin.actions.sync-fs: 從系統同步 Gists
+admin.actions.sync-db: 從資料庫同步 Gists
+admin.actions.git-gc: 清理 git 儲存庫
+admin.id: ID
+admin.user: 使用者
+admin.delete: 刪除
+admin.created_at: 創建時間
+
+admin.config-link: 這裡的設定可以通過 YAML 配置檔案或是環境變數 %s。
+admin.config-link-overriden: 覆蓋
+admin.disable-signup: 關閉註冊
+admin.disable-signup_help: 禁止創建新帳號。
+admin.require-login: 登錄後瀏覽
+admin.require-login_help: 強制使用者登錄以查看 Gist。
+admin.disable-login: 關閉登錄頁面
+admin.disable-login_help: 關閉通過登錄頁面登錄，強制使用 OAuth 提供者。
+admin.disable-gravatar: 禁用 Gravatar
+admin.disable-gravatar_help: 禁止使用 Gravatar 作為頭像提供者。
+
+admin.users.delete_confirm: 您要刪除這個使用者嗎？
+
+admin.gists.title: 標題
+admin.gists.private: 是否為私人
+admin.gists.nb-files: 檔案數
+admin.gists.nb-likes: 喜歡
+admin.gists.delete_confirm: 您要刪除這個 Gist 嗎？

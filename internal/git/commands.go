@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/config"
 	"os"
 	"os/exec"
 	"path"
@@ -14,6 +11,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/config"
 )
 
 var (
@@ -61,12 +62,14 @@ func TmpRepositoriesPath() string {
 func InitRepository(user string, gist string) error {
 	repositoryPath := RepositoryPath(user, gist)
 
-	cmd := exec.Command(
-		"git",
-		"init",
-		"--bare",
-		repositoryPath,
-	)
+	var args []string
+	args = append(args, "init")
+	if config.C.GitDefaultBranch != "" {
+		args = append(args, "--initial-branch", config.C.GitDefaultBranch)
+	}
+	args = append(args, "--bare", repositoryPath)
+
+	cmd := exec.Command("git", args...)
 
 	if err := cmd.Run(); err != nil {
 		return err

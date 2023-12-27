@@ -3,6 +3,7 @@
 | YAML Config Key       | Environment Variable     | Default value         | Description                                                                                                                       |
 |-----------------------|--------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | log-level             | OG_LOG_LEVEL             | `warn`                | Set the log level to one of the following: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`.                           |
+| log-output            | OG_LOG_OUTPUT            | `stdout,file`         | Set the log output to one or more of the following: `stdout`, `file`.                                                             |
 | external-url          | OG_EXTERNAL_URL          | none                  | Public URL for the Git HTTP/SSH connection. If not set, uses the URL from the request.                                            |
 | opengist-home         | OG_OPENGIST_HOME         | home directory        | Path to the directory where Opengist stores its data.                                                                             |
 | db-filename           | OG_DB_FILENAME           | `opengist.db`         | Name of the SQLite database file.                                                                                                 |

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -23,6 +24,7 @@ var C *config
 // doesn't support dot notation in this case sadly
 type config struct {
 	LogLevel     string `yaml:"log-level" env:"OG_LOG_LEVEL"`
+	LogOutput    string `yaml:"log-output" env:"OG_LOG_OUTPUT"`
 	ExternalUrl  string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
 	OpengistHome string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
 	DBFilename   string `yaml:"db-filename" env:"OG_DB_FILENAME"`
@@ -59,6 +61,7 @@ func configWithDefaults() (*config, error) {
 	c := &config{}
 
 	c.LogLevel = "warn"
+	c.LogOutput = "stdout,file"
 	c.OpengistHome = ""
 	c.DBFilename = "opengist.db"
 
@@ -115,18 +118,43 @@ func InitLog() {
 	if err := os.MkdirAll(filepath.Join(GetHomeDir(), "log"), 0755); err != nil {
 		panic(err)
 	}
-	file, err := os.OpenFile(filepath.Join(GetHomeDir(), "log", "opengist.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
 
 	var level zerolog.Level
-	level, err = zerolog.ParseLevel(C.LogLevel)
+	level, err := zerolog.ParseLevel(C.LogLevel)
 	if err != nil {
 		level = zerolog.InfoLevel
 	}
 
-	multi := zerolog.MultiLevelWriter(zerolog.NewConsoleWriter(), file)
+	var logWriters []io.Writer
+	logOutputTypes := utils.RemoveDuplicates[string](
+		strings.Split(strings.ToLower(C.LogOutput), ","),
+	)
+	for _, logOutputType := range logOutputTypes {
+		logOutputType = strings.TrimSpace(logOutputType)
+		if !utils.SliceContains([]string{"stdout", "file"}, logOutputType) {
+			defer func() { log.Warn().Msg("Invalid log output type: " + logOutputType) }()
+			continue
+		}
+
+		switch logOutputType {
+		case "stdout":
+			logWriters = append(logWriters, zerolog.NewConsoleWriter())
+			defer func() { log.Debug().Msg("Logging to stdout") }()
+		case "file":
+			file, err := os.OpenFile(filepath.Join(GetHomeDir(), "log", "opengist.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				panic(err)
+			}
+			logWriters = append(logWriters, file)
+			defer func() { log.Debug().Msg("Logging to file: " + file.Name()) }()
+		}
+	}
+	if len(logWriters) == 0 {
+		logWriters = append(logWriters, zerolog.NewConsoleWriter())
+		defer func() { log.Warn().Msg("No valid log outputs, defaulting to stdout") }()
+	}
+
+	multi := zerolog.MultiLevelWriter(logWriters...)
 	log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
 
 	if !utils.SliceContains([]string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}, strings.ToLower(C.LogLevel)) {

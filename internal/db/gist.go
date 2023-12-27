@@ -310,21 +310,21 @@ func (gist *Gist) DeleteRepository() error {
 	return git.DeleteRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) Files(revision string) ([]*git.File, error) {
+func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
 	var files []*git.File
 	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
 	if err != nil {
 		// if the revision or the file do not exist
 
 		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
-			return nil, nil
+			return nil, &git.RevisionNotFoundError{}
 		}
 
 		return nil, err
 	}
 
 	for _, fileStr := range filesStr {
-		file, err := gist.File(revision, fileStr, true)
+		file, err := gist.File(revision, fileStr, truncate)
 		if err != nil {
 			return nil, err
 		}

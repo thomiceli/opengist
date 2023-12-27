@@ -25,7 +25,7 @@ gist.raw: Brut
 gist.file-truncated: Ce fichier a été tronqué.
 gist.watch-full-file: Voir le fichier complet.
 gist.file-not-valid: Ce fichier n'est pas un fichier CSV valide.
-gist.no-content: Pas de contenu
+gist.no-content: Aucun fichier
 
 gist.new.new_gist: Nouveau gist
 gist.new.title: Titre

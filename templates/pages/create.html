@@ -9,18 +9,23 @@
     </header>
     <main class="mt-4">
         <form id="create" class="space-y-4" method="post" action="/">
-            <div class="grid grid-cols-12 gap-x-4">
-                <div class="col-span-8 sm:col-span-4">
-                    <div class="mt-1">
-                        <input type="text" placeholder="{{ .locale.Tr "gist.new.title" }}" name="title" id="title" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
+            <div>
+                <p class="cursor-pointer select-none" id="gist-metadata-btn">Metadata ▼</p>
+                <div class="grid grid-cols-12 gap-x-4 mt-1 hidden" id="gist-metadata">
+                    <div class="col-span-8 sm:col-span-4">
+                        <div class="mt-1">
+                            <input type="text" placeholder="{{ .locale.Tr "gist.new.title" }}" name="title" id="title" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md" maxlength="250">
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-8">
+                        <div class="mt-1">
+                            <input type="text" placeholder="{{ .locale.Tr "gist.new.description" }}" name="description" id="description" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md" maxlength="1000">
+                        </div>
+                    </div>
+                    <div class="col-span-6 sm:col-span-3 mt-2">
+                        <input type="text" placeholder="{{ .locale.Tr "gist.new.url" }}" name="url" id="url" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md" maxlength="32">
                     </div>
                 </div>
-                <div class="col-span-12 sm:col-span-8">
-                    <div class="mt-1">
-                        <input type="text" placeholder="{{ .locale.Tr "gist.new.description" }}" name="description" id="description" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
-                    </div>
-                </div>
-
             </div>
             <div id="editors" class="space-y-4">
                 <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 editor">
@@ -50,7 +55,7 @@
                             </select>
                         </div>
                     </div>
-                    <input type="hidden" value="" name="content" class="form-filecontent">
+                    <input type="hidden" value="" name="content" class="form-filecontent" autocomplete="off">
                 </div>
             </div>
 

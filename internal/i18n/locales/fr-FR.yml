@@ -17,15 +17,15 @@ gist.header.clone-http: Cloner via %s
 gist.header.clone-http-help: Cloner avec Git en utilisant l'authentification HTTP basic.
 gist.header.clone-ssh: Cloner via SSH
 gist.header.clone-ssh-help: Cloner avec Git en utilisant une clé SSH.
-gist.header.share: Partager
-gist.header.share-help: Copier le lien partageable de ce gist.
+gist.header.embed:
+gist.header.embed-help:
 gist.header.download-zip: Télécharger en ZIP
 
 gist.raw: Brut
 gist.file-truncated: Ce fichier a été tronqué.
 gist.watch-full-file: Voir le fichier complet.
 gist.file-not-valid: Ce fichier n'est pas un fichier CSV valide.
-gist.no-content: Pas de contenu
+gist.no-content: Aucun fichier
 
 gist.new.new_gist: Nouveau gist
 gist.new.title: Titre

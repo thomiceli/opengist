@@ -80,3 +80,12 @@ func IsUniqueConstraintViolation(err error) bool {
 	}
 	return false
 }
+
+func Ping() error {
+	sql, err := db.DB()
+	if err != nil {
+		return err
+	}
+
+	return sql.Ping()
+}

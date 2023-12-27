@@ -11,12 +11,14 @@ import (
 )
 
 type File struct {
-	Filename    string
-	OldFilename string
-	Content     string
-	Truncated   bool
-	IsCreated   bool
-	IsDeleted   bool
+	Filename    string `json:"filename"`
+	Size        uint64 `json:"size"`
+	HumanSize   string `json:"human_size"`
+	OldFilename string `json:"-"`
+	Content     string `json:"content"`
+	Truncated   bool   `json:"truncated"`
+	IsCreated   bool   `json:"-"`
+	IsDeleted   bool   `json:"-"`
 }
 
 type CsvFile struct {
@@ -91,6 +93,11 @@ func parseLog(out io.Reader, maxBytes int) []*Commit {
 		currentCommit.Timestamp = string(scanner.Bytes()[2:])
 
 		scanner.Scan()
+
+		if len(scanner.Bytes()) == 0 {
+			commits = append(commits, currentCommit)
+			break
+		}
 
 		// if there is no shortstat, it means that the commit is empty, we add it and move onto the next one
 		if scanner.Bytes()[0] != ' ' {

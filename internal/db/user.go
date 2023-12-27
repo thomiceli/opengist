@@ -14,6 +14,7 @@ type User struct {
 	MD5Hash   string // for gravatar, if no Email is specified, the value is random
 	AvatarURL string
 	GithubID  string
+	GitlabID  string
 	GiteaID   string
 	OIDCID    string `gorm:"column:oidc_id"`
 
@@ -48,6 +49,11 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		).
 		UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).
 		Error
+	if err != nil {
+		return err
+	}
+
+	err = tx.Where("user_id = ?", user.ID).Delete(&SSHKey{}).Error
 	if err != nil {
 		return err
 	}
@@ -100,7 +106,6 @@ func GetUsersFromEmails(emailsSet map[string]struct{}) (map[string]*User, error)
 	err := db.
 		Where("email IN ?", emails).
 		Find(&users).Error
-
 	if err != nil {
 		return nil, err
 	}
@@ -129,6 +134,8 @@ func GetUserByProvider(id string, provider string) (*User, error) {
 	switch provider {
 	case "github":
 		err = db.Where("github_id = ?", id).First(&user).Error
+	case "gitlab":
+		err = db.Where("gitlab_id = ?", id).First(&user).Error
 	case "gitea":
 		err = db.Where("gitea_id = ?", id).First(&user).Error
 	case "openid-connect":
@@ -167,20 +174,16 @@ func (user *User) HasLiked(gist *Gist) (bool, error) {
 }
 
 func (user *User) DeleteProviderID(provider string) error {
-	switch provider {
-	case "github":
+	providerIDFields := map[string]string{
+		"github":         "github_id",
+		"gitlab":         "gitlab_id",
+		"gitea":          "gitea_id",
+		"openid-connect": "oidc_id",
+	}
+
+	if providerIDField, ok := providerIDFields[provider]; ok {
 		return db.Model(&user).
-			Update("github_id", nil).
-			Update("avatar_url", nil).
-			Error
-	case "gitea":
-		return db.Model(&user).
-			Update("gitea_id", nil).
-			Update("avatar_url", nil).
-			Error
-	case "openid-connect":
-		return db.Model(&user).
-			Update("oidc_id", nil).
+			Update(providerIDField, nil).
 			Update("avatar_url", nil).
 			Error
 	}
@@ -191,7 +194,7 @@ func (user *User) DeleteProviderID(provider string) error {
 // -- DTO -- //
 
 type UserDTO struct {
-	Username string `form:"username" validate:"required,max=24,alphanum,notreserved"`
+	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
 	Password string `form:"password" validate:"required"`
 }
 

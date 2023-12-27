@@ -44,6 +44,10 @@ type config struct {
 	GithubClientKey string `yaml:"github.client-key" env:"OG_GITHUB_CLIENT_KEY"`
 	GithubSecret    string `yaml:"github.secret" env:"OG_GITHUB_SECRET"`
 
+	GitlabClientKey string `yaml:"gitlab.client-key" env:"OG_GITLAB_CLIENT_KEY"`
+	GitlabSecret    string `yaml:"gitlab.secret" env:"OG_GITLAB_SECRET"`
+	GitlabUrl       string `yaml:"gitlab.url" env:"OG_GITLAB_URL"`
+
 	GiteaClientKey string `yaml:"gitea.client-key" env:"OG_GITEA_CLIENT_KEY"`
 	GiteaSecret    string `yaml:"gitea.secret" env:"OG_GITEA_SECRET"`
 	GiteaUrl       string `yaml:"gitea.url" env:"OG_GITEA_URL"`
@@ -72,7 +76,7 @@ func configWithDefaults() (*config, error) {
 	c.SshPort = "2222"
 	c.SshKeygen = "ssh-keygen"
 
-	c.GiteaUrl = "http://gitea.com"
+	c.GiteaUrl = "https://gitea.com"
 
 	return c, nil
 }

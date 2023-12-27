@@ -30,7 +30,7 @@
 
     {{ if dev }}
         <script type="module" src="{{ asset "@vite/client" }}"></script>
-        <link rel="stylesheet" href="{{ asset "style.css" }}" />
+        <link rel="stylesheet" href="{{ asset "style.scss" }}" />
         <script type="module" src="{{ asset "main.ts" }}"></script>
     {{ else }}
         <link rel="stylesheet" href="{{ asset "main.css" }}" />
@@ -186,7 +186,7 @@
                                         </svg>
                                         {{ .locale.Tr "header.menu.dark" }}
                                     </button>
-                                    <button id="system-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
+                                    <button id="system-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-max hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-3 h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-500">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
                                         </svg>

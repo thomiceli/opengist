@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@config "../tailwind.config.js";
+
 @layer base {
     ul, ol {
         list-style: revert;
@@ -98,10 +100,6 @@ pre {
     max-height: 337px;
 }
 
-.hljs {
-    color: #c9d1d9;
-}
-
 .line-code.selected {
     background-color: rgb(255, 247, 190) !important;
     box-shadow: inset 4px 0 0 rgb(255, 213, 65) !important;
@@ -155,4 +153,24 @@ dl.dl-config dd {
 
 .markdown-body {
     @apply dark:bg-gray-900 !important;
+}
+
+.markdown-body pre {
+    @apply flex relative items-start p-0 !important;
+}
+
+.markdown-body .code-div {
+    @apply p-4 max-w-full overflow-x-auto !important;
+}
+
+.markdown-body code {
+    @apply overflow-auto whitespace-pre !important;
+}
+
+.chroma.preview.markdown code {
+    @apply p-4 !important;
+}
+
+.mermaid {
+    background: #f6f8fa !important;
 }

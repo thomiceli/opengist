@@ -1,9 +1,11 @@
 :root {
     @import "github-markdown-css/github-markdown-light";
-    @import 'highlight.js/scss/base16/one-light.scss';
+    @import './catppuccin-latte';
 }
 
 .dark {
     @import "github-markdown-css/github-markdown-dark";
-    @import 'highlight.js/scss/base16/onedark.scss';
+    @import './catppuccin-macchiato';
 }
+
+@import "style.css";

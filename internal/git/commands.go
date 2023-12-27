@@ -56,14 +56,14 @@ func TmpRepositoriesPath() string {
 func InitRepository(user string, gist string) error {
 	repositoryPath := RepositoryPath(user, gist)
 
-	cmd := exec.Command(
-		"git",
-		"init",
-		"--initial-branch",
-		config.C.GitDefaultBranch,
-		"--bare",
-		repositoryPath,
-	)
+	var args []string
+	args = append(args, "init")
+	if config.C.GitDefaultBranch != "" {
+		args = append(args, "--initial-branch", config.C.GitDefaultBranch)
+	}
+	args = append(args, "--bare", repositoryPath)
+
+	cmd := exec.Command("git", args...)
 
 	if err := cmd.Run(); err != nil {
 		return err

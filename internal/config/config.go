@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -23,11 +22,12 @@ var C *config
 // Not using nested structs because the library
 // doesn't support dot notation in this case sadly
 type config struct {
-	LogLevel         string `yaml:"log-level" env:"OG_LOG_LEVEL"`
-	ExternalUrl      string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
-	OpengistHome     string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
-	DBFilename       string `yaml:"db-filename" env:"OG_DB_FILENAME"`
-	GitDefaultBranch string `yaml:"git-default-branch" env:"OG_GIT_DEFAULT_BRANCH"`
+	LogLevel     string `yaml:"log-level" env:"OG_LOG_LEVEL"`
+	ExternalUrl  string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
+	OpengistHome string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
+	DBFilename   string `yaml:"db-filename" env:"OG_DB_FILENAME"`
+
+	GitDefaultBranch string `yaml:"git.default-branch" env:"OG_GIT_DEFAULT_BRANCH"`
 
 	SqliteJournalMode string `yaml:"sqlite.journal-mode" env:"OG_SQLITE_JOURNAL_MODE"`
 
@@ -59,7 +59,6 @@ func configWithDefaults() (*config, error) {
 	c.LogLevel = "warn"
 	c.OpengistHome = ""
 	c.DBFilename = "opengist.db"
-	c.GitDefaultBranch = "main"
 
 	c.SqliteJournalMode = "WAL"
 
@@ -147,8 +146,8 @@ func CheckGitVersion(version string) (bool, error) {
 		return false, fmt.Errorf("invalid minor version number")
 	}
 
-	// Check if version is prior to 2.20
-	if major < 2 || (major == 2 && minor < 20) {
+	// Check if version is prior to 2.28
+	if major < 2 || (major == 2 && minor < 28) {
 		return false, nil
 	}
 	return true, nil
@@ -236,11 +235,6 @@ func checks(c *config) error {
 
 	if _, err := url.Parse(c.OIDCDiscoveryUrl); err != nil {
 		return err
-	}
-
-	branchRe := regexp.MustCompile("^[a-z0-9-_]+$")
-	if !branchRe.MatchString(c.GitDefaultBranch) {
-		return fmt.Errorf("invalid git default branch name: %s", c.GitDefaultBranch)
 	}
 
 	return nil

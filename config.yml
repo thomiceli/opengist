@@ -15,6 +15,10 @@ opengist-home:
 # Name of the SQLite database file. Default: opengist.db
 db-filename: opengist.db
 
+# Default branch name used by Opengist when initializing Git repositories.
+# If not set, uses the Git default branch name. See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup#_new_default_branch
+git.default-branch:
+
 # Set the journal mode for SQLite. Default: WAL
 # See https://www.sqlite.org/pragma.html#pragma_journal_mode
 sqlite.journal-mode: WAL

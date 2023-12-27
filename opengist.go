@@ -37,7 +37,7 @@ func initialize() {
 	if ok, err := config.CheckGitVersion(gitVersion); err != nil {
 		log.Fatal().Err(err).Send()
 	} else if !ok {
-		log.Warn().Msg("Git version may be too old, as Opengist has not been tested prior git version 2.20. " +
+		log.Warn().Msg("Git version may be too old, as Opengist has not been tested prior git version 2.28 and some features would not work. " +
 			"Current git version: " + gitVersion)
 	}
 

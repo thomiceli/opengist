@@ -271,6 +271,27 @@ func TestInitViaGitInit(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestGitInitBranchNames(t *testing.T) {
+	setup(t)
+	defer teardown(t)
+
+	cmd := exec.Command("git", "symbolic-ref", "HEAD")
+	cmd.Dir = RepositoryPath("thomas", "gist1")
+	out, err := cmd.Output()
+	require.NoError(t, err, "Could not run git command")
+	require.Equal(t, "refs/heads/master", strings.TrimSpace(string(out)), "Repository should have master branch as default")
+
+	config.C.GitDefaultBranch = "main"
+
+	err = InitRepository("thomas", "gist2")
+	require.NoError(t, err)
+	cmd = exec.Command("git", "symbolic-ref", "HEAD")
+	cmd.Dir = RepositoryPath("thomas", "gist2")
+	out, err = cmd.Output()
+	require.NoError(t, err, "Could not run git command")
+	require.Equal(t, "refs/heads/main", strings.TrimSpace(string(out)), "Repository should have main branch as default")
+}
+
 func commitToBare(t *testing.T, user string, gist string, files map[string]string) {
 	err := CloneTmp(user, gist, gist, "thomas@mail.com")
 	require.NoError(t, err, "Could not commit to repository")

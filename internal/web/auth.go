@@ -140,7 +140,7 @@ func processLogin(ctx echo.Context) error {
 func oauthCallback(ctx echo.Context) error {
 	user, err := gothic.CompleteUserAuth(ctx.Response(), ctx.Request())
 	if err != nil {
-		return errorRes(400, "Cannot complete user auth", err)
+		return errorRes(400, "Cannot complete user auth: "+err.Error(), err)
 	}
 
 	currUser := getUserLogged(ctx)

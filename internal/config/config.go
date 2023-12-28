@@ -15,7 +15,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var OpengistVersion = "1.5.1"
+var OpengistVersion = "1.5.3"
 
 var C *config
 
@@ -52,14 +52,10 @@ type config struct {
 }
 
 func configWithDefaults() (*config, error) {
-	homeDir, err := os.UserHomeDir()
 	c := &config{}
-	if err != nil {
-		return c, err
-	}
 
 	c.LogLevel = "warn"
-	c.OpengistHome = filepath.Join(homeDir, ".opengist")
+	c.OpengistHome = ""
 	c.DBFilename = "opengist.db"
 
 	c.SqliteJournalMode = "WAL"
@@ -91,6 +87,15 @@ func InitConfig(configPath string) error {
 
 	if err = loadConfigFromEnv(c); err != nil {
 		return err
+	}
+
+	if c.OpengistHome == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("opengist home directory is not set and current user home directory could not be determined; please specify the opengist home directory manually via the configuration")
+		}
+
+		c.OpengistHome = filepath.Join(homeDir, ".opengist")
 	}
 
 	if err = checks(c); err != nil {

@@ -1,0 +1,177 @@
+gist.public: 公开
+gist.unlisted: 非列出
+gist.private: 私有
+
+gist.header.like: 喜欢
+gist.header.unlike: 取消喜欢
+gist.header.fork: 派生
+gist.header.edit: 编辑
+gist.header.delete: 删除
+gist.header.forked-from: 派生自
+gist.header.last-active: 最后活跃于
+gist.header.select-tab: Select a tab
+gist.header.code: 代码
+gist.header.revisions: 修订
+gist.header.revision: 修订
+gist.header.clone-http: 通过 %s 克隆
+gist.header.clone-http-help: 使用 Git 通过 HTTP 基础认证克隆。
+gist.header.clone-ssh: 通过 SSH 克隆
+gist.header.clone-ssh-help: 使用 Git 通过 SSH 密钥克隆。
+gist.header.share: 分享
+gist.header.share-help: 为此 Gist 复制可供分享的链接。
+gist.header.download-zip: 下载 ZIP
+
+gist.raw: 原始文件
+gist.file-truncated: 此文件已被截断。
+gist.watch-full-file: 查看完整文件。
+gist.file-not-valid: 此文件不是有效的 CSV 文件。
+gist.no-content: 没有内容
+
+gist.new.new_gist: 创建 Gist
+gist.new.title: 标题
+gist.new.description: 描述
+gist.new.filename-with-extension: 文件名与扩展名
+gist.new.indent-mode: 缩进模式
+gist.new.indent-mode-space: 空格
+gist.new.indent-mode-tab: 制表符
+gist.new.indent-size: 缩进大小
+gist.new.wrap-mode: 换行模式
+gist.new.wrap-mode-no: 不自动换行
+gist.new.wrap-mode-soft: 软换行
+gist.new.add-file: 添加文件
+gist.new.create-public-button: 创建公开 Gist
+gist.new.create-unlisted-button: 创建非列出 Gist
+gist.new.create-private-button: 创建私有 Gist
+
+gist.edit.editing: 编辑
+gist.edit.change-visibility: 设为
+gist.edit.delete: 删除
+gist.edit.cancel: 取消
+gist.edit.save: 保存
+
+gist.list.joined: Joined
+gist.list.all: 所有 Gists
+gist.list.search-results: 搜索结果
+gist.list.sort: 排序
+gist.list.sort-by-created: 创建
+gist.list.sort-by-updated: 更新
+gist.list.order-by-asc: 最早
+gist.list.order-by-desc: 最近
+gist.list.select-tab: Select a tab
+gist.list.liked: 已喜欢
+gist.list.likes: 喜欢
+gist.list.forked: 已派生
+gist.list.forked-from: 派生自
+gist.list.forks: 派生
+gist.list.files: 文件
+gist.list.last-active: 最后活跃于
+gist.list.no-gists: 没有 Gist
+
+gist.forks: 派生
+gist.forks.view: 查看派生
+gist.forks.no: 无公开派生
+
+gist.likes: 喜欢
+gist.likes.no: 还没有喜欢
+
+gist.revisions: 修订
+gist.revision.revised: 修订了这个 Gist
+gist.revision.go-to-revision: 跳至此修订
+gist.revision.file-created: file created
+gist.revision.file-deleted: file deleted
+gist.revision.file-renamed: 重命名为
+gist.revision.diff-truncated: 由于变更差异过大，显示内容已被截断
+gist.revision.file-renamed-no-changes: File renamed without changes
+gist.revision.empty-file: 空文件
+gist.revision.no-changes: 没有变更
+gist.revision.no-revisions: 无可供显示的修订
+
+settings: 设置
+settings.email: 邮箱
+settings.email-help: 用于提交与 Gravatar
+settings.email-set: 设置邮箱地址
+settings.link-accounts: 关联账号
+settings.link-github-account: 关联 GitHub 账号
+settings.link-gitea-account: 关联 Gitea 账号
+settings.unlink-github-account: 解除关联 GitHub 账号
+settings.unlink-gitea-account: 解除关联 Gitea 账号
+settings.delete-account: 删除账号
+settings.delete-account-confirm: 您确认要删除您的账号吗？
+settings.add-ssh-key: 添加 SSH 密钥
+settings.add-ssh-key-help: 用于使用 Git 通过 SSH 拉取与推送 Gist
+settings.add-ssh-key-title: 标题
+settings.add-ssh-key-content: 密钥
+settings.delete-ssh-key: 删除
+settings.delete-ssh-key-confirm: Confirm deletion of SSH key
+settings.ssh-key-added-at: 添加
+settings.ssh-key-never-used: 从未使用过
+settings.ssh-key-last-used: 最后使用于
+
+auth.signup-disabled: 管理员已禁用了注册
+auth.login: 登录
+auth.signup: 注册
+auth.new-account: 新建账号
+auth.username: 用户名
+auth.password: 密码
+auth.register-instead: 转到注册
+auth.login-instead: 转到登录
+auth.github-oauth: 使用 GitHub 账号继续
+auth.gitea-oauth: 使用 Gitea 账号继续
+
+error: 错误
+
+header.menu.all: 全部
+header.menu.new: 创建
+header.menu.search: 搜索
+header.menu.my-gists: 我的 Gists
+header.menu.liked: Liked
+header.menu.admin: 管理
+header.menu.settings: 设置
+header.menu.logout: 登出
+header.menu.register: 注册
+header.menu.login: 登录
+header.menu.light: 亮色
+header.menu.dark: 暗色
+header.menu.system: 系统
+footer.powered-by: 由 %s 强力驱动
+
+pagination.older: 更早
+pagination.newer: 更新
+pagination.previous: 上一页
+pagination.next: 下一页
+
+admin.admin_panel: 管理面板
+admin.general: 通用
+admin.users: 用户
+admin.gists: Gists
+admin.configuration: 配置
+admin.versions: 版本
+admin.ssh_keys: SSH 密钥
+admin.stats: 状态
+admin.actions: 动作
+admin.actions.sync-fs: 从文件系统同步 Gist
+admin.actions.sync-db: 从数据库同步 Gist
+admin.actions.git-gc: 对 Git 仓库执行垃圾回收
+admin.id: ID
+admin.user: 用户
+admin.delete: 删除
+admin.created_at: 创建于
+
+admin.config-link: 此配置可通过 YAML 配置和/或环境变量进行 %s 。
+admin.config-link-overriden: 覆盖
+admin.disable-signup: 禁用注册
+admin.disable-signup_help: 阻止创建新的账号。
+admin.require-login: 要求登录
+admin.require-login_help: 强制用户登录后才能查看 Gist。
+admin.disable-login: 禁用登录表单
+admin.disable-login_help: 禁止使用登录表单进行登录以强制通过 OAuth 提供方登录。
+admin.disable-gravatar: 禁用 Gravatar
+admin.disable-gravatar_help: 停止使用 Gravatar 作为头像提供方。
+
+admin.users.delete_confirm: 你想要删除此用户吗？
+
+admin.gists.title: 标题
+admin.gists.private: 私有？
+admin.gists.nb-files: 文件数
+admin.gists.nb-likes: 喜欢数
+admin.gists.delete_confirm: 你想要删除此 Gist 吗？

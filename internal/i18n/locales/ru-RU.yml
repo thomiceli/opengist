@@ -1,0 +1,177 @@
+gist.public: Публичный
+gist.unlisted: Скрытый
+gist.private: Приватный
+
+gist.header.like: Нравится
+gist.header.unlike: Не нравится
+gist.header.fork: Создать форк
+gist.header.edit: Редактировать
+gist.header.delete: Удалить
+gist.header.forked-from: Форк с
+gist.header.last-active: Последняя активность
+gist.header.select-tab: Перейти
+gist.header.code: Код
+gist.header.revisions: Версии
+gist.header.revision: Версия
+gist.header.clone-http: Клонировать с помощью %s
+gist.header.clone-http-help: Клонировать с помощью Git используя аутентификацию HTTP.
+gist.header.clone-ssh: Клонировать c помощью SSH
+gist.header.clone-ssh-help: Клонировать c помощью Git используя ключ SSH.
+gist.header.share: Поделиться
+gist.header.share-help: Скопировать ссылку на фрагмент.
+gist.header.download-zip: Скачать ZIP-архив
+
+gist.raw: Исходник
+gist.file-truncated: Файл был обрезан.
+gist.watch-full-file: Просмотр всего файла.
+gist.file-not-valid: Невалидный CSV.
+gist.no-content: Нет данных
+
+gist.new.new_gist: Новый фрагмент
+gist.new.title: Название
+gist.new.description: Описание
+gist.new.filename-with-extension: Имя файла с расширением
+gist.new.indent-mode: Отступы
+gist.new.indent-mode-space: Пробелы
+gist.new.indent-mode-tab: Табуляция
+gist.new.indent-size: Размер отступа
+gist.new.wrap-mode: Переносы строк
+gist.new.wrap-mode-no: Без переносов
+gist.new.wrap-mode-soft: Мягкие переносы
+gist.new.add-file: Добавить файл
+gist.new.create-public-button: Создать публичный фрагмент
+gist.new.create-unlisted-button: Создать скрытый фрагмент
+gist.new.create-private-button: Создать приватный фрагмент
+
+gist.edit.editing: Редактирование
+gist.edit.change-visibility: Применить
+gist.edit.delete: Удалить
+gist.edit.cancel: Отмена
+gist.edit.save: Сохранить
+
+gist.list.joined: Зарегистрирован
+gist.list.all: Все фрагменты
+gist.list.search-results: Результаты  поиска
+gist.list.sort: Сортировка
+gist.list.sort-by-created: по дате создания
+gist.list.sort-by-updated: по дате обновления
+gist.list.order-by-asc: Свежие снизу
+gist.list.order-by-desc: Свежие сверху
+gist.list.select-tab: Перейти
+gist.list.liked: Понравившиеся
+gist.list.likes: лайк(-ов)
+gist.list.forked: Форки
+gist.list.forked-from: Форки с
+gist.list.forks: форк(-ов)
+gist.list.files: файл(-ов)
+gist.list.last-active: Последняя активность
+gist.list.no-gists: Нет фрагментов
+
+gist.forks: Форки
+gist.forks.view: Посмотреть форк
+gist.forks.no: Нет форков
+
+gist.likes: Нравятся
+gist.likes.no: Нет
+
+gist.revisions: Ревизии
+gist.revision.revised: ревизий этого фрагмента
+gist.revision.go-to-revision: К ревизии
+gist.revision.file-created: файл создан
+gist.revision.file-deleted: файл удалён
+gist.revision.file-renamed: переименован в
+gist.revision.diff-truncated: Разница (diff) обрезана, так как результат слишком большой для показа
+gist.revision.file-renamed-no-changes: Файл переименован без изменений
+gist.revision.empty-file: Пустой файл
+gist.revision.no-changes: Без изменений
+gist.revision.no-revisions: Нет ревизий
+
+settings: Настройки
+settings.email: Адрес эл. почты
+settings.email-help: Нужен для коммитов и Gravatar
+settings.email-set: Сохранить адрес
+settings.link-accounts: Привязка доступов
+settings.link-github-account: Привязать доступ GitHub
+settings.link-gitea-account: Привязать доступ Gitea
+settings.unlink-github-account: Отвязать доступ GitHub
+settings.unlink-gitea-account: Отвязать доступ Gitea
+settings.delete-account: Удалить аккаунт
+settings.delete-account-confirm: Вы уверены что хотите удалить свой аккаунт?
+settings.add-ssh-key: Добавить ключ SSH
+settings.add-ssh-key-help: Нужен только для работы с фрагментами через Git+SSH
+settings.add-ssh-key-title: Название
+settings.add-ssh-key-content: Ключ
+settings.delete-ssh-key: Удалить
+settings.delete-ssh-key-confirm: Подтвердите удаления ключа SSH
+settings.ssh-key-added-at: Дата добавления
+settings.ssh-key-never-used: Не был использован
+settings.ssh-key-last-used: Последнее использование
+
+auth.signup-disabled: Регистрация запрещена Администратором сервиса
+auth.login: Вход
+auth.signup: Регистрация
+auth.new-account: Новый аккаунт
+auth.username: Имя пользователя
+auth.password: Пароль
+auth.register-instead: Зарегистрироваться
+auth.login-instead: Войти
+auth.github-oauth: Войти с помощью доступа GitHub
+auth.gitea-oauth: Войти с помощью доступа Gitea
+
+error: Ошибка
+
+header.menu.all: Все
+header.menu.new: Новый
+header.menu.search: Поиск
+header.menu.my-gists: Мои фрагменты
+header.menu.liked: Понравившиеся
+header.menu.admin: Администрирование
+header.menu.settings: Настройки
+header.menu.logout: Выйти
+header.menu.register: Регистрация
+header.menu.login: Войти
+header.menu.light: Светлая
+header.menu.dark: Тёмная
+header.menu.system: Системная
+footer.powered-by: Работает на %s
+
+pagination.older: Позже
+pagination.newer: Новее
+pagination.previous: Предыдущий
+pagination.next: Следующий
+
+admin.admin_panel: Панель управления
+admin.general: Общее
+admin.users: Пользователи
+admin.gists: Фрагменты
+admin.configuration: Настройки
+admin.versions: Версии
+admin.ssh_keys: Ключи SSH
+admin.stats: Статистика
+admin.actions: Действия
+admin.actions.sync-fs: Синхронизировать фрагменты из файловой системы
+admin.actions.sync-db: Синхронизировать фрагменты с базой данных
+admin.actions.git-gc: Сборка мусора в репозиториях Git
+admin.id: ID
+admin.user: Пользователь
+admin.delete: Удалить
+admin.created_at: Создан
+
+admin.config-link: Эти настройки могут быть %s файлом конфигурации YAML и/или переменными окружения.
+admin.config-link-overriden: перекрыты
+admin.disable-signup: Запретить регистрацию
+admin.disable-signup_help: Запретить создание новых доступов
+admin.require-login: Требовать авторизацию
+admin.require-login_help: Запретить просмотр фрагментов без авторизации.
+admin.disable-login: Запретить авторизацию по паролю
+admin.disable-login_help: Запретить авторизацию с вводом пароля, форсировать внешнюю авторизацию через Gitea/GitHub.
+admin.disable-gravatar: Запретить Gravatar
+admin.disable-gravatar_help: Запретить использование Gravatar как провайдера изображений профиля.
+
+admin.users.delete_confirm: Вы уверены что хотите удалить этого пользователя?
+
+admin.gists.title: Название
+admin.gists.private: Приватный
+admin.gists.nb-files: Файлов
+admin.gists.nb-likes: Понравилось
+admin.gists.delete_confirm: Вы уверены что хотите удалить этот фрагмент?

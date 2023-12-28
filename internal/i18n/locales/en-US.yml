@@ -80,7 +80,7 @@ gist.revision.go-to-revision: Go to revision
 gist.revision.file-created: file created
 gist.revision.file-deleted: file deleted
 gist.revision.file-renamed: renamed to
-gist.revision.diff-truncated: Diff truncated because it's too large to be shown
+gist.revision.diff-truncated: Diff is too large to be shown
 gist.revision.file-renamed-no-changes: File renamed without changes
 gist.revision.empty-file: Empty file
 gist.revision.no-changes: No changes
@@ -106,6 +106,11 @@ settings.delete-ssh-key-confirm: Confirm deletion of SSH key
 settings.ssh-key-added-at: Added
 settings.ssh-key-never-used: Never used
 settings.ssh-key-last-used: Last used
+settings.create-password: Create password
+settings.create-password-help: Create your password to login to Opengist via HTTP
+settings.change-password: Change password
+settings.change-password-help: Change your password to login to Opengist via HTTP
+settings.password-label-title: Password
 
 auth.signup-disabled: Administrator has disabled signing up
 auth.login: Login

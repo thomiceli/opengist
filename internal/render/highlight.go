@@ -39,7 +39,7 @@ func HighlightFile(file *git.File) (RenderedFile, error) {
 
 	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))
 
-	iterator, err := lexer.Tokenise(nil, file.Content)
+	iterator, err := lexer.Tokenise(nil, file.Content+"\n")
 	if err != nil {
 		return rendered, err
 	}

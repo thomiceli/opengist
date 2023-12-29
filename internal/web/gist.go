@@ -704,7 +704,7 @@ func downloadZip(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 	revision := ctx.Param("revision")
 
-	files, err := gist.Files(revision, true)
+	files, err := gist.Files(revision, false)
 	if err != nil {
 		return errorRes(500, "Error fetching files from repository", err)
 	}

@@ -1,9 +1,11 @@
 package git
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -122,6 +124,120 @@ func GetFilesOfRepository(user string, gist string, revision string) ([]string, 
 
 	slice := strings.Split(string(stdout), "\n")
 	return slice[:len(slice)-1], nil
+}
+
+type catFileBatch struct {
+	Name, Hash, Content string
+	Size                uint64
+	Truncated           bool
+}
+
+func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*catFileBatch, error) {
+	repositoryPath := RepositoryPath(user, gist)
+
+	lsTreeCmd := exec.Command("git", "ls-tree", "-l", revision)
+	lsTreeCmd.Dir = repositoryPath
+	lsTreeOutput, err := lsTreeCmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	fileMap := make([]*catFileBatch, 0)
+
+	lines := strings.Split(string(lsTreeOutput), "\n")
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		if len(fields) < 4 {
+			continue // Skip lines that don't have enough fields
+		}
+
+		hash := fields[2]
+		size, err := strconv.ParseUint(fields[3], 10, 64)
+		if err != nil {
+			continue // Skip lines with invalid size field
+		}
+		name := strings.Join(fields[4:], " ") // File name may contain spaces
+
+		fileMap = append(fileMap, &catFileBatch{
+			Hash: hash,
+			Size: size,
+			Name: name,
+		})
+	}
+
+	catFileCmd := exec.Command("git", "cat-file", "--batch")
+	catFileCmd.Dir = repositoryPath
+	stdin, err := catFileCmd.StdinPipe()
+	if err != nil {
+		return nil, err
+	}
+	stdout, err := catFileCmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+	if err = catFileCmd.Start(); err != nil {
+		return nil, err
+	}
+
+	reader := bufio.NewReader(stdout)
+
+	for _, file := range fileMap {
+		_, err = stdin.Write([]byte(file.Hash + "\n"))
+		if err != nil {
+			return nil, err
+		}
+
+		header, err := reader.ReadString('\n')
+		if err != nil {
+			return nil, err
+		}
+
+		parts := strings.Fields(header)
+		if len(parts) > 3 {
+			continue // Not a valid header, skip this entry
+		}
+
+		size, err := strconv.ParseUint(parts[2], 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		sizeToRead := size
+		if truncate && sizeToRead > truncateLimit {
+			sizeToRead = truncateLimit
+		}
+
+		// Read exactly size bytes from header, or the max allowed if truncated
+		content := make([]byte, sizeToRead)
+		if _, err = io.ReadFull(reader, content); err != nil {
+			return nil, err
+		}
+
+		file.Content = string(content)
+
+		if truncate && size > truncateLimit {
+			// skip other bytes if truncated
+			if _, err = reader.Discard(int(size - truncateLimit)); err != nil {
+				return nil, err
+			}
+			file.Truncated = true
+		}
+
+		// Read the blank line following the content
+		if _, err := reader.ReadByte(); err != nil {
+			return nil, err
+		}
+	}
+
+	if err = stdin.Close(); err != nil {
+		return nil, err
+	}
+
+	if err = catFileCmd.Wait(); err != nil {
+		return nil, err
+	}
+
+	return fileMap, nil
 }
 
 func GetFileContent(user string, gist string, revision string, filename string, truncate bool) (string, bool, error) {

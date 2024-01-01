@@ -109,6 +109,7 @@ settings.delete-ssh-key-confirm: Confirm deletion of SSH key
 settings.ssh-key-added-at: Added
 settings.ssh-key-never-used: Never used
 settings.ssh-key-last-used: Last used
+settings.change-username: Change username
 settings.create-password: Create password
 settings.create-password-help: Create your password to login to Opengist via HTTP
 settings.change-password: Change password

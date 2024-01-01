@@ -139,3 +139,32 @@ func passwordProcess(ctx echo.Context) error {
 	addFlash(ctx, "Password updated", "success")
 	return redirect(ctx, "/settings")
 }
+
+func usernameProcess(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+
+	dto := new(db.UserDTO)
+	if err := ctx.Bind(dto); err != nil {
+		return errorRes(400, "Cannot bind data", err)
+	}
+	dto.Password = user.Password
+
+	if err := ctx.Validate(dto); err != nil {
+		addFlash(ctx, validationMessages(&err), "error")
+		return redirect(ctx, "/settings")
+	}
+
+	if exists, err := db.UserExists(dto.Username); err != nil || exists {
+		addFlash(ctx, "Username already exists", "error")
+		return redirect(ctx, "/settings")
+	}
+
+	user.Username = dto.Username
+
+	if err := user.Update(); err != nil {
+		return errorRes(500, "Cannot update username", err)
+	}
+
+	addFlash(ctx, "Username updated", "success")
+	return redirect(ctx, "/settings")
+}

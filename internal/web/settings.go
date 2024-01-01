@@ -3,6 +3,9 @@ package web
 import (
 	"crypto/md5"
 	"fmt"
+	"github.com/thomiceli/opengist/internal/config"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -157,6 +160,13 @@ func usernameProcess(ctx echo.Context) error {
 	if exists, err := db.UserExists(dto.Username); err != nil || exists {
 		addFlash(ctx, "Username already exists", "error")
 		return redirect(ctx, "/settings")
+	}
+
+	err := os.Rename(
+		filepath.Join(config.C.OpengistHome, "repos", user.Username),
+		filepath.Join(config.C.OpengistHome, "repos", dto.Username))
+	if err != nil {
+		return errorRes(500, "Cannot rename user directory", err)
 	}
 
 	user.Username = dto.Username

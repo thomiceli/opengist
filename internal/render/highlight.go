@@ -11,6 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"sync"
 )
 
 type RenderedFile struct {
@@ -68,14 +69,33 @@ func HighlightFile(file *git.File) (RenderedFile, error) {
 }
 
 func HighlightFiles(files []*git.File) ([]RenderedFile, error) {
-	renderedFiles := make([]RenderedFile, 0, len(files))
-	for _, file := range files {
-		rendered, err := HighlightFile(file)
-		if err != nil {
-			log.Warn().Err(err).Msg("Error rendering gist preview for " + file.Filename)
+	const numWorkers = 10
+	jobs := make(chan int, numWorkers)
+	renderedFiles := make([]RenderedFile, len(files))
+	var wg sync.WaitGroup
+
+	worker := func() {
+		for idx := range jobs {
+			rendered, err := HighlightFile(files[idx])
+			if err != nil {
+				log.Warn().Err(err).Msg("Error rendering gist preview for " + files[idx].Filename)
+			}
+			renderedFiles[idx] = rendered
 		}
-		renderedFiles = append(renderedFiles, rendered)
+		wg.Done()
 	}
+
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go worker()
+	}
+
+	for i := range files {
+		jobs <- i
+	}
+	close(jobs)
+
+	wg.Wait()
 
 	return renderedFiles, nil
 }

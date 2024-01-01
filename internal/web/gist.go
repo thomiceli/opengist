@@ -294,10 +294,7 @@ func gistIndex(ctx echo.Context) error {
 		return errorRes(500, "Error fetching files", err)
 	}
 
-	renderedFiles, err := render.HighlightFiles(files)
-	if err != nil {
-		return errorRes(500, "Error rendering files", err)
-	}
+	renderedFiles := render.HighlightFiles(files)
 
 	setData(ctx, "page", "code")
 	setData(ctx, "commit", revision)
@@ -314,11 +311,7 @@ func gistJson(ctx echo.Context) error {
 		return errorRes(500, "Error fetching files", err)
 	}
 
-	renderedFiles, err := render.HighlightFiles(files)
-	if err != nil {
-		return errorRes(500, "Error rendering files", err)
-	}
-
+	renderedFiles := render.HighlightFiles(files)
 	setData(ctx, "files", renderedFiles)
 
 	htmlbuf := bytes.Buffer{}
@@ -362,11 +355,7 @@ func gistJs(ctx echo.Context) error {
 		return errorRes(500, "Error fetching files", err)
 	}
 
-	renderedFiles, err := render.HighlightFiles(files)
-	if err != nil {
-		return errorRes(500, "Error rendering files", err)
-	}
-
+	renderedFiles := render.HighlightFiles(files)
 	setData(ctx, "files", renderedFiles)
 
 	htmlbuf := bytes.Buffer{}

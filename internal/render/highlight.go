@@ -68,7 +68,7 @@ func HighlightFile(file *git.File) (RenderedFile, error) {
 	return rendered, err
 }
 
-func HighlightFiles(files []*git.File) ([]RenderedFile, error) {
+func HighlightFiles(files []*git.File) []RenderedFile {
 	const numWorkers = 10
 	jobs := make(chan int, numWorkers)
 	renderedFiles := make([]RenderedFile, len(files))
@@ -78,7 +78,7 @@ func HighlightFiles(files []*git.File) ([]RenderedFile, error) {
 		for idx := range jobs {
 			rendered, err := HighlightFile(files[idx])
 			if err != nil {
-				log.Warn().Err(err).Msg("Error rendering gist preview for " + files[idx].Filename)
+				log.Error().Err(err).Msg("Error rendering gist preview for " + files[idx].Filename)
 			}
 			renderedFiles[idx] = rendered
 		}
@@ -97,7 +97,7 @@ func HighlightFiles(files []*git.File) ([]RenderedFile, error) {
 
 	wg.Wait()
 
-	return renderedFiles, nil
+	return renderedFiles
 }
 
 func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {

@@ -311,7 +311,8 @@ func (gist *Gist) DeleteRepository() error {
 }
 
 func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
-	filesCat, err := git.CatFileBatch(gist.User.Username, gist.Uuid, revision, truncate)
+	var files []*git.File
+	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
 	if err != nil {
 		// if the revision or the file do not exist
 		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
@@ -320,15 +321,12 @@ func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
 		return nil, err
 	}
 
-	var files []*git.File
-	for _, fileCat := range filesCat {
-		files = append(files, &git.File{
-			Filename:  fileCat.Name,
-			Size:      fileCat.Size,
-			HumanSize: humanize.IBytes(fileCat.Size),
-			Content:   fileCat.Content,
-			Truncated: fileCat.Truncated,
-		})
+	for _, fileStr := range filesStr {
+		file, err := gist.File(revision, fileStr, truncate)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, file)
 	}
 	return files, err
 }

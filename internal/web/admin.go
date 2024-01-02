@@ -2,21 +2,12 @@ package web
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/actions"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"os"
-	"path/filepath"
 	"runtime"
 	"strconv"
-	"strings"
-)
-
-var (
-	syncReposFromFS = false
-	syncReposFromDB = false
-	gitGcRepos      = false
 )
 
 func adminIndex(ctx echo.Context) error {
@@ -50,9 +41,11 @@ func adminIndex(ctx echo.Context) error {
 	}
 	setData(ctx, "countKeys", countKeys)
 
-	setData(ctx, "syncReposFromFS", syncReposFromFS)
-	setData(ctx, "syncReposFromDB", syncReposFromDB)
-	setData(ctx, "gitGcRepos", gitGcRepos)
+	setData(ctx, "syncReposFromFS", actions.IsRunning(actions.SyncReposFromFS))
+	setData(ctx, "syncReposFromDB", actions.IsRunning(actions.SyncReposFromDB))
+	setData(ctx, "gitGcRepos", actions.IsRunning(actions.GitGcRepos))
+	setData(ctx, "syncGistPreviews", actions.IsRunning(actions.SyncGistPreviews))
+	setData(ctx, "resetHooks", actions.IsRunning(actions.ResetHooks))
 	return html(ctx, "admin_index.html")
 }
 
@@ -129,78 +122,31 @@ func adminGistDelete(ctx echo.Context) error {
 
 func adminSyncReposFromFS(ctx echo.Context) error {
 	addFlash(ctx, "Syncing repositories from filesystem...", "success")
-	go func() {
-		if syncReposFromFS {
-			return
-		}
-		syncReposFromFS = true
-
-		gists, err := db.GetAllGistsRows()
-		if err != nil {
-			log.Error().Err(err).Msg("Cannot get gists")
-			syncReposFromFS = false
-			return
-		}
-		for _, gist := range gists {
-			// if repository does not exist, delete gist from database
-			if _, err := os.Stat(git.RepositoryPath(gist.User.Username, gist.Uuid)); err != nil && !os.IsExist(err) {
-				if err2 := gist.Delete(); err2 != nil {
-					log.Error().Err(err2).Msg("Cannot delete gist")
-					syncReposFromFS = false
-					return
-				}
-			}
-		}
-		syncReposFromFS = false
-	}()
+	go actions.Run(actions.SyncReposFromFS)
 	return redirect(ctx, "/admin-panel")
 }
 
 func adminSyncReposFromDB(ctx echo.Context) error {
 	addFlash(ctx, "Syncing repositories from database...", "success")
-	go func() {
-		if syncReposFromDB {
-			return
-		}
-		syncReposFromDB = true
-		entries, err := filepath.Glob(filepath.Join(config.GetHomeDir(), "repos", "*", "*"))
-		if err != nil {
-			log.Error().Err(err).Msg("Cannot read repos directories")
-			syncReposFromDB = false
-			return
-		}
-
-		for _, e := range entries {
-			path := strings.Split(e, string(os.PathSeparator))
-			gist, _ := db.GetGist(path[len(path)-2], path[len(path)-1])
-
-			if gist.ID == 0 {
-				if err := git.DeleteRepository(path[len(path)-2], path[len(path)-1]); err != nil {
-					log.Error().Err(err).Msg("Cannot delete repository")
-					syncReposFromDB = false
-					return
-				}
-			}
-		}
-		syncReposFromDB = false
-	}()
+	go actions.Run(actions.SyncReposFromDB)
 	return redirect(ctx, "/admin-panel")
 }
 
 func adminGcRepos(ctx echo.Context) error {
 	addFlash(ctx, "Garbage collecting repositories...", "success")
-	go func() {
-		if gitGcRepos {
-			return
-		}
-		gitGcRepos = true
-		if err := git.GcRepos(); err != nil {
-			log.Error().Err(err).Msg("Error garbage collecting repositories")
-			gitGcRepos = false
-			return
-		}
-		gitGcRepos = false
-	}()
+	go actions.Run(actions.GitGcRepos)
+	return redirect(ctx, "/admin-panel")
+}
+
+func adminSyncGistPreviews(ctx echo.Context) error {
+	addFlash(ctx, "Syncing Gist previews...", "success")
+	go actions.Run(actions.SyncGistPreviews)
+	return redirect(ctx, "/admin-panel")
+}
+
+func adminResetHooks(ctx echo.Context) error {
+	addFlash(ctx, "Resetting Git server hooks for all repositories...", "success")
+	go actions.Run(actions.ResetHooks)
 	return redirect(ctx, "/admin-panel")
 }
 

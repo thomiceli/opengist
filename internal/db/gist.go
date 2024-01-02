@@ -226,6 +226,10 @@ func (gist *Gist) Update() error {
 	return db.Omit("forked_id").Save(&gist).Error
 }
 
+func (gist *Gist) UpdateNoTimestamps() error {
+	return db.Omit("forked_id", "updated_at").Save(&gist).Error
+}
+
 func (gist *Gist) Delete() error {
 	err := gist.DeleteRepository()
 	if err != nil {
@@ -419,7 +423,7 @@ func (gist *Gist) RPC(service string) ([]byte, error) {
 	return git.RPC(gist.User.Username, gist.Uuid, service)
 }
 
-func (gist *Gist) UpdatePreviewAndCount() error {
+func (gist *Gist) UpdatePreviewAndCount(withTimestampUpdate bool) error {
 	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, "HEAD")
 	if err != nil {
 		return err
@@ -445,7 +449,10 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 		gist.PreviewFilename = file.Filename
 	}
 
-	return gist.Update()
+	if withTimestampUpdate {
+		return gist.Update()
+	}
+	return gist.UpdateNoTimestamps()
 }
 
 func (gist *Gist) VisibilityStr() string {

@@ -371,6 +371,10 @@ func gistJs(ctx echo.Context) error {
 	_ = w.Flush()
 
 	cssUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), manifestEntries["embed.css"].File)
+	if err != nil {
+		return errorRes(500, "Error joining css url", err)
+	}
+
 	js := `document.write('<link rel="stylesheet" href="%s">')
 document.write('%s')
 `

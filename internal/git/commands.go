@@ -77,7 +77,7 @@ func InitRepository(user string, gist string) error {
 		return err
 	}
 
-	return createDotGitFiles(repositoryPath)
+	return CreateDotGitFiles(user, gist)
 }
 
 func InitRepositoryViaInit(user string, gist string, ctx echo.Context) error {
@@ -371,7 +371,7 @@ func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) e
 		return err
 	}
 
-	return createDotGitFiles(repositoryPathDst)
+	return CreateDotGitFiles(userDst, gistDst)
 }
 
 func SetFileContent(gistTmpId string, filename string, content string) error {
@@ -525,7 +525,9 @@ func GetGitVersion() (string, error) {
 	return versionFields[2], nil
 }
 
-func createDotGitFiles(repositoryPath string) error {
+func CreateDotGitFiles(user string, gist string) error {
+	repositoryPath := RepositoryPath(user, gist)
+
 	f1, err := os.OpenFile(filepath.Join(repositoryPath, "git-daemon-export-ok"), os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
@@ -540,7 +542,7 @@ func createDotGitFiles(repositoryPath string) error {
 }
 
 func createDotGitHookFile(repositoryPath string, hook string, content string) error {
-	preReceiveDst, err := os.OpenFile(filepath.Join(repositoryPath, "hooks", hook), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0744)
+	preReceiveDst, err := os.OpenFile(filepath.Join(repositoryPath, "hooks", hook), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0744)
 	if err != nil {
 		return err
 	}

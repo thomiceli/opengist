@@ -217,7 +217,7 @@ func pack(ctx echo.Context, serviceType string) error {
 		}
 
 		_ = gist.SetLastActiveNow()
-		_ = gist.UpdatePreviewAndCount()
+		_ = gist.UpdatePreviewAndCount(false)
 	}
 	return nil
 }

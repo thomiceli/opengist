@@ -542,7 +542,7 @@ func toggleVisibility(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 
 	gist.Private = (gist.Private + 1) % 3
-	if err := gist.Update(); err != nil {
+	if err := gist.UpdateNoTimestamps(); err != nil {
 		return errorRes(500, "Error updating this gist", err)
 	}
 
@@ -806,7 +806,7 @@ func checkbox(ctx echo.Context) error {
 		return errorRes(500, "Error adding and committing files", err)
 	}
 
-	if err = gist.UpdatePreviewAndCount(); err != nil {
+	if err = gist.UpdatePreviewAndCount(true); err != nil {
 		return errorRes(500, "Error updating the gist", err)
 	}
 

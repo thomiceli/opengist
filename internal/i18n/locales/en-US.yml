@@ -161,7 +161,9 @@ admin.stats: Stats
 admin.actions: Actions
 admin.actions.sync-fs: Synchronize gists from filesystem
 admin.actions.sync-db: Synchronize gists from database
-admin.actions.git-gc: Garbage collect git repositories
+admin.actions.git-gc: Garbage collect all git repositories
+admin.actions.sync-previews: Synchronize all gists previews
+admin.actions.reset-hooks: Reset Git server hooks for all repositories
 admin.id: ID
 admin.user: User
 admin.delete: Delete

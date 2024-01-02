@@ -8,6 +8,7 @@
     {{ end }}
 
     <script>
+        window.opengist_base_url = "{{ $.c.ExternalUrl }}";
         const checkTheme = () => {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark')
@@ -85,7 +86,7 @@
                                                     <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                                                 </svg>
                                             </div>
-                                            <form action="/search" method="GET">
+                                            <form action="{{ $.c.ExternalUrl }}/search" method="GET">
                                                 <input id="search" name="q" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Search" type="search" value="{{ .searchQuery }}">
                                                 <input type="submit" hidden="hidden">
                                             </form>
@@ -211,7 +212,7 @@
                                 <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <form action="/search" method="GET">
+                        <form action="{{ $.c.ExternalUrl }}/search" method="GET">
                             <input id="searchmobile" name="q" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Search" type="search" value="{{.searchQuery}}">
                             <input type="submit" hidden="hidden">
                         </form>

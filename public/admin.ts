@@ -8,13 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const setSetting = (key: string, value: string) => {
+    const baseUrl = window.opengist_base_url || '';
     const data = new URLSearchParams();
     data.append('key', key);
     data.append('value', value);
     if (document.getElementsByName('_csrf').length !== 0) {
         data.append('_csrf', ((document.getElementsByName('_csrf')[0] as HTMLInputElement).value));
     }
-    return fetch('/admin-panel/set-config', {
+    return fetch(`${baseUrl}/admin-panel/set-config`, {
         method: 'PUT',
         credentials: 'same-origin',
         body: data,

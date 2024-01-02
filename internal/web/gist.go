@@ -323,7 +323,12 @@ func gistJson(ctx echo.Context) error {
 
 	jsUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
 	if err != nil {
-		return errorRes(500, "Error joining url", err)
+		return errorRes(500, "Error joining js url", err)
+	}
+
+	cssUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), manifestEntries["embed.css"].File)
+	if err != nil {
+		return errorRes(500, "Error joining css url", err)
 	}
 
 	return ctx.JSON(200, map[string]interface{}{
@@ -337,7 +342,7 @@ func gistJson(ctx echo.Context) error {
 		"files":       renderedFiles,
 		"embed": map[string]string{
 			"html":    htmlbuf.String(),
-			"css":     getData(ctx, "baseHttpUrl").(string) + asset("embed.css"),
+			"css":     cssUrl,
 			"js":      jsUrl,
 			"js_dark": jsUrl + "?dark",
 		},
@@ -365,10 +370,15 @@ func gistJs(ctx echo.Context) error {
 	}
 	_ = w.Flush()
 
+	cssUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), manifestEntries["embed.css"].File)
+	if err != nil {
+		return errorRes(500, "Error joining css url", err)
+	}
+
 	js := `document.write('<link rel="stylesheet" href="%s">')
 document.write('%s')
 `
-	js = fmt.Sprintf(js, getData(ctx, "baseHttpUrl").(string)+asset("embed.css"),
+	js = fmt.Sprintf(js, cssUrl,
 		strings.Replace(htmlbuf.String(), "\n", `\n`, -1))
 	ctx.Response().Header().Set("Content-Type", "application/javascript")
 	return plainText(ctx, 200, js)

@@ -8,8 +8,7 @@ log-level: warn
 # Set the log output to one or more of the following: `stdout`, `file`. Default: stdout,file
 log-output: stdout,file
 
-# Public URL for the Git HTTP/SSH connection.
-# If not set, uses the URL from the request
+# Public URL to access to Opengist
 external-url:
 
 # Directory where Opengist will store its data. Default: ~/.opengist/

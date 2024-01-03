@@ -61,8 +61,11 @@ func initialize() {
 		log.Fatal().Err(err).Msg("Failed to initialize in memory database")
 	}
 
-	if err := index.Open(filepath.Join(homePath, config.C.IndexFilename)); err != nil {
-		log.Fatal().Err(err).Msg("Failed to open index")
+	if config.C.IndexEnabled {
+		log.Info().Msg("Index directory: " + filepath.Join(homePath, config.C.IndexDirname))
+		if err := index.Open(filepath.Join(homePath, config.C.IndexDirname)); err != nil {
+			log.Fatal().Err(err).Msg("Failed to open index")
+		}
 	}
 }
 

@@ -2,6 +2,7 @@ package index
 
 import (
 	"errors"
+	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
@@ -9,18 +10,19 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/search"
 	"github.com/blevesearch/bleve/v2/search/query"
-	"github.com/thomiceli/opengist/internal/db"
-	"path/filepath"
+	"github.com/thomiceli/opengist/internal/config"
 	"strconv"
-
-	"github.com/blevesearch/bleve/v2"
 )
 
-var I bleve.Index
+var bleveIndex bleve.Index
+
+func Enabled() bool {
+	return config.C.IndexEnabled
+}
 
 func Open(indexFilename string) error {
 	var err error
-	I, err = bleve.Open(indexFilename)
+	bleveIndex, err = bleve.Open(indexFilename)
 	if err == nil {
 		return nil
 	}
@@ -53,63 +55,43 @@ func Open(indexFilename string) error {
 
 	docMapping.DefaultAnalyzer = "gistAnalyser"
 
-	I, err = bleve.New(indexFilename, mapping)
+	bleveIndex, err = bleve.New(indexFilename, mapping)
 
 	return err
 }
 
 func Close() error {
-	return I.Close()
+	return bleveIndex.Close()
 }
 
-func Index(gist *db.Gist) error {
-	files, err := gist.Files("HEAD", true)
-	if err != nil {
-		return err
+func AddInIndex(gist *Gist) error {
+	if !Enabled() {
+		return nil
 	}
 
-	wholeContent := ""
-	for _, file := range files {
-		wholeContent += file.Content
+	if gist == nil {
+		return errors.New("failed to add nil gist to index")
 	}
-
-	fileNames, err := gist.FileNames("HEAD")
-	if err != nil {
-		return err
-	}
-
-	exts := make([]string, 0, len(fileNames))
-	for _, file := range fileNames {
-		exts = append(exts, filepath.Ext(file))
-	}
-
-	indexedGist := Gist{
-		GistID:     gist.ID,
-		Username:   gist.User.Username,
-		Title:      gist.Title,
-		Content:    wholeContent,
-		Filenames:  fileNames,
-		Extensions: exts,
-		CreatedAt:  gist.CreatedAt,
-		UpdatedAt:  gist.UpdatedAt,
-	}
-
-	return I.Index(strconv.Itoa(int(indexedGist.GistID)), indexedGist)
+	return bleveIndex.Index(strconv.Itoa(int(gist.GistID)), gist)
 }
 
-func SearchGists(queryStr string, queryMetadata SearchGistMetadata, userId uint, page int) ([]uint, error) {
+func RemoveFromIndex(gistID uint) error {
+	if !Enabled() {
+		return nil
+	}
+
+	return bleveIndex.Delete(strconv.Itoa(int(gistID)))
+}
+
+func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []uint, page int) ([]uint, error) {
+	if !Enabled() {
+		return nil, nil
+	}
+
 	var err error
 	var indexerQuery query.Query
 	contentQuery := bleve.NewMatchPhraseQuery(queryStr)
 	contentQuery.FieldVal = "Content"
-
-	var gistsIds []uint
-	if userId != 0 {
-		gistsIds, err = db.GetAllGistsVisibleByUser(userId)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	if len(gistsIds) > 0 {
 		repoQueries := make([]query.Query, 0, len(gistsIds))
@@ -155,7 +137,7 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, userId uint,
 	s.IncludeLocations = false
 	s.Sort = sort
 
-	results, err := I.Search(s)
+	results, err := bleveIndex.Search(s)
 	if err != nil {
 		return nil, err
 	}

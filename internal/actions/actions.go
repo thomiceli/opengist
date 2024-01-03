@@ -92,7 +92,6 @@ func syncReposFromFS() {
 		if _, err := os.Stat(git.RepositoryPath(gist.User.Username, gist.Uuid)); err != nil && !os.IsExist(err) {
 			if err2 := gist.Delete(); err2 != nil {
 				log.Error().Err(err2).Msgf("Cannot delete gist %d", gist.ID)
-				return
 			}
 		}
 	}
@@ -113,7 +112,6 @@ func syncReposFromDB() {
 		if gist.ID == 0 {
 			if err := git.DeleteRepository(path[len(path)-2], path[len(path)-1]); err != nil {
 				log.Error().Err(err).Msgf("Cannot delete repository %s/%s", path[len(path)-2], path[len(path)-1])
-				return
 			}
 		}
 	}
@@ -137,7 +135,6 @@ func syncGistPreviews() {
 	for _, gist := range gists {
 		if err = gist.UpdatePreviewAndCount(false); err != nil {
 			log.Error().Err(err).Msgf("Cannot update preview and count for gist %d", gist.ID)
-			return
 		}
 	}
 }
@@ -154,7 +151,6 @@ func resetHooks() {
 		path := strings.Split(e, string(os.PathSeparator))
 		if err := git.CreateDotGitFiles(path[len(path)-2], path[len(path)-1]); err != nil {
 			log.Error().Err(err).Msgf("Cannot reset hooks for repository %s/%s", path[len(path)-2], path[len(path)-1])
-			return
 		}
 	}
 }
@@ -169,9 +165,8 @@ func indexGists() {
 
 	for _, gist := range gists {
 		log.Info().Msgf("Indexing gist %d", gist.ID)
-		if err = index.Index(gist); err != nil {
+		if err = index.AddInIndex(gist.ToIndexedGist()); err != nil {
 			log.Error().Err(err).Msgf("Cannot index gist %d", gist.ID)
-			return
 		}
 	}
 }

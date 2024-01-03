@@ -144,8 +144,10 @@ func gistNewPushSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func bleve(ctx echo.Context) error {
+	var err error
 	var currentUserId uint
 	content, meta := parseSearchQueryStr(ctx.QueryParam("q"))
+	fmt.Println(content, meta)
 	userLogged := getUserLogged(ctx)
 	if userLogged != nil {
 		currentUserId = userLogged.ID
@@ -153,12 +155,20 @@ func bleve(ctx echo.Context) error {
 		currentUserId = 0
 	}
 
+	var visibleGistsIds []uint
+	if currentUserId != 0 {
+		visibleGistsIds, err = db.GetAllGistsVisibleByUser(currentUserId)
+		if err != nil {
+			return errorRes(500, "Error fetching gists", err)
+		}
+	}
+
 	gistsIds, err := index.SearchGists(content, index.SearchGistMetadata{
 		Username:  meta["username"],
 		Title:     meta["title"],
 		Filename:  meta["filename"],
 		Extension: meta["extension"],
-	}, currentUserId, 1)
+	}, visibleGistsIds, 1)
 	if err != nil {
 		return errorRes(500, "Error searching gists", err)
 	}
@@ -585,6 +595,8 @@ func processCreate(ctx echo.Context) error {
 		}
 	}
 
+	gist.AddInIndex()
+
 	return redirect(ctx, "/"+user.Username+"/"+gist.Identifier())
 }
 
@@ -606,6 +618,7 @@ func deleteGist(ctx echo.Context) error {
 	if err := gist.Delete(); err != nil {
 		return errorRes(500, "Error deleting this gist", err)
 	}
+	gist.RemoveFromIndex()
 
 	addFlash(ctx, "Gist has been deleted", "success")
 	return redirect(ctx, "/")

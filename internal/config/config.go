@@ -23,12 +23,13 @@ var C *config
 // Not using nested structs because the library
 // doesn't support dot notation in this case sadly
 type config struct {
-	LogLevel      string `yaml:"log-level" env:"OG_LOG_LEVEL"`
-	LogOutput     string `yaml:"log-output" env:"OG_LOG_OUTPUT"`
-	ExternalUrl   string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
-	OpengistHome  string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
-	DBFilename    string `yaml:"db-filename" env:"OG_DB_FILENAME"`
-	IndexFilename string `yaml:"index-filename" env:"OG_INDEX_FILENAME"`
+	LogLevel     string `yaml:"log-level" env:"OG_LOG_LEVEL"`
+	LogOutput    string `yaml:"log-output" env:"OG_LOG_OUTPUT"`
+	ExternalUrl  string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
+	OpengistHome string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
+	DBFilename   string `yaml:"db-filename" env:"OG_DB_FILENAME"`
+	IndexEnabled bool   `yaml:"index.enabled" env:"OG_INDEX_ENABLED"`
+	IndexDirname string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"`
 
 	GitDefaultBranch string `yaml:"git.default-branch" env:"OG_GIT_DEFAULT_BRANCH"`
 
@@ -67,7 +68,8 @@ func configWithDefaults() (*config, error) {
 	c.LogOutput = "stdout,file"
 	c.OpengistHome = ""
 	c.DBFilename = "opengist.db"
-	c.IndexFilename = "opengist.bleve"
+	c.IndexEnabled = true
+	c.IndexDirname = "opengist.index"
 
 	c.SqliteJournalMode = "WAL"
 

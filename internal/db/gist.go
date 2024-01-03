@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/index"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -529,4 +532,59 @@ func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Description = dto.Description
 	gist.URL = dto.URL
 	return gist
+}
+
+// -- Index -- //
+
+func (gist *Gist) ToIndexedGist() *index.Gist {
+	files, err := gist.Files("HEAD", true)
+	if err != nil {
+		return nil
+	}
+
+	wholeContent := ""
+	for _, file := range files {
+		wholeContent += file.Content
+	}
+
+	fileNames, err := gist.FileNames("HEAD")
+	if err != nil {
+		return nil
+	}
+
+	exts := make([]string, 0, len(fileNames))
+	for _, file := range fileNames {
+		exts = append(exts, filepath.Ext(file))
+	}
+
+	indexedGist := &index.Gist{
+		GistID:     gist.ID,
+		Username:   gist.User.Username,
+		Title:      gist.Title,
+		Content:    wholeContent,
+		Filenames:  fileNames,
+		Extensions: exts,
+		CreatedAt:  gist.CreatedAt,
+		UpdatedAt:  gist.UpdatedAt,
+	}
+
+	return indexedGist
+}
+
+func (gist *Gist) AddInIndex() {
+	go func() {
+		err := index.AddInIndex(gist.ToIndexedGist())
+		if err != nil {
+			log.Error().Err(err).Msgf("Error adding gist %d to index", gist.ID)
+		}
+	}()
+}
+
+func (gist *Gist) RemoveFromIndex() {
+	go func() {
+		err := index.RemoveFromIndex(gist.ID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Error remove gist %d from index", gist.ID)
+		}
+	}()
 }

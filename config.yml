@@ -17,6 +17,12 @@ opengist-home:
 # Name of the SQLite database file. Default: opengist.db
 db-filename: opengist.db
 
+# Enable or disable the code search index (either `true` or `false`). Default: true
+index.enabled: true
+
+# Name of the directory where the code search index is stored. Default: opengist.index
+index.dirname: opengist.index
+
 # Default branch name used by Opengist when initializing Git repositories.
 # If not set, uses the Git default branch name. See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup#_new_default_branch
 git.default-branch:

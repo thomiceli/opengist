@@ -143,7 +143,7 @@ func gistNewPushSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func bleve(ctx echo.Context) error {
+func search(ctx echo.Context) error {
 	var err error
 	var currentUserId uint
 	content, meta := parseSearchQueryStr(ctx.QueryParam("q"))

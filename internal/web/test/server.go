@@ -8,6 +8,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/memdb"
 	"github.com/thomiceli/opengist/internal/web"
 	"io"
@@ -133,13 +134,11 @@ func setup(t *testing.T) {
 
 	git.ReposDirectory = path.Join("tests")
 
+	config.C.LogLevel = "debug"
 	config.InitLog()
 
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
-
-	err = os.MkdirAll(filepath.Join(homePath, "repos"), 0755)
-	require.NoError(t, err, "Could not create repos directory")
 
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
 	require.NoError(t, err, "Could not create tmp repos directory")
@@ -149,6 +148,9 @@ func setup(t *testing.T) {
 
 	err = memdb.Setup()
 	require.NoError(t, err, "Could not initialize in memory database")
+
+	err = index.Open(filepath.Join(homePath, "testsindex", "opengist.index"))
+	require.NoError(t, err, "Could not open index")
 }
 
 func teardown(t *testing.T, s *testServer) {
@@ -159,4 +161,10 @@ func teardown(t *testing.T, s *testServer) {
 
 	err = os.RemoveAll(path.Join(config.C.OpengistHome, "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
+
+	err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))
+	require.NoError(t, err, "Could not remove repos directory")
+
+	err = index.Close()
+	require.NoError(t, err, "Could not close index")
 }

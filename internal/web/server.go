@@ -223,7 +223,7 @@ func NewServer(isDev bool) *Server {
 		g1.DELETE("/settings/ssh-keys/:id", sshKeysDelete, logged)
 		g1.PUT("/settings/password", passwordProcess, logged)
 		g1.PUT("/settings/username", usernameProcess, logged)
-		g1.GET("/bleve", bleve)
+		g1.GET("/bleve", search)
 		g2 := g1.Group("/admin-panel")
 		{
 			g2.Use(adminPermission)

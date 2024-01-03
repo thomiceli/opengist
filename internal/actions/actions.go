@@ -165,7 +165,12 @@ func indexGists() {
 
 	for _, gist := range gists {
 		log.Info().Msgf("Indexing gist %d", gist.ID)
-		if err = index.AddInIndex(gist.ToIndexedGist()); err != nil {
+		indexedGist, err := gist.ToIndexedGist()
+		if err != nil {
+			log.Error().Err(err).Msgf("Cannot convert gist %d to indexed gist", gist.ID)
+			continue
+		}
+		if err = index.AddInIndex(indexedGist); err != nil {
 			log.Error().Err(err).Msgf("Cannot index gist %d", gist.ID)
 		}
 	}

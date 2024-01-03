@@ -536,10 +536,10 @@ func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 
 // -- Index -- //
 
-func (gist *Gist) ToIndexedGist() *index.Gist {
+func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 	files, err := gist.Files("HEAD", true)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	wholeContent := ""
@@ -549,7 +549,7 @@ func (gist *Gist) ToIndexedGist() *index.Gist {
 
 	fileNames, err := gist.FileNames("HEAD")
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	exts := make([]string, 0, len(fileNames))
@@ -568,12 +568,17 @@ func (gist *Gist) ToIndexedGist() *index.Gist {
 		UpdatedAt:  gist.UpdatedAt,
 	}
 
-	return indexedGist
+	return indexedGist, nil
 }
 
 func (gist *Gist) AddInIndex() {
 	go func() {
-		err := index.AddInIndex(gist.ToIndexedGist())
+		indexedGist, err := gist.ToIndexedGist()
+		if err != nil {
+			log.Error().Err(err).Msgf("Cannot convert gist %d to indexed gist", gist.ID)
+			return
+		}
+		err = index.AddInIndex(indexedGist)
 		if err != nil {
 			log.Error().Err(err).Msgf("Error adding gist %d to index", gist.ID)
 		}

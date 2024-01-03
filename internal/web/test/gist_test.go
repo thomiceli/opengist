@@ -1,11 +1,10 @@
 package test
 
 import (
-	"testing"
-
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"testing"
 )
 
 func TestGists(t *testing.T) {

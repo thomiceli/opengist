@@ -34,10 +34,13 @@ func Open(indexFilename string) error {
 	docMapping.AddFieldMappingsAt("Content", bleve.NewTextFieldMapping())
 
 	mapping := bleve.NewIndexMapping()
-	mapping.AddCustomTokenFilter("unicodeNormalize", map[string]any{
+
+	if err = mapping.AddCustomTokenFilter("unicodeNormalize", map[string]any{
 		"type": unicodenorm.Name,
 		"form": unicodenorm.NFC,
-	})
+	}); err != nil {
+		return err
+	}
 
 	if err = mapping.AddCustomAnalyzer("gistAnalyser", map[string]interface{}{
 		"type":          custom.Name,

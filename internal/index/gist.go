@@ -7,6 +7,7 @@ type Gist struct {
 	Content    string
 	Filenames  []string
 	Extensions []string
+	Languages  []string
 	CreatedAt  int64
 	UpdatedAt  int64
 }

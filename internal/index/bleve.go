@@ -8,7 +8,6 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
 	"github.com/blevesearch/bleve/v2/analysis/token/unicodenorm"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
-	"github.com/blevesearch/bleve/v2/search"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/thomiceli/opengist/internal/config"
 	"strconv"
@@ -83,9 +82,9 @@ func RemoveFromIndex(gistID uint) error {
 	return bleveIndex.Delete(strconv.Itoa(int(gistID)))
 }
 
-func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []uint, page int) ([]uint, error) {
+func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []uint, page int) ([]uint, uint64, map[string]int, error) {
 	if !Enabled() {
-		return nil, nil
+		return nil, 0, nil, nil
 	}
 
 	var err error
@@ -122,29 +121,32 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 	addQuery("Extensions", "."+queryMetadata.Extension)
 	addQuery("Filenames", queryMetadata.Filename)
 
-	sort := search.SortOrder{
-		&search.SortField{
-			Field: "UpdatedAt",
-			Desc:  true,
-		},
-	}
+	languageFacet := bleve.NewFacetRequest("Languages", 10) // Adjust the size as needed
 
 	perPage := 10
 	offset := (page - 1) * perPage
 
 	s := bleve.NewSearchRequestOptions(indexerQuery, perPage, offset, false)
+	s.AddFacet("languageFacet", languageFacet)
 	s.Fields = []string{"GistID"}
 	s.IncludeLocations = false
-	s.Sort = sort
 
 	results, err := bleveIndex.Search(s)
 	if err != nil {
-		return nil, err
+		return nil, 0, nil, err
 	}
 
 	gistIds := make([]uint, 0, len(results.Hits))
 	for _, hit := range results.Hits {
 		gistIds = append(gistIds, uint(hit.Fields["GistID"].(float64)))
 	}
-	return gistIds, nil
+
+	languageCounts := make(map[string]int)
+	if facets, found := results.Facets["languageFacet"]; found {
+		for _, term := range facets.Terms.Terms() {
+			languageCounts[term.Term] = term.Count
+		}
+	}
+
+	return gistIds, results.Total, languageCounts, nil
 }

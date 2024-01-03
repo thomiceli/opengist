@@ -2,6 +2,8 @@ package db
 
 import (
 	"fmt"
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/dustin/go-humanize"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
@@ -501,6 +503,30 @@ func (gist *Gist) Identifier() string {
 	return gist.Uuid
 }
 
+func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
+	files, err := gist.Files("HEAD", true)
+	if err != nil {
+		return nil, err
+	}
+
+	languages := make([]string, 0, len(files))
+	for _, file := range files {
+		var lexer chroma.Lexer
+		if lexer = lexers.Get(file.Filename); lexer == nil {
+			lexer = lexers.Fallback
+		}
+
+		fileType := lexer.Config().Name
+		if lexer.Config().Name == "fallback" || lexer.Config().Name == "plaintext" {
+			fileType = "Text"
+		}
+
+		languages = append(languages, fileType)
+	}
+
+	return languages, nil
+}
+
 // -- DTO -- //
 
 type GistDTO struct {
@@ -557,6 +583,11 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 		exts = append(exts, filepath.Ext(file))
 	}
 
+	langs, err := gist.GetLanguagesFromFiles()
+	if err != nil {
+		return nil, err
+	}
+
 	indexedGist := &index.Gist{
 		GistID:     gist.ID,
 		Username:   gist.User.Username,
@@ -564,6 +595,7 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 		Content:    wholeContent,
 		Filenames:  fileNames,
 		Extensions: exts,
+		Languages:  langs,
 		CreatedAt:  gist.CreatedAt,
 		UpdatedAt:  gist.UpdatedAt,
 	}

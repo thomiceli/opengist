@@ -163,7 +163,7 @@ func search(ctx echo.Context) error {
 		}
 	}
 
-	gistsIds, err := index.SearchGists(content, index.SearchGistMetadata{
+	gistsIds, nbHits, _, err := index.SearchGists(content, index.SearchGistMetadata{
 		Username:  meta["username"],
 		Title:     meta["title"],
 		Filename:  meta["filename"],
@@ -186,6 +186,8 @@ func search(ctx echo.Context) error {
 		}
 		renderedGists = append(renderedGists, &rendered)
 	}
+
+	setData(ctx, "nbHits", nbHits)
 
 	return ctx.JSON(200, map[string]interface{}{
 		"res": renderedGists,

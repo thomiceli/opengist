@@ -17,8 +17,8 @@ gist.header.clone-http: 透過 %s 複製
 gist.header.clone-http-help: 使用 HTTP 基本認證透過 Git 複製。
 gist.header.clone-ssh: 透過 SSH 複製
 gist.header.clone-ssh-help: 使用 SSH 金鑰透過 Git 複製。
-gist.header.embed:
-gist.header.embed-help:
+gist.header.embed: 嵌入
+gist.header.embed-help: 將這個 Gist 嵌入您的網站。
 gist.header.download-zip: 下載 ZIP
 
 gist.raw: 原始檔案
@@ -30,6 +30,7 @@ gist.no-content: 內容為空
 gist.new.new_gist: 新增 Gist
 gist.new.title: 標題
 gist.new.description: 描述
+gist.new.url: 自定義 Gist 網址
 gist.new.filename-with-extension: 含副檔名的檔案名稱
 gist.new.indent-mode: 縮排模式
 gist.new.indent-mode-space: 空格
@@ -108,6 +109,7 @@ settings.delete-ssh-key-confirm: 確認刪除 SSH 金鑰
 settings.ssh-key-added-at: 添加於
 settings.ssh-key-never-used: 從未使用
 settings.ssh-key-last-used: 最後使用
+settings.change-username: 變更使用者名稱
 settings.create-password: 創建密碼
 settings.create-password-help: 創建您的密碼以通過 HTTP 登錄到 Opengist
 settings.change-password: 更改密碼
@@ -159,7 +161,9 @@ admin.stats: 統計
 admin.actions: 操作
 admin.actions.sync-fs: 從系統同步 Gists
 admin.actions.sync-db: 從資料庫同步 Gists
-admin.actions.git-gc: 清理 git 儲存庫
+admin.actions.git-gc: 清理所有的 git 儲存庫
+admin.actions.sync-previews: 同步所有 Gists 預覽
+admin.actions.reset-hooks: 重置 Git 伺服器所有儲存庫的 Git hooks
 admin.id: ID
 admin.user: 使用者
 admin.delete: 刪除

@@ -60,7 +60,7 @@ chmod +x opengist
 
 Requirements : 
 * [Git](https://git-scm.com/downloads) (2.28+)
-* [Go](https://go.dev/doc/install) (1.20+)
+* [Go](https://go.dev/doc/install) (1.21+)
 * [Node.js](https://nodejs.org/en/download/) (16+)
 
 ```shell

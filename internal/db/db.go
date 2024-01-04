@@ -2,13 +2,13 @@ package db
 
 import (
 	"errors"
+	"slices"
 	"strings"
 
 	msqlite "github.com/glebarez/go-sqlite"
 	"github.com/glebarez/sqlite"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -19,7 +19,7 @@ func Setup(dbPath string, sharedCache bool) error {
 	var err error
 	journalMode := strings.ToUpper(config.C.SqliteJournalMode)
 
-	if !utils.SliceContains([]string{"DELETE", "TRUNCATE", "PERSIST", "MEMORY", "WAL", "OFF"}, journalMode) {
+	if !slices.Contains([]string{"DELETE", "TRUNCATE", "PERSIST", "MEMORY", "WAL", "OFF"}, journalMode) {
 		log.Warn().Msg("Invalid SQLite journal mode: " + journalMode)
 	}
 

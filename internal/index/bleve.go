@@ -89,8 +89,14 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 
 	var err error
 	var indexerQuery query.Query
-	contentQuery := bleve.NewMatchPhraseQuery(queryStr)
-	contentQuery.FieldVal = "Content"
+	if queryStr != "" {
+		contentQuery := bleve.NewMatchPhraseQuery(queryStr)
+		contentQuery.FieldVal = "Content"
+		indexerQuery = contentQuery
+	} else {
+		contentQuery := bleve.NewMatchAllQuery()
+		indexerQuery = contentQuery
+	}
 
 	if len(gistsIds) > 0 {
 		repoQueries := make([]query.Query, 0, len(gistsIds))
@@ -103,9 +109,7 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 			repoQueries = append(repoQueries, qq)
 		}
 
-		indexerQuery = bleve.NewConjunctionQuery(bleve.NewDisjunctionQuery(repoQueries...), contentQuery)
-	} else {
-		indexerQuery = contentQuery
+		indexerQuery = bleve.NewConjunctionQuery(bleve.NewDisjunctionQuery(repoQueries...), indexerQuery)
 	}
 
 	addQuery := func(field, value string) {
@@ -120,8 +124,9 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 	addQuery("Title", queryMetadata.Title)
 	addQuery("Extensions", "."+queryMetadata.Extension)
 	addQuery("Filenames", queryMetadata.Filename)
+	addQuery("Languages", queryMetadata.Language)
 
-	languageFacet := bleve.NewFacetRequest("Languages", 10) // Adjust the size as needed
+	languageFacet := bleve.NewFacetRequest("Languages", 10)
 
 	perPage := 10
 	offset := (page - 1) * perPage

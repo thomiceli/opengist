@@ -145,9 +145,11 @@ func gistNewPushSoftInit(next echo.HandlerFunc) echo.HandlerFunc {
 
 func search(ctx echo.Context) error {
 	var err error
-	var currentUserId uint
+
 	content, meta := parseSearchQueryStr(ctx.QueryParam("q"))
-	fmt.Println(content, meta)
+	pageInt := getPage(ctx)
+
+	var currentUserId uint
 	userLogged := getUserLogged(ctx)
 	if userLogged != nil {
 		currentUserId = userLogged.ID
@@ -156,19 +158,18 @@ func search(ctx echo.Context) error {
 	}
 
 	var visibleGistsIds []uint
-	if currentUserId != 0 {
-		visibleGistsIds, err = db.GetAllGistsVisibleByUser(currentUserId)
-		if err != nil {
-			return errorRes(500, "Error fetching gists", err)
-		}
+	visibleGistsIds, err = db.GetAllGistsVisibleByUser(currentUserId)
+	if err != nil {
+		return errorRes(500, "Error fetching gists", err)
 	}
 
-	gistsIds, nbHits, _, err := index.SearchGists(content, index.SearchGistMetadata{
-		Username:  meta["username"],
+	gistsIds, nbHits, langs, err := index.SearchGists(content, index.SearchGistMetadata{
+		Username:  meta["user"],
 		Title:     meta["title"],
 		Filename:  meta["filename"],
 		Extension: meta["extension"],
-	}, visibleGistsIds, 1)
+		Language:  meta["language"],
+	}, visibleGistsIds, pageInt)
 	if err != nil {
 		return errorRes(500, "Error searching gists", err)
 	}
@@ -187,11 +188,22 @@ func search(ctx echo.Context) error {
 		renderedGists = append(renderedGists, &rendered)
 	}
 
+	if pageInt > 1 && len(renderedGists) != 0 {
+		setData(ctx, "prevPage", pageInt-1)
+	}
+	if 10*pageInt < int(nbHits) {
+		setData(ctx, "nextPage", pageInt+1)
+	}
+	setData(ctx, "prevLabel", tr(ctx, "pagination.previous"))
+	setData(ctx, "nextLabel", tr(ctx, "pagination.next"))
+	setData(ctx, "urlPage", "search")
+	setData(ctx, "urlParams", template.URL("&q="+ctx.QueryParam("q")))
+	setData(ctx, "htmlTitle", "Search results")
 	setData(ctx, "nbHits", nbHits)
-
-	return ctx.JSON(200, map[string]interface{}{
-		"res": renderedGists,
-	})
+	setData(ctx, "gists", renderedGists)
+	setData(ctx, "langs", langs)
+	setData(ctx, "searchQuery", ctx.QueryParam("q"))
+	return html(ctx, "search.html")
 }
 
 func allGists(ctx echo.Context) error {

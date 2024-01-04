@@ -568,19 +568,16 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 		return nil, err
 	}
 
+	exts := make([]string, 0, len(files))
 	wholeContent := ""
 	for _, file := range files {
 		wholeContent += file.Content
+		exts = append(exts, filepath.Ext(file.Filename))
 	}
 
 	fileNames, err := gist.FileNames("HEAD")
 	if err != nil {
 		return nil, err
-	}
-
-	exts := make([]string, 0, len(fileNames))
-	for _, file := range fileNames {
-		exts = append(exts, filepath.Ext(file))
 	}
 
 	langs, err := gist.GetLanguagesFromFiles()

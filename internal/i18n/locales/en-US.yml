@@ -68,6 +68,14 @@ gist.list.files: files
 gist.list.last-active: Last active
 gist.list.no-gists: No gists
 
+gist.search.found: gists found
+gist.search.no-results: No gists found
+gist.search.help.user: gists created by user
+gist.search.help.title: gists with given title
+gist.search.help.filename: gists having files with given name
+gist.search.help.extension: gists having files with given extension
+gist.search.help.language: gists having files with given language
+
 gist.forks: Forks
 gist.forks.view: View fork
 gist.forks.no: No public forks

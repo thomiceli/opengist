@@ -17,4 +17,5 @@ type SearchGistMetadata struct {
 	Title     string
 	Filename  string
 	Extension string
+	Language  string
 }

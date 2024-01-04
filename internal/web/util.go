@@ -270,6 +270,24 @@ func parseSearchQueryStr(query string) (string, map[string]string) {
 	return content, metadata
 }
 
+func addMetadataToSearchQuery(input, key, value string) string {
+	content, metadata := parseSearchQueryStr(input)
+
+	metadata[key] = value
+
+	var resultBuilder strings.Builder
+	resultBuilder.WriteString(content)
+
+	for k, v := range metadata {
+		resultBuilder.WriteString(" ")
+		resultBuilder.WriteString(k)
+		resultBuilder.WriteString(":")
+		resultBuilder.WriteString(v)
+	}
+
+	return strings.TrimSpace(resultBuilder.String())
+}
+
 type Argon2ID struct {
 	format  string
 	version int

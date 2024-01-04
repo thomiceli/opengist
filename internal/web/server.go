@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	htmlpkg "html"
 	"html/template"
@@ -115,6 +116,21 @@ var (
 		"safe": func(s string) template.HTML {
 			return template.HTML(s)
 		},
+		"dict": func(values ...interface{}) (map[string]interface{}, error) {
+			if len(values)%2 != 0 {
+				return nil, errors.New("invalid dict call")
+			}
+			dict := make(map[string]interface{})
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, errors.New("dict keys must be strings")
+				}
+				dict[key] = values[i+1]
+			}
+			return dict, nil
+		},
+		"addMetadataToSearchQuery": addMetadataToSearchQuery,
 	}
 )
 
@@ -223,7 +239,6 @@ func NewServer(isDev bool) *Server {
 		g1.DELETE("/settings/ssh-keys/:id", sshKeysDelete, logged)
 		g1.PUT("/settings/password", passwordProcess, logged)
 		g1.PUT("/settings/username", usernameProcess, logged)
-		g1.GET("/bleve", search)
 		g2 := g1.Group("/admin-panel")
 		{
 			g2.Use(adminPermission)
@@ -247,7 +262,7 @@ func NewServer(isDev bool) *Server {
 		}
 
 		g1.GET("/all", allGists, checkRequireLogin)
-		g1.GET("/search", allGists, checkRequireLogin)
+		g1.GET("/search", search, checkRequireLogin)
 		g1.GET("/:user", allGists, checkRequireLogin)
 		g1.GET("/:user/liked", allGists, checkRequireLogin)
 		g1.GET("/:user/forked", allGists, checkRequireLogin)

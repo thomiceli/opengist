@@ -1,11 +1,10 @@
 {
   "name": "opengist",
   "private": true,
-  "version": "1.0.0",
   "scripts": {
-    "dev": "node_modules/.bin/vite",
-    "build": "node_modules/.bin/vite build",
-    "preview": "node_modules/.bin/vite preview"
+    "dev": "node_modules/.bin/vite -c public/vite.config.js",
+    "build": "node_modules/.bin/vite -c public/vite.config.js build",
+    "preview": "node_modules/.bin/vite -c public/vite.config.js preview"
   },
   "devDependencies": {
     "@codemirror/commands": "^6.2.2",

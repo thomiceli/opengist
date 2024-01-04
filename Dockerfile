@@ -1,4 +1,4 @@
-FROM alpine:3.17 AS build
+FROM alpine:3.19 AS build
 
 RUN apk update && \
     apk add --no-cache \
@@ -10,7 +10,7 @@ RUN apk update && \
 COPY --from=golang:1.21-alpine /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-COPY --from=node:18-alpine /usr/local/ /usr/local/
+COPY --from=node:20-alpine /usr/local/ /usr/local/
 ENV NODE_PATH="/usr/local/lib/node_modules"
 ENV PATH="/usr/local/bin:${PATH}"
 
@@ -21,7 +21,7 @@ COPY . .
 RUN make
 
 
-FROM alpine:3.17 as run
+FROM alpine:3.19 as run
 
 RUN apk update && \
     apk add --no-cache \

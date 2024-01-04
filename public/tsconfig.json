@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true
+  },
+  "files": [
+    "main.ts",
+    "editor.ts",
+    "admin.ts",
+    "gist.ts",
+    "embed.ts",
+  ],
+}

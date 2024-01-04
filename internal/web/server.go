@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/thomiceli/opengist/internal/index"
 	htmlpkg "html"
 	"html/template"
 	"io"
@@ -131,6 +132,7 @@ var (
 			return dict, nil
 		},
 		"addMetadataToSearchQuery": addMetadataToSearchQuery,
+		"indexEnabled":             index.Enabled,
 	}
 )
 
@@ -262,7 +264,13 @@ func NewServer(isDev bool) *Server {
 		}
 
 		g1.GET("/all", allGists, checkRequireLogin)
-		g1.GET("/search", search, checkRequireLogin)
+
+		if index.Enabled() {
+			g1.GET("/search", search, checkRequireLogin)
+		} else {
+			g1.GET("/search", allGists, checkRequireLogin)
+		}
+
 		g1.GET("/:user", allGists, checkRequireLogin)
 		g1.GET("/:user/liked", allGists, checkRequireLogin)
 		g1.GET("/:user/forked", allGists, checkRequireLogin)

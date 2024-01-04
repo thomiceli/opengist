@@ -89,9 +89,10 @@
                                                 </svg>
                                             </div>
                                             <form action="{{ $.c.ExternalUrl }}/search" method="GET">
-                                                <input id="search" name="q" autocomplete="off" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Code search" type="search" value="{{ .searchQuery }}">
+                                                <input id="search" name="q" autocomplete="off" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="{{if indexEnabled}}Code search{{else}}Search{{end}}" type="search" value="{{ .searchQuery }}">
                                                 <input type="submit" hidden="hidden">
                                             </form>
+                                            {{if indexEnabled}}
                                             <div id="search-help" class="hidden absolute left-1/2 z-10 mt-5 w-screen max-w-max -translate-x-1/2 px-4">
                                                 <div class="flex-auto overflow-hidden rounded-md bg-white dark:bg-gray-800 text-sm leading-6 border-1 border-gray-100 dark:border-gray-700 ring-1 ring-gray-900/5">
                                                     <div class="p-4 text-xs space-y-1">
@@ -103,6 +104,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            {{end}}
                                         </div>
                                     </div>
                                 </div>

@@ -218,6 +218,7 @@ func pack(ctx echo.Context, serviceType string) error {
 
 		_ = gist.SetLastActiveNow()
 		_ = gist.UpdatePreviewAndCount(false)
+		gist.AddInIndex()
 	}
 	return nil
 }

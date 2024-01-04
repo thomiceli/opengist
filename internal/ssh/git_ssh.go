@@ -95,6 +95,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 	if verb == "receive-pack" {
 		_ = gist.SetLastActiveNow()
 		_ = gist.UpdatePreviewAndCount(false)
+		gist.AddInIndex()
 	}
 
 	return nil

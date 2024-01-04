@@ -18,6 +18,7 @@ func healthcheck(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(httpStatus, map[string]interface{}{
+		"opengist": "ok",
 		"database": dbOk,
 		"time":     time.Now().Format(time.RFC3339),
 	})

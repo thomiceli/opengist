@@ -5,6 +5,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,6 +22,7 @@ const (
 	GitGcRepos       = iota
 	SyncGistPreviews = iota
 	ResetHooks       = iota
+	IndexGists       = iota
 )
 
 var (
@@ -69,6 +71,8 @@ func Run(actionType int) {
 		functionToRun = syncGistPreviews
 	case ResetHooks:
 		functionToRun = resetHooks
+	case IndexGists:
+		functionToRun = indexGists
 	default:
 		panic("unhandled default case")
 	}
@@ -88,7 +92,6 @@ func syncReposFromFS() {
 		if _, err := os.Stat(git.RepositoryPath(gist.User.Username, gist.Uuid)); err != nil && !os.IsExist(err) {
 			if err2 := gist.Delete(); err2 != nil {
 				log.Error().Err(err2).Msgf("Cannot delete gist %d", gist.ID)
-				return
 			}
 		}
 	}
@@ -109,7 +112,6 @@ func syncReposFromDB() {
 		if gist.ID == 0 {
 			if err := git.DeleteRepository(path[len(path)-2], path[len(path)-1]); err != nil {
 				log.Error().Err(err).Msgf("Cannot delete repository %s/%s", path[len(path)-2], path[len(path)-1])
-				return
 			}
 		}
 	}
@@ -133,7 +135,6 @@ func syncGistPreviews() {
 	for _, gist := range gists {
 		if err = gist.UpdatePreviewAndCount(false); err != nil {
 			log.Error().Err(err).Msgf("Cannot update preview and count for gist %d", gist.ID)
-			return
 		}
 	}
 }
@@ -150,7 +151,27 @@ func resetHooks() {
 		path := strings.Split(e, string(os.PathSeparator))
 		if err := git.CreateDotGitFiles(path[len(path)-2], path[len(path)-1]); err != nil {
 			log.Error().Err(err).Msgf("Cannot reset hooks for repository %s/%s", path[len(path)-2], path[len(path)-1])
-			return
+		}
+	}
+}
+
+func indexGists() {
+	log.Info().Msg("Indexing all Gists...")
+	gists, err := db.GetAllGistsRows()
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get gists")
+		return
+	}
+
+	for _, gist := range gists {
+		log.Info().Msgf("Indexing gist %d", gist.ID)
+		indexedGist, err := gist.ToIndexedGist()
+		if err != nil {
+			log.Error().Err(err).Msgf("Cannot convert gist %d to indexed gist", gist.ID)
+			continue
+		}
+		if err = index.AddInIndex(indexedGist); err != nil {
+			log.Error().Err(err).Msgf("Cannot index gist %d", gist.ID)
 		}
 	}
 }

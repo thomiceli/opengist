@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/render"
 	"html/template"
 	"net/url"
@@ -252,25 +253,88 @@ func allGists(ctx echo.Context) error {
 		}
 	}
 
-	renderedFiles := make([]*render.RenderedGist, 0, len(gists))
+	renderedGists := make([]*render.RenderedGist, 0, len(gists))
 	for _, gist := range gists {
 		rendered, err := render.HighlightGistPreview(gist)
 		if err != nil {
-			log.Warn().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
+			log.Error().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
 		}
-		renderedFiles = append(renderedFiles, &rendered)
+		renderedGists = append(renderedGists, &rendered)
 	}
 
 	if err != nil {
 		return errorRes(500, "Error fetching gists", err)
 	}
 
-	if err = paginate(ctx, renderedFiles, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
+	if err = paginate(ctx, renderedGists, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
 	setData(ctx, "urlPage", urlPage)
 	return html(ctx, "all.html")
+}
+
+func search(ctx echo.Context) error {
+	var err error
+
+	content, meta := parseSearchQueryStr(ctx.QueryParam("q"))
+	pageInt := getPage(ctx)
+
+	var currentUserId uint
+	userLogged := getUserLogged(ctx)
+	if userLogged != nil {
+		currentUserId = userLogged.ID
+	} else {
+		currentUserId = 0
+	}
+
+	var visibleGistsIds []uint
+	visibleGistsIds, err = db.GetAllGistsVisibleByUser(currentUserId)
+	if err != nil {
+		return errorRes(500, "Error fetching gists", err)
+	}
+
+	gistsIds, nbHits, langs, err := index.SearchGists(content, index.SearchGistMetadata{
+		Username:  meta["user"],
+		Title:     meta["title"],
+		Filename:  meta["filename"],
+		Extension: meta["extension"],
+		Language:  meta["language"],
+	}, visibleGistsIds, pageInt)
+	if err != nil {
+		return errorRes(500, "Error searching gists", err)
+	}
+
+	gists, err := db.GetAllGistsByIds(gistsIds)
+	if err != nil {
+		return errorRes(500, "Error fetching gists", err)
+	}
+
+	renderedGists := make([]*render.RenderedGist, 0, len(gists))
+	for _, gist := range gists {
+		rendered, err := render.HighlightGistPreview(gist)
+		if err != nil {
+			log.Error().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
+		}
+		renderedGists = append(renderedGists, &rendered)
+	}
+
+	if pageInt > 1 && len(renderedGists) != 0 {
+		setData(ctx, "prevPage", pageInt-1)
+	}
+	if 10*pageInt < int(nbHits) {
+		setData(ctx, "nextPage", pageInt+1)
+	}
+	setData(ctx, "prevLabel", tr(ctx, "pagination.previous"))
+	setData(ctx, "nextLabel", tr(ctx, "pagination.next"))
+	setData(ctx, "urlPage", "search")
+	setData(ctx, "urlParams", template.URL("&q="+ctx.QueryParam("q")))
+	setData(ctx, "htmlTitle", "Search results")
+	setData(ctx, "nbHits", nbHits)
+	setData(ctx, "gists", renderedGists)
+	setData(ctx, "langs", langs)
+	setData(ctx, "searchQuery", ctx.QueryParam("q"))
+	return html(ctx, "search.html")
 }
 
 func gistIndex(ctx echo.Context) error {
@@ -545,6 +609,8 @@ func processCreate(ctx echo.Context) error {
 		}
 	}
 
+	gist.AddInIndex()
+
 	return redirect(ctx, "/"+user.Username+"/"+gist.Identifier())
 }
 
@@ -566,6 +632,7 @@ func deleteGist(ctx echo.Context) error {
 	if err := gist.Delete(); err != nil {
 		return errorRes(500, "Error deleting this gist", err)
 	}
+	gist.RemoveFromIndex()
 
 	addFlash(ctx, "Gist has been deleted", "success")
 	return redirect(ctx, "/")

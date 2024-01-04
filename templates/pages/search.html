@@ -1,0 +1,40 @@
+{{ template "header" .}}
+<div class="py-10">
+    <header class="pb-4 ">
+        <div class="flex">
+            <div class="flex-auto">
+                <h1 class="text-2xl font-bold leading-tight">{{ .nbHits }} {{ .locale.Tr "gist.search.found" }}</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        {{ if ne (len .gists) 0 }}
+            <div class="md:grid md:grid-cols-12 gap-x-4">
+                <div class="md:col-span-3 pb-4">
+                    <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto">
+                        {{ range $lang, $count := .langs }}
+                            <a href="{{ $.c.ExternalUrl }}/search?q={{ addMetadataToSearchQuery $.searchQuery "language" $lang }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
+                                {{ $lang }} ({{ $count }})
+                            </a>
+                        {{end}}
+                    </div>
+                </div>
+                <div class="md:col-span-9">
+                        {{ range $gist := .gists }}
+                            {{ $nest := dict "gist" $gist "C" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar }}
+                            {{ template "_gist_preview" $nest }}
+                        {{ end }}
+                </div>
+            </div>
+            {{ template "pagination" . }}
+        {{ else }}
+            <div class="text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "gist.search.no-results" }}</h3>
+            </div>
+        {{ end }}
+    </main>
+</div>
+{{ template "footer" .}}

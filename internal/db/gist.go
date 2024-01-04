@@ -2,9 +2,14 @@ package db
 
 import (
 	"fmt"
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/dustin/go-humanize"
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/index"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -213,6 +218,25 @@ func GetAllGistsRows() ([]*Gist, error) {
 	return gists, err
 }
 
+func GetAllGistsVisibleByUser(userId uint) ([]uint, error) {
+	var gists []uint
+
+	err := db.Table("gists").
+		Where("gists.private = 0 or gists.user_id = ?", userId).
+		Pluck("gists.id", &gists).Error
+
+	return gists, err
+}
+
+func GetAllGistsByIds(ids []uint) ([]*Gist, error) {
+	var gists []*Gist
+	err := db.Preload("User").Preload("Forked.User").
+		Where("id in ?", ids).
+		Find(&gists).Error
+
+	return gists, err
+}
+
 func (gist *Gist) Create() error {
 	// avoids foreign key constraint error because the default value in the struct is 0
 	return db.Omit("forked_id").Create(&gist).Error
@@ -361,6 +385,10 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 	}, err
 }
 
+func (gist *Gist) FileNames(revision string) ([]string, error) {
+	return git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
+}
+
 func (gist *Gist) Log(skip int) ([]*git.Commit, error) {
 	return git.GetLog(gist.User.Username, gist.Uuid, skip)
 }
@@ -475,6 +503,30 @@ func (gist *Gist) Identifier() string {
 	return gist.Uuid
 }
 
+func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
+	files, err := gist.Files("HEAD", true)
+	if err != nil {
+		return nil, err
+	}
+
+	languages := make([]string, 0, len(files))
+	for _, file := range files {
+		var lexer chroma.Lexer
+		if lexer = lexers.Get(file.Filename); lexer == nil {
+			lexer = lexers.Fallback
+		}
+
+		fileType := lexer.Config().Name
+		if lexer.Config().Name == "fallback" || lexer.Config().Name == "plaintext" {
+			fileType = "Text"
+		}
+
+		languages = append(languages, fileType)
+	}
+
+	return languages, nil
+}
+
 // -- DTO -- //
 
 type GistDTO struct {
@@ -506,4 +558,75 @@ func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Description = dto.Description
 	gist.URL = dto.URL
 	return gist
+}
+
+// -- Index -- //
+
+func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
+	files, err := gist.Files("HEAD", true)
+	if err != nil {
+		return nil, err
+	}
+
+	exts := make([]string, 0, len(files))
+	wholeContent := ""
+	for _, file := range files {
+		wholeContent += file.Content
+		exts = append(exts, filepath.Ext(file.Filename))
+	}
+
+	fileNames, err := gist.FileNames("HEAD")
+	if err != nil {
+		return nil, err
+	}
+
+	langs, err := gist.GetLanguagesFromFiles()
+	if err != nil {
+		return nil, err
+	}
+
+	indexedGist := &index.Gist{
+		GistID:     gist.ID,
+		Username:   gist.User.Username,
+		Title:      gist.Title,
+		Content:    wholeContent,
+		Filenames:  fileNames,
+		Extensions: exts,
+		Languages:  langs,
+		CreatedAt:  gist.CreatedAt,
+		UpdatedAt:  gist.UpdatedAt,
+	}
+
+	return indexedGist, nil
+}
+
+func (gist *Gist) AddInIndex() {
+	if !index.Enabled() {
+		return
+	}
+
+	go func() {
+		indexedGist, err := gist.ToIndexedGist()
+		if err != nil {
+			log.Error().Err(err).Msgf("Cannot convert gist %d to indexed gist", gist.ID)
+			return
+		}
+		err = index.AddInIndex(indexedGist)
+		if err != nil {
+			log.Error().Err(err).Msgf("Error adding gist %d to index", gist.ID)
+		}
+	}()
+}
+
+func (gist *Gist) RemoveFromIndex() {
+	if !index.Enabled() {
+		return
+	}
+
+	go func() {
+		err := index.RemoveFromIndex(gist.ID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Error remove gist %d from index", gist.ID)
+		}
+	}()
 }

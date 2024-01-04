@@ -167,4 +167,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    const searchinput = document.getElementById('search') as HTMLInputElement;
+    searchinput.addEventListener('focusin', () => {
+        document.getElementById('search-help').classList.remove('hidden');
+    })
+
+    searchinput.addEventListener('focusout', (e) => {
+        document.getElementById('search-help').classList.add('hidden');
+    })
 });

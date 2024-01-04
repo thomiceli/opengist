@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "esModuleInterop": true
-  },
-  "files": [
-    "public/main.ts",
-    "public/editor.ts",
-  ],
-}

@@ -64,7 +64,7 @@ func listen(serverConfig *ssh.ServerConfig) {
 		go func() {
 			sConn, channels, reqs, err := ssh.NewServerConn(nConn, serverConfig)
 			if err != nil {
-				if !(err != io.EOF && !errors.Is(err, syscall.ECONNRESET)) {
+				if err != io.EOF && !errors.Is(err, syscall.ECONNRESET) {
 					errorSsh("Failed to handshake", err)
 				}
 				return

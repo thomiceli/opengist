@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const setSetting = (key: string, value: string) => {
+    // @ts-ignore
     const baseUrl = window.opengist_base_url || '';
     const data = new URLSearchParams();
     data.append('key', key);

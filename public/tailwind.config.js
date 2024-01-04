@@ -1,11 +1,14 @@
 const colors = require('tailwindcss/colors')
 
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./templates/pages/gist_embed.html",
+    "./templates/**/*.html",
   ],
   theme: {
     colors: {
+      transparent: 'transparent',
+      current: 'currentColor',
       white: colors.white,
       black: colors.black,
       gray: {
@@ -20,6 +23,7 @@ module.exports = {
         800: "#232429",
         900: "#131316"
       },
+      rose: colors.rose,
       primary: {
         50: '#d6e1ff',
         100: '#d1dfff',
@@ -42,6 +46,6 @@ module.exports = {
       }
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography"),require('@tailwindcss/forms')],
   darkMode: 'class',
 }

@@ -11,7 +11,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@config "../tailwind-embed.config.js";
+@config "./tailwind-embed.config.js";
 
 .html {
     -webkit-text-size-adjust: 100%;

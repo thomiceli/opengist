@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.6.0](https://github.com/thomiceli/opengist/compare/v1.5.3...v1.6.0) - 2024-01-04
+See here how to [update](/docs/update.md) Opengist.
+
+### Added
+- Embedded gists (#179)
+- Gist code search (#194)
+- Custom URLS for gists (#183)
+- Gist JSON data/metadata (#179)
+- Keep default visibility when creating a gist on the UI (#155)
+- Health check endpoint (#170)
+- GitLab OAuth2 login (#174)
+- Syntax highlighting for more file types (#176) 
+- Checkable Markdown checkboxes (#182)
+- Config:
+  - Log output (#172) 
+  - Default git branch name (#171)
+- Change username setting (#190)
+- Admin actions:
+  - Synchronize all gists previews (#191)
+  - Reset Git server hooks for all repositories (#191)
+  - Index all gists (#194)
+- Translations:
+  - cs-CZ (#164)
+  - zh-TW (#166, #195)
+  - hu-HU (#185)
+  - pt-BR (#193)
+- Docs (#198)
+
+### Changed
+- Updated dependencies (#197):
+  - Go `1.20` -> `1.21` 
+  - JavaScript packages
+  - NodeJS Docker image `18` -> `20`
+  - Alpine Docker image `3.17` -> `3.19`
+
+### Fixed
+- Fix reverse proxy subpath support (#192)
+- Fix undecoded gist content when going back to editing in the UI (#184)
+- Fix outputting non-truncated large files for editon/zip download (#184)
+- Allow dashes in usernames (#184)
+- Delete SSH keys associated to deleted user (#184)
+- Better error message when there is no files in gist (#184)
+- Show if there is no files in gist preview (#184)
+- Log parsing for the 11th empty commit (#184)
+- Optimize reading gist files content (#186)
+
 ## [1.5.3](https://github.com/thomiceli/opengist/compare/v1.5.2...v1.5.3) - 2023-11-20
 ### Added
 - es-ES translation (#139)

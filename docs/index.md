@@ -11,13 +11,15 @@ Written in [Go](https://go.dev), Opengist aims to be fast and easy to deploy.
 
 * Create public, unlisted or private snippets
 * [Init](/docs/usage/init-via-git.md) / Clone / Pull / Push snippets **via Git** over HTTP or SSH
-* Revisions history
 * Syntax highlighting ; markdown & CSV support
+* Search code in snippets ; browse users snippets, likes and forks
+* Embed snippets in other websites
+* Revisions history
 * Like / Fork snippets
-* Search for snippets ; browse users snippets, likes and forks
 * Editor with indentation mode & size ; drag and drop files
 * Download raw files or as a ZIP archive
-* OAuth2 login with GitHub, Gitea, and OpenID Connect
+* Retrieve snippet data/metadata via a JSON API
+* OAuth2 login with GitHub, GitLab, Gitea, and OpenID Connect
 * Avatars via Gravatar or OAuth2 providers
 * Light/Dark mode
 * Responsive UI

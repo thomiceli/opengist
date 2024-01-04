@@ -67,7 +67,7 @@ ssh.keygen-executable: ssh-keygen
 
 
 # OAuth2 configuration
-# The callback/redirect URL must be http://opengist.domain/oauth/<github|gitlab|gitea|openid-connect>/callback
+# The callback/redirect URL must be http://opengist.url/oauth/<github|gitlab|gitea|openid-connect>/callback
 
 # To create a new OAuth2 application using GitHub : https://github.com/settings/applications/new
 github.client-key:

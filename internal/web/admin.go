@@ -117,6 +117,8 @@ func adminGistDelete(ctx echo.Context) error {
 		return errorRes(500, "Cannot delete this gist", err)
 	}
 
+	gist.RemoveFromIndex()
+
 	addFlash(ctx, "Gist has been deleted", "success")
 	return redirect(ctx, "/admin-panel/gists")
 }

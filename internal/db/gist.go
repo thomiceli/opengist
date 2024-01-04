@@ -601,6 +601,10 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 }
 
 func (gist *Gist) AddInIndex() {
+	if !index.Enabled() {
+		return
+	}
+
 	go func() {
 		indexedGist, err := gist.ToIndexedGist()
 		if err != nil {
@@ -615,6 +619,10 @@ func (gist *Gist) AddInIndex() {
 }
 
 func (gist *Gist) RemoveFromIndex() {
+	if !index.Enabled() {
+		return
+	}
+
 	go func() {
 		err := index.RemoveFromIndex(gist.ID)
 		if err != nil {

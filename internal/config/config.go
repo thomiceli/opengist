@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -137,7 +138,7 @@ func InitLog() {
 	)
 	for _, logOutputType := range logOutputTypes {
 		logOutputType = strings.TrimSpace(logOutputType)
-		if !utils.SliceContains([]string{"stdout", "file"}, logOutputType) {
+		if !slices.Contains([]string{"stdout", "file"}, logOutputType) {
 			defer func() { log.Warn().Msg("Invalid log output type: " + logOutputType) }()
 			continue
 		}
@@ -163,7 +164,7 @@ func InitLog() {
 	multi := zerolog.MultiLevelWriter(logWriters...)
 	log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
 
-	if !utils.SliceContains([]string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}, strings.ToLower(C.LogLevel)) {
+	if !slices.Contains([]string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}, strings.ToLower(C.LogLevel)) {
 		log.Warn().Msg("Invalid log level: " + C.LogLevel)
 	}
 }

@@ -7,7 +7,7 @@ RUN apk update && \
     musl-dev \
     libstdc++
 
-COPY --from=golang:1.20-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.21-alpine /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 COPY --from=node:18-alpine /usr/local/ /usr/local/

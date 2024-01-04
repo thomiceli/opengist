@@ -178,7 +178,7 @@ func NewServer(isDev bool) *Server {
 			return nil
 		},
 	}))
-	// e.Use(middleware.Recover())
+	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 
 	e.Renderer = &Template{

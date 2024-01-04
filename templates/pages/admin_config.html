@@ -14,9 +14,13 @@
                 </div>
             </div>
             <dt>Log level</dt><dd>{{ .c.LogLevel }}</dd>
+            <dt>Log output</dt><dd>{{ .c.LogOutput }}</dd>
             <dt>External URL</dt><dd>{{ .c.ExternalUrl }}</dd>
             <dt>Opengist home</dt><dd>{{ .c.OpengistHome }}</dd>
             <dt>DB filename</dt><dd>{{ .c.DBFilename }}</dd>
+            <dt>Index Enabled</dt><dd>{{ .c.IndexEnabled }}</dd>
+            <dt>Index Dirname</dt><dd>{{ .c.IndexDirname }}</dd>
+            <dt>Git default branch</dt><dd>{{ .c.GitDefaultBranch }}</dd>
             <dt>SQLite Journal Mode</dt><dd>{{ .c.SqliteJournalMode }}</dd>
             <div class="relative col-span-3 mt-4">
                 <div class="absolute inset-0 flex items-center" aria-hidden="true">
@@ -52,6 +56,9 @@
             </div>
             <dt>Github Client key</dt><dd>{{ .c.GithubClientKey }}</dd>
             <dt>Github Secret</dt><dd>{{ .c.GithubSecret }}</dd>
+            <dt>GitLab client Key</dt><dd>{{ .c.GitlabClientKey }}</dd>
+            <dt>GitLab Secret</dt><dd>{{ .c.GitlabSecret }}</dd>
+            <dt>GitLab URL</dt><dd>{{ .c.GitlabUrl }}</dd>
             <dt>Gitea client Key</dt><dd>{{ .c.GiteaClientKey }}</dd>
             <dt>Gitea Secret</dt><dd>{{ .c.GiteaSecret }}</dd>
             <dt>Gitea URL</dt><dd>{{ .c.GiteaUrl }}</dd>

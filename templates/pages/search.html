@@ -21,7 +21,7 @@
                 </div>
                 <div class="md:col-span-9">
                         {{ range $gist := .gists }}
-                            {{ $nest := dict "gist" $gist "C" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar }}
+                            {{ $nest := dict "gist" $gist "c" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar }}
                             {{ template "_gist_preview" $nest }}
                         {{ end }}
                 </div>

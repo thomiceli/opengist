@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/git"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -162,11 +163,14 @@ func usernameProcess(ctx echo.Context) error {
 		return redirect(ctx, "/settings")
 	}
 
-	err := os.Rename(
-		filepath.Join(config.C.OpengistHome, "repos", user.Username),
-		filepath.Join(config.C.OpengistHome, "repos", dto.Username))
-	if err != nil {
-		return errorRes(500, "Cannot rename user directory", err)
+	sourceDir := filepath.Join(config.C.OpengistHome, git.ReposDirectory, strings.ToLower(user.Username))
+	destinationDir := filepath.Join(config.C.OpengistHome, git.ReposDirectory, strings.ToLower(dto.Username))
+
+	if _, err := os.Stat(sourceDir); !os.IsNotExist(err) {
+		err := os.Rename(sourceDir, destinationDir)
+		if err != nil {
+			return errorRes(500, "Cannot rename user directory", err)
+		}
 	}
 
 	user.Username = dto.Username

@@ -5,6 +5,8 @@ on:
       - master
       - 'dev-*'
   pull_request:
+    paths-ignore:
+      - '**.yml'
 
 jobs:
   lint:

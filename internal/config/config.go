@@ -17,7 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var OpengistVersion = "1.6.0"
+var OpengistVersion = "1.6.1"
 
 var C *config
 

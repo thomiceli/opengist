@@ -3,7 +3,19 @@ package web
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/thomiceli/opengist/internal/index"
+	htmlpkg "html"
+	"html/template"
+	"io"
+	"net/http"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -16,106 +28,113 @@ import (
 	"github.com/thomiceli/opengist/public"
 	"github.com/thomiceli/opengist/templates"
 	"golang.org/x/text/language"
-	htmlpkg "html"
-	"html/template"
-	"io"
-	"net/http"
-	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 )
 
-var dev bool
-var store *sessions.CookieStore
-var re = regexp.MustCompile("[^a-z0-9]+")
-var fm = template.FuncMap{
-	"split":     strings.Split,
-	"indexByte": strings.IndexByte,
-	"toInt": func(i string) int {
-		val, _ := strconv.Atoi(i)
-		return val
-	},
-	"inc": func(i int) int {
-		return i + 1
-	},
-	"splitGit": func(i string) []string {
-		return strings.FieldsFunc(i, func(r rune) bool {
-			return r == ',' || r == ' '
-		})
-	},
-	"lines": func(i string) []string {
-		return strings.Split(i, "\n")
-	},
-	"isMarkdown": func(i string) bool {
-		return strings.ToLower(filepath.Ext(i)) == ".md"
-	},
-	"isCsv": func(i string) bool {
-		return strings.ToLower(filepath.Ext(i)) == ".csv"
-	},
-	"csvFile": func(file *git.File) *git.CsvFile {
-		if strings.ToLower(filepath.Ext(file.Filename)) != ".csv" {
-			return nil
-		}
+var (
+	dev   bool
+	store *sessions.CookieStore
+	re    = regexp.MustCompile("[^a-z0-9]+")
+	fm    = template.FuncMap{
+		"split":     strings.Split,
+		"indexByte": strings.IndexByte,
+		"toInt": func(i string) int {
+			val, _ := strconv.Atoi(i)
+			return val
+		},
+		"inc": func(i int) int {
+			return i + 1
+		},
+		"splitGit": func(i string) []string {
+			return strings.FieldsFunc(i, func(r rune) bool {
+				return r == ',' || r == ' '
+			})
+		},
+		"lines": func(i string) []string {
+			return strings.Split(i, "\n")
+		},
+		"isMarkdown": func(i string) bool {
+			return strings.ToLower(filepath.Ext(i)) == ".md"
+		},
+		"isCsv": func(i string) bool {
+			return strings.ToLower(filepath.Ext(i)) == ".csv"
+		},
+		"csvFile": func(file *git.File) *git.CsvFile {
+			if strings.ToLower(filepath.Ext(file.Filename)) != ".csv" {
+				return nil
+			}
 
-		csvFile, err := git.ParseCsv(file)
-		if err != nil {
-			return nil
-		}
+			csvFile, err := git.ParseCsv(file)
+			if err != nil {
+				return nil
+			}
 
-		return csvFile
-	},
-	"httpStatusText": http.StatusText,
-	"loadedTime": func(startTime time.Time) string {
-		return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
-	},
-	"slug": func(s string) string {
-		return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
-	},
-	"avatarUrl": func(user *db.User, noGravatar bool) string {
-		if user.AvatarURL != "" {
-			return user.AvatarURL
-		}
+			return csvFile
+		},
+		"httpStatusText": http.StatusText,
+		"loadedTime": func(startTime time.Time) string {
+			return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
+		},
+		"slug": func(s string) string {
+			return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
+		},
+		"avatarUrl": func(user *db.User, noGravatar bool) string {
+			if user.AvatarURL != "" {
+				return user.AvatarURL
+			}
 
-		if user.MD5Hash != "" && !noGravatar {
-			return "https://www.gravatar.com/avatar/" + user.MD5Hash + "?d=identicon&s=200"
-		}
+			if user.MD5Hash != "" && !noGravatar {
+				return "https://www.gravatar.com/avatar/" + user.MD5Hash + "?d=identicon&s=200"
+			}
 
-		return defaultAvatar()
-	},
-	"asset": func(file string) string {
-		if dev {
-			return "http://localhost:16157/" + file
-		}
-		return config.C.ExternalUrl + "/" + manifestEntries[file].File
-	},
-	"dev": func() bool {
-		return dev
-	},
-	"defaultAvatar": defaultAvatar,
-	"visibilityStr": func(visibility int, lowercase bool) string {
-		s := "Public"
-		switch visibility {
-		case 1:
-			s = "Unlisted"
-		case 2:
-			s = "Private"
-		}
+			return defaultAvatar()
+		},
+		"asset": asset,
+		"dev": func() bool {
+			return dev
+		},
+		"defaultAvatar": defaultAvatar,
+		"visibilityStr": func(visibility db.Visibility, lowercase bool) string {
+			s := "Public"
+			switch visibility {
+			case 1:
+				s = "Unlisted"
+			case 2:
+				s = "Private"
+			}
 
-		if lowercase {
-			return strings.ToLower(s)
-		}
-		return s
-	},
-	"unescape": htmlpkg.UnescapeString,
-	"join": func(s ...string) string {
-		return strings.Join(s, "")
-	},
-	"toStr": func(i interface{}) string {
-		return fmt.Sprint(i)
-	},
-}
+			if lowercase {
+				return strings.ToLower(s)
+			}
+			return s
+		},
+		"unescape": htmlpkg.UnescapeString,
+		"join": func(s ...string) string {
+			return strings.Join(s, "")
+		},
+		"toStr": func(i interface{}) string {
+			return fmt.Sprint(i)
+		},
+		"safe": func(s string) template.HTML {
+			return template.HTML(s)
+		},
+		"dict": func(values ...interface{}) (map[string]interface{}, error) {
+			if len(values)%2 != 0 {
+				return nil, errors.New("invalid dict call")
+			}
+			dict := make(map[string]interface{})
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, errors.New("dict keys must be strings")
+				}
+				dict[key] = values[i+1]
+			}
+			return dict, nil
+		},
+		"addMetadataToSearchQuery": addMetadataToSearchQuery,
+		"indexEnabled":             index.Enabled,
+	}
+)
 
 type Template struct {
 	templates *template.Template
@@ -159,7 +178,7 @@ func NewServer(isDev bool) *Server {
 			return nil
 		},
 	}))
-	//e.Use(middleware.Recover())
+	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 
 	e.Renderer = &Template{
@@ -205,6 +224,8 @@ func NewServer(isDev bool) *Server {
 		g1.GET("/", create, logged)
 		g1.POST("/", processCreate, logged)
 
+		g1.GET("/healthcheck", healthcheck)
+
 		g1.GET("/register", register)
 		g1.POST("/register", processRegister)
 		g1.GET("/login", login)
@@ -219,7 +240,7 @@ func NewServer(isDev bool) *Server {
 		g1.POST("/settings/ssh-keys", sshKeysProcess, logged)
 		g1.DELETE("/settings/ssh-keys/:id", sshKeysDelete, logged)
 		g1.PUT("/settings/password", passwordProcess, logged)
-
+		g1.PUT("/settings/username", usernameProcess, logged)
 		g2 := g1.Group("/admin-panel")
 		{
 			g2.Use(adminPermission)
@@ -231,6 +252,9 @@ func NewServer(isDev bool) *Server {
 			g2.POST("/sync-fs", adminSyncReposFromFS)
 			g2.POST("/sync-db", adminSyncReposFromDB)
 			g2.POST("/gc-repos", adminGcRepos)
+			g2.POST("/sync-previews", adminSyncGistPreviews)
+			g2.POST("/reset-hooks", adminResetHooks)
+			g2.POST("/index-gists", adminIndexGists)
 			g2.GET("/configuration", adminConfig)
 			g2.PUT("/set-config", adminSetConfig)
 		}
@@ -240,7 +264,13 @@ func NewServer(isDev bool) *Server {
 		}
 
 		g1.GET("/all", allGists, checkRequireLogin)
-		g1.GET("/search", allGists, checkRequireLogin)
+
+		if index.Enabled() {
+			g1.GET("/search", search, checkRequireLogin)
+		} else {
+			g1.GET("/search", allGists, checkRequireLogin)
+		}
+
 		g1.GET("/:user", allGists, checkRequireLogin)
 		g1.GET("/:user/liked", allGists, checkRequireLogin)
 		g1.GET("/:user/forked", allGists, checkRequireLogin)
@@ -262,6 +292,7 @@ func NewServer(isDev bool) *Server {
 			g3.GET("/likes", likes)
 			g3.POST("/fork", fork, logged)
 			g3.GET("/forks", forks)
+			g3.PUT("/checkbox", checkbox, logged, writePermission)
 		}
 	}
 
@@ -307,6 +338,7 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 		setData(ctx, "c", config.C)
 
 		setData(ctx, "githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
+		setData(ctx, "gitlabOauth", config.C.GitlabClientKey != "" && config.C.GitlabSecret != "")
 		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
 		setData(ctx, "oidcOauth", config.C.OIDCClientKey != "" && config.C.OIDCSecret != "" && config.C.OIDCDiscoveryUrl != "")
 
@@ -316,7 +348,6 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 
 func locale(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-
 		// Check URL arguments
 		lang := ctx.Request().URL.Query().Get("lang")
 		changeLang := lang != ""
@@ -335,7 +366,7 @@ func locale(next echo.HandlerFunc) echo.HandlerFunc {
 			changeLang = false
 		}
 
-		//3.Then check from 'Accept-Language' header.
+		// 3.Then check from 'Accept-Language' header.
 		if len(lang) == 0 {
 			tags, _, _ := language.ParseAcceptLanguage(ctx.Request().Header.Get("Accept-Language"))
 			lang = i18n.Locales.MatchTag(tags)
@@ -394,7 +425,7 @@ func writePermission(next echo.HandlerFunc) echo.HandlerFunc {
 		gist := getData(ctx, "gist")
 		user := getUserLogged(ctx)
 		if !gist.(*db.Gist).CanWrite(user) {
-			return redirect(ctx, "/"+gist.(*db.Gist).User.Username+"/"+gist.(*db.Gist).Uuid)
+			return redirect(ctx, "/"+gist.(*db.Gist).User.Username+"/"+gist.(*db.Gist).Identifier())
 		}
 		return next(ctx)
 	}
@@ -473,4 +504,11 @@ func defaultAvatar() string {
 		return "http://localhost:16157/default.png"
 	}
 	return config.C.ExternalUrl + "/" + manifestEntries["default.png"].File
+}
+
+func asset(file string) string {
+	if dev {
+		return "http://localhost:16157/" + file
+	}
+	return config.C.ExternalUrl + "/" + manifestEntries[file].File
 }

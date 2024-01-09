@@ -5,6 +5,8 @@ on:
       - master
       - 'dev-*'
   pull_request:
+    paths-ignore:
+      - '**.yml'
 
 jobs:
   lint:
@@ -13,10 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Go 1.20
+      - name: Set up Go 1.21
         uses: actions/setup-go@v4
         with:
-          go-version: "1.20"
+          go-version: "1.21"
 
       - name: Lint
         uses: golangci/golangci-lint-action@v3
@@ -34,10 +36,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Go 1.20
+      - name: Set up Go 1.21
         uses: actions/setup-go@v4
         with:
-          go-version: "1.20"
+          go-version: "1.21"
 
       - name: Check
         run: make go_mod check_changes
@@ -47,7 +49,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
-        go: ["1.20", "1.21"]
+        go: ["1.21"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout

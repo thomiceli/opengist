@@ -17,19 +17,20 @@ gist.header.clone-http: Clone via %s
 gist.header.clone-http-help: Clone with Git using HTTP basic authentication.
 gist.header.clone-ssh: Clone via SSH
 gist.header.clone-ssh-help: Clone with Git using an SSH key.
-gist.header.share: Share
-gist.header.share-help: Copy shareable link for this gist.
+gist.header.embed: Embed
+gist.header.embed-help: Embed this gist to your website.
 gist.header.download-zip: Download ZIP
 
 gist.raw: Raw
 gist.file-truncated: This file has been truncated.
 gist.watch-full-file: View the full file.
 gist.file-not-valid: This file is not a valid CSV file.
-gist.no-content: No content
+gist.no-content: No files found
 
 gist.new.new_gist: New gist
 gist.new.title: Title
 gist.new.description: Description
+gist.new.url: URL
 gist.new.filename-with-extension: Filename with extension
 gist.new.indent-mode: Indent mode
 gist.new.indent-mode-space: Space
@@ -67,6 +68,14 @@ gist.list.files: files
 gist.list.last-active: Last active
 gist.list.no-gists: No gists
 
+gist.search.found: gists found
+gist.search.no-results: No gists found
+gist.search.help.user: gists created by user
+gist.search.help.title: gists with given title
+gist.search.help.filename: gists having files with given name
+gist.search.help.extension: gists having files with given extension
+gist.search.help.language: gists having files with given language
+
 gist.forks: Forks
 gist.forks.view: View fork
 gist.forks.no: No public forks
@@ -92,8 +101,10 @@ settings.email-help: Used for commits and Gravatar
 settings.email-set: Set email
 settings.link-accounts: Link accounts
 settings.link-github-account: Link GitHub account
+settings.link-gitlab-account: Link GitLab account
 settings.link-gitea-account: Link Gitea account
 settings.unlink-github-account: Unlink GitHub account
+settings.unlink-gitlab-account: Unlink GitLab account
 settings.unlink-gitea-account: Unlink Gitea account
 settings.delete-account: Delete account
 settings.delete-account-confirm: Are you sure you want to delete your account ?
@@ -106,6 +117,7 @@ settings.delete-ssh-key-confirm: Confirm deletion of SSH key
 settings.ssh-key-added-at: Added
 settings.ssh-key-never-used: Never used
 settings.ssh-key-last-used: Last used
+settings.change-username: Change username
 settings.create-password: Create password
 settings.create-password-help: Create your password to login to Opengist via HTTP
 settings.change-password: Change password
@@ -121,6 +133,7 @@ auth.password: Password
 auth.register-instead: Register instead
 auth.login-instead: Login instead
 auth.github-oauth: Continue with GitHub account
+auth.gitlab-oauth: Continue with GitLab account
 auth.gitea-oauth: Continue with Gitea account
 
 error: Error
@@ -156,7 +169,10 @@ admin.stats: Stats
 admin.actions: Actions
 admin.actions.sync-fs: Synchronize gists from filesystem
 admin.actions.sync-db: Synchronize gists from database
-admin.actions.git-gc: Garbage collect git repositories
+admin.actions.git-gc: Garbage collect all git repositories
+admin.actions.sync-previews: Synchronize all gists previews
+admin.actions.reset-hooks: Reset Git server hooks for all repositories
+admin.actions.index-gists: Index all gists
 admin.id: ID
 admin.user: User
 admin.delete: Delete

@@ -7,7 +7,10 @@
         <meta name="robots" content="noindex, follow">
     {{ end }}
 
+    <base href="{{ $.c.ExternalUrl }}" />
+
     <script>
+        window.opengist_base_url = "{{ $.c.ExternalUrl }}";
         const checkTheme = () => {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark')
@@ -30,7 +33,7 @@
 
     {{ if dev }}
         <script type="module" src="{{ asset "@vite/client" }}"></script>
-        <link rel="stylesheet" href="{{ asset "style.css" }}" />
+        <link rel="stylesheet" href="{{ asset "style.scss" }}" />
         <script type="module" src="{{ asset "main.ts" }}"></script>
     {{ else }}
         <link rel="stylesheet" href="{{ asset "main.css" }}" />
@@ -85,10 +88,23 @@
                                                     <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                                                 </svg>
                                             </div>
-                                            <form action="/search" method="GET">
-                                                <input id="search" name="q" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Search" type="search" value="{{ .searchQuery }}">
+                                            <form action="{{ $.c.ExternalUrl }}/search" method="GET">
+                                                <input id="search" name="q" autocomplete="off" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="{{if indexEnabled}}Code search{{else}}Search{{end}}" type="search" value="{{ .searchQuery }}">
                                                 <input type="submit" hidden="hidden">
                                             </form>
+                                            {{if indexEnabled}}
+                                            <div id="search-help" class="hidden absolute left-1/2 z-10 mt-5 w-screen max-w-max -translate-x-1/2 px-4">
+                                                <div class="flex-auto overflow-hidden rounded-md bg-white dark:bg-gray-800 text-sm leading-6 border-1 border-gray-100 dark:border-gray-700 ring-1 ring-gray-900/5">
+                                                    <div class="p-4 text-xs space-y-1">
+                                                        <p class="text-gray-400"><code class="text-slate-800 dark:text-slate-300 pr-1">user:thomas</code> {{ .locale.Tr "gist.search.help.user" }}</p>
+                                                        <p class="text-gray-400"><code class="text-slate-800 dark:text-slate-300 pr-1">title:mygist</code> {{ .locale.Tr "gist.search.help.title" }}</p>
+                                                        <p class="text-gray-400"><code class="text-slate-800 dark:text-slate-300 pr-1">filename:myfile.txt</code> {{ .locale.Tr "gist.search.help.filename" }}</p>
+                                                        <p class="text-gray-400"><code class="text-slate-800 dark:text-slate-300 pr-1">extension:yml</code> {{ .locale.Tr "gist.search.help.extension" }}</p>
+                                                        <p class="text-gray-400"><code class="text-slate-800 dark:text-slate-300 pr-1">language:go</code> {{ .locale.Tr "gist.search.help.language" }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {{end}}
                                         </div>
                                     </div>
                                 </div>
@@ -186,7 +202,7 @@
                                         </svg>
                                         {{ .locale.Tr "header.menu.dark" }}
                                     </button>
-                                    <button id="system-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
+                                    <button id="system-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-max hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-3 h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-500">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
                                         </svg>
@@ -211,7 +227,7 @@
                                 <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <form action="/search" method="GET">
+                        <form action="{{ $.c.ExternalUrl }}/search" method="GET">
                             <input id="searchmobile" name="q" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md pl-10" placeholder="Search" type="search" value="{{.searchQuery}}">
                             <input type="submit" hidden="hidden">
                         </form>

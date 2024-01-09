@@ -19,12 +19,13 @@ It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and c
 
 * Create public, unlisted or private snippets
 * [Init](/docs/usage/init-via-git.md) / Clone / Pull / Push snippets **via Git** over HTTP or SSH
-* Revisions history
 * Syntax highlighting ; markdown & CSV support
+* Search code in snippets ; browse users snippets, likes and forks
+* Embed snippets in other websites
+* Revisions history
 * Like / Fork snippets
-* Search for snippets ; browse users snippets, likes and forks
 * Download raw files or as a ZIP archive
-* OAuth2 login with GitHub, Gitea, and OpenID Connect
+* OAuth2 login with GitHub, GitLab, Gitea, and OpenID Connect
 * Restrict or unrestrict snippets visibility to anonymous users
 * Docker support
 * [More...](/docs/index.md#features)
@@ -77,9 +78,9 @@ Download the archive for your system from the release page [here](https://github
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.5.2/opengist1.5.2-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.6.1/opengist1.6.1-linux-amd64.tar.gz
 
-tar xzvf opengist1.5.2-linux-amd64.tar.gz
+tar xzvf opengist1.6.1-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`
@@ -89,7 +90,7 @@ Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ### From source
 
-Requirements : [Git](https://git-scm.com/downloads) (2.20+), [Go](https://go.dev/doc/install) (1.20+), [Node.js](https://nodejs.org/en/download/) (16+)
+Requirements : [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.21+), [Node.js](https://nodejs.org/en/download/) (16+)
 
 ```shell
 git clone https://github.com/thomiceli/opengist

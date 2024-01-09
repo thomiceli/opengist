@@ -17,15 +17,15 @@ gist.header.clone-http: Cloner via %s
 gist.header.clone-http-help: Cloner avec Git en utilisant l'authentification HTTP basic.
 gist.header.clone-ssh: Cloner via SSH
 gist.header.clone-ssh-help: Cloner avec Git en utilisant une clé SSH.
-gist.header.share: Partager
-gist.header.share-help: Copier le lien partageable de ce gist.
+gist.header.embed: Intégrer
+gist.header.embed-help: Intégrer ce gist dans une page web.
 gist.header.download-zip: Télécharger en ZIP
 
 gist.raw: Brut
 gist.file-truncated: Ce fichier a été tronqué.
 gist.watch-full-file: Voir le fichier complet.
 gist.file-not-valid: Ce fichier n'est pas un fichier CSV valide.
-gist.no-content: Pas de contenu
+gist.no-content: Aucun fichier
 
 gist.new.new_gist: Nouveau gist
 gist.new.title: Titre
@@ -175,3 +175,23 @@ admin.gists.private: Privé ?
 admin.gists.nb-files: Nb. de fichiers
 admin.gists.nb-likes: Nb. de j'aime
 admin.gists.delete_confirm: Voulez-vous supprimer ce gist ?
+gist.search.help.user: gists créés par un utilisateur
+gist.search.help.title: gists avec un titre spécifique
+gist.search.help.extension: gists qui ont des fichiers avec une extension spécifique
+gist.search.found: gists trouvés
+gist.search.help.filename: gists qui ont des fichiers avec un nom spécifique
+settings.link-gitlab-account: Lier le compte GitLab
+gist.search.help.language: gists qui ont des fichiers écrits en un langage spécifique
+settings.change-username: Changer le nom d'utilisateur
+settings.create-password: Créer un mot de passe
+settings.create-password-help: Créer un mot de passe pour se connecter à Opengist via HTTP
+settings.change-password: Changer le mot de passe
+settings.change-password-help: Changer le mot de passe pour se connecter à Opengist via HTTP
+settings.password-label-title: Mot de passe
+auth.gitlab-oauth: Continuer avec un compte GitLab
+admin.actions.sync-previews: Synchroniser l'aperçu des gists
+admin.actions.reset-hooks: Réinitialiser les hooks de Git pour tous les dépôts
+gist.new.url: URL
+gist.search.no-results: Aucun gist trouvé
+settings.unlink-gitlab-account: Détacher le compte GitLab
+admin.actions.index-gists: Indexer tous les gists

@@ -3,12 +3,17 @@ package web
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/thomiceli/opengist/internal/db"
-	"golang.org/x/crypto/ssh"
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/git"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/thomiceli/opengist/internal/db"
+	"golang.org/x/crypto/ssh"
 )
 
 func userSettings(ctx echo.Context) error {
@@ -62,7 +67,7 @@ func accountDeleteProcess(ctx echo.Context) error {
 func sshKeysProcess(ctx echo.Context) error {
 	user := getUserLogged(ctx)
 
-	var dto = new(db.SSHKeyDTO)
+	dto := new(db.SSHKeyDTO)
 	if err := ctx.Bind(dto); err != nil {
 		return errorRes(400, "Cannot bind data", err)
 	}
@@ -93,7 +98,6 @@ func sshKeysProcess(ctx echo.Context) error {
 func sshKeysDelete(ctx echo.Context) error {
 	user := getUserLogged(ctx)
 	keyId, err := strconv.Atoi(ctx.Param("id"))
-
 	if err != nil {
 		return redirect(ctx, "/settings")
 	}
@@ -137,5 +141,44 @@ func passwordProcess(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, "Password updated", "success")
+	return redirect(ctx, "/settings")
+}
+
+func usernameProcess(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+
+	dto := new(db.UserDTO)
+	if err := ctx.Bind(dto); err != nil {
+		return errorRes(400, "Cannot bind data", err)
+	}
+	dto.Password = user.Password
+
+	if err := ctx.Validate(dto); err != nil {
+		addFlash(ctx, validationMessages(&err), "error")
+		return redirect(ctx, "/settings")
+	}
+
+	if exists, err := db.UserExists(dto.Username); err != nil || exists {
+		addFlash(ctx, "Username already exists", "error")
+		return redirect(ctx, "/settings")
+	}
+
+	sourceDir := filepath.Join(config.C.OpengistHome, git.ReposDirectory, strings.ToLower(user.Username))
+	destinationDir := filepath.Join(config.C.OpengistHome, git.ReposDirectory, strings.ToLower(dto.Username))
+
+	if _, err := os.Stat(sourceDir); !os.IsNotExist(err) {
+		err := os.Rename(sourceDir, destinationDir)
+		if err != nil {
+			return errorRes(500, "Cannot rename user directory", err)
+		}
+	}
+
+	user.Username = dto.Username
+
+	if err := user.Update(); err != nil {
+		return errorRes(500, "Cannot update username", err)
+	}
+
+	addFlash(ctx, "Username updated", "success")
 	return redirect(ctx, "/settings")
 }

@@ -1,22 +1,63 @@
 package db
 
 import (
+	"fmt"
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/dustin/go-humanize"
 	"github.com/labstack/echo/v4"
-	"github.com/thomiceli/opengist/internal/git"
-	"gorm.io/gorm"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/index"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/git"
+	"gorm.io/gorm"
 )
+
+type Visibility int
+
+const (
+	PublicVisibility Visibility = iota
+	UnlistedVisibility
+	PrivateVisibility
+)
+
+func (v Visibility) Next() Visibility {
+	switch v {
+	case PublicVisibility:
+		return UnlistedVisibility
+	case UnlistedVisibility:
+		return PrivateVisibility
+	default:
+		return PublicVisibility
+	}
+}
+
+func ParseVisibility[T string | int](v T) (Visibility, error) {
+	switch s := fmt.Sprint(v); s {
+	case "0":
+		return PublicVisibility, nil
+	case "1":
+		return UnlistedVisibility, nil
+	case "2":
+		return PrivateVisibility, nil
+	default:
+		return -1, fmt.Errorf("unknown visibility %q", s)
+	}
+}
 
 type Gist struct {
 	ID              uint `gorm:"primaryKey"`
 	Uuid            string
 	Title           string
+	URL             string
 	Preview         string
 	PreviewFilename string
 	Description     string
-	Private         int // 0: public, 1: unlisted, 2: private
+	Private         Visibility // 0: public, 1: unlisted, 2: private
 	UserID          uint
 	User            User
 	NbFiles         int
@@ -48,7 +89,7 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
 	err := db.Preload("User").Preload("Forked.User").
-		Where("gists.uuid = ? AND users.username like ?", gistUuid, user).
+		Where("(gists.uuid = ? OR gists.url = ?) AND users.username like ?", gistUuid, gistUuid, user).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
 
@@ -177,6 +218,25 @@ func GetAllGistsRows() ([]*Gist, error) {
 	return gists, err
 }
 
+func GetAllGistsVisibleByUser(userId uint) ([]uint, error) {
+	var gists []uint
+
+	err := db.Table("gists").
+		Where("gists.private = 0 or gists.user_id = ?", userId).
+		Pluck("gists.id", &gists).Error
+
+	return gists, err
+}
+
+func GetAllGistsByIds(ids []uint) ([]*Gist, error) {
+	var gists []*Gist
+	err := db.Preload("User").Preload("Forked.User").
+		Where("id in ?", ids).
+		Find(&gists).Error
+
+	return gists, err
+}
+
 func (gist *Gist) Create() error {
 	// avoids foreign key constraint error because the default value in the struct is 0
 	return db.Omit("forked_id").Create(&gist).Error
@@ -188,6 +248,10 @@ func (gist *Gist) CreateForked() error {
 
 func (gist *Gist) Update() error {
 	return db.Omit("forked_id").Save(&gist).Error
+}
+
+func (gist *Gist) UpdateNoTimestamps() error {
+	return db.Omit("forked_id", "updated_at").Save(&gist).Error
 }
 
 func (gist *Gist) Delete() error {
@@ -274,25 +338,25 @@ func (gist *Gist) DeleteRepository() error {
 	return git.DeleteRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) Files(revision string) ([]*git.File, error) {
-	var files []*git.File
-	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
+func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
+	filesCat, err := git.CatFileBatch(gist.User.Username, gist.Uuid, revision, truncate)
 	if err != nil {
 		// if the revision or the file do not exist
-
 		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
-			return nil, nil
+			return nil, &git.RevisionNotFoundError{}
 		}
-
 		return nil, err
 	}
 
-	for _, fileStr := range filesStr {
-		file, err := gist.File(revision, fileStr, true)
-		if err != nil {
-			return nil, err
-		}
-		files = append(files, file)
+	var files []*git.File
+	for _, fileCat := range filesCat {
+		files = append(files, &git.File{
+			Filename:  fileCat.Name,
+			Size:      fileCat.Size,
+			HumanSize: humanize.IBytes(fileCat.Size),
+			Content:   fileCat.Content,
+			Truncated: fileCat.Truncated,
+		})
 	}
 	return files, err
 }
@@ -305,11 +369,24 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 		return nil, nil
 	}
 
+	var size uint64
+
+	size, err = git.GetFileSize(gist.User.Username, gist.Uuid, revision, filename)
+	if err != nil {
+		return nil, err
+	}
+
 	return &git.File{
 		Filename:  filename,
+		Size:      size,
+		HumanSize: humanize.IBytes(size),
 		Content:   content,
 		Truncated: truncated,
 	}, err
+}
+
+func (gist *Gist) FileNames(revision string) ([]string, error) {
+	return git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
 }
 
 func (gist *Gist) Log(skip int) ([]*git.Commit, error) {
@@ -321,7 +398,7 @@ func (gist *Gist) NbCommits() (string, error) {
 }
 
 func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
-	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email); err != nil {
+	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email, true); err != nil {
 		return err
 	}
 
@@ -329,6 +406,26 @@ func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
 		if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
 			return err
 		}
+	}
+
+	if err := git.AddAll(gist.Uuid); err != nil {
+		return err
+	}
+
+	if err := git.CommitRepository(gist.Uuid, gist.User.Username, gist.User.Email); err != nil {
+		return err
+	}
+
+	return git.Push(gist.Uuid)
+}
+
+func (gist *Gist) AddAndCommitFile(file *FileDTO) error {
+	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email, false); err != nil {
+		return err
+	}
+
+	if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
+		return err
 	}
 
 	if err := git.AddAll(gist.Uuid); err != nil {
@@ -354,7 +451,7 @@ func (gist *Gist) RPC(service string) ([]byte, error) {
 	return git.RPC(gist.User.Username, gist.Uuid, service)
 }
 
-func (gist *Gist) UpdatePreviewAndCount() error {
+func (gist *Gist) UpdatePreviewAndCount(withTimestampUpdate bool) error {
 	filesStr, err := git.GetFilesOfRepository(gist.User.Username, gist.Uuid, "HEAD")
 	if err != nil {
 		return err
@@ -380,18 +477,66 @@ func (gist *Gist) UpdatePreviewAndCount() error {
 		gist.PreviewFilename = file.Filename
 	}
 
-	return gist.Update()
+	if withTimestampUpdate {
+		return gist.Update()
+	}
+	return gist.UpdateNoTimestamps()
+}
+
+func (gist *Gist) VisibilityStr() string {
+	switch gist.Private {
+	case PublicVisibility:
+		return "public"
+	case UnlistedVisibility:
+		return "unlisted"
+	case PrivateVisibility:
+		return "private"
+	default:
+		return ""
+	}
+}
+
+func (gist *Gist) Identifier() string {
+	if gist.URL != "" {
+		return gist.URL
+	}
+	return gist.Uuid
+}
+
+func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
+	files, err := gist.Files("HEAD", true)
+	if err != nil {
+		return nil, err
+	}
+
+	languages := make([]string, 0, len(files))
+	for _, file := range files {
+		var lexer chroma.Lexer
+		if lexer = lexers.Get(file.Filename); lexer == nil {
+			lexer = lexers.Fallback
+		}
+
+		fileType := lexer.Config().Name
+		if lexer.Config().Name == "fallback" || lexer.Config().Name == "plaintext" {
+			fileType = "Text"
+		}
+
+		languages = append(languages, fileType)
+	}
+
+	return languages, nil
 }
 
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string    `validate:"max=250" form:"title"`
-	Description string    `validate:"max=1000" form:"description"`
-	Private     int       `validate:"number,min=0,max=2" form:"private"`
-	Files       []FileDTO `validate:"min=1,dive"`
-	Name        []string  `form:"name"`
-	Content     []string  `form:"content"`
+	Title       string     `validate:"max=250" form:"title"`
+	Description string     `validate:"max=1000" form:"description"`
+	URL         string     `validate:"max=32,alphanumdashorempty" form:"url"`
+	Private     Visibility `validate:"number,min=0,max=2" form:"private"`
+	Files       []FileDTO  `validate:"min=1,dive"`
+	Name        []string   `form:"name"`
+	Content     []string   `form:"content"`
 }
 
 type FileDTO struct {
@@ -404,11 +549,84 @@ func (dto *GistDTO) ToGist() *Gist {
 		Title:       dto.Title,
 		Description: dto.Description,
 		Private:     dto.Private,
+		URL:         dto.URL,
 	}
 }
 
 func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Title = dto.Title
 	gist.Description = dto.Description
+	gist.URL = dto.URL
 	return gist
+}
+
+// -- Index -- //
+
+func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
+	files, err := gist.Files("HEAD", true)
+	if err != nil {
+		return nil, err
+	}
+
+	exts := make([]string, 0, len(files))
+	wholeContent := ""
+	for _, file := range files {
+		wholeContent += file.Content
+		exts = append(exts, filepath.Ext(file.Filename))
+	}
+
+	fileNames, err := gist.FileNames("HEAD")
+	if err != nil {
+		return nil, err
+	}
+
+	langs, err := gist.GetLanguagesFromFiles()
+	if err != nil {
+		return nil, err
+	}
+
+	indexedGist := &index.Gist{
+		GistID:     gist.ID,
+		Username:   gist.User.Username,
+		Title:      gist.Title,
+		Content:    wholeContent,
+		Filenames:  fileNames,
+		Extensions: exts,
+		Languages:  langs,
+		CreatedAt:  gist.CreatedAt,
+		UpdatedAt:  gist.UpdatedAt,
+	}
+
+	return indexedGist, nil
+}
+
+func (gist *Gist) AddInIndex() {
+	if !index.Enabled() {
+		return
+	}
+
+	go func() {
+		indexedGist, err := gist.ToIndexedGist()
+		if err != nil {
+			log.Error().Err(err).Msgf("Cannot convert gist %d to indexed gist", gist.ID)
+			return
+		}
+		err = index.AddInIndex(indexedGist)
+		if err != nil {
+			log.Error().Err(err).Msgf("Error adding gist %d to index", gist.ID)
+		}
+	}()
+}
+
+func (gist *Gist) RemoveFromIndex() {
+	if !index.Enabled() {
+		return
+	}
+
+	go func() {
+		err := index.RemoveFromIndex(gist.ID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Error remove gist %d from index", gist.ID)
+		}
+	}()
 }

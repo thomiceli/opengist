@@ -12,7 +12,7 @@
                 </svg>
                 {{ $user := (index $.emails $commit.AuthorEmail) }}
                 <img class="h-5 w-5 rounded-full inline" src="{{if $user }}{{ avatarUrl $user $.DisableGravatar }}{{else}}{{defaultAvatar}}{{end}}" {{if $user }}alt="{{ $user.Username }}'s Avatar"{{end}} />
-                <span class="font-bold">{{if $user}}<a href="{{ $.c.ExternalUrl }}/{{$user.Username}}" class="text-slate-300 hover:text-slate-300 hover:underline">{{ $commit.AuthorName }}</a>{{else}}{{ $commit.AuthorName }}{{end}}</span> {{ $.locale.Tr "gist.revision.revised" }} <span class="moment-timestamp font-bold">{{ $commit.Timestamp }}</span>. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Uuid }}/rev/{{ $commit.Hash }}">{{ $.locale.Tr "gist.revision.go-to-revision" }}</a></h3>
+                <span class="font-bold">{{if $user}}<a href="{{ $.c.ExternalUrl }}/{{$user.Username}}" class="text-slate-300 hover:text-slate-300 hover:underline">{{ $commit.AuthorName }}</a>{{else}}{{ $commit.AuthorName }}{{end}}</span> {{ $.locale.Tr "gist.revision.revised" }} <span class="moment-timestamp font-bold">{{ $commit.Timestamp }}</span>. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/rev/{{ $commit.Hash }}">{{ $.locale.Tr "gist.revision.go-to-revision" }}</a></h3>
                 {{ if ne $commit.Changed "" }}
                     <p class="text-sm float-right py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-flex">
@@ -50,7 +50,7 @@
                             {{ else if eq $file.Content "" }}
                                 <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.empty-file" }}</p>
                             {{ else }}
-                            <table class="code table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
+                            <table class="code chroma table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
                                 <tbody>
                                 {{ $left  := 0 }}
                                 {{ $right := 0 }}
@@ -98,7 +98,7 @@
         {{end}}
         </div>
         <div class="flex justify-center space-x-2">
-            {{ template "pagination" . }}
+            {{ template "_pagination" . }}
         </div>
 {{ else }}
 <div class="text-center">

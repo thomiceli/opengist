@@ -1,11 +1,10 @@
 {
   "name": "opengist",
   "private": true,
-  "version": "1.0.0",
   "scripts": {
-    "dev": "node_modules/.bin/vite",
-    "build": "node_modules/.bin/vite build",
-    "preview": "node_modules/.bin/vite preview"
+    "dev": "node_modules/.bin/vite -c public/vite.config.js",
+    "build": "node_modules/.bin/vite -c public/vite.config.js build",
+    "preview": "node_modules/.bin/vite -c public/vite.config.js preview"
   },
   "devDependencies": {
     "@codemirror/commands": "^6.2.2",
@@ -20,14 +19,14 @@
     "codemirror": "^6.0.1",
     "cssnano": "^5.1.15",
     "dayjs": "^1.11.9",
-    "github-markdown-css": "^5.2.0",
-    "highlight.js": "^11.7.0",
-    "markdown-it": "^13.0.1",
+    "github-markdown-css": "^5.5.0",
     "nodemon": "^2.0.22",
     "postcss": "^8.4.13",
+    "postcss-cli": "^11.0.0",
     "postcss-cssnext": "^3.1.1",
     "postcss-import": "^15.1.0",
     "postcss-loader": "^7.1.0",
+    "postcss-selector-namespace": "^3.0.1",
     "sass": "^1.62.1",
     "sugarss": "^4.0.1",
     "tailwindcss": "^3.2.7",

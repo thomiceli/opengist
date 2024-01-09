@@ -56,22 +56,40 @@
                 <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.actions" }}</span>
             </div>
             <div class="space-y-2">
-                <form action="/admin-panel/sync-fs" method="POST">
+                <form action="{{ $.c.ExternalUrl }}/admin-panel/sync-fs" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .syncReposFromFS }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                         {{ .locale.Tr "admin.actions.sync-fs" }}
                     </button>
                 </form>
-                <form action="/admin-panel/sync-db" method="POST">
+                <form action="{{ $.c.ExternalUrl }}/admin-panel/sync-db" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .syncReposFromDB }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromDB }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                         {{ .locale.Tr "admin.actions.sync-db" }}
                     </button>
                 </form>
-                <form action="/admin-panel/gc-repos" method="POST">
+                <form action="{{ $.c.ExternalUrl }}/admin-panel/gc-repos" method="POST">
                     {{ .csrfHtml }}
                     <button type="submit" {{ if .gitGcRepos }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .gitGcRepos }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                         {{ .locale.Tr "admin.actions.git-gc" }}
+                    </button>
+                </form>
+                <form action="{{ $.c.ExternalUrl }}/admin-panel/sync-previews" method="POST">
+                    {{ .csrfHtml }}
+                    <button type="submit" {{ if .syncGistPreviews }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncGistPreviews }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                        {{ .locale.Tr "admin.actions.sync-previews" }}
+                    </button>
+                </form>
+                <form action="{{ $.c.ExternalUrl }}/admin-panel/reset-hooks" method="POST">
+                    {{ .csrfHtml }}
+                    <button type="submit" {{ if .resetHooks }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .resetHooks }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                        {{ .locale.Tr "admin.actions.reset-hooks" }}
+                    </button>
+                </form>
+                <form action="{{ $.c.ExternalUrl }}/admin-panel/index-gists" method="POST">
+                    {{ .csrfHtml }}
+                    <button type="submit" {{ if .indexGists }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .indexGists }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                        {{ .locale.Tr "admin.actions.index-gists" }}
                     </button>
                 </form>
             </div>

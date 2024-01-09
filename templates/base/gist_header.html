@@ -1,15 +1,15 @@
 {{ define "gist_header" }}
-<div class="py-10">
+<div class="py-10" id="gist" data-own="{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}">
     <header>
         <div class="flex flex-col lg:flex-row">
             <div>
                 <h1 class="text-2xl font-bold leading-tight break-all">
-                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}">{{ .gist.User.Username }}</a> <span class="text-slate-700 dark:text-slate-300">/</span> <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}">{{ .gist.Title }}</a>
+                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}">{{ .gist.User.Username }}</a> <span class="text-slate-700 dark:text-slate-300">/</span> <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}">{{ .gist.Title }}</a>
                 </h1>
             </div>
             <div class="lg:flex-row flex py-2 lg:py-0 lg:ml-auto">
                 {{ if .userLogged }}
-                    <form id="like" class="flex items-center" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/like?redirecturl={{ .currentUrl }}">
+                    <form id="like" class="flex items-center" method="post" action="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/like?redirecturl={{ .currentUrl }}">
                         {{ .csrfHtml }}
                         <button type="submit" class="focus-within:z-10 text-slate-700 dark:text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                             {{ if not .hasLiked }}
@@ -24,12 +24,12 @@
                             {{ .locale.Tr "gist.header.unlike" }}
                             {{ end }}
                         </button>
-                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/likes" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                            {{ .gist.NbLikes }}
                         </a>
                     </form>
                     {{ if ne .userLogged.ID .gist.User.ID }}
-                    <form id="fork" class="ml-2 flex items-center " method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/fork">
+                    <form id="fork" class="ml-2 flex items-center " method="post" action="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/fork">
                         {{ .csrfHtml }}
                         <button type="submit" class="ml-auto focus-within:z-10 text-slate-700 dark:text-slate-300 relative inline-flex items-center space-x-2 rounded-l-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
@@ -37,7 +37,7 @@
                             </svg>
                             {{ .locale.Tr "gist.header.fork" }}
                         </button>
-                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/forks" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                            {{ .gist.NbForks }}
                         </a>
                     </form>
@@ -50,7 +50,7 @@
                         </svg>
                         {{ .locale.Tr "gist.header.like" }}
                     </a>
-                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/likes" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/likes" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                         {{ .gist.NbLikes }}
                     </a>
                 </div>
@@ -61,21 +61,21 @@
                         </svg>
                         {{ .locale.Tr "gist.header.fork" }}
                     </a>
-                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/forks" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/forks" class="text-slate-700 dark:text-slate-300 relative inline-flex align-middle items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 -ml-px text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                         {{ .gist.NbForks }}
                     </a>
                 </div>
                 {{ end }}
                 {{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}
                 <div class="ml-2 flex items-center">
-                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/edit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                    <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/edit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                         {{ .locale.Tr "gist.header.edit" }}
                     </a>
                 </div>
-                <form id="delete" onsubmit="return confirm('Are you sure you want to delete this gist ?')" class="ml-2 flex items-center" method="post" action="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/delete">
+                <form id="delete" onsubmit="return confirm('Are you sure you want to delete this gist ?')" class="ml-2 flex items-center" method="post" action="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/delete">
                     {{ .csrfHtml }}
                     <button type="submit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 hover:border-rose-600 dark:hover:border-rose-700 dark:hover:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -89,12 +89,12 @@
             </div>
         </div>
         {{ if .gist.Forked }}
-            <p class="mt-1 max-w-2xl text-sm text-slate-500">{{ .locale.Tr "gist.header.forked-from" }} <a href="{{ $.c.ExternalUrl }}/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Uuid }}">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a></p>
+            <p class="mt-1 max-w-2xl text-sm text-slate-500">{{ .locale.Tr "gist.header.forked-from" }} <a href="{{ $.c.ExternalUrl }}/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Identifier }}">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a></p>
         {{ end }}
         <p class="mt-1 max-w-2xl text-sm text-slate-500">{{ .locale.Tr "gist.header.last-active" }} <span class="moment-timestamp"> {{ .gist.UpdatedAt }} </span>
             {{ if .gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> {{ visibilityStr .gist.Private false }} </span>{{ end }}
         </p>
-        <p class="mt-3 max-w-2xl text-slate-700 dark:text-slate-300">{{ .gist.Description }}</p>
+        <p class="mt-1 text-sm max-w-2xl text-slate-600 dark:text-slate-400">{{ .gist.Description }}</p>
     </header>
     <main class="mt-4">
 
@@ -102,20 +102,20 @@
             <div class="sm:hidden">
                 <label for="gist-tabs" class="sr-only">{{ .locale.Tr "gist.header.select-tab" }}</label>
                 <select id="gist-tabs" name="tabs" class="block bg-gray-50 dark:bg-gray-800 w-full pl-3 pr-10 py-2 text-base border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
-                    <option {{ if eq .page "code"}}selected{{end}} data-url="/{{ .gist.User.Username }}/{{ .gist.Uuid }}">{{ .locale.Tr "gist.header.code" }}</option>
-                    <option {{ if eq .page "revisions"}}selected{{end}} data-url="/{{ .gist.User.Username }}/{{ .gist.Uuid }}/revisions">{{ .locale.Tr "gist.header.revisions" }} ({{ if .nbCommits }}{{ .nbCommits }}{{else}}0{{ end }})</option>
+                    <option {{ if eq .page "code"}}selected{{end}} data-url="/{{ .gist.User.Username }}/{{ .gist.Identifier }}">{{ .locale.Tr "gist.header.code" }}</option>
+                    <option {{ if eq .page "revisions"}}selected{{end}} data-url="/{{ .gist.User.Username }}/{{ .gist.Identifier }}/revisions">{{ .locale.Tr "gist.header.revisions" }} ({{ if .nbCommits }}{{ .nbCommits }}{{else}}0{{ end }})</option>
                 </select>
             </div>
             <div class="hidden sm:block">
                 <div class="border-b flex border-gray-200 dark:border-gray-700">
                     <nav class="-mb-px flex-auto space-x-4" aria-label="Tabs">
-                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}" class="inline-flex items-center text-slate-700 dark:text-slate-300 {{ if eq .page "code"}}border-slate-500 dark:border-slate-300 {{else}}border-transparent hover:border-gray-700 dark:hover:border-gray-200{{end}} hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" aria-current="page">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" class="inline-flex items-center text-slate-700 dark:text-slate-300 {{ if eq .page "code"}}border-slate-500 dark:border-slate-300 {{else}}border-transparent hover:border-gray-700 dark:hover:border-gray-200{{end}} hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" aria-current="page">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
                             </svg>
                             {{ .locale.Tr "gist.header.code" }}
                         </a>
-                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/revisions" class="inline-flex items-center text-slate-700 dark:text-slate-300 {{ if eq .page "revisions"}}border-slate-500 dark:border-slate-300 {{else}}border-transparent hover:border-gray-700 dark:hover:border-gray-200{{end}} hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/revisions" class="inline-flex items-center text-slate-700 dark:text-slate-300 {{ if eq .page "revisions"}}border-slate-500 dark:border-slate-300 {{else}}border-transparent hover:border-gray-700 dark:hover:border-gray-200{{end}} hover:text-slate-700 dark:hover:text-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                             </svg>
@@ -128,13 +128,16 @@
                             <div class="flex rounded-md shadow-sm">
                                 <div class="relative">
                                     <button type="button" id="gist-menu-toggle" class="relative text-xs inline-flex items-center space-x-2 rounded-l-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3 focus-within:z-10 -mr-px">
-                                        <span id="gist-menu-title" class="whitespace-nowrap"></span>
+                                        <span id="gist-menu-title" class="whitespace-nowrap">{{ .locale.Tr "gist.header.embed" }}</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                         </svg>
                                     </button>
                                     <div class="absolute left-0 z-10 mt-2 w-56 origin-top-left bg-gray-50 dark:bg-gray-800 shadow-lg ring-1 ring-white dark:ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                         <div class="py-1 cursor-pointer border-1 rounded-md border-gray-200 dark:border-gray-700 hidden" id="gist-menu-copy" role="none">
+                                            <div class="text-slate-700 dark:text-slate-300 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 gist-menu-item" role="menuitem" id="gist-menu-share" data-link="{{ .embedScript }}"><p>{{ .locale.Tr "gist.header.embed" }}</p>
+                                                <p class="text-xs font-normal text-gray-600 dark:text-gray-400">{{ .locale.Tr "gist.header.embed-help" }}</p>
+                                            </div>
                                             {{ if .httpCloneUrl }}
                                                 <div class="text-slate-700 dark:text-slate-300 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 gist-menu-item" role="menuitem" id="gist-menu-http" data-link="{{ .httpCloneUrl }}"><p>{{ .locale.Tr "gist.header.clone-http" .httpProtocol }}</p>
                                                     <p class="text-xs font-normal text-gray-600 dark:text-gray-400">{{ .locale.Tr "gist.header.clone-http-help" }}</p>
@@ -145,25 +148,22 @@
                                                     <p class="text-xs font-normal text-gray-600 dark:text-gray-400">{{ .locale.Tr "gist.header.clone-ssh-help" }}</p>
                                                 </div>
                                             {{ end }}
-                                            <div class="text-slate-700 dark:text-slate-300 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 gist-menu-item" role="menuitem" id="gist-menu-share" data-link="{{ .httpCopyUrl }}"><p>{{ .locale.Tr "gist.header.share" }}</p>
-                                                <p class="text-xs font-normal text-gray-600 dark:text-gray-400">{{ .locale.Tr "gist.header.share-help" }}</p>
-                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
                                 <div class="relative flex flex-grow items-stretch focus-within:z-10">
-                                    <input id="gist-menu-input" value="" class="block code bg-white dark:bg-gray-900 w-full rounded-none border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-primary-500 focus:outline-none focus:ring-1 text-xs px-2">
+                                    <input readonly id="gist-menu-input" value="{{.embedScript}}" class="block code bg-white dark:bg-gray-900 w-full rounded-none border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-primary-500 focus:outline-none focus:ring-1 text-xs px-2 py-1">
                                 </div>
                                 <button id="gist-menu-button-copy" type="button" class="relative text-xs -ml-px inline-flex items-center space-x-2 rounded-r-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" />
                                     </svg>
-
                                 </button>
                             </div>
                         </div>
 
-                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Uuid }}/archive/{{ .revision }}" class="whitespace-nowrap text-slate-700 dark:text-slate-300 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                        <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/archive/{{ .revision }}" class="whitespace-nowrap text-slate-700 dark:text-slate-300 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
                             {{ .locale.Tr "gist.header.download-zip" }}</a>
                     </div>
                 </div>

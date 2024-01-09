@@ -4,8 +4,8 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub, Gite
 
 ## Github
 
-* Add a new OAuth app in your [Github account settings](https://github.com/settings/applications/new)
-* Set 'Authorization callback URL' to `http://opengist.domain/oauth/github/callback`
+* Add a new OAuth app in your [GitHub account settings](https://github.com/settings/applications/new)
+* Set 'Authorization callback URL' to `http://opengist.url/oauth/github/callback`
 * Copy the 'Client ID' and 'Client Secret' and add them to the [configuration](/docs/configuration/cheat-sheet.md) :
   ```yaml
   github.client-key: <key>
@@ -13,10 +13,23 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub, Gite
   ```
 
 
+## GitLab
+
+* Add a new OAuth app in Application settings from the [GitLab instance](https://gitlab.com/-/user_settings/applications)
+* Set 'Redirect URI' to `http://opengist.url/oauth/gitlab/callback`
+* Copy the 'Client ID' and 'Client Secret' and add them to the [configuration](/docs/configuration/cheat-sheet.md) :
+  ```yaml
+  gitlab.client-key: <key>
+  gitlab.secret: <secret>
+  # URL of the GitLab instance. Default: https://gitlab.com/
+  gitlab.url: https://gitlab.com/
+  ```
+
+
 ## Gitea
 
 * Add a new OAuth app in Application settings from the [Gitea instance](https://gitea.com/user/settings/applications)
-* Set 'Redirect URI' to `http://opengist.domain/oauth/gitea/callback`
+* Set 'Redirect URI' to `http://opengist.url/oauth/gitea/callback`
 * Copy the 'Client ID' and 'Client Secret' and add them to the [configuration](/docs/configuration/cheat-sheet.md) :
   ```yaml
   gitea.client-key: <key>
@@ -29,7 +42,7 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub, Gite
 ## OpenID Connect
 
 * Add a new OAuth app in Application settings of your OIDC provider
-* Set 'Redirect URI' to `http://opengist.domain/oauth/openid-connect/callback`
+* Set 'Redirect URI' to `http://opengist.url/oauth/openid-connect/callback`
 * Copy the 'Client ID', 'Client Secret', and the discovery endpoint, and add them to the [configuration](/docs/configuration/cheat-sheet.md) :
   ```yaml
   oidc.client-key: <key>

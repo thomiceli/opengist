@@ -5,8 +5,10 @@
 # Set the log level to one of the following: trace, debug, info, warn, error, fatal, panic. Default: warn
 log-level: warn
 
-# Public URL for the Git HTTP/SSH connection.
-# If not set, uses the URL from the request
+# Set the log output to one or more of the following: `stdout`, `file`. Default: stdout,file
+log-output: stdout,file
+
+# Public URL to access to Opengist
 external-url:
 
 # Directory where Opengist will store its data. Default: ~/.opengist/
@@ -14,6 +16,16 @@ opengist-home:
 
 # Name of the SQLite database file. Default: opengist.db
 db-filename: opengist.db
+
+# Enable or disable the code search index (either `true` or `false`). Default: true
+index.enabled: true
+
+# Name of the directory where the code search index is stored. Default: opengist.index
+index.dirname: opengist.index
+
+# Default branch name used by Opengist when initializing Git repositories.
+# If not set, uses the Git default branch name. See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup#_new_default_branch
+git.default-branch:
 
 # Set the journal mode for SQLite. Default: WAL
 # See https://www.sqlite.org/pragma.html#pragma_journal_mode
@@ -55,11 +67,17 @@ ssh.keygen-executable: ssh-keygen
 
 
 # OAuth2 configuration
-# The callback/redirect URL must be http://opengist.domain/oauth/<github|gitea|openid-connect>/callback
+# The callback/redirect URL must be http://opengist.url/oauth/<github|gitlab|gitea|openid-connect>/callback
 
 # To create a new OAuth2 application using GitHub : https://github.com/settings/applications/new
 github.client-key:
 github.secret:
+
+# To create a new OAuth2 application using Gitlab : https://gitlab.com/-/user_settings/applications
+gitlab.client-key:
+gitlab.secret:
+# URL of the Gitlab instance. Default: https://gitlab.com/
+gitlab.url: https://gitlab.com/
 
 # To create a new OAuth2 application using Gitea : https://gitea.domain/user/settings/applications
 gitea.client-key:

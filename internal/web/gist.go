@@ -2,18 +2,27 @@ package web
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/render"
+	"html/template"
+	"net/url"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"gorm.io/gorm"
-	"html/template"
-	"net/url"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
@@ -23,14 +32,24 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 		userName := ctx.Param("user")
 		gistName := ctx.Param("gistname")
 
-		gistName = strings.TrimSuffix(gistName, ".git")
+		switch filepath.Ext(gistName) {
+		case ".js":
+			setData(ctx, "gistpage", "js")
+			gistName = strings.TrimSuffix(gistName, ".js")
+		case ".json":
+			setData(ctx, "gistpage", "json")
+			gistName = strings.TrimSuffix(gistName, ".json")
+		case ".git":
+			setData(ctx, "gistpage", "git")
+			gistName = strings.TrimSuffix(gistName, ".git")
+		}
 
 		gist, err := db.GetGist(userName, gistName)
 		if err != nil {
 			return notFound("Gist not found")
 		}
 
-		if gist.Private == 2 {
+		if gist.Private == db.PrivateVisibility {
 			if currUser == nil || currUser.ID != gist.UserID {
 				return notFound("Gist not found")
 			}
@@ -68,12 +87,15 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 			baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
 		}
 
+		setData(ctx, "baseHttpUrl", baseHttpUrl)
+
 		if config.C.HttpGit {
 			setData(ctx, "httpCloneUrl", baseHttpUrl+"/"+userName+"/"+gistName+".git")
 		}
 
 		setData(ctx, "httpCopyUrl", baseHttpUrl+"/"+userName+"/"+gistName)
 		setData(ctx, "currentUrl", template.URL(ctx.Request().URL.Path))
+		setData(ctx, "embedScript", fmt.Sprintf(`<script src="%s"></script>`, baseHttpUrl+"/"+userName+"/"+gistName+".js"))
 
 		nbCommits, err := gist.NbCommits()
 		if err != nil {
@@ -231,11 +253,20 @@ func allGists(ctx echo.Context) error {
 		}
 	}
 
+	renderedGists := make([]*render.RenderedGist, 0, len(gists))
+	for _, gist := range gists {
+		rendered, err := render.HighlightGistPreview(gist)
+		if err != nil {
+			log.Error().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
+		}
+		renderedGists = append(renderedGists, &rendered)
+	}
+
 	if err != nil {
 		return errorRes(500, "Error fetching gists", err)
 	}
 
-	if err = paginate(ctx, gists, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
+	if err = paginate(ctx, renderedGists, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -243,7 +274,76 @@ func allGists(ctx echo.Context) error {
 	return html(ctx, "all.html")
 }
 
+func search(ctx echo.Context) error {
+	var err error
+
+	content, meta := parseSearchQueryStr(ctx.QueryParam("q"))
+	pageInt := getPage(ctx)
+
+	var currentUserId uint
+	userLogged := getUserLogged(ctx)
+	if userLogged != nil {
+		currentUserId = userLogged.ID
+	} else {
+		currentUserId = 0
+	}
+
+	var visibleGistsIds []uint
+	visibleGistsIds, err = db.GetAllGistsVisibleByUser(currentUserId)
+	if err != nil {
+		return errorRes(500, "Error fetching gists", err)
+	}
+
+	gistsIds, nbHits, langs, err := index.SearchGists(content, index.SearchGistMetadata{
+		Username:  meta["user"],
+		Title:     meta["title"],
+		Filename:  meta["filename"],
+		Extension: meta["extension"],
+		Language:  meta["language"],
+	}, visibleGistsIds, pageInt)
+	if err != nil {
+		return errorRes(500, "Error searching gists", err)
+	}
+
+	gists, err := db.GetAllGistsByIds(gistsIds)
+	if err != nil {
+		return errorRes(500, "Error fetching gists", err)
+	}
+
+	renderedGists := make([]*render.RenderedGist, 0, len(gists))
+	for _, gist := range gists {
+		rendered, err := render.HighlightGistPreview(gist)
+		if err != nil {
+			log.Error().Err(err).Msg("Error rendering gist preview for " + gist.Identifier() + " - " + gist.PreviewFilename)
+		}
+		renderedGists = append(renderedGists, &rendered)
+	}
+
+	if pageInt > 1 && len(renderedGists) != 0 {
+		setData(ctx, "prevPage", pageInt-1)
+	}
+	if 10*pageInt < int(nbHits) {
+		setData(ctx, "nextPage", pageInt+1)
+	}
+	setData(ctx, "prevLabel", tr(ctx, "pagination.previous"))
+	setData(ctx, "nextLabel", tr(ctx, "pagination.next"))
+	setData(ctx, "urlPage", "search")
+	setData(ctx, "urlParams", template.URL("&q="+ctx.QueryParam("q")))
+	setData(ctx, "htmlTitle", "Search results")
+	setData(ctx, "nbHits", nbHits)
+	setData(ctx, "gists", renderedGists)
+	setData(ctx, "langs", langs)
+	setData(ctx, "searchQuery", ctx.QueryParam("q"))
+	return html(ctx, "search.html")
+}
+
 func gistIndex(ctx echo.Context) error {
+	if getData(ctx, "gistpage") == "js" {
+		return gistJs(ctx)
+	} else if getData(ctx, "gistpage") == "json" {
+		return gistJson(ctx)
+	}
+
 	gist := getData(ctx, "gist").(*db.Gist)
 	revision := ctx.Param("revision")
 
@@ -251,27 +351,107 @@ func gistIndex(ctx echo.Context) error {
 		revision = "HEAD"
 	}
 
-	files, err := gist.Files(revision)
-	if err != nil {
+	files, err := gist.Files(revision, true)
+	if _, ok := err.(*git.RevisionNotFoundError); ok {
+		return notFound("Revision not found")
+	} else if err != nil {
 		return errorRes(500, "Error fetching files", err)
 	}
 
-	if len(files) == 0 {
-		return notFound("Revision not found")
-	}
+	renderedFiles := render.HighlightFiles(files)
 
 	setData(ctx, "page", "code")
 	setData(ctx, "commit", revision)
-	setData(ctx, "files", files)
+	setData(ctx, "files", renderedFiles)
 	setData(ctx, "revision", revision)
 	setData(ctx, "htmlTitle", gist.Title)
 	return html(ctx, "gist.html")
 }
 
+func gistJson(ctx echo.Context) error {
+	gist := getData(ctx, "gist").(*db.Gist)
+	files, err := gist.Files("HEAD", true)
+	if err != nil {
+		return errorRes(500, "Error fetching files", err)
+	}
+
+	renderedFiles := render.HighlightFiles(files)
+	setData(ctx, "files", renderedFiles)
+
+	htmlbuf := bytes.Buffer{}
+	w := bufio.NewWriter(&htmlbuf)
+	if err = ctx.Echo().Renderer.Render(w, "gist_embed.html", dataMap(ctx), ctx); err != nil {
+		return err
+	}
+	_ = w.Flush()
+
+	jsUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
+	if err != nil {
+		return errorRes(500, "Error joining js url", err)
+	}
+
+	cssUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), manifestEntries["embed.css"].File)
+	if err != nil {
+		return errorRes(500, "Error joining css url", err)
+	}
+
+	return ctx.JSON(200, map[string]interface{}{
+		"owner":       gist.User.Username,
+		"id":          gist.Identifier(),
+		"uuid":        gist.Uuid,
+		"title":       gist.Title,
+		"description": gist.Description,
+		"created_at":  time.Unix(gist.CreatedAt, 0).Format(time.RFC3339),
+		"visibility":  gist.VisibilityStr(),
+		"files":       renderedFiles,
+		"embed": map[string]string{
+			"html":    htmlbuf.String(),
+			"css":     cssUrl,
+			"js":      jsUrl,
+			"js_dark": jsUrl + "?dark",
+		},
+	})
+}
+
+func gistJs(ctx echo.Context) error {
+	if _, exists := ctx.QueryParams()["dark"]; exists {
+		setData(ctx, "dark", "dark")
+	}
+
+	gist := getData(ctx, "gist").(*db.Gist)
+	files, err := gist.Files("HEAD", true)
+	if err != nil {
+		return errorRes(500, "Error fetching files", err)
+	}
+
+	renderedFiles := render.HighlightFiles(files)
+	setData(ctx, "files", renderedFiles)
+
+	htmlbuf := bytes.Buffer{}
+	w := bufio.NewWriter(&htmlbuf)
+	if err = ctx.Echo().Renderer.Render(w, "gist_embed.html", dataMap(ctx), ctx); err != nil {
+		return err
+	}
+	_ = w.Flush()
+
+	cssUrl, err := url.JoinPath(getData(ctx, "baseHttpUrl").(string), manifestEntries["embed.css"].File)
+	if err != nil {
+		return errorRes(500, "Error joining css url", err)
+	}
+
+	js := `document.write('<link rel="stylesheet" href="%s">')
+document.write('%s')
+`
+	js = fmt.Sprintf(js, cssUrl,
+		strings.Replace(htmlbuf.String(), "\n", `\n`, -1))
+	ctx.Response().Header().Set("Content-Type", "application/javascript")
+	return plainText(ctx, 200, js)
+}
+
 func revisions(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 	userName := gist.User.Username
-	gistName := gist.Uuid
+	gistName := gist.Identifier()
 
 	pageInt := getPage(ctx)
 
@@ -363,7 +543,7 @@ func processCreate(ctx echo.Context) error {
 		if isCreate {
 			return html(ctx, "create.html")
 		} else {
-			files, err := gist.Files("HEAD")
+			files, err := gist.Files("HEAD", false)
 			if err != nil {
 				return errorRes(500, "Error fetching files", err)
 			}
@@ -429,34 +609,37 @@ func processCreate(ctx echo.Context) error {
 		}
 	}
 
-	return redirect(ctx, "/"+user.Username+"/"+gist.Uuid)
+	gist.AddInIndex()
+
+	return redirect(ctx, "/"+user.Username+"/"+gist.Identifier())
 }
 
 func toggleVisibility(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	gist.Private = (gist.Private + 1) % 3
-	if err := gist.Update(); err != nil {
+	if err := gist.UpdateNoTimestamps(); err != nil {
 		return errorRes(500, "Error updating this gist", err)
 	}
 
 	addFlash(ctx, "Gist visibility has been changed", "success")
-	return redirect(ctx, "/"+gist.User.Username+"/"+gist.Uuid)
+	return redirect(ctx, "/"+gist.User.Username+"/"+gist.Identifier())
 }
 
 func deleteGist(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	if err := gist.Delete(); err != nil {
 		return errorRes(500, "Error deleting this gist", err)
 	}
+	gist.RemoveFromIndex()
 
 	addFlash(ctx, "Gist has been deleted", "success")
 	return redirect(ctx, "/")
 }
 
 func like(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	currentUser := getUserLogged(ctx)
 
 	hasLiked, err := currentUser.HasLiked(gist)
@@ -474,7 +657,7 @@ func like(ctx echo.Context) error {
 		return errorRes(500, "Error liking/dislking this gist", err)
 	}
 
-	redirectTo := "/" + gist.User.Username + "/" + gist.Uuid
+	redirectTo := "/" + gist.User.Username + "/" + gist.Identifier()
 	if r := ctx.QueryParam("redirecturl"); r != "" {
 		redirectTo = r
 	}
@@ -482,7 +665,7 @@ func like(ctx echo.Context) error {
 }
 
 func fork(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	currentUser := getUserLogged(ctx)
 
 	alreadyForked, err := gist.GetForkParent(currentUser)
@@ -492,11 +675,11 @@ func fork(ctx echo.Context) error {
 
 	if gist.User.ID == currentUser.ID {
 		addFlash(ctx, "Unable to fork own gists", "error")
-		return redirect(ctx, "/"+gist.User.Username+"/"+gist.Uuid)
+		return redirect(ctx, "/"+gist.User.Username+"/"+gist.Identifier())
 	}
 
 	if alreadyForked.ID != 0 {
-		return redirect(ctx, "/"+alreadyForked.User.Username+"/"+alreadyForked.Uuid)
+		return redirect(ctx, "/"+alreadyForked.User.Username+"/"+alreadyForked.Identifier())
 	}
 
 	uuidGist, err := uuid.NewRandom()
@@ -529,13 +712,12 @@ func fork(ctx echo.Context) error {
 
 	addFlash(ctx, "Gist has been forked", "success")
 
-	return redirect(ctx, "/"+currentUser.Username+"/"+newGist.Uuid)
+	return redirect(ctx, "/"+currentUser.Username+"/"+newGist.Identifier())
 }
 
 func rawFile(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 	file, err := gist.File(ctx.Param("revision"), ctx.Param("file"), false)
-
 	if err != nil {
 		return errorRes(500, "Error getting file content", err)
 	}
@@ -550,7 +732,6 @@ func rawFile(ctx echo.Context) error {
 func downloadFile(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 	file, err := gist.File(ctx.Param("revision"), ctx.Param("file"), false)
-
 	if err != nil {
 		return errorRes(500, "Error getting file content", err)
 	}
@@ -572,9 +753,9 @@ func downloadFile(ctx echo.Context) error {
 }
 
 func edit(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
-	files, err := gist.Files("HEAD")
+	files, err := gist.Files("HEAD", false)
 	if err != nil {
 		return errorRes(500, "Error fetching files from repository", err)
 	}
@@ -586,10 +767,10 @@ func edit(ctx echo.Context) error {
 }
 
 func downloadZip(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
-	var revision = ctx.Param("revision")
+	gist := getData(ctx, "gist").(*db.Gist)
+	revision := ctx.Param("revision")
 
-	files, err := gist.Files(revision)
+	files, err := gist.Files(revision, false)
 	if err != nil {
 		return errorRes(500, "Error fetching files from repository", err)
 	}
@@ -621,7 +802,7 @@ func downloadZip(ctx echo.Context) error {
 	}
 
 	ctx.Response().Header().Set("Content-Type", "application/zip")
-	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+gist.Uuid+".zip")
+	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+gist.Identifier()+".zip")
 	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(zipFile.Bytes())))
 	_, err = ctx.Response().Write(zipFile.Bytes())
 	if err != nil {
@@ -631,7 +812,7 @@ func downloadZip(ctx echo.Context) error {
 }
 
 func likes(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	pageInt := getPage(ctx)
 
@@ -640,7 +821,7 @@ func likes(ctx echo.Context) error {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}
 
-	if err = paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Uuid+"/likes", 1); err != nil {
+	if err = paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Identifier()+"/likes", 1); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
@@ -650,7 +831,7 @@ func likes(ctx echo.Context) error {
 }
 
 func forks(ctx echo.Context) error {
-	var gist = getData(ctx, "gist").(*db.Gist)
+	gist := getData(ctx, "gist").(*db.Gist)
 	pageInt := getPage(ctx)
 
 	currentUser := getUserLogged(ctx)
@@ -664,11 +845,47 @@ func forks(ctx echo.Context) error {
 		return errorRes(500, "Error getting users who liked this gist", err)
 	}
 
-	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Uuid+"/forks", 2); err != nil {
+	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Identifier()+"/forks", 2); err != nil {
 		return errorRes(404, "Page not found", nil)
 	}
 
 	setData(ctx, "htmlTitle", "Forks for "+gist.Title)
 	setData(ctx, "revision", "HEAD")
 	return html(ctx, "forks.html")
+}
+
+func checkbox(ctx echo.Context) error {
+	filename := ctx.FormValue("file")
+	checkboxNb := ctx.FormValue("checkbox")
+
+	i, err := strconv.Atoi(checkboxNb)
+	if err != nil {
+		return errorRes(400, "Invalid number", nil)
+	}
+
+	gist := getData(ctx, "gist").(*db.Gist)
+	file, err := gist.File("HEAD", filename, false)
+	if err != nil {
+		return errorRes(500, "Error getting file content", err)
+	} else if file == nil {
+		return notFound("File not found")
+	}
+
+	markdown, err := render.Checkbox(file.Content, i)
+	if err != nil {
+		return errorRes(500, "Error checking checkbox", err)
+	}
+
+	if err = gist.AddAndCommitFile(&db.FileDTO{
+		Filename: filename,
+		Content:  markdown,
+	}); err != nil {
+		return errorRes(500, "Error adding and committing files", err)
+	}
+
+	if err = gist.UpdatePreviewAndCount(true); err != nil {
+		return errorRes(500, "Error updating the gist", err)
+	}
+
+	return plainText(ctx, 200, "ok")
 }

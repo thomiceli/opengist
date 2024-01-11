@@ -10,7 +10,6 @@ import (
 	"html/template"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -520,9 +519,10 @@ func asset(file string) string {
 }
 
 func custom(file string) string {
-	path, err := url.JoinPath(config.C.ExternalUrl, "custom", file)
-	if err != nil {
-		log.Warn().Err(err).Msgf("Failed to join path for custom file %s", file)
-	}
-	return path
+	// TODO: join url paths
+	//path, err := url.JoinPath(config.C.ExternalUrl, "/", "custom", file)
+	//if err != nil {
+	//	log.Warn().Err(err).Msgf("Failed to join path for custom file %s", file)
+	//}
+	return config.C.ExternalUrl + "/custom/" + file
 }

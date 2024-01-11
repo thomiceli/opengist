@@ -10,6 +10,8 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -88,7 +90,8 @@ var (
 
 			return defaultAvatar()
 		},
-		"asset": asset,
+		"asset":  asset,
+		"custom": custom,
 		"dev": func() bool {
 			return dev
 		},
@@ -207,6 +210,9 @@ func NewServer(isDev bool) *Server {
 		parseManifestEntries()
 		e.GET("/assets/*", cacheControl(echo.WrapHandler(http.FileServer(http.FS(public.Files)))))
 	}
+
+	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
+	e.GET("/custom/*", cacheControl(echo.WrapHandler(http.StripPrefix("/custom/", http.FileServer(http.FS(customFs))))))
 
 	// Web based routes
 	g1 := e.Group("")
@@ -511,4 +517,12 @@ func asset(file string) string {
 		return "http://localhost:16157/" + file
 	}
 	return config.C.ExternalUrl + "/" + manifestEntries[file].File
+}
+
+func custom(file string) string {
+	path, err := url.JoinPath(config.C.ExternalUrl, "custom", file)
+	if err != nil {
+		log.Warn().Err(err).Msgf("Failed to join path for custom file %s", file)
+	}
+	return path
 }

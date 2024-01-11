@@ -51,7 +51,9 @@ func initialize() {
 	if err := os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755); err != nil {
 		log.Fatal().Err(err).Send()
 	}
-
+	if err := os.MkdirAll(filepath.Join(homePath, "custom"), 0755); err != nil {
+		log.Fatal().Err(err).Send()
+	}
 	log.Info().Msg("Database file: " + filepath.Join(homePath, config.C.DBFilename))
 	if err := db.Setup(filepath.Join(homePath, config.C.DBFilename), false); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")

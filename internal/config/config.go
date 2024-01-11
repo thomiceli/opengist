@@ -60,6 +60,9 @@ type config struct {
 	OIDCClientKey    string `yaml:"oidc.client-key" env:"OG_OIDC_CLIENT_KEY"`
 	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
 	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
+
+	CustomLogo    string `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
+	CustomFavicon string `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
 }
 
 func configWithDefaults() (*config, error) {

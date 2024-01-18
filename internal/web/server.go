@@ -10,7 +10,9 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -90,7 +92,7 @@ var (
 			return defaultAvatar()
 		},
 		"asset":  asset,
-		"custom": custom,
+		"custom": customAsset,
 		"dev": func() bool {
 			return dev
 		},
@@ -207,11 +209,16 @@ func NewServer(isDev bool) *Server {
 
 	if !dev {
 		parseManifestEntries()
-		e.GET("/assets/*", cacheControl(echo.WrapHandler(http.FileServer(http.FS(public.Files)))))
 	}
-
 	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
-	e.GET("/custom/*", cacheControl(echo.WrapHandler(http.StripPrefix("/custom/", http.FileServer(http.FS(customFs))))))
+	e.GET("/assets/*", func(c echo.Context) error {
+		fmt.Println(c.Param("*"))
+		if _, err := public.Files.Open(path.Join("assets", c.Param("*"))); !dev && err == nil {
+			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(c)
+		}
+
+		return echo.WrapHandler(http.StripPrefix("/assets/", http.FileServer(http.FS(customFs))))(c)
+	})
 
 	// Web based routes
 	g1 := e.Group("")
@@ -518,11 +525,10 @@ func asset(file string) string {
 	return config.C.ExternalUrl + "/" + manifestEntries[file].File
 }
 
-func custom(file string) string {
-	// TODO: join url paths
-	//path, err := url.JoinPath(config.C.ExternalUrl, "/", "custom", file)
-	//if err != nil {
-	//	log.Warn().Err(err).Msgf("Failed to join path for custom file %s", file)
-	//}
-	return config.C.ExternalUrl + "/custom/" + file
+func customAsset(file string) string {
+	assetpath, err := url.JoinPath("/", "assets", file)
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to join path for custom file %s", file)
+	}
+	return config.C.ExternalUrl + assetpath
 }

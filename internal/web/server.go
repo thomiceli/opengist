@@ -212,7 +212,6 @@ func NewServer(isDev bool) *Server {
 	}
 	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
 	e.GET("/assets/*", func(c echo.Context) error {
-		fmt.Println(c.Param("*"))
 		if _, err := public.Files.Open(path.Join("assets", c.Param("*"))); !dev && err == nil {
 			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(c)
 		}
@@ -475,13 +474,6 @@ func checkRequireLogin(next echo.HandlerFunc) echo.HandlerFunc {
 			return redirect(ctx, "/login")
 		}
 		return next(ctx)
-	}
-}
-
-func cacheControl(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
-		return next(c)
 	}
 }
 

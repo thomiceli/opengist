@@ -163,8 +163,8 @@ func usernameProcess(ctx echo.Context) error {
 		return redirect(ctx, "/settings")
 	}
 
-	sourceDir := filepath.Join(config.C.OpengistHome, git.ReposDirectory, strings.ToLower(user.Username))
-	destinationDir := filepath.Join(config.C.OpengistHome, git.ReposDirectory, strings.ToLower(dto.Username))
+	sourceDir := filepath.Join(config.GetHomeDir(), git.ReposDirectory, strings.ToLower(user.Username))
+	destinationDir := filepath.Join(config.GetHomeDir(), git.ReposDirectory, strings.ToLower(dto.Username))
 
 	if _, err := os.Stat(sourceDir); !os.IsNotExist(err) {
 		err := os.Rename(sourceDir, destinationDir)

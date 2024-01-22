@@ -5,7 +5,6 @@ import (
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/dustin/go-humanize"
-	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/index"
 	"os/exec"
@@ -327,11 +326,7 @@ func (gist *Gist) CanWrite(user *User) bool {
 }
 
 func (gist *Gist) InitRepository() error {
-	return git.InitRepository(gist.User.Username, gist.Uuid)
-}
-
-func (gist *Gist) InitRepositoryViaInit(ctx echo.Context) error {
-	return git.InitRepositoryViaInit(gist.User.Username, gist.Uuid, ctx)
+	return git.InitRepository(gist.User.Username, gist.Uuid, true)
 }
 
 func (gist *Gist) DeleteRepository() error {
@@ -440,7 +435,7 @@ func (gist *Gist) AddAndCommitFile(file *FileDTO) error {
 }
 
 func (gist *Gist) ForkClone(username string, uuid string) error {
-	return git.ForkClone(gist.User.Username, gist.Uuid, username, uuid)
+	return git.ForkClone(gist.User.Username, gist.Uuid, username, uuid, true)
 }
 
 func (gist *Gist) UpdateServerInfo() error {

@@ -27,7 +27,7 @@ func setup(t *testing.T) {
 	err = os.MkdirAll(filepath.Join(config.GetHomeDir(), "tmp", "repos"), 0755)
 	require.NoError(t, err)
 
-	err = InitRepository("thomas", "gist1", false)
+	err = InitRepository("thomas", "gist1")
 	require.NoError(t, err)
 }
 
@@ -197,7 +197,7 @@ func TestFork(t *testing.T) {
 		"my_file.txt": "I love Opengist\n",
 	})
 
-	err := ForkClone("thomas", "gist1", "thomas", "gist2", false)
+	err := ForkClone("thomas", "gist1", "thomas", "gist2")
 	require.NoError(t, err, "Could not fork repository")
 
 	files1, err := GetFilesOfRepository("thomas", "gist1", "HEAD")
@@ -258,7 +258,7 @@ func TestGitInitBranchNames(t *testing.T) {
 
 	config.C.GitDefaultBranch = "main"
 
-	err = InitRepository("thomas", "gist2", false)
+	err = InitRepository("thomas", "gist2")
 	require.NoError(t, err)
 	cmd = exec.Command("git", "symbolic-ref", "HEAD")
 	cmd.Dir = RepositoryPath("thomas", "gist2")

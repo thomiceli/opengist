@@ -326,7 +326,7 @@ func (gist *Gist) CanWrite(user *User) bool {
 }
 
 func (gist *Gist) InitRepository() error {
-	return git.InitRepository(gist.User.Username, gist.Uuid, true)
+	return git.InitRepository(gist.User.Username, gist.Uuid)
 }
 
 func (gist *Gist) DeleteRepository() error {
@@ -435,7 +435,7 @@ func (gist *Gist) AddAndCommitFile(file *FileDTO) error {
 }
 
 func (gist *Gist) ForkClone(username string, uuid string) error {
-	return git.ForkClone(gist.User.Username, gist.Uuid, username, uuid, true)
+	return git.ForkClone(gist.User.Username, gist.Uuid, username, uuid)
 }
 
 func (gist *Gist) UpdateServerInfo() error {

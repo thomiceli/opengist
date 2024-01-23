@@ -62,7 +62,7 @@ func TmpRepositoriesPath() string {
 	return filepath.Join(config.GetHomeDir(), "tmp", "repos")
 }
 
-func InitRepository(user string, gist string, withHooks bool) error {
+func InitRepository(user string, gist string) error {
 	repositoryPath := RepositoryPath(user, gist)
 
 	var args []string
@@ -353,7 +353,7 @@ func CloneTmp(user string, gist string, gistTmpId string, email string, remove b
 	return cmd.Run()
 }
 
-func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string, withHooks bool) error {
+func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) error {
 	repositoryPathSrc := RepositoryPath(userSrc, gistSrc)
 	repositoryPathDst := RepositoryPath(userDst, gistDst)
 

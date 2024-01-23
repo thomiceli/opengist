@@ -307,6 +307,8 @@ func TestPreReceiveHook(t *testing.T) {
 	err = hooks.PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
 	require.Error(t, err, "Should have an error on pre-receive hook for commit+push 4")
 	require.Equal(t, "pushing files in directories is not allowed: [dir/ok/afileagain.txt dir/my_file.txt]", err.Error(), "Error message is not correct")
+
+	_ = os.Chdir(os.TempDir()) // Leave the current dir to avoid errors on teardown
 }
 
 func commitToBare(t *testing.T, user string, gist string, files map[string]string) {

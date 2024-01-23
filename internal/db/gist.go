@@ -5,7 +5,6 @@ import (
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/dustin/go-humanize"
-	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/index"
 	"os/exec"
@@ -328,10 +327,6 @@ func (gist *Gist) CanWrite(user *User) bool {
 
 func (gist *Gist) InitRepository() error {
 	return git.InitRepository(gist.User.Username, gist.Uuid)
-}
-
-func (gist *Gist) InitRepositoryViaInit(ctx echo.Context) error {
-	return git.InitRepositoryViaInit(gist.User.Username, gist.Uuid, ctx)
 }
 
 func (gist *Gist) DeleteRepository() error {

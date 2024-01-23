@@ -67,8 +67,7 @@ func PreReceive(in io.Reader, out, er io.Writer) error {
 }
 
 func getChangedFiles(rev string) (string, error) {
-	var cmd *exec.Cmd
-	cmd = exec.Command("git", "log", "--name-only", "--format=/%H", "--diff-filter=AM", rev)
+	cmd := exec.Command("git", "log", "--name-only", "--format=/%H", "--diff-filter=AM", rev)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out

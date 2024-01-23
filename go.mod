@@ -17,6 +17,7 @@ require (
 	github.com/markbates/goth v1.78.0
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.8.4
+	github.com/urfave/cli/v2 v2.27.1
 	github.com/yuin/goldmark v1.6.0
 	github.com/yuin/goldmark-emoji v1.0.2
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
@@ -74,7 +75,6 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/urfave/cli/v2 v2.27.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect

@@ -411,9 +411,6 @@ func Push(gistTmpId string) error {
 	)
 	cmd.Dir = tmpRepositoryPath
 
-	stderr := &bytes.Buffer{}
-	cmd.Stderr = stderr
-
 	err := cmd.Run()
 	if err != nil {
 		return err

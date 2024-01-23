@@ -32,7 +32,7 @@ func setup(t *testing.T) {
 }
 
 func teardown(t *testing.T) {
-	err := os.RemoveAll(path.Join(config.C.OpengistHome, "tests"))
+	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
 }
 

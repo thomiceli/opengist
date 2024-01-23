@@ -121,6 +121,10 @@ func InitConfig(configPath string) error {
 
 	C = c
 
+	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -125,6 +125,8 @@ func structToURLValues(s interface{}) url.Values {
 }
 
 func setup(t *testing.T) {
+	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
+
 	err := config.InitConfig("")
 	require.NoError(t, err, "Could not init config")
 
@@ -159,7 +161,10 @@ func teardown(t *testing.T, s *testServer) {
 	err := db.Close()
 	require.NoError(t, err, "Could not close database")
 
-	err = os.RemoveAll(path.Join(config.C.OpengistHome, "tests"))
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	require.NoError(t, err, "Could not remove repos directory")
+
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
 	require.NoError(t, err, "Could not remove repos directory")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))

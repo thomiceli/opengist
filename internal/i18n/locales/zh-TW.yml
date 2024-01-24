@@ -124,9 +124,7 @@ auth.username: 使用者名稱
 auth.password: 密碼
 auth.register-instead: 註冊
 auth.login-instead: 登錄
-auth.github-oauth: 用 GitHub 帳號繼續
-auth.gitlab-oauth: 用 GitLab 帳號繼續
-auth.gitea-oauth: 用 Gitea 帳號繼續
+auth.oauth: 用 %s 帳號繼續
 
 error: 錯誤
 

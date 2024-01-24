@@ -115,8 +115,7 @@ auth.username: Nome de usuário
 auth.password: Senha
 auth.register-instead: Registrar-se no lugar
 auth.login-instead: Entrar no lugar
-auth.github-oauth: Continuar com conta do GitHub
-auth.gitea-oauth: Continuar com conta do Gitea
+auth.oauth: Continuar com conta do %s
 
 error: Erro
 

@@ -115,8 +115,7 @@ auth.username: 用户名
 auth.password: 密码
 auth.register-instead: 转到注册
 auth.login-instead: 转到登录
-auth.github-oauth: 使用 GitHub 账号继续
-auth.gitea-oauth: 使用 Gitea 账号继续
+auth.oauth: 使用 %s 账号继续
 
 error: 错误
 

@@ -203,26 +203,12 @@ func pack(ctx echo.Context, serviceType string) error {
 	cmd.Stderr = &stderr
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "OPENGIST_REPOSITORY_URL_INTERNAL="+git.RepositoryUrl(ctx, gist.User.Username, gist.Identifier()))
+	cmd.Env = append(cmd.Env, "OPENGIST_REPOSITORY_ID="+strconv.Itoa(int(gist.ID)))
 
 	if err = cmd.Run(); err != nil {
 		return errorRes(500, "Cannot run git "+serviceType+" ; "+stderr.String(), err)
 	}
 
-	// updatedAt is updated only if serviceType is receive-pack
-	if serviceType == "receive-pack" {
-
-		if hasNoCommits, err := git.HasNoCommits(gist.User.Username, gist.Uuid); err != nil {
-			return err
-		} else if hasNoCommits {
-			if err = gist.Delete(); err != nil {
-				return err
-			}
-		}
-
-		_ = gist.SetLastActiveNow()
-		_ = gist.UpdatePreviewAndCount(false)
-		gist.AddInIndex()
-	}
 	return nil
 }
 

@@ -37,11 +37,11 @@ func (v Visibility) Next() Visibility {
 
 func ParseVisibility[T string | int](v T) (Visibility, error) {
 	switch s := fmt.Sprint(v); s {
-	case "0":
+	case "0", "public":
 		return PublicVisibility, nil
-	case "1":
+	case "1", "unlisted":
 		return UnlistedVisibility, nil
-	case "2":
+	case "2", "private":
 		return PrivateVisibility, nil
 	default:
 		return -1, fmt.Errorf("unknown visibility %q", s)

@@ -127,7 +127,7 @@ func structToURLValues(s interface{}) url.Values {
 func setup(t *testing.T) {
 	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
 
-	err := config.InitConfig("")
+	err := config.InitConfig("", io.Discard)
 	require.NoError(t, err, "Could not init config")
 
 	err = os.MkdirAll(filepath.Join(config.GetHomeDir()), 0755)

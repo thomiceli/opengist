@@ -24,7 +24,6 @@ var (
 )
 
 const truncateLimit = 2 << 18
-const BaseHash = "0000000000000000000000000000000000000000"
 
 type RevisionNotFoundError struct{}
 
@@ -565,5 +564,5 @@ func removeFilesExceptGit(dir string) error {
 }
 
 const hookTemplate = `#!/bin/sh
-"$OG_OPENGIST_HOME_INTERNAL/opengist-bin" hook %s
+"$OG_OPENGIST_HOME_INTERNAL/symlinks/opengist" --config=$OG_OPENGIST_HOME_INTERNAL/symlinks/config.yml hook %s
 `

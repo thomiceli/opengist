@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-const BaseHash = "0000000000000000000000000000000000000000"
-
 func PreReceive(in io.Reader, out, er io.Writer) error {
 	var err error
 	var disallowedFiles []string

@@ -59,7 +59,7 @@ func App() error {
 func Initialize(ctx *cli.Context) {
 	fmt.Println("Opengist v" + config.OpengistVersion)
 
-	if err := config.InitConfig(ctx.String("config")); err != nil {
+	if err := config.InitConfig(ctx.String("config"), os.Stdout); err != nil {
 		panic(err)
 	}
 	if err := os.MkdirAll(filepath.Join(config.GetHomeDir()), 0755); err != nil {
@@ -83,8 +83,8 @@ func Initialize(ctx *cli.Context) {
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
 
-	if err := createSymlink(); err != nil {
-		log.Fatal().Err(err).Send()
+	if err := createSymlink(homePath, ctx.String("config")); err != nil {
+		log.Fatal().Err(err).Msg("Failed to create symlinks")
 	}
 
 	if err := os.MkdirAll(filepath.Join(homePath, "repos"), 0755); err != nil {
@@ -113,19 +113,41 @@ func Initialize(ctx *cli.Context) {
 	}
 }
 
-func createSymlink() error {
+func createSymlink(homePath string, configPath string) error {
+	if err := os.MkdirAll(filepath.Join(homePath, "symlinks"), 0755); err != nil {
+		return err
+	}
+
 	exePath, err := os.Executable()
 	if err != nil {
 		return err
 	}
 
-	symlinkPath := path.Join(config.GetHomeDir(), "opengist-bin")
-
-	if _, err := os.Lstat(symlinkPath); err == nil {
-		if err := os.Remove(symlinkPath); err != nil {
+	symlinkExePath := path.Join(config.GetHomeDir(), "symlinks", "opengist")
+	if _, err := os.Lstat(symlinkExePath); err == nil {
+		if err := os.Remove(symlinkExePath); err != nil {
 			return err
 		}
 	}
+	if err = os.Symlink(exePath, symlinkExePath); err != nil {
+		return err
+	}
 
-	return os.Symlink(exePath, symlinkPath)
+	if configPath == "" {
+		return nil
+	}
+
+	configPath, _ = filepath.Abs(configPath)
+	configPath = filepath.Clean(configPath)
+	symlinkConfigPath := path.Join(config.GetHomeDir(), "symlinks", "config.yml")
+	if _, err := os.Lstat(symlinkConfigPath); err == nil {
+		if err := os.Remove(symlinkConfigPath); err != nil {
+			return err
+		}
+	}
+	if err = os.Symlink(configPath, symlinkConfigPath); err != nil {
+		return err
+	}
+
+	return nil
 }

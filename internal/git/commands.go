@@ -24,7 +24,6 @@ var (
 )
 
 const truncateLimit = 2 << 18
-const BaseHash = "0000000000000000000000000000000000000000"
 
 type RevisionNotFoundError struct{}
 

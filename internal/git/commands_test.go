@@ -1,45 +1,18 @@
 package git
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/hooks"
-	"io"
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
-func setup(t *testing.T) {
-	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
-
-	err := config.InitConfig("", io.Discard)
-	require.NoError(t, err, "Could not init config")
-
-	err = os.MkdirAll(path.Join(config.GetHomeDir(), "tests"), 0755)
-	ReposDirectory = path.Join("tests")
-	require.NoError(t, err)
-
-	err = os.MkdirAll(filepath.Join(config.GetHomeDir(), "tmp", "repos"), 0755)
-	require.NoError(t, err)
-
-	err = InitRepository("thomas", "gist1")
-	require.NoError(t, err)
-}
-
-func teardown(t *testing.T) {
-	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
-	require.NoError(t, err, "Could not remove repos directory")
-}
-
 func TestInitDeleteRepository(t *testing.T) {
-	setup(t)
-	defer teardown(t)
+	SetupTest(t)
+	defer TeardownTest(t)
 
 	cmd := exec.Command("git", "rev-parse", "--is-bare-repository")
 	cmd.Dir = RepositoryPath("thomas", "gist1")
@@ -56,14 +29,14 @@ func TestInitDeleteRepository(t *testing.T) {
 }
 
 func TestCommits(t *testing.T) {
-	setup(t)
-	defer teardown(t)
+	SetupTest(t)
+	defer TeardownTest(t)
 
 	hasNoCommits, err := HasNoCommits("thomas", "gist1")
 	require.NoError(t, err, "Could not check if repository has no commits")
 	require.True(t, hasNoCommits, "Repository should have no commits")
 
-	commitToBare(t, "thomas", "gist1", nil)
+	CommitToBare(t, "thomas", "gist1", nil)
 
 	hasNoCommits, err = HasNoCommits("thomas", "gist1")
 	require.NoError(t, err, "Could not check if repository has no commits")
@@ -73,17 +46,17 @@ func TestCommits(t *testing.T) {
 	require.NoError(t, err, "Could not count commits")
 	require.Equal(t, "1", nbCommits, "Repository should have 1 commit")
 
-	commitToBare(t, "thomas", "gist1", nil)
+	CommitToBare(t, "thomas", "gist1", nil)
 	nbCommits, err = CountCommits("thomas", "gist1")
 	require.NoError(t, err, "Could not count commits")
 	require.Equal(t, "2", nbCommits, "Repository should have 2 commits")
 }
 
 func TestContent(t *testing.T) {
-	setup(t)
-	defer teardown(t)
+	SetupTest(t)
+	defer TeardownTest(t)
 
-	commitToBare(t, "thomas", "gist1", map[string]string{
+	CommitToBare(t, "thomas", "gist1", map[string]string{
 		"my_file.txt": "I love Opengist\n",
 		"my_other_file.txt": `I really
 hate Opengist`,
@@ -104,7 +77,7 @@ hate Opengist`,
 	require.False(t, truncated, "Content should not be truncated")
 	require.Equal(t, "I really\nhate Opengist", content, "Content is not correct")
 
-	commitToBare(t, "thomas", "gist1", map[string]string{
+	CommitToBare(t, "thomas", "gist1", map[string]string{
 		"my_renamed_file.txt": "I love Opengist\n",
 		"my_other_file.txt": `I really
 like Opengist actually`,
@@ -183,18 +156,18 @@ like Opengist actually`,
 }
 
 func TestGitGc(t *testing.T) {
-	setup(t)
-	defer teardown(t)
+	SetupTest(t)
+	defer TeardownTest(t)
 
 	err := GcRepos()
 	require.NoError(t, err, "Could not run git gc")
 }
 
 func TestFork(t *testing.T) {
-	setup(t)
-	defer teardown(t)
+	SetupTest(t)
+	defer TeardownTest(t)
 
-	commitToBare(t, "thomas", "gist1", map[string]string{
+	CommitToBare(t, "thomas", "gist1", map[string]string{
 		"my_file.txt": "I love Opengist\n",
 	})
 
@@ -211,10 +184,10 @@ func TestFork(t *testing.T) {
 }
 
 func TestTruncate(t *testing.T) {
-	setup(t)
-	defer teardown(t)
+	SetupTest(t)
+	defer TeardownTest(t)
 
-	commitToBare(t, "thomas", "gist1", map[string]string{
+	CommitToBare(t, "thomas", "gist1", map[string]string{
 		"my_file.txt": "A",
 	})
 
@@ -228,7 +201,7 @@ func TestTruncate(t *testing.T) {
 		builder.WriteString("A")
 	}
 	str := builder.String()
-	commitToBare(t, "thomas", "gist1", map[string]string{
+	CommitToBare(t, "thomas", "gist1", map[string]string{
 		"my_file.txt": str,
 	})
 
@@ -237,7 +210,7 @@ func TestTruncate(t *testing.T) {
 	require.True(t, truncated, "Content should be truncated")
 	require.Equal(t, truncateLimit, len(content), "Content size should be at truncate limit")
 
-	commitToBare(t, "thomas", "gist1", map[string]string{
+	CommitToBare(t, "thomas", "gist1", map[string]string{
 		"my_file.txt": "AA\n" + str,
 	})
 
@@ -248,8 +221,8 @@ func TestTruncate(t *testing.T) {
 }
 
 func TestGitInitBranchNames(t *testing.T) {
-	setup(t)
-	defer teardown(t)
+	SetupTest(t)
+	defer TeardownTest(t)
 
 	cmd := exec.Command("git", "symbolic-ref", "HEAD")
 	cmd.Dir = RepositoryPath("thomas", "gist1")
@@ -266,84 +239,4 @@ func TestGitInitBranchNames(t *testing.T) {
 	out, err = cmd.Output()
 	require.NoError(t, err, "Could not run git command")
 	require.Equal(t, "refs/heads/main", strings.TrimSpace(string(out)), "Repository should have main branch as default")
-}
-
-func TestPreReceiveHook(t *testing.T) {
-	setup(t)
-	defer teardown(t)
-	var lastCommitHash string
-	err := os.Chdir(RepositoryPath("thomas", "gist1"))
-	require.NoError(t, err, "Could not change directory")
-
-	commitToBare(t, "thomas", "gist1", map[string]string{
-		"my_file.txt":  "some allowed file",
-		"my_file2.txt": "some allowed file\nagain",
-	})
-	lastCommitHash = lastHashOfCommit(t, "thomas", "gist1")
-	err = hooks.PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
-	require.NoError(t, err, "Should not have an error on pre-receive hook for commit+push 1")
-
-	commitToBare(t, "thomas", "gist1", map[string]string{
-		"my_file.txt":     "some allowed file",
-		"dir/my_file.txt": "some disallowed file suddenly",
-	})
-	lastCommitHash = lastHashOfCommit(t, "thomas", "gist1")
-	err = hooks.PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
-	require.Error(t, err, "Should have an error on pre-receive hook for commit+push 2")
-	require.Equal(t, "pushing files in directories is not allowed: [dir/my_file.txt]", err.Error(), "Error message is not correct")
-
-	commitToBare(t, "thomas", "gist1", map[string]string{
-		"my_file.txt":           "some allowed file",
-		"dir/ok/afileagain.txt": "some disallowed file\nagain",
-	})
-	lastCommitHash = lastHashOfCommit(t, "thomas", "gist1")
-	err = hooks.PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
-	require.Error(t, err, "Should have an error on pre-receive hook for commit+push 3")
-	require.Equal(t, "pushing files in directories is not allowed: [dir/ok/afileagain.txt dir/my_file.txt]", err.Error(), "Error message is not correct")
-
-	commitToBare(t, "thomas", "gist1", map[string]string{
-		"allowedfile.txt": "some allowed file only",
-	})
-	lastCommitHash = lastHashOfCommit(t, "thomas", "gist1")
-	err = hooks.PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
-	require.Error(t, err, "Should have an error on pre-receive hook for commit+push 4")
-	require.Equal(t, "pushing files in directories is not allowed: [dir/ok/afileagain.txt dir/my_file.txt]", err.Error(), "Error message is not correct")
-
-	_ = os.Chdir(os.TempDir()) // Leave the current dir to avoid errors on teardown
-}
-
-func commitToBare(t *testing.T, user string, gist string, files map[string]string) {
-	err := CloneTmp(user, gist, gist, "thomas@mail.com", true)
-	require.NoError(t, err, "Could not clone repository")
-
-	if len(files) > 0 {
-		for filename, content := range files {
-			if strings.Contains(filename, "/") {
-				dir := filepath.Dir(filename)
-				err := os.MkdirAll(filepath.Join(TmpRepositoryPath(gist), dir), os.ModePerm)
-				require.NoError(t, err, "Could not create directory")
-			}
-			_ = os.WriteFile(filepath.Join(TmpRepositoryPath(gist), filename), []byte(content), 0644)
-
-			if err := AddAll(gist); err != nil {
-				require.NoError(t, err, "Could not add all to repository")
-			}
-		}
-	}
-
-	if err := CommitRepository(gist, user, "thomas@mail.com"); err != nil {
-		require.NoError(t, err, "Could not commit to repository")
-	}
-
-	if err := Push(gist); err != nil {
-		require.NoError(t, err, "Could not push to repository")
-	}
-}
-
-func lastHashOfCommit(t *testing.T, user string, gist string) string {
-	cmd := exec.Command("git", "rev-parse", "HEAD")
-	cmd.Dir = RepositoryPath(user, gist)
-	out, err := cmd.Output()
-	require.NoError(t, err, "Could not run git command")
-	return strings.TrimSpace(string(out))
 }

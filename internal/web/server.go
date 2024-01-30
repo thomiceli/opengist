@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/utils"
 	htmlpkg "html"
 	"html/template"
 	"io"
@@ -205,7 +206,7 @@ func NewServer(isDev bool) *Server {
 
 	e.Use(sessionInit)
 
-	e.Validator = NewValidator()
+	e.Validator = utils.NewValidator()
 
 	if !dev {
 		parseManifestEntries()

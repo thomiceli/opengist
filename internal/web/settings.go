@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/utils"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -73,7 +74,7 @@ func sshKeysProcess(ctx echo.Context) error {
 	}
 
 	if err := ctx.Validate(dto); err != nil {
-		addFlash(ctx, validationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err), "error")
 		return redirect(ctx, "/settings")
 	}
 	key := dto.ToSSHKey()
@@ -126,7 +127,7 @@ func passwordProcess(ctx echo.Context) error {
 	dto.Username = user.Username
 
 	if err := ctx.Validate(dto); err != nil {
-		addFlash(ctx, validationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err), "error")
 		return html(ctx, "settings.html")
 	}
 
@@ -154,7 +155,7 @@ func usernameProcess(ctx echo.Context) error {
 	dto.Password = user.Password
 
 	if err := ctx.Validate(dto); err != nil {
-		addFlash(ctx, validationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err), "error")
 		return redirect(ctx, "/settings")
 	}
 

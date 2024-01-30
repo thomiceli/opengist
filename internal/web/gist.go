@@ -10,6 +10,7 @@ import (
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/render"
+	"github.com/thomiceli/opengist/internal/utils"
 	"html/template"
 	"net/url"
 	"path/filepath"
@@ -539,7 +540,7 @@ func processCreate(ctx echo.Context) error {
 
 	err = ctx.Validate(dto)
 	if err != nil {
-		addFlash(ctx, validationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err), "error")
 		if isCreate {
 			return html(ctx, "create.html")
 		} else {

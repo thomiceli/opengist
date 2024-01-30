@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/utils"
 	"io"
 	"os"
 	"os/exec"
@@ -13,7 +14,12 @@ import (
 )
 
 func PostReceive(in io.Reader, out, er io.Writer) error {
+	var outputSb strings.Builder
+	newGist := false
 	opts := pushOptions()
+	gistUrl := os.Getenv("OPENGIST_REPOSITORY_URL_INTERNAL")
+	validator := utils.NewValidator()
+
 	scanner := bufio.NewScanner(in)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -29,9 +35,7 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 		}
 
 		if oldrev == BaseHash {
-			_, _ = fmt.Fprintf(out, "\nYour new repository has been created here: %s\n\n", os.Getenv("OPENGIST_REPOSITORY_URL_INTERNAL"))
-			_, _ = fmt.Fprintln(out, "If you want to keep working with your gist, you could set the remote URL via:")
-			_, _ = fmt.Fprintf(out, "git remote set-url origin %s\n\n", os.Getenv("OPENGIST_REPOSITORY_URL_INTERNAL"))
+			newGist = true
 		}
 	}
 
@@ -43,7 +47,22 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 
 	if slices.Contains([]string{"public", "unlisted", "private"}, opts["visibility"]) {
 		gist.Private, _ = db.ParseVisibility(opts["visibility"])
-		_, _ = fmt.Fprintf(out, "\nGist visibility set to %s\n\n", opts["visibility"])
+		outputSb.WriteString(fmt.Sprintf("Gist visibility set to %s\n\n", opts["visibility"]))
+	}
+
+	if opts["url"] != "" && validator.Var(opts["url"], "max=32,alphanumdashorempty") == nil {
+		gist.URL = opts["url"]
+		lastIndex := strings.LastIndex(gistUrl, "/")
+		gistUrl = gistUrl[:lastIndex+1] + gist.URL
+		if !newGist {
+			outputSb.WriteString(fmt.Sprintf("Gist URL set to %s. Set the Git remote URL via:\n", gistUrl))
+			outputSb.WriteString(fmt.Sprintf("git remote set-url origin %s\n\n", gistUrl))
+		}
+	}
+
+	if opts["title"] != "" && validator.Var(opts["title"], "max=250") == nil {
+		gist.Title = opts["title"]
+		outputSb.WriteString(fmt.Sprintf("Gist title set to \"%s\"\n\n", opts["title"]))
 	}
 
 	if hasNoCommits, err := git.HasNoCommits(gist.User.Username, gist.Uuid); err != nil {
@@ -64,6 +83,17 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 	}
 
 	gist.AddInIndex()
+
+	if newGist {
+		outputSb.WriteString(fmt.Sprintf("Your new gist has been created here: %s\n", gistUrl))
+		outputSb.WriteString("If you want to keep working with your gist, you could set the Git remote URL via:\n")
+		outputSb.WriteString(fmt.Sprintf("git remote set-url origin %s\n\n", gistUrl))
+	}
+
+	outputStr := outputSb.String()
+	if outputStr != "" {
+		_, _ = fmt.Fprint(out, "\n"+outputStr)
+	}
 
 	return nil
 }

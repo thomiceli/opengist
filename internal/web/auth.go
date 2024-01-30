@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/thomiceli/opengist/internal/utils"
 	"io"
 	"net/http"
 	"net/url"
@@ -63,7 +64,7 @@ func processRegister(ctx echo.Context) error {
 	}
 
 	if err := ctx.Validate(dto); err != nil {
-		addFlash(ctx, validationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err), "error")
 		return html(ctx, "auth_form.html")
 	}
 

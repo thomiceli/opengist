@@ -30,7 +30,7 @@ Requirements:
 * [Make](https://linux.die.net/man/1/make) (optional, but easier)
 
 ```shell
-git clone https://github.com/thomiceli/opengist
+git clone git@github.com:thomiceli/opengist.git
 cd opengist
 make watch
 ```

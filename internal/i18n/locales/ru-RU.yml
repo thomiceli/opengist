@@ -115,8 +115,7 @@ auth.username: Имя пользователя
 auth.password: Пароль
 auth.register-instead: Зарегистрироваться
 auth.login-instead: Войти
-auth.github-oauth: Войти с помощью доступа GitHub
-auth.gitea-oauth: Войти с помощью доступа Gitea
+auth.oauth: Войти с помощью доступа %s
 
 error: Ошибка
 

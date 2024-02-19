@@ -132,9 +132,7 @@ auth.username: Username
 auth.password: Password
 auth.register-instead: Register instead
 auth.login-instead: Login instead
-auth.github-oauth: Continue with GitHub account
-auth.gitlab-oauth: Continue with GitLab account
-auth.gitea-oauth: Continue with Gitea account
+auth.oauth: Continue with %s account
 
 error: Error
 

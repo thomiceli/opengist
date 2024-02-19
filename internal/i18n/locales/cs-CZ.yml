@@ -122,8 +122,7 @@ auth.username: Uživatelské jméno
 auth.password: Heslo
 auth.register-instead: Raději se zaregistrovat
 auth.login-instead: Raději se přihlásit
-auth.github-oauth: Pokračovat s účtem na GitHubu
-auth.gitea-oauth: Pokračovat s účtem na Gitea
+auth.oauth: Pokračovat s účtem na %s
 
 error: Chyba
 

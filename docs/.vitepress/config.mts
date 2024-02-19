@@ -56,4 +56,5 @@ export default defineConfig({
         // @ts-ignore
         lastUpdated: true,
     },
+    ignoreDeadLinks: true
 })

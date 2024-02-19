@@ -137,7 +137,7 @@
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
 
-img {
+.content img {
     padding-left: 20px;
     height: 108px;
 }

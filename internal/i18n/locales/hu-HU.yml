@@ -30,6 +30,7 @@ gist.no-content: Nincs tartalom
 gist.new.new_gist: Új gist
 gist.new.title: Cím
 gist.new.description: Leírás
+gist.new.url: URL
 gist.new.filename-with-extension: Fájlnév kiterjesztéssel
 gist.new.indent-mode: Indentáció típusa
 gist.new.indent-mode-space: Szóköz
@@ -67,6 +68,14 @@ gist.list.files: fájlok
 gist.list.last-active: Utoljára aktív
 gist.list.no-gists: Nincsenek gistek
 
+gist.search.found: találat
+gist.search.no-results: Nincsenek találatok
+gist.search.help.user: létrehozva e felhasználó által
+gist.search.help.title: gistek egyező címmel
+gist.search.help.filename: gistek melyek tartalmaznak fájlt egyező névvel
+gist.search.help.extension: gistek melyek tartalmaznak fájlt egyező kiterjesztéssel
+gist.search.help.language: gistek melyek tartalmaznak fájlt egyező nyelvvel
+
 gist.forks: Forkok
 gist.forks.view: Fork megtekintése
 gist.forks.no: Nincsenek nyilvános forkok
@@ -92,8 +101,10 @@ settings.email-help: Commitoknál és Gravatarnál van használva
 settings.email-set: Email beállítása
 settings.link-accounts: Fiókok összekötése
 settings.link-github-account: GitHub fiók hozzáadása
+settings.link-gitlab-account: GitLab fiók hozzáadása
 settings.link-gitea-account: Gitea fiók hozzáadása
 settings.unlink-github-account: GitHub fiók eltávolítása
+settings.unlink-gitlab-account: GitLab fiók eltávolítása
 settings.unlink-gitea-account: Gitea fiók eltávolítása
 settings.delete-account: Fiók törlése
 settings.delete-account-confirm: Biztosan törölni szeretnéd a fiókod?
@@ -106,6 +117,7 @@ settings.delete-ssh-key-confirm: Erősítsd meg az SSH kulcs törlését
 settings.ssh-key-added-at: "Hozzáadva:"
 settings.ssh-key-never-used: Sosem használt
 settings.ssh-key-last-used: "Utoljára használva:"
+settings.change-username: Felhasználónév megváltoztatása
 settings.create-password: Jelszó létrehozása
 settings.create-password-help: Hozz létre egy jelszót, hogy bejelentkezhess az OpenGist-be HTTP-n keresztül
 settings.change-password: Jelszó megváltoztatása
@@ -156,6 +168,9 @@ admin.actions: Műveletek
 admin.actions.sync-fs: Gistek szinkronizálása a fájlrendszerrel
 admin.actions.sync-db: Gistek szinkronizálása az adatbázissal
 admin.actions.git-gc: Használatlan git repository-k eltávolítása
+admin.actions.sync-previews: Gist előnézetek szinkronizálása
+admin.actions.reset-hooks: Git server hook-ok alaphelyzetbe állítása minden repository-nál
+admin.actions.index-gists: Gistek indexelése
 admin.id: Azonosító
 admin.user: Felhasználó
 admin.delete: Törlés

@@ -28,7 +28,11 @@
             )
 
     </script>
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset "favicon-32.png" }}">
+    {{ if $.c.CustomFavicon }}
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ custom $.c.CustomFavicon }}">
+    {{ else }}
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset "favicon-32.png" }}">
+    {{ end }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     {{ if dev }}
@@ -66,13 +70,21 @@
                     </div>
                     <div class="flex-shrink-0 items-center hidden sm:flex">
                         <a href="{{ $.c.ExternalUrl }}/">
-                            <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                            {{ if $.c.CustomLogo }}
+                                <img src="{{ custom $.c.CustomLogo }}" class="object-cover h-12">
+                            {{ else }}
+                                <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                            {{ end }}
                         </a>
                     </div>
                     <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
                         <div class="flex-shrink-0 items-center flex sm:hidden">
                             <a href="{{ $.c.ExternalUrl }}/">
-                                <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                                {{ if $.c.CustomLogo }}
+                                    <img src="{{ custom $.c.CustomLogo }}" class="object-cover h-12">
+                                {{ else }}
+                                    <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                                {{ end }}
                             </a>
                         </div>
                         <div class="hidden sm:block sm:ml-6">

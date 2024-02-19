@@ -185,3 +185,11 @@ admin.gists.private: 是否為私人
 admin.gists.nb-files: 檔案數
 admin.gists.nb-likes: 喜歡
 admin.gists.delete_confirm: 您要刪除這個 Gist 嗎？
+gist.search.no-results: 沒有找到任何 Gists
+gist.search.help.title: Gists 的標題
+gist.search.help.filename: Gists 的檔案名稱
+gist.search.help.language: Gists 的程式語言
+admin.actions.index-gists: 索引所有的 Gists
+gist.search.help.user: 由使用者建立的 Gists
+gist.search.found: 已找到 Gists
+gist.search.help.extension: Gists 的副檔名

@@ -6,10 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/utils"
 	htmlpkg "html"
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -88,7 +92,8 @@ var (
 
 			return defaultAvatar()
 		},
-		"asset": asset,
+		"asset":  asset,
+		"custom": customAsset,
 		"dev": func() bool {
 			return dev
 		},
@@ -201,12 +206,19 @@ func NewServer(isDev bool) *Server {
 
 	e.Use(sessionInit)
 
-	e.Validator = NewValidator()
+	e.Validator = utils.NewValidator()
 
 	if !dev {
 		parseManifestEntries()
-		e.GET("/assets/*", cacheControl(echo.WrapHandler(http.FileServer(http.FS(public.Files)))))
 	}
+	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
+	e.GET("/assets/*", func(c echo.Context) error {
+		if _, err := public.Files.Open(path.Join("assets", c.Param("*"))); !dev && err == nil {
+			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(c)
+		}
+
+		return echo.WrapHandler(http.StripPrefix("/assets/", http.FileServer(http.FS(customFs))))(c)
+	})
 
 	// Web based routes
 	g1 := e.Group("")
@@ -466,13 +478,6 @@ func checkRequireLogin(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func cacheControl(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
-		return next(c)
-	}
-}
-
 func noRouteFound(echo.Context) error {
 	return notFound("Page not found")
 }
@@ -511,4 +516,12 @@ func asset(file string) string {
 		return "http://localhost:16157/" + file
 	}
 	return config.C.ExternalUrl + "/" + manifestEntries[file].File
+}
+
+func customAsset(file string) string {
+	assetpath, err := url.JoinPath("/", "assets", file)
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to join path for custom file %s", file)
+	}
+	return config.C.ExternalUrl + assetpath
 }

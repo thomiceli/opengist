@@ -134,7 +134,7 @@ func gitHttp(ctx echo.Context) error {
 					gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
 					gist.Title = "gist:" + gist.Uuid
 
-					if err = gist.InitRepositoryViaInit(ctx); err != nil {
+					if err = gist.InitRepository(); err != nil {
 						return errorRes(500, "Cannot init repository in the file system", err)
 					}
 
@@ -193,6 +193,7 @@ func pack(ctx echo.Context, serviceType string) error {
 	}
 
 	repositoryPath := getData(ctx, "repositoryPath").(string)
+	gist := getData(ctx, "gist").(*db.Gist)
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("git", serviceType, "--stateless-rpc", repositoryPath)
@@ -200,26 +201,14 @@ func pack(ctx echo.Context, serviceType string) error {
 	cmd.Stdin = reqBody
 	cmd.Stdout = ctx.Response().Writer
 	cmd.Stderr = &stderr
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "OPENGIST_REPOSITORY_URL_INTERNAL="+git.RepositoryUrl(ctx, gist.User.Username, gist.Identifier()))
+	cmd.Env = append(cmd.Env, "OPENGIST_REPOSITORY_ID="+strconv.Itoa(int(gist.ID)))
+
 	if err = cmd.Run(); err != nil {
 		return errorRes(500, "Cannot run git "+serviceType+" ; "+stderr.String(), err)
 	}
 
-	// updatedAt is updated only if serviceType is receive-pack
-	if serviceType == "receive-pack" {
-		gist := getData(ctx, "gist").(*db.Gist)
-
-		if hasNoCommits, err := git.HasNoCommits(gist.User.Username, gist.Uuid); err != nil {
-			return err
-		} else if hasNoCommits {
-			if err = gist.Delete(); err != nil {
-				return err
-			}
-		}
-
-		_ = gist.SetLastActiveNow()
-		_ = gist.UpdatePreviewAndCount(false)
-		gist.AddInIndex()
-	}
 	return nil
 }
 

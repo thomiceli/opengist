@@ -6,12 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/thomiceli/opengist/internal/utils"
-	"io"
-	"net/http"
-	"net/url"
-	"strings"
-
 	"github.com/labstack/echo/v4"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -22,9 +16,14 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/utils"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
 const (
@@ -140,6 +139,7 @@ func processLogin(ctx echo.Context) error {
 	}
 
 	sess.Values["user"] = user.ID
+	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year
 	saveSession(sess, ctx)
 	deleteCsrfCookie(ctx)
 

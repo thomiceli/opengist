@@ -17,7 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var OpengistVersion = "1.6.0"
+var OpengistVersion = "1.7-dev"
 
 var C *config
 
@@ -60,6 +60,9 @@ type config struct {
 	OIDCClientKey    string `yaml:"oidc.client-key" env:"OG_OIDC_CLIENT_KEY"`
 	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
 	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
+
+	CustomLogo    string `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
+	CustomFavicon string `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
 }
 
 func configWithDefaults() (*config, error) {
@@ -88,18 +91,18 @@ func configWithDefaults() (*config, error) {
 	return c, nil
 }
 
-func InitConfig(configPath string) error {
+func InitConfig(configPath string, out io.Writer) error {
 	// Default values
 	c, err := configWithDefaults()
 	if err != nil {
 		return err
 	}
 
-	if err = loadConfigFromYaml(c, configPath); err != nil {
+	if err = loadConfigFromYaml(c, configPath, out); err != nil {
 		return err
 	}
 
-	if err = loadConfigFromEnv(c); err != nil {
+	if err = loadConfigFromEnv(c, out); err != nil {
 		return err
 	}
 
@@ -117,6 +120,10 @@ func InitConfig(configPath string) error {
 	}
 
 	C = c
+
+	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -195,7 +202,7 @@ func GetHomeDir() string {
 	return filepath.Clean(absolutePath)
 }
 
-func loadConfigFromYaml(c *config, configPath string) error {
+func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {
 	if configPath != "" {
 		absolutePath, _ := filepath.Abs(configPath)
 		absolutePath = filepath.Clean(absolutePath)
@@ -204,9 +211,9 @@ func loadConfigFromYaml(c *config, configPath string) error {
 			if !os.IsNotExist(err) {
 				return err
 			}
-			fmt.Println("No YAML config file found at " + absolutePath)
+			_, _ = fmt.Fprintln(out, "No YAML config file found at "+absolutePath)
 		} else {
-			fmt.Println("Using YAML config file: " + absolutePath)
+			_, _ = fmt.Fprintln(out, "Using YAML config file: "+absolutePath)
 
 			// Override default values with values from config.yml
 			d := yaml.NewDecoder(file)
@@ -216,13 +223,13 @@ func loadConfigFromYaml(c *config, configPath string) error {
 			defer file.Close()
 		}
 	} else {
-		fmt.Println("No YAML config file specified.")
+		_, _ = fmt.Fprintln(out, "No YAML config file specified.")
 	}
 
 	return nil
 }
 
-func loadConfigFromEnv(c *config) error {
+func loadConfigFromEnv(c *config, out io.Writer) error {
 	v := reflect.ValueOf(c).Elem()
 	var envVars []string
 
@@ -253,9 +260,9 @@ func loadConfigFromEnv(c *config) error {
 	}
 
 	if len(envVars) > 0 {
-		fmt.Println("Using environment variables config: " + strings.Join(envVars, ", "))
+		_, _ = fmt.Fprintln(out, "Using environment variables config: "+strings.Join(envVars, ", "))
 	} else {
-		fmt.Println("No environment variables config specified.")
+		_, _ = fmt.Fprintln(out, "No environment variables config specified.")
 	}
 
 	return nil

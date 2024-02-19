@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.6.1](https://github.com/thomiceli/opengist/compare/v1.6.0...v1.6.1) - 2024-01-06
+See here how to [update](/docs/update.md) Opengist.
+
+### Added
+- Healthcheck on Docker container (#204)
+- Translations:
+  - fr-FR (#201)
+
+### Fixed
+- Directory renaming on username change (#205)
+
 ## [1.6.0](https://github.com/thomiceli/opengist/compare/v1.5.3...v1.6.0) - 2024-01-04
 See here how to [update](/docs/update.md) Opengist.
 

@@ -78,9 +78,9 @@ Download the archive for your system from the release page [here](https://github
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.6.0/opengist1.6.0-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.6.1/opengist1.6.1-linux-amd64.tar.gz
 
-tar xzvf opengist1.6.0-linux-amd64.tar.gz
+tar xzvf opengist1.6.1-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`
@@ -90,7 +90,7 @@ Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ### From source
 
-Requirements : [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.21+), [Node.js](https://nodejs.org/en/download/) (16+)
+Requirements: [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.21+), [Node.js](https://nodejs.org/en/download/) (16+), [Make](https://linux.die.net/man/1/make) (optional, but easier)
 
 ```shell
 git clone https://github.com/thomiceli/opengist
@@ -101,6 +101,9 @@ make
 
 Opengist is now running on port 6157, you can browse http://localhost:6157
 
+---
+
+To create and run a development environment, see [run-development.md](/docs/contributing/run-development.md).
 
 ## Documentation
 

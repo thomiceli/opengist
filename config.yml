@@ -90,3 +90,9 @@ oidc.client-key:
 oidc.secret:
 # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
 oidc.discovery-url:
+
+
+# Custom assets
+# Add your own custom assets to $opengist-home/custom/
+custom.logo:
+custom.favicon:

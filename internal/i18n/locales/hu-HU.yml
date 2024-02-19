@@ -132,9 +132,7 @@ auth.username: Felhasználónév
 auth.password: Jelszó
 auth.register-instead: Vagy regisztrálj
 auth.login-instead: Vagy jelentkezz be
-auth.github-oauth: Folytatás GitHub fiókkal
-auth.gitlab-oauth: Folytatás GitLab fiókkal
-auth.gitea-oauth: Folytatás Gitea fiókkal
+auth.oauth: Folytatás %s fiókkal
 
 error: Hiba
 

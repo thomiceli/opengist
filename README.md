@@ -90,7 +90,7 @@ Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ### From source
 
-Requirements : [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.21+), [Node.js](https://nodejs.org/en/download/) (16+)
+Requirements: [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.21+), [Node.js](https://nodejs.org/en/download/) (16+), [Make](https://linux.die.net/man/1/make) (optional, but easier)
 
 ```shell
 git clone https://github.com/thomiceli/opengist
@@ -101,6 +101,9 @@ make
 
 Opengist is now running on port 6157, you can browse http://localhost:6157
 
+---
+
+To create and run a development environment, see [run-development.md](/docs/contributing/run-development.md).
 
 ## Documentation
 

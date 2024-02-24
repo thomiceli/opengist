@@ -74,7 +74,7 @@ func processRegister(ctx echo.Context) error {
 
 	user := dto.ToUser()
 
-	password, err := argon2id.hash(user.Password)
+	password, err := utils.Argon2id.Hash(user.Password)
 	if err != nil {
 		return errorRes(500, "Cannot hash password", err)
 	}
@@ -129,7 +129,7 @@ func processLogin(ctx echo.Context) error {
 		return redirect(ctx, "/login")
 	}
 
-	if ok, err := argon2id.verify(password, user.Password); !ok {
+	if ok, err := utils.Argon2id.Verify(password, user.Password); !ok {
 		if err != nil {
 			return errorRes(500, "Cannot check for password", err)
 		}

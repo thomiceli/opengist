@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/thomiceli/opengist/internal/utils"
 	"net/http"
 	"os"
 	"os/exec"
@@ -98,7 +99,7 @@ func gitHttp(ctx echo.Context) error {
 					return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
 				}
 
-				if ok, err := argon2id.verify(authPassword, gist.User.Password); !ok || gist.User.Username != authUsername {
+				if ok, err := utils.Argon2id.Verify(authPassword, gist.User.Password); !ok || gist.User.Username != authUsername {
 					if err != nil {
 						return errorRes(500, "Cannot verify password", err)
 					}
@@ -115,7 +116,7 @@ func gitHttp(ctx echo.Context) error {
 					return errorRes(401, "Invalid credentials", nil)
 				}
 
-				if ok, err := argon2id.verify(authPassword, user.Password); !ok {
+				if ok, err := utils.Argon2id.Verify(authPassword, user.Password); !ok {
 					if err != nil {
 						return errorRes(500, "Cannot check for password", err)
 					}

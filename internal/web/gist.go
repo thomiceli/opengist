@@ -890,3 +890,14 @@ func checkbox(ctx echo.Context) error {
 
 	return plainText(ctx, 200, "ok")
 }
+
+func preview(ctx echo.Context) error {
+	content := ctx.FormValue("content")
+
+	previewStr, err := render.MarkdownString(content)
+	if err != nil {
+		return errorRes(500, "Error rendering markdown", err)
+	}
+
+	return plainText(ctx, 200, previewStr)
+}

@@ -43,6 +43,7 @@ gist.new.add-file: Add file
 gist.new.create-public-button: Create public gist
 gist.new.create-unlisted-button: Create unlisted gist
 gist.new.create-private-button: Create private gist
+gist.new.preview: Preview
 
 gist.edit.editing: Editing
 gist.edit.change-visibility: Make

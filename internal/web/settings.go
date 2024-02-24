@@ -131,7 +131,7 @@ func passwordProcess(ctx echo.Context) error {
 		return html(ctx, "settings.html")
 	}
 
-	password, err := argon2id.hash(dto.Password)
+	password, err := utils.Argon2id.Hash(dto.Password)
 	if err != nil {
 		return errorRes(500, "Cannot hash password", err)
 	}

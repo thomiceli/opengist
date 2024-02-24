@@ -41,6 +41,12 @@ func MarkdownFile(file *git.File) (RenderedFile, error) {
 		Type: "Markdown",
 	}, err
 }
+func MarkdownString(content string) (string, error) {
+	var buf bytes.Buffer
+	err := newMarkdown().Convert([]byte(content), &buf)
+
+	return buf.String(), err
+}
 
 func newMarkdown() goldmark.Markdown {
 	return goldmark.New(

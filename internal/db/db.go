@@ -52,10 +52,11 @@ func Setup(dbPath string, sharedCache bool) error {
 
 	// Default admin setting values
 	return initAdminSettings(map[string]string{
-		SettingDisableSignup:    "0",
-		SettingRequireLogin:     "0",
-		SettingDisableLoginForm: "0",
-		SettingDisableGravatar:  "0",
+		SettingDisableSignup:          "0",
+		SettingRequireLogin:           "0",
+		SettingAllowGistsWithoutLogin: "0",
+		SettingDisableLoginForm:       "0",
+		SettingDisableGravatar:        "0",
 	})
 }
 

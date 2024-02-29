@@ -184,6 +184,8 @@ admin.disable-signup: Disable signup
 admin.disable-signup_help: Forbid the creation of new accounts.
 admin.require-login: Require login
 admin.require-login_help: Enforce users to be logged in to see gists.
+admin.allow-gists-without-login: Allow individual gists without login
+admin.allow-gists-without-login_help: Allow individual gists to be viewed and downloaded without login, while requiring login for discovering gists.
 admin.disable-login: Disable login form
 admin.disable-login_help: Forbid logging in via the login form to force using OAuth providers instead.
 admin.disable-gravatar: Disable Gravatar

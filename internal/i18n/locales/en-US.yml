@@ -163,6 +163,8 @@ admin.general: General
 admin.users: Users
 admin.gists: Gists
 admin.configuration: Configuration
+admin.invitations: Invitations
+admin.invitations.create: Create invitation
 admin.versions: Versions
 admin.ssh_keys: SSH keys
 admin.stats: Stats

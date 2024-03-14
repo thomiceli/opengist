@@ -7,3 +7,8 @@ public/assets/*
 public/manifest.json
 opengist
 build/
+/opengist.db
+/log
+/ssh
+/repos
+/opengist.index

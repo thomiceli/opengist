@@ -48,6 +48,7 @@ func initialize() {
 	if err := os.MkdirAll(filepath.Join(homePath, "repos"), 0755); err != nil {
 		log.Fatal().Err(err).Send()
 	}
+
 	if err := os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755); err != nil {
 		log.Fatal().Err(err).Send()
 	}

@@ -1,9 +1,10 @@
 package test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
-	"testing"
 )
 
 func TestRegister(t *testing.T) {

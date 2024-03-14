@@ -72,6 +72,15 @@ services:
       GID: 1001
 ```
 
+### With Docker Compose
+
+Simply run it on docker compose like (settings defined here: `docker-compose.yml`)
+
+```shell
+docker compose build
+docker compose up
+```
+
 ### Via binary
 
 Download the archive for your system from the release page [here](https://github.com/thomiceli/opengist/releases/latest), and extract it.

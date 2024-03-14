@@ -1,14 +1,13 @@
 package db
 
 import (
-	"errors"
 	"slices"
 	"strings"
 
-	msqlite "github.com/glebarez/go-sqlite"
 	"github.com/glebarez/sqlite"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -28,10 +27,19 @@ func Setup(dbPath string, sharedCache bool) error {
 		sharedCacheStr = "&cache=shared"
 	}
 
-	if db, err = gorm.Open(sqlite.Open(dbPath+"?_fk=true&_journal_mode="+journalMode+sharedCacheStr), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
-	}); err != nil {
-		return err
+	if config.C.DBUrl != "" {
+		if db, err = gorm.Open(postgres.Open(config.C.DBUrl), &gorm.Config{
+			TranslateError: true,
+			Logger:         logger.Default.LogMode(logger.Silent),
+		}); err != nil {
+			return err
+		}
+	} else {
+		if db, err = gorm.Open(sqlite.Open(dbPath+"?_fk=true&_journal_mode="+journalMode+sharedCacheStr), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		}); err != nil {
+			return err
+		}
 	}
 
 	if err = db.SetupJoinTable(&Gist{}, "Likes", &Like{}); err != nil {
@@ -74,11 +82,7 @@ func CountAll(table interface{}) (int64, error) {
 }
 
 func IsUniqueConstraintViolation(err error) bool {
-	var sqliteErr *msqlite.Error
-	if errors.As(err, &sqliteErr) && sqliteErr.Code() == 2067 {
-		return true
-	}
-	return false
+	return err == gorm.ErrDuplicatedKey
 }
 
 func Ping() error {

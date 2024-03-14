@@ -28,7 +28,7 @@ type config struct {
 	LogOutput    string `yaml:"log-output" env:"OG_LOG_OUTPUT"`
 	ExternalUrl  string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
 	OpengistHome string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
-	DBUrl   	 string `yaml:"db-url" env:"OG_DB_URL"`
+	DBUrl        string `yaml:"db-url" env:"OG_DB_URL"`
 	DBFilename   string `yaml:"db-filename" env:"OG_DB_FILENAME"`
 	IndexEnabled bool   `yaml:"index.enabled" env:"OG_INDEX_ENABLED"`
 	IndexDirname string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"`

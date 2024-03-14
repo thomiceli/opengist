@@ -4,9 +4,9 @@ import (
 	"slices"
 	"strings"
 
-	"gorm.io/driver/postgres"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -23,7 +23,7 @@ func Setup(dbPath string, sharedCache bool) error {
 
 	if db, err = gorm.Open(postgres.Open(config.C.DBUrl), &gorm.Config{
 		TranslateError: true,
-		Logger: logger.Default.LogMode(logger.Silent),
+		Logger:         logger.Default.LogMode(logger.Silent),
 	}); err != nil {
 		return err
 	}

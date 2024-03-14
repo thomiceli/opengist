@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -16,7 +17,8 @@ func TestGists(t *testing.T) {
 	err = s.request("GET", "/", nil, 302)
 	require.NoError(t, err)
 
-	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
+	username := "thomas_" + uuid.NewRandom()
+	user1 := db.UserDTO{Username: username, Password: "thomas"}
 	register(t, s, user1)
 
 	err = s.request("GET", "/all", nil, 200)
@@ -104,7 +106,8 @@ func TestVisibility(t *testing.T) {
 	require.NoError(t, err, "Failed to create test server")
 	defer teardown(t, s)
 
-	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
+	username := "thomas_" + uuid.NewRandom()
+	user1 := db.UserDTO{Username: username, Password: "thomas"}
 	register(t, s, user1)
 
 	gist1 := db.GistDTO{
@@ -146,7 +149,8 @@ func TestLikeFork(t *testing.T) {
 	require.NoError(t, err, "Failed to create test server")
 	defer teardown(t, s)
 
-	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
+	username := "thomas_" + uuid.NewRandom()
+	user1 := db.UserDTO{Username: username, Password: "thomas"}
 	register(t, s, user1)
 
 	gist1 := db.GistDTO{
@@ -205,7 +209,8 @@ func TestCustomUrl(t *testing.T) {
 	require.NoError(t, err, "Failed to create test server")
 	defer teardown(t, s)
 
-	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
+	username := "thomas_" + uuid.NewRandom()
+	user1 := db.UserDTO{Username: username, Password: "thomas"}
 	register(t, s, user1)
 
 	gist1 := db.GistDTO{

@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/glebarez/sqlite"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"gorm.io/driver/postgres"
@@ -21,11 +22,24 @@ func Setup(dbPath string, sharedCache bool) error {
 		log.Warn().Msg("Invalid SQLite journal mode: " + journalMode)
 	}
 
-	if db, err = gorm.Open(postgres.Open(config.C.DBUrl), &gorm.Config{
-		TranslateError: true,
-		Logger:         logger.Default.LogMode(logger.Silent),
-	}); err != nil {
-		return err
+	sharedCacheStr := ""
+	if sharedCache {
+		sharedCacheStr = "&cache=shared"
+	}
+
+	if config.C.DBUrl != "" {
+		if db, err = gorm.Open(postgres.Open(config.C.DBUrl), &gorm.Config{
+			TranslateError: true,
+			Logger:         logger.Default.LogMode(logger.Silent),
+		}); err != nil {
+			return err
+		}
+	} else {
+		if db, err = gorm.Open(sqlite.Open(dbPath+"?_fk=true&_journal_mode="+journalMode+sharedCacheStr), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		}); err != nil {
+			return err
+		}
 	}
 
 	if err = db.SetupJoinTable(&Gist{}, "Likes", &Like{}); err != nil {

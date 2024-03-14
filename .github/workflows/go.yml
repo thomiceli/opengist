@@ -74,7 +74,5 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Run tests
-        env:
-          OG_DB_URL: host=localhost user=opengist password=opengist dbname=opengist port=5432 sslmode=disable
         run: make test
 

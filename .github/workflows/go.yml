@@ -74,5 +74,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Run tests
+        env:
+          OG_DB_URL: ""
         run: make test
 

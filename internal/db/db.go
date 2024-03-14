@@ -68,10 +68,7 @@ func CountAll(table interface{}) (int64, error) {
 }
 
 func IsUniqueConstraintViolation(err error) bool {
-	if err == gorm.ErrDuplicatedKey {
-		return true
-	}
-	return false
+	return err == gorm.ErrDuplicatedKey
 }
 
 func Ping() error {

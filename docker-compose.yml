@@ -23,6 +23,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ${PWD}:/opengist:rw
+    environment:
+      OG_DB_URL: "host=db user=opengist password=opengist dbname=opengist sslmode=disable"
     depends_on:
       - db
     ports:

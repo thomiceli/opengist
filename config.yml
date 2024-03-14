@@ -15,7 +15,7 @@ external-url:
 opengist-home:
 
 # Database configuration (SQLite or PostgreSQL)
-db-url: host=db user=opengist password=opengist dbname=opengist port=5432 sslmode=disable
+db-url:
 
 # Name of the SQLite database file. Default: opengist.db
 db-filename: opengist.db

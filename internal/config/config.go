@@ -69,7 +69,7 @@ func configWithDefaults() (*config, error) {
 	c.LogLevel = "warn"
 	c.LogOutput = "stdout,file"
 	c.OpengistHome = ""
-	c.DBUrl = "host=db user=opengist password=opengist dbname=opengist port=5432 sslmode=disable"
+	c.DBUrl = ""
 	c.DBFilename = "opengist.db"
 	c.IndexEnabled = true
 	c.IndexDirname = "opengist.index"

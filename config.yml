@@ -14,6 +14,9 @@ external-url:
 # Directory where Opengist will store its data. Default: ~/.opengist/
 opengist-home:
 
+# Database configuration (SQLite or PostgreSQL)
+db-url: host=db user=opengist password=opengist dbname=opengist port=5432 sslmode=disable
+
 # Name of the SQLite database file. Default: opengist.db
 db-filename: opengist.db
 
@@ -30,7 +33,6 @@ git.default-branch:
 # Set the journal mode for SQLite. Default: WAL
 # See https://www.sqlite.org/pragma.html#pragma_journal_mode
 sqlite.journal-mode: WAL
-
 
 # HTTP server configuration
 # Host to bind to. Default: 0.0.0.0
@@ -64,7 +66,6 @@ ssh.external-domain:
 
 # Path or alias to ssh-keygen executable. Default: ssh-keygen
 ssh.keygen-executable: ssh-keygen
-
 
 # OAuth2 configuration
 # The callback/redirect URL must be http://opengist.url/oauth/<github|gitlab|gitea|openid-connect>/callback

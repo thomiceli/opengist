@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+
+  # The PostgreSQL database.
+  db:
+    image: postgres:13.3
+    environment:
+      POSTGRES_USER: opengist
+      POSTGRES_PASSWORD: opengist
+      POSTGRES_DB: opengist
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+  # The core service written in Go.
+  core: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ${PWD}:/opengist:rw
+    depends_on:
+      - db
+    ports:
+      - "6157:6157"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"
+    name: opengist-network
+
+volumes:
+  db:
+    name: psqldata

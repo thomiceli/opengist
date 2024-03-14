@@ -1,12 +1,10 @@
 package db
 
 import (
-	"errors"
 	"slices"
 	"strings"
 
-	msqlite "github.com/glebarez/go-sqlite"
-	"github.com/glebarez/sqlite"
+	"gorm.io/driver/postgres"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"gorm.io/gorm"
@@ -23,12 +21,8 @@ func Setup(dbPath string, sharedCache bool) error {
 		log.Warn().Msg("Invalid SQLite journal mode: " + journalMode)
 	}
 
-	sharedCacheStr := ""
-	if sharedCache {
-		sharedCacheStr = "&cache=shared"
-	}
-
-	if db, err = gorm.Open(sqlite.Open(dbPath+"?_fk=true&_journal_mode="+journalMode+sharedCacheStr), &gorm.Config{
+	if db, err = gorm.Open(postgres.Open(config.C.DBUrl), &gorm.Config{
+		TranslateError: true,
 		Logger: logger.Default.LogMode(logger.Silent),
 	}); err != nil {
 		return err
@@ -74,8 +68,7 @@ func CountAll(table interface{}) (int64, error) {
 }
 
 func IsUniqueConstraintViolation(err error) bool {
-	var sqliteErr *msqlite.Error
-	if errors.As(err, &sqliteErr) && sqliteErr.Code() == 2067 {
+	if err == gorm.ErrDuplicatedKey {
 		return true
 	}
 	return false

@@ -75,7 +75,6 @@ jobs:
 
       - name: Run tests
         env:
-          OG_OPENGIST_HOME: /opengist
           OG_DB_URL: host=localhost user=opengist password=opengist dbname=opengist port=5432 sslmode=disable
         run: make test
 

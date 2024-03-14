@@ -81,7 +81,7 @@ func TestLogin(t *testing.T) {
 }
 
 func register(t *testing.T, s *testServer, user db.UserDTO) {
-	err := s.request("POST", "/register", user, 302)
+	err := s.request("POST", "/register", user, 200)
 	require.NoError(t, err)
 }
 

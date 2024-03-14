@@ -20,7 +20,6 @@ COPY . .
 
 RUN make
 
-
 FROM alpine:3.19 as run
 
 RUN apk update && \

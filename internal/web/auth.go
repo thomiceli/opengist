@@ -36,15 +36,38 @@ const (
 var title = cases.Title(language.English)
 
 func register(ctx echo.Context) error {
+	disableSignup := getData(ctx, "DisableSignup")
+	disableForm := getData(ctx, "DisableLoginForm")
+
+	code := ctx.QueryParam("code")
+	if code != "" {
+		if invitation, err := db.GetInvitationByCode(code); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return errorRes(500, "Cannot check for invitation code", err)
+		} else if invitation != nil && invitation.IsUsable() {
+			disableSignup = false
+		}
+	}
+
 	setData(ctx, "title", tr(ctx, "auth.new-account"))
 	setData(ctx, "htmlTitle", "New account")
-	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
+	setData(ctx, "disableForm", disableForm)
+	setData(ctx, "disableSignup", disableSignup)
 	setData(ctx, "isLoginPage", false)
 	return html(ctx, "auth_form.html")
 }
 
 func processRegister(ctx echo.Context) error {
-	if getData(ctx, "DisableSignup") == true {
+	disableSignup := getData(ctx, "DisableSignup")
+
+	code := ctx.QueryParam("code")
+	invitation, err := db.GetInvitationByCode(code)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return errorRes(500, "Cannot check for invitation code", err)
+	} else if invitation != nil && invitation.IsUsable() {
+		disableSignup = false
+	}
+
+	if disableSignup == true {
 		return errorRes(403, "Signing up is disabled", nil)
 	}
 
@@ -88,6 +111,10 @@ func processRegister(ctx echo.Context) error {
 		if err = user.SetAdmin(); err != nil {
 			return errorRes(500, "Cannot set user admin", err)
 		}
+	}
+
+	if err := invitation.Use(); err != nil {
+		return errorRes(500, "Cannot use invitation", err)
 	}
 
 	sess.Values["user"] = user.ID

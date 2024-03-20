@@ -53,6 +53,22 @@ document.addEventListener('DOMContentLoaded', () => {
         e.innerHTML = dayjs.unix(parseInt(e.innerHTML)).format('DD/MM/YYYY HH:mm');
     });
 
+    document.querySelectorAll('form').forEach((form: HTMLFormElement) => {
+        form.onsubmit = () => {
+            form.querySelectorAll('input[type=datetime-local]').forEach((input: HTMLInputElement) => {
+                console.log(dayjs(input.value).unix());
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'expiredAtUnix'
+                hiddenInput.value = dayjs(input.value).unix().toString();
+                form.appendChild(hiddenInput);
+            });
+            return true;
+        };
+    })
+
+
+
     const rev = document.querySelector<HTMLElement>('.revision-text');
     if (rev) {
         const fullRev = rev.innerHTML;

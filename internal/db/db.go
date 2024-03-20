@@ -42,7 +42,7 @@ func Setup(dbPath string, sharedCache bool) error {
 		return err
 	}
 
-	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}); err != nil {
+	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}); err != nil {
 		return err
 	}
 

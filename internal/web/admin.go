@@ -1,7 +1,6 @@
 package web
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/actions"
 	"github.com/thomiceli/opengist/internal/config"
@@ -203,18 +202,10 @@ func adminInvitationsCreate(ctx echo.Context) error {
 	if err != nil {
 		nbMax = 10
 	}
-	expiresAt := ctx.FormValue("expiresAt")
-	var expiresAtUnix int64
-	fmt.Println(expiresAt)
-	if expiresAt == "" {
-		expiresAtUnix = time.Now().Add(7 * 24 * time.Hour).Unix()
-	} else {
-		parsedDate, err := time.Parse("2006-01-02T15:04", expiresAt)
-		if err != nil {
-			return errorRes(400, "Invalid date format", err)
-		}
-		parsedDateUTC := time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), parsedDate.Hour(), parsedDate.Minute(), 0, 0, time.Local)
-		expiresAtUnix = parsedDateUTC.Unix()
+
+	expiresAtUnix, err := strconv.ParseInt(ctx.FormValue("expiredAtUnix"), 10, 64)
+	if err != nil {
+		expiresAtUnix = time.Now().Unix() + 604800 // 1 week
 	}
 
 	invitation := &db.Invitation{

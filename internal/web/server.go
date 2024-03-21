@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/utils"
+	"github.com/thomiceli/opengist/templates"
 	htmlpkg "html"
 	"html/template"
 	"io"
@@ -30,7 +31,6 @@ import (
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/public"
-	"github.com/thomiceli/opengist/templates"
 	"golang.org/x/text/language"
 )
 
@@ -186,8 +186,13 @@ func NewServer(isDev bool) *Server {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 
+	t := template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html"))
+	t, err := t.ParseGlob(filepath.Join(config.GetHomeDir(), "custom", "*.html"))
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to parse custom templates")
+	}
 	e.Renderer = &Template{
-		templates: template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html")),
+		templates: t,
 	}
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
 		if err, ok := er.(*echo.HTTPError); ok {
@@ -211,14 +216,6 @@ func NewServer(isDev bool) *Server {
 	if !dev {
 		parseManifestEntries()
 	}
-	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
-	e.GET("/assets/*", func(c echo.Context) error {
-		if _, err := public.Files.Open(path.Join("assets", c.Param("*"))); !dev && err == nil {
-			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(c)
-		}
-
-		return echo.WrapHandler(http.StripPrefix("/assets/", http.FileServer(http.FS(customFs))))(c)
-	})
 
 	// Web based routes
 	g1 := e.Group("")
@@ -308,6 +305,20 @@ func NewServer(isDev bool) *Server {
 			g3.PUT("/checkbox", checkbox, logged, writePermission)
 		}
 	}
+
+	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
+	e.GET("/assets/*", func(c echo.Context) error {
+		if _, err := public.Files.Open(path.Join("assets", c.Param("*"))); !dev && err == nil {
+			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(c)
+		}
+
+		// if the custom file is an .html template, render it
+		if strings.HasSuffix(c.Param("*"), ".html") {
+			return html(c, c.Param("*"))
+		}
+
+		return echo.WrapHandler(http.StripPrefix("/assets/", http.FileServer(http.FS(customFs))))(c)
+	})
 
 	// Git HTTP routes
 	if config.C.HttpGit {

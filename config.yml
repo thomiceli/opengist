@@ -100,3 +100,8 @@ oidc.discovery-url:
 # Add your own custom assets to $opengist-home/custom/
 custom.logo:
 custom.favicon:
+
+# Static pages in footer (like legal notices, privacy policy, etc.)
+custom.static-pages:
+#  - name: Legal notices
+#    path: legal.html

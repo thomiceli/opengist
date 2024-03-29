@@ -198,3 +198,11 @@ admin.gists.private: Private ?
 admin.gists.nb-files: Nb. files
 admin.gists.nb-likes: Nb. likes
 admin.gists.delete_confirm: Do you want to delete this gist ?
+
+admin.invitations.help: Invitations can be used to create an account even if signing up is disabled.
+admin.invitations.max_uses: Max uses
+admin.invitations.expires_at: Expires at
+admin.invitations.code: Code
+admin.invitations.copy_link: Copy link
+admin.invitations.uses: Uses
+admin.invitations.expired: Expired

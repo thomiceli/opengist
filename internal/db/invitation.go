@@ -77,7 +77,7 @@ func (i *Invitation) Use() error {
 
 func generateRandomCode() string {
 	const charset = "0123456789ABCDEF"
-	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	result := make([]byte, 16)
 
 	for i := range result {

@@ -356,6 +356,22 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
 		setData(ctx, "oidcOauth", config.C.OIDCClientKey != "" && config.C.OIDCSecret != "" && config.C.OIDCDiscoveryUrl != "")
 
+		httpProtocol := "http"
+		if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
+			httpProtocol = "https"
+		}
+		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))
+
+		var baseHttpUrl string
+		// if a custom external url is set, use it
+		if config.C.ExternalUrl != "" {
+			baseHttpUrl = config.C.ExternalUrl
+		} else {
+			baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
+		}
+
+		setData(ctx, "baseHttpUrl", baseHttpUrl)
+
 		return next(ctx)
 	}
 }

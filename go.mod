@@ -11,6 +11,7 @@ require (
 	github.com/glebarez/sqlite v1.10.0
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/google/uuid v1.5.0
+	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.2.2
 	github.com/hashicorp/go-memdb v1.3.4
 	github.com/labstack/echo/v4 v4.11.4
@@ -57,7 +58,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
-	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

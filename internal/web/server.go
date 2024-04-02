@@ -271,6 +271,9 @@ func NewServer(isDev bool) *Server {
 			g2.POST("/users/:user/delete", adminUserDelete)
 			g2.GET("/gists", adminGists)
 			g2.POST("/gists/:gist/delete", adminGistDelete)
+			g2.GET("/invitations", adminInvitations)
+			g2.POST("/invitations", adminInvitationsCreate)
+			g2.POST("/invitations/:id/delete", adminInvitationsDelete)
 			g2.POST("/sync-fs", adminSyncReposFromFS)
 			g2.POST("/sync-db", adminSyncReposFromDB)
 			g2.POST("/gc-repos", adminGcRepos)
@@ -380,6 +383,22 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 		setData(ctx, "gitlabOauth", config.C.GitlabClientKey != "" && config.C.GitlabSecret != "")
 		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
 		setData(ctx, "oidcOauth", config.C.OIDCClientKey != "" && config.C.OIDCSecret != "" && config.C.OIDCDiscoveryUrl != "")
+
+		httpProtocol := "http"
+		if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
+			httpProtocol = "https"
+		}
+		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))
+
+		var baseHttpUrl string
+		// if a custom external url is set, use it
+		if config.C.ExternalUrl != "" {
+			baseHttpUrl = config.C.ExternalUrl
+		} else {
+			baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
+		}
+
+		setData(ctx, "baseHttpUrl", baseHttpUrl)
 
 		return next(ctx)
 	}

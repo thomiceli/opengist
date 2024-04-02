@@ -87,6 +87,9 @@ func Initialize(ctx *cli.Context) {
 		log.Fatal().Err(err).Msg("Failed to create symlinks")
 	}
 
+	if err := os.MkdirAll(filepath.Join(homePath, "sessions"), 0755); err != nil {
+		log.Fatal().Err(err).Send()
+	}
 	if err := os.MkdirAll(filepath.Join(homePath, "repos"), 0755); err != nil {
 		log.Fatal().Err(err).Send()
 	}

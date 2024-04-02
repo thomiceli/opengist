@@ -142,6 +142,9 @@ func setup(t *testing.T) {
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
 
+	err = os.MkdirAll(filepath.Join(homePath, "sessions"), 0755)
+	require.NoError(t, err, "Could not create sessions directory")
+
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
 	require.NoError(t, err, "Could not create tmp repos directory")
 

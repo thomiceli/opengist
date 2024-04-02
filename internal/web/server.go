@@ -35,10 +35,11 @@ import (
 )
 
 var (
-	dev   bool
-	store *sessions.CookieStore
-	re    = regexp.MustCompile("[^a-z0-9]+")
-	fm    = template.FuncMap{
+	dev        bool
+	flashStore *sessions.CookieStore     // session store for flash messages
+	userStore  *sessions.FilesystemStore // session store for user sessions
+	re         = regexp.MustCompile("[^a-z0-9]+")
+	fm         = template.FuncMap{
 		"split":     strings.Split,
 		"indexByte": strings.IndexByte,
 		"toInt": func(i string) int {
@@ -160,8 +161,13 @@ type Server struct {
 
 func NewServer(isDev bool) *Server {
 	dev = isDev
-	store = sessions.NewCookieStore([]byte("opengist"))
-	gothic.Store = store
+	flashStore = sessions.NewCookieStore([]byte("opengist"))
+	userStore = sessions.NewFilesystemStore(path.Join(config.GetHomeDir(), "sessions"),
+		utils.ReadKey(path.Join(config.GetHomeDir(), "sessions", "session-auth.key")),
+		utils.ReadKey(path.Join(config.GetHomeDir(), "sessions", "session-encrypt.key")),
+	)
+	userStore.MaxLength(10 * 1024)
+	gothic.Store = userStore
 
 	e := echo.New()
 	e.HideBanner = true

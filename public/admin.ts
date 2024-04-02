@@ -5,6 +5,15 @@ document.addEventListener('DOMContentLoaded', () => {
             registerDomSetting(elem as HTMLElement)
         })
     }
+
+    let copyInviteButtons = Array.from(document.getElementsByClassName("copy-invitation-link"));
+    for (let button of copyInviteButtons) {
+        button.addEventListener('click', () => {
+            navigator.clipboard.writeText((button as HTMLElement).dataset.link).catch((err) => {
+                console.error('Could not copy text: ', err);
+            });
+        })
+    }
 });
 
 const setSetting = (key: string, value: string) => {

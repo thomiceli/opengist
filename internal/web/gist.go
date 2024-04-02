@@ -74,21 +74,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		httpProtocol := "http"
-		if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
-			httpProtocol = "https"
-		}
-		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))
-
-		var baseHttpUrl string
-		// if a custom external url is set, use it
-		if config.C.ExternalUrl != "" {
-			baseHttpUrl = config.C.ExternalUrl
-		} else {
-			baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
-		}
-
-		setData(ctx, "baseHttpUrl", baseHttpUrl)
+		baseHttpUrl := getData(ctx, "baseHttpUrl").(string)
 
 		if config.C.HttpGit {
 			setData(ctx, "httpCloneUrl", baseHttpUrl+"/"+userName+"/"+gistName+".git")

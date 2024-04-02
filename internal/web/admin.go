@@ -8,6 +8,7 @@ import (
 	"github.com/thomiceli/opengist/internal/git"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 func adminIndex(ctx echo.Context) error {
@@ -178,4 +179,60 @@ func adminSetConfig(ctx echo.Context) error {
 	return ctx.JSON(200, map[string]interface{}{
 		"success": true,
 	})
+}
+
+func adminInvitations(ctx echo.Context) error {
+	setData(ctx, "title", "Invitations")
+	setData(ctx, "htmlTitle", "Invitations - Admin panel")
+	setData(ctx, "adminHeaderPage", "invitations")
+
+	var invitations []*db.Invitation
+	var err error
+	if invitations, err = db.GetAllInvitations(); err != nil {
+		return errorRes(500, "Cannot get invites", err)
+	}
+
+	setData(ctx, "invitations", invitations)
+	return html(ctx, "admin_invitations.html")
+}
+
+func adminInvitationsCreate(ctx echo.Context) error {
+	code := ctx.FormValue("code")
+	nbMax, err := strconv.ParseUint(ctx.FormValue("nbMax"), 10, 64)
+	if err != nil {
+		nbMax = 10
+	}
+
+	expiresAtUnix, err := strconv.ParseInt(ctx.FormValue("expiredAtUnix"), 10, 64)
+	if err != nil {
+		expiresAtUnix = time.Now().Unix() + 604800 // 1 week
+	}
+
+	invitation := &db.Invitation{
+		Code:      code,
+		ExpiresAt: expiresAtUnix,
+		NbMax:     uint(nbMax),
+	}
+
+	if err := invitation.Create(); err != nil {
+		return errorRes(500, "Cannot create invitation", err)
+	}
+
+	addFlash(ctx, "Invitation has been created", "success")
+	return redirect(ctx, "/admin-panel/invitations")
+}
+
+func adminInvitationsDelete(ctx echo.Context) error {
+	id, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	invitation, err := db.GetInvitationByID(uint(id))
+	if err != nil {
+		return errorRes(500, "Cannot retrieve invitation", err)
+	}
+
+	if err := invitation.Delete(); err != nil {
+		return errorRes(500, "Cannot delete this invitation", err)
+	}
+
+	addFlash(ctx, "Invitation has been deleted", "success")
+	return redirect(ctx, "/admin-panel/invitations")
 }

@@ -8,7 +8,7 @@
 
     </header>
     <main class="mt-4">
-        {{ if and .DisableSignup (not .isLoginPage) }}
+        {{ if .disableSignup }}
         <p class="italic">{{ .locale.Tr "auth.signup-disabled" }}</p>
         {{ else }}
         <div class="sm:col-span-6">

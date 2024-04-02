@@ -68,7 +68,7 @@ func getUserLogged(ctx echo.Context) *db.User {
 }
 
 func setErrorFlashes(ctx echo.Context) {
-	sess, _ := store.Get(ctx.Request(), "flash")
+	sess, _ := flashStore.Get(ctx.Request(), "flash")
 
 	setData(ctx, "flashErrors", sess.Flashes("error"))
 	setData(ctx, "flashSuccess", sess.Flashes("success"))
@@ -77,13 +77,13 @@ func setErrorFlashes(ctx echo.Context) {
 }
 
 func addFlash(ctx echo.Context, flashMessage string, flashType string) {
-	sess, _ := store.Get(ctx.Request(), "flash")
+	sess, _ := flashStore.Get(ctx.Request(), "flash")
 	sess.AddFlash(flashMessage, flashType)
 	_ = sess.Save(ctx.Request(), ctx.Response())
 }
 
 func getSession(ctx echo.Context) *sessions.Session {
-	sess, _ := store.Get(ctx.Request(), "session")
+	sess, _ := userStore.Get(ctx.Request(), "session")
 	return sess
 }
 

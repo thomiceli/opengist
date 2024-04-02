@@ -258,12 +258,14 @@ func loadConfigFromEnv(c *config, out io.Writer) error {
 		switch v.Field(i).Kind() {
 		case reflect.String:
 			v.Field(i).SetString(envValue)
+			envVars = append(envVars, tag)
 		case reflect.Bool:
 			boolVal, err := strconv.ParseBool(envValue)
 			if err != nil {
 				return err
 			}
 			v.Field(i).SetBool(boolVal)
+			envVars = append(envVars, tag)
 		case reflect.Slice:
 			if v.Type().Field(i).Type.Elem().Kind() == reflect.Struct {
 				prefix := strings.ToUpper(tag) + "_"
@@ -306,7 +308,6 @@ func loadConfigFromEnv(c *config, out io.Writer) error {
 			return fmt.Errorf("unsupported type: %s", v.Field(i).Kind())
 		}
 
-		envVars = append(envVars, tag)
 	}
 
 	if len(envVars) > 0 {

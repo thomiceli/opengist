@@ -97,6 +97,14 @@ oidc.discovery-url:
 
 
 # Custom assets
-# Add your own custom assets to $opengist-home/custom/
+# Add your own custom assets, that are files relatives to $opengist-home/custom/
 custom.logo:
 custom.favicon:
+
+# Static pages in footer (like legal notices, privacy policy, etc.)
+# The path can be a URL or a relative path to a file in the $opengist-home/custom/ directory
+custom.static-links:
+#  - name: Gitea
+#    path: https://gitea.com
+#  - name: Legal notices
+#    path: legal.html

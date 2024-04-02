@@ -63,8 +63,14 @@ type config struct {
 	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
 	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
 
-	CustomLogo    string `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
-	CustomFavicon string `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
+	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
+	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
+	StaticLinks   []StaticLink `yaml:"custom.static-links" env:"OG_CUSTOM_STATIC_LINK"`
+}
+
+type StaticLink struct {
+	Name string `yaml:"name" env:"OG_CUSTOM_STATIC_LINK_#_NAME"`
+	Path string `yaml:"path" env:"OG_CUSTOM_STATIC_LINK_#_PATH"`
 }
 
 func configWithDefaults() (*config, error) {
@@ -129,7 +135,6 @@ func InitConfig(configPath string, out io.Writer) error {
 	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -246,22 +251,63 @@ func loadConfigFromEnv(c *config, out io.Writer) error {
 		}
 
 		envValue := os.Getenv(strings.ToUpper(tag))
-		if envValue == "" {
+		if envValue == "" && v.Field(i).Kind() != reflect.Slice {
 			continue
 		}
 
 		switch v.Field(i).Kind() {
 		case reflect.String:
 			v.Field(i).SetString(envValue)
+			envVars = append(envVars, tag)
 		case reflect.Bool:
 			boolVal, err := strconv.ParseBool(envValue)
 			if err != nil {
 				return err
 			}
 			v.Field(i).SetBool(boolVal)
+			envVars = append(envVars, tag)
+		case reflect.Slice:
+			if v.Type().Field(i).Type.Elem().Kind() == reflect.Struct {
+				prefix := strings.ToUpper(tag) + "_"
+				var sliceValue reflect.Value
+				elemType := v.Type().Field(i).Type.Elem()
+
+				for index := 0; ; index++ {
+					allFieldsPresent := true
+					elemValue := reflect.New(elemType).Elem()
+
+					for j := 0; j < elemValue.NumField() && allFieldsPresent; j++ {
+						elemField := elemValue.Type().Field(j)
+						envName := fmt.Sprintf("%s%d_%s", prefix, index, strings.ToUpper(elemField.Name))
+						envValue, present := os.LookupEnv(envName)
+
+						if !present {
+							allFieldsPresent = false
+							break
+						}
+
+						envVars = append(envVars, envName)
+						elemValue.Field(j).SetString(envValue)
+					}
+
+					if !allFieldsPresent {
+						break
+					}
+
+					if sliceValue.Kind() != reflect.Slice {
+						sliceValue = reflect.MakeSlice(v.Type().Field(i).Type, 0, index+1)
+					}
+					sliceValue = reflect.Append(sliceValue, elemValue)
+				}
+
+				if sliceValue.IsValid() {
+					v.Field(i).Set(sliceValue)
+				}
+			}
+		default:
+			return fmt.Errorf("unsupported type: %s", v.Field(i).Kind())
 		}
 
-		envVars = append(envVars, tag)
 	}
 
 	if len(envVars) > 0 {

@@ -28,10 +28,10 @@
                 </div>
             </div>
         </div>
-        {{ if ne (len .c.StaticPages) 0 }}
+        {{ if ne (len .c.StaticLinks) 0 }}
         <div class="ml-1.5">
-            {{ range $index, $value := .c.StaticPages }}
-                ⋅ <a href="{{ $.c.ExternalUrl }}/assets/{{ .Path }}" class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 inline-flex">{{ .Name }}</a>
+            {{ range $index, $value := .c.StaticLinks }}
+                ⋅ <a href="{{ if isUrl .Path }}{{ .Path }}{{ else }}{{ $.c.ExternalUrl }}/assets/{{ .Path }}{{ end }}" class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 inline-flex">{{ .Name }}</a>
             {{ end }}
         </div>
         {{ end }}

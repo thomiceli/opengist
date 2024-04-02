@@ -138,6 +138,10 @@ var (
 		},
 		"addMetadataToSearchQuery": addMetadataToSearchQuery,
 		"indexEnabled":             index.Enabled,
+		"isUrl": func(s string) bool {
+			_, err := url.ParseRequestURI(s)
+			return err == nil
+		},
 	}
 )
 
@@ -187,13 +191,21 @@ func NewServer(isDev bool) *Server {
 	e.Use(middleware.Secure())
 
 	t := template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html"))
-	t, err := t.ParseGlob(filepath.Join(config.GetHomeDir(), "custom", "*.html"))
+	customPattern := filepath.Join(config.GetHomeDir(), "custom", "*.html")
+	matches, err := filepath.Glob(customPattern)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to parse custom templates")
+		log.Fatal().Err(err).Msg("Failed to check for custom templates")
+	}
+	if len(matches) > 0 {
+		t, err = t.ParseGlob(customPattern)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to parse custom templates")
+		}
 	}
 	e.Renderer = &Template{
 		templates: t,
 	}
+
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
 		if err, ok := er.(*echo.HTTPError); ok {
 			if err.Code >= 500 {
@@ -307,17 +319,20 @@ func NewServer(isDev bool) *Server {
 	}
 
 	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
-	e.GET("/assets/*", func(c echo.Context) error {
-		if _, err := public.Files.Open(path.Join("assets", c.Param("*"))); !dev && err == nil {
-			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(c)
+	e.GET("/assets/*", func(ctx echo.Context) error {
+		if _, err := public.Files.Open(path.Join("assets", ctx.Param("*"))); !dev && err == nil {
+			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(ctx)
 		}
 
 		// if the custom file is an .html template, render it
-		if strings.HasSuffix(c.Param("*"), ".html") {
-			return html(c, c.Param("*"))
+		if strings.HasSuffix(ctx.Param("*"), ".html") {
+			if err := html(ctx, ctx.Param("*")); err != nil {
+				return notFound("Page not found")
+			}
+			return nil
 		}
 
-		return echo.WrapHandler(http.StripPrefix("/assets/", http.FileServer(http.FS(customFs))))(c)
+		return echo.WrapHandler(http.StripPrefix("/assets/", http.FileServer(http.FS(customFs))))(ctx)
 	})
 
 	// Git HTTP routes

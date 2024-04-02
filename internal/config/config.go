@@ -65,12 +65,12 @@ type config struct {
 
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
-	StaticPages   []StaticPage `yaml:"custom.static-pages" env:"OG_CUSTOM_STATIC_PAGES"`
+	StaticLinks   []StaticLink `yaml:"custom.static-links" env:"OG_CUSTOM_STATIC_LINK"`
 }
 
-type StaticPage struct {
-	Name string `yaml:"name"`
-	Path string `yaml:"path"`
+type StaticLink struct {
+	Name string `yaml:"name" env:"OG_CUSTOM_STATIC_LINK_#_NAME"`
+	Path string `yaml:"path" env:"OG_CUSTOM_STATIC_LINK_#_PATH"`
 }
 
 func configWithDefaults() (*config, error) {

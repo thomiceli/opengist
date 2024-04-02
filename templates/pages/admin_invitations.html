@@ -47,7 +47,7 @@
                         </svg>
                     </span>
                     {{ else }}
-                    <span class="italic">{{ .locale.Tr "admin.invitations.expired" }}</span>
+                    <span class="italic">{{ $.locale.Tr "admin.invitations.expired" }}</span>
                     {{ end }}
                 </td>
                 <td class="whitespace-nowrap py-2 px-2 text-sm">{{ $invitation.NbUsed }}/{{ $invitation.NbMax }}</td>

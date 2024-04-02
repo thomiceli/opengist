@@ -443,8 +443,9 @@ func gistJs(ctx echo.Context) error {
 	js := `document.write('<link rel="stylesheet" href="%s">')
 document.write('%s')
 `
-	js = fmt.Sprintf(js, cssUrl,
-		strings.Replace(htmlbuf.String(), "\n", `\n`, -1))
+	content := strings.Replace(htmlbuf.String(), `\n`, `\\n`, -1)
+	content = strings.Replace(content, "\n", `\n`, -1)
+	js = fmt.Sprintf(js, cssUrl, content)
 	ctx.Response().Header().Set("Content-Type", "application/javascript")
 	return plainText(ctx, 200, js)
 }

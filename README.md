@@ -37,7 +37,7 @@ It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and c
 Docker [images](https://github.com/thomiceli/opengist/pkgs/container/opengist) are available for each release :
 
 ```shell
-docker pull ghcr.io/thomiceli/opengist:1
+docker pull ghcr.io/thomiceli/opengist:1.7
 ```
 
 It can be used in a `docker-compose.yml` file :
@@ -51,7 +51,7 @@ version: "3"
 
 services:
   opengist:
-    image: ghcr.io/thomiceli/opengist:1
+    image: ghcr.io/thomiceli/opengist:1.7
     container_name: opengist
     restart: unless-stopped
     ports:
@@ -78,9 +78,9 @@ Download the archive for your system from the release page [here](https://github
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.6.1/opengist1.6.1-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.7.0/opengist1.7.0-linux-amd64.tar.gz
 
-tar xzvf opengist1.6.1-linux-amd64.tar.gz
+tar xzvf opengist1.7.0-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`

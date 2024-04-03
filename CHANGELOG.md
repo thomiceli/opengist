@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.7.0](https://github.com/thomiceli/opengist/compare/v1.6.1...v1.7.0) - 2024-04-03
+See here how to [update](/docs/update.md) Opengist.
+
+Note: all sessions will be invalidated after this update.
+
+### Added
+- Custom logo configuration (#209)
+- Custom static links (#234)
+- Invitations for closed registrations (#233)
+- Set gist visibility via Git push options (#215)
+- Set gist URL and title via push options (#216)
+- Specify custom names in the OAuth login buttons (#214)
+- Markdown preview (#224)
+- Reset a user password using CLI (#226)
+- Translations (#207, #210)
+
+### Changed
+- Use filesystem session store (#240)
+- Move Git hook logic to Opengist (#213)
+- Increase login for 1 year (#222)
+
+### Fixed
+- Show theme change button on responsive devices (#225)
+- New line literal in embed gists (#237)
+
+### Other
+- GitHub security updates
+- New docker dev env (#220)
+
 ## [1.6.1](https://github.com/thomiceli/opengist/compare/v1.6.0...v1.6.1) - 2024-01-06
 See here how to [update](/docs/update.md) Opengist.
 

@@ -36,3 +36,27 @@ In the start and end of the custom HTML files, you can use the syntax to include
 
 {{ template "footer" . }}
 ```
+
+If you want your custom page to integrate well into the existing theme, you can use the following:
+
+```html
+{{ template "header" . }}
+
+<div class="py-10">
+   <header class="pb-4 ">
+      <div class="flex">
+         <div class="flex-auto">
+            <h2 class="text-2xl font-bold leading-tight">Heading</h2>
+         </div>
+      </div>
+   </header>
+   <main>
+     <h3 class="text-2xl font-bold leading-tight mt-4">Sub-Heading</h3>
+     <p class="mt-4 ml-1"><!-- content --></p>
+   </main>
+</div>
+
+{{ template "footer" . }}
+```
+
+You can adjust above as needed. Opengist uses Tailwind CSS classes.

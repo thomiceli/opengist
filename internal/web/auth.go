@@ -63,7 +63,7 @@ func processRegister(ctx echo.Context) error {
 	invitation, err := db.GetInvitationByCode(code)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return errorRes(500, "Cannot check for invitation code", err)
-	} else if invitation != nil && invitation.IsUsable() {
+	} else if invitation.ID != 0 && invitation.IsUsable() {
 		disableSignup = false
 	}
 
@@ -113,8 +113,10 @@ func processRegister(ctx echo.Context) error {
 		}
 	}
 
-	if err := invitation.Use(); err != nil {
-		return errorRes(500, "Cannot use invitation", err)
+	if invitation.ID != 0 {
+		if err := invitation.Use(); err != nil {
+			return errorRes(500, "Cannot use invitation", err)
+		}
 	}
 
 	sess.Values["user"] = user.ID

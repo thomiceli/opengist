@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.7.1](https://github.com/thomiceli/opengist/compare/v1.7.0...v1.7.1) - 2024-04-05
+See here how to [update](/docs/update.md) Opengist.
+
+### Added
+- Docs: More detailed variant for custom pages (#248)
+
+### Fixed
+- Auth page GitlabName Error (#242)
+- Empty invitation on user creation (#247)
+
 ## [1.7.0](https://github.com/thomiceli/opengist/compare/v1.6.1...v1.7.0) - 2024-04-03
 See here how to [update](/docs/update.md) Opengist.
 

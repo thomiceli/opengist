@@ -51,7 +51,7 @@ If you want your custom page to integrate well into the existing theme, you can 
       </div>
    </header>
    <main>
-     <h3 class="text-2xl font-bold leading-tight mt-4">Sub-Heading</h3>
+     <h3 class="text-xl font-bold leading-tight mt-4">Sub-Heading</h3>
      <p class="mt-4 ml-1"><!-- content --></p>
    </main>
 </div>

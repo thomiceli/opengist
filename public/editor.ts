@@ -36,8 +36,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let mdpreview = dom.querySelector(".md-preview") as HTMLElement;
 
+        let formfilename = dom.querySelector<HTMLInputElement>(".form-filename");
+
+        // check if file ends with .md on pageload
+        if (formfilename!.value.endsWith(".md")) {
+            mdpreview!.classList.remove("hidden");
+        } else {
+            mdpreview!.classList.add("hidden");
+        }
+
         // event if the filename ends with .md; trigger event
-        dom.querySelector<HTMLInputElement>(".form-filename")!.onkeyup = (e) => {
+        formfilename!.onkeyup = (e) => {
             let filename = (e.target as HTMLInputElement).value;
             if (filename.endsWith(".md")) {
                 mdpreview!.classList.remove("hidden");

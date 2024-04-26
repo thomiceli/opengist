@@ -35,7 +35,7 @@
                                      <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }}<span class="italic text-gray-600 dark:text-gray-400 ml-1">({{ $.locale.Tr "gist.revision.file-created" }})</span></span>
                                 {{ else if $file.IsDeleted }}
                                     <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }} <span class="italic text-gray-600 dark:text-gray-400 ml-1">({{ $.locale.Tr "gist.revision.file-deleted" }})</span></span>
-                                {{ else if ne $file.OldFilename "" }}
+                                {{ else if ne $file.OldFilename $file.Filename }}
                                     <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.OldFilename }} <span class="italic text-gray-600 dark:text-gray-400 mx-1">{{ $.locale.Tr "gist.revision.file-renamed" }}</span> {{ $file.Filename }}</span>
                                 {{ else }}
                                     <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }}</span>

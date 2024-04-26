@@ -183,6 +183,8 @@ loopLog:
 					// Attempt to parse the file header
 					switch {
 					case strings.HasPrefix(line, "diff --git"):
+						currentCommit.Files = append(currentCommit.Files, *currentFile)
+						headerParsed = false
 						break loopFileDiff
 					case strings.HasPrefix(line, "old mode"):
 					case strings.HasPrefix(line, "new mode"):
@@ -191,14 +193,14 @@ loopLog:
 					case strings.HasPrefix(line, "dissimilarity index"):
 						continue
 					case strings.HasPrefix(line, "rename from "):
-						currentFile.OldFilename = line[11 : len(line)-1]
+						currentFile.OldFilename = line[12 : len(line)-1]
 					case strings.HasPrefix(line, "rename to "):
-						currentFile.Filename = line[9 : len(line)-1]
+						currentFile.Filename = line[10 : len(line)-1]
 						parseRename = false
 					case strings.HasPrefix(line, "copy from "):
-						currentFile.OldFilename = line[9 : len(line)-1]
+						currentFile.OldFilename = line[10 : len(line)-1]
 					case strings.HasPrefix(line, "copy to "):
-						currentFile.Filename = line[7 : len(line)-1]
+						currentFile.Filename = line[8 : len(line)-1]
 						parseRename = false
 					case strings.HasPrefix(line, "new file"):
 						currentFile.IsCreated = true
@@ -217,7 +219,6 @@ loopLog:
 							currentFile.Filename = name[2:]
 						}
 
-						sb := &strings.Builder{}
 						// Header is finally parsed, now we can parse the file diff content
 						lineBytes, isFragment, err := parseDiffContent(currentFile, maxBytes, input)
 						if err != nil {
@@ -231,9 +232,6 @@ loopLog:
 							break loopCommit
 						}
 
-						sb.Reset()
-						_, _ = sb.Write(lineBytes)
-
 						currentCommit.Files = append(currentCommit.Files, *currentFile)
 
 						if string(lineBytes) == "" {
@@ -242,15 +240,12 @@ loopLog:
 						}
 
 						for isFragment {
-							lineBytes, isFragment, err = input.ReadLine()
+							_, isFragment, err = input.ReadLine()
 							if err != nil {
 								return commits, fmt.Errorf("unable to ReadLine: %w", err)
 							}
-							_, _ = sb.Write(lineBytes)
 						}
 
-						line = sb.String()
-						sb.Reset()
 						break loopFileDiff
 					}
 				}

@@ -125,7 +125,7 @@ like Opengist actually`,
 
 	require.Contains(t, commits[0].Files, File{
 		Filename:    "my_other_file.txt",
-		OldFilename: "",
+		OldFilename: "my_other_file.txt",
 		Content: `@@ -1,2 +1,2 @@
  I really
 -hate Opengist

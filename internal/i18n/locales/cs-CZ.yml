@@ -17,8 +17,8 @@ gist.header.clone-http: Klonovat pomocí %s
 gist.header.clone-http-help: Klonovat s pomocí Git pomocí základní autentizace HTTP.
 gist.header.clone-ssh: Klonovat pomocí SSH
 gist.header.clone-ssh-help: Klonovat s pomocí Git pomocí klíče SSH.
-gist.header.embed:
-gist.header.embed-help:
+gist.header.embed: Vložit
+gist.header.embed-help: Vložte tento gist na vaši webovou stránku.
 gist.header.download-zip: Stáhnout ZIP
 
 gist.raw: Raw
@@ -53,7 +53,7 @@ gist.list.joined: Připojeno
 gist.list.all: Všechny gisty
 gist.list.search-results: Výsledky hledání
 gist.list.sort: Seřadit
-gist.list.sort-by-created: Vytvořeno
+gist.list.sort-by-created: vytvořeno
 gist.list.sort-by-updated: Aktualizováno
 gist.list.order-by-asc: Nejméně nedávno
 gist.list.order-by-desc: Nedávno
@@ -181,3 +181,25 @@ admin.gists.private: Soukromé?
 admin.gists.nb-files: Počet souborů
 admin.gists.nb-likes: Počet lajků
 admin.gists.delete_confirm: Opravdu chcete smazat tento gist?
+admin.invitations.help: Pozvánky mohou být použity pro vytvoření účtu i v případě, že je registrace zakázaná.
+admin.actions.sync-previews: Synchronizovat náhledy všech gistů
+admin.actions.index-gists: Indexovat všechny gisty
+gist.new.url: URL
+gist.new.preview: Náhled
+gist.search.found: gistů nalezeno
+gist.search.no-results: Žádné gisty nenalezeny
+gist.search.help.user: gistů vytvořeno uživatelem
+gist.search.help.title: gistů s vybraným nadpisem
+gist.search.help.filename: gistů se soubory s vybraným názvem
+gist.search.help.extension: gistů se soubory s vybranou příponou
+gist.search.help.language: gistů se soubory s vybraným jazykem
+settings.link-gitlab-account: Připojit GitLab účet
+settings.unlink-gitlab-account: Odpojit GitLab účet
+settings.change-username: Změnit uživatelské jméno
+admin.invitations: Pozvánky
+admin.invitations.create: Vytvořit pozvánku
+admin.invitations.max_uses: Maximální počet uživatelů
+admin.invitations.expires_at: Vyprší
+admin.invitations.code: Kód
+admin.invitations.copy_link: Zkopírovat odkaz
+admin.invitations.uses: ''

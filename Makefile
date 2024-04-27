@@ -2,6 +2,8 @@
 
 # Specify the name of your Go binary output
 BINARY_NAME := opengist
+GIT_TAG := $(shell git describe --tags)
+VERSION_PKG := github.com/thomiceli/opengist/internal/config.OpengistVersion
 
 all: clean install build
 
@@ -20,7 +22,7 @@ build_frontend:
 
 build_backend:
 	@echo "Building Opengist binary..."
-	go build -tags fs_embed -o $(BINARY_NAME) .
+	go build -tags fs_embed -ldflags "-X $(VERSION_PKG)=$(GIT_TAG)" -o $(BINARY_NAME) .
 
 build: build_frontend build_backend
 
@@ -36,7 +38,7 @@ build_dev_docker:
 	docker build -t $(BINARY_NAME)-dev:latest --target dev .
 
 run_dev_docker:
-	docker run -v .:/opengist -p 6157:6157 -p 16157:16157 $(BINARY_NAME)-dev:latest
+	docker run -v .:/opengist -p 6157:6157 -p 16157:16157 -v $(HOME)/.opengist-dev:/root/.opengist --rm $(BINARY_NAME)-dev:latest
 
 watch_frontend:
 	@echo "Building frontend assets..."
@@ -44,7 +46,7 @@ watch_frontend:
 
 watch_backend:
 	@echo "Building Opengist binary..."
-	OG_DEV=1 npx nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run . --config config.yml'
+	OG_DEV=1 npx nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run -ldflags "-X $(VERSION_PKG)=$(GIT_TAG)" . --config config.yml'
 
 watch:
 	@sh ./scripts/watch.sh

@@ -4,6 +4,7 @@ CHECKSUMS_FILE="build/checksums.txt"
 BINARY_NAME="opengist"
 TARGETS="darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 linux/armv6 linux/armv7 linux/386 windows/amd64"
 VERSION=$(git describe --tags | sed 's/^v//')
+VERSION_PKG="github.com/thomiceli/opengist/internal/config.OpengistVersion"
 
 if [ -z "$VERSION" ]; then
     echo "Error: Could not retrieve version from git tags. Exiting..."
@@ -38,7 +39,7 @@ for TARGET in $TARGETS; do
 
     echo "Building version $VERSION for $GOOS/$GOARCH${GOARM:+v$GOARM}..."
     mkdir -p $OUTPUT_DIR
-    env GOOS=$GOOS GOARCH=$GOARCH GOARM=$GOARM CGO_ENABLED=0 go build -tags fs_embed -o $OUTPUT_FILE
+    env GOOS=$GOOS GOARCH=$GOARCH GOARM=$GOARM CGO_ENABLED=0 go build -tags fs_embed -ldflags "-X $VERSION_PKG=v$VERSION" -o $OUTPUT_FILE
     cp README.md $OUTPUT_DIR
     cp LICENSE $OUTPUT_DIR
     cp config.yml $OUTPUT_DIR

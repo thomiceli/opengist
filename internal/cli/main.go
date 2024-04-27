@@ -20,7 +20,7 @@ var CmdVersion = cli.Command{
 	Name:  "version",
 	Usage: "Print the version of Opengist",
 	Action: func(c *cli.Context) error {
-		fmt.Println("Opengist v" + config.OpengistVersion)
+		fmt.Println("Opengist " + config.OpengistVersion)
 		return nil
 	},
 }
@@ -57,7 +57,7 @@ func App() error {
 }
 
 func Initialize(ctx *cli.Context) {
-	fmt.Println("Opengist v" + config.OpengistVersion)
+	fmt.Println("Opengist " + config.OpengistVersion)
 
 	if err := config.InitConfig(ctx.String("config"), os.Stdout); err != nil {
 		panic(err)

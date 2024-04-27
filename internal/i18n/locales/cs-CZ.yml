@@ -17,8 +17,8 @@ gist.header.clone-http: Klonovat pomocí %s
 gist.header.clone-http-help: Klonovat s pomocí Git pomocí základní autentizace HTTP.
 gist.header.clone-ssh: Klonovat pomocí SSH
 gist.header.clone-ssh-help: Klonovat s pomocí Git pomocí klíče SSH.
-gist.header.embed:
-gist.header.embed-help:
+gist.header.embed: ''
+gist.header.embed-help: ''
 gist.header.download-zip: Stáhnout ZIP
 
 gist.raw: Raw
@@ -236,3 +236,25 @@ validation.not-enough: ''
 validation.invalid: ''
 html.title.admin-panel: ''
 flash.gist.deleted: ''
+gist.new.url: ''
+gist.search.found: ''
+gist.search.no-results: ''
+gist.search.help.user: ''
+gist.search.help.title: ''
+gist.search.help.filename: ''
+gist.search.help.extension: ''
+gist.search.help.language: ''
+settings.change-username: ''
+admin.invitations: ''
+admin.invitations.create: ''
+admin.actions.sync-previews: ''
+admin.actions.index-gists: ''
+admin.invitations.code: ''
+admin.invitations.copy_link: ''
+admin.invitations.uses: ''
+gist.new.preview: ''
+settings.link-gitlab-account: ''
+settings.unlink-gitlab-account: ''
+admin.invitations.help: ''
+admin.invitations.max_uses: ''
+admin.invitations.expires_at: ''

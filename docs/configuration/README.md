@@ -6,6 +6,19 @@ Opengist will simply apply the default values.
 
 The [configuration cheat sheet](cheat-sheet.md) lists all available configuration options.
 
+## Table of contents
+
+- [Cheat sheet](cheat-sheet.md)
+- [Admin panel](admin-panel.md)
+- [OAuth providers](oauth-providers.md)
+- [Password reset](reset-password.md)
+- [Custom assets](custom-assets.md)
+- [Custom links](custom-links.md)
+- [Fail2ban](fail2ban.md)
+- [Running using `systemd`](run-with-systemd.md)
+- [Running behind reverse proxy](proxy.md)
+- [Health check](healthcheck.md)
+
 
 ## Configuration via YAML file
 

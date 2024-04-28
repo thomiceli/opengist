@@ -72,3 +72,7 @@ make
 ```
 
 Opengist is now running on port 6157, you can browse http://localhost:6157
+
+## Admin user
+
+The first user created, be it by using the sign up form or OAuth, had Admin priviledges and therefore has access to the `Admin` page.

@@ -71,7 +71,7 @@ func sshKeysProcess(ctx echo.Context) error {
 
 	dto := new(db.SSHKeyDTO)
 	if err := ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 
 	if err := ctx.Validate(dto); err != nil {
@@ -123,7 +123,7 @@ func passwordProcess(ctx echo.Context) error {
 
 	dto := new(db.UserDTO)
 	if err := ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 	dto.Username = user.Username
 
@@ -151,7 +151,7 @@ func usernameProcess(ctx echo.Context) error {
 
 	dto := new(db.UserDTO)
 	if err := ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 	dto.Password = user.Password
 

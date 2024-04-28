@@ -136,6 +136,16 @@ auth.login-instead: Login instead
 auth.oauth: Continue with %s account
 
 error: Error
+error.page-not-found: Page not found
+error.bad-request: Bad request
+error.signup-disabled: Signing up is disabled
+error.signup-disabled-form: Signing up via registration form is disabled
+error.login-disabled-form: Logging in via login form is disabled
+error.complete-oauth-login: "Cannot complete user auth: %s"
+error.oauth-unsupported: Unsupported provider
+error.cannot-bind-data: Cannot bind data
+error.invalid-number: Invalid number
+error.invalid-character-unescaped: Invalid character unescaped
 
 header.menu.all: All
 header.menu.new: New
@@ -244,3 +254,5 @@ validation.should-only-contain-alphanumeric-characters: Field %s should only con
 validation.should-only-contain-alphanumeric-characters-and-dashes: Field %s should only contain alphanumeric characters and dashes
 validation.not-enough: Not enough %s
 validation.invalid: Invalid %s
+
+html.title.admin-panel: Admin panel

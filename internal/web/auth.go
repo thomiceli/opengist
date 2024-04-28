@@ -69,11 +69,11 @@ func processRegister(ctx echo.Context) error {
 	}
 
 	if disableSignup == true {
-		return errorRes(403, "Signing up is disabled", nil)
+		return errorRes(403, tr(ctx, "error.signup-disabled"), nil)
 	}
 
 	if getData(ctx, "DisableLoginForm") == true {
-		return errorRes(403, "Signing up via registration form is disabled", nil)
+		return errorRes(403, tr(ctx, "error.signup-disabled-form"), nil)
 	}
 
 	setData(ctx, "title", "New account")
@@ -83,7 +83,7 @@ func processRegister(ctx echo.Context) error {
 
 	dto := new(db.UserDTO)
 	if err := ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 
 	if err := ctx.Validate(dto); err != nil {
@@ -136,7 +136,7 @@ func login(ctx echo.Context) error {
 
 func processLogin(ctx echo.Context) error {
 	if getData(ctx, "DisableLoginForm") == true {
-		return errorRes(403, "Logging in via login form is disabled", nil)
+		return errorRes(403, tr(ctx, "error.login-disabled-form"), nil)
 	}
 
 	var err error
@@ -144,7 +144,7 @@ func processLogin(ctx echo.Context) error {
 
 	dto := &db.UserDTO{}
 	if err = ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 	password := dto.Password
 
@@ -179,7 +179,7 @@ func processLogin(ctx echo.Context) error {
 func oauthCallback(ctx echo.Context) error {
 	user, err := gothic.CompleteUserAuth(ctx.Response(), ctx.Request())
 	if err != nil {
-		return errorRes(400, "Cannot complete user auth: "+err.Error(), err)
+		return errorRes(400, tr(ctx, "error.complete-oauth-login", err.Error()), err)
 	}
 
 	currUser := getUserLogged(ctx)
@@ -199,7 +199,7 @@ func oauthCallback(ctx echo.Context) error {
 	userDB, err := db.GetUserByProvider(user.UserID, user.Provider)
 	if err != nil {
 		if getData(ctx, "DisableSignup") == true {
-			return errorRes(403, "Signing up is disabled", nil)
+			return errorRes(403, tr(ctx, "error.signup-disabled"), nil)
 		}
 
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -369,7 +369,7 @@ func oauth(ctx echo.Context) error {
 	ctxValue := context.WithValue(ctx.Request().Context(), gothic.ProviderParamKey, provider)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 	if provider != GitHubProvider && provider != GitLabProvider && provider != GiteaProvider && provider != OpenIDConnect {
-		return errorRes(400, "Unsupported provider", nil)
+		return errorRes(400, tr(ctx, "error.oauth-unsupported"), nil)
 	}
 
 	gothic.BeginAuthHandler(ctx.Response(), ctx.Request())

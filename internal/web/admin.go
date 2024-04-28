@@ -64,7 +64,7 @@ func adminUsers(ctx echo.Context) error {
 	}
 
 	if err = paginate(ctx, data, pageInt, 10, "data", "admin-panel/users", 1); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
 	return html(ctx, "admin_users.html")
@@ -83,7 +83,7 @@ func adminGists(ctx echo.Context) error {
 	}
 
 	if err = paginate(ctx, data, pageInt, 10, "data", "admin-panel/gists", 1); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
 	return html(ctx, "admin_gists.html")

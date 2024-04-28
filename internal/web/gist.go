@@ -255,7 +255,7 @@ func allGists(ctx echo.Context) error {
 	}
 
 	if err = paginate(ctx, renderedGists, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
 	setData(ctx, "urlPage", urlPage)
@@ -450,7 +450,7 @@ func revisions(ctx echo.Context) error {
 	}
 
 	if err := paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions", 2); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
 	emailsSet := map[string]struct{}{}
@@ -487,7 +487,7 @@ func processCreate(ctx echo.Context) error {
 
 	err := ctx.Request().ParseForm()
 	if err != nil {
-		return errorRes(400, "Bad request", err)
+		return errorRes(400, tr(ctx, "error.bad-request"), err)
 	}
 
 	dto := new(db.GistDTO)
@@ -501,7 +501,7 @@ func processCreate(ctx echo.Context) error {
 	}
 
 	if err := ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 
 	dto.Files = make([]db.FileDTO, 0)
@@ -517,7 +517,7 @@ func processCreate(ctx echo.Context) error {
 
 		escapedValue, err := url.QueryUnescape(content)
 		if err != nil {
-			return errorRes(400, "Invalid character unescaped", err)
+			return errorRes(400, tr(ctx, "error.invalid-character-unescaped"), err)
 		}
 
 		dto.Files = append(dto.Files, db.FileDTO{
@@ -811,7 +811,7 @@ func likes(ctx echo.Context) error {
 	}
 
 	if err = paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Identifier()+"/likes", 1); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
 	setData(ctx, "htmlTitle", "Like for "+gist.Title)
@@ -835,7 +835,7 @@ func forks(ctx echo.Context) error {
 	}
 
 	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Identifier()+"/forks", 2); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
 	setData(ctx, "htmlTitle", "Forks for "+gist.Title)
@@ -849,7 +849,7 @@ func checkbox(ctx echo.Context) error {
 
 	i, err := strconv.Atoi(checkboxNb)
 	if err != nil {
-		return errorRes(400, "Invalid number", nil)
+		return errorRes(400, tr(ctx, "error.invalid-number"), nil)
 	}
 
 	gist := getData(ctx, "gist").(*db.Gist)

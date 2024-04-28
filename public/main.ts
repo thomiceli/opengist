@@ -4,10 +4,19 @@ import './opengist.svg';
 import './default.png';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/cs';
+import 'dayjs/locale/de';
+import 'dayjs/locale/es';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/hu';
+import 'dayjs/locale/pt';
+import 'dayjs/locale/ru';
+import 'dayjs/locale/zh';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
+dayjs.locale(window.opengist_locale || 'en');
 
 document.addEventListener('DOMContentLoaded', () => {
     const themeMenu = document.getElementById('theme-menu')!;

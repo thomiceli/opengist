@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/thomiceli/opengist/internal/i18n"
 	"regexp"
 	"strings"
 )
@@ -26,26 +27,26 @@ func (cv *OpengistValidator) Var(field interface{}, tag string) error {
 	return cv.v.Var(field, tag)
 }
 
-func ValidationMessages(err *error) string {
+func ValidationMessages(err *error, locale *i18n.Locale) string {
 	errs := (*err).(validator.ValidationErrors)
 	messages := make([]string, len(errs))
 	for i, e := range errs {
 		switch e.Tag() {
 		case "max":
-			messages[i] = e.Field() + " is too long"
+			messages[i] = locale.String("validation.is-too-long", e.Field())
 		case "required":
-			messages[i] = e.Field() + " should not be empty"
+			messages[i] = locale.String("validation.should-not-be-empty", e.Field())
 		case "excludes":
-			messages[i] = e.Field() + " should not include a sub directory"
+			messages[i] = locale.String("validation.should-not-include-sub-directory", e.Field())
 		case "alphanum":
-			messages[i] = e.Field() + " should only contain alphanumeric characters"
+			messages[i] = locale.String("validation.should-only-contain-alphanumeric-characters", e.Field())
 		case "alphanumdash":
 		case "alphanumdashorempty":
-			messages[i] = e.Field() + " should only contain alphanumeric characters and dashes"
+			messages[i] = locale.String("validation.should-only-contain-alphanumeric-characters-and-dashes", e.Field())
 		case "min":
-			messages[i] = "Not enough " + e.Field()
+			messages[i] = locale.String("validation.not-enough", e.Field())
 		case "notreserved":
-			messages[i] = "Invalid " + e.Field()
+			messages[i] = locale.String("validation.invalid", e.Field())
 		}
 	}
 

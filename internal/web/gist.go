@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/render"
 	"github.com/thomiceli/opengist/internal/utils"
@@ -139,18 +140,18 @@ func allGists(ctx echo.Context) error {
 	pageInt := getPage(ctx)
 
 	sort := "created"
-	sortText := tr(ctx, "gist.list.sort-by-created")
+	sortText := trH(ctx, "gist.list.sort-by-created")
 	order := "desc"
-	orderText := tr(ctx, "gist.list.order-by-desc")
+	orderText := trH(ctx, "gist.list.order-by-desc")
 
 	if ctx.QueryParam("sort") == "updated" {
 		sort = "updated"
-		sortText = tr(ctx, "gist.list.sort-by-updated")
+		sortText = trH(ctx, "gist.list.sort-by-updated")
 	}
 
 	if ctx.QueryParam("order") == "asc" {
 		order = "asc"
-		orderText = tr(ctx, "gist.list.order-by-asc")
+		orderText = trH(ctx, "gist.list.order-by-asc")
 	}
 
 	setData(ctx, "sort", sortText)
@@ -312,8 +313,8 @@ func search(ctx echo.Context) error {
 	if 10*pageInt < int(nbHits) {
 		setData(ctx, "nextPage", pageInt+1)
 	}
-	setData(ctx, "prevLabel", tr(ctx, "pagination.previous"))
-	setData(ctx, "nextLabel", tr(ctx, "pagination.next"))
+	setData(ctx, "prevLabel", trH(ctx, "pagination.previous"))
+	setData(ctx, "nextLabel", trH(ctx, "pagination.next"))
 	setData(ctx, "urlPage", "search")
 	setData(ctx, "urlParams", template.URL("&q="+ctx.QueryParam("q")))
 	setData(ctx, "htmlTitle", "Search results")
@@ -527,7 +528,7 @@ func processCreate(ctx echo.Context) error {
 
 	err = ctx.Validate(dto)
 	if err != nil {
-		addFlash(ctx, utils.ValidationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err, getData(ctx, "locale").(*i18n.Locale)), "error")
 		if isCreate {
 			return html(ctx, "create.html")
 		} else {
@@ -610,7 +611,7 @@ func toggleVisibility(ctx echo.Context) error {
 		return errorRes(500, "Error updating this gist", err)
 	}
 
-	addFlash(ctx, "Gist visibility has been changed", "success")
+	addFlash(ctx, tr(ctx, "flash.gist.visibility-changed"), "success")
 	return redirect(ctx, "/"+gist.User.Username+"/"+gist.Identifier())
 }
 
@@ -622,7 +623,7 @@ func deleteGist(ctx echo.Context) error {
 	}
 	gist.RemoveFromIndex()
 
-	addFlash(ctx, "Gist has been deleted", "success")
+	addFlash(ctx, tr(ctx, "flash.gist.deleted"), "success")
 	return redirect(ctx, "/")
 }
 
@@ -662,7 +663,7 @@ func fork(ctx echo.Context) error {
 	}
 
 	if gist.User.ID == currentUser.ID {
-		addFlash(ctx, "Unable to fork own gists", "error")
+		addFlash(ctx, tr(ctx, "flash.gist.fork-own-gist"), "error")
 		return redirect(ctx, "/"+gist.User.Username+"/"+gist.Identifier())
 	}
 
@@ -698,7 +699,7 @@ func fork(ctx echo.Context) error {
 		return errorRes(500, "Error incrementing the fork count", err)
 	}
 
-	addFlash(ctx, "Gist has been forked", "success")
+	addFlash(ctx, tr(ctx, "flash.gist.forked"), "success")
 
 	return redirect(ctx, "/"+currentUser.Username+"/"+newGist.Identifier())
 }

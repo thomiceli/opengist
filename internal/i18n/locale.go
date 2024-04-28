@@ -112,6 +112,20 @@ func (store *LocaleStore) MatchTag(langs []language.Tag) string {
 	return "en-US"
 }
 
+func (l *Locale) String(key string, args ...any) string {
+	message := l.Messages[key]
+
+	if message == "" {
+		return Locales.Locales["en-US"].String(key, args...)
+	}
+
+	if len(args) == 0 {
+		return message
+	}
+
+	return fmt.Sprintf(message, args...)
+}
+
 func (l *Locale) Tr(key string, args ...any) template.HTML {
 	message := l.Messages[key]
 

@@ -158,11 +158,11 @@ func paginate[T any](ctx echo.Context, data []*T, pageInt int, perPage int, temp
 
 	switch labels {
 	case 1:
-		setData(ctx, "prevLabel", tr(ctx, "pagination.previous"))
-		setData(ctx, "nextLabel", tr(ctx, "pagination.next"))
+		setData(ctx, "prevLabel", trH(ctx, "pagination.previous"))
+		setData(ctx, "nextLabel", trH(ctx, "pagination.next"))
 	case 2:
-		setData(ctx, "prevLabel", tr(ctx, "pagination.newer"))
-		setData(ctx, "nextLabel", tr(ctx, "pagination.older"))
+		setData(ctx, "prevLabel", trH(ctx, "pagination.newer"))
+		setData(ctx, "nextLabel", trH(ctx, "pagination.older"))
 	}
 
 	setData(ctx, "urlPage", urlPage)
@@ -170,9 +170,14 @@ func paginate[T any](ctx echo.Context, data []*T, pageInt int, perPage int, temp
 	return nil
 }
 
-func tr(ctx echo.Context, key string) template.HTML {
+func trH(ctx echo.Context, key string) template.HTML {
 	l := getData(ctx, "locale").(*i18n.Locale)
 	return l.Tr(key)
+}
+
+func tr(ctx echo.Context, key string, args ...any) string {
+	l := getData(ctx, "locale").(*i18n.Locale)
+	return l.String(key, args...)
 }
 
 func parseSearchQueryStr(query string) (string, map[string]string) {

@@ -523,7 +523,7 @@ func checkRequireLogin(next echo.HandlerFunc) echo.HandlerFunc {
 
 		require := getData(ctx, "RequireLogin")
 		if require == true {
-			addFlash(ctx, "You must be logged in to access gists", "error")
+			addFlash(ctx, tr(ctx, "flash.auth.must-be-logged-in"), "error")
 			return redirect(ctx, "/login")
 		}
 		return next(ctx)

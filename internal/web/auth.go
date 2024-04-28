@@ -16,6 +16,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/internal/utils"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -48,7 +49,7 @@ func register(ctx echo.Context) error {
 		}
 	}
 
-	setData(ctx, "title", tr(ctx, "auth.new-account"))
+	setData(ctx, "title", trH(ctx, "auth.new-account"))
 	setData(ctx, "htmlTitle", "New account")
 	setData(ctx, "disableForm", disableForm)
 	setData(ctx, "disableSignup", disableSignup)
@@ -86,12 +87,12 @@ func processRegister(ctx echo.Context) error {
 	}
 
 	if err := ctx.Validate(dto); err != nil {
-		addFlash(ctx, utils.ValidationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err, getData(ctx, "locale").(*i18n.Locale)), "error")
 		return html(ctx, "auth_form.html")
 	}
 
 	if exists, err := db.UserExists(dto.Username); err != nil || exists {
-		addFlash(ctx, "Username already exists", "error")
+		addFlash(ctx, tr(ctx, "flash.auth.username-exists"), "error")
 		return html(ctx, "auth_form.html")
 	}
 
@@ -126,7 +127,7 @@ func processRegister(ctx echo.Context) error {
 }
 
 func login(ctx echo.Context) error {
-	setData(ctx, "title", tr(ctx, "auth.login"))
+	setData(ctx, "title", trH(ctx, "auth.login"))
 	setData(ctx, "htmlTitle", "Login")
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	setData(ctx, "isLoginPage", true)
@@ -154,7 +155,7 @@ func processLogin(ctx echo.Context) error {
 			return errorRes(500, "Cannot get user", err)
 		}
 		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-		addFlash(ctx, "Invalid credentials", "error")
+		addFlash(ctx, tr(ctx, "flash.auth.invalid-credentials"), "error")
 		return redirect(ctx, "/login")
 	}
 
@@ -163,7 +164,7 @@ func processLogin(ctx echo.Context) error {
 			return errorRes(500, "Cannot check for password", err)
 		}
 		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-		addFlash(ctx, "Invalid credentials", "error")
+		addFlash(ctx, tr(ctx, "flash.auth.invalid-credentials"), "error")
 		return redirect(ctx, "/login")
 	}
 
@@ -190,7 +191,7 @@ func oauthCallback(ctx echo.Context) error {
 			return errorRes(500, "Cannot update user "+title.String(user.Provider)+" id", err)
 		}
 
-		addFlash(ctx, "Account linked to "+title.String(user.Provider), "success")
+		addFlash(ctx, tr(ctx, "flash.auth.account-linked-oauth", title.String(user.Provider)), "success")
 		return redirect(ctx, "/settings")
 	}
 
@@ -216,7 +217,7 @@ func oauthCallback(ctx echo.Context) error {
 
 		if err = userDB.Create(); err != nil {
 			if db.IsUniqueConstraintViolation(err) {
-				addFlash(ctx, "Username "+user.NickName+" already exists in Opengist", "error")
+				addFlash(ctx, tr(ctx, "flash.auth.username-exists"), "error")
 				return redirect(ctx, "/login")
 			}
 
@@ -246,7 +247,7 @@ func oauthCallback(ctx echo.Context) error {
 
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				addFlash(ctx, "Could not get user keys", "error")
+				addFlash(ctx, tr(ctx, "flash.auth.user-sshkeys-not-retrievable"), "error")
 				log.Error().Err(err).Msg("Could not get user keys")
 			}
 
@@ -262,7 +263,7 @@ func oauthCallback(ctx echo.Context) error {
 				}
 
 				if err = sshKey.Create(); err != nil {
-					addFlash(ctx, "Could not create ssh key", "error")
+					addFlash(ctx, tr(ctx, "flash.auth.user-sshkeys-not-created"), "error")
 					log.Error().Err(err).Msg("Could not create ssh key")
 				}
 			}
@@ -360,7 +361,7 @@ func oauth(ctx echo.Context) error {
 				return errorRes(500, "Cannot unlink account from "+title.String(provider), err)
 			}
 
-			addFlash(ctx, "Account unlinked from "+title.String(provider), "success")
+			addFlash(ctx, tr(ctx, "flash.auth.account-unlinked-oauth", title.String(provider)), "success")
 			return redirect(ctx, "/settings")
 		}
 	}

@@ -205,3 +205,42 @@ admin.invitations.code: Code
 admin.invitations.copy_link: Copy link
 admin.invitations.uses: Uses
 admin.invitations.expired: Expired
+
+flash.admin.user-deleted: User has been deleted
+flash.admin.gist-deleted: Gist has been deleted
+flash.admin.invitation-created: Invitation has been created
+flash.admin.invitation-deleted: Invitation has been deleted
+flash.admin.sync-fs: Syncing repositories from filesystem...
+flash.admin.sync-db: Syncing repositories from database...
+flash.admin.git-gc: Garbage collecting repositories...
+flash.admin.sync-previews: Syncing Gist previews...
+flash.admin.reset-hooks: Resetting Git server hooks for all repositories...
+flash.admin.index-gists: Indexing all gists...
+
+flash.auth.username-exists: Username already exists
+flash.auth.invalid-credentials: Invalid credentials
+flash.auth.account-linked-oauth: Account linked to %s
+flash.auth.account-unlinked-oauth: Account unlinked from %s
+flash.auth.user-sshkeys-not-retrievable: Could not get user keys
+flash.auth.user-sshkeys-not-created: Could not create ssh key
+flash.auth.must-be-logged-in: You must be logged in to access gists
+
+flash.gist.visibility-changed: Gist visibility has been changed
+flash.gist.deleted: Gist has been deleted
+flash.gist.fork-own-gist: Unable to fork own gists
+flash.gist.forked: Gist has been forked
+
+flash.user.email-updated: Email updated
+flash.user.invalid-ssh-key: Invalid SSH key
+flash.user.ssh-key-added: SSH key added
+flash.user.ssh-key-deleted: SSH key deleted
+flash.user.password-updated: Password updated
+flash.user.username-updated: Username updated
+
+validation.is-too-long: Field %s is too long
+validation.should-not-be-empty: Field %s should not be empty
+validation.should-not-include-sub-directory: Field %s should not include a sub directory
+validation.should-only-contain-alphanumeric-characters: Field %s should only contain alphanumeric characters
+validation.should-only-contain-alphanumeric-characters-and-dashes: Field %s should only contain alphanumeric characters and dashes
+validation.not-enough: Not enough %s
+validation.invalid: Invalid %s

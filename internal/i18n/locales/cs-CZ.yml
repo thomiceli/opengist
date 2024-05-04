@@ -236,6 +236,7 @@ validation.not-enough: ''
 validation.invalid: ''
 html.title.admin-panel: ''
 flash.gist.deleted: ''
+
 gist.new.url: ''
 gist.search.found: ''
 gist.search.no-results: ''
@@ -258,3 +259,4 @@ settings.unlink-gitlab-account: ''
 admin.invitations.help: ''
 admin.invitations.max_uses: ''
 admin.invitations.expires_at: ''
+

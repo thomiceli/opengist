@@ -44,8 +44,10 @@ gist.new.create-public-button: Create public gist
 gist.new.create-unlisted-button: Create unlisted gist
 gist.new.create-private-button: Create private gist
 gist.new.preview: Preview
+gist.new.create-a-new-gist: Create a new gist
 
 gist.edit.editing: Editing
+gist.edit.edit-gist: Edit %s
 gist.edit.change-visibility: Make
 gist.edit.delete: Delete
 gist.edit.cancel: Cancel
@@ -68,6 +70,9 @@ gist.list.forks: forks
 gist.list.files: files
 gist.list.last-active: Last active
 gist.list.no-gists: No gists
+gist.list.all-liked-by: All gists liked by %s
+gist.list.all-forked-by: All gists forked by %s
+gist.list.all-from: All gists from %s
 
 gist.search.found: gists found
 gist.search.no-results: No gists found
@@ -80,9 +85,11 @@ gist.search.help.language: gists having files with given language
 gist.forks: Forks
 gist.forks.view: View fork
 gist.forks.no: No public forks
+gist.forks.for: Forks for %s
 
 gist.likes: Likes
 gist.likes.no: No likes yet
+gist.likes.for: Likes for %s
 
 gist.revisions: Revisions
 gist.revision.revised: revised this gist
@@ -95,6 +102,7 @@ gist.revision.file-renamed-no-changes: File renamed without changes
 gist.revision.empty-file: Empty file
 gist.revision.no-changes: No changes
 gist.revision.no-revisions: No revisions to show
+gist.revision-of: Revision of %s
 
 settings: Settings
 settings.email: Email

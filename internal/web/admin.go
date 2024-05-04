@@ -12,8 +12,7 @@ import (
 )
 
 func adminIndex(ctx echo.Context) error {
-	setData(ctx, "title", "Admin panel")
-	setData(ctx, "htmlTitle", "Admin panel")
+	setData(ctx, "htmlTitle", trH(ctx, "admin.admin_panel"))
 	setData(ctx, "adminHeaderPage", "index")
 
 	setData(ctx, "opengistVersion", config.OpengistVersion)
@@ -52,8 +51,7 @@ func adminIndex(ctx echo.Context) error {
 }
 
 func adminUsers(ctx echo.Context) error {
-	setData(ctx, "title", "Users")
-	setData(ctx, "htmlTitle", "Users - Admin panel")
+	setData(ctx, "htmlTitle", trH(ctx, "admin.users")+" - "+trH(ctx, "admin.admin_panel"))
 	setData(ctx, "adminHeaderPage", "users")
 	pageInt := getPage(ctx)
 
@@ -71,8 +69,7 @@ func adminUsers(ctx echo.Context) error {
 }
 
 func adminGists(ctx echo.Context) error {
-	setData(ctx, "title", "Gists")
-	setData(ctx, "htmlTitle", "Gists - Admin panel")
+	setData(ctx, "htmlTitle", trH(ctx, "admin.gists")+" - "+trH(ctx, "admin.admin_panel"))
 	setData(ctx, "adminHeaderPage", "gists")
 	pageInt := getPage(ctx)
 
@@ -161,8 +158,7 @@ func adminIndexGists(ctx echo.Context) error {
 }
 
 func adminConfig(ctx echo.Context) error {
-	setData(ctx, "title", "Configuration")
-	setData(ctx, "htmlTitle", "Configuration - Admin panel")
+	setData(ctx, "htmlTitle", trH(ctx, "admin.configuration")+" - "+trH(ctx, "admin.admin_panel"))
 	setData(ctx, "adminHeaderPage", "config")
 
 	return html(ctx, "admin_config.html")
@@ -182,8 +178,7 @@ func adminSetConfig(ctx echo.Context) error {
 }
 
 func adminInvitations(ctx echo.Context) error {
-	setData(ctx, "title", "Invitations")
-	setData(ctx, "htmlTitle", "Invitations - Admin panel")
+	setData(ctx, "htmlTitle", trH(ctx, "admin.invitations")+" - "+trH(ctx, "admin.admin_panel"))
 	setData(ctx, "adminHeaderPage", "invitations")
 
 	var invitations []*db.Invitation

@@ -170,9 +170,9 @@ func paginate[T any](ctx echo.Context, data []*T, pageInt int, perPage int, temp
 	return nil
 }
 
-func trH(ctx echo.Context, key string) template.HTML {
+func trH(ctx echo.Context, key string, args ...any) template.HTML {
 	l := getData(ctx, "locale").(*i18n.Locale)
-	return l.Tr(key)
+	return l.Tr(key, args...)
 }
 
 func tr(ctx echo.Context, key string, args ...any) string {

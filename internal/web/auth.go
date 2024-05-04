@@ -50,7 +50,7 @@ func register(ctx echo.Context) error {
 	}
 
 	setData(ctx, "title", trH(ctx, "auth.new-account"))
-	setData(ctx, "htmlTitle", "New account")
+	setData(ctx, "htmlTitle", trH(ctx, "auth.new-account"))
 	setData(ctx, "disableForm", disableForm)
 	setData(ctx, "disableSignup", disableSignup)
 	setData(ctx, "isLoginPage", false)
@@ -76,8 +76,8 @@ func processRegister(ctx echo.Context) error {
 		return errorRes(403, tr(ctx, "error.signup-disabled-form"), nil)
 	}
 
-	setData(ctx, "title", "New account")
-	setData(ctx, "htmlTitle", "New account")
+	setData(ctx, "title", trH(ctx, "auth.new-account"))
+	setData(ctx, "htmlTitle", trH(ctx, "auth.new-account"))
 
 	sess := getSession(ctx)
 
@@ -128,7 +128,7 @@ func processRegister(ctx echo.Context) error {
 
 func login(ctx echo.Context) error {
 	setData(ctx, "title", trH(ctx, "auth.login"))
-	setData(ctx, "htmlTitle", "Login")
+	setData(ctx, "htmlTitle", trH(ctx, "auth.login"))
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	setData(ctx, "isLoginPage", true)
 	return html(ctx, "auth_form.html")

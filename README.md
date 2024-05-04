@@ -6,7 +6,7 @@ Opengist is a **self-hosted** pastebin **powered by Git**. All snippets are stor
 read and/or modified using standard Git commands, or with the web interface.
 It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and could be self-hosted.
 
-[Documentation](/docs) • [Demo](https://opengist.thomice.li)
+[Documentation](/docs) • [Discord](https://discord.gg/9Pm3X5scZT) • [Demo](https://demo.opengist.io)
 
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/thomiceli/opengist?sort=semver)
@@ -78,9 +78,9 @@ Download the archive for your system from the release page [here](https://github
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.7.1/opengist1.7.1-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.7.2/opengist1.7.2-linux-amd64.tar.gz
 
-tar xzvf opengist1.7.1-linux-amd64.tar.gz
+tar xzvf opengist1.7.2-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`

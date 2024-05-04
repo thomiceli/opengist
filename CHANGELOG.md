@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.7.2](https://github.com/thomiceli/opengist/compare/v1.7.1...v1.7.2) - 2024-05-05
+See here how to [update](/docs/update.md) Opengist.
+
+### Added
+- Docs: 
+  - Run with systemd as a normal user (#254)
+  - Kubernetes deployment (#258)
+- More translation strings (#269) (#271)
+
+### Changed
+- Rework git log parsing and truncating (#260)
+- Set Opengist version from git tags (#261)
+
+### Fixed
+- Missing preview button when editing .md gist (#259)
+- Frontend (#267)
+  - Fix mermaid display 
+  - Move Login/Register buttons on mobile 
+  - Set minimum width on avatar
+
+### Other
+- Use go 1.22 and update deps (#244)
+
 ## [1.7.1](https://github.com/thomiceli/opengist/compare/v1.7.0...v1.7.1) - 2024-04-05
 See here how to [update](/docs/update.md) Opengist.
 

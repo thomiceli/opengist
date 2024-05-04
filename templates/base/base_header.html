@@ -11,6 +11,7 @@
 
     <script>
         window.opengist_base_url = "{{ $.c.ExternalUrl }}";
+        window.opengist_locale = "{{ .locale.Code }}".substring(0, 2);
         const checkTheme = () => {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark')

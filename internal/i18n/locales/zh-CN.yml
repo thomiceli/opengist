@@ -18,7 +18,7 @@ gist.header.clone-http-help: 使用 Git 通过 HTTP 基础认证克隆。
 gist.header.clone-ssh: 通过 SSH 克隆
 gist.header.clone-ssh-help: 使用 Git 通过 SSH 密钥克隆。
 gist.header.embed: ''
-gist.header.embed-help: ''
+gist.header.embed-help: '在你的网页中嵌入此gist。'
 gist.header.download-zip: 下载 ZIP
 
 gist.raw: 原始文件
@@ -57,7 +57,7 @@ gist.list.sort-by-created: 创建
 gist.list.sort-by-updated: 更新
 gist.list.order-by-asc: 最早
 gist.list.order-by-desc: 最近
-gist.list.select-tab: Select a tab
+gist.list.select-tab: 选择一个标签
 gist.list.liked: 已喜欢
 gist.list.likes: 喜欢
 gist.list.forked: 已派生
@@ -174,18 +174,18 @@ admin.gists.private: 私有？
 admin.gists.nb-files: 文件数
 admin.gists.nb-likes: 喜欢数
 admin.gists.delete_confirm: 你想要删除此 Gist 吗？
-gist.new.url: ''
+gist.new.url: 'URL'
 gist.new.preview: ''
 error.page-not-found: ''
-gist.new.create-a-new-gist: ''
+gist.new.create-a-new-gist: '创建一个新的gist'
 gist.edit.edit-gist: ''
 gist.list.all-liked-by: ''
 gist.list.all-forked-by: ''
 gist.list.all-from: ''
 gist.search.found: ''
-gist.search.no-results: ''
-gist.search.help.user: ''
-gist.search.help.title: ''
+gist.search.no-results: '没有找到gist'
+gist.search.help.user: '由用户创建的gist'
+gist.search.help.title: '给定标题的gist'
 gist.search.help.filename: ''
 gist.search.help.extension: ''
 gist.search.help.language: ''

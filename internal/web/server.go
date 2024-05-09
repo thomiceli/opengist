@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/thomiceli/opengist/internal/index"
-	"github.com/thomiceli/opengist/internal/utils"
-	"github.com/thomiceli/opengist/templates"
 	htmlpkg "html"
 	"html/template"
 	"io"
@@ -20,6 +17,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/utils"
+	"github.com/thomiceli/opengist/templates"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
@@ -313,7 +314,7 @@ func NewServer(isDev bool) *Server {
 			g3.GET("/rev/:revision", gistIndex)
 			g3.GET("/revisions", revisions)
 			g3.GET("/archive/:revision", downloadZip)
-			g3.POST("/visibility", toggleVisibility, logged, writePermission)
+			g3.POST("/visibility", editVisibility, logged, writePermission)
 			g3.POST("/delete", deleteGist, logged, writePermission)
 			g3.GET("/raw/:revision/:file", rawFile)
 			g3.GET("/download/:revision/:file", downloadFile)

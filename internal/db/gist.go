@@ -2,15 +2,16 @@ package db
 
 import (
 	"fmt"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/dustin/go-humanize"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/index"
-	"os/exec"
-	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
@@ -525,13 +526,17 @@ func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string     `validate:"max=250" form:"title"`
-	Description string     `validate:"max=1000" form:"description"`
-	URL         string     `validate:"max=32,alphanumdashorempty" form:"url"`
-	Private     Visibility `validate:"number,min=0,max=2" form:"private"`
-	Files       []FileDTO  `validate:"min=1,dive"`
-	Name        []string   `form:"name"`
-	Content     []string   `form:"content"`
+	Title       string    `validate:"max=250" form:"title"`
+	Description string    `validate:"max=1000" form:"description"`
+	URL         string    `validate:"max=32,alphanumdashorempty" form:"url"`
+	Files       []FileDTO `validate:"min=1,dive"`
+	Name        []string  `form:"name"`
+	Content     []string  `form:"content"`
+	VisibilityDTO
+}
+
+type VisibilityDTO struct {
+	Private Visibility `validate:"number,min=0,max=2" form:"private"`
 }
 
 type FileDTO struct {

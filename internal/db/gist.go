@@ -2,17 +2,17 @@ package db
 
 import (
 	"fmt"
-	"github.com/alecthomas/chroma/v2"
-	"github.com/alecthomas/chroma/v2/lexers"
-	"github.com/dustin/go-humanize"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/index"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/dustin/go-humanize"
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +23,19 @@ const (
 	UnlistedVisibility
 	PrivateVisibility
 )
+
+func (v Visibility) String() string {
+	switch v {
+	case PublicVisibility:
+		return "public"
+	case UnlistedVisibility:
+		return "unlisted"
+	case PrivateVisibility:
+		return "private"
+	default:
+		return "???"
+	}
+}
 
 func (v Visibility) Next() Visibility {
 	switch v {

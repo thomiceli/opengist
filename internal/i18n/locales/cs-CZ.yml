@@ -236,7 +236,6 @@ validation.not-enough: ''
 validation.invalid: ''
 html.title.admin-panel: ''
 flash.gist.deleted: ''
-
 gist.new.url: ''
 gist.search.found: ''
 gist.search.no-results: ''

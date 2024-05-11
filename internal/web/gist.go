@@ -6,12 +6,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/i18n"
-	"github.com/thomiceli/opengist/internal/index"
-	"github.com/thomiceli/opengist/internal/render"
-	"github.com/thomiceli/opengist/internal/utils"
 	"html/template"
 	"net/url"
 	"path/filepath"
@@ -19,6 +13,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/i18n"
+	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/render"
+	"github.com/thomiceli/opengist/internal/utils"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -603,10 +604,15 @@ func processCreate(ctx echo.Context) error {
 	return redirect(ctx, "/"+user.Username+"/"+gist.Identifier())
 }
 
-func toggleVisibility(ctx echo.Context) error {
+func editVisibility(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 
-	gist.Private = (gist.Private + 1) % 3
+	dto := new(db.VisibilityDTO)
+	if err := ctx.Bind(dto); err != nil {
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
+	}
+
+	gist.Private = dto.Private
 	if err := gist.UpdateNoTimestamps(); err != nil {
 		return errorRes(500, "Error updating this gist", err)
 	}
@@ -733,7 +739,6 @@ func downloadFile(ctx echo.Context) error {
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+file.Filename)
 	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(file.Content)))
 	_, err = ctx.Response().Write([]byte(file.Content))
-
 	if err != nil {
 		return errorRes(500, "Error downloading the file", err)
 	}

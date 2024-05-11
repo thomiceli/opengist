@@ -3,13 +3,6 @@ package test
 import (
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"github.com/stretchr/testify/require"
-	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/memdb"
-	"github.com/thomiceli/opengist/internal/web"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -21,6 +14,14 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/require"
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/memdb"
+	"github.com/thomiceli/opengist/internal/web"
 )
 
 type testServer struct {
@@ -106,7 +107,7 @@ func structToURLValues(s interface{}) url.Values {
 	for i := 0; i < rValue.NumField(); i++ {
 		field := rValue.Type().Field(i)
 		tag := field.Tag.Get("form")
-		if tag != "" {
+		if tag != "" || field.Anonymous {
 			if field.Type.Kind() == reflect.Int {
 				fieldValue := rValue.Field(i).Int()
 				v.Add(tag, strconv.FormatInt(fieldValue, 10))
@@ -114,6 +115,12 @@ func structToURLValues(s interface{}) url.Values {
 				fieldValue := rValue.Field(i).Interface().([]string)
 				for _, va := range fieldValue {
 					v.Add(tag, va)
+				}
+			} else if field.Type.Kind() == reflect.Struct {
+				for key, val := range structToURLValues(rValue.Field(i).Interface()) {
+					for _, vv := range val {
+						v.Add(key, vv)
+					}
 				}
 			} else {
 				fieldValue := rValue.Field(i).String()

@@ -18,11 +18,7 @@ gist.header.clone-http-help: 使用 Git 通过 HTTP 基础认证克隆。
 gist.header.clone-ssh: 通过 SSH 克隆
 gist.header.clone-ssh-help: 使用 Git 通过 SSH 密钥克隆。
 gist.header.embed: ''
-<<<<<<< HEAD
 gist.header.embed-help: '在你的网页中嵌入此gist。'
-=======
-gist.header.embed-help: ''
->>>>>>> bdc9e91 (Translated using Weblate (Chinese (Simplified)))
 gist.header.download-zip: 下载 ZIP
 
 gist.raw: 原始文件
@@ -178,31 +174,18 @@ admin.gists.private: 私有？
 admin.gists.nb-files: 文件数
 admin.gists.nb-likes: 喜欢数
 admin.gists.delete_confirm: 你想要删除此 Gist 吗？
-<<<<<<< HEAD
 gist.new.url: 'URL'
 gist.new.preview: ''
 error.page-not-found: ''
 gist.new.create-a-new-gist: '创建一个新的gist'
-=======
-gist.new.url: ''
-gist.new.preview: ''
-error.page-not-found: ''
-gist.new.create-a-new-gist: ''
->>>>>>> bdc9e91 (Translated using Weblate (Chinese (Simplified)))
 gist.edit.edit-gist: ''
 gist.list.all-liked-by: ''
 gist.list.all-forked-by: ''
 gist.list.all-from: ''
 gist.search.found: ''
-<<<<<<< HEAD
 gist.search.no-results: '没有找到gist'
 gist.search.help.user: '由用户创建的gist'
 gist.search.help.title: '给定标题的gist'
-=======
-gist.search.no-results: ''
-gist.search.help.user: ''
-gist.search.help.title: ''
->>>>>>> bdc9e91 (Translated using Weblate (Chinese (Simplified)))
 gist.search.help.filename: ''
 gist.search.help.extension: ''
 gist.search.help.language: ''

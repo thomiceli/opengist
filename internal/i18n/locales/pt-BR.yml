@@ -17,8 +17,6 @@ gist.header.clone-http: Clonar via %s
 gist.header.clone-http-help: Clonar com Git usando autenticação básica HTTP.
 gist.header.clone-ssh: Clonar via SSH
 gist.header.clone-ssh-help: Clonar com Git usando uma chave SSH.
-gist.header.share: Compartilhar
-gist.header.share-help: Copiar link para compartilhar este gist.
 gist.header.download-zip: Baixar ZIP
 
 gist.raw: Bruto
@@ -157,7 +155,6 @@ admin.delete: Excluir
 admin.created_at: Criado
 
 admin.config-link: Esta configuração pode ser %s por um arquivo de configuração YAML e/ou variáveis de ambiente.
-admin.config-link-overridden: sobrescrito
 admin.disable-signup: Desabilitar registro
 admin.disable-signup_help: Proibir a criação de novas contas.
 admin.require-login: Exigir login

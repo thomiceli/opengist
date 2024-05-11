@@ -157,7 +157,6 @@ admin.delete: Eliminar
 admin.created_at: Creado
 
 admin.config-link: Esta configuración puede ser %s por un archivo de configuración YAML y/o variables de entorno.
-admin.config-link-overridden: sobrescrito
 admin.disable-signup: Deshabilitar registro
 admin.disable-signup_help: Prohibir la creación de nuevas cuentas.
 admin.require-login: Requerir inicio de sesión

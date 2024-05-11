@@ -132,9 +132,6 @@ auth.username: 'Benutzername'
 auth.password: 'Passwort'
 auth.register-instead: 'Stattdessen registrieren'
 auth.login-instead: 'Stattdessen anmelden'
-auth.github-oauth: 'Mit GitHub-Account fortfahren'
-auth.gitlab-oauth: 'Mit GitLab-Account fortfahren'
-auth.gitea-oauth: 'Mit Gitea-Account fortfahren'
 
 error: 'Fehler'
 

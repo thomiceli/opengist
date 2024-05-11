@@ -187,7 +187,6 @@ settings.create-password-help: Créer un mot de passe pour se connecter à Openg
 settings.change-password: Changer le mot de passe
 settings.change-password-help: Changer le mot de passe pour se connecter à Opengist via HTTP
 settings.password-label-title: Mot de passe
-auth.gitlab-oauth: Continuer avec un compte GitLab
 admin.actions.sync-previews: Synchroniser l'aperçu des gists
 admin.actions.reset-hooks: Réinitialiser les hooks de Git pour tous les dépôts
 gist.new.url: URL

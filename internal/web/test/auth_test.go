@@ -110,9 +110,11 @@ func TestAnonymous(t *testing.T) {
 	gist1 := db.GistDTO{
 		Title:       "gist1",
 		Description: "my first gist",
-		Private:     0,
-		Name:        []string{"gist1.txt", "gist2.txt", "gist3.txt"},
-		Content:     []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
 	err = s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)

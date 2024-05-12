@@ -14,5 +14,5 @@ func ShouldAllowUnauthenticatedGistAccess(prov AuthInfoProvider, isSingleGistAcc
 	if err != nil {
 		return false, err
 	}
-	return !require || (isSingleGistAccess && allow == true), nil
+	return !require || (isSingleGistAccess && allow), nil
 }

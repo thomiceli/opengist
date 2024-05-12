@@ -3,13 +3,6 @@ package test
 import (
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"github.com/stretchr/testify/require"
-	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/memdb"
-	"github.com/thomiceli/opengist/internal/web"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -21,6 +14,14 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/require"
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/memdb"
+	"github.com/thomiceli/opengist/internal/web"
 )
 
 type testServer struct {
@@ -106,7 +107,7 @@ func structToURLValues(s interface{}) url.Values {
 	for i := 0; i < rValue.NumField(); i++ {
 		field := rValue.Type().Field(i)
 		tag := field.Tag.Get("form")
-		if tag != "" {
+		if tag != "" || field.Anonymous {
 			if field.Type.Kind() == reflect.Int {
 				fieldValue := rValue.Field(i).Int()
 				v.Add(tag, strconv.FormatInt(fieldValue, 10))
@@ -114,6 +115,12 @@ func structToURLValues(s interface{}) url.Values {
 				fieldValue := rValue.Field(i).Interface().([]string)
 				for _, va := range fieldValue {
 					v.Add(tag, va)
+				}
+			} else if field.Type.Kind() == reflect.Struct {
+				for key, val := range structToURLValues(rValue.Field(i).Interface()) {
+					for _, vv := range val {
+						v.Add(key, vv)
+					}
 				}
 			} else {
 				fieldValue := rValue.Field(i).String()
@@ -125,7 +132,9 @@ func structToURLValues(s interface{}) url.Values {
 }
 
 func setup(t *testing.T) {
-	err := config.InitConfig("")
+	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
+
+	err := config.InitConfig("", io.Discard)
 	require.NoError(t, err, "Could not init config")
 
 	err = os.MkdirAll(filepath.Join(config.GetHomeDir()), 0755)
@@ -139,6 +148,9 @@ func setup(t *testing.T) {
 
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
+
+	err = os.MkdirAll(filepath.Join(homePath, "sessions"), 0755)
+	require.NoError(t, err, "Could not create sessions directory")
 
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
 	require.NoError(t, err, "Could not create tmp repos directory")
@@ -159,7 +171,10 @@ func teardown(t *testing.T, s *testServer) {
 	err := db.Close()
 	require.NoError(t, err, "Could not close database")
 
-	err = os.RemoveAll(path.Join(config.C.OpengistHome, "tests"))
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	require.NoError(t, err, "Could not remove repos directory")
+
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
 	require.NoError(t, err, "Could not remove repos directory")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))

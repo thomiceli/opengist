@@ -6,7 +6,7 @@ Opengist is a **self-hosted** pastebin **powered by Git**. All snippets are stor
 read and/or modified using standard Git commands, or with the web interface.
 It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and could be self-hosted.
 
-[Documentation](/docs) • [Demo](https://opengist.thomice.li)
+[Documentation](/docs) • [Discord](https://discord.gg/9Pm3X5scZT) • [Demo](https://demo.opengist.io)
 
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/thomiceli/opengist?sort=semver)
@@ -37,7 +37,7 @@ It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and c
 Docker [images](https://github.com/thomiceli/opengist/pkgs/container/opengist) are available for each release :
 
 ```shell
-docker pull ghcr.io/thomiceli/opengist:1
+docker pull ghcr.io/thomiceli/opengist:1.7
 ```
 
 It can be used in a `docker-compose.yml` file :
@@ -51,7 +51,7 @@ version: "3"
 
 services:
   opengist:
-    image: ghcr.io/thomiceli/opengist:1
+    image: ghcr.io/thomiceli/opengist:1.7
     container_name: opengist
     restart: unless-stopped
     ports:
@@ -78,9 +78,9 @@ Download the archive for your system from the release page [here](https://github
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.6.1/opengist1.6.1-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.7.2/opengist1.7.2-linux-amd64.tar.gz
 
-tar xzvf opengist1.6.1-linux-amd64.tar.gz
+tar xzvf opengist1.7.2-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`
@@ -90,7 +90,7 @@ Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ### From source
 
-Requirements : [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.21+), [Node.js](https://nodejs.org/en/download/) (16+)
+Requirements: [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.22+), [Node.js](https://nodejs.org/en/download/) (16+), [Make](https://linux.die.net/man/1/make) (optional, but easier)
 
 ```shell
 git clone https://github.com/thomiceli/opengist
@@ -101,6 +101,9 @@ make
 
 Opengist is now running on port 6157, you can browse http://localhost:6157
 
+---
+
+To create and run a development environment, see [run-development.md](/docs/contributing/run-development.md).
 
 ## Documentation
 

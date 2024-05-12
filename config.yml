@@ -78,15 +78,33 @@ gitlab.client-key:
 gitlab.secret:
 # URL of the Gitlab instance. Default: https://gitlab.com/
 gitlab.url: https://gitlab.com/
+# The name of the GitLab instance. It is displayed in the OAuth login button. Default: GitLab
+gitlab.name: GitLab
 
 # To create a new OAuth2 application using Gitea : https://gitea.domain/user/settings/applications
 gitea.client-key:
 gitea.secret:
 # URL of the Gitea instance. Default: https://gitea.com/
 gitea.url: https://gitea.com/
+# The name of the Gitea instance. It is displayed in the OAuth login button. Default: Gitea
+gitea.name: Gitea
 
 # To create a new OAuth2 application using OpenID Connect:
 oidc.client-key:
 oidc.secret:
 # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
 oidc.discovery-url:
+
+
+# Custom assets
+# Add your own custom assets, that are files relatives to $opengist-home/custom/
+custom.logo:
+custom.favicon:
+
+# Static pages in footer (like legal notices, privacy policy, etc.)
+# The path can be a URL or a relative path to a file in the $opengist-home/custom/ directory
+custom.static-links:
+#  - name: Gitea
+#    path: https://gitea.com
+#  - name: Legal notices
+#    path: legal.html

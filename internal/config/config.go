@@ -17,7 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var OpengistVersion = "1.6.1"
+var OpengistVersion = ""
 
 var C *config
 
@@ -52,14 +52,25 @@ type config struct {
 	GitlabClientKey string `yaml:"gitlab.client-key" env:"OG_GITLAB_CLIENT_KEY"`
 	GitlabSecret    string `yaml:"gitlab.secret" env:"OG_GITLAB_SECRET"`
 	GitlabUrl       string `yaml:"gitlab.url" env:"OG_GITLAB_URL"`
+	GitlabName      string `yaml:"gitlab.name" env:"OG_GITLAB_NAME"`
 
 	GiteaClientKey string `yaml:"gitea.client-key" env:"OG_GITEA_CLIENT_KEY"`
 	GiteaSecret    string `yaml:"gitea.secret" env:"OG_GITEA_SECRET"`
 	GiteaUrl       string `yaml:"gitea.url" env:"OG_GITEA_URL"`
+	GiteaName      string `yaml:"gitea.name" env:"OG_GITEA_NAME"`
 
 	OIDCClientKey    string `yaml:"oidc.client-key" env:"OG_OIDC_CLIENT_KEY"`
 	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
 	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
+
+	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
+	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
+	StaticLinks   []StaticLink `yaml:"custom.static-links" env:"OG_CUSTOM_STATIC_LINK"`
+}
+
+type StaticLink struct {
+	Name string `yaml:"name" env:"OG_CUSTOM_STATIC_LINK_#_NAME"`
+	Path string `yaml:"path" env:"OG_CUSTOM_STATIC_LINK_#_PATH"`
 }
 
 func configWithDefaults() (*config, error) {
@@ -83,23 +94,26 @@ func configWithDefaults() (*config, error) {
 	c.SshPort = "2222"
 	c.SshKeygen = "ssh-keygen"
 
+	c.GitlabName = "GitLab"
+
 	c.GiteaUrl = "https://gitea.com"
+	c.GiteaName = "Gitea"
 
 	return c, nil
 }
 
-func InitConfig(configPath string) error {
+func InitConfig(configPath string, out io.Writer) error {
 	// Default values
 	c, err := configWithDefaults()
 	if err != nil {
 		return err
 	}
 
-	if err = loadConfigFromYaml(c, configPath); err != nil {
+	if err = loadConfigFromYaml(c, configPath, out); err != nil {
 		return err
 	}
 
-	if err = loadConfigFromEnv(c); err != nil {
+	if err = loadConfigFromEnv(c, out); err != nil {
 		return err
 	}
 
@@ -118,6 +132,9 @@ func InitConfig(configPath string) error {
 
 	C = c
 
+	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -195,7 +212,7 @@ func GetHomeDir() string {
 	return filepath.Clean(absolutePath)
 }
 
-func loadConfigFromYaml(c *config, configPath string) error {
+func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {
 	if configPath != "" {
 		absolutePath, _ := filepath.Abs(configPath)
 		absolutePath = filepath.Clean(absolutePath)
@@ -204,9 +221,9 @@ func loadConfigFromYaml(c *config, configPath string) error {
 			if !os.IsNotExist(err) {
 				return err
 			}
-			fmt.Println("No YAML config file found at " + absolutePath)
+			_, _ = fmt.Fprintln(out, "No YAML config file found at "+absolutePath)
 		} else {
-			fmt.Println("Using YAML config file: " + absolutePath)
+			_, _ = fmt.Fprintln(out, "Using YAML config file: "+absolutePath)
 
 			// Override default values with values from config.yml
 			d := yaml.NewDecoder(file)
@@ -216,13 +233,13 @@ func loadConfigFromYaml(c *config, configPath string) error {
 			defer file.Close()
 		}
 	} else {
-		fmt.Println("No YAML config file specified.")
+		_, _ = fmt.Fprintln(out, "No YAML config file specified.")
 	}
 
 	return nil
 }
 
-func loadConfigFromEnv(c *config) error {
+func loadConfigFromEnv(c *config, out io.Writer) error {
 	v := reflect.ValueOf(c).Elem()
 	var envVars []string
 
@@ -234,28 +251,69 @@ func loadConfigFromEnv(c *config) error {
 		}
 
 		envValue := os.Getenv(strings.ToUpper(tag))
-		if envValue == "" {
+		if envValue == "" && v.Field(i).Kind() != reflect.Slice {
 			continue
 		}
 
 		switch v.Field(i).Kind() {
 		case reflect.String:
 			v.Field(i).SetString(envValue)
+			envVars = append(envVars, tag)
 		case reflect.Bool:
 			boolVal, err := strconv.ParseBool(envValue)
 			if err != nil {
 				return err
 			}
 			v.Field(i).SetBool(boolVal)
+			envVars = append(envVars, tag)
+		case reflect.Slice:
+			if v.Type().Field(i).Type.Elem().Kind() == reflect.Struct {
+				prefix := strings.ToUpper(tag) + "_"
+				var sliceValue reflect.Value
+				elemType := v.Type().Field(i).Type.Elem()
+
+				for index := 0; ; index++ {
+					allFieldsPresent := true
+					elemValue := reflect.New(elemType).Elem()
+
+					for j := 0; j < elemValue.NumField() && allFieldsPresent; j++ {
+						elemField := elemValue.Type().Field(j)
+						envName := fmt.Sprintf("%s%d_%s", prefix, index, strings.ToUpper(elemField.Name))
+						envValue, present := os.LookupEnv(envName)
+
+						if !present {
+							allFieldsPresent = false
+							break
+						}
+
+						envVars = append(envVars, envName)
+						elemValue.Field(j).SetString(envValue)
+					}
+
+					if !allFieldsPresent {
+						break
+					}
+
+					if sliceValue.Kind() != reflect.Slice {
+						sliceValue = reflect.MakeSlice(v.Type().Field(i).Type, 0, index+1)
+					}
+					sliceValue = reflect.Append(sliceValue, elemValue)
+				}
+
+				if sliceValue.IsValid() {
+					v.Field(i).Set(sliceValue)
+				}
+			}
+		default:
+			return fmt.Errorf("unsupported type: %s", v.Field(i).Kind())
 		}
 
-		envVars = append(envVars, tag)
 	}
 
 	if len(envVars) > 0 {
-		fmt.Println("Using environment variables config: " + strings.Join(envVars, ", "))
+		_, _ = fmt.Fprintln(out, "Using environment variables config: "+strings.Join(envVars, ", "))
 	} else {
-		fmt.Println("No environment variables config specified.")
+		_, _ = fmt.Fprintln(out, "No environment variables config specified.")
 	}
 
 	return nil

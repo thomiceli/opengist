@@ -19,7 +19,7 @@ type SSHKey struct {
 	User       User `validate:"-" `
 }
 
-func (sshKey *SSHKey) BeforeCreate(tx *gorm.DB) error {
+func (sshKey *SSHKey) BeforeCreate(*gorm.DB) error {
 	pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(sshKey.Content))
 	if err != nil {
 		return err

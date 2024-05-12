@@ -5,16 +5,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/thomiceli/opengist/internal/index"
 	htmlpkg "html"
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/utils"
+	"github.com/thomiceli/opengist/templates"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
@@ -27,15 +33,15 @@ import (
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/public"
-	"github.com/thomiceli/opengist/templates"
 	"golang.org/x/text/language"
 )
 
 var (
-	dev   bool
-	store *sessions.CookieStore
-	re    = regexp.MustCompile("[^a-z0-9]+")
-	fm    = template.FuncMap{
+	dev        bool
+	flashStore *sessions.CookieStore     // session store for flash messages
+	userStore  *sessions.FilesystemStore // session store for user sessions
+	re         = regexp.MustCompile("[^a-z0-9]+")
+	fm         = template.FuncMap{
 		"split":     strings.Split,
 		"indexByte": strings.IndexByte,
 		"toInt": func(i string) int {
@@ -89,7 +95,8 @@ var (
 
 			return defaultAvatar()
 		},
-		"asset": asset,
+		"asset":  asset,
+		"custom": customAsset,
 		"dev": func() bool {
 			return dev
 		},
@@ -134,6 +141,10 @@ var (
 		},
 		"addMetadataToSearchQuery": addMetadataToSearchQuery,
 		"indexEnabled":             index.Enabled,
+		"isUrl": func(s string) bool {
+			_, err := url.ParseRequestURI(s)
+			return err == nil
+		},
 	}
 )
 
@@ -152,8 +163,13 @@ type Server struct {
 
 func NewServer(isDev bool) *Server {
 	dev = isDev
-	store = sessions.NewCookieStore([]byte("opengist"))
-	gothic.Store = store
+	flashStore = sessions.NewCookieStore([]byte("opengist"))
+	userStore = sessions.NewFilesystemStore(path.Join(config.GetHomeDir(), "sessions"),
+		utils.ReadKey(path.Join(config.GetHomeDir(), "sessions", "session-auth.key")),
+		utils.ReadKey(path.Join(config.GetHomeDir(), "sessions", "session-encrypt.key")),
+	)
+	userStore.MaxLength(10 * 1024)
+	gothic.Store = userStore
 
 	e := echo.New()
 	e.HideBanner = true
@@ -182,9 +198,22 @@ func NewServer(isDev bool) *Server {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 
-	e.Renderer = &Template{
-		templates: template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html")),
+	t := template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html"))
+	customPattern := filepath.Join(config.GetHomeDir(), "custom", "*.html")
+	matches, err := filepath.Glob(customPattern)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to check for custom templates")
 	}
+	if len(matches) > 0 {
+		t, err = t.ParseGlob(customPattern)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to parse custom templates")
+		}
+	}
+	e.Renderer = &Template{
+		templates: t,
+	}
+
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
 		if err, ok := er.(*echo.HTTPError); ok {
 			if err.Code >= 500 {
@@ -202,11 +231,10 @@ func NewServer(isDev bool) *Server {
 
 	e.Use(sessionInit)
 
-	e.Validator = NewValidator()
+	e.Validator = utils.NewValidator()
 
 	if !dev {
 		parseManifestEntries()
-		e.GET("/assets/*", cacheControl(echo.WrapHandler(http.FileServer(http.FS(public.Files)))))
 	}
 
 	// Web based routes
@@ -224,6 +252,7 @@ func NewServer(isDev bool) *Server {
 
 		g1.GET("/", create, logged)
 		g1.POST("/", processCreate, logged)
+		g1.GET("/preview", preview, logged)
 
 		g1.GET("/healthcheck", healthcheck)
 
@@ -250,6 +279,9 @@ func NewServer(isDev bool) *Server {
 			g2.POST("/users/:user/delete", adminUserDelete)
 			g2.GET("/gists", adminGists)
 			g2.POST("/gists/:gist/delete", adminGistDelete)
+			g2.GET("/invitations", adminInvitations)
+			g2.POST("/invitations", adminInvitationsCreate)
+			g2.POST("/invitations/:id/delete", adminInvitationsDelete)
 			g2.POST("/sync-fs", adminSyncReposFromFS)
 			g2.POST("/sync-db", adminSyncReposFromDB)
 			g2.POST("/gc-repos", adminGcRepos)
@@ -283,7 +315,7 @@ func NewServer(isDev bool) *Server {
 			g3.GET("/rev/:revision", gistIndex)
 			g3.GET("/revisions", revisions)
 			g3.GET("/archive/:revision", downloadZip)
-			g3.POST("/visibility", toggleVisibility, logged, writePermission)
+			g3.POST("/visibility", editVisibility, logged, writePermission)
 			g3.POST("/delete", deleteGist, logged, writePermission)
 			g3.GET("/raw/:revision/:file", rawFile)
 			g3.GET("/download/:revision/:file", downloadFile)
@@ -296,6 +328,23 @@ func NewServer(isDev bool) *Server {
 			g3.PUT("/checkbox", checkbox, logged, writePermission)
 		}
 	}
+
+	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
+	e.GET("/assets/*", func(ctx echo.Context) error {
+		if _, err := public.Files.Open(path.Join("assets", ctx.Param("*"))); !dev && err == nil {
+			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(ctx)
+		}
+
+		// if the custom file is an .html template, render it
+		if strings.HasSuffix(ctx.Param("*"), ".html") {
+			if err := html(ctx, ctx.Param("*")); err != nil {
+				return notFound("Page not found")
+			}
+			return nil
+		}
+
+		return echo.WrapHandler(http.StripPrefix("/assets/", http.FileServer(http.FS(customFs))))(ctx)
+	})
 
 	// Git HTTP routes
 	if config.C.HttpGit {
@@ -342,6 +391,22 @@ func dataInit(next echo.HandlerFunc) echo.HandlerFunc {
 		setData(ctx, "gitlabOauth", config.C.GitlabClientKey != "" && config.C.GitlabSecret != "")
 		setData(ctx, "giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
 		setData(ctx, "oidcOauth", config.C.OIDCClientKey != "" && config.C.OIDCSecret != "" && config.C.OIDCDiscoveryUrl != "")
+
+		httpProtocol := "http"
+		if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
+			httpProtocol = "https"
+		}
+		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))
+
+		var baseHttpUrl string
+		// if a custom external url is set, use it
+		if config.C.ExternalUrl != "" {
+			baseHttpUrl = config.C.ExternalUrl
+		} else {
+			baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
+		}
+
+		setData(ctx, "baseHttpUrl", baseHttpUrl)
 
 		return next(ctx)
 	}
@@ -465,7 +530,7 @@ func makeCheckRequireLogin(isSingleGistAccess bool) echo.MiddlewareFunc {
 			}
 
 			if !allow {
-				addFlash(ctx, "You must be logged in to access gists", "error")
+				addFlash(ctx, tr(ctx, "flash.auth.must-be-logged-in"), "error")
 				return redirect(ctx, "/login")
 			}
 			return next(ctx)
@@ -475,13 +540,6 @@ func makeCheckRequireLogin(isSingleGistAccess bool) echo.MiddlewareFunc {
 
 func checkRequireLogin(next echo.HandlerFunc) echo.HandlerFunc {
 	return makeCheckRequireLogin(false)(next)
-}
-
-func cacheControl(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
-		return next(c)
-	}
 }
 
 func noRouteFound(echo.Context) error {
@@ -522,4 +580,12 @@ func asset(file string) string {
 		return "http://localhost:16157/" + file
 	}
 	return config.C.ExternalUrl + "/" + manifestEntries[file].File
+}
+
+func customAsset(file string) string {
+	assetpath, err := url.JoinPath("/", "assets", file)
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to join path for custom file %s", file)
+	}
+	return config.C.ExternalUrl + assetpath
 }

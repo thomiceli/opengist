@@ -6,10 +6,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/index"
-	"github.com/thomiceli/opengist/internal/render"
 	"html/template"
 	"net/url"
 	"path/filepath"
@@ -17,6 +13,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/i18n"
+	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/render"
+	"github.com/thomiceli/opengist/internal/utils"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -73,21 +76,7 @@ func gistInit(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		httpProtocol := "http"
-		if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
-			httpProtocol = "https"
-		}
-		setData(ctx, "httpProtocol", strings.ToUpper(httpProtocol))
-
-		var baseHttpUrl string
-		// if a custom external url is set, use it
-		if config.C.ExternalUrl != "" {
-			baseHttpUrl = config.C.ExternalUrl
-		} else {
-			baseHttpUrl = httpProtocol + "://" + ctx.Request().Host
-		}
-
-		setData(ctx, "baseHttpUrl", baseHttpUrl)
+		baseHttpUrl := getData(ctx, "baseHttpUrl").(string)
 
 		if config.C.HttpGit {
 			setData(ctx, "httpCloneUrl", baseHttpUrl+"/"+userName+"/"+gistName+".git")
@@ -152,18 +141,18 @@ func allGists(ctx echo.Context) error {
 	pageInt := getPage(ctx)
 
 	sort := "created"
-	sortText := tr(ctx, "gist.list.sort-by-created")
+	sortText := trH(ctx, "gist.list.sort-by-created")
 	order := "desc"
-	orderText := tr(ctx, "gist.list.order-by-desc")
+	orderText := trH(ctx, "gist.list.order-by-desc")
 
 	if ctx.QueryParam("sort") == "updated" {
 		sort = "updated"
-		sortText = tr(ctx, "gist.list.sort-by-updated")
+		sortText = trH(ctx, "gist.list.sort-by-updated")
 	}
 
 	if ctx.QueryParam("order") == "asc" {
 		order = "asc"
-		orderText = tr(ctx, "gist.list.order-by-asc")
+		orderText = trH(ctx, "gist.list.order-by-asc")
 	}
 
 	setData(ctx, "sort", sortText)
@@ -180,14 +169,14 @@ func allGists(ctx echo.Context) error {
 	if fromUserStr == "" {
 		urlctx := ctx.Request().URL.Path
 		if strings.HasSuffix(urlctx, "search") {
-			setData(ctx, "htmlTitle", "Search results")
+			setData(ctx, "htmlTitle", trH(ctx, "gist.list.search-results"))
 			setData(ctx, "mode", "search")
 			setData(ctx, "searchQuery", ctx.QueryParam("q"))
 			setData(ctx, "searchQueryUrl", template.URL("&q="+ctx.QueryParam("q")))
 			urlPage = "search"
 			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order)
 		} else if strings.HasSuffix(urlctx, "all") {
-			setData(ctx, "htmlTitle", "All gists")
+			setData(ctx, "htmlTitle", trH(ctx, "gist.list.all"))
 			setData(ctx, "mode", "all")
 			urlPage = "all"
 			gists, err = db.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
@@ -237,17 +226,17 @@ func allGists(ctx echo.Context) error {
 
 		if liked {
 			urlPage = fromUserStr + "/liked"
-			setData(ctx, "htmlTitle", "All gists liked by "+fromUserStr)
+			setData(ctx, "htmlTitle", trH(ctx, "gist.list.all-liked-by", fromUserStr))
 			setData(ctx, "mode", "liked")
 			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		} else if forked {
 			urlPage = fromUserStr + "/forked"
-			setData(ctx, "htmlTitle", "All gists forked by "+fromUserStr)
+			setData(ctx, "htmlTitle", trH(ctx, "gist.list.all-forked-by", fromUserStr))
 			setData(ctx, "mode", "forked")
 			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		} else {
 			urlPage = fromUserStr
-			setData(ctx, "htmlTitle", "All gists from "+fromUserStr)
+			setData(ctx, "htmlTitle", trH(ctx, "gist.list.all-from", fromUserStr))
 			setData(ctx, "mode", "fromUser")
 			gists, err = db.GetAllGistsFromUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		}
@@ -267,7 +256,7 @@ func allGists(ctx echo.Context) error {
 	}
 
 	if err = paginate(ctx, renderedGists, pageInt, 10, "gists", fromUserStr, 2, "&sort="+sort+"&order="+order); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
 	setData(ctx, "urlPage", urlPage)
@@ -325,11 +314,11 @@ func search(ctx echo.Context) error {
 	if 10*pageInt < int(nbHits) {
 		setData(ctx, "nextPage", pageInt+1)
 	}
-	setData(ctx, "prevLabel", tr(ctx, "pagination.previous"))
-	setData(ctx, "nextLabel", tr(ctx, "pagination.next"))
+	setData(ctx, "prevLabel", trH(ctx, "pagination.previous"))
+	setData(ctx, "nextLabel", trH(ctx, "pagination.next"))
 	setData(ctx, "urlPage", "search")
 	setData(ctx, "urlParams", template.URL("&q="+ctx.QueryParam("q")))
-	setData(ctx, "htmlTitle", "Search results")
+	setData(ctx, "htmlTitle", trH(ctx, "gist.list.search-results"))
 	setData(ctx, "nbHits", nbHits)
 	setData(ctx, "gists", renderedGists)
 	setData(ctx, "langs", langs)
@@ -442,8 +431,9 @@ func gistJs(ctx echo.Context) error {
 	js := `document.write('<link rel="stylesheet" href="%s">')
 document.write('%s')
 `
-	js = fmt.Sprintf(js, cssUrl,
-		strings.Replace(htmlbuf.String(), "\n", `\n`, -1))
+	content := strings.Replace(htmlbuf.String(), `\n`, `\\n`, -1)
+	content = strings.Replace(content, "\n", `\n`, -1)
+	js = fmt.Sprintf(js, cssUrl, content)
 	ctx.Response().Header().Set("Content-Type", "application/javascript")
 	return plainText(ctx, 200, js)
 }
@@ -461,7 +451,7 @@ func revisions(ctx echo.Context) error {
 	}
 
 	if err := paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions", 2); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
 	emailsSet := map[string]struct{}{}
@@ -480,13 +470,13 @@ func revisions(ctx echo.Context) error {
 	setData(ctx, "page", "revisions")
 	setData(ctx, "revision", "HEAD")
 	setData(ctx, "emails", emailsUsers)
-	setData(ctx, "htmlTitle", "Revision of "+gist.Title)
+	setData(ctx, "htmlTitle", trH(ctx, "gist.revision-of", gist.Title))
 
 	return html(ctx, "revisions.html")
 }
 
 func create(ctx echo.Context) error {
-	setData(ctx, "htmlTitle", "Create a new gist")
+	setData(ctx, "htmlTitle", trH(ctx, "gist.new.create-a-new-gist"))
 	return html(ctx, "create.html")
 }
 
@@ -498,21 +488,21 @@ func processCreate(ctx echo.Context) error {
 
 	err := ctx.Request().ParseForm()
 	if err != nil {
-		return errorRes(400, "Bad request", err)
+		return errorRes(400, tr(ctx, "error.bad-request"), err)
 	}
 
 	dto := new(db.GistDTO)
 	var gist *db.Gist
 
 	if isCreate {
-		setData(ctx, "htmlTitle", "Create a new gist")
+		setData(ctx, "htmlTitle", trH(ctx, "gist.new.create-a-new-gist"))
 	} else {
 		gist = getData(ctx, "gist").(*db.Gist)
-		setData(ctx, "htmlTitle", "Edit "+gist.Title)
+		setData(ctx, "htmlTitle", trH(ctx, "gist.edit.edit-gist", gist.Title))
 	}
 
 	if err := ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 
 	dto.Files = make([]db.FileDTO, 0)
@@ -528,7 +518,7 @@ func processCreate(ctx echo.Context) error {
 
 		escapedValue, err := url.QueryUnescape(content)
 		if err != nil {
-			return errorRes(400, "Invalid character unescaped", err)
+			return errorRes(400, tr(ctx, "error.invalid-character-unescaped"), err)
 		}
 
 		dto.Files = append(dto.Files, db.FileDTO{
@@ -539,7 +529,7 @@ func processCreate(ctx echo.Context) error {
 
 	err = ctx.Validate(dto)
 	if err != nil {
-		addFlash(ctx, validationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err, getData(ctx, "locale").(*i18n.Locale)), "error")
 		if isCreate {
 			return html(ctx, "create.html")
 		} else {
@@ -614,15 +604,20 @@ func processCreate(ctx echo.Context) error {
 	return redirect(ctx, "/"+user.Username+"/"+gist.Identifier())
 }
 
-func toggleVisibility(ctx echo.Context) error {
+func editVisibility(ctx echo.Context) error {
 	gist := getData(ctx, "gist").(*db.Gist)
 
-	gist.Private = (gist.Private + 1) % 3
+	dto := new(db.VisibilityDTO)
+	if err := ctx.Bind(dto); err != nil {
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
+	}
+
+	gist.Private = dto.Private
 	if err := gist.UpdateNoTimestamps(); err != nil {
 		return errorRes(500, "Error updating this gist", err)
 	}
 
-	addFlash(ctx, "Gist visibility has been changed", "success")
+	addFlash(ctx, tr(ctx, "flash.gist.visibility-changed"), "success")
 	return redirect(ctx, "/"+gist.User.Username+"/"+gist.Identifier())
 }
 
@@ -634,7 +629,7 @@ func deleteGist(ctx echo.Context) error {
 	}
 	gist.RemoveFromIndex()
 
-	addFlash(ctx, "Gist has been deleted", "success")
+	addFlash(ctx, tr(ctx, "flash.gist.deleted"), "success")
 	return redirect(ctx, "/")
 }
 
@@ -674,7 +669,7 @@ func fork(ctx echo.Context) error {
 	}
 
 	if gist.User.ID == currentUser.ID {
-		addFlash(ctx, "Unable to fork own gists", "error")
+		addFlash(ctx, tr(ctx, "flash.gist.fork-own-gist"), "error")
 		return redirect(ctx, "/"+gist.User.Username+"/"+gist.Identifier())
 	}
 
@@ -710,7 +705,7 @@ func fork(ctx echo.Context) error {
 		return errorRes(500, "Error incrementing the fork count", err)
 	}
 
-	addFlash(ctx, "Gist has been forked", "success")
+	addFlash(ctx, tr(ctx, "flash.gist.forked"), "success")
 
 	return redirect(ctx, "/"+currentUser.Username+"/"+newGist.Identifier())
 }
@@ -744,7 +739,6 @@ func downloadFile(ctx echo.Context) error {
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+file.Filename)
 	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(file.Content)))
 	_, err = ctx.Response().Write([]byte(file.Content))
-
 	if err != nil {
 		return errorRes(500, "Error downloading the file", err)
 	}
@@ -761,7 +755,7 @@ func edit(ctx echo.Context) error {
 	}
 
 	setData(ctx, "files", files)
-	setData(ctx, "htmlTitle", "Edit "+gist.Title)
+	setData(ctx, "htmlTitle", trH(ctx, "gist.edit.edit-gist", gist.Title))
 
 	return html(ctx, "edit.html")
 }
@@ -822,10 +816,10 @@ func likes(ctx echo.Context) error {
 	}
 
 	if err = paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Identifier()+"/likes", 1); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
-	setData(ctx, "htmlTitle", "Like for "+gist.Title)
+	setData(ctx, "htmlTitle", trH(ctx, "gist.likes.for", gist.Title))
 	setData(ctx, "revision", "HEAD")
 	return html(ctx, "likes.html")
 }
@@ -846,10 +840,10 @@ func forks(ctx echo.Context) error {
 	}
 
 	if err = paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Identifier()+"/forks", 2); err != nil {
-		return errorRes(404, "Page not found", nil)
+		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
-	setData(ctx, "htmlTitle", "Forks for "+gist.Title)
+	setData(ctx, "htmlTitle", trH(ctx, "gist.forks.for: Forks for %s", gist.Title))
 	setData(ctx, "revision", "HEAD")
 	return html(ctx, "forks.html")
 }
@@ -860,7 +854,7 @@ func checkbox(ctx echo.Context) error {
 
 	i, err := strconv.Atoi(checkboxNb)
 	if err != nil {
-		return errorRes(400, "Invalid number", nil)
+		return errorRes(400, tr(ctx, "error.invalid-number"), nil)
 	}
 
 	gist := getData(ctx, "gist").(*db.Gist)
@@ -888,4 +882,15 @@ func checkbox(ctx echo.Context) error {
 	}
 
 	return plainText(ctx, 200, "ok")
+}
+
+func preview(ctx echo.Context) error {
+	content := ctx.FormValue("content")
+
+	previewStr, err := render.MarkdownString(content)
+	if err != nil {
+		return errorRes(500, "Error rendering markdown", err)
+	}
+
+	return plainText(ctx, 200, previewStr)
 }

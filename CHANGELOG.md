@@ -1,5 +1,67 @@
 # Changelog
 
+## [1.7.2](https://github.com/thomiceli/opengist/compare/v1.7.1...v1.7.2) - 2024-05-05
+See here how to [update](/docs/update.md) Opengist.
+
+### Added
+- Docs: 
+  - Run with systemd as a normal user (#254)
+  - Kubernetes deployment (#258)
+- More translation strings (#269) (#271)
+
+### Changed
+- Rework git log parsing and truncating (#260)
+- Set Opengist version from git tags (#261)
+
+### Fixed
+- Missing preview button when editing .md gist (#259)
+- Frontend (#267)
+  - Fix mermaid display 
+  - Move Login/Register buttons on mobile 
+  - Set minimum width on avatar
+
+### Other
+- Use go 1.22 and update deps (#244)
+
+## [1.7.1](https://github.com/thomiceli/opengist/compare/v1.7.0...v1.7.1) - 2024-04-05
+See here how to [update](/docs/update.md) Opengist.
+
+### Added
+- Docs: More detailed variant for custom pages (#248)
+
+### Fixed
+- Auth page GitlabName Error (#242)
+- Empty invitation on user creation (#247)
+
+## [1.7.0](https://github.com/thomiceli/opengist/compare/v1.6.1...v1.7.0) - 2024-04-03
+See here how to [update](/docs/update.md) Opengist.
+
+Note: all sessions will be invalidated after this update.
+
+### Added
+- Custom logo configuration (#209)
+- Custom static links (#234)
+- Invitations for closed registrations (#233)
+- Set gist visibility via Git push options (#215)
+- Set gist URL and title via push options (#216)
+- Specify custom names in the OAuth login buttons (#214)
+- Markdown preview (#224)
+- Reset a user password using CLI (#226)
+- Translations (#207, #210)
+
+### Changed
+- Use filesystem session store (#240)
+- Move Git hook logic to Opengist (#213)
+- Increase login for 1 year (#222)
+
+### Fixed
+- Show theme change button on responsive devices (#225)
+- New line literal in embed gists (#237)
+
+### Other
+- GitHub security updates
+- New docker dev env (#220)
+
 ## [1.6.1](https://github.com/thomiceli/opengist/compare/v1.6.0...v1.6.1) - 2024-01-06
 See here how to [update](/docs/update.md) Opengist.
 

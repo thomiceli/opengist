@@ -15,10 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Go 1.21
+      - name: Set up Go 1.22
         uses: actions/setup-go@v4
         with:
-          go-version: "1.21"
+          go-version: "1.22"
 
       - name: Lint
         uses: golangci/golangci-lint-action@v3
@@ -36,20 +36,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Go 1.21
+      - name: Set up Go 1.22
         uses: actions/setup-go@v4
         with:
-          go-version: "1.21"
+          go-version: "1.22"
 
-      - name: Check
+      - name: Check Go modules
         run: make go_mod check_changes
+
+      - name: Check translations
+        run: make check-tr
 
   test:
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
-        go: ["1.21"]
+        go: ["1.22"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout

@@ -34,6 +34,54 @@ document.addEventListener("DOMContentLoaded", () => {
             ],
         });
 
+        let mdpreview = dom.querySelector(".md-preview") as HTMLElement;
+
+        let formfilename = dom.querySelector<HTMLInputElement>(".form-filename");
+
+        // check if file ends with .md on pageload
+        if (formfilename!.value.endsWith(".md")) {
+            mdpreview!.classList.remove("hidden");
+        } else {
+            mdpreview!.classList.add("hidden");
+        }
+
+        // event if the filename ends with .md; trigger event
+        formfilename!.onkeyup = (e) => {
+            let filename = (e.target as HTMLInputElement).value;
+            if (filename.endsWith(".md")) {
+                mdpreview!.classList.remove("hidden");
+            } else {
+                mdpreview!.classList.add("hidden");
+            }
+        };
+
+        // @ts-ignore
+        const baseUrl = window.opengist_base_url || '';
+        let previewShown = false;
+        mdpreview.onclick = () => {
+            previewShown = !previewShown;
+            let divpreview = dom.querySelector("div.preview") as HTMLElement;
+            let cmeditor = dom.querySelector(".cm-editor") as HTMLElement;
+
+            if (!previewShown) {
+                divpreview!.classList.add("hidden");
+                cmeditor!.classList.remove("hidden-important");
+                return;
+            } else {
+                fetch(`${baseUrl}/preview?` +  new URLSearchParams({
+                    content: editor.state.doc.toString()
+                }), {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                }).then(r => r.text()).then(r => {
+                    let divpreview = dom.querySelector("div.preview") as HTMLElement;
+                    divpreview!.innerHTML = r;
+                    divpreview!.classList.remove("hidden");
+                    cmeditor!.classList.add("hidden-important");
+                })
+            }
+        }
+
         dom.querySelector<HTMLInputElement>(".editor-indent-type")!.onchange = (e) => {
             let newTabType = (e.target as HTMLInputElement).value;
             setIndentType(editor, !["tab", "space"].includes(newTabType) ? "space" : newTabType);

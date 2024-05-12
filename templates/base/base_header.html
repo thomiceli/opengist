@@ -11,6 +11,7 @@
 
     <script>
         window.opengist_base_url = "{{ $.c.ExternalUrl }}";
+        window.opengist_locale = "{{ .locale.Code }}".substring(0, 2);
         const checkTheme = () => {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark')
@@ -28,7 +29,11 @@
             )
 
     </script>
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset "favicon-32.png" }}">
+    {{ if $.c.CustomFavicon }}
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ custom $.c.CustomFavicon }}">
+    {{ else }}
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset "favicon-32.png" }}">
+    {{ end }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     {{ if dev }}
@@ -66,13 +71,21 @@
                     </div>
                     <div class="flex-shrink-0 items-center hidden sm:flex">
                         <a href="{{ $.c.ExternalUrl }}/">
-                            <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                            {{ if $.c.CustomLogo }}
+                                <img src="{{ custom $.c.CustomLogo }}" class="object-cover h-12">
+                            {{ else }}
+                                <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                            {{ end }}
                         </a>
                     </div>
                     <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
                         <div class="flex-shrink-0 items-center flex sm:hidden">
                             <a href="{{ $.c.ExternalUrl }}/">
-                                <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                                {{ if $.c.CustomLogo }}
+                                    <img src="{{ custom $.c.CustomLogo }}" class="object-cover h-12">
+                                {{ else }}
+                                    <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                                {{ end }}
                             </a>
                         </div>
                         <div class="hidden sm:block sm:ml-6">
@@ -167,17 +180,17 @@
                         </div>
                         {{ else }}
                             {{ if not .DisableSignup }}
-                            <a href="{{ $.c.ExternalUrl }}/register" class="inline-flex text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                            <a href="{{ $.c.ExternalUrl }}/register" class="hidden sm:inline-flex text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                                 <p class="text-slate-700 dark:text-slate-300 mr-1">{{ .locale.Tr "header.menu.register" }}</p>
                             </a>
                             {{ end }}
-                            <a href="{{ $.c.ExternalUrl }}/login" class="inline-flex text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                            <a href="{{ $.c.ExternalUrl }}/login" class="hidden sm:inline-flex hidden-xs text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                                 <p class="text-slate-700 dark:text-slate-300 mr-1">{{ .locale.Tr "header.menu.login" }}</p>
                             </a>
                         {{ end }}
 
                         <div class="hidden sm:block ml-2 border-l-1 border-gray-200 dark:border-gray-600 rounded-md"><br /></div>
-                        <div id="theme-btn" class="hidden sm:flex items-center ml-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md px-3 py-2">
+                        <div id="theme-btn" class="sm:flex items-center ml-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md px-3 py-2">
                             <div>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-primary-500 dark:hidden">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
@@ -186,7 +199,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
                                 </svg>
                             </div>
-                            <div class="hidden relative sm:inline-block text-left">
+                            <div class="relative sm:inline-block text-left">
                             <div id="theme-menu" class="hidden font-medium absolute right-0 z-10 mt-12 origin-top-right divide-y dark:divide-gray-600 divide-gray-100 rounded-md dark:bg-gray-800 bg-white shadow-lg ring-1 ring-gray-50 dark:ring-gray-700 focus:outline-none">
                                 <div class="py-1" role="none">
                                     <!-- Active: "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900", Not Active: "text-gray-300 dark:text-gray-700" -->
@@ -240,9 +253,15 @@
                         <a href="{{ $.c.ExternalUrl }}/{{ .userLogged.Username }}" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">{{ .locale.Tr "header.menu.my-gists" }}</a>
                         <a href="{{ $.c.ExternalUrl }}/settings" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">{{ .locale.Tr "header.menu.settings" }}</a>
 
-                    {{ if .userLogged.IsAdmin }}
+                        {{ if .userLogged.IsAdmin }}
                             <a href="{{ $.c.ExternalUrl }}/admin-panel" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">{{ .locale.Tr "header.menu.admin" }}</a>
                         {{ end }}
+                        <a href="{{ $.c.ExternalUrl }}/logout" class="dark:text-rose-400 text-rose-500 hover:text-rose-600 dark:hover:text-rose-500 hover:bg-gray-100 dark:hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">{{ .locale.Tr "header.menu.logout" }}</a>
+                    {{ else }}
+                        {{ if not .DisableSignup }}
+                            <a href="{{ $.c.ExternalUrl }}/register" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">{{ .locale.Tr "header.menu.register" }}</a>
+                        {{ end }}
+                        <a href="{{ $.c.ExternalUrl }}/login" class="text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">{{ .locale.Tr "header.menu.login" }}</a>
                     {{ end }}
                 </div>
             </div>

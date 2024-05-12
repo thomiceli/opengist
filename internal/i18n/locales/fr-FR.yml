@@ -115,8 +115,7 @@ auth.username: Nom d'utilisateur
 auth.password: Mot de passe
 auth.register-instead: Je préfère m'inscrire
 auth.login-instead: Je préfère me connecter
-auth.github-oauth: Continuer avec un compte GitHub
-auth.gitea-oauth: Continuer avec un compte Gitea
+auth.oauth: Continuer avec un compte %s
 
 error: Erreur
 
@@ -188,10 +187,72 @@ settings.create-password-help: Créer un mot de passe pour se connecter à Openg
 settings.change-password: Changer le mot de passe
 settings.change-password-help: Changer le mot de passe pour se connecter à Opengist via HTTP
 settings.password-label-title: Mot de passe
-auth.gitlab-oauth: Continuer avec un compte GitLab
 admin.actions.sync-previews: Synchroniser l'aperçu des gists
 admin.actions.reset-hooks: Réinitialiser les hooks de Git pour tous les dépôts
 gist.new.url: URL
 gist.search.no-results: Aucun gist trouvé
 settings.unlink-gitlab-account: Détacher le compte GitLab
 admin.actions.index-gists: Indexer tous les gists
+gist.new.preview: ''
+gist.new.create-a-new-gist: ''
+gist.edit.edit-gist: ''
+gist.list.all-liked-by: ''
+gist.list.all-forked-by: ''
+gist.list.all-from: ''
+gist.forks.for: ''
+gist.likes.for: ''
+gist.revision-of: ''
+error.page-not-found: ''
+error.bad-request: ''
+error.signup-disabled: ''
+error.signup-disabled-form: ''
+error.login-disabled-form: ''
+error.complete-oauth-login: ''
+error.oauth-unsupported: ''
+error.cannot-bind-data: ''
+error.invalid-number: ''
+error.invalid-character-unescaped: ''
+admin.invitations: ''
+admin.invitations.create: ''
+admin.invitations.help: ''
+admin.invitations.max_uses: ''
+admin.invitations.expires_at: ''
+admin.invitations.code: ''
+admin.invitations.copy_link: ''
+admin.invitations.uses: ''
+admin.invitations.expired: ''
+flash.admin.user-deleted: ''
+flash.admin.gist-deleted: ''
+flash.admin.invitation-created: ''
+flash.admin.invitation-deleted: ''
+flash.admin.sync-fs: ''
+flash.admin.sync-db: ''
+flash.admin.git-gc: ''
+flash.admin.sync-previews: ''
+flash.admin.reset-hooks: ''
+flash.admin.index-gists: ''
+flash.auth.username-exists: ''
+flash.auth.invalid-credentials: ''
+flash.auth.account-linked-oauth: ''
+flash.auth.account-unlinked-oauth: ''
+flash.auth.user-sshkeys-not-retrievable: ''
+flash.auth.user-sshkeys-not-created: ''
+flash.auth.must-be-logged-in: ''
+flash.gist.visibility-changed: ''
+flash.gist.deleted: ''
+flash.gist.fork-own-gist: ''
+flash.gist.forked: ''
+flash.user.email-updated: ''
+flash.user.invalid-ssh-key: ''
+flash.user.ssh-key-added: ''
+flash.user.ssh-key-deleted: ''
+flash.user.password-updated: ''
+flash.user.username-updated: ''
+validation.is-too-long: ''
+validation.should-not-be-empty: ''
+validation.should-not-include-sub-directory: ''
+validation.should-only-contain-alphanumeric-characters: ''
+validation.should-only-contain-alphanumeric-characters-and-dashes: ''
+validation.not-enough: ''
+validation.invalid: ''
+html.title.admin-panel: ''

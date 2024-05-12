@@ -1,10 +1,11 @@
 package test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"testing"
 )
 
 func TestGists(t *testing.T) {
@@ -28,9 +29,11 @@ func TestGists(t *testing.T) {
 	gist1 := db.GistDTO{
 		Title:       "gist1",
 		Description: "my first gist",
-		Private:     0,
-		Name:        []string{"gist1.txt", "gist2.txt", "gist3.txt"},
-		Content:     []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
 	err = s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)
@@ -57,9 +60,11 @@ func TestGists(t *testing.T) {
 	gist2 := db.GistDTO{
 		Title:       "gist2",
 		Description: "my second gist",
-		Private:     0,
-		Name:        []string{"", "gist2.txt", "gist3.txt"},
-		Content:     []string{"", "yeah\ncool", "yeah\ncool gist actually"},
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"", "gist2.txt", "gist3.txt"},
+		Content: []string{"", "yeah\ncool", "yeah\ncool gist actually"},
 	}
 	err = s.request("POST", "/", gist2, 200)
 	require.NoError(t, err)
@@ -67,9 +72,11 @@ func TestGists(t *testing.T) {
 	gist3 := db.GistDTO{
 		Title:       "gist3",
 		Description: "my third gist",
-		Private:     0,
-		Name:        []string{""},
-		Content:     []string{"yeah"},
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{""},
+		Content: []string{"yeah"},
 	}
 	err = s.request("POST", "/", gist3, 302)
 	require.NoError(t, err)
@@ -110,9 +117,11 @@ func TestVisibility(t *testing.T) {
 	gist1 := db.GistDTO{
 		Title:       "gist1",
 		Description: "my first gist",
-		Private:     db.UnlistedVisibility,
-		Name:        []string{""},
-		Content:     []string{"yeah"},
+		VisibilityDTO: db.VisibilityDTO{
+			Private: db.UnlistedVisibility,
+		},
+		Name:    []string{""},
+		Content: []string{"yeah"},
 	}
 	err = s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)
@@ -121,19 +130,19 @@ func TestVisibility(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, db.UnlistedVisibility, gist1db.Private)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.PrivateVisibility}, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
 	require.Equal(t, db.PrivateVisibility, gist1db.Private)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.PublicVisibility}, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
 	require.Equal(t, db.PublicVisibility, gist1db.Private)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", nil, 302)
+	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.UnlistedVisibility}, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
@@ -152,9 +161,11 @@ func TestLikeFork(t *testing.T) {
 	gist1 := db.GistDTO{
 		Title:       "gist1",
 		Description: "my first gist",
-		Private:     1,
-		Name:        []string{""},
-		Content:     []string{"yeah"},
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 1,
+		},
+		Name:    []string{""},
+		Content: []string{"yeah"},
 	}
 	err = s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)
@@ -212,9 +223,11 @@ func TestCustomUrl(t *testing.T) {
 		Title:       "gist1",
 		URL:         "my-gist",
 		Description: "my first gist",
-		Private:     0,
-		Name:        []string{"gist1.txt", "gist2.txt", "gist3.txt"},
-		Content:     []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
 	err = s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)
@@ -241,9 +254,11 @@ func TestCustomUrl(t *testing.T) {
 	gist2 := db.GistDTO{
 		Title:       "gist2",
 		Description: "my second gist",
-		Private:     0,
-		Name:        []string{"gist1.txt", "gist2.txt", "gist3.txt"},
-		Content:     []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
 	err = s.request("POST", "/", gist2, 302)
 	require.NoError(t, err)

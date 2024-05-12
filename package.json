@@ -21,7 +21,7 @@
     "dayjs": "^1.11.9",
     "github-markdown-css": "^5.5.0",
     "nodemon": "^2.0.22",
-    "postcss": "^8.4.13",
+    "postcss": "^8.4.32",
     "postcss-cli": "^11.0.0",
     "postcss-cssnext": "^3.1.1",
     "postcss-import": "^15.1.0",
@@ -30,6 +30,6 @@
     "sass": "^1.62.1",
     "sugarss": "^4.0.1",
     "tailwindcss": "^3.2.7",
-    "vite": "^4.2.3"
+    "vite": "^4.5.3"
   }
 }

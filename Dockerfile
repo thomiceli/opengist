@@ -1,14 +1,23 @@
-FROM alpine:3.19 AS build
+FROM alpine:3.19 AS base
 
 RUN apk update && \
-    apk add --no-cache \
-    make \
-    gcc \
-    musl-dev \
-    libstdc++
+        apk add --no-cache \
+        make \
+        shadow \
+        openssl \
+        openssh \
+        curl \
+        wget \
+        git \
+        gnupg \
+        xz \
+        gcc \
+        musl-dev \
+        libstdc++
 
-COPY --from=golang:1.21-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.22-alpine /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
+ENV CGO_ENABLED=0
 
 COPY --from=node:20-alpine /usr/local/ /usr/local/
 ENV NODE_PATH="/usr/local/lib/node_modules"
@@ -18,10 +27,23 @@ WORKDIR /opengist
 
 COPY . .
 
+
+FROM base AS dev
+
+EXPOSE 6157 2222 16157
+VOLUME /opengist
+
+RUN git config --global --add safe.directory /opengist
+
+CMD ["make", "watch"]
+
+
+FROM base AS build
+
 RUN make
 
 
-FROM alpine:3.19 as run
+FROM alpine:3.19 as prod
 
 RUN apk update && \
     apk add --no-cache \

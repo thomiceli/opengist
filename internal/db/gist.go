@@ -2,18 +2,17 @@ package db
 
 import (
 	"fmt"
-	"github.com/alecthomas/chroma/v2"
-	"github.com/alecthomas/chroma/v2/lexers"
-	"github.com/dustin/go-humanize"
-	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/index"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/dustin/go-humanize"
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
 	"gorm.io/gorm"
 )
 
@@ -24,6 +23,19 @@ const (
 	UnlistedVisibility
 	PrivateVisibility
 )
+
+func (v Visibility) String() string {
+	switch v {
+	case PublicVisibility:
+		return "public"
+	case UnlistedVisibility:
+		return "unlisted"
+	case PrivateVisibility:
+		return "private"
+	default:
+		return "???"
+	}
+}
 
 func (v Visibility) Next() Visibility {
 	switch v {
@@ -38,11 +50,11 @@ func (v Visibility) Next() Visibility {
 
 func ParseVisibility[T string | int](v T) (Visibility, error) {
 	switch s := fmt.Sprint(v); s {
-	case "0":
+	case "0", "public":
 		return PublicVisibility, nil
-	case "1":
+	case "1", "unlisted":
 		return UnlistedVisibility, nil
-	case "2":
+	case "2", "private":
 		return PrivateVisibility, nil
 	default:
 		return -1, fmt.Errorf("unknown visibility %q", s)
@@ -330,10 +342,6 @@ func (gist *Gist) InitRepository() error {
 	return git.InitRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) InitRepositoryViaInit(ctx echo.Context) error {
-	return git.InitRepositoryViaInit(gist.User.Username, gist.Uuid, ctx)
-}
-
 func (gist *Gist) DeleteRepository() error {
 	return git.DeleteRepository(gist.User.Username, gist.Uuid)
 }
@@ -530,13 +538,17 @@ func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string     `validate:"max=250" form:"title"`
-	Description string     `validate:"max=1000" form:"description"`
-	URL         string     `validate:"max=32,alphanumdashorempty" form:"url"`
-	Private     Visibility `validate:"number,min=0,max=2" form:"private"`
-	Files       []FileDTO  `validate:"min=1,dive"`
-	Name        []string   `form:"name"`
-	Content     []string   `form:"content"`
+	Title       string    `validate:"max=250" form:"title"`
+	Description string    `validate:"max=1000" form:"description"`
+	URL         string    `validate:"max=32,alphanumdashorempty" form:"url"`
+	Files       []FileDTO `validate:"min=1,dive"`
+	Name        []string  `form:"name"`
+	Content     []string  `form:"content"`
+	VisibilityDTO
+}
+
+type VisibilityDTO struct {
+	Private Visibility `validate:"number,min=0,max=2" form:"private"`
 }
 
 type FileDTO struct {

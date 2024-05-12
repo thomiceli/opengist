@@ -6,11 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"strings"
-
 	"github.com/labstack/echo/v4"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -21,9 +16,15 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/i18n"
+	"github.com/thomiceli/opengist/internal/utils"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
 const (
@@ -36,45 +37,68 @@ const (
 var title = cases.Title(language.English)
 
 func register(ctx echo.Context) error {
-	setData(ctx, "title", tr(ctx, "auth.new-account"))
-	setData(ctx, "htmlTitle", "New account")
-	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
+	disableSignup := getData(ctx, "DisableSignup")
+	disableForm := getData(ctx, "DisableLoginForm")
+
+	code := ctx.QueryParam("code")
+	if code != "" {
+		if invitation, err := db.GetInvitationByCode(code); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return errorRes(500, "Cannot check for invitation code", err)
+		} else if invitation != nil && invitation.IsUsable() {
+			disableSignup = false
+		}
+	}
+
+	setData(ctx, "title", trH(ctx, "auth.new-account"))
+	setData(ctx, "htmlTitle", trH(ctx, "auth.new-account"))
+	setData(ctx, "disableForm", disableForm)
+	setData(ctx, "disableSignup", disableSignup)
 	setData(ctx, "isLoginPage", false)
 	return html(ctx, "auth_form.html")
 }
 
 func processRegister(ctx echo.Context) error {
-	if getData(ctx, "DisableSignup") == true {
-		return errorRes(403, "Signing up is disabled", nil)
+	disableSignup := getData(ctx, "DisableSignup")
+
+	code := ctx.QueryParam("code")
+	invitation, err := db.GetInvitationByCode(code)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return errorRes(500, "Cannot check for invitation code", err)
+	} else if invitation.ID != 0 && invitation.IsUsable() {
+		disableSignup = false
+	}
+
+	if disableSignup == true {
+		return errorRes(403, tr(ctx, "error.signup-disabled"), nil)
 	}
 
 	if getData(ctx, "DisableLoginForm") == true {
-		return errorRes(403, "Signing up via registration form is disabled", nil)
+		return errorRes(403, tr(ctx, "error.signup-disabled-form"), nil)
 	}
 
-	setData(ctx, "title", "New account")
-	setData(ctx, "htmlTitle", "New account")
+	setData(ctx, "title", trH(ctx, "auth.new-account"))
+	setData(ctx, "htmlTitle", trH(ctx, "auth.new-account"))
 
 	sess := getSession(ctx)
 
 	dto := new(db.UserDTO)
 	if err := ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 
 	if err := ctx.Validate(dto); err != nil {
-		addFlash(ctx, validationMessages(&err), "error")
+		addFlash(ctx, utils.ValidationMessages(&err, getData(ctx, "locale").(*i18n.Locale)), "error")
 		return html(ctx, "auth_form.html")
 	}
 
 	if exists, err := db.UserExists(dto.Username); err != nil || exists {
-		addFlash(ctx, "Username already exists", "error")
+		addFlash(ctx, tr(ctx, "flash.auth.username-exists"), "error")
 		return html(ctx, "auth_form.html")
 	}
 
 	user := dto.ToUser()
 
-	password, err := argon2id.hash(user.Password)
+	password, err := utils.Argon2id.Hash(user.Password)
 	if err != nil {
 		return errorRes(500, "Cannot hash password", err)
 	}
@@ -90,6 +114,12 @@ func processRegister(ctx echo.Context) error {
 		}
 	}
 
+	if invitation.ID != 0 {
+		if err := invitation.Use(); err != nil {
+			return errorRes(500, "Cannot use invitation", err)
+		}
+	}
+
 	sess.Values["user"] = user.ID
 	saveSession(sess, ctx)
 
@@ -97,8 +127,8 @@ func processRegister(ctx echo.Context) error {
 }
 
 func login(ctx echo.Context) error {
-	setData(ctx, "title", tr(ctx, "auth.login"))
-	setData(ctx, "htmlTitle", "Login")
+	setData(ctx, "title", trH(ctx, "auth.login"))
+	setData(ctx, "htmlTitle", trH(ctx, "auth.login"))
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	setData(ctx, "isLoginPage", true)
 	return html(ctx, "auth_form.html")
@@ -106,7 +136,7 @@ func login(ctx echo.Context) error {
 
 func processLogin(ctx echo.Context) error {
 	if getData(ctx, "DisableLoginForm") == true {
-		return errorRes(403, "Logging in via login form is disabled", nil)
+		return errorRes(403, tr(ctx, "error.login-disabled-form"), nil)
 	}
 
 	var err error
@@ -114,7 +144,7 @@ func processLogin(ctx echo.Context) error {
 
 	dto := &db.UserDTO{}
 	if err = ctx.Bind(dto); err != nil {
-		return errorRes(400, "Cannot bind data", err)
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
 	}
 	password := dto.Password
 
@@ -125,20 +155,21 @@ func processLogin(ctx echo.Context) error {
 			return errorRes(500, "Cannot get user", err)
 		}
 		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-		addFlash(ctx, "Invalid credentials", "error")
+		addFlash(ctx, tr(ctx, "flash.auth.invalid-credentials"), "error")
 		return redirect(ctx, "/login")
 	}
 
-	if ok, err := argon2id.verify(password, user.Password); !ok {
+	if ok, err := utils.Argon2id.Verify(password, user.Password); !ok {
 		if err != nil {
 			return errorRes(500, "Cannot check for password", err)
 		}
 		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-		addFlash(ctx, "Invalid credentials", "error")
+		addFlash(ctx, tr(ctx, "flash.auth.invalid-credentials"), "error")
 		return redirect(ctx, "/login")
 	}
 
 	sess.Values["user"] = user.ID
+	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year
 	saveSession(sess, ctx)
 	deleteCsrfCookie(ctx)
 
@@ -148,7 +179,7 @@ func processLogin(ctx echo.Context) error {
 func oauthCallback(ctx echo.Context) error {
 	user, err := gothic.CompleteUserAuth(ctx.Response(), ctx.Request())
 	if err != nil {
-		return errorRes(400, "Cannot complete user auth: "+err.Error(), err)
+		return errorRes(400, tr(ctx, "error.complete-oauth-login", err.Error()), err)
 	}
 
 	currUser := getUserLogged(ctx)
@@ -160,7 +191,7 @@ func oauthCallback(ctx echo.Context) error {
 			return errorRes(500, "Cannot update user "+title.String(user.Provider)+" id", err)
 		}
 
-		addFlash(ctx, "Account linked to "+title.String(user.Provider), "success")
+		addFlash(ctx, tr(ctx, "flash.auth.account-linked-oauth", title.String(user.Provider)), "success")
 		return redirect(ctx, "/settings")
 	}
 
@@ -168,7 +199,7 @@ func oauthCallback(ctx echo.Context) error {
 	userDB, err := db.GetUserByProvider(user.UserID, user.Provider)
 	if err != nil {
 		if getData(ctx, "DisableSignup") == true {
-			return errorRes(403, "Signing up is disabled", nil)
+			return errorRes(403, tr(ctx, "error.signup-disabled"), nil)
 		}
 
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -186,7 +217,7 @@ func oauthCallback(ctx echo.Context) error {
 
 		if err = userDB.Create(); err != nil {
 			if db.IsUniqueConstraintViolation(err) {
-				addFlash(ctx, "Username "+user.NickName+" already exists in Opengist", "error")
+				addFlash(ctx, tr(ctx, "flash.auth.username-exists"), "error")
 				return redirect(ctx, "/login")
 			}
 
@@ -216,7 +247,7 @@ func oauthCallback(ctx echo.Context) error {
 
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				addFlash(ctx, "Could not get user keys", "error")
+				addFlash(ctx, tr(ctx, "flash.auth.user-sshkeys-not-retrievable"), "error")
 				log.Error().Err(err).Msg("Could not get user keys")
 			}
 
@@ -232,7 +263,7 @@ func oauthCallback(ctx echo.Context) error {
 				}
 
 				if err = sshKey.Create(); err != nil {
-					addFlash(ctx, "Could not create ssh key", "error")
+					addFlash(ctx, tr(ctx, "flash.auth.user-sshkeys-not-created"), "error")
 					log.Error().Err(err).Msg("Could not create ssh key")
 				}
 			}
@@ -330,7 +361,7 @@ func oauth(ctx echo.Context) error {
 				return errorRes(500, "Cannot unlink account from "+title.String(provider), err)
 			}
 
-			addFlash(ctx, "Account unlinked from "+title.String(provider), "success")
+			addFlash(ctx, tr(ctx, "flash.auth.account-unlinked-oauth", title.String(provider)), "success")
 			return redirect(ctx, "/settings")
 		}
 	}
@@ -338,7 +369,7 @@ func oauth(ctx echo.Context) error {
 	ctxValue := context.WithValue(ctx.Request().Context(), gothic.ProviderParamKey, provider)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 	if provider != GitHubProvider && provider != GitLabProvider && provider != GiteaProvider && provider != OpenIDConnect {
-		return errorRes(400, "Unsupported provider", nil)
+		return errorRes(400, tr(ctx, "error.oauth-unsupported"), nil)
 	}
 
 	gothic.BeginAuthHandler(ctx.Response(), ctx.Request())

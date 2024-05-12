@@ -24,6 +24,8 @@ var (
 )
 
 const truncateLimit = 2 << 18
+const diffSize = 2 << 12
+const maxFilesPerDiffCommit = 10
 
 type RevisionNotFoundError struct{}
 
@@ -78,16 +80,6 @@ func InitRepository(user string, gist string) error {
 	}
 
 	return CreateDotGitFiles(user, gist)
-}
-
-func InitRepositoryViaInit(user string, gist string, ctx echo.Context) error {
-	repositoryPath := RepositoryPath(user, gist)
-
-	if err := InitRepository(user, gist); err != nil {
-		return err
-	}
-	repositoryUrl := RepositoryUrl(ctx, user, gist)
-	return createDotGitHookFile(repositoryPath, "post-receive", fmt.Sprintf(postReceive, repositoryUrl, repositoryUrl))
 }
 
 func CountCommits(user string, gist string) (string, error) {
@@ -323,7 +315,7 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 		}
 	}(cmd)
 
-	return parseLog(stdout, truncateLimit), err
+	return parseLog(stdout, maxFilesPerDiffCommit, diffSize)
 }
 
 func CloneTmp(user string, gist string, gistTmpId string, email string, remove bool) error {
@@ -424,7 +416,6 @@ func Push(gistTmpId string) error {
 	if err != nil {
 		return err
 	}
-
 	return os.RemoveAll(tmpRepositoryPath)
 }
 
@@ -534,8 +525,12 @@ func CreateDotGitFiles(user string, gist string) error {
 	}
 	defer f1.Close()
 
-	if err = createDotGitHookFile(repositoryPath, "pre-receive", preReceive); err != nil {
-		return err
+	if os.Getenv("OPENGIST_SKIP_GIT_HOOKS") != "1" {
+		for _, hook := range []string{"pre-receive", "post-receive"} {
+			if err = createDotGitHookFile(repositoryPath, hook, fmt.Sprintf(hookTemplate, hook)); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
@@ -570,57 +565,6 @@ func removeFilesExceptGit(dir string) error {
 	})
 }
 
-const preReceive = `#!/bin/sh
-
-disallowed_files=""
-
-while read -r old_rev new_rev ref
-do
-  if [ "$old_rev" = "0000000000000000000000000000000000000000" ]; then
-    # This is the first commit, so we check all the files in that commit
-    changed_files=$(git ls-tree -r --name-only "$new_rev")
-  else
-    # This is not the first commit, so we compare it with its predecessor
-    changed_files=$(git diff --name-only "$old_rev" "$new_rev")
-  fi
-
-  while IFS= read -r file
-  do
-    case $file in
-      */*)
-        disallowed_files="${disallowed_files}${file} "
-        ;;
-    esac
-  done <<EOF
-$changed_files
-EOF
-done
-
-if [ -n "$disallowed_files" ]; then
-  echo ""
-  echo "Pushing files in folders is not allowed:"
-  for file in $disallowed_files; do
-    echo "  $file"
-  done
-  echo ""
-  exit 1
-fi
-`
-
-const postReceive = `#!/bin/sh
-
-while read oldrev newrev refname; do
-    if ! git rev-parse --verify --quiet HEAD &>/dev/null; then
-        git symbolic-ref HEAD "$refname"
-    fi
-done
-
-echo ""
-echo "Your new repository has been created here: %s"
-echo ""
-echo "If you want to keep working with your gist, you could set the remote URL via:"
-echo "git remote set-url origin %s"
-echo ""
-
-rm -f $0
+const hookTemplate = `#!/bin/sh
+"$OG_OPENGIST_HOME_INTERNAL/symlinks/opengist" --config=$OG_OPENGIST_HOME_INTERNAL/symlinks/config.yml hook %s
 `

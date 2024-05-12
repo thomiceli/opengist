@@ -17,8 +17,6 @@ gist.header.clone-http: Clonar via %s
 gist.header.clone-http-help: Clonar com Git usando autenticação básica HTTP.
 gist.header.clone-ssh: Clonar via SSH
 gist.header.clone-ssh-help: Clonar com Git usando uma chave SSH.
-gist.header.share: Compartilhar
-gist.header.share-help: Copiar link para compartilhar este gist.
 gist.header.download-zip: Baixar ZIP
 
 gist.raw: Bruto
@@ -115,8 +113,7 @@ auth.username: Nome de usuário
 auth.password: Senha
 auth.register-instead: Registrar-se no lugar
 auth.login-instead: Entrar no lugar
-auth.github-oauth: Continuar com conta do GitHub
-auth.gitea-oauth: Continuar com conta do Gitea
+auth.oauth: Continuar com conta do %s
 
 error: Erro
 
@@ -158,7 +155,6 @@ admin.delete: Excluir
 admin.created_at: Criado
 
 admin.config-link: Esta configuração pode ser %s por um arquivo de configuração YAML e/ou variáveis de ambiente.
-admin.config-link-overridden: sobrescrito
 admin.disable-signup: Desabilitar registro
 admin.disable-signup_help: Proibir a criação de novas contas.
 admin.require-login: Exigir login
@@ -175,3 +171,88 @@ admin.gists.private: Privado
 admin.gists.nb-files: Núm. de arquivos
 admin.gists.nb-likes: Núm. de curtidas
 admin.gists.delete_confirm: Quer excluir este gist?
+flash.admin.index-gists: ''
+gist.header.embed: ''
+gist.header.embed-help: ''
+gist.new.url: ''
+gist.list.all-liked-by: ''
+gist.new.preview: ''
+gist.new.create-a-new-gist: ''
+gist.edit.edit-gist: ''
+gist.list.all-forked-by: ''
+gist.list.all-from: ''
+gist.search.found: ''
+gist.search.no-results: ''
+gist.search.help.user: ''
+gist.search.help.title: ''
+gist.search.help.filename: ''
+gist.search.help.extension: ''
+gist.search.help.language: ''
+gist.forks.for: ''
+gist.likes.for: ''
+gist.revision-of: ''
+settings.link-gitlab-account: ''
+settings.unlink-gitlab-account: ''
+settings.change-username: ''
+settings.create-password: ''
+settings.create-password-help: ''
+settings.change-password: ''
+settings.change-password-help: ''
+settings.password-label-title: ''
+error.page-not-found: ''
+error.bad-request: ''
+error.signup-disabled: ''
+error.signup-disabled-form: ''
+error.login-disabled-form: ''
+error.complete-oauth-login: ''
+error.oauth-unsupported: ''
+error.cannot-bind-data: ''
+error.invalid-number: ''
+error.invalid-character-unescaped: ''
+admin.invitations: ''
+admin.invitations.create: ''
+admin.actions.sync-previews: ''
+admin.actions.reset-hooks: ''
+admin.actions.index-gists: ''
+admin.config-link-overriden: ''
+validation.invalid: ''
+admin.invitations.help: ''
+admin.invitations.max_uses: ''
+admin.invitations.expires_at: ''
+admin.invitations.code: ''
+admin.invitations.copy_link: ''
+admin.invitations.uses: ''
+admin.invitations.expired: ''
+flash.admin.user-deleted: ''
+flash.admin.gist-deleted: ''
+flash.admin.invitation-created: ''
+flash.admin.invitation-deleted: ''
+flash.admin.sync-fs: ''
+flash.admin.sync-db: ''
+flash.admin.git-gc: ''
+flash.admin.sync-previews: ''
+flash.admin.reset-hooks: ''
+flash.auth.username-exists: ''
+flash.auth.invalid-credentials: ''
+flash.auth.account-linked-oauth: ''
+flash.auth.account-unlinked-oauth: ''
+flash.auth.user-sshkeys-not-retrievable: ''
+flash.auth.user-sshkeys-not-created: ''
+flash.auth.must-be-logged-in: ''
+flash.gist.visibility-changed: ''
+flash.gist.deleted: ''
+flash.gist.fork-own-gist: ''
+flash.gist.forked: ''
+flash.user.email-updated: ''
+flash.user.invalid-ssh-key: ''
+flash.user.ssh-key-added: ''
+flash.user.ssh-key-deleted: ''
+flash.user.password-updated: ''
+flash.user.username-updated: ''
+validation.is-too-long: ''
+validation.should-not-be-empty: ''
+validation.should-not-include-sub-directory: ''
+validation.should-only-contain-alphanumeric-characters: ''
+validation.should-only-contain-alphanumeric-characters-and-dashes: ''
+validation.not-enough: ''
+html.title.admin-panel: ''

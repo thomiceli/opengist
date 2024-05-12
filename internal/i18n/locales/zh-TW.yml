@@ -177,7 +177,8 @@ admin.disable-login: 關閉登錄頁面
 admin.disable-login_help: 關閉通過登錄頁面登錄，強制使用 OAuth 提供者。
 admin.disable-gravatar: 禁用 Gravatar
 admin.disable-gravatar_help: 禁止使用 Gravatar 作為頭像提供者。
-
+admin.allow-gists-without-login:
+admin.allow-gists-without-login_help:
 admin.users.delete_confirm: 您要刪除這個使用者嗎？
 
 admin.gists.title: 標題

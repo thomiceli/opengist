@@ -442,3 +442,15 @@ func getAvatarUrlFromProvider(provider string, identifier string) string {
 	}
 	return ""
 }
+
+type ContextAuthInfo struct {
+	context echo.Context
+}
+
+func (auth ContextAuthInfo) RequireLogin() (bool, error) {
+	return getData(auth.context, "RequireLogin") == true, nil
+}
+
+func (auth ContextAuthInfo) AllowGistsWithoutLogin() (bool, error) {
+	return getData(auth.context, "AllowGistsWithoutLogin") == true, nil
+}

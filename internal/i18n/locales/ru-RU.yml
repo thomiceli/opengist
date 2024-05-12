@@ -166,7 +166,8 @@ admin.disable-login: Запретить авторизацию по паролю
 admin.disable-login_help: Запретить авторизацию с вводом пароля, форсировать внешнюю авторизацию через Gitea/GitHub.
 admin.disable-gravatar: Запретить Gravatar
 admin.disable-gravatar_help: Запретить использование Gravatar как провайдера изображений профиля.
-
+admin.allow-gists-without-login:
+admin.allow-gists-without-login_help:
 admin.users.delete_confirm: Вы уверены что хотите удалить этого пользователя?
 
 admin.gists.title: Название

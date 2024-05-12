@@ -89,3 +89,61 @@ func login(t *testing.T, s *testServer, user db.UserDTO) {
 	err := s.request("POST", "/login", user, 302)
 	require.NoError(t, err)
 }
+
+type settingSet struct {
+	key   string `form:"key"`
+	value string `form:"value"`
+}
+
+func TestAnonymous(t *testing.T) {
+	setup(t)
+	s, err := newTestServer()
+	require.NoError(t, err, "Failed to create test server")
+	defer teardown(t, s)
+
+	user := db.UserDTO{Username: "thomas", Password: "azeaze"}
+	register(t, s, user)
+
+	err = s.request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
+	require.NoError(t, err)
+
+	gist1 := db.GistDTO{
+		Title:       "gist1",
+		Description: "my first gist",
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+	}
+	err = s.request("POST", "/", gist1, 302)
+	require.NoError(t, err)
+
+	gist1db, err := db.GetGistByID("1")
+	require.NoError(t, err)
+
+	err = s.request("GET", "/all", nil, 200)
+	require.NoError(t, err)
+
+	cookie := s.sessionCookie
+	s.sessionCookie = ""
+
+	err = s.request("GET", "/all", nil, 302)
+	require.NoError(t, err)
+
+	// Should redirect to login if RequireLogin
+	err = s.request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 302)
+	require.NoError(t, err)
+
+	s.sessionCookie = cookie
+
+	err = s.request("PUT", "/admin-panel/set-config", settingSet{"allow-gists-without-login", "1"}, 200)
+	require.NoError(t, err)
+
+	s.sessionCookie = ""
+
+	// Should return results
+	err = s.request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 200)
+	require.NoError(t, err)
+
+}

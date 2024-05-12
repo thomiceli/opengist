@@ -2,14 +2,16 @@ package ssh
 
 import (
 	"errors"
+	"io"
+	"os/exec"
+	"strings"
+
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
-	"io"
-	"os/exec"
-	"strings"
 )
 
 func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
@@ -37,7 +39,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 		return errors.New("gist not found")
 	}
 
-	requireLogin, err := db.GetSetting(db.SettingRequireLogin)
+	allowUnauthenticated, err := auth.ShouldAllowUnauthenticatedGistAccess(db.DBAuthInfo{}, true)
 	if err != nil {
 		return errors.New("internal server error")
 	}
@@ -50,7 +52,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 	if verb == "receive-pack" ||
 		gist.Private == 2 ||
 		gist.ID == 0 ||
-		requireLogin == "1" {
+		!allowUnauthenticated {
 
 		pubKey, err := db.SSHKeyExistsForUser(key, gist.UserID)
 		if err != nil {

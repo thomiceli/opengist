@@ -10,10 +10,11 @@ type AdminSetting struct {
 }
 
 const (
-	SettingDisableSignup    = "disable-signup"
-	SettingRequireLogin     = "require-login"
-	SettingDisableLoginForm = "disable-login-form"
-	SettingDisableGravatar  = "disable-gravatar"
+	SettingDisableSignup          = "disable-signup"
+	SettingRequireLogin           = "require-login"
+	SettingAllowGistsWithoutLogin = "allow-gists-without-login"
+	SettingDisableLoginForm       = "disable-login-form"
+	SettingDisableGravatar        = "disable-gravatar"
 )
 
 func GetSetting(key string) (string, error) {
@@ -61,4 +62,22 @@ func initAdminSettings(settings map[string]string) error {
 	}
 
 	return nil
+}
+
+type DBAuthInfo struct{}
+
+func (auth DBAuthInfo) RequireLogin() (bool, error) {
+	s, err := GetSetting(SettingRequireLogin)
+	if err != nil {
+		return true, err
+	}
+	return s == "1", nil
+}
+
+func (auth DBAuthInfo) AllowGistsWithoutLogin() (bool, error) {
+	s, err := GetSetting(SettingAllowGistsWithoutLogin)
+	if err != nil {
+		return false, err
+	}
+	return s == "1", nil
 }

@@ -19,6 +19,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/memdb"
@@ -70,12 +71,17 @@ func gitHttp(ctx echo.Context) error {
 
 			setData(ctx, "repositoryPath", repositoryPath)
 
+			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(ContextAuthInfo{ctx}, true)
+			if err != nil {
+				panic("impossible")
+			}
+
 			// Shows basic auth if :
 			// - user wants to push the gist
 			// - user wants to clone/pull a private gist
 			// - gist is not found (obfuscation)
 			// - admin setting to require login is set to true
-			if isPull && gist.Private != db.PrivateVisibility && gist.ID != 0 && !getData(ctx, "RequireLogin").(bool) {
+			if isPull && gist.Private != db.PrivateVisibility && gist.ID != 0 && allow {
 				return route.handler(ctx)
 			}
 

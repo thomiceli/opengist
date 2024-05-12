@@ -27,6 +27,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/markbates/goth/gothic"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -309,7 +310,7 @@ func NewServer(isDev bool) *Server {
 
 		g3 := g1.Group("/:user/:gistname")
 		{
-			g3.Use(checkRequireLogin, gistInit)
+			g3.Use(makeCheckRequireLogin(true), gistInit)
 			g3.GET("", gistIndex)
 			g3.GET("/rev/:revision", gistIndex)
 			g3.GET("/revisions", revisions)
@@ -321,9 +322,9 @@ func NewServer(isDev bool) *Server {
 			g3.GET("/edit", edit, logged, writePermission)
 			g3.POST("/edit", processCreate, logged, writePermission)
 			g3.POST("/like", like, logged)
-			g3.GET("/likes", likes)
+			g3.GET("/likes", likes, checkRequireLogin)
 			g3.POST("/fork", fork, logged)
-			g3.GET("/forks", forks)
+			g3.GET("/forks", forks, checkRequireLogin)
 			g3.PUT("/checkbox", checkbox, logged, writePermission)
 		}
 	}
@@ -516,19 +517,29 @@ func logged(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func checkRequireLogin(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		if user := getUserLogged(ctx); user != nil {
+func makeCheckRequireLogin(isSingleGistAccess bool) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			if user := getUserLogged(ctx); user != nil {
+				return next(ctx)
+			}
+
+			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(ContextAuthInfo{ctx}, isSingleGistAccess)
+			if err != nil {
+				panic("impossible")
+			}
+
+			if !allow {
+				addFlash(ctx, tr(ctx, "flash.auth.must-be-logged-in"), "error")
+				return redirect(ctx, "/login")
+			}
 			return next(ctx)
 		}
-
-		require := getData(ctx, "RequireLogin")
-		if require == true {
-			addFlash(ctx, tr(ctx, "flash.auth.must-be-logged-in"), "error")
-			return redirect(ctx, "/login")
-		}
-		return next(ctx)
 	}
+}
+
+func checkRequireLogin(next echo.HandlerFunc) echo.HandlerFunc {
+	return makeCheckRequireLogin(false)(next)
 }
 
 func noRouteFound(echo.Context) error {

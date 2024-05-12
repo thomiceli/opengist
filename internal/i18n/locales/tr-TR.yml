@@ -27,55 +27,55 @@ gist.watch-full-file: Dosyanın tamamını görüntüleyin.
 gist.file-not-valid: Bu dosya geçerli bir CSV dosyası değildir.
 gist.no-content: Dosya bulunamadı
 
-gist.new.new_gist: New gist
-gist.new.title: Title
+gist.new.new_gist: Yeni gist
+gist.new.title: Başlık
 gist.new.description: Description
 gist.new.url: URL
-gist.new.filename-with-extension: Filename with extension
-gist.new.indent-mode: Indent mode
-gist.new.indent-mode-space: Space
+gist.new.filename-with-extension: Uzantılı dosya adı
+gist.new.indent-mode: Girinti modu
+gist.new.indent-mode-space: Boşluk
 gist.new.indent-mode-tab: Tab
-gist.new.indent-size: Indent size
-gist.new.wrap-mode: Wrap mode
-gist.new.wrap-mode-no: No wrap
-gist.new.wrap-mode-soft: Soft wrap
+gist.new.indent-size: Girinti boyutu
+gist.new.wrap-mode: ''
+gist.new.wrap-mode-no: ''
+gist.new.wrap-mode-soft: ''
 gist.new.add-file: Add file
-gist.new.create-public-button: Create public gist
-gist.new.create-unlisted-button: Create unlisted gist
-gist.new.create-private-button: Create private gist
-gist.new.preview: Preview
-gist.new.create-a-new-gist: Create a new gist
+gist.new.create-public-button: Herkese açık gist oluştur
+gist.new.create-unlisted-button: Liste dışı gist oluştur
+gist.new.create-private-button: Gizli gist oluştur
+gist.new.preview: Ön izle
+gist.new.create-a-new-gist: Yeni bir gist oluştur
 
-gist.edit.editing: Editing
-gist.edit.edit-gist: Edit %s
-gist.edit.change-visibility: Make
+gist.edit.editing: Düzenleme
+gist.edit.edit-gist: '%s düzenle'
+gist.edit.change-visibility: ''
 gist.edit.delete: Delete
-gist.edit.cancel: Cancel
-gist.edit.save: Save
+gist.edit.cancel: İptal Et
+gist.edit.save: Kaydet
 
-gist.list.joined: Joined
-gist.list.all: All gists
-gist.list.search-results: Search results
-gist.list.sort: Sort
-gist.list.sort-by-created: created
-gist.list.sort-by-updated: updated
-gist.list.order-by-asc: Least recently
-gist.list.order-by-desc: Recently
-gist.list.select-tab: Select a tab
-gist.list.liked: Liked
-gist.list.likes: likes
-gist.list.forked: Forked
-gist.list.forked-from: Forked from
-gist.list.forks: forks
+gist.list.joined: Katıldı
+gist.list.all: Tüm gistler
+gist.list.search-results: Arama sonuçları
+gist.list.sort: Sırala
+gist.list.sort-by-created: oluşturuldu
+gist.list.sort-by-updated: düzenlendi
+gist.list.order-by-asc: En son yakın zamanda
+gist.list.order-by-desc: Son zamanlarda
+gist.list.select-tab: Bir sekme seçin
+gist.list.liked: Beğenildi
+gist.list.likes: beğeniler
+gist.list.forked: Çatallı
+gist.list.forked-from: çatallandı
+gist.list.forks: çatallar
 gist.list.files: files
-gist.list.last-active: Last active
-gist.list.no-gists: No gists
-gist.list.all-liked-by: All gists liked by %s
-gist.list.all-forked-by: All gists forked by %s
-gist.list.all-from: All gists from %s
+gist.list.last-active: Son aktif
+gist.list.no-gists: Gistler yok
+gist.list.all-liked-by: '%s tarafından beğenilen tüm gistler'
+gist.list.all-forked-by: '%s tarafından beğenilen tüm çatallar'
+gist.list.all-from: '%s tüm gistleri'
 
-gist.search.found: gists found
-gist.search.no-results: No gists found
+gist.search.found: bulunan gistler
+gist.search.no-results: Hiç gist bulunamadı
 gist.search.help.user: gists created by user
 gist.search.help.title: gists with given title
 gist.search.help.filename: gists having files with given name

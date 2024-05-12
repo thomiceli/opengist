@@ -66,7 +66,7 @@ func initAdminSettings(settings map[string]string) error {
 
 type DBAuthInfo struct{}
 
-func (this DBAuthInfo) RequireLogin() (bool, error) {
+func (auth DBAuthInfo) RequireLogin() (bool, error) {
 	s, err := GetSetting(SettingRequireLogin)
 	if err != nil {
 		return true, err
@@ -74,7 +74,7 @@ func (this DBAuthInfo) RequireLogin() (bool, error) {
 	return s == "1", nil
 }
 
-func (this DBAuthInfo) AllowGistsWithoutLogin() (bool, error) {
+func (auth DBAuthInfo) AllowGistsWithoutLogin() (bool, error) {
 	s, err := GetSetting(SettingAllowGistsWithoutLogin)
 	if err != nil {
 		return false, err

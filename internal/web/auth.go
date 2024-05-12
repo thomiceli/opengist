@@ -447,10 +447,10 @@ type ContextAuthInfo struct {
 	context echo.Context
 }
 
-func (this ContextAuthInfo) RequireLogin() (bool, error) {
-	return getData(this.context, "RequireLogin") == true, nil
+func (auth ContextAuthInfo) RequireLogin() (bool, error) {
+	return getData(auth.context, "RequireLogin") == true, nil
 }
 
-func (this ContextAuthInfo) AllowGistsWithoutLogin() (bool, error) {
-	return getData(this.context, "AllowGistsWithoutLogin") == true, nil
+func (auth ContextAuthInfo) AllowGistsWithoutLogin() (bool, error) {
+	return getData(auth.context, "AllowGistsWithoutLogin") == true, nil
 }

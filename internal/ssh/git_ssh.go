@@ -39,8 +39,6 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 		return errors.New("gist not found")
 	}
 
-	// FIXME: this seems to not actually work for clones, the auth process
-	// fails before any metadata is acquired.
 	allowUnauthenticated, err := auth.ShouldAllowUnauthenticatedGistAccess(db.DBAuthInfo{}, true)
 	if err != nil {
 		return errors.New("internal server error")

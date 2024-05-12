@@ -173,7 +173,8 @@ admin.disable-login: Zakázat přihlášení
 admin.disable-login_help: Zakázat přihlašování pomocí formuláře pro přihlášení a vynutit používání OAuth poskytovatele.
 admin.disable-gravatar: Zakázat Gravatar
 admin.disable-gravatar_help: Zakázat použití Gravataru jako poskytovatele avatara.
-
+admin.allow-gists-without-login:
+admin.allow-gists-without-login_help:
 admin.users.delete_confirm: Opravdu chcete smazat tohoto uživatele?
 
 admin.gists.title: Titulek

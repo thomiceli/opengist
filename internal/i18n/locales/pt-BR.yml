@@ -163,7 +163,8 @@ admin.disable-login: Desabilitar formulário de login
 admin.disable-login_help: Proibir o login através do formulário de login para forçar o uso de provedores de OAuth no lugar.
 admin.disable-gravatar: Desabilitar Gravatar
 admin.disable-gravatar_help: Desabilitar o uso do Gravatar como provedor de avatar.
-
+admin.allow-gists-without-login:
+admin.allow-gists-without-login_help:
 admin.users.delete_confirm: Quer excluir este usuário?
 
 admin.gists.title: Título

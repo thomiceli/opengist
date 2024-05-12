@@ -166,7 +166,8 @@ admin.disable-login: Désactiver le formulaire de connexion
 admin.disable-login_help: Interdire la connexion via le formulaire de connexion pour forcer l'utilisation des fournisseurs OAuth à la place.
 admin.disable-gravatar: Désactiver Gravatar
 admin.disable-gravatar_help: Désactiver l'utilisation de Gravatar comme fournisseur d'avatar.
-
+admin.allow-gists-without-login:
+admin.allow-gists-without-login_help:
 admin.users.delete_confirm: Voulez-vous supprimer cet utilisateur ?
 
 admin.gists.title: Titre

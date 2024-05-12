@@ -185,7 +185,8 @@ admin.disable-login: 'Login-Maske deaktivieren'
 admin.disable-login_help: 'Login über Login-Maske verbieten und Benutzung von OAuth Providern erzwingen.'
 admin.disable-gravatar: 'Gravatar deaktivieren'
 admin.disable-gravatar_help: 'Gravatar als Avatar-Anbieter deaktivieren.'
-
+admin.allow-gists-without-login:
+admin.allow-gists-without-login_help:
 admin.users.delete_confirm: 'Willst du diesen Benutzer löschen?'
 
 admin.gists.title: 'Titel'

@@ -166,7 +166,8 @@ admin.disable-login: 禁用登录表单
 admin.disable-login_help: 禁止使用登录表单进行登录以强制通过 OAuth 提供方登录。
 admin.disable-gravatar: 禁用 Gravatar
 admin.disable-gravatar_help: 停止使用 Gravatar 作为头像提供方。
-
+admin.allow-gists-without-login:
+admin.allow-gists-without-login_help:
 admin.users.delete_confirm: 你想要删除此用户吗？
 
 admin.gists.title: 标题

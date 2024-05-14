@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
@@ -214,220 +215,108 @@ func TestGitClonePull(t *testing.T) {
 	err = s.request("POST", "/", gist3, 302)
 	require.NoError(t, err)
 
-	// clone public gist
-	// : means no credentials
-	err = clientGitClone(":", "kaguya", "kaguya-pub-gist")
-	require.NoError(t, err)
+	gitOperations := func(credentials, owner, url, filename string, expectErrorClone, expectErrorCheck, expectErrorPush bool) {
+		fmt.Println("Testing", credentials, url, expectErrorClone, expectErrorCheck, expectErrorPush)
+		err := clientGitClone(credentials, owner, url)
+		if expectErrorClone {
+			require.Error(t, err)
+		} else {
+			require.NoError(t, err)
+		}
+		err = clientCheckRepo(url, filename)
+		if expectErrorCheck {
+			require.Error(t, err)
+		} else {
+			require.NoError(t, err)
+		}
+		err = clientGitPush(url)
+		if expectErrorPush {
+			require.Error(t, err)
+		} else {
+			require.NoError(t, err)
+		}
+	}
 
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.NoError(t, err)
+	tests := []struct {
+		credentials      string
+		user             string
+		url              string
+		expectErrorClone bool
+		expectErrorCheck bool
+		expectErrorPush  bool
+	}{
+		{":", "kaguya", "kaguya-pub-gist", false, false, true},
+		{":", "kaguya", "kaguya-unl-gist", false, false, true},
+		{":", "kaguya", "kaguya-priv-gist", true, true, true},
+		{"kaguya:kaguya", "kaguya", "kaguya-pub-gist", false, false, false},
+		{"kaguya:kaguya", "kaguya", "kaguya-unl-gist", false, false, false},
+		{"kaguya:kaguya", "kaguya", "kaguya-priv-gist", false, false, false},
+		{"fujiwara:fujiwara", "kaguya", "kaguya-pub-gist", false, false, true},
+		{"fujiwara:fujiwara", "kaguya", "kaguya-unl-gist", false, false, true},
+		{"fujiwara:fujiwara", "kaguya", "kaguya-priv-gist", true, true, true},
+	}
 
-	// clone unlisted gist
-	err = clientGitClone(":", "kaguya", "kaguya-unl-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone private gist
-	err = clientGitClone(":", "kaguya", "kaguya-priv-gist")
-	require.Error(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.Error(t, err)
-
-	// clone public gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-pub-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone unlisted gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-unl-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone private gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-priv-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone public gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-pub-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone unlisted gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-unl-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone private gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-priv-gist")
-	require.Error(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.Error(t, err)
+	for _, test := range tests {
+		gitOperations(test.credentials, test.user, test.url, "kaguya-file.txt", test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
+	}
 
 	login(t, s, admin)
 	err = s.request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
 	require.NoError(t, err)
 
-	// clone public gist
-	// : means no credentials
-	err = clientGitClone(":", "kaguya", "kaguya-pub-gist")
-	require.Error(t, err)
+	testsRequireLogin := []struct {
+		credentials      string
+		user             string
+		url              string
+		expectErrorClone bool
+		expectErrorCheck bool
+		expectErrorPush  bool
+	}{
+		{":", "kaguya", "kaguya-pub-gist", true, true, true},
+		{":", "kaguya", "kaguya-unl-gist", true, true, true},
+		{":", "kaguya", "kaguya-priv-gist", true, true, true},
+		{"kaguya:kaguya", "kaguya", "kaguya-pub-gist", false, false, false},
+		{"kaguya:kaguya", "kaguya", "kaguya-unl-gist", false, false, false},
+		{"kaguya:kaguya", "kaguya", "kaguya-priv-gist", false, false, false},
+		{"fujiwara:fujiwara", "kaguya", "kaguya-pub-gist", false, false, true},
+		{"fujiwara:fujiwara", "kaguya", "kaguya-unl-gist", false, false, true},
+		{"fujiwara:fujiwara", "kaguya", "kaguya-priv-gist", true, true, true},
+	}
 
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.Error(t, err)
-
-	// clone unlisted gist
-	err = clientGitClone(":", "kaguya", "kaguya-unl-gist")
-	require.Error(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.Error(t, err)
-
-	// clone private gist
-	err = clientGitClone(":", "kaguya", "kaguya-priv-gist")
-	require.Error(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.Error(t, err)
-
-	// clone public gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-pub-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone unlisted gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-unl-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone private gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-priv-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone public gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-pub-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone unlisted gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-unl-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone private gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-priv-gist")
-	require.Error(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.Error(t, err)
+	for _, test := range testsRequireLogin {
+		gitOperations(test.credentials, test.user, test.url, "kaguya-file.txt", test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
+	}
 
 	login(t, s, admin)
 	err = s.request("PUT", "/admin-panel/set-config", settingSet{"allow-gists-without-login", "1"}, 200)
 	require.NoError(t, err)
 
-	// clone public gist
-	// : means no credentials
-	err = clientGitClone(":", "kaguya", "kaguya-pub-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone unlisted gist
-	err = clientGitClone(":", "kaguya", "kaguya-unl-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone private gist
-	err = clientGitClone(":", "kaguya", "kaguya-priv-gist")
-	require.Error(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.Error(t, err)
-
-	// clone public gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-pub-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone unlisted gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-unl-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone private gist
-	err = clientGitClone("kaguya:kaguya", "kaguya", "kaguya-priv-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone public gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-pub-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-pub-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone unlisted gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-unl-gist")
-	require.NoError(t, err)
-
-	err = clientCheckRepo("kaguya-unl-gist", "kaguya-file.txt")
-	require.NoError(t, err)
-
-	// clone private gist
-	err = clientGitClone("fujiwara:fujiwara", "kaguya", "kaguya-priv-gist")
-	require.Error(t, err)
-
-	err = clientCheckRepo("kaguya-priv-gist", "kaguya-file.txt")
-	require.Error(t, err)
+	for _, test := range tests {
+		gitOperations(test.credentials, test.user, test.url, "kaguya-file.txt", test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
+	}
 }
 
 func clientGitClone(creds string, user string, url string) error {
-	cmd := exec.Command("git", "clone", "http://"+creds+"@localhost:6157/"+user+"/"+url, path.Join(config.GetHomeDir(), "tmp", url))
-	err := cmd.Run()
+	return exec.Command("git", "clone", "http://"+creds+"@localhost:6157/"+user+"/"+url, path.Join(config.GetHomeDir(), "tmp", url)).Run()
+}
+
+func clientGitPush(url string) error {
+	f, err := os.Create(path.Join(config.GetHomeDir(), "tmp", url, "newfile.txt"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_ = exec.Command("git", "-C", path.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt").Run()
+	_ = exec.Command("git", "-C", path.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file").Run()
+	err = exec.Command("git", "-C", path.Join(config.GetHomeDir(), "tmp", url), "push", "origin", "master").Run()
+
+	_ = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", url))
 
 	return err
 }
 
 func clientCheckRepo(url string, file string) error {
 	_, err := os.ReadFile(path.Join(config.GetHomeDir(), "tmp", url, file))
-	if err != nil {
-		return err
-	}
-
-	_ = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", url))
-	return nil
+	return err
 }

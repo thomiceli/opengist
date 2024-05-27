@@ -107,7 +107,7 @@ func gitHttp(ctx echo.Context) error {
 
 				var userToCheckPermissions *db.User
 				if gist.Private != db.PrivateVisibility && isPull {
-					userToCheckPermissions, err = db.GetUserByUsername(authUsername)
+					userToCheckPermissions, _ = db.GetUserByUsername(authUsername)
 				} else {
 					userToCheckPermissions = &gist.User
 				}

@@ -56,7 +56,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 
 		var userToCheckPermissions *db.User
 		if gist.Private != db.PrivateVisibility && verb == "upload-pack" {
-			userToCheckPermissions, err = db.GetUserFromSSHKey(key)
+			userToCheckPermissions, _ = db.GetUserFromSSHKey(key)
 		} else {
 			userToCheckPermissions = &gist.User
 		}

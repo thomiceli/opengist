@@ -31,7 +31,7 @@ type testServer struct {
 
 func newTestServer() (*testServer, error) {
 	s := &testServer{
-		server: web.NewServer(true),
+		server: web.NewServer(true, path.Join(config.GetHomeDir(), "tmp", "sessions")),
 	}
 
 	go s.start()

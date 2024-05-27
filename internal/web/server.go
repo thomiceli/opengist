@@ -161,12 +161,12 @@ type Server struct {
 	dev  bool
 }
 
-func NewServer(isDev bool) *Server {
+func NewServer(isDev bool, sessionsPath string) *Server {
 	dev = isDev
 	flashStore = sessions.NewCookieStore([]byte("opengist"))
 	userStore = sessions.NewFilesystemStore(path.Join(config.GetHomeDir(), "sessions"),
-		utils.ReadKey(path.Join(config.GetHomeDir(), "sessions", "session-auth.key")),
-		utils.ReadKey(path.Join(config.GetHomeDir(), "sessions", "session-encrypt.key")),
+		utils.ReadKey(path.Join(sessionsPath, "session-auth.key")),
+		utils.ReadKey(path.Join(sessionsPath, "session-encrypt.key")),
 	)
 	userStore.MaxLength(10 * 1024)
 	gothic.Store = userStore

@@ -30,7 +30,7 @@ var CmdStart = cli.Command{
 	Usage: "Start Opengist server",
 	Action: func(ctx *cli.Context) error {
 		Initialize(ctx)
-		go web.NewServer(os.Getenv("OG_DEV") == "1").Start()
+		go web.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions")).Start()
 		go ssh.Start()
 		select {}
 	},

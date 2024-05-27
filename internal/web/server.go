@@ -161,12 +161,12 @@ type Server struct {
 	dev  bool
 }
 
-func NewServer(isDev bool) *Server {
+func NewServer(isDev bool, sessionsPath string) *Server {
 	dev = isDev
 	flashStore = sessions.NewCookieStore([]byte("opengist"))
-	userStore = sessions.NewFilesystemStore(path.Join(config.GetHomeDir(), "sessions"),
-		utils.ReadKey(path.Join(config.GetHomeDir(), "sessions", "session-auth.key")),
-		utils.ReadKey(path.Join(config.GetHomeDir(), "sessions", "session-encrypt.key")),
+	userStore = sessions.NewFilesystemStore(sessionsPath,
+		utils.ReadKey(path.Join(sessionsPath, "session-auth.key")),
+		utils.ReadKey(path.Join(sessionsPath, "session-encrypt.key")),
 	)
 	userStore.MaxLength(10 * 1024)
 	gothic.Store = userStore
@@ -526,7 +526,7 @@ func makeCheckRequireLogin(isSingleGistAccess bool) echo.MiddlewareFunc {
 
 			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(ContextAuthInfo{ctx}, isSingleGistAccess)
 			if err != nil {
-				panic("impossible")
+				log.Fatal().Err(err).Msg("Failed to check if unauthenticated access is allowed")
 			}
 
 			if !allow {

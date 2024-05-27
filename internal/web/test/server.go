@@ -31,7 +31,7 @@ type testServer struct {
 
 func newTestServer() (*testServer, error) {
 	s := &testServer{
-		server: web.NewServer(true),
+		server: web.NewServer(true, path.Join(config.GetHomeDir(), "tmp", "sessions")),
 	}
 
 	go s.start()
@@ -149,7 +149,7 @@ func setup(t *testing.T) {
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
 
-	err = os.MkdirAll(filepath.Join(homePath, "sessions"), 0755)
+	err = os.MkdirAll(filepath.Join(homePath, "tmp", "sessions"), 0755)
 	require.NoError(t, err, "Could not create sessions directory")
 
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
@@ -175,6 +175,9 @@ func teardown(t *testing.T, s *testServer) {
 	require.NoError(t, err, "Could not remove repos directory")
 
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
+	require.NoError(t, err, "Could not remove repos directory")
+
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "sessions"))
 	require.NoError(t, err, "Could not remove repos directory")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))

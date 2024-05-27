@@ -74,7 +74,7 @@ func Run(actionType int) {
 	case IndexGists:
 		functionToRun = indexGists
 	default:
-		panic("unhandled default case")
+		log.Error().Msg("Unknown action type")
 	}
 
 	functionToRun()

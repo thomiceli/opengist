@@ -50,11 +50,18 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 	// - gist is not found (obfuscation)
 	// - admin setting to require login is set to true
 	if verb == "receive-pack" ||
-		gist.Private == 2 ||
+		gist.Private == db.PrivateVisibility ||
 		gist.ID == 0 ||
 		!allowUnauthenticated {
 
-		pubKey, err := db.SSHKeyExistsForUser(key, gist.UserID)
+		var userToCheckPermissions *db.User
+		if gist.Private != db.PrivateVisibility && verb == "upload-pack" {
+			userToCheckPermissions, _ = db.GetUserFromSSHKey(key)
+		} else {
+			userToCheckPermissions = &gist.User
+		}
+
+		pubKey, err := db.SSHKeyExistsForUser(key, userToCheckPermissions.ID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				log.Warn().Msg("Invalid SSH authentication attempt from " + ip)

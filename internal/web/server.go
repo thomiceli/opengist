@@ -164,7 +164,7 @@ type Server struct {
 func NewServer(isDev bool, sessionsPath string) *Server {
 	dev = isDev
 	flashStore = sessions.NewCookieStore([]byte("opengist"))
-	userStore = sessions.NewFilesystemStore(path.Join(config.GetHomeDir(), "sessions"),
+	userStore = sessions.NewFilesystemStore(sessionsPath,
 		utils.ReadKey(path.Join(sessionsPath, "session-auth.key")),
 		utils.ReadKey(path.Join(sessionsPath, "session-encrypt.key")),
 	)

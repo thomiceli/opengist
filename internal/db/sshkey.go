@@ -48,13 +48,12 @@ func GetSSHKeyByID(sshKeyId uint) (*SSHKey, error) {
 	return sshKey, err
 }
 
-func SSHKeyDoesExists(sshKeyContent string) (*SSHKey, error) {
-	sshKey := new(SSHKey)
-	err := db.
-		Where("content like ?", sshKeyContent+"%").
-		First(&sshKey).Error
-
-	return sshKey, err
+func SSHKeyDoesExists(sshKeyContent string) (bool, error) {
+	var count int64
+	err := db.Model(&SSHKey{}).
+		Where("content = ?", sshKeyContent).
+		Count(&count).Error
+	return count > 0, err
 }
 
 func (sshKey *SSHKey) Create() error {

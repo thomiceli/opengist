@@ -89,6 +89,14 @@ func sshKeysProcess(ctx echo.Context) error {
 	}
 	key.Content = strings.TrimSpace(string(ssh.MarshalAuthorizedKey(pubKey)))
 
+	if exists, err := db.SSHKeyDoesExists(key.Content); exists {
+		if err != nil {
+			return errorRes(500, "Cannot check if SSH key exists", err)
+		}
+		addFlash(ctx, tr(ctx, "settings.ssh-key-exists"), "error")
+		return redirect(ctx, "/settings")
+	}
+
 	if err := key.Create(); err != nil {
 		return errorRes(500, "Cannot add SSH key", err)
 	}

@@ -153,7 +153,7 @@ func TestAnonymous(t *testing.T) {
 
 }
 
-func TestGitClonePull(t *testing.T) {
+func TestGitOperations(t *testing.T) {
 	setup(t)
 	s, err := newTestServer()
 	require.NoError(t, err, "Failed to create test server")
@@ -161,11 +161,7 @@ func TestGitClonePull(t *testing.T) {
 
 	admin := db.UserDTO{Username: "thomas", Password: "thomas"}
 	register(t, s, admin)
-
-	// err = s.request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
-	// require.NoError(t, err)
 	s.sessionCookie = ""
-
 	register(t, s, db.UserDTO{Username: "fujiwara", Password: "fujiwara"})
 	s.sessionCookie = ""
 	register(t, s, db.UserDTO{Username: "kaguya", Password: "kaguya"})

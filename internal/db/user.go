@@ -118,6 +118,15 @@ func GetUsersFromEmails(emailsSet map[string]struct{}) (map[string]*User, error)
 	return userMap, nil
 }
 
+func GetUserFromSSHKey(sshKey string) (*User, error) {
+	user := new(User)
+	err := db.
+		Joins("JOIN ssh_keys ON users.id = ssh_keys.user_id").
+		Where("ssh_keys.content = ?", sshKey).
+		First(&user).Error
+	return user, err
+}
+
 func SSHKeyExistsForUser(sshKey string, userId uint) (*SSHKey, error) {
 	key := new(SSHKey)
 	err := db.

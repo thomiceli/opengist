@@ -526,7 +526,7 @@ func makeCheckRequireLogin(isSingleGistAccess bool) echo.MiddlewareFunc {
 
 			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(ContextAuthInfo{ctx}, isSingleGistAccess)
 			if err != nil {
-				panic("impossible")
+				log.Fatal().Err(err).Msg("Failed to check if unauthenticated access is allowed")
 			}
 
 			if !allow {

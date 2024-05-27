@@ -73,7 +73,7 @@ func gitHttp(ctx echo.Context) error {
 
 			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(ContextAuthInfo{ctx}, true)
 			if err != nil {
-				panic("impossible")
+				log.Fatal().Err(err).Msg("Cannot check if unauthenticated access is allowed")
 			}
 
 			// Shows basic auth if :
@@ -105,7 +105,14 @@ func gitHttp(ctx echo.Context) error {
 					return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
 				}
 
-				if ok, err := utils.Argon2id.Verify(authPassword, gist.User.Password); !ok || gist.User.Username != authUsername {
+				var userToCheckPermissions *db.User
+				if gist.Private != db.PrivateVisibility && isPull {
+					userToCheckPermissions, err = db.GetUserByUsername(authUsername)
+				} else {
+					userToCheckPermissions = &gist.User
+				}
+
+				if ok, err := utils.Argon2id.Verify(authPassword, userToCheckPermissions.Password); !ok {
 					if err != nil {
 						return errorRes(500, "Cannot verify password", err)
 					}

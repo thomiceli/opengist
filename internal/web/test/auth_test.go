@@ -301,7 +301,7 @@ func clientGitPush(url string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	f.Close()
 
 	_ = exec.Command("git", "-C", path.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt").Run()
 	_ = exec.Command("git", "-C", path.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file").Run()

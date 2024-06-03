@@ -843,7 +843,7 @@ func forks(ctx echo.Context) error {
 		return errorRes(404, tr(ctx, "error.page-not-found"), nil)
 	}
 
-	setData(ctx, "htmlTitle", trH(ctx, "gist.forks.for: Forks for %s", gist.Title))
+	setData(ctx, "htmlTitle", trH(ctx, "gist.forks.for", gist.Title))
 	setData(ctx, "revision", "HEAD")
 	return html(ctx, "forks.html")
 }

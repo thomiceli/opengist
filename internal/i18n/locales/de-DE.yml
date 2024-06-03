@@ -214,7 +214,7 @@ admin.disable-gravatar_help: 'Gravatar als Avatar-Anbieter deaktivieren.'
 admin.users.delete_confirm: 'Willst du diesen Benutzer löschen?'
 
 admin.gists.title: 'Titel'
-admin.gists.private: 'privat?'
+admin.gists.private: 'Privat?'
 admin.gists.nb-files: 'Anz. Dateien'
 admin.gists.nb-likes: 'Anz. Favoriten'
 admin.gists.delete_confirm: 'Willst du diese Gist löschen?'

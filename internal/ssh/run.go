@@ -25,8 +25,8 @@ func Start() {
 		PublicKeyCallback: func(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
 			strKey := strings.TrimSpace(string(ssh.MarshalAuthorizedKey(key)))
 			exists, err := db.SSHKeyDoesExists(strKey)
-			if !exists {
-				if !errors.Is(err, gorm.ErrRecordNotFound) {
+			if !exists || err != nil {
+				if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 					return nil, err
 				}
 

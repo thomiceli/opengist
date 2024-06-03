@@ -38,7 +38,7 @@ build_dev_docker:
 	docker build -t $(BINARY_NAME)-dev:latest --target dev .
 
 run_dev_docker:
-	docker run -v .:/opengist -p 6157:6157 -p 16157:16157 -v $(HOME)/.opengist-dev:/root/.opengist --rm $(BINARY_NAME)-dev:latest
+	docker run -v .:/opengist -p 6157:6157 -p 16157:16157 -p 2222:2222 -v $(HOME)/.opengist-dev:/root/.opengist --rm $(BINARY_NAME)-dev:latest
 
 watch_frontend:
 	@echo "Building frontend assets..."

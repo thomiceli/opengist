@@ -1,5 +1,13 @@
 # Configuration Cheat Sheet
 
+> [!Important]
+> The following options can be changes only using the [admin panel](admin-panel.md)
+>
+> - Disable signup
+> - Require login
+> - Disable login form
+> - Disable Gravatar
+
 | YAML Config Key       | Environment Variable                | Default value         | Description                                                                                                                                                                                                                      |
 |-----------------------|-------------------------------------|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | log-level             | OG_LOG_LEVEL                        | `warn`                | Set the log level to one of the following: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`.                                                                                                                          |

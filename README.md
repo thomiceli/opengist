@@ -59,6 +59,11 @@ services:
       - "2222:2222" # SSH port, can be removed if you don't use SSH
     volumes:
       - "$HOME/.opengist:/opengist"
+    healthcheck:
+      test:  curl -sS http://localhost:6157/healthcheck | grep '"database":"ok"' | grep '"opengist":"ok"' || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
 ```
 
 You can define which user/group should run the container and own the files by setting the `UID` and `GID` environment variables :

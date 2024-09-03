@@ -29,6 +29,7 @@ func userSettings(ctx echo.Context) error {
 	setData(ctx, "email", user.Email)
 	setData(ctx, "sshKeys", keys)
 	setData(ctx, "hasPassword", user.Password != "")
+	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	setData(ctx, "htmlTitle", trH(ctx, "settings"))
 	return html(ctx, "settings.html")
 }

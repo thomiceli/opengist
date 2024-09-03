@@ -34,8 +34,6 @@ const (
 	OpenIDConnect  = "openid-connect"
 )
 
-var title = cases.Title(language.English)
-
 func register(ctx echo.Context) error {
 	disableSignup := getData(ctx, "DisableSignup")
 	disableForm := getData(ctx, "DisableLoginForm")
@@ -188,10 +186,10 @@ func oauthCallback(ctx echo.Context) error {
 		updateUserProviderInfo(currUser, user.Provider, user)
 
 		if err = currUser.Update(); err != nil {
-			return errorRes(500, "Cannot update user "+title.String(user.Provider)+" id", err)
+			return errorRes(500, "Cannot update user "+cases.Title(language.English).String(user.Provider)+" id", err)
 		}
 
-		addFlash(ctx, tr(ctx, "flash.auth.account-linked-oauth", title.String(user.Provider)), "success")
+		addFlash(ctx, tr(ctx, "flash.auth.account-linked-oauth", cases.Title(language.English).String(user.Provider)), "success")
 		return redirect(ctx, "/settings")
 	}
 
@@ -358,10 +356,10 @@ func oauth(ctx echo.Context) error {
 		// Means that the user wants to unlink the account
 		if checkFunc, exists := providerIDCheckMap[provider]; exists && checkFunc() {
 			if err := currUser.DeleteProviderID(provider); err != nil {
-				return errorRes(500, "Cannot unlink account from "+title.String(provider), err)
+				return errorRes(500, "Cannot unlink account from "+cases.Title(language.English).String(provider), err)
 			}
 
-			addFlash(ctx, tr(ctx, "flash.auth.account-unlinked-oauth", title.String(provider)), "success")
+			addFlash(ctx, tr(ctx, "flash.auth.account-unlinked-oauth", cases.Title(language.English).String(provider)), "success")
 			return redirect(ctx, "/settings")
 		}
 	}

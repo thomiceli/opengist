@@ -98,19 +98,17 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 		indexerQuery = contentQuery
 	}
 
-	if len(gistsIds) > 0 {
-		repoQueries := make([]query.Query, 0, len(gistsIds))
+	repoQueries := make([]query.Query, 0, len(gistsIds))
 
-		truee := true
-		for _, id := range gistsIds {
-			f := float64(id)
-			qq := bleve.NewNumericRangeInclusiveQuery(&f, &f, &truee, &truee)
-			qq.SetField("GistID")
-			repoQueries = append(repoQueries, qq)
-		}
-
-		indexerQuery = bleve.NewConjunctionQuery(bleve.NewDisjunctionQuery(repoQueries...), indexerQuery)
+	truee := true
+	for _, id := range gistsIds {
+		f := float64(id)
+		qq := bleve.NewNumericRangeInclusiveQuery(&f, &f, &truee, &truee)
+		qq.SetField("GistID")
+		repoQueries = append(repoQueries, qq)
 	}
+
+	indexerQuery = bleve.NewConjunctionQuery(bleve.NewDisjunctionQuery(repoQueries...), indexerQuery)
 
 	addQuery := func(field, value string) {
 		if value != "" && value != "." {

@@ -111,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
             deleteBtns.onclick = () => {
                 editorsjs.splice(editorsjs.indexOf(editor), 1);
                 dom.remove();
+                checkForFirstDeleteButton();
             };
         }
 
@@ -191,6 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
         editorsjs.push(currEditor);
     });
 
+    checkForFirstDeleteButton();
+
     document.getElementById("add-file")!.onclick = () => {
         let newEditorDom = firstEditordom.cloneNode(true) as HTMLElement;
 
@@ -204,6 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // creating the new codemirror editor and append it in the editor div
         editorsjs.push(newEditor(newEditorDom));
         editorsParentdom.append(newEditorDom);
+        showDeleteButton(newEditorDom);
     };
 
     document.querySelector<HTMLFormElement>("form#create")!.onsubmit = () => {
@@ -224,6 +228,27 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.innerText = btn.innerText.replace('▲', '▼');
         }
 
+    }
+
+    function checkForFirstDeleteButton() {
+        let deleteBtn = editorsParentdom.querySelector<HTMLButtonElement>("button.delete-file")!;
+        if (editorsjs.length === 1) {
+            deleteBtn.classList.add("hidden");
+            deleteBtn.previousElementSibling.classList.remove("rounded-l-md");
+            deleteBtn.previousElementSibling.classList.add("rounded-md");
+        } else {
+            deleteBtn.classList.remove("hidden");
+            deleteBtn.previousElementSibling.classList.add("rounded-l-md");
+            deleteBtn.previousElementSibling.classList.remove("rounded-md");
+        }
+    }
+
+    function showDeleteButton(editorDom: HTMLElement) {
+        let deleteBtn = editorDom.querySelector<HTMLButtonElement>("button.delete-file")!;
+        deleteBtn.classList.remove("hidden");
+        deleteBtn.previousElementSibling.classList.add("rounded-l-md");
+        deleteBtn.previousElementSibling.classList.remove("rounded-md");
+        checkForFirstDeleteButton();
     }
 
     document.onsubmit = () => {

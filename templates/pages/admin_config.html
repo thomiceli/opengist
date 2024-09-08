@@ -54,19 +54,19 @@
                     <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">OAuth</span>
                 </div>
             </div>
-            <dt>Github Client key</dt><dd>{{ .c.GithubClientKey }}</dd>
-            <dt>Github Secret</dt><dd>{{ .c.GithubSecret }}</dd>
-            <dt>GitLab client Key</dt><dd>{{ .c.GitlabClientKey }}</dd>
-            <dt>GitLab Secret</dt><dd>{{ .c.GitlabSecret }}</dd>
+            <dt>Github Client key</dt><dd>{{ if .c.GithubClientKey }}&#60;defined&#62;{{ end }}</dd>
+            <dt>Github Secret</dt><dd>{{ if .c.GithubSecret }}&#60;defined&#62;{{ end }}</dd>
+            <dt>GitLab client Key</dt><dd>{{ if .c.GitlabClientKey }}&#60;defined&#62;{{ end }}</dd>
+            <dt>GitLab Secret</dt><dd>{{ if .c.GitlabSecret }}&#60;defined&#62;{{ end }}</dd>
             <dt>GitLab URL</dt><dd>{{ .c.GitlabUrl }}</dd>
             <dt>GitLab Name</dt><dd>{{ .c.GitlabName }}</dd>
-            <dt>Gitea client Key</dt><dd>{{ .c.GiteaClientKey }}</dd>
-            <dt>Gitea Secret</dt><dd>{{ .c.GiteaSecret }}</dd>
+            <dt>Gitea client Key</dt><dd>{{ if .c.GiteaClientKey }}&#60;defined&#62;{{ end }}</dd>
+            <dt>Gitea Secret</dt><dd>{{ if .c.GiteaSecret }}&#60;defined&#62;{{ end }}</dd>
             <dt>Gitea URL</dt><dd>{{ .c.GiteaUrl }}</dd>
             <dt>Gitea Name</dt><dd>{{ .c.GiteaName }}</dd>
-            <dt>OIDC client Key</dt><dd>{{ .c.OIDCClientKey }}</dd>
-            <dt>OIDC Secret</dt><dd>{{ .c.OIDCSecret }}</dd>
-            <dt>OIDC Discovery URL</dt><dd>{{ .c.OIDCDiscoveryUrl }}</dd>
+            <dt>OIDC client Key</dt><dd>{{ if .c.OIDCClientKey }}&#60;defined&#62;{{ end }}</dd>
+            <dt>OIDC Secret</dt><dd>{{ if .c.OIDCSecret }}&#60;defined&#62;{{ end }}</dd>
+            <dt>OIDC Discovery URL</dt><dd>{{ if .c.OIDCDiscoveryUrl }}&#60;defined&#62;{{ end }}</dd>
         </dl>
     </div>
     <div>

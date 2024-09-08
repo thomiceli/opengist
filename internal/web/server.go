@@ -332,6 +332,9 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
 	e.GET("/assets/*", func(ctx echo.Context) error {
 		if _, err := public.Files.Open(path.Join("assets", ctx.Param("*"))); !dev && err == nil {
+			ctx.Response().Header().Set("Cache-Control", "public, max-age=31536000")
+			ctx.Response().Header().Set("Expires", time.Now().AddDate(1, 0, 0).Format(http.TimeFormat))
+
 			return echo.WrapHandler(http.FileServer(http.FS(public.Files)))(ctx)
 		}
 

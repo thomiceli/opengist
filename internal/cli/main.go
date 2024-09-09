@@ -12,8 +12,10 @@ import (
 	"github.com/thomiceli/opengist/internal/web"
 	"github.com/urfave/cli/v2"
 	"os"
+	"os/signal"
 	"path"
 	"path/filepath"
+	"syscall"
 )
 
 var CmdVersion = cli.Command{
@@ -29,10 +31,17 @@ var CmdStart = cli.Command{
 	Name:  "start",
 	Usage: "Start Opengist server",
 	Action: func(ctx *cli.Context) error {
+		stopCtx, stop := signal.NotifyContext(ctx.Context, syscall.SIGINT, syscall.SIGTERM)
+		defer stop()
+
 		Initialize(ctx)
+
 		go web.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions")).Start()
 		go ssh.Start()
-		select {}
+
+		<-stopCtx.Done()
+		shutdown()
+		return nil
 	},
 }
 
@@ -110,10 +119,22 @@ func Initialize(ctx *cli.Context) {
 
 	if config.C.IndexEnabled {
 		log.Info().Msg("Index directory: " + filepath.Join(homePath, config.C.IndexDirname))
-		if err := index.Open(filepath.Join(homePath, config.C.IndexDirname)); err != nil {
-			log.Fatal().Err(err).Msg("Failed to open index")
-		}
+		index.Init(filepath.Join(homePath, config.C.IndexDirname))
 	}
+}
+
+func shutdown() {
+	log.Info().Msg("Shutting down database...")
+	if err := db.Close(); err != nil {
+		log.Error().Err(err).Msg("Failed to close database")
+	}
+
+	if config.C.IndexEnabled {
+		log.Info().Msg("Shutting down index...")
+		index.Close()
+	}
+
+	log.Info().Msg("Shutdown complete")
 }
 
 func createSymlink(homePath string, configPath string) error {

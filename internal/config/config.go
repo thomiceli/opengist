@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -153,6 +154,21 @@ func InitLog() {
 	logOutputTypes := utils.RemoveDuplicates[string](
 		strings.Split(strings.ToLower(C.LogOutput), ","),
 	)
+
+	consoleWriter := zerolog.NewConsoleWriter(
+		func(w *zerolog.ConsoleWriter) {
+			w.TimeFormat = time.TimeOnly
+			w.FormatCaller = func(i interface{}) string {
+				file := i.(string)
+				index := strings.Index(file, "internal")
+				if index == -1 {
+					return file
+				}
+				return file[index:]
+			}
+		},
+	)
+
 	for _, logOutputType := range logOutputTypes {
 		logOutputType = strings.TrimSpace(logOutputType)
 		if !slices.Contains([]string{"stdout", "file"}, logOutputType) {
@@ -162,7 +178,7 @@ func InitLog() {
 
 		switch logOutputType {
 		case "stdout":
-			logWriters = append(logWriters, zerolog.NewConsoleWriter())
+			logWriters = append(logWriters, consoleWriter)
 			defer func() { log.Debug().Msg("Logging to stdout") }()
 		case "file":
 			file, err := os.OpenFile(filepath.Join(GetHomeDir(), "log", "opengist.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -174,14 +190,14 @@ func InitLog() {
 		}
 	}
 	if len(logWriters) == 0 {
-		logWriters = append(logWriters, zerolog.NewConsoleWriter())
+		logWriters = append(logWriters, consoleWriter)
 		defer func() { log.Warn().Msg("No valid log outputs, defaulting to stdout") }()
 	}
 
 	multi := zerolog.MultiLevelWriter(logWriters...)
-	log.Logger = zerolog.New(multi).Level(level).With().Timestamp().Logger()
+	log.Logger = zerolog.New(multi).Level(level).With().Caller().Timestamp().Logger()
 
-	if !slices.Contains([]string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}, strings.ToLower(C.LogLevel)) {
+	if !slices.Contains([]string{"debug", "info", "warn", "error", "fatal"}, strings.ToLower(C.LogLevel)) {
 		log.Warn().Msg("Invalid log level: " + C.LogLevel)
 	}
 }

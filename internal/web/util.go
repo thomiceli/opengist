@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
@@ -58,6 +59,11 @@ func notFound(message string) error {
 }
 
 func errorRes(code int, message string, err error) error {
+	if code >= 500 {
+		var skipLogger = log.With().CallerWithSkipFrameCount(3).Logger()
+		skipLogger.Error().Err(err).Msg(message)
+	}
+
 	return &echo.HTTPError{Code: code, Message: message, Internal: err}
 }
 

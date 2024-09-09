@@ -17,8 +17,8 @@ gist.header.clone-http: Клонировать с помощью %s
 gist.header.clone-http-help: Клонировать с помощью Git используя аутентификацию HTTP.
 gist.header.clone-ssh: Клонировать c помощью SSH
 gist.header.clone-ssh-help: Клонировать c помощью Git используя ключ SSH.
-gist.header.embed: ''
-gist.header.embed-help: ''
+gist.header.embed: 'Встроить'
+gist.header.embed-help: 'Встроить этот фрагмент в ваш веб-сайт.'
 gist.header.download-zip: Скачать ZIP-архив
 
 gist.raw: Исходник
@@ -175,16 +175,16 @@ admin.gists.private: Приватный
 admin.gists.nb-files: Файлов
 admin.gists.nb-likes: Понравилось
 admin.gists.delete_confirm: Вы уверены что хотите удалить этот фрагмент?
-gist.new.url: ''
-gist.new.preview: ''
-gist.new.create-a-new-gist: ''
-gist.edit.edit-gist: ''
-gist.list.all-liked-by: ''
-gist.list.all-forked-by: ''
-gist.list.all-from: ''
-gist.search.found: ''
-gist.search.no-results: ''
-gist.search.help.user: ''
+gist.new.url: 'URL'
+gist.new.preview: 'Предпросмотр'
+gist.new.create-a-new-gist: 'Создать новый фрагмент'
+gist.edit.edit-gist: 'Редактировать %s'
+gist.list.all-liked-by: 'Все фрагменты, понравившиеся %s'
+gist.list.all-forked-by: 'Все фрагменты, ответвлённые %s'
+gist.list.all-from: 'Все фрагменты от %s'
+gist.search.found: 'фрагментов найдено'
+gist.search.no-results: 'Не найден ни один фрагмент'
+gist.search.help.user: 'фрагментов создано пользователем'
 gist.search.help.title: ''
 gist.search.help.filename: ''
 gist.search.help.extension: ''

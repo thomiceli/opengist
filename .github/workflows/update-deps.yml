@@ -1,0 +1,35 @@
+name: Update Dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Update Go dependencies
+        run: |
+          go get -u ./...
+          go mod tidy
+
+      - name: Update Node.js dependencies
+        run: |
+          npm update
+          npm install -g npm-check-updates
+          ncu -u
+          npm install
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: Update dependencies
+          title: Update Go and Node.js dependencies
+          body: This is an automated PR to update Go and Node.js dependencies to their latest versions.
+          branch: update-dependencies

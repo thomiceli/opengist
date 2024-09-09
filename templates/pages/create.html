@@ -1,4 +1,5 @@
 {{ template "header" .}}
+{{ template "secret" .}}
 <div class="py-10">
     <header>
 
@@ -8,6 +9,7 @@
 
     </header>
     <main class="mt-4">
+        
         <form id="create" class="space-y-4" method="post" action="{{ $.c.ExternalUrl }}/">
             <div>
                 <p class="cursor-pointer select-none" id="gist-metadata-btn">Metadata ▼</p>

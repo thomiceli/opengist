@@ -1,4 +1,5 @@
 {{ template "header" .}}
+{{ template "secret" .}}
 <div class="py-10">
     <header>
         <div class="flex flex-col lg:flex-row">
@@ -7,6 +8,7 @@
                     {{ .locale.Tr "gist.edit.editing" }} {{ .gist.Title }}
                 </h1>
             </div>
+           
             <div class="lg:flex-row flex py-2 lg:py-0 lg:ml-auto">
                 <form id="visibility" class="flex items-center whitespace-nowrap" method="post" action="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/visibility">
                     {{ .csrfHtml }}

@@ -189,8 +189,8 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 	e.Pre(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI: true, LogStatus: true, LogMethod: true,
 		LogValuesFunc: func(ctx echo.Context, v middleware.RequestLoggerValues) error {
-			log.Info().Str("URI", v.URI).Int("status", v.Status).Str("method", v.Method).
-				Str("ip", ctx.RealIP()).
+			log.Info().Str("uri", v.URI).Int("status", v.Status).Str("method", v.Method).
+				Str("ip", ctx.RealIP()).TimeDiff("duration", time.Now(), v.StartTime).
 				Msg("HTTP")
 			return nil
 		},
@@ -216,10 +216,6 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
 		if err, ok := er.(*echo.HTTPError); ok {
-			if err.Code >= 500 {
-				log.Error().Int("code", err.Code).Err(err.Internal).Msg("HTTP: " + err.Message.(string))
-			}
-
 			setData(ctx, "error", err)
 			if errHtml := htmlWithCode(ctx, err.Code, "error.html"); errHtml != nil {
 				log.Fatal().Err(errHtml).Send()

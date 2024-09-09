@@ -1,6 +1,6 @@
 module github.com/thomiceli/opengist
 
-go 1.22
+go 1.23
 
 require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0

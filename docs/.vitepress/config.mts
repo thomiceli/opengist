@@ -2,34 +2,40 @@ import {defineConfig} from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-    title: "Opengist Docs",
+    title: "Opengist",
     description: "Documention for Opengist",
-    base: '/docs/master/',
+    rewrites: {
+        'index.md': 'index.md',
+        'introduction.md': 'docs/index.md',
+        ':path(.*)': 'docs/:path'
+    },
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
         logo: 'https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg',
+        logoLink: '/',
         nav: [
             { text: 'Demo', link: 'https://demo.opengist.io' },
             { text: 'Translate', link: 'https://tr.opengist.io' }
         ],
 
-        sidebar: [
+        sidebar: {
+            '/docs/': [
             {
                 text: '', items: [
-                    {text: 'Introduction', link: '/'},
-                    {text: 'Installation', link: '/installation', items: [
-                        {text: 'Docker', link: '/installation/docker'},
-                        {text: 'Binary', link: '/installation/binary'},
-                        {text: 'Source', link: '/installation/source'},
+                    {text: 'Introduction', link: '/docs'},
+                    {text: 'Installation', link: '/docs/installation', items: [
+                        {text: 'Docker', link: '/docs/installation/docker'},
+                        {text: 'Binary', link: '/docs/installation/binary'},
+                        {text: 'Source', link: '/docs/installation/source'},
                         ],
                         collapsed: true
                     },
-                    {text: 'Update', link: '/update'},
+                    {text: 'Update', link: '/docs/update'},
                 ], collapsed: false
             },
             {
-                text: 'Configuration', base: '/configuration', items: [
-                    {text: 'Configure Opengist', link: '/index'},
+                text: 'Configuration', base: '/docs/configuration', items: [
+                    {text: 'Configure Opengist', link: '/configure'},
                     {text: 'OAuth Providers', link: '/oauth-providers'},
                     {text: 'Custom assets', link: '/custom-assets'},
                     {text: 'Custom links', link: '/custom-links'},
@@ -37,7 +43,7 @@ export default defineConfig({
                 ], collapsed: false
             },
             {
-                text: 'Usage', base: '/usage', items: [
+                text: 'Usage', base: '/docs/usage', items: [
                     {text: 'Init via Git', link: '/init-via-git'},
                     {text: 'Embed Gist', link: '/embed'},
                     {text: 'Gist as JSON', link: '/gist-json'},
@@ -46,7 +52,7 @@ export default defineConfig({
                 ], collapsed: false
             },
             {
-                text: 'Administration', base: '/administration', items: [
+                text: 'Administration', base: '/docs/administration', items: [
                     {text: 'Run with systemd', link: '/run-with-systemd'},
                     {text: 'Reverse proxy', items: [
                         {text: 'Nginx', link: '/nginx-reverse-proxy'},
@@ -56,22 +62,23 @@ export default defineConfig({
                 ], collapsed: false
             },
             {
-                text: 'Contributing', base: '/contributing', items: [
+                text: 'Contributing', base: '/docs/contributing', items: [
                     {text: 'Community', link: '/community'},
                     {text: 'Development', link: '/development'},
                 ], collapsed: false
             },
 
-        ],
+        ]},
 
         socialLinks: [
             {icon: 'github', link: 'https://github.com/thomiceli/opengist'}
         ],
         editLink: {
-            pattern: 'https://github.com/thomiceli/opengist/edit/master/docs/:path'
+            pattern: 'https://github.com/thomiceli/opengist/edit/stable/docs/:path'
         },
         // @ts-ignore
         lastUpdated: true,
+
     },
     ignoreDeadLinks: true
 })

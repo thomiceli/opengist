@@ -94,8 +94,8 @@
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: -webkit-linear-gradient(
     120deg,
-    #bd34fe 30%,
-    #41d1ff
+    #0f0513 30%,
+    #7e8b90
   );
 
   --vp-home-hero-image-background-image: linear-gradient(
@@ -141,3 +141,7 @@
     padding-left: 20px;
     height: 108px;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -27,7 +27,7 @@ Usage via command line :
 ./opengist --config /path/to/config.yml
 ```
 
-You can start by copying and/or modifying the provided [config.yml](/config.yml) file.
+You can start by copying and/or modifying the provided [config.yml](https://github.com/thomiceli/opengist/blob/stable/config.yml) file.
 
 
 ## Configuration via Environment Variables

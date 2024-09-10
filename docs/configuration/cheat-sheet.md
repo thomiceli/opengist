@@ -1,3 +1,7 @@
+---
+aside: false
+---
+
 # Configuration Cheat Sheet
 
 | YAML Config Key       | Environment Variable                | Default value         | Description                                                                                                                                                                                                                      |

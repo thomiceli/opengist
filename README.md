@@ -103,7 +103,7 @@ Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ---
 
-To create and run a development environment, see [run-development.md](/docs/contributing/run-development.md).
+To create and run a development environment, see [run-development.md](/docs/contributing/development.md).
 
 ## Documentation
 

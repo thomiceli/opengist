@@ -49,7 +49,7 @@ Version **2.28** or later is recommended as the app has not been tested with old
 * Backend Web Framework: [Echo](https://echo.labstack.com/)
 * ORM: [GORM](https://gorm.io/)
 * Frontend libraries:
-  * [Tailwind CSS](https://tailwindcss.com/)
+  * [TailwindCSS](https://tailwindcss.com/)
   * [CodeMirror](https://codemirror.net/)
   * [Day.js](https://day.js.org/)
   * [highlight.js](https://highlightjs.org/)

@@ -36,6 +36,7 @@ export default defineConfig({
             {
                 text: 'Configuration', base: '/docs/configuration', items: [
                     {text: 'Configure Opengist', link: '/configure'},
+                    {text: 'Admin panel', link: '/admin-panel'},
                     {text: 'OAuth Providers', link: '/oauth-providers'},
                     {text: 'Custom assets', link: '/custom-assets'},
                     {text: 'Custom links', link: '/custom-links'},
@@ -56,6 +57,7 @@ export default defineConfig({
                     {text: 'Run with systemd', link: '/run-with-systemd'},
                     {text: 'Reverse proxy', items: [
                         {text: 'Nginx', link: '/nginx-reverse-proxy'},
+                        {text: 'Traefik', link: '/traefik-reverse-proxy'},
                     ], collapsed: true},
                     {text: 'Fail2ban', link: '/fail2ban-setup'},
                     {text: 'Healthcheck', link: '/healthcheck'},

@@ -1,0 +1,269 @@
+gist.public: Публічний
+gist.unlisted: Прихований
+gist.private: Приватний
+
+gist.header.like: Подобається
+gist.header.unlike: Не подобається
+gist.header.fork: Створити форк
+gist.header.edit: Редагувати
+gist.header.delete: Видалити
+gist.header.forked-from: Форк з
+gist.header.last-active: Остання активність
+gist.header.select-tab: Перейти
+gist.header.code: Код
+gist.header.revisions: Версії
+gist.header.revision: Версія
+gist.header.clone-http: Клонувати за допомогою %s
+gist.header.clone-http-help: Клонувати за допомогою Git з використанням аутентифікації HTTP.
+gist.header.clone-ssh: Клонувати за допомогою SSH
+gist.header.clone-ssh-help: Клонувати за допомогою Git з використанням ключа SSH.
+gist.header.embed: 'Вбудувати'
+gist.header.embed-help: 'Вбудувати цей gist до вашого веб-сайту.'
+gist.header.download-zip: Скачати ZIP-архів
+
+gist.raw: Неформатований
+gist.file-truncated: Цей файл було обрізано.
+gist.watch-full-file: Перегляд всього файла.
+gist.file-not-valid: Невалідний CSV.
+gist.no-content: Немає даних
+
+gist.new.new_gist: Новий gist
+gist.new.title: Назва
+gist.new.description: Опис
+gist.new.url: URL
+gist.new.filename-with-extension: Ім'я файла з розширенням
+gist.new.indent-mode: Режим відступів
+gist.new.indent-mode-space: Пробіли
+gist.new.indent-mode-tab: Табуляція
+gist.new.indent-size: Розмір відступа
+gist.new.wrap-mode: Переноси рядків
+gist.new.wrap-mode-no: Без переносів
+gist.new.wrap-mode-soft: М'які переноси
+gist.new.add-file: Додати файл
+gist.new.create-public-button: Створити публічний gist
+gist.new.create-unlisted-button: Створити прихований gist
+gist.new.create-private-button: Створити приватний gist
+ist.new.preview: Перегляд
+gist.new.create-a-new-gist: Створити новий gist
+
+gist.edit.editing: Редагування
+gist.edit.edit-gist: Редагувати %s
+gist.edit.change-visibility: Зробити
+gist.edit.delete: Видалити
+gist.edit.cancel: Скасувати
+gist.edit.save: Зберегти
+
+gist.list.joined: Зареєстрован
+gist.list.all: Всі gist
+gist.list.search-results: Результати пошуку
+gist.list.sort: Сортування
+gist.list.sort-by-created: створені
+gist.list.sort-by-updated: оновлені
+gist.list.order-by-asc: Нещодавні знизу
+gist.list.order-by-desc: Нещодавні зверху
+gist.list.select-tab: Оберіть вкладку
+gist.list.liked: Вподобані
+gist.list.likes: вподобань
+gist.list.forked: Форки
+gist.list.forked-from: Форки з
+gist.list.forks: форк(-ів)
+gist.list.files: файл(-ів)
+gist.list.last-active: Остання активність
+gist.list.no-gists: Немає gists
+gist.list.all-liked-by: Всі gists вподобані %s
+gist.list.all-forked-by: Всі gists форкнуті by %s
+gist.list.all-from: Всі gists від %s
+
+gist.search.found: gists знайдено
+gist.search.no-results: Не знайдено gists
+gist.search.help.user: gists створені користувачем
+gist.search.help.title: gists з наданим ім'ям 
+gist.search.help.filename: gists мають файли з наданим ім'ям
+gist.search.help.extension: gists мають файли з наданим розширенням
+gist.search.help.language: gists мають файли з наданою мовою
+
+gist.forks: Форки
+gist.forks.view: Подивитися форк
+gist.forks.no: Немає форків
+gist.forks.for: Форки для %s
+
+gist.likes: Подобається
+gist.likes.no: Ще немає вподобань
+gist.likes.for: Вподобання для %s
+
+gist.revisions: Ревизії
+gist.revision.revised: ревизій цього gist
+gist.revision.go-to-revision: До ревизії
+gist.revision.file-created: файл створено
+gist.revision.file-deleted: файл видалено
+gist.revision.file-renamed: перейменовано в
+gist.revision.diff-truncated: Різниця завелика для відображення
+gist.revision.file-renamed-no-changes: Файл перейменовано без змін
+gist.revision.empty-file: Пустий файл
+gist.revision.no-changes: Без змін
+gist.revision.no-revisions: Немає ревізій для відображення
+gist.revision-of: Ревізії %s
+
+settings: Налаштування
+settings.email: Адреса електронної пошти
+settings.email-help: Використовується для коммітів та Gravatar
+settings.email-set: Зберегти адресу електронної пошти
+settings.link-accounts: Підключення акаунтів
+settings.link-github-account: Підключити GitHub акаунт
+settings.link-gitlab-account: Підключити GitLab акаунт
+settings.link-gitea-account: Підключити Gitea акаунт
+settings.unlink-github-account: Відключити GitHub акаунт
+settings.unlink-gitlab-account: Відключити GitLab акаунт
+settings.unlink-gitea-account: Відключити Gitea акаунт
+settings.delete-account: Видалити акаунт
+settings.delete-account-confirm: Ви впевненні, що хочете видалити свій акаунт?
+settings.add-ssh-key: Додати SSH ключ
+settings.add-ssh-key-help: Використовується только для pull/push gists при використанні Git з SSH
+settings.add-ssh-key-title: Назва
+settings.add-ssh-key-content: Ключ
+settings.delete-ssh-key: Видалити
+settings.delete-ssh-key-confirm: Підтвердьте видалення ключа SSH
+settings.ssh-key-added-at: Додано
+settings.ssh-key-never-used: Не використовувася
+settings.ssh-key-last-used: Останнє використання
+settings.ssh-key-exists: SSH ключ вже існує
+settings.change-username: Змінити им'я користувача
+settings.create-password: Створити пароль
+settings.create-password-help: Створити ваш пароль для логіну в Opengist через HTTP
+settings.change-password: Створити пароль
+settings.change-password-help: Змінити ваш пароль для логіну в Opengist через HTTP
+settings.password-label-title: Пароль
+
+auth.signup-disabled: Адміністратор відключив реєстрацію
+auth.login: Вхід
+auth.signup: Реєстрація
+auth.new-account: Новий акаунт
+auth.username: Им'я користувача
+auth.password: Пароль
+auth.register-instead: Зареєструватися
+auth.login-instead: Увійти
+auth.oauth: Продовжити з %s акаунтом
+
+error: Помилка
+error.page-not-found: Сторінка не знайдена
+error.bad-request: Невірний запрос
+error.signup-disabled: Реєстрацію вимкнено
+error.signup-disabled-form: Реєстрацію через форму вимкнено
+error.login-disabled-form: Логін через форму логіна вимкнено
+error.complete-oauth-login: "Неможливо виконати авторизацію користувача: %s"
+error.oauth-unsupported: Провайдер не підтримується
+error.cannot-bind-data: Не вдається зв'язати дані
+error.invalid-number: Недійсний номер
+error.invalid-character-unescaped: Неправильний символ не екранований
+
+header.menu.all: Все
+header.menu.new: Новий
+header.menu.search: Пошук
+header.menu.my-gists: Мої gists
+header.menu.liked: Сподобалися
+header.menu.admin: Адміністрування
+header.menu.settings: Налаштування
+header.menu.logout: Вийти
+header.menu.register: Реєстрація
+header.menu.login: Увійти
+header.menu.light: Світла
+header.menu.dark: Темна
+header.menu.system: Системна
+footer.powered-by: Працює на %s
+
+pagination.older: Пізніше
+pagination.newer: Новіше
+pagination.previous: Попередня
+pagination.next: Наступна
+
+admin.admin_panel: Панель управління
+admin.general: Загальні
+admin.users: Користувачі
+admin.gists: Gists
+admin.configuration: Конфігурація
+admin.invitations: Запрошення
+admin.invitations.create: Створити запрошення
+admin.versions: Версії
+admin.ssh_keys: Ключі SSH
+admin.stats: Статистика
+admin.actions: Дії
+admin.actions.sync-fs: Синхронізувати gists з файлової системи
+admin.actions.sync-db: Синхронізувати gists з базою даних
+admin.actions.git-gc: Збір сміття з репозиторіїв Git
+admin.actions.sync-previews: Синхронізувати всі gists перегляди
+admin.actions.reset-hooks: Скинути серверні Git hooks для всіх репозиторіїв
+admin.actions.index-gists: Проіндексувати всі gists
+admin.id: ID
+admin.user: Користувач
+admin.delete: Видалити
+admin.created_at: Створено
+
+admin.config-link: Ця конфігурація може бути %s за допомогою YAML файла та/або змінних середовища
+admin.config-link-overriden: перевизначено
+admin.disable-signup: Вимкнути реєстрацію
+admin.disable-signup_help: Заборонити створення нових акаунтів
+admin.require-login: Вимагати авторизацію
+admin.require-login_help: Вимагати авторизації для перегляду gists
+admin.allow-gists-without-login: Дозволити перегляд індивідуальних gists без авторизації
+admin.allow-gists-without-login_help: Дозволити перегляд і скачування індивідуальних gists без авторизації, але вимагати авторизацію для перегляду переліку gists.
+admin.disable-login: Вимкнути форму авторизації
+admin.disable-login_help: Заборонити авторизацію по паролю та замість цього примушувати використовувати провайдерів OAuth.
+admin.disable-gravatar: Заборонити Gravatar
+admin.disable-gravatar_help: Вимкнути використання Gravatar як провайдера аватарів.
+
+admin.users.delete_confirm: Ви впевнені, що хочете видалити цього користувача?
+
+admin.gists.title: Назва
+admin.gists.private: Чи приватний
+admin.gists.nb-files: Файлів
+admin.gists.nb-likes: Вподобань
+admin.gists.delete_confirm: Ви впевнені, що хочете видалити цей gist?
+
+admin.invitations.help: Запрошення можуть бути використані навіть якщо реєстрація вимкнена.
+admin.invitations.max_uses: Максимальна кількість використань
+admin.invitations.expires_at: Спливає
+admin.invitations.code: Код
+admin.invitations.copy_link: Копіювати посилання
+admin.invitations.uses: Використовується
+admin.invitations.expired: Сплинув
+
+flash.admin.user-deleted: Користувач був видалений
+flash.admin.gist-deleted: Gist був видалений
+flash.admin.invitation-created: Запрошення було створено
+flash.admin.invitation-deleted: Запрошення було видалено
+flash.admin.sync-fs: Синхронізація репозиторіїв за файловою системою...
+flash.admin.sync-db: Синхронізація репозиторіїв за базою даних...
+flash.admin.git-gc: Збір сміття з репозиторіїв...
+flash.admin.sync-previews: Синхронізація Gist переглядів...
+flash.admin.reset-hooks: Скидання cерверниз Git hooks для всіх репозиторіїв...
+flash.admin.index-gists: Індексація всіх gists...
+
+flash.auth.username-exists: Це ім'я користувача вже існує
+flash.auth.invalid-credentials: Недійсні облікові дані
+flash.auth.account-linked-oauth: Акаунт підключено до %s
+flash.auth.account-unlinked-oauth: Акаунт відключено від %s
+flash.auth.user-sshkeys-not-retrievable: Не зміг отримати ключі користувача
+flash.auth.user-sshkeys-not-created: Не зміг створити ssh ключ
+flash.auth.must-be-logged-in: Ви маєте бути авторизовані для доступу до gists
+
+flash.gist.visibility-changed: Параметри перегляду gist змінено
+flash.gist.deleted: Gist було видалено
+flash.gist.fork-own-gist: Неможливо форкнути власні gists
+flash.gist.forked: Gist було форкнуто
+
+flash.user.email-updated: Email оновлено
+flash.user.invalid-ssh-key: Недійсний SSH ключ
+flash.user.ssh-key-added: SSH ключ додано
+flash.user.ssh-key-deleted: SSH key видалено
+flash.user.password-updated: Пароль оновлено
+flash.user.username-updated: Ім'я користувача оновлено
+
+validation.is-too-long: Поле %s занадто велике
+validation.should-not-be-empty: Поле %s не має бути пустим
+validation.should-not-include-sub-directory: Поле %s неповинно включати піддиректорії
+validation.should-only-contain-alphanumeric-characters: Поле %s має містити лише буквено-цифрові символи
+validation.should-only-contain-alphanumeric-characters-and-dashes: Поле %s має містити лише буквено-цифрові символи та тире
+validation.not-enough: Недостатньо %s
+validation.invalid: Недійсний %s
+
+html.title.admin-panel: Панель адміністратора

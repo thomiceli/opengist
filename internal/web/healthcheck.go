@@ -23,3 +23,9 @@ func healthcheck(ctx echo.Context) error {
 		"time":     time.Now().Format(time.RFC3339),
 	})
 }
+
+// metrics is a dummy handler to satisfy the /metrics endpoint (for Prometheus, Openmetrics, etc.)
+// until we have a proper metrics endpoint
+func metrics(ctx echo.Context) error {
+	return ctx.String(200, "")
+}

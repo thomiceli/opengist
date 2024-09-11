@@ -1,12 +1,12 @@
 # Opengist
 
-<img height="108px" src="https://raw.githubusercontent.com/thomiceli/opengist/a9dd531f676d01b93bb6bd70751a69382ca563b0/public/opengist.svg" alt="Opengist" align="right" />
+<img height="108px" src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg" alt="Opengist" align="right" />
 
 Opengist is a **self-hosted** pastebin **powered by Git**. All snippets are stored in a Git repository and can be
 read and/or modified using standard Git commands, or with the web interface.
 It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and could be self-hosted.
 
-[Documentation](/docs) • [Discord](https://discord.gg/9Pm3X5scZT) • [Demo](https://demo.opengist.io)
+[Home Page](https://opengist.io) • [Documentation](https://opengist.io/docs) • [Discord](https://discord.gg/9Pm3X5scZT) • [Demo](https://demo.opengist.io)
 
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/thomiceli/opengist?sort=semver)
@@ -103,11 +103,11 @@ Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ---
 
-To create and run a development environment, see [run-development.md](/docs/contributing/run-development.md).
+To create and run a development environment, see [run-development.md](/docs/contributing/development.md).
 
 ## Documentation
 
-The documentation is available in [/docs](/docs) directory.
+The documentation is available at [https://opengist.io/](https://opengist.io/) or in the [/docs](/docs) directory.
 
 
 ## License

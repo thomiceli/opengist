@@ -1,4 +1,4 @@
-# Update
+# Update Opengist
 
 ## Make a backup
 
@@ -40,6 +40,7 @@ chmod +x opengist
 Stop the running instance; then pull the last changes from the master branch, and build the new version.
 
 ```shell
+git switch master
 git pull
 make
 ./opengist

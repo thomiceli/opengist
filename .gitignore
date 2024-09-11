@@ -7,3 +7,5 @@ public/assets/*
 public/manifest.json
 opengist
 build/
+docs/.vitepress/dist/
+docs/.vitepress/cache/

@@ -1,0 +1,47 @@
+name: Build / Deploy docs
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install JS dependencies
+        run: |
+          npm install vitepress@1.3.4 tailwindcss@3.4.10
+
+      - name: Build docs
+        run: |
+          cd docs
+          npx tailwindcss -i .vitepress/theme/style.css -o .vitepress/theme/theme.css -c .vitepress/tailwind.config.js
+          npm run docs:build
+
+      - name: Deploy to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "docs/.vitepress/dist/*"
+          target: ${{ secrets.SERVER_PATH }}
+
+      - name: Update remote docs
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            ${{ secrets.UPDATE_DOCS }}

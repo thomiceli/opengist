@@ -52,11 +52,11 @@ If you want your custom page to integrate well into the existing theme, you can 
    </header>
    <main>
      <h3 class="text-xl font-bold leading-tight mt-4">Sub-Heading</h3>
-     <p class="mt-4 ml-1"><!-- content --></p>
+     <p class="mt-4 ml-1"><!-- my content --></p>
    </main>
 </div>
 
 {{ template "footer" . }}
 ```
 
-You can adjust above as needed. Opengist uses Tailwind CSS classes.
+You can adjust above as needed. Opengist uses TailwindCSS classes.

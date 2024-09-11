@@ -251,6 +251,7 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 		g1.GET("/preview", preview, logged)
 
 		g1.GET("/healthcheck", healthcheck)
+		g1.GET("/metrics", metrics)
 
 		g1.GET("/register", register)
 		g1.POST("/register", processRegister)

@@ -6,7 +6,7 @@ Opengist is a **self-hosted** pastebin **powered by Git**. All snippets are stor
 read and/or modified using standard Git commands, or with the web interface.
 It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and could be self-hosted.
 
-[Documentation](/docs) • [Discord](https://discord.gg/9Pm3X5scZT) • [Demo](https://demo.opengist.io)
+[Home Page](https://opengist.io) • [Documentation](https://opengist.io/docs) • [Discord](https://discord.gg/9Pm3X5scZT) • [Demo](https://demo.opengist.io)
 
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/thomiceli/opengist?sort=semver)
@@ -107,7 +107,7 @@ To create and run a development environment, see [run-development.md](/docs/cont
 
 ## Documentation
 
-The documentation is available in [/docs](/docs) directory.
+The documentation is available at [https://opengist.io/](https://opengist.io/) or in the [/docs](/docs) directory.
 
 
 ## License

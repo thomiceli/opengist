@@ -137,7 +137,8 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 	var err error
 	var indexerQuery query.Query
 	if queryStr != "" {
-		contentQuery := bleve.NewMatchPhraseQuery(queryStr)
+		contentQuery := bleve.NewFuzzyQuery(queryStr)
+    		contentQuery.SetFuzziness(2)
 		contentQuery.FieldVal = "Content"
 		indexerQuery = contentQuery
 	} else {
@@ -159,7 +160,8 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 
 	addQuery := func(field, value string) {
 		if value != "" && value != "." {
-			q := bleve.NewMatchPhraseQuery(value)
+			q := bleve.NewFuzzyQuery(value)
+			q.SetFuzziness(2)
 			q.FieldVal = field
 			indexerQuery = bleve.NewConjunctionQuery(indexerQuery, q)
 		}

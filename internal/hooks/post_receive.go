@@ -50,7 +50,7 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 		outputSb.WriteString(fmt.Sprintf("Gist visibility set to %s\n\n", opts["visibility"]))
 	}
 
-	if opts["url"] != "" && validator.Var(opts["url"], "max=32,alphanumdashorempty") == nil {
+	if opts["url"] != "" && validator.Var(opts["url"], "max=2048,alphanumdashorempty") == nil {
 		gist.URL = opts["url"]
 		lastIndex := strings.LastIndex(gistUrl, "/")
 		gistUrl = gistUrl[:lastIndex+1] + gist.URL

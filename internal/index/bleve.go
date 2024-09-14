@@ -138,7 +138,7 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 	var indexerQuery query.Query
 	if queryStr != "" {
 		contentQuery := bleve.NewFuzzyQuery(queryStr)
-    		contentQuery.SetFuzziness(2)
+		contentQuery.SetFuzziness(2)
 		contentQuery.FieldVal = "Content"
 		indexerQuery = contentQuery
 	} else {

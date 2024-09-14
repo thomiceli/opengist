@@ -540,7 +540,7 @@ func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
 type GistDTO struct {
 	Title       string    `validate:"max=250" form:"title"`
 	Description string    `validate:"max=1000" form:"description"`
-	URL         string    `validate:"max=32,alphanumdashorempty" form:"url"`
+	URL         string    `validate:"max=2048,alphanumdashorempty" form:"url"`
 	Files       []FileDTO `validate:"min=1,dive"`
 	Name        []string  `form:"name"`
 	Content     []string  `form:"content"`

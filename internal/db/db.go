@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
@@ -90,22 +91,36 @@ func Setup(dbUri string, sharedCache bool) error {
 	if err != nil {
 		return err
 	}
+
 	log.Info().Msgf("Setting up a %s database connection", dbInfo.Type)
+	var setupFunc func(databaseInfo, bool) error
 	switch dbInfo.Type {
 	case SQLite:
-		if err = setupSQLite(*dbInfo, sharedCache); err != nil {
-			return err
-		}
+		setupFunc = setupSQLite
 	case PostgreSQL:
-		if err = setupPostgres(*dbInfo); err != nil {
-			return err
-		}
+		setupFunc = setupPostgres
 	case MySQL:
-		if err = setupMySQL(*dbInfo); err != nil {
-			return err
-		}
+		setupFunc = setupMySQL
 	default:
 		return fmt.Errorf("unknown database type: %v", dbInfo.Type)
+	}
+
+	maxAttempts := 60
+	retryInterval := 1 * time.Second
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		err = setupFunc(*dbInfo, sharedCache)
+		if err == nil {
+			log.Info().Msg("Database connection established")
+			break
+		}
+
+		if attempt < maxAttempts {
+			log.Warn().Err(err).Msgf("Failed to connect to database (attempt %d), retrying in %v...", attempt, retryInterval)
+			time.Sleep(retryInterval)
+		} else {
+			return err
+		}
 	}
 
 	DatabaseInfo = dbInfo
@@ -184,7 +199,7 @@ func setupSQLite(dbInfo databaseInfo, sharedCache bool) error {
 	return err
 }
 
-func setupPostgres(dbInfo databaseInfo) error {
+func setupPostgres(dbInfo databaseInfo, sharedCache bool) error {
 	var err error
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbInfo.Host, dbInfo.Port, dbInfo.User, dbInfo.Password, dbInfo.Database)
 
@@ -196,7 +211,7 @@ func setupPostgres(dbInfo databaseInfo) error {
 	return err
 }
 
-func setupMySQL(dbInfo databaseInfo) error {
+func setupMySQL(dbInfo databaseInfo, sharedCache bool) error {
 	var err error
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbInfo.User, dbInfo.Password, dbInfo.Host, dbInfo.Port, dbInfo.Database)
 

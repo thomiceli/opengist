@@ -59,10 +59,10 @@ jobs:
         include:
           - database: postgres
             image: postgres:16
-            port: 5432
+            port: 5432:5432
           - database: mysql
             image: mysql:8
-            port: 3306
+            port: 3306:3306
 
     runs-on: ${{ matrix.os }}
     services:

@@ -235,3 +235,7 @@ func DeprecationDBFilename() {
 		config.C.DBUri = config.C.DBFilename
 	}
 }
+
+func TruncateDatabase() error {
+	return db.Migrator().DropTable("likes", &User{}, "gists", &SSHKey{}, &AdminSetting{}, &Invitation{})
+}

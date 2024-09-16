@@ -4,6 +4,7 @@
 BINARY_NAME := opengist
 GIT_TAG := $(shell git describe --tags)
 VERSION_PKG := github.com/thomiceli/opengist/internal/config.OpengistVersion
+TEST_DB_TYPE ?= sqlite
 
 all: clean install build
 
@@ -72,7 +73,7 @@ fmt:
 	@go fmt ./...
 
 test:
-	@go test ./... -p 1
+	@OPENGIST_TEST_DB=$(TEST_DB_TYPE) go test ./... -p 1
 
 check-tr:
 	@bash ./scripts/check-translations.sh

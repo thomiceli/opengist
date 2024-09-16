@@ -11,7 +11,19 @@ type MigrationVersion struct {
 	Version uint
 }
 
-func ApplyMigrations(db *gorm.DB) error {
+func applyMigrations(db *gorm.DB, dbInfo *databaseInfo) error {
+	switch dbInfo.Type {
+	case SQLite:
+		return applySqliteMigrations(db)
+	case PostgreSQL, MySQL:
+		return nil
+	default:
+		return fmt.Errorf("unknown database type: %s", dbInfo.Type)
+	}
+
+}
+
+func applySqliteMigrations(db *gorm.DB) error {
 	// Create migration table if it doesn't exist
 	if err := db.AutoMigrate(&MigrationVersion{}); err != nil {
 		log.Fatal().Err(err).Msg("Error creating migration version table")

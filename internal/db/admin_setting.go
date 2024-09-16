@@ -5,7 +5,7 @@ import (
 )
 
 type AdminSetting struct {
-	Key   string `gorm:"uniqueIndex"`
+	Key   string `gorm:"index:,unique"`
 	Value string
 }
 
@@ -49,7 +49,7 @@ func UpdateSetting(key string, value string) error {
 }
 
 func setSetting(key string, value string) error {
-	return db.Create(&AdminSetting{Key: key, Value: value}).Error
+	return db.FirstOrCreate(&AdminSetting{Key: key, Value: value}, &AdminSetting{Key: key}).Error
 }
 
 func initAdminSettings(settings map[string]string) error {
@@ -64,9 +64,9 @@ func initAdminSettings(settings map[string]string) error {
 	return nil
 }
 
-type DBAuthInfo struct{}
+type AuthInfo struct{}
 
-func (auth DBAuthInfo) RequireLogin() (bool, error) {
+func (auth AuthInfo) RequireLogin() (bool, error) {
 	s, err := GetSetting(SettingRequireLogin)
 	if err != nil {
 		return true, err
@@ -74,7 +74,7 @@ func (auth DBAuthInfo) RequireLogin() (bool, error) {
 	return s == "1", nil
 }
 
-func (auth DBAuthInfo) AllowGistsWithoutLogin() (bool, error) {
+func (auth AuthInfo) AllowGistsWithoutLogin() (bool, error) {
 	s, err := GetSetting(SettingAllowGistsWithoutLogin)
 	if err != nil {
 		return false, err

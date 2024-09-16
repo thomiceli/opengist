@@ -14,8 +14,11 @@ external-url:
 # Directory where Opengist will store its data. Default: ~/.opengist/
 opengist-home:
 
-# Name of the SQLite database file. Default: opengist.db
-db-filename: opengist.db
+# URI of the database. Default: opengist.db (SQLite)
+# SQLite:        file name
+# PostgreSQL:    postgres://user:password@host:port/database
+# MySQL/MariaDB: mysql://user:password@host:port/database
+db-uri: opengist.db
 
 # Enable or disable the code search index (either `true` or `false`). Default: true
 index.enabled: true
@@ -29,6 +32,7 @@ git.default-branch:
 
 # Set the journal mode for SQLite. Default: WAL
 # See https://www.sqlite.org/pragma.html#pragma_journal_mode
+# For SQLite databases only.
 sqlite.journal-mode: WAL
 
 

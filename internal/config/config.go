@@ -29,7 +29,10 @@ type config struct {
 	LogOutput    string `yaml:"log-output" env:"OG_LOG_OUTPUT"`
 	ExternalUrl  string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
 	OpengistHome string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
-	DBFilename   string `yaml:"db-filename" env:"OG_DB_FILENAME"`
+
+	DBUri      string `yaml:"db-uri" env:"OG_DB_URI"`
+	DBFilename string `yaml:"db-filename" env:"OG_DB_FILENAME"` // deprecated
+
 	IndexEnabled bool   `yaml:"index.enabled" env:"OG_INDEX_ENABLED"`
 	IndexDirname string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"`
 
@@ -80,7 +83,7 @@ func configWithDefaults() (*config, error) {
 	c.LogLevel = "warn"
 	c.LogOutput = "stdout,file"
 	c.OpengistHome = ""
-	c.DBFilename = "opengist.db"
+	c.DBUri = "opengist.db"
 	c.IndexEnabled = true
 	c.IndexDirname = "opengist.index"
 

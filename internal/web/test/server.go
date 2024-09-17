@@ -140,7 +140,7 @@ func setup(t *testing.T) {
 	case "sqlite":
 		databaseDsn = "file::memory:"
 	case "postgres":
-		databaseDsn = "postgres://root:opengist@localhost:5432/opengist_test"
+		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
 	case "mysql":
 		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
 	}

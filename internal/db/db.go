@@ -48,6 +48,10 @@ func parseDBURI(uri string) (*databaseInfo, error) {
 
 	if !strings.Contains(uri, "://") {
 		info.Type = SQLite
+		if uri == "file::memory:" {
+			info.Database = "file::memory:"
+			return info, nil
+		}
 		info.Database = filepath.Join(config.GetHomeDir(), uri)
 		return info, nil
 	}

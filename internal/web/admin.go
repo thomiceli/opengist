@@ -161,6 +161,9 @@ func adminConfig(ctx echo.Context) error {
 	setData(ctx, "htmlTitle", trH(ctx, "admin.configuration")+" - "+trH(ctx, "admin.admin_panel"))
 	setData(ctx, "adminHeaderPage", "config")
 
+	setData(ctx, "dbtype", db.DatabaseInfo.Type.String())
+	setData(ctx, "dbname", db.DatabaseInfo.Database)
+
 	return html(ctx, "admin_config.html")
 }
 

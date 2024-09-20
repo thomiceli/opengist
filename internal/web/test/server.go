@@ -24,6 +24,8 @@ import (
 	"github.com/thomiceli/opengist/internal/web"
 )
 
+var databaseType string
+
 type testServer struct {
 	server        *web.Server
 	sessionCookie string
@@ -132,6 +134,17 @@ func structToURLValues(s interface{}) url.Values {
 }
 
 func setup(t *testing.T) {
+	var databaseDsn string
+	databaseType = os.Getenv("OPENGIST_TEST_DB")
+	switch databaseType {
+	case "sqlite":
+		databaseDsn = "file::memory:"
+	case "postgres":
+		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
+	case "mysql":
+		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
+	}
+
 	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
 
 	err := config.InitConfig("", io.Discard)
@@ -155,8 +168,12 @@ func setup(t *testing.T) {
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
 	require.NoError(t, err, "Could not create tmp repos directory")
 
-	err = db.Setup("file::memory:", true)
+	err = db.Setup(databaseDsn, true)
 	require.NoError(t, err, "Could not initialize database")
+
+	if err != nil {
+		log.Fatal().Err(err).Msg("Could not initialize database")
+	}
 
 	err = memdb.Setup()
 	require.NoError(t, err, "Could not initialize in memory database")
@@ -168,10 +185,10 @@ func setup(t *testing.T) {
 func teardown(t *testing.T, s *testServer) {
 	s.stop()
 
-	err := db.Close()
-	require.NoError(t, err, "Could not close database")
+	//err := db.Close()
+	//require.NoError(t, err, "Could not close database")
 
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
 
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
@@ -179,6 +196,9 @@ func teardown(t *testing.T, s *testServer) {
 
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "sessions"))
 	require.NoError(t, err, "Could not remove repos directory")
+
+	err = db.TruncateDatabase()
+	require.NoError(t, err, "Could not truncate database")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))
 	// require.NoError(t, err, "Could not remove repos directory")

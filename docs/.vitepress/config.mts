@@ -36,11 +36,17 @@ export default defineConfig({
             {
                 text: 'Configuration', base: '/docs/configuration', items: [
                     {text: 'Configure Opengist', link: '/configure'},
-                    {text: 'Admin panel', link: '/admin-panel'},
+                    {text: 'Databases', items: [
+                        {text: 'SQLite', link: '/databases/sqlite'},
+                        {text: 'PostgreSQL', link: '/databases/postgresql'},
+                        {text: 'MySQL', link: '/databases/mysql'},
+                        ], collapsed: true
+                    },
                     {text: 'OAuth Providers', link: '/oauth-providers'},
                     {text: 'Custom assets', link: '/custom-assets'},
                     {text: 'Custom links', link: '/custom-links'},
                     {text: 'Cheat Sheet', link: '/cheat-sheet'},
+                    {text: 'Admin panel', link: '/admin-panel'},
                 ], collapsed: false
             },
             {

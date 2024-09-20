@@ -31,7 +31,7 @@ Written in [Go](https://go.dev), Opengist aims to be fast and easy to deploy.
   * delete users/gists; 
   * clean database/filesystem by syncing gists
   * run `git gc` for all repositories
-* SQLite database
+* SQLite/PostgreSQL/MySQL database
 * Logging
 * Docker support
 

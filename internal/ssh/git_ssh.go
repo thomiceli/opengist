@@ -39,7 +39,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 		return errors.New("gist not found")
 	}
 
-	allowUnauthenticated, err := auth.ShouldAllowUnauthenticatedGistAccess(db.DBAuthInfo{}, true)
+	allowUnauthenticated, err := auth.ShouldAllowUnauthenticatedGistAccess(db.AuthInfo{}, true)
 	if err != nil {
 		return errors.New("internal server error")
 	}

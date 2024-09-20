@@ -8,7 +8,6 @@ import (
 	"github.com/urfave/cli/v2"
 	"io"
 	"os"
-	"path/filepath"
 )
 
 var CmdHook = cli.Command{
@@ -50,7 +49,8 @@ func initialize(ctx *cli.Context) {
 	}
 	config.InitLog()
 
-	if err := db.Setup(filepath.Join(config.GetHomeDir(), config.C.DBFilename), false); err != nil {
+	db.DeprecationDBFilename()
+	if err := db.Setup(config.C.DBUri, false); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database in hooks")
 	}
 }

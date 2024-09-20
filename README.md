@@ -28,7 +28,7 @@ It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and c
 * OAuth2 login with GitHub, GitLab, Gitea, and OpenID Connect
 * Restrict or unrestrict snippets visibility to anonymous users
 * Docker support
-* [More...](/docs/index.md#features)
+* [More...](/docs/introduction.md#features)
 
 ## Quick start
 

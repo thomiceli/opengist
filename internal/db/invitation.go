@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -15,10 +16,21 @@ type Invitation struct {
 
 func GetAllInvitations() ([]*Invitation, error) {
 	var invitations []*Invitation
-	err := db.
-		Order("(((expires_at >= strftime('%s', 'now')) AND ((nb_max <= 0) OR (nb_used < nb_max)))) desc").
-		Order("id asc").
-		Find(&invitations).Error
+	dialect := db.Dialector.Name()
+	query := db.Model(&Invitation{})
+
+	switch dialect {
+	case "sqlite":
+		query = query.Order("(((expires_at >= strftime('%s', 'now')) AND ((nb_max <= 0) OR (nb_used < nb_max)))) DESC")
+	case "postgres":
+		query = query.Order("(((expires_at >= EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)) AND ((nb_max <= 0) OR (nb_used < nb_max)))) DESC")
+	case "mysql":
+		query = query.Order("(((expires_at >= UNIX_TIMESTAMP()) AND ((nb_max <= 0) OR (nb_used < nb_max)))) DESC")
+	default:
+		return nil, fmt.Errorf("unsupported database dialect: %s", dialect)
+	}
+
+	err := query.Order("id ASC").Find(&invitations).Error
 
 	return invitations, err
 }

@@ -260,6 +260,7 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 		g1.GET("/logout", logout)
 		g1.GET("/oauth/:provider", oauth)
 		g1.GET("/oauth/:provider/callback", oauthCallback)
+		g1.GET("/oauth/:provider/unlink", oauthUnlink, logged)
 
 		g1.GET("/settings", userSettings, logged)
 		g1.POST("/settings/email", emailProcess, logged)

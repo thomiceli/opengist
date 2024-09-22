@@ -342,28 +342,6 @@ func oauth(ctx echo.Context) error {
 		goth.UseProviders(oidcProvider)
 	}
 
-	currUser := getUserLogged(ctx)
-	if currUser != nil {
-		// Map each provider to a function that checks the relevant ID in currUser
-		providerIDCheckMap := map[string]func() bool{
-			GitHubProvider: func() bool { return currUser.GithubID != "" },
-			GitLabProvider: func() bool { return currUser.GitlabID != "" },
-			GiteaProvider:  func() bool { return currUser.GiteaID != "" },
-			OpenIDConnect:  func() bool { return currUser.OIDCID != "" },
-		}
-
-		// Check if the provider is valid and if the user has a linked ID
-		// Means that the user wants to unlink the account
-		if checkFunc, exists := providerIDCheckMap[provider]; exists && checkFunc() {
-			if err := currUser.DeleteProviderID(provider); err != nil {
-				return errorRes(500, "Cannot unlink account from "+cases.Title(language.English).String(provider), err)
-			}
-
-			addFlash(ctx, tr(ctx, "flash.auth.account-unlinked-oauth", cases.Title(language.English).String(provider)), "success")
-			return redirect(ctx, "/settings")
-		}
-	}
-
 	ctxValue := context.WithValue(ctx.Request().Context(), gothic.ProviderParamKey, provider)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 	if provider != GitHubProvider && provider != GitLabProvider && provider != GiteaProvider && provider != OpenIDConnect {
@@ -372,6 +350,30 @@ func oauth(ctx echo.Context) error {
 
 	gothic.BeginAuthHandler(ctx.Response(), ctx.Request())
 	return nil
+}
+
+func oauthUnlink(ctx echo.Context) error {
+	provider := ctx.Param("provider")
+
+	currUser := getUserLogged(ctx)
+	// Map each provider to a function that checks the relevant ID in currUser
+	providerIDCheckMap := map[string]func() bool{
+		GitHubProvider: func() bool { return currUser.GithubID != "" },
+		GitLabProvider: func() bool { return currUser.GitlabID != "" },
+		GiteaProvider:  func() bool { return currUser.GiteaID != "" },
+		OpenIDConnect:  func() bool { return currUser.OIDCID != "" },
+	}
+
+	if checkFunc, exists := providerIDCheckMap[provider]; exists && checkFunc() {
+		if err := currUser.DeleteProviderID(provider); err != nil {
+			return errorRes(500, "Cannot unlink account from "+cases.Title(language.English).String(provider), err)
+		}
+
+		addFlash(ctx, tr(ctx, "flash.auth.account-unlinked-oauth", cases.Title(language.English).String(provider)), "success")
+		return redirect(ctx, "/settings")
+	}
+
+	return redirect(ctx, "/settings")
 }
 
 func logout(ctx echo.Context) error {

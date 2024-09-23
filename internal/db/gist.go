@@ -101,7 +101,7 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
 	err := db.Preload("User").Preload("Forked.User").
-		Where("(gists.uuid = ? OR gists.url = ?) AND users.username like ?", gistUuid, gistUuid, user).
+		Where("(gists.uuid like ? OR gists.url = ?) AND users.username like ?", gistUuid+"%", gistUuid, user).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
 

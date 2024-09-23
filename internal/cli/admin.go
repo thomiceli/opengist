@@ -12,6 +12,7 @@ var CmdAdmin = cli.Command{
 	Usage: "Admin commands",
 	Subcommands: []*cli.Command{
 		&CmdAdminResetPassword,
+		&CmdAdminToggleAdmin,
 	},
 }
 
@@ -45,6 +46,33 @@ var CmdAdminResetPassword = cli.Command{
 		}
 
 		fmt.Printf("Password for user %s has been reset.\n", username)
+		return nil
+	},
+}
+
+var CmdAdminToggleAdmin = cli.Command{
+	Name:      "toggle-admin",
+	Usage:     "Toggle the admin status for a given user",
+	ArgsUsage: "[username]",
+	Action: func(ctx *cli.Context) error {
+		initialize(ctx)
+		if ctx.NArg() < 1 {
+			return fmt.Errorf("username is required")
+		}
+		username := ctx.Args().Get(0)
+
+		user, err := db.GetUserByUsername(username)
+		if err != nil {
+			fmt.Printf("Cannot get user %s: %s\n", username, err)
+			return err
+		}
+
+		user.IsAdmin = !user.IsAdmin
+		if err = user.Update(); err != nil {
+			fmt.Printf("Cannot update user %s: %s\n", username, err)
+		}
+
+		fmt.Printf("User %s admin set to %t\n", username, user.IsAdmin)
 		return nil
 	},
 }

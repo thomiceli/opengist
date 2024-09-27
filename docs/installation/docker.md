@@ -13,8 +13,6 @@ It can be used in a `docker-compose.yml` file :
 3. Opengist is now running on port 6157, you can browse http://localhost:6157
 
 ```yml
-version: "3"
-
 services:
   opengist:
     image: ghcr.io/thomiceli/opengist:1

@@ -18,8 +18,6 @@ OG_DB_URI=mysql://root:passwd@localhost:3306/opengist_db
 
 ### Docker Compose
 ```yml
-version: "3"
-
 services:
   opengist:
     image: ghcr.io/thomiceli/opengist:1

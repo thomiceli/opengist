@@ -18,8 +18,6 @@ OG_DB_URI=postgres://postgres:passwd@localhost:5432/opengist_db
 
 ### Docker Compose
 ```yml
-version: "3"
-
 services:
   opengist:
     image: ghcr.io/thomiceli/opengist:1

@@ -21,8 +21,6 @@ OG_SQLITE_JOURNAL_MODE=WAL
 
 ### Docker Compose
 ```yml
-version: "3"
-
 services:
   opengist:
     image: ghcr.io/thomiceli/opengist:1

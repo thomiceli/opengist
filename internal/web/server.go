@@ -2,7 +2,7 @@ package web
 
 import (
 	"context"
-	"encoding/json"
+	gojson "encoding/json"
 	"errors"
 	"fmt"
 	htmlpkg "html"
@@ -215,10 +215,14 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 	}
 
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
-		if err, ok := er.(*echo.HTTPError); ok {
-			setData(ctx, "error", err)
-			if errHtml := htmlWithCode(ctx, err.Code, "error.html"); errHtml != nil {
-				log.Fatal().Err(errHtml).Send()
+		if httpErr, ok := er.(*HTMLError); ok {
+			setData(ctx, "error", er)
+			if fatalErr := htmlWithCode(ctx, httpErr.Code, "error.html"); fatalErr != nil {
+				log.Fatal().Err(fatalErr).Send()
+			}
+		} else if httpErr, ok := er.(*JSONError); ok {
+			if fatalErr := json(ctx, httpErr.Code, httpErr); fatalErr != nil {
+				log.Fatal().Err(fatalErr).Send()
 			}
 		} else {
 			log.Fatal().Err(er).Send()
@@ -236,15 +240,13 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 	// Web based routes
 	g1 := e.Group("")
 	{
-		if !dev {
-			g1.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-				TokenLookup:    "form:_csrf",
-				CookiePath:     "/",
-				CookieHTTPOnly: true,
-				CookieSameSite: http.SameSiteStrictMode,
-			}))
-			g1.Use(csrfInit)
-		}
+		g1.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+			TokenLookup:    "form:_csrf,header:X-CSRF-Token",
+			CookiePath:     "/",
+			CookieHTTPOnly: true,
+			CookieSameSite: http.SameSiteStrictMode,
+		}))
+		g1.Use(csrfInit)
 
 		g1.GET("/", create, logged)
 		g1.POST("/", processCreate, logged)
@@ -261,12 +263,20 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 		g1.GET("/oauth/:provider", oauth)
 		g1.GET("/oauth/:provider/callback", oauthCallback)
 		g1.GET("/oauth/:provider/unlink", oauthUnlink, logged)
+		g1.POST("/webauthn/bind", beginWebAuthnBinding, logged)
+		g1.POST("/webauthn/bind/finish", finishWebAuthnBinding, logged)
+		g1.POST("/webauthn/login", beginWebAuthnLogin)
+		g1.POST("/webauthn/login/finish", finishWebAuthnLogin)
+		g1.POST("/webauthn/assertion", beginWebAuthnAssertion, inMFASession)
+		g1.POST("/webauthn/assertion/finish", finishWebAuthnAssertion, inMFASession)
+		g1.GET("/mfa", mfa, inMFASession)
 
 		g1.GET("/settings", userSettings, logged)
 		g1.POST("/settings/email", emailProcess, logged)
 		g1.DELETE("/settings/account", accountDeleteProcess, logged)
 		g1.POST("/settings/ssh-keys", sshKeysProcess, logged)
 		g1.DELETE("/settings/ssh-keys/:id", sshKeysDelete, logged)
+		g1.DELETE("/settings/passkeys/:id", passkeyDelete, logged)
 		g1.PUT("/settings/password", passwordProcess, logged)
 		g1.PUT("/settings/username", usernameProcess, logged)
 		g2 := g1.Group("/admin-panel")
@@ -518,6 +528,17 @@ func logged(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func inMFASession(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		sess := getSession(ctx)
+		_, ok := sess.Values["mfaID"].(uint)
+		if !ok {
+			return errorRes(400, tr(ctx, "error.not-in-mfa-session"), nil)
+		}
+		return next(ctx)
+	}
+}
+
 func makeCheckRequireLogin(isSingleGistAccess bool) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
@@ -564,7 +585,7 @@ func parseManifestEntries() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to read manifest.json")
 	}
-	if err = json.Unmarshal(byteValue, &manifestEntries); err != nil {
+	if err = gojson.Unmarshal(byteValue, &manifestEntries); err != nil {
 		log.Fatal().Err(err).Msg("Failed to unmarshal manifest.json")
 	}
 }

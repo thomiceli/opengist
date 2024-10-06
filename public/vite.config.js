@@ -14,7 +14,8 @@ export default defineConfig({
                 './public/editor.ts',
                 './public/admin.ts',
                 './public/gist.ts',
-                './public/embed.ts'
+                './public/embed.ts',
+                './public/webauthn.ts'
             ]
         },
         assetsInlineLimit: 0,

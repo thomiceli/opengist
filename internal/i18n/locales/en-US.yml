@@ -143,6 +143,22 @@ auth.password: Password
 auth.register-instead: Register instead
 auth.login-instead: Login instead
 auth.oauth: Continue with %s account
+auth.mfa: Multi-factor authentication
+auth.mfa.passkey: Passkey
+auth.mfa.passkeys: Passkeys
+auth.mfa.use-passkey: Use passkey
+auth.mfa.bind-passkey: Bind passkey
+auth.mfa.login-with-passkey: Login with passkey
+auth.mfa.waiting-for-passkey-input: Waiting for input from browser interaction...
+auth.mfa.use-passkey-to-finish: Use a passkey to finish authentication
+auth.mfa.passkeys-help: Add a passkey to log to your account and to use as an MFA method.
+auth.mfa.passkey-name: Name
+auth.mfa.delete-passkey: Delete
+auth.mfa.passkey-added-at: Added
+auth.mfa.passkey-never-used: Never used
+auth.mfa.passkey-last-used: Last used
+auth.mfa.delete-passkey-confirm: Confirm deletion of passkey
+
 
 error: Error
 error.page-not-found: Page not found
@@ -155,6 +171,7 @@ error.oauth-unsupported: Unsupported provider
 error.cannot-bind-data: Cannot bind data
 error.invalid-number: Invalid number
 error.invalid-character-unescaped: Invalid character unescaped
+error.not-in-mfa-session: User is not in a MFA session
 
 header.menu.all: All
 header.menu.new: New
@@ -245,6 +262,8 @@ flash.auth.account-unlinked-oauth: Account unlinked from %s
 flash.auth.user-sshkeys-not-retrievable: Could not get user keys
 flash.auth.user-sshkeys-not-created: Could not create ssh key
 flash.auth.must-be-logged-in: You must be logged in to access gists
+flash.auth.passkey-registred: Passkey %s registered
+flash.auth.passkey-deleted: Passkey deleted
 
 flash.gist.visibility-changed: Gist visibility has been changed
 flash.gist.deleted: Gist has been deleted

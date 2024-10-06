@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/auth/webauthn"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -116,6 +117,10 @@ func Initialize(ctx *cli.Context) {
 
 	if err := memdb.Setup(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize in memory database")
+	}
+
+	if err := webauthn.Init(config.C.ExternalUrl); err != nil {
+		log.Error().Err(err).Msg("Failed to initialize WebAuthn")
 	}
 
 	if config.C.IndexEnabled {

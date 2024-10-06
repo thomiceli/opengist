@@ -127,9 +127,11 @@ func deleteSession(ctx echo.Context) {
 }
 
 func setCsrfHtmlForm(ctx echo.Context) {
+	var csrf string
 	if csrfToken, ok := ctx.Get("csrf").(string); ok {
-		setData(ctx, "csrfHtml", template.HTML(`<input type="hidden" name="_csrf" value="`+csrfToken+`">`))
+		csrf = csrfToken
 	}
+	setData(ctx, "csrfHtml", template.HTML(`<input type="hidden" name="_csrf" value="`+csrf+`">`))
 }
 
 func deleteCsrfCookie(ctx echo.Context) {

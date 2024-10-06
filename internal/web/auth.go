@@ -585,7 +585,7 @@ func getAvatarUrlFromProvider(provider string, identifier string) string {
 		}
 
 		var result map[string]interface{}
-		err = json.Unmarshal(body, &result)
+		err = gojson.Unmarshal(body, &result)
 		if err != nil {
 			log.Error().Err(err).Msg("Cannot unmarshal Gitea response body")
 			return ""

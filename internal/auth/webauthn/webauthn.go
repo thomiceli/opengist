@@ -119,6 +119,10 @@ func FinishLogin(dbUser *db.User, jsonSession []byte, response *http.Request) er
 	_ = json.Unmarshal(jsonSession, &session)
 
 	cred, err := webAuthn.FinishLogin(waUser, session, response)
+	if err != nil {
+		return err
+	}
+
 	dbCredential, err := db.GetCredentialByID(cred.ID)
 	if err != nil {
 		return err

@@ -137,7 +137,7 @@ func Setup(dbUri string, sharedCache bool) error {
 		return err
 	}
 
-	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}); err != nil {
+	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}); err != nil {
 		return err
 	}
 
@@ -241,5 +241,5 @@ func DeprecationDBFilename() {
 }
 
 func TruncateDatabase() error {
-	return db.Migrator().DropTable("likes", &User{}, "gists", &SSHKey{}, &AdminSetting{}, &Invitation{})
+	return db.Migrator().DropTable("likes", &User{}, "gists", &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{})
 }

@@ -26,8 +26,14 @@ func userSettings(ctx echo.Context) error {
 		return errorRes(500, "Cannot get SSH keys", err)
 	}
 
+	passkeys, err := db.GetAllCredentialsForUser(user.ID)
+	if err != nil {
+		return errorRes(500, "Cannot get WebAuthn credentials", err)
+	}
+
 	setData(ctx, "email", user.Email)
 	setData(ctx, "sshKeys", keys)
+	setData(ctx, "passkeys", passkeys)
 	setData(ctx, "hasPassword", user.Password != "")
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	setData(ctx, "htmlTitle", trH(ctx, "settings"))
@@ -124,6 +130,26 @@ func sshKeysDelete(ctx echo.Context) error {
 	}
 
 	addFlash(ctx, tr(ctx, "flash.user.ssh-key-deleted"), "success")
+	return redirect(ctx, "/settings")
+}
+
+func passkeyDelete(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+	keyId, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return redirect(ctx, "/settings")
+	}
+
+	passkey, err := db.GetCredentialByIDDB(uint(keyId))
+	if err != nil || passkey.UserID != user.ID {
+		return redirect(ctx, "/settings")
+	}
+
+	if err := passkey.Delete(); err != nil {
+		return errorRes(500, "Cannot delete passkey", err)
+	}
+
+	addFlash(ctx, tr(ctx, "flash.auth.passkey-deleted"), "success")
 	return redirect(ctx, "/settings")
 }
 

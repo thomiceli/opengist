@@ -19,6 +19,14 @@ import (
 
 type dataTypeKey string
 
+type HTMLError struct {
+	*echo.HTTPError
+}
+
+type JSONError struct {
+	*echo.HTTPError
+}
+
 const dataKey dataTypeKey = "data"
 
 func setData(ctx echo.Context, key string, value any) {
@@ -46,6 +54,10 @@ func htmlWithCode(ctx echo.Context, code int, template string) error {
 	return ctx.Render(code, template, ctx.Request().Context().Value(dataKey))
 }
 
+func json(ctx echo.Context, code int, data any) error {
+	return ctx.JSON(code, data)
+}
+
 func redirect(ctx echo.Context, location string) error {
 	return ctx.Redirect(302, config.C.ExternalUrl+location)
 }
@@ -64,7 +76,16 @@ func errorRes(code int, message string, err error) error {
 		skipLogger.Error().Err(err).Msg(message)
 	}
 
-	return &echo.HTTPError{Code: code, Message: message, Internal: err}
+	return &HTMLError{&echo.HTTPError{Code: code, Message: message, Internal: err}}
+}
+
+func jsonErrorRes(code int, message string, err error) error {
+	if code >= 500 {
+		var skipLogger = log.With().CallerWithSkipFrameCount(3).Logger()
+		skipLogger.Error().Err(err).Msg(message)
+	}
+
+	return &JSONError{&echo.HTTPError{Code: code, Message: message, Internal: err}}
 }
 
 func getUserLogged(ctx echo.Context) *db.User {
@@ -102,14 +123,15 @@ func saveSession(sess *sessions.Session, ctx echo.Context) {
 func deleteSession(ctx echo.Context) {
 	sess := getSession(ctx)
 	sess.Options.MaxAge = -1
-	sess.Values["user"] = nil
 	saveSession(sess, ctx)
 }
 
 func setCsrfHtmlForm(ctx echo.Context) {
+	var csrf string
 	if csrfToken, ok := ctx.Get("csrf").(string); ok {
-		setData(ctx, "csrfHtml", template.HTML(`<input type="hidden" name="_csrf" value="`+csrfToken+`">`))
+		csrf = csrfToken
 	}
+	setData(ctx, "csrfHtml", template.HTML(`<input type="hidden" name="_csrf" value="`+csrf+`">`))
 }
 
 func deleteCsrfCookie(ctx echo.Context) {

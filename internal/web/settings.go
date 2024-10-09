@@ -31,9 +31,15 @@ func userSettings(ctx echo.Context) error {
 		return errorRes(500, "Cannot get WebAuthn credentials", err)
 	}
 
+	_, hasTotp, err := user.HasMFA()
+	if err != nil {
+		return errorRes(500, "Cannot get MFA status", err)
+	}
+
 	setData(ctx, "email", user.Email)
 	setData(ctx, "sshKeys", keys)
 	setData(ctx, "passkeys", passkeys)
+	setData(ctx, "hasTotp", hasTotp)
 	setData(ctx, "hasPassword", user.Password != "")
 	setData(ctx, "disableForm", getData(ctx, "DisableLoginForm"))
 	setData(ctx, "htmlTitle", trH(ctx, "settings"))

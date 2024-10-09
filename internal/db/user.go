@@ -206,11 +206,17 @@ func (user *User) DeleteProviderID(provider string) error {
 	return nil
 }
 
-func (user *User) HasMFA() (bool, error) {
-	var exists bool
-	err := db.Model(&WebAuthnCredential{}).Select("count(*) > 0").Where("user_id = ?", user.ID).Find(&exists).Error
+func (user *User) HasMFA() (bool, bool, error) {
+	var webauthn bool
+	var totp bool
+	err := db.Model(&WebAuthnCredential{}).Select("count(*) > 0").Where("user_id = ?", user.ID).Find(&webauthn).Error
+	if err != nil {
+		return false, false, err
+	}
 
-	return exists, err
+	err = db.Model(&TOTP{}).Select("count(*) > 0").Where("user_id = ?", user.ID).Find(&totp).Error
+
+	return webauthn, totp, err
 }
 
 // -- DTO -- //

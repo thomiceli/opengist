@@ -1,0 +1,50 @@
+{{ template "header" .}}
+
+<div class="py-10">
+    <header class="pb-4">
+        <div>
+            <h1 class="text-2xl font-bold leading-tight">TOTP</h1>
+        </div>
+    </header>
+    <main>
+        {{ if .recoveryCodes }}
+        <p class="mb-4">Save your recovery codes in a safe place. You can use these codes to recover access to your account if you lose access to your authenticator app.</p>
+
+        <div class="mt-8 sm:w-full sm:max-w-md mx-auto flex">
+            <div class="mx-auto bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                <ul class="list-none">
+                    <code>
+                    {{ range .recoveryCodes }}
+                    <li>{{ . }}</li>
+                    {{ end }}
+                    </code>
+                </ul>
+            </div>
+
+        </div>
+        <div class="mt-8 sm:w-full sm:max-w-md mx-auto flex flex-col items-center">
+            <a href="{{ $.c.ExternalUrl }}/settings" class="px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Proceed</a>
+        </div>
+
+        {{ else }}
+
+        <p class="mb-4">Scan the QR code below with your authenticator app to enable two-factor authentication.</p>
+        <p class="mb-4">If you can't scan the QR code, you can manually enter the
+            following code into your authenticator app: <code>{{.totpSecret}}</code></p>
+        <img src="{{.totpQrcode}}" alt="{{.totpSecret}}">
+
+        <form method="post" action="{{ $.c.ExternalUrl }}/settings/totp/generate">
+            {{ .csrfHtml }}
+            <label for="code" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Passcode</label>
+            <div class="mt-1">
+                <input id="code" name="code" type="text" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" />
+            </div>
+            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Generate new TOTP</button>
+        </form>
+        {{ end }}
+    </main>
+</div>
+
+
+
+{{ template "footer" .}}

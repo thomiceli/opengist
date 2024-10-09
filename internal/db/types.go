@@ -2,6 +2,8 @@ package db
 
 import (
 	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -37,4 +39,39 @@ func (*binaryData) GormDBDataType(db *gorm.DB, _ *schema.Field) string {
 	default:
 		return "BLOB"
 	}
+}
+
+type jsonData json.RawMessage
+
+func (j *jsonData) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
+	}
+
+	result := json.RawMessage{}
+	err := json.Unmarshal(bytes, &result)
+	*j = jsonData(result)
+	return err
+}
+
+func (j *jsonData) Value() (driver.Value, error) {
+	if len(*j) == 0 {
+		return nil, nil
+	}
+	return json.RawMessage(*j).MarshalJSON()
+}
+
+func (*jsonData) GormDataType() string {
+	return "json"
+}
+
+func (*jsonData) GormDBDataType(db *gorm.DB, _ *schema.Field) string {
+	switch db.Dialector.Name() {
+	case "mysql", "sqlite":
+		return "JSON"
+	case "postgres":
+		return "JSONB"
+	}
+	return ""
 }

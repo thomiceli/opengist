@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func ReadKey(filePath string) []byte {
+func GenerateSecretKey(filePath string) []byte {
 	key, err := os.ReadFile(filePath)
 	if err == nil {
 		return key

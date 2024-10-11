@@ -1,5 +1,5 @@
 # Learn more about Opengist configuration here:
-# https://github.com/thomiceli/opengist/blob/master/docs/configuration/index.md
+# https://github.com/thomiceli/opengist/blob/master/docs/configuration/configure.md
 # https://github.com/thomiceli/opengist/blob/master/docs/configuration/cheat-sheet.md
 
 # Set the log level to one of the following: debug, info, warn, error, fatal. Default: warn

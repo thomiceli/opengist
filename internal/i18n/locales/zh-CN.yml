@@ -257,4 +257,4 @@ validation.should-only-contain-alphanumeric-characters-and-dashes: ''
 validation.not-enough: ''
 validation.invalid: ''
 html.title.admin-panel: ''
-settings.ssh-key-exists: SSH密钥已经存在
+settings.ssh-key-exists: SSH 密钥已经存在

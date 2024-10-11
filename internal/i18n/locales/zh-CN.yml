@@ -123,7 +123,7 @@ header.menu.all: 全部
 header.menu.new: 创建
 header.menu.search: 搜索
 header.menu.my-gists: 我的 Gists
-header.menu.liked: Liked
+header.menu.liked: 喜欢的 Gists
 header.menu.admin: 管理
 header.menu.settings: 设置
 header.menu.logout: 登出
@@ -166,8 +166,8 @@ admin.disable-login: 禁用登录表单
 admin.disable-login_help: 禁止使用登录表单进行登录以强制通过 OAuth 提供方登录。
 admin.disable-gravatar: 禁用 Gravatar
 admin.disable-gravatar_help: 停止使用 Gravatar 作为头像提供方。
-admin.allow-gists-without-login:
-admin.allow-gists-without-login_help:
+admin.allow-gists-without-login: 允许未登录状态下输入个人 gists
+admin.allow-gists-without-login_help: 允许在不登录的情况下查看和下载 gist，同时需要登录才能使用 gists 的发现功能。
 admin.users.delete_confirm: 你想要删除此用户吗？
 
 admin.gists.title: 标题
@@ -186,7 +186,7 @@ gist.list.all-from: '所有 gists 来自于 %s'
 gist.search.found: '以下是找到的 gists'
 gist.search.no-results: '没有找到gist'
 gist.search.help.user: '由用户创建的gist'
-gist.search.help.title: '给定标题的gist'
+gist.search.help.title: '包含指定标题的 gists'
 gist.search.help.filename: 'gists 文件中包含指定名称'
 gist.search.help.extension: 'gists 文件中包含指定插件'
 gist.search.help.language: 'gists 文件中包含指定的开发语言'
@@ -203,58 +203,70 @@ settings.change-password-help: '修改您的密码用于 HTTP 方式登录 Openg
 settings.password-label-title: '密码'
 error.bad-request: '请求错误'
 error.signup-disabled: '注册功能已被管理员禁用'
-error.signup-disabled-form: ''
-error.login-disabled-form: ''
-error.complete-oauth-login: ''
-error.oauth-unsupported: ''
-error.cannot-bind-data: ''
-error.invalid-number: ''
-error.invalid-character-unescaped: ''
+error.signup-disabled-form: '已禁用了表单注册功能'
+error.login-disabled-form: '已禁用了表单登录功能'
+error.complete-oauth-login: '用户认证未能通过: %s'
+error.oauth-unsupported: '不支持的认证提供商'
+error.cannot-bind-data: '无法绑定数据'
+error.invalid-number: '数字格式不正确'
+error.invalid-character-unescaped: '包含未转义的无效字符'
 admin.invitations: '邀请'
 admin.invitations.create: '创建邀请'
-admin.actions.sync-previews: ''
-admin.actions.reset-hooks: ''
-admin.actions.index-gists: ''
-admin.invitations.help: ''
+admin.actions.sync-previews: '同步所有 gists 预览'
+admin.actions.reset-hooks: '重置所有存储库的 Git 服务hooks'
+admin.actions.index-gists: '索引所有 gists'
+admin.invitations.help: '即使在禁用注册功能的情况下，邀请功能也可用于创建帐户。'
 admin.invitations.max_uses: '最多使用次数'
 admin.invitations.expires_at: '过期时间'
 admin.invitations.code: '邀请码'
 admin.invitations.copy_link: '复制链接'
 admin.invitations.uses: '使用次数'
-admin.invitations.expired: ''
+admin.invitations.expired: '已到期'
 flash.admin.user-deleted: '用户已删除'
 flash.admin.gist-deleted: 'Gist 已删除'
-flash.admin.invitation-created: ''
-flash.admin.invitation-deleted: ''
-flash.admin.sync-fs: ''
-flash.admin.sync-db: ''
-flash.admin.git-gc: ''
-flash.admin.sync-previews: ''
-flash.admin.reset-hooks: ''
-flash.admin.index-gists: ''
-flash.auth.username-exists: ''
-flash.auth.invalid-credentials: ''
-flash.auth.account-linked-oauth: ''
-flash.auth.account-unlinked-oauth: ''
-flash.auth.user-sshkeys-not-retrievable: ''
-flash.auth.user-sshkeys-not-created: ''
-flash.auth.must-be-logged-in: ''
-flash.gist.visibility-changed: ''
-flash.gist.deleted: ''
-flash.gist.fork-own-gist: ''
-flash.gist.forked: ''
-flash.user.email-updated: ''
-flash.user.invalid-ssh-key: ''
-flash.user.ssh-key-added: ''
-flash.user.ssh-key-deleted: ''
-flash.user.password-updated: ''
-flash.user.username-updated: ''
-validation.is-too-long: ''
-validation.should-not-be-empty: ''
-validation.should-not-include-sub-directory: ''
-validation.should-only-contain-alphanumeric-characters: ''
-validation.should-only-contain-alphanumeric-characters-and-dashes: ''
-validation.not-enough: ''
-validation.invalid: ''
-html.title.admin-panel: ''
+flash.admin.invitation-created: '该邀请已被创建'
+flash.admin.invitation-deleted: '该邀请已被删除'
+flash.admin.sync-fs: '正在从文件系统同步存储库...'
+flash.admin.sync-db: '正在从数据库同步存储库...'
+flash.admin.git-gc: '正在进行存储库垃圾回收...'
+flash.admin.sync-previews: '正在同步 Gist 预览...'
+flash.admin.reset-hooks: '正在重置所有存储库的 Git 服务挂钩...'
+flash.admin.index-gists: '索引所有 gists...'
+flash.auth.username-exists: '用户名已存在'
+flash.auth.invalid-credentials: '无效的凭证'
+flash.auth.account-linked-oauth: '帐户已关联到 %s'
+flash.auth.account-unlinked-oauth: '帐户与 %s 解除关联'
+flash.auth.user-sshkeys-not-retrievable: '无法获取用户密钥'
+flash.auth.user-sshkeys-not-created: '无法创建 ssh 密钥'
+flash.auth.must-be-logged-in: '您必须登录才能访问 gists'
+flash.gist.visibility-changed: 'Gist可见性已更改'
+flash.gist.deleted: 'Gist已被删除'
+flash.gist.fork-own-gist: '无法派生自己的要点'
+flash.gist.forked: 'Gist 已被派生'
+flash.user.email-updated: '电子邮件已更新'
+flash.user.invalid-ssh-key: 'SSH 密钥无效'
+flash.user.ssh-key-added: 'SSH 密钥已添加'
+flash.user.ssh-key-deleted: 'SSH 密钥已删除'
+flash.user.password-updated: '密码已更新'
+flash.user.username-updated: '用户名已更新'
+validation.is-too-long: '字段 %s 太长'
+validation.should-not-be-empty: '字段 %s 不能为空'
+validation.should-not-include-sub-directory: '字段 %s 不应包含子目录'
+validation.should-only-contain-alphanumeric-characters: '字段 %s 只能包含字母、数字、字符'
+validation.should-only-contain-alphanumeric-characters-and-dashes: '字段 %s 应仅包含字母、数字、字符和 ‘-’'
+validation.not-enough: '还不够 %s'
+validation.invalid: '无效 %s'
+html.title.admin-panel: '管理面板'
 settings.ssh-key-exists: SSH 密钥已经存在
+auth.mfa.passkey-name: 密钥名称
+auth.mfa.use-passkey-to-finish: 使用密钥完成身份验证
+auth.mfa.delete-passkey: 删除密钥
+auth.mfa.passkey-added-at: 密钥已添加
+auth.mfa.passkey-never-used: 密钥从未使用
+auth.mfa.passkey-last-used: 密钥上次使用时间
+auth.mfa.delete-passkey-confirm: 确认删除密钥
+error.not-in-mfa-session: 用户不在 MFA 会话中
+auth.mfa.waiting-for-passkey-input: 等待浏览器的交互输入...
+auth.mfa.passkeys-help: 添加密钥以登录您的帐户并用于 MFA 方式。
+flash.auth.passkey-registred: 密钥 %s 已注册
+flash.auth.passkey-deleted: 密钥已删除

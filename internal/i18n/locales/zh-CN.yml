@@ -9,7 +9,7 @@ gist.header.edit: 编辑
 gist.header.delete: 删除
 gist.header.forked-from: 派生自
 gist.header.last-active: 最后活跃于
-gist.header.select-tab: Select a tab
+gist.header.select-tab: 选择一个选项
 gist.header.code: 代码
 gist.header.revisions: 修订
 gist.header.revision: 修订
@@ -17,7 +17,7 @@ gist.header.clone-http: 通过 %s 克隆
 gist.header.clone-http-help: 使用 Git 通过 HTTP 基础认证克隆。
 gist.header.clone-ssh: 通过 SSH 克隆
 gist.header.clone-ssh-help: 使用 Git 通过 SSH 密钥克隆。
-gist.header.embed: ''
+gist.header.embed: '嵌入'
 gist.header.embed-help: '在你的网页中嵌入此gist。'
 gist.header.download-zip: 下载 ZIP
 
@@ -49,7 +49,7 @@ gist.edit.delete: 删除
 gist.edit.cancel: 取消
 gist.edit.save: 保存
 
-gist.list.joined: Joined
+gist.list.joined: 已加入
 gist.list.all: 所有 Gists
 gist.list.search-results: 搜索结果
 gist.list.sort: 排序
@@ -77,11 +77,11 @@ gist.likes.no: 还没有喜欢
 gist.revisions: 修订
 gist.revision.revised: 修订了这个 Gist
 gist.revision.go-to-revision: 跳至此修订
-gist.revision.file-created: file created
-gist.revision.file-deleted: file deleted
+gist.revision.file-created: 文件已创建
+gist.revision.file-deleted: 文件已被删除
 gist.revision.file-renamed: 重命名为
 gist.revision.diff-truncated: 由于变更差异过大，显示内容已被截断
-gist.revision.file-renamed-no-changes: File renamed without changes
+gist.revision.file-renamed-no-changes: 文件已重命名，但名称与之前没有差异
 gist.revision.empty-file: 空文件
 gist.revision.no-changes: 没有变更
 gist.revision.no-revisions: 无可供显示的修订
@@ -102,7 +102,7 @@ settings.add-ssh-key-help: 用于使用 Git 通过 SSH 拉取与推送 Gist
 settings.add-ssh-key-title: 标题
 settings.add-ssh-key-content: 密钥
 settings.delete-ssh-key: 删除
-settings.delete-ssh-key-confirm: Confirm deletion of SSH key
+settings.delete-ssh-key-confirm: 确认删除 SSH 密钥
 settings.ssh-key-added-at: 添加
 settings.ssh-key-never-used: 从未使用过
 settings.ssh-key-last-used: 最后使用于
@@ -176,33 +176,33 @@ admin.gists.nb-files: 文件数
 admin.gists.nb-likes: 喜欢数
 admin.gists.delete_confirm: 你想要删除此 Gist 吗？
 gist.new.url: 'URL'
-gist.new.preview: ''
-error.page-not-found: ''
+gist.new.preview: '预览 gist'
+error.page-not-found: '页面未找到'
 gist.new.create-a-new-gist: '创建一个新的gist'
-gist.edit.edit-gist: ''
-gist.list.all-liked-by: ''
-gist.list.all-forked-by: ''
-gist.list.all-from: ''
-gist.search.found: ''
+gist.edit.edit-gist: '编辑 %s'
+gist.list.all-liked-by: '所有 gists 被 %s 标记喜欢'
+gist.list.all-forked-by: '所有 gists 被 %s 派生'
+gist.list.all-from: '所有 gists 来自于 %s'
+gist.search.found: '以下是找到的 gists'
 gist.search.no-results: '没有找到gist'
 gist.search.help.user: '由用户创建的gist'
 gist.search.help.title: '给定标题的gist'
-gist.search.help.filename: ''
-gist.search.help.extension: ''
-gist.search.help.language: ''
-gist.forks.for: ''
-gist.likes.for: ''
-gist.revision-of: ''
-settings.link-gitlab-account: ''
-settings.unlink-gitlab-account: ''
+gist.search.help.filename: 'gists 文件中包含指定名称'
+gist.search.help.extension: 'gists 文件中包含指定插件'
+gist.search.help.language: 'gists 文件中包含指定的开发语言'
+gist.forks.for: '派生到 %s'
+gist.likes.for: '喜欢给 %s'
+gist.revision-of: '被 %s 修订'
+settings.link-gitlab-account: '关联 GitLab 账号'
+settings.unlink-gitlab-account: '解除关联 GitLab 账号'
 settings.change-username: '修改用户名'
-settings.create-password: ''
-settings.create-password-help: ''
+settings.create-password: '创建密码'
+settings.create-password-help: '创建密码用于 HTTP 方式登录 Opengist'
 settings.change-password: '修改密码'
-settings.change-password-help: ''
+settings.change-password-help: '修改您的密码用于 HTTP 方式登录 Opengist'
 settings.password-label-title: '密码'
-error.bad-request: ''
-error.signup-disabled: ''
+error.bad-request: '请求错误'
+error.signup-disabled: '注册功能已被管理员禁用'
 error.signup-disabled-form: ''
 error.login-disabled-form: ''
 error.complete-oauth-login: ''
@@ -257,3 +257,4 @@ validation.should-only-contain-alphanumeric-characters-and-dashes: ''
 validation.not-enough: ''
 validation.invalid: ''
 html.title.admin-panel: ''
+settings.ssh-key-exists: SSH密钥已经存在

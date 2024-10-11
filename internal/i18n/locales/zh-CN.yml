@@ -270,3 +270,9 @@ auth.mfa.waiting-for-passkey-input: 等待浏览器的交互输入...
 auth.mfa.passkeys-help: 添加密钥以登录您的帐户并用于 MFA 方式。
 flash.auth.passkey-registred: 密钥 %s 已注册
 flash.auth.passkey-deleted: 密钥已删除
+auth.mfa.use-passkey: 使用通行密钥
+auth.mfa.bind-passkey: 绑定通行密钥
+auth.mfa.login-with-passkey: 使用通行密钥登录
+auth.mfa: 多因素认证
+auth.mfa.passkey: 通行密钥
+auth.mfa.passkeys: 通行密钥

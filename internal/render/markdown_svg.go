@@ -12,6 +12,8 @@ import (
 	"regexp"
 )
 
+var svgRegex = regexp.MustCompile(`(?i)^[ ]{0,3}<(svg)(?:\s.*|>.*|/>.*|)(?:\r\n|\n)?$`)
+
 type svgToImgBase64 struct{}
 
 func (e *svgToImgBase64) Extend(m goldmark.Markdown) {
@@ -72,8 +74,7 @@ func (b *svgParser) Open(parent ast.Node, reader text.Reader, _ parser.Context) 
 		return nil, parser.None
 	}
 
-	a := regexp.MustCompile("(?i)^[ ]{0,3}<(svg)(?:\\s.*|>.*|/>.*|)(?:\\r\\n|\\n)?$")
-	if a.Match(line) {
+	if svgRegex.Match(line) {
 		node = newSvgBlock()
 	}
 

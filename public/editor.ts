@@ -1,6 +1,6 @@
 import {EditorView, gutter, keymap, lineNumbers} from "@codemirror/view";
 import {Compartment, EditorState, Facet, Line, SelectionRange} from "@codemirror/state";
-import {indentLess} from "@codemirror/commands";
+import {defaultKeymap, indentLess} from "@codemirror/commands";
 
 document.addEventListener("DOMContentLoaded", () => {
     EditorView.theme({}, {dark: true});
@@ -27,7 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
             extensions: [
                 lineNumbers(),
                 gutter({class: "cm-mygutter"}),
-                keymap.of([{key: "Tab", run: customIndentMore, shift: indentLess}]),
+                keymap.of([
+                    {key: "Tab", run: customIndentMore, shift: indentLess},
+                    ...defaultKeymap,
+                ]),
                 indentSize.of(EditorState.tabSize.of(2)),
                 wrapMode.of([]),
                 indentType.of(txtFacet.of("space")),

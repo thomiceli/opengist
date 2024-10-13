@@ -26,7 +26,7 @@ func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
 
 func MarkdownFile(file *git.File) (RenderedFile, error) {
 	var buf bytes.Buffer
-	err := newMarkdown().Convert([]byte(file.Content), &buf)
+	err := newMarkdownWithSvgExtension().Convert([]byte(file.Content), &buf)
 
 	return RenderedFile{
 		File: file,
@@ -36,26 +36,34 @@ func MarkdownFile(file *git.File) (RenderedFile, error) {
 }
 func MarkdownString(content string) (string, error) {
 	var buf bytes.Buffer
-	err := newMarkdown().Convert([]byte(content), &buf)
+	err := newMarkdownWithSvgExtension().Convert([]byte(content), &buf)
 
 	return buf.String(), err
 }
 
-func newMarkdown() goldmark.Markdown {
-	return goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			highlighting.NewHighlighting(
-				highlighting.WithStyle("catppuccin-latte"),
-				highlighting.WithFormatOptions(html.WithClasses(true))),
-			emoji.Emoji,
-			&mermaid.Extender{},
-			&svgToImgBase64{},
+func newMarkdown(extraExtensions ...goldmark.Extender) goldmark.Markdown {
+	extensions := []goldmark.Extender{
+		extension.GFM,
+		highlighting.NewHighlighting(
+			highlighting.WithStyle("catppuccin-latte"),
+			highlighting.WithFormatOptions(html.WithClasses(true)),
 		),
+		emoji.Emoji,
+		&mermaid.Extender{},
+	}
+
+	extensions = append(extensions, extraExtensions...)
+
+	return goldmark.New(
+		goldmark.WithExtensions(extensions...),
 		goldmark.WithParserOptions(
 			parser.WithASTTransformers(
 				util.Prioritized(&checkboxTransformer{}, 10000),
 			),
 		),
 	)
+}
+
+func newMarkdownWithSvgExtension() goldmark.Markdown {
+	return newMarkdown(&svgToImgBase64{})
 }

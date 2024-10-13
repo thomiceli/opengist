@@ -50,7 +50,7 @@ func newMarkdown() goldmark.Markdown {
 				highlighting.WithFormatOptions(html.WithClasses(true))),
 			emoji.Emoji,
 			&mermaid.Extender{},
-			&svgToImg{},
+			&svgToImgBase64{},
 		),
 		goldmark.WithParserOptions(
 			parser.WithASTTransformers(

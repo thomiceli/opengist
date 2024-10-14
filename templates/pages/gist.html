@@ -68,6 +68,8 @@
                     </table>
                 {{ else if isMarkdown $file.Filename }}
                     <div class="chroma markdown markdown-body p-8">{{ $file.HTML | safe }}</div>
+                {{ else if isSvg $file.Filename }}
+                    <div class="p-8 flex justify-center">{{ $file.HTML | safe }}</div>
                 {{ else }}
                     <div class="code">
                         {{ $fileslug := slug $file.Filename }}

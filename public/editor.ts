@@ -71,11 +71,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 cmeditor!.classList.remove("hidden-important");
                 return;
             } else {
-                fetch(`${baseUrl}/preview?` +  new URLSearchParams({
-                    content: editor.state.doc.toString()
-                }), {
-                    method: 'GET',
+                const formData = new FormData();
+                formData.append('content', editor.state.doc.toString());
+                fetch(`${baseUrl}/preview`, {
+                    method: 'POST',
                     credentials: 'same-origin',
+                    body: formData
                 }).then(r => r.text()).then(r => {
                     let divpreview = dom.querySelector("div.preview") as HTMLElement;
                     divpreview!.innerHTML = r;

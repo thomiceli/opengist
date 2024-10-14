@@ -251,7 +251,7 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 		g1.Use(csrfInit)
 		g1.GET("/", create, logged)
 		g1.POST("/", processCreate, logged)
-		g1.GET("/preview", preview, logged)
+		g1.POST("/preview", preview, logged)
 
 		g1.GET("/healthcheck", healthcheck)
 		g1.GET("/metrics", metrics)

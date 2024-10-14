@@ -107,6 +107,10 @@ dl.dl-config dd {
     @apply overflow-auto whitespace-pre;
 }
 
+.markdown-body img {
+    @apply bg-transparent dark:bg-transparent;
+}
+
 .chroma.preview.markdown pre code {
     @apply p-4;
 }

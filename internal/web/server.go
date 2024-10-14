@@ -65,6 +65,9 @@ var (
 		"isCsv": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".csv"
 		},
+		"isSvg": func(i string) bool {
+			return strings.ToLower(filepath.Ext(i)) == ".svg"
+		},
 		"csvFile": func(file *git.File) *git.CsvFile {
 			if strings.ToLower(filepath.Ext(file.Filename)) != ".csv" {
 				return nil

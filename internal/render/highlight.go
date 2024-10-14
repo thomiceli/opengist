@@ -3,6 +3,7 @@ package render
 import (
 	"bufio"
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
@@ -11,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"path"
 	"sync"
 )
 
@@ -28,17 +30,21 @@ type RenderedGist struct {
 }
 
 func HighlightFile(file *git.File) (RenderedFile, error) {
-	rendered := RenderedFile{
-		File: file,
-	}
-
 	style := newStyle()
 	lexer := newLexer(file.Filename)
+
 	if lexer.Config().Name == "markdown" {
 		return MarkdownFile(file)
 	}
+	if lexer.Config().Name == "XML" && path.Ext(file.Filename) == ".svg" {
+		return RenderSvgFile(file), nil
+	}
 
 	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))
+
+	rendered := RenderedFile{
+		File: file,
+	}
 
 	iterator, err := lexer.Tokenise(nil, file.Content+"\n")
 	if err != nil {
@@ -138,6 +144,20 @@ func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {
 	rendered.Lines = lines
 
 	return rendered, err
+}
+
+func RenderSvgFile(file *git.File) RenderedFile {
+	rendered := RenderedFile{
+		File: file,
+	}
+
+	encoded := base64.StdEncoding.EncodeToString([]byte(file.Content))
+	content := `<img src="data:image/svg+xml;base64,` + encoded + `" />`
+
+	rendered.HTML = content
+	rendered.Type = "SVG"
+
+	return rendered
 }
 
 func parseFileTypeName(config chroma.Config) string {

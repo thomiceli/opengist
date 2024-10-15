@@ -22,6 +22,8 @@ var OpengistVersion = ""
 
 var C *config
 
+var SecretKey []byte
+
 // Not using nested structs because the library
 // doesn't support dot notation in this case sadly
 type config struct {
@@ -135,6 +137,8 @@ func InitConfig(configPath string, out io.Writer) error {
 	}
 
 	C = c
+
+	SecretKey = utils.GenerateSecretKey(filepath.Join(GetHomeDir(), "opengist-secret.key"))
 
 	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {
 		return err

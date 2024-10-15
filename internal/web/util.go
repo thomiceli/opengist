@@ -101,6 +101,7 @@ func setErrorFlashes(ctx echo.Context) {
 
 	setData(ctx, "flashErrors", sess.Flashes("error"))
 	setData(ctx, "flashSuccess", sess.Flashes("success"))
+	setData(ctx, "flashWarnings", sess.Flashes("warning"))
 
 	_ = sess.Save(ctx.Request(), ctx.Response())
 }

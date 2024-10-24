@@ -170,7 +170,7 @@ auth.totp.disabled: TOTP successfully disabled
 auth.totp.disable: Disable TOTP
 auth.totp.enter-code: Enter the code from the Authenticator app
 auth.totp.enter-recovery-key: or a recovery key if you lost your device
-auth.totp.passcode: Passcode
+auth.totp.code: Code
 auth.totp.submit: Submit
 auth.totp.proceed: Proceed
 auth.totp.save-recovery-codes: Save your recovery codes in a safe place. You can use these codes to recover access to your account if you lose access to your authenticator app.

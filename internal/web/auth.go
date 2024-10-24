@@ -562,15 +562,19 @@ func beginTotp(ctx echo.Context) error {
 	if err != nil {
 		return errorRes(500, "Cannot parse base URL", err)
 	}
-	secret, qrcode, err := totp.GenerateQRCode(getUserLogged(ctx).Username, ogUrl.Hostname())
+
+	sess := getSession(ctx)
+	generatedSecret, _ := sess.Values["generatedSecret"].([]byte)
+
+	totpSecret, qrcode, err, generatedSecret := totp.GenerateQRCode(getUserLogged(ctx).Username, ogUrl.Hostname(), generatedSecret)
 	if err != nil {
 		return errorRes(500, "Cannot generate TOTP QR code", err)
 	}
-	sess := getSession(ctx)
-	sess.Values["totpSecret"] = secret
+	sess.Values["totpSecret"] = totpSecret
+	sess.Values["generatedSecret"] = generatedSecret
 	saveSession(sess, ctx)
 
-	setData(ctx, "totpSecret", secret)
+	setData(ctx, "totpSecret", totpSecret)
 	setData(ctx, "totpQrcode", qrcode)
 
 	return html(ctx, "totp.html")
@@ -604,7 +608,9 @@ func finishTotp(ctx echo.Context) error {
 	}
 
 	if !totp.Validate(dto.Code, secret) {
-		return errorRes(400, tr(ctx, "auth.totp.invalid-secret"), nil)
+		addFlash(ctx, tr(ctx, "auth.totp.invalid-code"), "error")
+
+		return redirect(ctx, "/settings/totp/generate")
 	}
 
 	userTotp := &db.TOTP{
@@ -623,6 +629,10 @@ func finishTotp(ctx echo.Context) error {
 	if err != nil {
 		return errorRes(500, "Cannot generate recovery codes", err)
 	}
+
+	delete(sess.Values, "totpSecret")
+	delete(sess.Values, "generatedSecret")
+	saveSession(sess, ctx)
 
 	setData(ctx, "recoveryCodes", codes)
 	return html(ctx, "totp.html")

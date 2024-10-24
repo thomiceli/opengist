@@ -158,6 +158,23 @@ auth.mfa.passkey-added-at: Added
 auth.mfa.passkey-never-used: Never used
 auth.mfa.passkey-last-used: Last used
 auth.mfa.delete-passkey-confirm: Confirm deletion of passkey
+auth.totp: Time based one-time password (TOTP)
+auth.totp.help: TOTP is a two-factor authentication method that uses a shared secret to generate a one-time password.
+auth.totp.use: Use TOTP
+auth.totp.regenerate-recovery-codes: Regenerate recovery codes
+auth.totp.already-enabled: TOTP is already enabled
+auth.totp.invalid-secret: Invalid TOTP secret
+auth.totp.invalid-code: Invalid TOTP code
+auth.totp.code-used: The recovery code %s was used, it is now invalid. You may want to disable MFA for now or regenerate your codes.
+auth.totp.disabled: TOTP successfully disabled
+auth.totp.disable: Disable TOTP
+auth.totp.enter-code: Enter the code from the Authenticator app
+auth.totp.enter-recovery-key: or a recovery key if you lost your device
+auth.totp.code: Code
+auth.totp.submit: Submit
+auth.totp.proceed: Proceed
+auth.totp.save-recovery-codes: Save your recovery codes in a safe place. You can use these codes to recover access to your account if you lose access to your authenticator app.
+auth.totp.scan-qr-code: Scan the QR code below with your authenticator app to enable two-factor authentication or enter the following string, then confirm with the generated code.
 
 
 error: Error

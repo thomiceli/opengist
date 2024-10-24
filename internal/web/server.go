@@ -168,8 +168,8 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 	dev = isDev
 	flashStore = sessions.NewCookieStore([]byte("opengist"))
 	userStore = sessions.NewFilesystemStore(sessionsPath,
-		utils.ReadKey(path.Join(sessionsPath, "session-auth.key")),
-		utils.ReadKey(path.Join(sessionsPath, "session-encrypt.key")),
+		utils.GenerateSecretKey(path.Join(sessionsPath, "session-auth.key")),
+		utils.GenerateSecretKey(path.Join(sessionsPath, "session-encrypt.key")),
 	)
 	userStore.MaxLength(10 * 1024)
 	gothic.Store = userStore
@@ -274,6 +274,7 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 		g1.POST("/webauthn/assertion", beginWebAuthnAssertion, inMFASession)
 		g1.POST("/webauthn/assertion/finish", finishWebAuthnAssertion, inMFASession)
 		g1.GET("/mfa", mfa, inMFASession)
+		g1.POST("/mfa/totp/assertion", assertTotp, inMFASession)
 
 		g1.GET("/settings", userSettings, logged)
 		g1.POST("/settings/email", emailProcess, logged)
@@ -283,6 +284,11 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 		g1.DELETE("/settings/passkeys/:id", passkeyDelete, logged)
 		g1.PUT("/settings/password", passwordProcess, logged)
 		g1.PUT("/settings/username", usernameProcess, logged)
+		g1.GET("/settings/totp/generate", beginTotp, logged)
+		g1.POST("/settings/totp/generate", finishTotp, logged)
+		g1.DELETE("/settings/totp", disableTotp, logged)
+		g1.POST("/settings/totp/regenerate", regenerateTotpRecoveryCodes, logged)
+
 		g2 := g1.Group("/admin-panel")
 		{
 			g2.Use(adminPermission)

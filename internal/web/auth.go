@@ -15,6 +15,7 @@ import (
 	"github.com/markbates/goth/providers/gitlab"
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/auth/totp"
 	"github.com/thomiceli/opengist/internal/auth/webauthn"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
@@ -169,12 +170,13 @@ func processLogin(ctx echo.Context) error {
 	}
 
 	// handle MFA
-	var hasMFA bool
-	if hasMFA, err = user.HasMFA(); err != nil {
+	var hasWebauthn, hasTotp bool
+	if hasWebauthn, hasTotp, err = user.HasMFA(); err != nil {
 		return errorRes(500, "Cannot check for user MFA", err)
 	}
-	if hasMFA {
+	if hasWebauthn || hasTotp {
 		sess.Values["mfaID"] = user.ID
+		sess.Options.MaxAge = 5 * 60 // 5 minutes
 		saveSession(sess, ctx)
 		return redirect(ctx, "/mfa")
 	}
@@ -188,6 +190,18 @@ func processLogin(ctx echo.Context) error {
 }
 
 func mfa(ctx echo.Context) error {
+	var err error
+
+	user := db.User{ID: getSession(ctx).Values["mfaID"].(uint)}
+
+	var hasWebauthn, hasTotp bool
+	if hasWebauthn, hasTotp, err = user.HasMFA(); err != nil {
+		return errorRes(500, "Cannot check for user MFA", err)
+	}
+
+	setData(ctx, "hasWebauthn", hasWebauthn)
+	setData(ctx, "hasTotp", hasTotp)
+
 	return html(ctx, "mfa.html")
 }
 
@@ -532,6 +546,175 @@ func finishWebAuthnAssertion(ctx echo.Context) error {
 	saveSession(sess, ctx)
 
 	return json(ctx, 200, []string{"OK"})
+}
+
+func beginTotp(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+
+	if _, hasTotp, err := user.HasMFA(); err != nil {
+		return errorRes(500, "Cannot check for user MFA", err)
+	} else if hasTotp {
+		addFlash(ctx, tr(ctx, "auth.totp.already-enabled"), "error")
+		return redirect(ctx, "/settings")
+	}
+
+	ogUrl, err := url.Parse(getData(ctx, "baseHttpUrl").(string))
+	if err != nil {
+		return errorRes(500, "Cannot parse base URL", err)
+	}
+
+	sess := getSession(ctx)
+	generatedSecret, _ := sess.Values["generatedSecret"].([]byte)
+
+	totpSecret, qrcode, err, generatedSecret := totp.GenerateQRCode(getUserLogged(ctx).Username, ogUrl.Hostname(), generatedSecret)
+	if err != nil {
+		return errorRes(500, "Cannot generate TOTP QR code", err)
+	}
+	sess.Values["totpSecret"] = totpSecret
+	sess.Values["generatedSecret"] = generatedSecret
+	saveSession(sess, ctx)
+
+	setData(ctx, "totpSecret", totpSecret)
+	setData(ctx, "totpQrcode", qrcode)
+
+	return html(ctx, "totp.html")
+
+}
+
+func finishTotp(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+
+	if _, hasTotp, err := user.HasMFA(); err != nil {
+		return errorRes(500, "Cannot check for user MFA", err)
+	} else if hasTotp {
+		addFlash(ctx, tr(ctx, "auth.totp.already-enabled"), "error")
+		return redirect(ctx, "/settings")
+	}
+
+	dto := &db.TOTPDTO{}
+	if err := ctx.Bind(dto); err != nil {
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
+	}
+
+	if err := ctx.Validate(dto); err != nil {
+		addFlash(ctx, "Invalid secret", "error")
+		return redirect(ctx, "/settings/totp/generate")
+	}
+
+	sess := getSession(ctx)
+	secret, ok := sess.Values["totpSecret"].(string)
+	if !ok {
+		return errorRes(500, "Cannot get TOTP secret from session", nil)
+	}
+
+	if !totp.Validate(dto.Code, secret) {
+		addFlash(ctx, tr(ctx, "auth.totp.invalid-code"), "error")
+
+		return redirect(ctx, "/settings/totp/generate")
+	}
+
+	userTotp := &db.TOTP{
+		UserID: getUserLogged(ctx).ID,
+	}
+	if err := userTotp.StoreSecret(secret); err != nil {
+		return errorRes(500, "Cannot store TOTP secret", err)
+	}
+
+	if err := userTotp.Create(); err != nil {
+		return errorRes(500, "Cannot create TOTP", err)
+	}
+
+	addFlash(ctx, "TOTP successfully enabled", "success")
+	codes, err := userTotp.GenerateRecoveryCodes()
+	if err != nil {
+		return errorRes(500, "Cannot generate recovery codes", err)
+	}
+
+	delete(sess.Values, "totpSecret")
+	delete(sess.Values, "generatedSecret")
+	saveSession(sess, ctx)
+
+	setData(ctx, "recoveryCodes", codes)
+	return html(ctx, "totp.html")
+}
+
+func assertTotp(ctx echo.Context) error {
+	var err error
+	dto := &db.TOTPDTO{}
+	if err := ctx.Bind(dto); err != nil {
+		return errorRes(400, tr(ctx, "error.cannot-bind-data"), err)
+	}
+
+	if err := ctx.Validate(dto); err != nil {
+		addFlash(ctx, tr(ctx, "auth.totp.invalid-code"), "error")
+		return redirect(ctx, "/mfa")
+	}
+
+	sess := getSession(ctx)
+	userId := sess.Values["mfaID"].(uint)
+	var userTotp *db.TOTP
+	if userTotp, err = db.GetTOTPByUserID(userId); err != nil {
+		return errorRes(500, "Cannot get TOTP by UID", err)
+	}
+
+	redirectUrl := "/"
+
+	var validCode, validRecoveryCode bool
+	if validCode, err = userTotp.ValidateCode(dto.Code); err != nil {
+		return errorRes(500, "Cannot validate TOTP code", err)
+	}
+	if !validCode {
+		validRecoveryCode, err = userTotp.ValidateRecoveryCode(dto.Code)
+		if err != nil {
+			return errorRes(500, "Cannot validate TOTP code", err)
+		}
+
+		if !validRecoveryCode {
+			addFlash(ctx, tr(ctx, "auth.totp.invalid-code"), "error")
+			return redirect(ctx, "/mfa")
+		}
+
+		addFlash(ctx, tr(ctx, "auth.totp.code-used", dto.Code), "warning")
+		redirectUrl = "/settings"
+	}
+
+	sess.Values["user"] = userId
+	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year
+	delete(sess.Values, "mfaID")
+	saveSession(sess, ctx)
+
+	return redirect(ctx, redirectUrl)
+}
+
+func disableTotp(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+	userTotp, err := db.GetTOTPByUserID(user.ID)
+	if err != nil {
+		return errorRes(500, "Cannot get TOTP by UID", err)
+	}
+
+	if err = userTotp.Delete(); err != nil {
+		return errorRes(500, "Cannot delete TOTP", err)
+	}
+
+	addFlash(ctx, tr(ctx, "auth.totp.disabled"), "success")
+	return redirect(ctx, "/settings")
+}
+
+func regenerateTotpRecoveryCodes(ctx echo.Context) error {
+	user := getUserLogged(ctx)
+	userTotp, err := db.GetTOTPByUserID(user.ID)
+	if err != nil {
+		return errorRes(500, "Cannot get TOTP by UID", err)
+	}
+
+	codes, err := userTotp.GenerateRecoveryCodes()
+	if err != nil {
+		return errorRes(500, "Cannot generate recovery codes", err)
+	}
+
+	setData(ctx, "recoveryCodes", codes)
+	return html(ctx, "totp.html")
 }
 
 func logout(ctx echo.Context) error {

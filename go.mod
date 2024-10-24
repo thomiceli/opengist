@@ -16,6 +16,7 @@ require (
 	github.com/hashicorp/go-memdb v1.3.4
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/markbates/goth v1.80.0
+	github.com/pquerna/otp v1.4.0
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
@@ -51,6 +52,7 @@ require (
 	github.com/blevesearch/zapx/v14 v14.3.10 // indirect
 	github.com/blevesearch/zapx/v15 v15.3.13 // indirect
 	github.com/blevesearch/zapx/v16 v16.1.0 // indirect
+	github.com/boombuler/barcode v1.0.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect

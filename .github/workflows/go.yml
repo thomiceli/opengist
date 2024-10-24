@@ -136,4 +136,4 @@ jobs:
 
       - name: Build
         shell: bash
-        run: make build
+        run: make

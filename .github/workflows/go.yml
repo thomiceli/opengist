@@ -132,7 +132,7 @@ jobs:
       - name: Set up Go 1.22
         uses: actions/setup-go@v4
         with:
-          go-version: ${{ matrix.os }}
+          go-version: ${{ matrix.go }}
 
       - name: Build
         shell: bash

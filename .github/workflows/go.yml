@@ -25,10 +25,9 @@ jobs:
           go-version: "1.23"
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.54
-          skip-pkg-cache: true
+          version: v1.60
           args: --out-format=colored-line-number --timeout=20m
 
       - name: Format

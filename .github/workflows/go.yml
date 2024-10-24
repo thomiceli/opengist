@@ -19,16 +19,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Go 1.22
+      - name: Set up Go 1.23
         uses: actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version: "1.23"
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.54
-          skip-pkg-cache: true
+          version: v1.60
           args: --out-format=colored-line-number --timeout=20m
 
       - name: Format
@@ -41,10 +40,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Go 1.22
+      - name: Set up Go 1.23
         uses: actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version: "1.23"
 
       - name: Check Go modules
         run: make go_mod check_changes
@@ -58,7 +57,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        go: ["1.22"]
+        go: ["1.23"]
         database: [postgres, mysql]
         include:
           - database: postgres
@@ -102,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
-        go: ["1.22"]
+        go: ["1.23"]
         database: ["sqlite"]
     runs-on: ${{ matrix.os }}
     steps:
@@ -123,13 +122,13 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
-        go: ["1.22"]
+        go: ["1.23"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Go 1.22
+      - name: Set up Go 1.23
         uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}

@@ -176,6 +176,7 @@ func processLogin(ctx echo.Context) error {
 	}
 	if hasWebauthn || hasTotp {
 		sess.Values["mfaID"] = user.ID
+		sess.Options.MaxAge = 5 * 60 // 5 minutes
 		saveSession(sess, ctx)
 		return redirect(ctx, "/mfa")
 	}
@@ -553,7 +554,7 @@ func beginTotp(ctx echo.Context) error {
 	if _, hasTotp, err := user.HasMFA(); err != nil {
 		return errorRes(500, "Cannot check for user MFA", err)
 	} else if hasTotp {
-		addFlash(ctx, "TOTP already enabled", "error")
+		addFlash(ctx, tr(ctx, "auth.totp.already-enabled"), "error")
 		return redirect(ctx, "/settings")
 	}
 
@@ -582,7 +583,7 @@ func finishTotp(ctx echo.Context) error {
 	if _, hasTotp, err := user.HasMFA(); err != nil {
 		return errorRes(500, "Cannot check for user MFA", err)
 	} else if hasTotp {
-		addFlash(ctx, "TOTP already enabled", "error")
+		addFlash(ctx, tr(ctx, "auth.totp.already-enabled"), "error")
 		return redirect(ctx, "/settings")
 	}
 
@@ -603,7 +604,7 @@ func finishTotp(ctx echo.Context) error {
 	}
 
 	if !totp.Validate(dto.Code, secret) {
-		return errorRes(400, "Invalid TOTP secret", nil)
+		return errorRes(400, tr(ctx, "auth.totp.invalid-secret"), nil)
 	}
 
 	userTotp := &db.TOTP{
@@ -635,7 +636,7 @@ func assertTotp(ctx echo.Context) error {
 	}
 
 	if err := ctx.Validate(dto); err != nil {
-		addFlash(ctx, "Invalid TOTP code", "error")
+		addFlash(ctx, tr(ctx, "auth.totp.invalid-code"), "error")
 		return redirect(ctx, "/mfa")
 	}
 
@@ -659,11 +660,11 @@ func assertTotp(ctx echo.Context) error {
 		}
 
 		if !validRecoveryCode {
-			addFlash(ctx, "Invalid TOTP code", "error")
+			addFlash(ctx, tr(ctx, "auth.totp.invalid-code"), "error")
 			return redirect(ctx, "/mfa")
 		}
 
-		addFlash(ctx, fmt.Sprintf("The recovery code %s was used, it is now invalid. You may want to disable MFA for now or regenerate your codes.", dto.Code), "warning")
+		addFlash(ctx, tr(ctx, "auth.totp.code-used", dto.Code), "warning")
 		redirectUrl = "/settings"
 	}
 
@@ -686,7 +687,7 @@ func disableTotp(ctx echo.Context) error {
 		return errorRes(500, "Cannot delete TOTP", err)
 	}
 
-	addFlash(ctx, "TOTP successfully disabled", "success")
+	addFlash(ctx, tr(ctx, "auth.totp.disabled"), "success")
 	return redirect(ctx, "/settings")
 }
 

@@ -7,6 +7,8 @@ module.exports = {
   ],
   theme: {
     colors: {
+      transparent: 'transparent',
+      current: 'currentColor',
       white: colors.white,
       black: colors.black,
       gray: {

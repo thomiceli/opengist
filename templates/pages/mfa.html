@@ -41,7 +41,7 @@
                 <div class="flex items-center justify-center mt-4">
                     <form method="post" action="{{ $.c.ExternalUrl }}/mfa/totp/assertion">
                         {{ .csrfHtml }}
-                        <label for="code" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "auth.totp.passcode" }}</label>
+                        <label for="code" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "auth.totp.code" }}</label>
                         <div class="mt-1">
                             <input id="code" name="code" type="text" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" />
                         </div>

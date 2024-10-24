@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	ogtotp "github.com/thomiceli/opengist/internal/auth/totp"
-	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/utils"
 	"slices"
 )
@@ -30,7 +29,7 @@ func GetTOTPByUserID(userID uint) (*TOTP, error) {
 
 func (totp *TOTP) StoreSecret(secret string) error {
 	secretBytes := []byte(secret)
-	encrypted, err := utils.AESEncrypt(config.SecretKey, secretBytes)
+	encrypted, err := utils.AESEncrypt([]byte("tmp"), secretBytes)
 	if err != nil {
 		return err
 	}
@@ -45,7 +44,7 @@ func (totp *TOTP) ValidateCode(code string) (bool, error) {
 		return false, err
 	}
 
-	secretBytes, err := utils.AESDecrypt(config.SecretKey, ciphertext)
+	secretBytes, err := utils.AESDecrypt([]byte("tmp"), ciphertext)
 	if err != nil {
 		return false, err
 	}

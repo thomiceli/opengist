@@ -138,7 +138,7 @@ func InitConfig(configPath string, out io.Writer) error {
 
 	C = c
 
-	SecretKey = utils.GenerateSecretKey(filepath.Join(GetHomeDir(), "opengist-secret.key"))
+	// SecretKey = utils.GenerateSecretKey(filepath.Join(GetHomeDir(), "opengist-secret.key"))
 
 	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {
 		return err

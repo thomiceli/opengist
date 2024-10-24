@@ -1,5 +1,5 @@
 gist.public: Herkese Açık
-gist.unlisted: Liste Dışı
+gist.unlisted: Listelenmemiş
 gist.private: Gizli
 
 gist.header.like: Beğen
@@ -7,19 +7,19 @@ gist.header.unlike: Beğenmekten Vazgeç
 gist.header.fork: Çatalla
 gist.header.edit: Düzenle
 gist.header.delete: Sil
-gist.header.forked-from: Çatallı
-gist.header.last-active: Son aktif
+gist.header.forked-from: Çatallandı
+gist.header.last-active: Son aktivite
 gist.header.select-tab: Bir sekme seç
 gist.header.code: Kod
 gist.header.revisions: Revizyonlar
 gist.header.revision: Revizyon
-gist.header.clone-http: \%s aracılığıyla klonla
+gist.header.clone-http: '%s ile klonla'
 gist.header.clone-http-help: HTTP temel kimlik doğrulamasını kullanarak Git ile klonlayın.
 gist.header.clone-ssh: SSH aracılığıyla klonla
 gist.header.clone-ssh-help: Bir SSH anahtarı kullanarak Git ile klonlayın.
-gist.header.embed: Yerleştirme
+gist.header.embed: Göm
 gist.header.embed-help: Bu gisti web sitenize yerleştirin.
-gist.header.download-zip: ZIP'i indirin
+gist.header.download-zip: ZIP'i İndir
 
 gist.raw: Ham
 gist.file-truncated: Bu dosya kısaltılmıştır.
@@ -29,27 +29,27 @@ gist.no-content: Dosya bulunamadı
 
 gist.new.new_gist: Yeni gist
 gist.new.title: Başlık
-gist.new.description: Description
+gist.new.description: Açıklama
 gist.new.url: URL
-gist.new.filename-with-extension: Uzantılı dosya adı
+gist.new.filename-with-extension: Dosya adı ve uzantısı
 gist.new.indent-mode: Girinti modu
 gist.new.indent-mode-space: Boşluk
-gist.new.indent-mode-tab: Tab
+gist.new.indent-mode-tab: Sekme
 gist.new.indent-size: Girinti boyutu
-gist.new.wrap-mode: ''
-gist.new.wrap-mode-no: ''
-gist.new.wrap-mode-soft: ''
-gist.new.add-file: Add file
+gist.new.wrap-mode: 'Satır kaydırma modu'
+gist.new.wrap-mode-no: 'Kaydırma yok'
+gist.new.wrap-mode-soft: 'Yumuşak kaydırma'
+gist.new.add-file: Dosya ekle
 gist.new.create-public-button: Herkese açık gist oluştur
 gist.new.create-unlisted-button: Liste dışı gist oluştur
 gist.new.create-private-button: Gizli gist oluştur
-gist.new.preview: Ön izle
+gist.new.preview: Önizle
 gist.new.create-a-new-gist: Yeni bir gist oluştur
 
-gist.edit.editing: Düzenleme
+gist.edit.editing: Düzenleniyor
 gist.edit.edit-gist: '%s düzenle'
-gist.edit.change-visibility: ''
-gist.edit.delete: Delete
+gist.edit.change-visibility: 'Yap'
+gist.edit.delete: Sil
 gist.edit.cancel: İptal Et
 gist.edit.save: Kaydet
 
@@ -58,210 +58,211 @@ gist.list.all: Tüm gistler
 gist.list.search-results: Arama sonuçları
 gist.list.sort: Sırala
 gist.list.sort-by-created: oluşturuldu
-gist.list.sort-by-updated: düzenlendi
-gist.list.order-by-asc: En son yakın zamanda
-gist.list.order-by-desc: Son zamanlarda
+gist.list.sort-by-updated: güncellendi
+gist.list.order-by-asc: En eski
+gist.list.order-by-desc: Yakın zamanda
 gist.list.select-tab: Bir sekme seçin
 gist.list.liked: Beğenildi
 gist.list.likes: beğeniler
-gist.list.forked: Çatallı
-gist.list.forked-from: çatallandı
+gist.list.forked: Çatallandı
+gist.list.forked-from: Çatallandı
 gist.list.forks: çatallar
-gist.list.files: files
-gist.list.last-active: Son aktif
-gist.list.no-gists: Gistler yok
+gist.list.files: dosyalar
+gist.list.last-active: Son aktivite
+gist.list.no-gists: Gist yok
 gist.list.all-liked-by: '%s tarafından beğenilen tüm gistler'
-gist.list.all-forked-by: '%s tarafından beğenilen tüm çatallar'
-gist.list.all-from: '%s tüm gistleri'
+gist.list.all-forked-by: '%s tarafından çatallanan tüm gistler'
+gist.list.all-from: '%s oluşturduğu tüm gistler'
 
-gist.search.found: bulunan gistler
+gist.search.found: gist bulundu
 gist.search.no-results: Hiç gist bulunamadı
-gist.search.help.user: gists created by user
-gist.search.help.title: gists with given title
-gist.search.help.filename: gists having files with given name
-gist.search.help.extension: gists having files with given extension
-gist.search.help.language: gists having files with given language
+gist.search.help.user: kullanıcı tarafından oluşturulan gistler
+gist.search.help.title: belirtilen isme sahip gistler
+gist.search.help.filename: belirtilen isimde dosyaları olan gistler
+gist.search.help.extension: belirtilen uzantıya sahip dosyalara sahip gistler
+gist.search.help.language: belirtilen dilde dosyaları olan gistler
 
-gist.forks: Forks
-gist.forks.view: View fork
-gist.forks.no: No public forks
-gist.forks.for: Forks for %s
+gist.forks: Çatallar
+gist.forks.view: Çatalı görüntüle
+gist.forks.no: Herkes açık çatal yok
+gist.forks.for: '%s için çatallar'
 
-gist.likes: Likes
-gist.likes.no: No likes yet
-gist.likes.for: Likes for %s
+gist.likes: Beğeniler
+gist.likes.no: Henüz kimse beğenmedi
+gist.likes.for: '%s için beğeniler'
 
-gist.revisions: Revisions
-gist.revision.revised: revised this gist
-gist.revision.go-to-revision: Go to revision
-gist.revision.file-created: file created
-gist.revision.file-deleted: file deleted
-gist.revision.file-renamed: renamed to
-gist.revision.diff-truncated: Diff is too large to be shown
-gist.revision.file-renamed-no-changes: File renamed without changes
-gist.revision.empty-file: Empty file
-gist.revision.no-changes: No changes
-gist.revision.no-revisions: No revisions to show
-gist.revision-of: Revision of %s
+gist.revisions: Düzenlemeler
+gist.revision.revised: bu gisti düzenledi
+gist.revision.go-to-revision: Düzenlemeye git
+gist.revision.file-created: dosya oluşturuldu
+gist.revision.file-deleted: dosya silindi
+gist.revision.file-renamed: yeniden adlandırıldı
+gist.revision.diff-truncated: Fark gösterilemeyecek kadar büyük
+gist.revision.file-renamed-no-changes: Dosya değişiklik yapılmadan yeniden adlandırıldı
+gist.revision.empty-file: Boş dosya
+gist.revision.no-changes: Değişiklik yok
+gist.revision.no-revisions: Gösterilecek düzenleme yok
+gist.revision-of: '%s düzenlemesi'
 
-settings: Settings
-settings.email: Email
-settings.email-help: Used for commits and Gravatar
-settings.email-set: Set email
-settings.link-accounts: Link accounts
-settings.link-github-account: Link GitHub account
-settings.link-gitlab-account: Link GitLab account
-settings.link-gitea-account: Link Gitea account
-settings.unlink-github-account: Unlink GitHub account
-settings.unlink-gitlab-account: Unlink GitLab account
-settings.unlink-gitea-account: Unlink Gitea account
-settings.delete-account: Delete account
-settings.delete-account-confirm: Are you sure you want to delete your account ?
-settings.add-ssh-key: Add SSH key
-settings.add-ssh-key-help: Used only to pull/push gists using Git via SSH
-settings.add-ssh-key-title: Title
-settings.add-ssh-key-content: Key
-settings.delete-ssh-key: Delete
-settings.delete-ssh-key-confirm: Confirm deletion of SSH key
-settings.ssh-key-added-at: Added
-settings.ssh-key-never-used: Never used
-settings.ssh-key-last-used: Last used
-settings.change-username: Change username
-settings.create-password: Create password
-settings.create-password-help: Create your password to login to Opengist via HTTP
-settings.change-password: Change password
-settings.change-password-help: Change your password to login to Opengist via HTTP
-settings.password-label-title: Password
+settings: Ayarlar
+settings.email: E-Posta
+settings.email-help: Commit ve Gravatar için kullanılır
+settings.email-set: E-postayı ayarla
+settings.link-accounts: Hesapları bağla
+settings.link-github-account: GitHub hesabını bağla
+settings.link-gitlab-account: GitLab hesabını bağla
+settings.link-gitea-account: Gitea hesabını bağla
+settings.unlink-github-account: GitHub hesabının bağlantısını kaldır
+settings.unlink-gitlab-account: GitLab hesabının bağlantısını kaldır
+settings.unlink-gitea-account: Gitea hesabının bağlantısını kaldır
+settings.delete-account: Hesabı sil
+settings.delete-account-confirm: Hesabını silmek istediğinden emin misin?
+settings.add-ssh-key: SSH anahtarı ekle
+settings.add-ssh-key-help: Sadece SSH üzerinden Git kullanarak gistlerin pull/push işlemlerinde kullanılır
+settings.add-ssh-key-title: Başlık
+settings.add-ssh-key-content: Anahtar
+settings.delete-ssh-key: Sil
+settings.delete-ssh-key-confirm: SSH anahtarının silinmesini onaylayın
+settings.ssh-key-added-at: Eklendi
+settings.ssh-key-never-used: Hiç kullanılmadı
+settings.ssh-key-last-used: Son kullanma
+settings.change-username: Kullanıcı adını değiştir
+settings.create-password: Parola oluştur
+settings.create-password-help: HTTP üzerinden Opengist'e giriş yapmak için parolanızı oluşturun
+settings.change-password: Parolayı değiştir
+settings.change-password-help: HTTP üzerinden Opengist'e giriş yapmak için parolanızı değiştirin
+settings.password-label-title: Parola
 
-auth.signup-disabled: Administrator has disabled signing up
-auth.login: Login
-auth.signup: Register
-auth.new-account: New account
-auth.username: Username
-auth.password: Password
-auth.register-instead: Register instead
-auth.login-instead: Login instead
-auth.oauth: Continue with %s account
+auth.signup-disabled: Yönetici kaydolmayı devre dışı bıraktı
+auth.login: Giriş
+auth.signup: Kaydol
+auth.new-account: Yeni hesap
+auth.username: Kullanıcı adı
+auth.password: Parola
+auth.register-instead: Bunun yerine kayıt olun
+auth.login-instead: Bunun yerine giriş yapın
+auth.oauth: '%s hesabı ile devam et'
 
-error: Error
-error.page-not-found: Page not found
-error.bad-request: Bad request
-error.signup-disabled: Signing up is disabled
-error.signup-disabled-form: Signing up via registration form is disabled
-error.login-disabled-form: Logging in via login form is disabled
-error.complete-oauth-login: "Cannot complete user auth: %s"
-error.oauth-unsupported: Unsupported provider
-error.cannot-bind-data: Cannot bind data
-error.invalid-number: Invalid number
-error.invalid-character-unescaped: Invalid character unescaped
+error: Hata
+error.page-not-found: Sayfa bulunamadı
+error.bad-request: Geçersiz istek
+error.signup-disabled: Kullanıcı kaydı devre dışı bırakıldı
+error.signup-disabled-form: Kayıt formu aracılığıyla kullanıcı kaydı devre dışı bırakıldı
+error.login-disabled-form: Giriş formu üzerinden giriş yapma devre dışı bırakıldı
+error.complete-oauth-login: "Kullanıcı kimlik doğrulaması tamamlanamıyor: %s"
+error.oauth-unsupported: Desteklenmeyen sağlayıcı
+error.cannot-bind-data: Veri bağlanamıyor
+error.invalid-number: Geçersiz numara
+error.invalid-character-unescaped: Geçersiz karakter için kaçış işlemi yapılamadı
 
-header.menu.all: All
-header.menu.new: New
-header.menu.search: Search
-header.menu.my-gists: My gists
-header.menu.liked: Liked
-header.menu.admin: Admin
-header.menu.settings: Settings
-header.menu.logout: Logout
-header.menu.register: Register
-header.menu.login: Login
-header.menu.light: Light
-header.menu.dark: Dark
-header.menu.system: System
-footer.powered-by: Powered by %s
+header.menu.all: Tümü
+header.menu.new: Yeni
+header.menu.search: Ara
+header.menu.my-gists: Gistlerim
+header.menu.liked: Beğenilen
+header.menu.admin: Yönetici
+header.menu.settings: Ayarlar
+header.menu.logout: Çıkış
+header.menu.register: Kaydol
+header.menu.login: Giriş
+header.menu.light: Açık
+header.menu.dark: Koyu
+header.menu.system: Sistem
+footer.powered-by: '%s tarafından desteklenmektedir'
 
-pagination.older: Older
-pagination.newer: Newer
-pagination.previous: Previous
-pagination.next: Next
+pagination.older: Daha eski
+pagination.newer: Daha yeni
+pagination.previous: Önceki
+pagination.next: Sonraki
 
-admin.admin_panel: Admin panel
-admin.general: General
-admin.users: Users
-admin.gists: Gists
-admin.configuration: Configuration
-admin.invitations: Invitations
-admin.invitations.create: Create invitation
-admin.versions: Versions
-admin.ssh_keys: SSH keys
-admin.stats: Stats
-admin.actions: Actions
-admin.actions.sync-fs: Synchronize gists from filesystem
-admin.actions.sync-db: Synchronize gists from database
-admin.actions.git-gc: Garbage collect all git repositories
-admin.actions.sync-previews: Synchronize all gists previews
-admin.actions.reset-hooks: Reset Git server hooks for all repositories
-admin.actions.index-gists: Index all gists
+admin.admin_panel: Yönetici paneli
+admin.general: Genel
+admin.users: Kullanıcılar
+admin.gists: Gistler
+admin.configuration: Yapılandırma
+admin.invitations: Davetler
+admin.invitations.create: Davet oluştur
+admin.versions: Sürümler
+admin.ssh_keys: SSH anahtarları
+admin.stats: İstatistikler
+admin.actions: Eylemler
+admin.actions.sync-fs: Gistleri dosya sisteminden senkronize et
+admin.actions.sync-db: Gistleri veri tabanından senkronize et
+admin.actions.git-gc: Tüm Git depolarındaki gereksiz verileri temizle
+admin.actions.sync-previews: Tüm gist önizlemelerini senkronize et
+admin.actions.reset-hooks: Tüm depolar için Git sunucu kancalarını sıfırla
+admin.actions.index-gists: Tüm gistleri indeksle
 admin.id: ID
-admin.user: User
-admin.delete: Delete
-admin.created_at: Created
+admin.user: Kullanıcı
+admin.delete: Sil
+admin.created_at: Oluşturulma
 
-admin.config-link: This configuration can be %s by a YAML config file and/or environment variables.
-admin.config-link-overriden: overridden
-admin.disable-signup: Disable signup
-admin.disable-signup_help: Forbid the creation of new accounts.
-admin.require-login: Require login
-admin.require-login_help: Enforce users to be logged in to see gists.
-admin.disable-login: Disable login form
-admin.disable-login_help: Forbid logging in via the login form to force using OAuth providers instead.
-admin.disable-gravatar: Disable Gravatar
-admin.disable-gravatar_help: Disable the usage of Gravatar as an avatar provider.
-admin.allow-gists-without-login:
-admin.allow-gists-without-login_help:
-admin.users.delete_confirm: Do you want to delete this user ?
+admin.config-link: Bu yapılandırma, bir YAML yapılandırma dosyası ve/veya ortam değişkenleri tarafından %s.
+admin.config-link-overriden: geçersiz kılınabilir
+admin.disable-signup: Kayıt işlemini devre dışı bırak
+admin.disable-signup_help: Yeni hesap oluşturulmasını yasaklar.
+admin.require-login: Giriş gerektir
+admin.require-login_help: Gistleri görebilmek için kullanıcıların oturum açmasını zorunlu kılar.
+admin.disable-login: Giriş formunu devre dışı bırak
+admin.disable-login_help: Giriş formunu kullanarak giriş yapmayı yasaklar ve bunun yerine OAuth sağlayıcılarının kullanılmasını zorunlu hale getirir.
+admin.disable-gravatar: Gravatar'ı devre dışı bırak
+admin.disable-gravatar_help: Gravatar'ın avatar sağlayıcı olarak kullanımını devre dışı bırakır.
+admin.allow-gists-without-login: Bireysel gistlere oturum açmadan izin ver
+admin.allow-gists-without-login_help: Bireysel gistlerin oturum açmadan görüntülenmesine ve indirilmesine izin verir, ancak gistleri keşfetmek için oturum açmayı zorunlu kılar.
+admin.users.delete_confirm: Bu kullanıcıyı silmek istiyor musun?
 
-admin.gists.title: Title
-admin.gists.private: Private ?
-admin.gists.nb-files: Nb. files
-admin.gists.nb-likes: Nb. likes
-admin.gists.delete_confirm: Do you want to delete this gist ?
+admin.gists.title: Başlık
+admin.gists.private: Gizlilik
+admin.gists.nb-files: Dosyalar
+admin.gists.nb-likes: Beğeniler
+admin.gists.delete_confirm: Bu gisti silmek istiyor musun?
 
-admin.invitations.help: Invitations can be used to create an account even if signing up is disabled.
-admin.invitations.max_uses: Max uses
-admin.invitations.expires_at: Expires at
-admin.invitations.code: Code
-admin.invitations.copy_link: Copy link
-admin.invitations.uses: Uses
-admin.invitations.expired: Expired
+admin.invitations.help: Kayıt olma özelliği devre dışı bırakılmış olsa bile, hesap oluşturmak için davetiyeler kullanılabilir.
+admin.invitations.max_uses: Maksimum kullanım
+admin.invitations.expires_at: Sona erme tarihi
+admin.invitations.code: Kod
+admin.invitations.copy_link: Linki kopyala
+admin.invitations.uses: Kullanım
+admin.invitations.expired: Süresi bitti
 
-flash.admin.user-deleted: User has been deleted
-flash.admin.gist-deleted: Gist has been deleted
-flash.admin.invitation-created: Invitation has been created
-flash.admin.invitation-deleted: Invitation has been deleted
-flash.admin.sync-fs: Syncing repositories from filesystem...
-flash.admin.sync-db: Syncing repositories from database...
-flash.admin.git-gc: Garbage collecting repositories...
-flash.admin.sync-previews: Syncing Gist previews...
-flash.admin.reset-hooks: Resetting Git server hooks for all repositories...
-flash.admin.index-gists: Indexing all gists...
+flash.admin.user-deleted: Kullanıcı silindi
+flash.admin.gist-deleted: Gist silindi
+flash.admin.invitation-created: Davetiye oluşturuldu
+flash.admin.invitation-deleted: Davetiye silindi
+flash.admin.sync-fs: Depolar dosya sisteminden senkronize ediliyor...
+flash.admin.sync-db: Depolar veri tabanından senkronize ediliyor...
+flash.admin.git-gc: Depolardan gereksiz veriler temizleniyor...
+flash.admin.sync-previews: Gist önizlemeleri senkronize ediliyor...
+flash.admin.reset-hooks: Tüm depolar için Git sunucusu kancaları sıfırlanıyor...
+flash.admin.index-gists: Tüm gistler indeksleniyor...
 
-flash.auth.username-exists: Username already exists
-flash.auth.invalid-credentials: Invalid credentials
-flash.auth.account-linked-oauth: Account linked to %s
-flash.auth.account-unlinked-oauth: Account unlinked from %s
-flash.auth.user-sshkeys-not-retrievable: Could not get user keys
-flash.auth.user-sshkeys-not-created: Could not create ssh key
-flash.auth.must-be-logged-in: You must be logged in to access gists
+flash.auth.username-exists: Kullanıcı adı zaten mevcut
+flash.auth.invalid-credentials: Geçersiz kimlik bilgileri
+flash.auth.account-linked-oauth: Hesap %s ile bağlantılı
+flash.auth.account-unlinked-oauth: Hesabın %s ile bağlantısı kaldırıldı
+flash.auth.user-sshkeys-not-retrievable: Kullanıcı anahtarları alınamadı
+flash.auth.user-sshkeys-not-created: SSH anahtarı oluşturulamadı
+flash.auth.must-be-logged-in: Gistlere erişmek için giriş yapmış olmanız gerekli
 
-flash.gist.visibility-changed: Gist visibility has been changed
-flash.gist.deleted: Gist has been deleted
-flash.gist.fork-own-gist: Unable to fork own gists
-flash.gist.forked: Gist has been forked
+flash.gist.visibility-changed: Gist görünürlüğü değiştirildi
+flash.gist.deleted: Gist silindi
+flash.gist.fork-own-gist: Kendi gistlerin çatallanamaz
+flash.gist.forked: Gist çatallandı
 
-flash.user.email-updated: Email updated
-flash.user.invalid-ssh-key: Invalid SSH key
-flash.user.ssh-key-added: SSH key added
-flash.user.ssh-key-deleted: SSH key deleted
-flash.user.password-updated: Password updated
-flash.user.username-updated: Username updated
+flash.user.email-updated: E-posta güncellendi
+flash.user.invalid-ssh-key: Geçersiz SSH anahtarı
+flash.user.ssh-key-added: SSH anahtarı eklendi
+flash.user.ssh-key-deleted: SSH anahtarı silindi
+flash.user.password-updated: Parola güncellendi
+flash.user.username-updated: Kullanıcı adı güncellendi
 
-validation.is-too-long: Field %s is too long
-validation.should-not-be-empty: Field %s should not be empty
-validation.should-not-include-sub-directory: Field %s should not include a sub directory
-validation.should-only-contain-alphanumeric-characters: Field %s should only contain alphanumeric characters
-validation.should-only-contain-alphanumeric-characters-and-dashes: Field %s should only contain alphanumeric characters and dashes
-validation.not-enough: Not enough %s
-validation.invalid: Invalid %s
+validation.is-too-long: '%s alanı çok uzun'
+validation.should-not-be-empty: '%s alanı boş olmamalı'
+validation.should-not-include-sub-directory: '%s alanı bir alt dizin içermemeli'
+validation.should-only-contain-alphanumeric-characters: '%s alanı yalnızca alfanümerik karakterler içermelidir'
+validation.should-only-contain-alphanumeric-characters-and-dashes: '%s alanı yalnızca alfanümerik karakterler ve tire içermelidir'
+validation.not-enough: Yeterli %s yok
+validation.invalid: Geçersiz %s
 
-html.title.admin-panel: Admin panel
+html.title.admin-panel: Yönetici paneli
+settings.ssh-key-exists: SSH anahtarı zaten mevcut

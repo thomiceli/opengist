@@ -27,26 +27,7 @@ func migrateConfig() error {
 
 func v1_8_0() error {
 	homeDir := GetHomeDir()
-	sessionsDir := filepath.Join(homeDir, "sessions")
-
-	moves := []struct {
-		oldName string
-		newName string
-	}{
-		{
-			oldName: filepath.Join(sessionsDir, "session-auth.key"),
-			newName: filepath.Join(homeDir, "opengist-secret.key"),
-		},
-		{
-			oldName: filepath.Join(sessionsDir, "session-encrypt.key"),
-			newName: filepath.Join(homeDir, "session-encrypt.key"),
-		},
-	}
-
-	for _, move := range moves {
-		moveFile(move.oldName, move.newName)
-	}
-
+	moveFile(filepath.Join(filepath.Join(homeDir, "sessions"), "session-auth.key"), filepath.Join(homeDir, "opengist-secret.key"))
 	return nil
 }
 

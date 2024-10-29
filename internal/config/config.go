@@ -147,18 +147,10 @@ func InitConfig(configPath string, out io.Writer) error {
 	}
 
 	if c.SecretKey == "" {
-		var generated bool
 		path := filepath.Join(GetHomeDir(), "opengist-secret.key")
-		SecretKey, generated = utils.GenerateSecretKey(path)
-
-		if generated {
-			fmt.Printf("Generated a new secret key at %s\n", path)
-		} else {
-			fmt.Printf("Using the secret key from %s\n", path)
-		}
+		SecretKey, _ = utils.GenerateSecretKey(path)
 	} else {
 		SecretKey = []byte(C.SecretKey)
-		fmt.Println("Using the secret key from config")
 	}
 
 	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {

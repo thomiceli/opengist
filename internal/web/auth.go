@@ -315,6 +315,20 @@ func oauth(ctx echo.Context) error {
 		httpProtocol = "https"
 	}
 
+	forwarded_hdr := ctx.Request().Header.Get("Forwarded")
+	if forwarded_hdr != "" {
+		fields := strings.Split(forwarded_hdr, ";")
+		fwd := make(map[string]string)
+		for _, v := range fields {
+			p := strings.Split(v, "=")
+			fwd[p[0]] = p[1]
+		}
+		val, ok := fwd["proto"]
+		if ok && val == "https" {
+			httpProtocol = "https"
+		}
+	}
+
 	var opengistUrl string
 	if config.C.ExternalUrl != "" {
 		opengistUrl = config.C.ExternalUrl

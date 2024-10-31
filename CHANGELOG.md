@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.8.0](https://github.com/thomiceli/opengist/compare/v1.7.5...v1.8.0) - 2024-09-12
+## [1.8.0](https://github.com/thomiceli/opengist/compare/v1.7.5...v1.8.0) - 2024-10-31
 See here how to [update](https://opengist.io/docs/update) Opengist.
 
 ### 🔴 Deprecations 

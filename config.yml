@@ -14,6 +14,9 @@ external-url:
 # Directory where Opengist will store its data. Default: ~/.opengist/
 opengist-home:
 
+# Secret key used for session store & encrypt MFA data on database. Default: <randomized 32 bytes>
+secret-key:
+
 # URI of the database. Default: opengist.db (SQLite)
 # SQLite:        file name
 # PostgreSQL:    postgres://user:password@host:port/database

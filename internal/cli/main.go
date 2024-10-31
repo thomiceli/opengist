@@ -76,6 +76,8 @@ func Initialize(ctx *cli.Context) {
 		panic(err)
 	}
 
+	config.SetupSecretKey()
+
 	config.InitLog()
 
 	gitVersion, err := git.GetGitVersion()

@@ -27,6 +27,8 @@ var SecretKey []byte
 // Not using nested structs because the library
 // doesn't support dot notation in this case sadly
 type config struct {
+	SecretKey string `yaml:"secret-key" env:"OG_SECRET_KEY"`
+
 	LogLevel     string `yaml:"log-level" env:"OG_LOG_LEVEL"`
 	LogOutput    string `yaml:"log-output" env:"OG_LOG_OUTPUT"`
 	ExternalUrl  string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
@@ -81,6 +83,8 @@ type StaticLink struct {
 
 func configWithDefaults() (*config, error) {
 	c := &config{}
+
+	c.SecretKey = ""
 
 	c.LogLevel = "warn"
 	c.LogOutput = "stdout,file"
@@ -138,7 +142,9 @@ func InitConfig(configPath string, out io.Writer) error {
 
 	C = c
 
-	// SecretKey = utils.GenerateSecretKey(filepath.Join(GetHomeDir(), "opengist-secret.key"))
+	if err = migrateConfig(); err != nil {
+		return err
+	}
 
 	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {
 		return err
@@ -233,6 +239,15 @@ func CheckGitVersion(version string) (bool, error) {
 func GetHomeDir() string {
 	absolutePath, _ := filepath.Abs(C.OpengistHome)
 	return filepath.Clean(absolutePath)
+}
+
+func SetupSecretKey() {
+	if C.SecretKey == "" {
+		path := filepath.Join(GetHomeDir(), "opengist-secret.key")
+		SecretKey, _ = utils.GenerateSecretKey(path)
+	} else {
+		SecretKey = []byte(C.SecretKey)
+	}
 }
 
 func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {

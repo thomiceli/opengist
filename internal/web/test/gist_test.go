@@ -9,12 +9,10 @@ import (
 )
 
 func TestGists(t *testing.T) {
-	setup(t)
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s := setup(t)
 	defer teardown(t, s)
 
-	err = s.request("GET", "/", nil, 302)
+	err := s.request("GET", "/", nil, 302)
 	require.NoError(t, err)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
@@ -106,9 +104,7 @@ func TestGists(t *testing.T) {
 }
 
 func TestVisibility(t *testing.T) {
-	setup(t)
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s := setup(t)
 	defer teardown(t, s)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
@@ -123,7 +119,7 @@ func TestVisibility(t *testing.T) {
 		Name:    []string{""},
 		Content: []string{"yeah"},
 	}
-	err = s.request("POST", "/", gist1, 302)
+	err := s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	gist1db, err := db.GetGistByID("1")
@@ -150,9 +146,7 @@ func TestVisibility(t *testing.T) {
 }
 
 func TestLikeFork(t *testing.T) {
-	setup(t)
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s := setup(t)
 	defer teardown(t, s)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
@@ -167,7 +161,7 @@ func TestLikeFork(t *testing.T) {
 		Name:    []string{""},
 		Content: []string{"yeah"},
 	}
-	err = s.request("POST", "/", gist1, 302)
+	err := s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	s.sessionCookie = ""
@@ -211,9 +205,7 @@ func TestLikeFork(t *testing.T) {
 }
 
 func TestCustomUrl(t *testing.T) {
-	setup(t)
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s := setup(t)
 	defer teardown(t, s)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
@@ -229,7 +221,7 @@ func TestCustomUrl(t *testing.T) {
 		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
 		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
-	err = s.request("POST", "/", gist1, 302)
+	err := s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	gist1db, err := db.GetGistByID("1")

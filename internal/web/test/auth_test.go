@@ -12,12 +12,10 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-	setup(t)
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s := setup(t)
 	defer teardown(t, s)
 
-	err = s.request("GET", "/", nil, 302)
+	err := s.request("GET", "/", nil, 302)
 	require.NoError(t, err)
 
 	err = s.request("GET", "/register", nil, 200)
@@ -55,12 +53,10 @@ func TestRegister(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	setup(t)
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s := setup(t)
 	defer teardown(t, s)
 
-	err = s.request("GET", "/login", nil, 200)
+	err := s.request("GET", "/login", nil, 200)
 	require.NoError(t, err)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
@@ -101,15 +97,13 @@ type settingSet struct {
 }
 
 func TestAnonymous(t *testing.T) {
-	setup(t)
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s := setup(t)
 	defer teardown(t, s)
 
 	user := db.UserDTO{Username: "thomas", Password: "azeaze"}
 	register(t, s, user)
 
-	err = s.request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
+	err := s.request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
 	require.NoError(t, err)
 
 	gist1 := db.GistDTO{
@@ -154,9 +148,7 @@ func TestAnonymous(t *testing.T) {
 }
 
 func TestGitOperations(t *testing.T) {
-	setup(t)
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s := setup(t)
 	defer teardown(t, s)
 
 	admin := db.UserDTO{Username: "thomas", Password: "thomas"}
@@ -178,7 +170,7 @@ func TestGitOperations(t *testing.T) {
 			"yeah",
 		},
 	}
-	err = s.request("POST", "/", gist1, 302)
+	err := s.request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	gist2 := db.GistDTO{

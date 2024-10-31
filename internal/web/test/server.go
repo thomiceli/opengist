@@ -133,7 +133,7 @@ func structToURLValues(s interface{}) url.Values {
 	return v
 }
 
-func setup(t *testing.T) {
+func setup(t *testing.T) *testServer {
 	var databaseDsn string
 	databaseType = os.Getenv("OPENGIST_TEST_DB")
 	switch databaseType {
@@ -182,6 +182,11 @@ func setup(t *testing.T) {
 
 	// err = index.Open(filepath.Join(homePath, "testsindex", "opengist.index"))
 	// require.NoError(t, err, "Could not open index")
+
+	s, err := newTestServer()
+	require.NoError(t, err, "Failed to create test server")
+
+	return s
 }
 
 func teardown(t *testing.T, s *testServer) {
@@ -190,17 +195,17 @@ func teardown(t *testing.T, s *testServer) {
 	//err := db.Close()
 	//require.NoError(t, err, "Could not close database")
 
-	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "sessions"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	err = db.TruncateDatabase()
-	require.NoError(t, err, "Could not truncate database")
+	//err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	//require.NoError(t, err, "Could not remove repos directory")
+	//
+	//err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
+	//require.NoError(t, err, "Could not remove repos directory")
+	//
+	//err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "sessions"))
+	//require.NoError(t, err, "Could not remove repos directory")
+	//
+	//err = db.TruncateDatabase()
+	//require.NoError(t, err, "Could not truncate database")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))
 	// require.NoError(t, err, "Could not remove repos directory")

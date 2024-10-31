@@ -167,7 +167,7 @@ type Server struct {
 func NewServer(isDev bool, sessionsPath string) *Server {
 	dev = isDev
 	flashStore = sessions.NewCookieStore([]byte("opengist"))
-	encryptKey, _ := utils.GenerateSecretKey(filepath.Join(config.GetHomeDir(), "sessions", "session-encrypt.key"))
+	encryptKey, _ := utils.GenerateSecretKey(filepath.Join(sessionsPath, "session-encrypt.key"))
 	userStore = sessions.NewFilesystemStore(sessionsPath, config.SecretKey, encryptKey)
 	userStore.MaxLength(10 * 1024)
 	gothic.Store = userStore

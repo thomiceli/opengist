@@ -235,6 +235,10 @@ func oauthCallback(ctx echo.Context) error {
 			return errorRes(500, "Cannot get user", err)
 		}
 
+		if user.NickName == "" {
+			user.NickName = strings.Split(user.Email, "@")[0]
+		}
+
 		userDB = &db.User{
 			Username: user.NickName,
 			Email:    user.Email,

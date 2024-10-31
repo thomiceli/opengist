@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.8.0](https://github.com/thomiceli/opengist/compare/v1.7.5...v1.8.0) - 2024-09-12
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### 🔴 Deprecations 
+_Removed in the next SemVer MAJOR version of Opengist._
+* Use the configuration option `db-uri`/`OG_DB_URI` **instead of** `db-filename`/`OG_DB_FILENAME`.\
+  More info [here](https://opengist.io/docs/configuration/databases/sqlite) if you plan to keep SQLite as a DBMS for Opengist.
+
+### Added
+- Postgres and MySQL databases support (#335)
+- Passkeys & TOTP support + MFA (#341) (#342)
+- Add/Remove admins (#337)
+- Queriable shorter uuids (#338)
+- Use Docker secrets (#340)
+- SVG preview in Markdown (#346)
+- Secret key definition & move the secret key file to its parent directory (#358)
+- More translation strings (#339)
+
+### Changed
+- Separate OAuth unlink URL (#336)
+
+### Fixed
+- Adding multiple empty lines in editor. (#345)
+- Config URL (#343)
+- Send Markdown preview data as form params (#347)
+- Fix oauth endpoint to support detecting https in 'Forwarded' header, enabling google support (#359)
+- Use mail handle if OAuth nickname is empty (#362)
+
+### Other
+- Use go 1.23 and update deps (#354)
+- Typos in README (#363)
+
 ## [1.7.5](https://github.com/thomiceli/opengist/compare/v1.7.4...v1.7.5) - 2024-09-12
 See here how to [update](/docs/update.md) Opengist.
 

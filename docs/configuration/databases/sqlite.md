@@ -11,11 +11,15 @@ The SQLite journal mode is set to [`WAL` (Write-Ahead Logging)](https://www.sqli
 
 #### YAML
 ```yaml
+# default
+db-uri: opengist.db
 sqlite.journal-mode: WAL
 ```
 
 #### Environment variable
 ```sh
+# default
+OG_DB_URI=opengist.db
 OG_SQLITE_JOURNAL_MODE=WAL
 ```
 

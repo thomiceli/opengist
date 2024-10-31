@@ -153,6 +153,8 @@ func setup(t *testing.T) {
 	err = os.MkdirAll(filepath.Join(config.GetHomeDir()), 0755)
 	require.NoError(t, err, "Could not create Opengist home directory")
 
+	config.SetupSecretKey()
+
 	git.ReposDirectory = path.Join("tests")
 
 	config.C.IndexEnabled = false

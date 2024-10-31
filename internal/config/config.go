@@ -146,13 +146,6 @@ func InitConfig(configPath string, out io.Writer) error {
 		return err
 	}
 
-	if c.SecretKey == "" {
-		path := filepath.Join(GetHomeDir(), "opengist-secret.key")
-		SecretKey, _ = utils.GenerateSecretKey(path)
-	} else {
-		SecretKey = []byte(C.SecretKey)
-	}
-
 	if err = os.Setenv("OG_OPENGIST_HOME_INTERNAL", GetHomeDir()); err != nil {
 		return err
 	}
@@ -246,6 +239,15 @@ func CheckGitVersion(version string) (bool, error) {
 func GetHomeDir() string {
 	absolutePath, _ := filepath.Abs(C.OpengistHome)
 	return filepath.Clean(absolutePath)
+}
+
+func SetupSecretKey() {
+	if C.SecretKey == "" {
+		path := filepath.Join(GetHomeDir(), "opengist-secret.key")
+		SecretKey, _ = utils.GenerateSecretKey(path)
+	} else {
+		SecretKey = []byte(C.SecretKey)
+	}
 }
 
 func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {

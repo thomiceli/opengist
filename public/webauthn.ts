@@ -22,6 +22,8 @@ function decodeBase64UrlToArrayBuffer(base64Url) {
 }
 
 async function bindPasskey() {
+    // @ts-ignore
+    const baseUrl = window.opengist_base_url || '';
     let waitText = document.getElementById("login-passkey-wait");
 
     try {
@@ -30,7 +32,10 @@ async function bindPasskey() {
 
         let csrf = document.querySelector<HTMLInputElement>('form#webauthn input[name="_csrf"]').value
 
-        const beginResponse = await fetch('/webauthn/bind', {
+        const beginResponse = await fetch(`${baseUrl}/webauthn/bind`, {
+            headers: {
+                'Accept': 'application/json',
+            },
             method: 'POST',
             credentials: 'include',
             body: new FormData(document.querySelector<HTMLFormElement>('form#webauthn'))
@@ -52,10 +57,11 @@ async function bindPasskey() {
             throw new Error('Credential object is missing required properties');
         }
 
-        const finishResponse = await fetch('/webauthn/bind/finish', {
+        const finishResponse = await fetch(`${baseUrl}/webauthn/bind/finish`, {
             method: 'POST',
             credentials: 'include',
             headers: {
+                'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'X-CSRF-Token': csrf
             },
@@ -84,6 +90,8 @@ async function bindPasskey() {
 }
 
 async function loginWithPasskey() {
+    // @ts-ignore
+    const baseUrl = window.opengist_base_url || '';
     let waitText = document.getElementById("login-passkey-wait");
 
     try {
@@ -91,7 +99,10 @@ async function loginWithPasskey() {
         waitText.classList.remove('hidden');
 
         let csrf = document.querySelector<HTMLInputElement>('form#webauthn input[name="_csrf"]').value
-        const beginResponse = await fetch('/webauthn/' + loginMethod, {
+        const beginResponse = await fetch(`${baseUrl}/webauthn/${loginMethod}`, {
+            headers: {
+                'Accept': 'application/json',
+            },
             method: 'POST',
             credentials: 'include',
             body: new FormData(document.querySelector<HTMLFormElement>('form#webauthn'))
@@ -115,10 +126,11 @@ async function loginWithPasskey() {
             throw new Error('Credential object is missing required properties');
         }
 
-        const finishResponse = await fetch('/webauthn/' + loginMethod + '/finish', {
+        const finishResponse = await fetch(`${baseUrl}/webauthn/${loginMethod}/finish`, {
             method: 'POST',
             credentials: 'include',
             headers: {
+                'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'X-CSRF-Token': csrf
             },

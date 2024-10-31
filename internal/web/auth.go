@@ -462,7 +462,7 @@ func finishWebAuthnBinding(ctx echo.Context) error {
 	saveSession(sess, ctx)
 
 	addFlash(ctx, tr(ctx, "flash.auth.passkey-registred", passkeyName), "success")
-	return json(ctx, 200, []string{"OK"})
+	return json(ctx, []string{"OK"})
 }
 
 func beginWebAuthnLogin(ctx echo.Context) error {
@@ -476,7 +476,7 @@ func beginWebAuthnLogin(ctx echo.Context) error {
 	sess.Options.MaxAge = 5 * 60 // 5 minutes
 	saveSession(sess, ctx)
 
-	return json(ctx, 200, credsCreation)
+	return json(ctx, credsCreation)
 }
 
 func finishWebAuthnLogin(ctx echo.Context) error {
@@ -497,7 +497,7 @@ func finishWebAuthnLogin(ctx echo.Context) error {
 	delete(sess.Values, "webauthn_login_session")
 	saveSession(sess, ctx)
 
-	return json(ctx, 200, []string{"OK"})
+	return json(ctx, []string{"OK"})
 }
 
 func beginWebAuthnAssertion(ctx echo.Context) error {
@@ -517,7 +517,7 @@ func beginWebAuthnAssertion(ctx echo.Context) error {
 	sess.Options.MaxAge = 5 * 60 // 5 minutes
 	saveSession(sess, ctx)
 
-	return json(ctx, 200, credsCreation)
+	return json(ctx, credsCreation)
 }
 
 func finishWebAuthnAssertion(ctx echo.Context) error {
@@ -545,7 +545,7 @@ func finishWebAuthnAssertion(ctx echo.Context) error {
 	delete(sess.Values, "mfaID")
 	saveSession(sess, ctx)
 
-	return json(ctx, 200, []string{"OK"})
+	return json(ctx, []string{"OK"})
 }
 
 func beginTotp(ctx echo.Context) error {

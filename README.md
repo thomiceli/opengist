@@ -2,9 +2,9 @@
 
 <img height="108px" src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg" alt="Opengist" align="right" />
 
-Opengist is a **self-hosted** pastebin **powered by Git**. All snippets are stored in a Git repository and can be
+Opengist is a **self-hosted** Pastebin **powered by Git**. All snippets are stored in a Git repository and can be
 read and/or modified using standard Git commands, or with the web interface.
-It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and could be self-hosted.
+It is similar to [GitHub Gist](https://gist.github.com/), but open-source and could be self-hosted.
 
 [Home Page](https://opengist.io) • [Documentation](https://opengist.io/docs) • [Discord](https://discord.gg/9Pm3X5scZT) • [Demo](https://demo.opengist.io)
 
@@ -20,7 +20,7 @@ It is similiar to [GitHub Gist](https://gist.github.com/), but open-source and c
 * Create public, unlisted or private snippets
 * [Init](/docs/usage/init-via-git.md) / Clone / Pull / Push snippets **via Git** over HTTP or SSH
 * Syntax highlighting ; markdown & CSV support
-* Search code in snippets ; browse users snippets, likes and forks
+* Search code in snippets; browse users snippets, likes and forks
 * Embed snippets in other websites
 * Revisions history
 * Like / Fork snippets

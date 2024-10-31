@@ -195,17 +195,17 @@ func teardown(t *testing.T, s *testServer) {
 	//err := db.Close()
 	//require.NoError(t, err, "Could not close database")
 
-	//err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
-	//require.NoError(t, err, "Could not remove repos directory")
-	//
-	//err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
-	//require.NoError(t, err, "Could not remove repos directory")
-	//
-	//err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "sessions"))
-	//require.NoError(t, err, "Could not remove repos directory")
-	//
-	//err = db.TruncateDatabase()
-	//require.NoError(t, err, "Could not truncate database")
+	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	require.NoError(t, err, "Could not remove repos directory")
+
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
+	require.NoError(t, err, "Could not remove repos directory")
+
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "sessions"))
+	require.NoError(t, err, "Could not remove repos directory")
+
+	err = db.TruncateDatabase()
+	require.NoError(t, err, "Could not truncate database")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))
 	// require.NoError(t, err, "Could not remove repos directory")

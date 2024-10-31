@@ -19,14 +19,6 @@ import (
 
 type dataTypeKey string
 
-type HTMLError struct {
-	*echo.HTTPError
-}
-
-type JSONError struct {
-	*echo.HTTPError
-}
-
 const dataKey dataTypeKey = "data"
 
 func setData(ctx echo.Context, key string, value any) {
@@ -54,7 +46,11 @@ func htmlWithCode(ctx echo.Context, code int, template string) error {
 	return ctx.Render(code, template, ctx.Request().Context().Value(dataKey))
 }
 
-func json(ctx echo.Context, code int, data any) error {
+func json(ctx echo.Context, data any) error {
+	return jsonWithCode(ctx, 200, data)
+}
+
+func jsonWithCode(ctx echo.Context, code int, data any) error {
 	return ctx.JSON(code, data)
 }
 
@@ -76,7 +72,7 @@ func errorRes(code int, message string, err error) error {
 		skipLogger.Error().Err(err).Msg(message)
 	}
 
-	return &HTMLError{&echo.HTTPError{Code: code, Message: message, Internal: err}}
+	return &echo.HTTPError{Code: code, Message: message, Internal: err}
 }
 
 func jsonErrorRes(code int, message string, err error) error {
@@ -85,7 +81,7 @@ func jsonErrorRes(code int, message string, err error) error {
 		skipLogger.Error().Err(err).Msg(message)
 	}
 
-	return &JSONError{&echo.HTTPError{Code: code, Message: message, Internal: err}}
+	return &echo.HTTPError{Code: code, Message: message, Internal: err}
 }
 
 func getUserLogged(ctx echo.Context) *db.User {

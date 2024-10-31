@@ -218,14 +218,18 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 	}
 
 	e.HTTPErrorHandler = func(er error, ctx echo.Context) {
-		if httpErr, ok := er.(*HTMLError); ok {
+		var httpErr *echo.HTTPError
+		if errors.As(er, &httpErr) {
+			acceptJson := strings.Contains(ctx.Request().Header.Get("Accept"), "application/json")
 			setData(ctx, "error", er)
-			if fatalErr := htmlWithCode(ctx, httpErr.Code, "error.html"); fatalErr != nil {
-				log.Fatal().Err(fatalErr).Send()
-			}
-		} else if httpErr, ok := er.(*JSONError); ok {
-			if fatalErr := json(ctx, httpErr.Code, httpErr); fatalErr != nil {
-				log.Fatal().Err(fatalErr).Send()
+			if acceptJson {
+				if fatalErr := jsonWithCode(ctx, httpErr.Code, httpErr); fatalErr != nil {
+					log.Fatal().Err(fatalErr).Send()
+				}
+			} else {
+				if fatalErr := htmlWithCode(ctx, httpErr.Code, "error.html"); fatalErr != nil {
+					log.Fatal().Err(fatalErr).Send()
+				}
 			}
 		} else {
 			log.Fatal().Err(er).Send()

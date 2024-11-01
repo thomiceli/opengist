@@ -164,7 +164,7 @@ type Server struct {
 	dev  bool
 }
 
-func NewServer(isDev bool, sessionsPath string) *Server {
+func NewServer(isDev bool, sessionsPath string, ignoreCsrf bool) *Server {
 	dev = isDev
 	flashStore = sessions.NewCookieStore([]byte("opengist"))
 	encryptKey, _ := utils.GenerateSecretKey(filepath.Join(sessionsPath, "session-encrypt.key"))
@@ -245,14 +245,16 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 	// Web based routes
 	g1 := e.Group("")
 	{
-		g1.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-			TokenLookup:    "form:_csrf,header:X-CSRF-Token",
-			CookiePath:     "/",
-			CookieHTTPOnly: true,
-			CookieSameSite: http.SameSiteStrictMode,
-		}))
+		if !ignoreCsrf {
+			g1.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+				TokenLookup:    "form:_csrf,header:X-CSRF-Token",
+				CookiePath:     "/",
+				CookieHTTPOnly: true,
+				CookieSameSite: http.SameSiteStrictMode,
+			}))
+			g1.Use(csrfInit)
+		}
 
-		g1.Use(csrfInit)
 		g1.GET("/", create, logged)
 		g1.POST("/", processCreate, logged)
 		g1.POST("/preview", preview, logged)

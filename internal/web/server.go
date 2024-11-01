@@ -245,14 +245,13 @@ func NewServer(isDev bool, sessionsPath string) *Server {
 	// Web based routes
 	g1 := e.Group("")
 	{
-		if !dev {
-			g1.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-				TokenLookup:    "form:_csrf,header:X-CSRF-Token",
-				CookiePath:     "/",
-				CookieHTTPOnly: true,
-				CookieSameSite: http.SameSiteStrictMode,
-			}))
-		}
+		g1.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+			TokenLookup:    "form:_csrf,header:X-CSRF-Token",
+			CookiePath:     "/",
+			CookieHTTPOnly: true,
+			CookieSameSite: http.SameSiteStrictMode,
+		}))
+
 		g1.Use(csrfInit)
 		g1.GET("/", create, logged)
 		g1.POST("/", processCreate, logged)

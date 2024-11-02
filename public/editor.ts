@@ -73,10 +73,14 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 const formData = new FormData();
                 formData.append('content', editor.state.doc.toString());
+                let csrf = document.querySelector<HTMLInputElement>('form#create input[name="_csrf"]').value
                 fetch(`${baseUrl}/preview`, {
                     method: 'POST',
                     credentials: 'same-origin',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        'X-CSRF-Token': csrf
+                    }
                 }).then(r => r.text()).then(r => {
                     let divpreview = dom.querySelector("div.preview") as HTMLElement;
                     divpreview!.innerHTML = r;

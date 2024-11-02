@@ -218,10 +218,10 @@
                                         <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "auth.mfa.passkey-last-used" }} <span class="moment-timestamp">{{ .LastUsedAt }}</span></p>
                                         {{ end }}
                                     </div>
-                                    <form action="{{ $.c.ExternalUrl }}/settings/passkeys/{{.ID}}" method="post" class="inline-block" onsubmit="return confirm('{{ $.locale.Tr "auth.mfa.delete-passkey-confirm" }}');">
+                                    <form action="{{ $.c.ExternalUrl }}/settings/passkeys/{{.ID}}" method="post" class="inline-block">
                                         <input type="hidden" name="_method" value="DELETE">
                                         {{ $.csrfHtml }}
-                                        <button type="submit" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ $.locale.Tr "auth.mfa.delete-passkey" }}</button>
+                                        <button type="submit" onclick="return confirm('{{ $.locale.Tr "auth.mfa.delete-passkey-confirm" }}');" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ $.locale.Tr "auth.mfa.delete-passkey" }}</button>
                                     </form>
                                 </div>
                             </li>
@@ -280,11 +280,11 @@
                                                     <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-last-used" }} <span class="moment-timestamp">{{ .LastUsedAt }}</span></p>
                                                 {{ end }}
                                             </div>
-                                            <form action="{{ $.c.ExternalUrl }}/settings/ssh-keys/{{.ID}}" method="post" class="inline-block" onsubmit="return confirm('{{ $.locale.Tr "settings.delete-ssh-key-confirm" }}')">
+                                            <form action="{{ $.c.ExternalUrl }}/settings/ssh-keys/{{.ID}}" method="post" class="inline-block">
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 {{ $.csrfHtml }}
 
-                                                <button type="submit" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ $.locale.Tr "settings.delete-ssh-key" }}</button>
+                                                <button type="submit" onclick="return confirm('{{ $.locale.Tr "settings.delete-ssh-key-confirm" }}')" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ $.locale.Tr "settings.delete-ssh-key" }}</button>
                                             </form>
                                         </div>
                                     </li>

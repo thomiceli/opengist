@@ -53,9 +53,9 @@
                 <td class="whitespace-nowrap py-2 px-2 text-sm">{{ $invitation.NbUsed }}/{{ $invitation.NbMax }}</td>
                 <td class="whitespace-nowrap px-2 py-2 text-sm"><span class="moment-timestamp-date">{{ $invitation.ExpiresAt }}</span></td>
                 <td class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                    <form action="{{ $.c.ExternalUrl }}/admin-panel/invitations/{{ $invitation.ID }}/delete" method="POST" onsubmit="return confirm('{{ $.locale.Tr "admin.users.delete_confirm" }}')">
+                    <form action="{{ $.c.ExternalUrl }}/admin-panel/invitations/{{ $invitation.ID }}/delete" method="POST">
                         {{ $.csrfHtml }}
-                        <button type="submit" class="text-rose-500 hover:text-rose-600">{{ $.locale.Tr "admin.delete" }}</button>
+                        <button type="submit" onclick="return confirm('{{ $.locale.Tr "admin.users.delete_confirm" }}')" class="text-rose-500 hover:text-rose-600">{{ $.locale.Tr "admin.delete" }}</button>
                     </form>
                 </td>
             </tr>

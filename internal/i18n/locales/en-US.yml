@@ -52,6 +52,7 @@ gist.edit.change-visibility: Make
 gist.edit.delete: Delete
 gist.edit.cancel: Cancel
 gist.edit.save: Save
+gist.delete.confirm: Are you sure you want to delete this gist ?
 
 gist.list.joined: Joined
 gist.list.all: All gists

@@ -13,7 +13,7 @@ It is similar to [GitHub Gist](https://gist.github.com/), but open-source and co
 ![License](https://img.shields.io/github/license/thomiceli/opengist?color=blue)
 [![Go CI](https://github.com/thomiceli/opengist/actions/workflows/go.yml/badge.svg)](https://github.com/thomiceli/opengist/actions/workflows/go.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thomiceli/opengist)](https://goreportcard.com/report/github.com/thomiceli/opengist)
-
+[![Translate](https://tr.opengist.io/widget/_/svg-badge.svg)](https://tr.opengist.io/projects/_/opengist/)
 
 ## Features
 
@@ -76,9 +76,9 @@ Download the archive for your system from the release page [here](https://github
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.8.0/opengist1.8.0-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.8.1/opengist1.8.1-linux-amd64.tar.gz
 
-tar xzvf opengist1.8.0-linux-amd64.tar.gz
+tar xzvf opengist1.8.1-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`

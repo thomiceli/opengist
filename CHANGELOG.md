@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.8.1](https://github.com/thomiceli/opengist/compare/v1.8.0...v1.8.1) - 2024-11-02
+See here how to [update](/docs/update.md) Opengist.
+
+### Changed
+- Hide passkey login when login form is disabled (#369)
+
+### Fixed
+- Markdown preview (#368)
+- confirm() popup messages (#370)
+
 ## [1.8.0](https://github.com/thomiceli/opengist/compare/v1.7.5...v1.8.0) - 2024-10-31
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

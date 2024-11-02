@@ -87,7 +87,7 @@
                     </div>
                 </div>
             </div>
-            {{ if .isLoginPage }}
+            {{ if and (.isLoginPage) (not .disableForm) }}
             <div class="">
                 <div class="mt-8 sm:w-full sm:max-w-md">
                     <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10 ">

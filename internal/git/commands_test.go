@@ -61,11 +61,12 @@ func TestContent(t *testing.T) {
 		"my_other_file.txt": `I really
 hate Opengist`,
 		"rip.txt": "byebye",
+		"中文名.txt": "中文内容",
 	})
 
 	files, err := GetFilesOfRepository("thomas", "gist1", "HEAD")
 	require.NoError(t, err, "Could not get files of repository")
-	require.Subset(t, []string{"my_file.txt", "my_other_file.txt", "rip.txt"}, files, "Files are not correct")
+	require.Subset(t, []string{"my_file.txt", "my_other_file.txt", "rip.txt", "中文名.txt"}, files, "Files are not correct")
 
 	content, truncated, err := GetFileContent("thomas", "gist1", "HEAD", "my_file.txt", false)
 	require.NoError(t, err, "Could not get content")
@@ -77,16 +78,22 @@ hate Opengist`,
 	require.False(t, truncated, "Content should not be truncated")
 	require.Equal(t, "I really\nhate Opengist", content, "Content is not correct")
 
+	content, truncated, err = GetFileContent("thomas", "gist1", "HEAD", "中文名.txt", false)
+	require.NoError(t, err, "Could not get content")
+	require.False(t, truncated, "Content should not be truncated")
+	require.Equal(t, "中文内容", content, "Content is not correct")
+
 	CommitToBare(t, "thomas", "gist1", map[string]string{
 		"my_renamed_file.txt": "I love Opengist\n",
 		"my_other_file.txt": `I really
 like Opengist actually`,
 		"new_file.txt": "Wait now there is a new file",
+		"中文名.txt":      "中文内容",
 	})
 
 	files, err = GetFilesOfRepository("thomas", "gist1", "HEAD")
 	require.NoError(t, err, "Could not get files of repository")
-	require.Subset(t, []string{"my_renamed_file.txt", "my_other_file.txt", "new_file.txt"}, files, "Files are not correct")
+	require.Subset(t, []string{"my_renamed_file.txt", "my_other_file.txt", "new_file.txt", "中文名.txt"}, files, "Files are not correct")
 
 	content, truncated, err = GetFileContent("thomas", "gist1", "HEAD", "my_other_file.txt", false)
 	require.NoError(t, err, "Could not get content")

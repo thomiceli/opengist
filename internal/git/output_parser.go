@@ -193,28 +193,28 @@ loopLog:
 					case strings.HasPrefix(line, "dissimilarity index"):
 						continue
 					case strings.HasPrefix(line, "rename from "):
-						currentFile.OldFilename = line[12 : len(line)-1]
+						currentFile.OldFilename = convertOctalToUTF8(line[12 : len(line)-1])
 					case strings.HasPrefix(line, "rename to "):
-						currentFile.Filename = line[10 : len(line)-1]
+						currentFile.Filename = convertOctalToUTF8(line[10 : len(line)-1])
 						parseRename = false
 					case strings.HasPrefix(line, "copy from "):
-						currentFile.OldFilename = line[10 : len(line)-1]
+						currentFile.OldFilename = convertOctalToUTF8(line[10 : len(line)-1])
 					case strings.HasPrefix(line, "copy to "):
-						currentFile.Filename = line[8 : len(line)-1]
+						currentFile.Filename = convertOctalToUTF8(line[8 : len(line)-1])
 						parseRename = false
 					case strings.HasPrefix(line, "new file"):
 						currentFile.IsCreated = true
 					case strings.HasPrefix(line, "deleted file"):
 						currentFile.IsDeleted = true
 					case strings.HasPrefix(line, "--- "):
-						name := line[4 : len(line)-1]
+						name := convertOctalToUTF8(line[4 : len(line)-1])
 						if parseRename && currentFile.IsDeleted {
 							currentFile.Filename = name[2:]
 						} else if parseRename && strings.HasPrefix(name, "a/") {
 							currentFile.OldFilename = name[2:]
 						}
 					case strings.HasPrefix(line, "+++ "):
-						name := line[4 : len(line)-1]
+						name := convertOctalToUTF8(line[4 : len(line)-1])
 						if parseRename && strings.HasPrefix(name, "b/") {
 							currentFile.Filename = name[2:]
 						}

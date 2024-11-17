@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -115,6 +116,9 @@ func GetFilesOfRepository(user string, gist string, revision string) ([]string, 
 	}
 
 	slice := strings.Split(string(stdout), "\n")
+	for i, s := range slice {
+		slice[i] = convertOctalToUTF8(s)
+	}
 	return slice[:len(slice)-1], nil
 }
 
@@ -153,7 +157,7 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 		fileMap = append(fileMap, &catFileBatch{
 			Hash: hash,
 			Size: size,
-			Name: name,
+			Name: convertOctalToUTF8(name),
 		})
 	}
 
@@ -249,7 +253,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 		"git",
 		"--no-pager",
 		"show",
-		revision+":"+filename,
+		revision+":"+convertURLToOctal(filename),
 	)
 	cmd.Dir = repositoryPath
 
@@ -273,7 +277,7 @@ func GetFileSize(user string, gist string, revision string, filename string) (ui
 		"git",
 		"cat-file",
 		"-s",
-		revision+":"+filename,
+		revision+":"+convertURLToOctal(filename),
 	)
 	cmd.Dir = repositoryPath
 
@@ -563,6 +567,48 @@ func removeFilesExceptGit(dir string) error {
 		}
 		return nil
 	})
+}
+
+func convertOctalToUTF8(name string) string {
+	name = strings.Trim(name, `"`)
+	utf8Name, err := strconv.Unquote(name)
+	if err != nil {
+		utf8Name, err = strconv.Unquote(`"` + name + `"`)
+		if err != nil {
+			return name
+		}
+	}
+	return utf8Name
+}
+
+func convertUTF8ToOctal(name string) string {
+	if strings.Contains(name, "\\") {
+		return name
+	}
+
+	needsQuoting := false
+	for _, r := range name {
+		if r > 127 {
+			needsQuoting = true
+			break
+		}
+	}
+
+	if !needsQuoting {
+		return name
+	}
+
+	quoted := fmt.Sprintf("%q", name)
+	return strings.Trim(quoted, `"`)
+}
+
+func convertURLToOctal(name string) string {
+	decoded, err := url.QueryUnescape(name)
+	if err != nil {
+		return name
+	}
+
+	return convertUTF8ToOctal(decoded)
 }
 
 const hookTemplate = `#!/bin/sh

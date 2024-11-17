@@ -41,6 +41,7 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 
 	allowUnauthenticated, err := auth.ShouldAllowUnauthenticatedGistAccess(db.AuthInfo{}, true)
 	if err != nil {
+		errorSsh("Failed to get auth info", err)
 		return errors.New("internal server error")
 	}
 

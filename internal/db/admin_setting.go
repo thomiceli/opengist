@@ -19,7 +19,7 @@ const (
 
 func GetSetting(key string) (string, error) {
 	var setting AdminSetting
-	err := db.Where("key = ?", key).First(&setting).Error
+	err := db.Where("`key` = ?", key).First(&setting).Error
 	return setting.Value, err
 }
 

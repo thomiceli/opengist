@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bufio"
 	"bytes"
+	gojson "encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -428,12 +429,10 @@ func gistJs(ctx echo.Context) error {
 		return errorRes(500, "Error joining css url", err)
 	}
 
-	js := `document.write('<link rel="stylesheet" href="%s">')
-document.write('%s')
-`
-	content := strings.Replace(htmlbuf.String(), `\n`, `\\n`, -1)
-	content = strings.Replace(content, "\n", `\n`, -1)
-	js = fmt.Sprintf(js, cssUrl, content)
+	js, err := escapeJavaScriptContent(htmlbuf.String(), cssUrl)
+	if err != nil {
+		return errorRes(500, "Error escaping JavaScript content", err)
+	}
 	ctx.Response().Header().Set("Content-Type", "application/javascript")
 	return plainText(ctx, 200, js)
 }
@@ -893,4 +892,26 @@ func preview(ctx echo.Context) error {
 	}
 
 	return plainText(ctx, 200, previewStr)
+}
+
+func escapeJavaScriptContent(htmlContent, cssUrl string) (string, error) {
+	jsonContent, err := gojson.Marshal(htmlContent)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode content: %w", err)
+	}
+
+	jsonCssUrl, err := gojson.Marshal(cssUrl)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode CSS URL: %w", err)
+	}
+
+	js := fmt.Sprintf(`
+        document.write('<link rel="stylesheet" href=%s>');
+        document.write(%s);
+    `,
+		string(jsonCssUrl),
+		string(jsonContent),
+	)
+
+	return js, nil
 }

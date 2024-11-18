@@ -33,8 +33,6 @@ FROM base AS dev
 EXPOSE 6157 2222 16157
 VOLUME /opengist
 
-RUN git config --global --add safe.directory /opengist
-
 CMD ["make", "watch"]
 
 

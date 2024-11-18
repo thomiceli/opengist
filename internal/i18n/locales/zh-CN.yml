@@ -176,7 +176,7 @@ admin.gists.nb-files: 文件数
 admin.gists.nb-likes: 喜欢数
 admin.gists.delete_confirm: 你想要删除此 Gist 吗？
 gist.new.url: 'URL'
-gist.new.preview: '预览 gist'
+gist.new.preview: '预览'
 error.page-not-found: '页面未找到'
 gist.new.create-a-new-gist: '创建一个新的gist'
 gist.edit.edit-gist: '编辑 %s'

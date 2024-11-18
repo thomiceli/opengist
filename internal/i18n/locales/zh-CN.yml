@@ -1,6 +1,6 @@
 gist.public: 公开
 gist.unlisted: 非列出
-gist.private: 私有
+gist.private: 私密
 
 gist.header.like: 喜欢
 gist.header.unlike: 取消喜欢
@@ -14,11 +14,11 @@ gist.header.code: 代码
 gist.header.revisions: 修订
 gist.header.revision: 修订
 gist.header.clone-http: 通过 %s 克隆
-gist.header.clone-http-help: 使用 Git 通过 HTTP 基础认证克隆。
+gist.header.clone-http-help: 使用 HTTP 基础认证通过 Git 克隆。
 gist.header.clone-ssh: 通过 SSH 克隆
-gist.header.clone-ssh-help: 使用 Git 通过 SSH 密钥克隆。
+gist.header.clone-ssh-help: 使用 SSH 密钥通过 Git 克隆。
 gist.header.embed: '嵌入'
-gist.header.embed-help: '在你的网页中嵌入此gist。'
+gist.header.embed-help: '将此 Gist 嵌入到您的网站。'
 gist.header.download-zip: 下载 ZIP
 
 gist.raw: 原始文件
@@ -27,10 +27,10 @@ gist.watch-full-file: 查看完整文件。
 gist.file-not-valid: 此文件不是有效的 CSV 文件。
 gist.no-content: 没有内容
 
-gist.new.new_gist: 创建 Gist
+gist.new.new_gist: 新建 Gist
 gist.new.title: 标题
 gist.new.description: 描述
-gist.new.filename-with-extension: 文件名与扩展名
+gist.new.filename-with-extension: 带扩展名的文件名
 gist.new.indent-mode: 缩进模式
 gist.new.indent-mode-space: 空格
 gist.new.indent-mode-tab: 制表符
@@ -39,17 +39,17 @@ gist.new.wrap-mode: 换行模式
 gist.new.wrap-mode-no: 不自动换行
 gist.new.wrap-mode-soft: 软换行
 gist.new.add-file: 添加文件
-gist.new.create-public-button: 创建公开 Gist
-gist.new.create-unlisted-button: 创建非列出 Gist
-gist.new.create-private-button: 创建私有 Gist
+gist.new.create-public-button: 创建公开的 Gist
+gist.new.create-unlisted-button: 创建非列出的 Gist
+gist.new.create-private-button: 创建私密的 Gist
 
-gist.edit.editing: 编辑
+gist.edit.editing: 正在编辑
 gist.edit.change-visibility: 设为
 gist.edit.delete: 删除
 gist.edit.cancel: 取消
 gist.edit.save: 保存
 
-gist.list.joined: 已加入
+gist.list.joined: 加入于
 gist.list.all: 所有 Gists
 gist.list.search-results: 搜索结果
 gist.list.sort: 排序
@@ -65,30 +65,30 @@ gist.list.forked-from: 派生自
 gist.list.forks: 派生
 gist.list.files: 文件
 gist.list.last-active: 最后活跃于
-gist.list.no-gists: 没有 Gist
+gist.list.no-gists: 没有任何 Gist
 
 gist.forks: 派生
 gist.forks.view: 查看派生
-gist.forks.no: 无公开派生
+gist.forks.no: 没有任何公开的派生
 
 gist.likes: 喜欢
-gist.likes.no: 还没有喜欢
+gist.likes.no: 目前还没有任何喜欢
 
 gist.revisions: 修订
 gist.revision.revised: 修订了这个 Gist
-gist.revision.go-to-revision: 跳至此修订
+gist.revision.go-to-revision: 转到此修订
 gist.revision.file-created: 文件已创建
-gist.revision.file-deleted: 文件已被删除
+gist.revision.file-deleted: 文件已删除
 gist.revision.file-renamed: 重命名为
-gist.revision.diff-truncated: 由于变更差异过大，显示内容已被截断
-gist.revision.file-renamed-no-changes: 文件已重命名，但名称与之前没有差异
-gist.revision.empty-file: 空文件
-gist.revision.no-changes: 没有变更
+gist.revision.diff-truncated: 差异内容过多而无法显示
+gist.revision.file-renamed-no-changes: 文件已重命名，但内容与之前没有差异
+gist.revision.empty-file: 文件为空
+gist.revision.no-changes: 没有任何变更
 gist.revision.no-revisions: 无可供显示的修订
 
 settings: 设置
-settings.email: 邮箱
-settings.email-help: 用于提交与 Gravatar
+settings.email: 电子邮箱
+settings.email-help: 用于提交和 Gravatar 头像
 settings.email-set: 设置邮箱地址
 settings.link-accounts: 关联账号
 settings.link-github-account: 关联 GitHub 账号
@@ -98,16 +98,16 @@ settings.unlink-gitea-account: 解除关联 Gitea 账号
 settings.delete-account: 删除账号
 settings.delete-account-confirm: 您确认要删除您的账号吗？
 settings.add-ssh-key: 添加 SSH 密钥
-settings.add-ssh-key-help: 用于使用 Git 通过 SSH 拉取与推送 Gist
-settings.add-ssh-key-title: 标题
+settings.add-ssh-key-help: 仅用于使用 Git 通过 SSH 拉取与推送 Gist
+settings.add-ssh-key-title: 名称
 settings.add-ssh-key-content: 密钥
 settings.delete-ssh-key: 删除
 settings.delete-ssh-key-confirm: 确认删除 SSH 密钥
-settings.ssh-key-added-at: 添加
+settings.ssh-key-added-at: 添加于
 settings.ssh-key-never-used: 从未使用过
 settings.ssh-key-last-used: 最后使用于
 
-auth.signup-disabled: 管理员已禁用了注册
+auth.signup-disabled: 管理员已禁用注册
 auth.login: 登录
 auth.signup: 注册
 auth.new-account: 新建账号
@@ -120,7 +120,7 @@ auth.oauth: 使用 %s 账号继续
 error: 错误
 
 header.menu.all: 全部
-header.menu.new: 创建
+header.menu.new: 新建
 header.menu.search: 搜索
 header.menu.my-gists: 我的 Gists
 header.menu.liked: 喜欢的 Gists
@@ -129,13 +129,13 @@ header.menu.settings: 设置
 header.menu.logout: 登出
 header.menu.register: 注册
 header.menu.login: 登录
-header.menu.light: 亮色
-header.menu.dark: 暗色
-header.menu.system: 系统
+header.menu.light: 亮色模式
+header.menu.dark: 暗色模式
+header.menu.system: 跟随系统
 footer.powered-by: 由 %s 强力驱动
 
-pagination.older: 更早
-pagination.newer: 更新
+pagination.older: 下一页
+pagination.newer: 上一页
 pagination.previous: 上一页
 pagination.next: 下一页
 
@@ -156,92 +156,92 @@ admin.user: 用户
 admin.delete: 删除
 admin.created_at: 创建于
 
-admin.config-link: 此配置可通过 YAML 配置和/或环境变量进行 %s 。
+admin.config-link: 此配置可通过 YAML 配置文件和/或环境变量进行 %s 。
 admin.config-link-overriden: 覆盖
-admin.disable-signup: 禁用注册
-admin.disable-signup_help: 阻止创建新的账号。
-admin.require-login: 要求登录
+admin.disable-signup: 禁止用户注册
+admin.disable-signup_help: 禁止创建新的账号。
+admin.require-login: 登录访问限制
 admin.require-login_help: 强制用户登录后才能查看 Gist。
 admin.disable-login: 禁用登录表单
 admin.disable-login_help: 禁止使用登录表单进行登录以强制通过 OAuth 提供方登录。
 admin.disable-gravatar: 禁用 Gravatar
 admin.disable-gravatar_help: 停止使用 Gravatar 作为头像提供方。
-admin.allow-gists-without-login: 允许未登录状态下输入个人 gists
-admin.allow-gists-without-login_help: 允许在不登录的情况下查看和下载 gist，同时需要登录才能使用 gists 的发现功能。
-admin.users.delete_confirm: 你想要删除此用户吗？
+admin.allow-gists-without-login: 允许未登录状态下访问单个 Gists
+admin.allow-gists-without-login_help: 允许在不登录的情况下查看和下载 Gist，同时需要登录才能使用 Gists 的发现功能。
+admin.users.delete_confirm: 您想要删除此用户吗？
 
 admin.gists.title: 标题
-admin.gists.private: 私有？
+admin.gists.private: 访问权限
 admin.gists.nb-files: 文件数
 admin.gists.nb-likes: 喜欢数
-admin.gists.delete_confirm: 你想要删除此 Gist 吗？
-gist.new.url: 'URL'
+admin.gists.delete_confirm: 您想要删除此 Gist 吗？
+gist.new.url: '自定义 URL 路径名'
 gist.new.preview: '预览'
 error.page-not-found: '页面未找到'
-gist.new.create-a-new-gist: '创建一个新的gist'
+gist.new.create-a-new-gist: '创建一个新的 Gist'
 gist.edit.edit-gist: '编辑 %s'
-gist.list.all-liked-by: '所有 gists 被 %s 标记喜欢'
-gist.list.all-forked-by: '所有 gists 被 %s 派生'
-gist.list.all-from: '所有 gists 来自于 %s'
-gist.search.found: '以下是找到的 gists'
-gist.search.no-results: '没有找到gist'
-gist.search.help.user: '由用户创建的gist'
-gist.search.help.title: '包含指定标题的 gists'
-gist.search.help.filename: 'gists 文件中包含指定名称'
-gist.search.help.extension: 'gists 文件中包含指定插件'
-gist.search.help.language: 'gists 文件中包含指定的开发语言'
-gist.forks.for: '派生到 %s'
-gist.likes.for: '喜欢给 %s'
-gist.revision-of: '被 %s 修订'
+gist.list.all-liked-by: '%s 喜欢的所有 Gists'
+gist.list.all-forked-by: '%s 派生的所有 Gists'
+gist.list.all-from: '来自于 %s 的所有 Gists'
+gist.search.found: '个已找到的 Gist(s)'
+gist.search.no-results: '没有找到任何 Gist'
+gist.search.help.user: '由用户创建的 Gists'
+gist.search.help.title: '包含指定标题的 Gists'
+gist.search.help.filename: '包含指定文件名的 Gists'
+gist.search.help.extension: '包含指定扩展名的 Gists'
+gist.search.help.language: '包含指定编程语言的 Gists'
+gist.forks.for: '%s 的派生'
+gist.likes.for: '%s 的喜欢'
+gist.revision-of: '%s 的修订'
 settings.link-gitlab-account: '关联 GitLab 账号'
 settings.unlink-gitlab-account: '解除关联 GitLab 账号'
 settings.change-username: '修改用户名'
 settings.create-password: '创建密码'
-settings.create-password-help: '创建密码用于 HTTP 方式登录 Opengist'
+settings.create-password-help: '创建您的密码以通过 HTTP 的方式登录到 Opengist'
 settings.change-password: '修改密码'
-settings.change-password-help: '修改您的密码用于 HTTP 方式登录 Opengist'
+settings.change-password-help: '修改您通过 HTTP 登录到 Opengist 的密码'
 settings.password-label-title: '密码'
 error.bad-request: '请求错误'
-error.signup-disabled: '注册功能已被管理员禁用'
-error.signup-disabled-form: '已禁用了表单注册功能'
-error.login-disabled-form: '已禁用了表单登录功能'
-error.complete-oauth-login: '用户认证未能通过: %s'
+error.signup-disabled: '注册已被禁用'
+error.signup-disabled-form: '通过用户名密码注册已被禁用'
+error.login-disabled-form: '通过用户名密码登录已被禁用'
+error.complete-oauth-login: '用户认证未能通过：%s'
 error.oauth-unsupported: '不支持的认证提供商'
 error.cannot-bind-data: '无法绑定数据'
 error.invalid-number: '数字格式不正确'
 error.invalid-character-unescaped: '包含未转义的无效字符'
 admin.invitations: '邀请'
 admin.invitations.create: '创建邀请'
-admin.actions.sync-previews: '同步所有 gists 预览'
-admin.actions.reset-hooks: '重置所有存储库的 Git 服务hooks'
-admin.actions.index-gists: '索引所有 gists'
+admin.actions.sync-previews: '同步所有 Gists 预览'
+admin.actions.reset-hooks: '重置所有存储库的 Git 服务 hooks'
+admin.actions.index-gists: '索引所有 Gists'
 admin.invitations.help: '即使在禁用注册功能的情况下，邀请功能也可用于创建帐户。'
 admin.invitations.max_uses: '最多使用次数'
 admin.invitations.expires_at: '过期时间'
 admin.invitations.code: '邀请码'
 admin.invitations.copy_link: '复制链接'
 admin.invitations.uses: '使用次数'
-admin.invitations.expired: '已到期'
-flash.admin.user-deleted: '用户已删除'
-flash.admin.gist-deleted: 'Gist 已删除'
-flash.admin.invitation-created: '该邀请已被创建'
-flash.admin.invitation-deleted: '该邀请已被删除'
+admin.invitations.expired: '已过期'
+flash.admin.user-deleted: '用户已被删除'
+flash.admin.gist-deleted: 'Gist 已被删除'
+flash.admin.invitation-created: '邀请已被创建'
+flash.admin.invitation-deleted: '邀请已被删除'
 flash.admin.sync-fs: '正在从文件系统同步存储库...'
 flash.admin.sync-db: '正在从数据库同步存储库...'
 flash.admin.git-gc: '正在进行存储库垃圾回收...'
 flash.admin.sync-previews: '正在同步 Gist 预览...'
 flash.admin.reset-hooks: '正在重置所有存储库的 Git 服务挂钩...'
-flash.admin.index-gists: '索引所有 gists...'
+flash.admin.index-gists: '正在索引所有 Gists...'
 flash.auth.username-exists: '用户名已存在'
 flash.auth.invalid-credentials: '无效的凭证'
 flash.auth.account-linked-oauth: '帐户已关联到 %s'
 flash.auth.account-unlinked-oauth: '帐户与 %s 解除关联'
 flash.auth.user-sshkeys-not-retrievable: '无法获取用户密钥'
-flash.auth.user-sshkeys-not-created: '无法创建 ssh 密钥'
-flash.auth.must-be-logged-in: '您必须登录才能访问 gists'
-flash.gist.visibility-changed: 'Gist可见性已更改'
-flash.gist.deleted: 'Gist已被删除'
-flash.gist.fork-own-gist: '无法派生自己的要点'
+flash.auth.user-sshkeys-not-created: '无法创建 SSH 密钥'
+flash.auth.must-be-logged-in: '您必须登录才能访问 Gists'
+flash.gist.visibility-changed: 'Gist 可见性已更改'
+flash.gist.deleted: 'Gist 已被删除'
+flash.gist.fork-own-gist: '无法派生自己的 Gists'
 flash.gist.forked: 'Gist 已被派生'
 flash.user.email-updated: '电子邮件已更新'
 flash.user.invalid-ssh-key: 'SSH 密钥无效'
@@ -254,20 +254,20 @@ validation.should-not-be-empty: '字段 %s 不能为空'
 validation.should-not-include-sub-directory: '字段 %s 不应包含子目录'
 validation.should-only-contain-alphanumeric-characters: '字段 %s 只能包含字母、数字、字符'
 validation.should-only-contain-alphanumeric-characters-and-dashes: '字段 %s 应仅包含字母、数字、字符和 ‘-’'
-validation.not-enough: '还不够 %s'
-validation.invalid: '无效 %s'
+validation.not-enough: '%s 长度过短'
+validation.invalid: '%s 无效'
 html.title.admin-panel: '管理面板'
 settings.ssh-key-exists: SSH 密钥已经存在
-auth.mfa.passkey-name: 密钥名称
-auth.mfa.use-passkey-to-finish: 使用密钥完成身份验证
-auth.mfa.delete-passkey: 删除密钥
+auth.mfa.passkey-name: 名称
+auth.mfa.use-passkey-to-finish: 使用通行密钥完成身份验证
+auth.mfa.delete-passkey: 删除
 auth.mfa.passkey-added-at: 密钥已添加
-auth.mfa.passkey-never-used: 密钥从未使用
-auth.mfa.passkey-last-used: 密钥上次使用时间
+auth.mfa.passkey-never-used: 从未使用过
+auth.mfa.passkey-last-used: 最后使用于
 auth.mfa.delete-passkey-confirm: 确认删除密钥
 error.not-in-mfa-session: 用户不在 MFA 会话中
 auth.mfa.waiting-for-passkey-input: 等待浏览器的交互输入...
-auth.mfa.passkeys-help: 添加密钥以登录您的帐户并用于 MFA 方式。
+auth.mfa.passkeys-help: 添加通行密钥以登录您的帐户并用作 MFA 方法。
 flash.auth.passkey-registred: 密钥 %s 已注册
 flash.auth.passkey-deleted: 密钥已删除
 auth.mfa.use-passkey: 使用通行密钥
@@ -276,7 +276,7 @@ auth.mfa.login-with-passkey: 使用通行密钥登录
 auth.mfa: 多因素认证
 auth.mfa.passkey: 通行密钥
 auth.mfa.passkeys: 通行密钥
-gist.delete.confirm: 确定要删除该 Gist 吗？
+gist.delete.confirm: 确定要删除此 Gist 吗？
 auth.totp.scan-qr-code: 使用您的身份验证应用扫描下面的二维码以启用双因素认证，或者输入以下字符串，然后用生成的代码进行确认。
 auth.totp: 基于时间的一次性密码算法（TOTP）
 auth.totp.help: TOTP 是一种双因素认证方法，它使用共享密钥生成一次性密码。
@@ -284,7 +284,7 @@ auth.totp.use: 使用 TOTP
 auth.totp.regenerate-recovery-codes: 重新生成恢复码
 auth.totp.already-enabled: TOTP 已启用
 auth.totp.invalid-secret: 无效的 TOTP 密钥
-auth.totp.code-used: 恢复代码 %s 已被使用，现已失效。您可能需要暂时 MFA 或重新生成代码。
+auth.totp.code-used: 恢复代码 %s 已被使用且失效。您可能需要暂时禁用 MFA 或重新生成代码。
 auth.totp.invalid-code: 无效的 TOTP 代码
 auth.totp.disabled: 成功禁用 TOTP
 auth.totp.disable: 禁用 TOTP

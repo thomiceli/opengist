@@ -276,3 +276,21 @@ auth.mfa.login-with-passkey: 使用通行密钥登录
 auth.mfa: 多因素认证
 auth.mfa.passkey: 通行密钥
 auth.mfa.passkeys: 通行密钥
+gist.delete.confirm: 确定要删除该 Gist 吗？
+auth.totp.scan-qr-code: 使用您的身份验证应用扫描下面的二维码以启用双因素认证，或者输入以下字符串，然后用生成的代码进行确认。
+auth.totp: 基于时间的一次性密码算法（TOTP）
+auth.totp.help: TOTP 是一种双因素认证方法，它使用共享密钥生成一次性密码。
+auth.totp.use: 使用 TOTP
+auth.totp.regenerate-recovery-codes: 重新生成恢复码
+auth.totp.already-enabled: TOTP 已启用
+auth.totp.invalid-secret: 无效的 TOTP 密钥
+auth.totp.code-used: 恢复代码 %s 已被使用，现已失效。您可能需要暂时 MFA 或重新生成代码。
+auth.totp.invalid-code: 无效的 TOTP 代码
+auth.totp.disabled: 成功禁用 TOTP
+auth.totp.disable: 禁用 TOTP
+auth.totp.enter-code: 请输入来自身份验证器应用程序的代码
+auth.totp.enter-recovery-key: 如果您丢失了设备，可以使用恢复密钥
+auth.totp.code: 代码
+auth.totp.submit: 提交
+auth.totp.proceed: 继续
+auth.totp.save-recovery-codes: 请将您的恢复代码保存在安全的地方。在您无法访问身份验证应用程序时，可以使用这些代码恢复访问。

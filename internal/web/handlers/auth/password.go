@@ -6,6 +6,7 @@ import (
 	passwordpkg "github.com/thomiceli/opengist/internal/auth/password"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
+	"github.com/thomiceli/opengist/internal/ldap"
 	"github.com/thomiceli/opengist/internal/validator"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"gorm.io/gorm"
@@ -114,6 +115,8 @@ func ProcessLogin(ctx *context.Context) error {
 		return ctx.ErrorRes(403, ctx.Tr("error.login-disabled-form"), nil)
 	}
 
+	enableLDAP := ctx.GetData("EnableLdap")
+
 	var err error
 	sess := ctx.GetSession()
 
@@ -132,6 +135,36 @@ func ProcessLogin(ctx *context.Context) error {
 		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
 		ctx.AddFlash(ctx.Tr("flash.auth.invalid-credentials"), "error")
 		return ctx.RedirectTo("/login")
+	}
+
+	if enableLDAP == true {
+		ok, err := ldap.Authenticate(user.Username, password)
+		if err != nil {
+			log.Warn().Msgf("Cannot check for LDAP password: %v", err)
+			log.Info().Msg("LDAP authentication failed for user: " + user.Username)
+		}
+
+		if !ok {
+			log.Warn().Msg("Invalid LDAP authentication attempt from " + ctx.RealIP())
+			log.Info().Msg("LDAP authentication failed for user: " + user.Username)
+			ctx.AddFlash(ctx.Tr("flash.auth.invalid-credentials"), "error")
+		}
+
+		if ok {
+			user.Password, err = passwordpkg.HashPassword(password)
+			if err != nil {
+				return ctx.ErrorRes(500, "Cannot hash password for user", err)
+			}
+
+			err = user.Update()
+			if err != nil {
+				log.Info().Msg("LDAP authentication failed for " + user.Username)
+				return ctx.ErrorRes(500, "Cannot update LDAP user "+user.Username, err)
+			}
+
+			log.Info().Msg("Synced local password from LDAP for user: " + user.Username)
+			log.Info().Msg("LDAP authentication succeeded for user: " + user.Username)
+		}
 	}
 
 	if ok, err := passwordpkg.VerifyPassword(password, user.Password); !ok {

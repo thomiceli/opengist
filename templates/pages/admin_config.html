@@ -71,6 +71,19 @@
             <dt>OIDC Discovery URL</dt><dd>{{ if .c.OIDCDiscoveryUrl }}&#60;defined&#62;{{ end }}</dd>
             <dt>OIDC Group Claim Name</dt><dd>{{ .c.OIDCGroupClaimName }}</dd>
             <dt>OIDC Admin Group</dt><dd>{{ .c.OIDCAdminGroup }}</dd>
+            <div class="relative col-span-3 mt-4">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">LDAP</span>
+                </div>
+            </div>
+            <dt>LDAP URL</dt><dd>{{ .c.LDAPUrl }}</dd>
+            <dt>LDAP Bind DN</dt><dd>{{ .c.LDAPBindDn }}</dd>
+            <dt>LDAP Bind Credentials</dt><dd>{{ if .c.LDAPBindCredentials }}&#60;defined&#62;{{ end }}</dd>
+            <dt>LDAP Search Base</dt><dd>{{ .c.LDAPSearchBase }}</dd>
+            <dt>LDAP Search Filter</dt><dd>{{ .c.LDAPSearchFilter }}</dd>
         </dl>
     </div>
     <div>
@@ -94,6 +107,17 @@
                     </span>
                     <button type="button" id="require-login" data-bool="{{ .RequireLogin }}" class="toggle-button {{ if .RequireLogin }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
                         <span aria-hidden="true" class="{{ if .RequireLogin }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                    </button>
+                </div>
+            </li>
+            <li class="list-none gap-x-4 py-5">
+                <div class="flex items-center justify-between">
+                    <span class="flex flex-grow flex-col">
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.enable-ldap" }}</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.enable-ldap_help" }}</span>
+                    </span>
+                    <button type="button" id="enable-ldap" data-bool="{{ .EnableLdap }}" class="toggle-button {{ if .EnableLdap }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
+                        <span aria-hidden="true" class="{{ if .EnableLdap }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
                     </button>
                 </div>
             </li>

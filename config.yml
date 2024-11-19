@@ -72,7 +72,6 @@ ssh.external-domain:
 # Path or alias to ssh-keygen executable. Default: ssh-keygen
 ssh.keygen-executable: ssh-keygen
 
-
 # OAuth2 configuration
 # The callback/redirect URL must be http://opengist.url/oauth/<github|gitlab|gitea|openid-connect>/callback
 
@@ -102,6 +101,17 @@ oidc.secret:
 # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
 oidc.discovery-url:
 
+# LDAP authentication configuration
+# URL of the LDAP instance e.g: ldap://ldap.example.com:389
+ldap.url:
+# Bind DN to authenticate against the LDAP e.g: cn=read-only-admin,dc=example,dc=com
+ldap.bind-dn:
+# The password for the Bind DN.
+ldap.bind-credentials:
+# The Base DN to start search from e.g: dc=example,dc=com
+ldap.search-base:
+# The filter to search against (the format string %s will be replaced with the username) e.g: (uid=%s)
+ldap.search-filter:
 
 # Custom assets
 # Add your own custom assets, that are files relatives to $opengist-home/custom/

@@ -17,8 +17,8 @@ opengist-home:
 # Secret key used for session store & encrypt MFA data on database. Default: <randomized 32 bytes>
 secret-key:
 
-# URI of the database. Default: opengist.db (SQLite)
-# SQLite:        file name
+# URI of the database. Default: opengist.db (SQLite) is placed in opengist-home
+# SQLite:        file:/path/to/database
 # PostgreSQL:    postgres://user:password@host:port/database
 # MySQL/MariaDB: mysql://user:password@host:port/database
 db-uri: opengist.db

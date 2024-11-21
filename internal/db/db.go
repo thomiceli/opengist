@@ -46,18 +46,15 @@ var DatabaseInfo *databaseInfo
 func parseDBURI(uri string) (*databaseInfo, error) {
 	info := &databaseInfo{}
 
-	if !strings.Contains(uri, "://") {
-		info.Type = SQLite
-		if uri == "file::memory:" {
-			info.Database = "file::memory:"
-			return info, nil
-		}
-		info.Database = filepath.Join(config.GetHomeDir(), uri)
-		return info, nil
-	}
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, fmt.Errorf("invalid URI: %v", err)
+	}
+
+	if u.Scheme == "" {
+		info.Type = SQLite
+		info.Database = filepath.Join(config.GetHomeDir(), uri)
+		return info, nil
 	}
 
 	switch u.Scheme {
@@ -65,6 +62,8 @@ func parseDBURI(uri string) (*databaseInfo, error) {
 		info.Type = PostgreSQL
 	case "mysql", "mariadb":
 		info.Type = MySQL
+	case "file":
+		info.Type = SQLite
 	default:
 		return nil, fmt.Errorf("unknown database: %v", err)
 	}
@@ -83,6 +82,8 @@ func parseDBURI(uri string) (*databaseInfo, error) {
 	switch info.Type {
 	case PostgreSQL, MySQL:
 		info.Database = strings.TrimPrefix(u.Path, "/")
+	case SQLite:
+		info.Database = u.String()
 	default:
 		return nil, fmt.Errorf("unknown database: %v", err)
 	}
@@ -190,12 +191,21 @@ func setupSQLite(dbInfo databaseInfo, sharedCache bool) error {
 		log.Warn().Msg("Invalid SQLite journal mode: " + journalMode)
 	}
 
-	sharedCacheStr := ""
-	if sharedCache {
-		sharedCacheStr = "&cache=shared"
+	u, err := url.Parse(dbInfo.Database)
+	if err != nil {
+		return err
 	}
 
-	db, err = gorm.Open(sqlite.Open(dbInfo.Database+"?_fk=true&_journal_mode="+journalMode+sharedCacheStr), &gorm.Config{
+	u.Scheme = "file"
+	q := u.Query()
+	q.Set("_fk", "true")
+	q.Set("_journal_mode", journalMode)
+	if sharedCache {
+		q.Set("cache", "shared")
+	}
+	u.RawQuery = q.Encode()
+	dsn := u.String()
+	db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger:         logger.Default.LogMode(logger.Silent),
 		TranslateError: true,
 	})

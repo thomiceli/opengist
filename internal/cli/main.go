@@ -92,6 +92,10 @@ func Initialize(ctx *cli.Context) {
 			"Current git version: " + gitVersion)
 	}
 
+	if err := git.InitGitConfig(); err != nil {
+		log.Fatal().Err(err).Send()
+	}
+
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
 

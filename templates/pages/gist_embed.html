@@ -8,7 +8,7 @@
             </div>
             {{ if $file.Truncated }}
                 <div class="text-xs px-4 bg-gray-50 py-1.5 border-b-1 border-gray-100 dark:border-gray-700">
-                    {{ $.locale.Tr "gist.file-truncated" }} <a target="_blank" class="text-primary-600" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}.</a>
+                    {{ $.locale.Tr "gist.file-truncated" }} <a target="_blank" class="text-primary-600" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
                 </div>
             {{ end }}
             {{ $csv := csvFile $file.File }}

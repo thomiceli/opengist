@@ -38,7 +38,7 @@
                 </div>
                 {{ if $file.Truncated }}
                 <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
-                    {{ $.locale.Tr "gist.file-truncated" }} <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}.</a>
+                    {{ $.locale.Tr "gist.file-truncated" }} <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
                 </div>
                 {{ end }}
                 {{ if and (not $csv) (isCsv $file.Filename) }}

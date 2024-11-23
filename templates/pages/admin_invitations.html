@@ -55,7 +55,7 @@
                 <td class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                     <form action="{{ $.c.ExternalUrl }}/admin-panel/invitations/{{ $invitation.ID }}/delete" method="POST">
                         {{ $.csrfHtml }}
-                        <button type="submit" onclick="return confirm('{{ $.locale.Tr "admin.users.delete_confirm" }}')" class="text-rose-500 hover:text-rose-600">{{ $.locale.Tr "admin.delete" }}</button>
+                        <button type="submit" onclick="return confirm('{{ $.locale.Tr "admin.invitations.delete_confirm" }}')" class="text-rose-500 hover:text-rose-600">{{ $.locale.Tr "admin.delete" }}</button>
                     </form>
                 </td>
             </tr>

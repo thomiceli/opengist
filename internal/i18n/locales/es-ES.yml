@@ -17,8 +17,8 @@ gist.header.clone-http: Clonar via %s
 gist.header.clone-http-help: Clonar con Git usando autenticación básica HTTP.
 gist.header.clone-ssh: Clonar via SSH
 gist.header.clone-ssh-help: Clonar con Git usando una clave SSH.
-gist.header.embed: ''
-gist.header.embed-help: ''
+gist.header.embed: 'Embeber'
+gist.header.embed-help: 'Embebe este gist en tu sitio web.'
 gist.header.download-zip: Descargar ZIP
 
 gist.raw: Sin formato
@@ -71,8 +71,8 @@ gist.forks: Bifurcaciones
 gist.forks.view: Ver bifurcación
 gist.forks.no: No hay bifurcaciones públicas
 
-gist.likes: Gustos
-gist.likes.no: Aún no hay gustos
+gist.likes: Todos los me gusta
+gist.likes.no: Aún no hay me gusta
 
 gist.revisions: Revisiones
 gist.revision.revised: revisó este gist
@@ -80,7 +80,7 @@ gist.revision.go-to-revision: Ir a la revisión
 gist.revision.file-created: archivo creado
 gist.revision.file-deleted: archivo eliminado
 gist.revision.file-renamed: renombrado a
-gist.revision.diff-truncated: Diferencia truncada porque es demasiado grande para mostrarse.
+gist.revision.diff-truncated: Diferencia truncada porque es demasiado grande para mostrarse
 gist.revision.file-renamed-no-changes: Archivo renombrado sin cambios
 gist.revision.empty-file: Archivo vacío
 gist.revision.no-changes: Sin cambios
@@ -165,8 +165,8 @@ admin.disable-login: Deshabilitar formulario de inicio de sesión
 admin.disable-login_help: Prohibir el inicio de sesión a través del formulario de inicio de sesión para forzar el uso de proveedores de OAuth en su lugar.
 admin.disable-gravatar: Deshabilitar Gravatar
 admin.disable-gravatar_help: Deshabilitar el uso de Gravatar como proveedor de avatar.
-admin.allow-gists-without-login:
-admin.allow-gists-without-login_help:
+admin.allow-gists-without-login: Permitir gists individuales sin iniciar sesión
+admin.allow-gists-without-login_help: Permitir ver y descargar gists individuales sin iniciar sesión, requiriendo iniciar sesión para descubrir gists.
 admin.users.delete_confirm: ¿Quieres eliminar a este usuario?
 
 admin.gists.title: Título
@@ -174,86 +174,123 @@ admin.gists.private: ¿Privado?
 admin.gists.nb-files: Núm. de archivos
 admin.gists.nb-likes: Núm. de gustos
 admin.gists.delete_confirm: ¿Quieres eliminar este gist?
-gist.new.url: ''
-gist.new.preview: ''
-gist.new.create-a-new-gist: ''
-gist.edit.edit-gist: ''
-gist.list.all-liked-by: ''
-gist.list.all-forked-by: ''
-gist.list.all-from: ''
-gist.search.found: ''
-gist.search.no-results: ''
-gist.search.help.user: ''
-gist.search.help.title: ''
-gist.search.help.filename: ''
-gist.search.help.extension: ''
-gist.search.help.language: ''
-gist.forks.for: ''
-gist.likes.for: ''
-gist.revision-of: ''
-settings.link-gitlab-account: ''
-settings.unlink-gitlab-account: ''
-settings.change-username: ''
-settings.create-password: ''
-settings.create-password-help: ''
-settings.change-password: ''
-settings.change-password-help: ''
-settings.password-label-title: ''
-error.page-not-found: ''
-error.bad-request: ''
-error.signup-disabled: ''
-error.signup-disabled-form: ''
-error.login-disabled-form: ''
-error.complete-oauth-login: ''
-error.oauth-unsupported: ''
-error.cannot-bind-data: ''
-error.invalid-number: ''
-error.invalid-character-unescaped: ''
-admin.invitations: ''
-admin.invitations.create: ''
-admin.actions.sync-previews: ''
-admin.actions.reset-hooks: ''
-admin.actions.index-gists: ''
-admin.config-link-overriden: ''
-admin.invitations.help: ''
-admin.invitations.max_uses: ''
-admin.invitations.expires_at: ''
-admin.invitations.code: ''
-admin.invitations.copy_link: ''
-admin.invitations.uses: ''
-admin.invitations.expired: ''
-flash.admin.user-deleted: ''
-flash.admin.gist-deleted: ''
-flash.admin.invitation-created: ''
-flash.admin.invitation-deleted: ''
-flash.admin.sync-fs: ''
-flash.admin.sync-db: ''
-flash.admin.git-gc: ''
-flash.admin.sync-previews: ''
-flash.admin.reset-hooks: ''
-flash.admin.index-gists: ''
-flash.auth.username-exists: ''
-flash.auth.invalid-credentials: ''
-flash.auth.account-linked-oauth: ''
-flash.auth.account-unlinked-oauth: ''
-flash.auth.user-sshkeys-not-retrievable: ''
-flash.auth.user-sshkeys-not-created: ''
-flash.auth.must-be-logged-in: ''
-flash.gist.visibility-changed: ''
-flash.gist.deleted: ''
-flash.gist.fork-own-gist: ''
-flash.gist.forked: ''
-flash.user.email-updated: ''
-flash.user.invalid-ssh-key: ''
-flash.user.ssh-key-added: ''
-flash.user.ssh-key-deleted: ''
-flash.user.password-updated: ''
-flash.user.username-updated: ''
-validation.is-too-long: ''
-validation.should-not-be-empty: ''
-validation.should-not-include-sub-directory: ''
-validation.should-only-contain-alphanumeric-characters: ''
-validation.should-only-contain-alphanumeric-characters-and-dashes: ''
-validation.not-enough: ''
-validation.invalid: ''
-html.title.admin-panel: ''
+gist.new.url: 'URL'
+gist.new.preview: 'Previsualizar'
+gist.new.create-a-new-gist: 'Crear un nuevo gist'
+gist.edit.edit-gist: 'Editar %s'
+gist.list.all-liked-by: 'Todos los gists que le gustaron a %s'
+gist.list.all-forked-by: 'Todos los gists bifurcados por %s'
+gist.list.all-from: 'Todos los gists de %s'
+gist.search.found: 'gists encontrados'
+gist.search.no-results: 'No se han encontrado gists'
+gist.search.help.user: 'gists creados por el usuario'
+gist.search.help.title: 'gists con el título indicado'
+gist.search.help.filename: 'gists que contienen archivos con el nombre indicado'
+gist.search.help.extension: 'gists que contienen archivos con la extensión indicada'
+gist.search.help.language: 'gists que contienen archivos con el lenguaje indicado'
+gist.forks.for: 'Bifurcacaiones de %s'
+gist.likes.for: 'Me gusta para %s'
+gist.revision-of: 'Revisión de %s'
+settings.link-gitlab-account: 'Vincular cuenta de GitLab'
+settings.unlink-gitlab-account: 'Desvincular cuenta de GitLab'
+settings.change-username: 'Cambiar nombre de usuario'
+settings.create-password: 'Crear contraseña'
+settings.create-password-help: 'Crea tu contraseña para acceder a Opengist vía HTTP'
+settings.change-password: 'Cambiar contraseña'
+settings.change-password-help: 'Cambia tu contraseña para acceder a Opengist vía HTTP'
+settings.password-label-title: 'Contraseña'
+error.page-not-found: 'Página no encontrada'
+error.bad-request: 'Solicitud incorrecta'
+error.signup-disabled: 'El registro está deshabilitado'
+error.signup-disabled-form: 'El registro mediante el formulario está deshabilitado'
+error.login-disabled-form: 'El inicio de sesión mediante el formulario está deshabilitado'
+error.complete-oauth-login: 'No se puede completar la autenticación del usuario: %s'
+error.oauth-unsupported: 'Proveedor no compatible'
+error.cannot-bind-data: 'No se puede vincular los datos'
+error.invalid-number: 'Número inválido'
+error.invalid-character-unescaped: 'Carácter inválido no escapado'
+admin.invitations: 'Invitaciones'
+admin.invitations.create: 'Crear invitación'
+admin.actions.sync-previews: 'Sincronizar todas las vistas previas de gists'
+admin.actions.reset-hooks: 'Resetear los hooks de Git en todos los repositorios'
+admin.actions.index-gists: 'Indexar todos los gists'
+admin.config-link-overriden: 'sobrescrito'
+admin.invitations.help: 'Las invitaciones se pueden usar para crear una cuenta aunque el registro esté deshabilitado.'
+admin.invitations.max_uses: 'Cantidad máxima de usos'
+admin.invitations.expires_at: 'Expira el'
+admin.invitations.code: 'Código'
+admin.invitations.copy_link: 'Copiar vínculo'
+admin.invitations.uses: 'Usos'
+admin.invitations.expired: 'Expirado'
+flash.admin.user-deleted: 'El usuario ha sido eliminado'
+flash.admin.gist-deleted: 'El gist ha sido eliminado'
+flash.admin.invitation-created: 'La invitación ha sido creada'
+flash.admin.invitation-deleted: 'La invitación ha sido eliminada'
+flash.admin.sync-fs: 'Sincronizando repositorios desde el sistema de archivos...'
+flash.admin.sync-db: 'Sincronizando repositorios desde la base de datos...'
+flash.admin.git-gc: 'Recolectando basura en los repositorios...'
+flash.admin.sync-previews: 'Sincronizando vistas previas de gists...'
+flash.admin.reset-hooks: 'Reseteando hooks del servidor Git en todos los repositorios...'
+flash.admin.index-gists: 'Indexando todos los gists...'
+flash.auth.username-exists: 'El nombre de usuario ya existe'
+flash.auth.invalid-credentials: 'Credenciales incorrectas'
+flash.auth.account-linked-oauth: 'Cuenta vinculada a %s'
+flash.auth.account-unlinked-oauth: 'Cuenta desvinculada de %s'
+flash.auth.user-sshkeys-not-retrievable: 'No se pudo obtener las claves del usuario'
+flash.auth.user-sshkeys-not-created: 'No se pudo crear la aclave ssh'
+flash.auth.must-be-logged-in: 'Debes estar logueaado para acceder a los gists'
+flash.gist.visibility-changed: 'La visibilidad del Gist ha sido modificada'
+flash.gist.deleted: 'El gist fue eliminado'
+flash.gist.fork-own-gist: 'No se puede bifurcar gists propios'
+flash.gist.forked: 'El gist ha sido bifurcado'
+flash.user.email-updated: 'Correo actualizado'
+flash.user.invalid-ssh-key: 'Clave SSH inválida'
+flash.user.ssh-key-added: 'Clave SSH añadida'
+flash.user.ssh-key-deleted: 'Clave SSH eliminada'
+flash.user.password-updated: 'Contraseña actualizada'
+flash.user.username-updated: 'Nombre de usuario actualizado'
+validation.is-too-long: 'El campo %s es demasiado largo'
+validation.should-not-be-empty: 'El campo %s no puede estar vacío'
+validation.should-not-include-sub-directory: 'El campo %s no puede incluir un sub directorio'
+validation.should-only-contain-alphanumeric-characters: 'El campo %s solo puede contener caracteres alfanuméricos'
+validation.should-only-contain-alphanumeric-characters-and-dashes: 'El campo %s solo puede contener caracteres alfanuméricos y guiones'
+validation.not-enough: 'No hay suficiente %s'
+validation.invalid: '%s inválido'
+html.title.admin-panel: 'Panel de administración'
+auth.mfa: Autenticación mult-factor
+auth.mfa.passkey: Clave de acceso
+auth.mfa.passkeys: Claves de acceso
+auth.mfa.use-passkey: Utilizar clave de acceso
+auth.mfa.bind-passkey: Vincular clave de acceso
+auth.mfa.login-with-passkey: Ingresar con clave de acceso
+auth.mfa.waiting-for-passkey-input: Esperando interacción del navegador...
+auth.mfa.use-passkey-to-finish: Usa una clave de acceso para completar la autenticación
+auth.mfa.passkeys-help: Agrega una clave de acceso para iniciar sesión en tu cuenta y usarla como método MFA.
+auth.mfa.passkey-name: Nombre
+auth.mfa.delete-passkey: Eliminar
+auth.mfa.passkey-added-at: Agregado
+auth.mfa.passkey-never-used: Nunca utilizado
+auth.mfa.passkey-last-used: Último uso
+auth.mfa.delete-passkey-confirm: Confirmar eliminación de clave de acceso
+auth.totp.enter-recovery-key: o una clave de recuperación si perdiste tu dispositivo
+auth.totp.code: Código
+auth.totp.submit: Enviar
+auth.totp.proceed: Proceder
+auth.totp.save-recovery-codes: Guarda tus códigos de recuperación en un lugar seguro. Puedes usarlos para recuperar el acceso a tu cuenta si pierdes el acceso a tu app de autenticación.
+auth.totp.scan-qr-code: Escanea el código QR con tu app de autenticación para habilitar la autenticación de doble factor o ingresa la siguiente cadena y confirma con el código generado.
+error.not-in-mfa-session: El usuario no está en una sesión MFA
+settings.ssh-key-exists: La clave SSH ya existe
+auth.totp: Contraseña de un solo uso basada en tiempo (TOTP)
+auth.totp.help: TOTP es un método de autenticación doble factor que utiliza una clave compartida para generar una contraseña de un solo uso.
+auth.totp.use: Usar TOTP
+auth.totp.regenerate-recovery-codes: Regenerar códigos de recuperación
+auth.totp.already-enabled: TOTP ya está habilitado
+auth.totp.invalid-secret: Clave TOTP inválido
+auth.totp.invalid-code: Código TOTP inválido
+auth.totp.code-used: El código de recuperación %s fue utilizado, ahora es inválido. Puedes desactivar MFA por ahora o regenerar tus códigos.
+auth.totp.disabled: TOTP deshabilitado exitosamente
+auth.totp.disable: Deshabilitar TOTP
+auth.totp.enter-code: Ingresa el código de la app de autenticación
+gist.delete.confirm: ¿Estás seguro que deseas eliminar este gist?
+flash.auth.passkey-registred: Clave de acceso %s registrada
+flash.auth.passkey-deleted: Clave de acceso eliminada

@@ -258,3 +258,4 @@ validation.not-enough: 'Pas assez de %s'
 validation.invalid: '%s non valide'
 html.title.admin-panel: 'Administration'
 settings.ssh-key-exists: La clé SSH existe déjà
+gist.delete.confirm: Voulez-vous supprimer ce Gist ?

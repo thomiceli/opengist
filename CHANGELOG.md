@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.8.2](https://github.com/thomiceli/opengist/compare/v1.8.1...v1.8.2) - 2024-11-25
+See here how to [update](/docs/update.md) Opengist.
+
+### Added
+- More translation strings (#373) (#388)
+
+### Changed
+- Enforce git config on startup (#383)
+- Respect file scheme URIs for SQLite. (#387)
+
+### Fixed
+- Convert octal notation file names in Git (#380)
+- Git clone on SSH with MySQL (#382)
+- Escaping for embed gists (#381)
+
+### Other
+- Update deps Golang & JS deps
+
 ## [1.8.1](https://github.com/thomiceli/opengist/compare/v1.8.0...v1.8.1) - 2024-11-02
 See here how to [update](/docs/update.md) Opengist.
 

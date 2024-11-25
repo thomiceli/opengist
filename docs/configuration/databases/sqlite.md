@@ -5,7 +5,7 @@ By default, Opengist uses SQLite as the database backend.
 Because SQLite is a file-based database, there is not much configuration to tweak.
 
 The configuration `db-uri`/`OG_DB_URI` refers to the path of the SQLite database file relative in the `$opengist-home/` directory (default `opengist.db`),
-although it can be left untouched.
+although it can be left untouched. You can also use an absolute path outside the `$opengist-home/` directory.
 
 The SQLite journal mode is set to [`WAL` (Write-Ahead Logging)](https://www.sqlite.org/pragma.html#pragma_journal_mode) by default and can be changed.
 

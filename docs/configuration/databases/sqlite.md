@@ -14,6 +14,9 @@ The SQLite journal mode is set to [`WAL` (Write-Ahead Logging)](https://www.sqli
 # default
 db-uri: opengist.db
 sqlite.journal-mode: WAL
+
+# absolute path outside the $opengist-home/ directory
+db-uri: file:/home/user/opengist.db
 ```
 
 #### Environment variable

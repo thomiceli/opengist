@@ -92,12 +92,12 @@ func Initialize(ctx *cli.Context) {
 			"Current git version: " + gitVersion)
 	}
 
-	if err := git.InitGitConfig(); err != nil {
-		log.Fatal().Err(err).Send()
-	}
-
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
+
+	if err := git.InitGitConfig(); err != nil {
+		log.Warn().Err(err).Msgf("Failed to change the host's git global config, ensure to add to `safe.directory` the path %s, and `receive.advertisePushOptions` is set to true.", homePath)
+	}
 
 	if err := createSymlink(homePath, ctx.String("config")); err != nil {
 		log.Fatal().Err(err).Msg("Failed to create symlinks")

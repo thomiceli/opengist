@@ -96,7 +96,7 @@ func Initialize(ctx *cli.Context) {
 	log.Info().Msg("Data directory: " + homePath)
 
 	if err := git.InitGitConfig(); err != nil {
-		log.Warn().Msg("Git config modification failed, ensure " + homePath + " is added to git safe directories, and receive.advertisePushOptions is set to true.")
+		log.Warn().Err(err).Msgf("Failed to change the host's git global config, ensure to add to `safe.directory` the path %s, and `receive.advertisePushOptions` is set to true.", homePath)
 	}
 
 	if err := createSymlink(homePath, ctx.String("config")); err != nil {

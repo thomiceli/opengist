@@ -76,9 +76,9 @@ Download the archive for your system from the release page [here](https://github
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.8.2/opengist1.8.2-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.8.3/opengist1.8.3-linux-amd64.tar.gz
 
-tar xzvf opengist1.8.2-linux-amd64.tar.gz
+tar xzvf opengist1.8.3-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`

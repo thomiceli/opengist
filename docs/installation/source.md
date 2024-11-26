@@ -10,7 +10,7 @@ Requirements:
 git clone https://github.com/thomiceli/opengist
 cd opengist
 
-git checkout v1.8.2 # optional, to checkout the latest release
+git checkout v1.8.3 # optional, to checkout the latest release
 
 make
 ./opengist

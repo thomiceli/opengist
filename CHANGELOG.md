@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.3](https://github.com/thomiceli/opengist/compare/v1.8.2...v1.8.3) - 2024-11-26
+See here how to [update](/docs/update.md) Opengist.
+
+### Changed
+- Throw `warn` instead of `fatal` on Git global config init failure (#392)
+- Define esbuild as a Javascript dependency for all other platforms (#393)
+
 ## [1.8.2](https://github.com/thomiceli/opengist/compare/v1.8.1...v1.8.2) - 2024-11-25
 See here how to [update](/docs/update.md) Opengist.
 

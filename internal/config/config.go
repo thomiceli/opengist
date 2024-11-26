@@ -71,6 +71,12 @@ type config struct {
 	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
 	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
 
+	LDAPUrl             string `yaml:"ldap.url" env:"OG_LDAP_URL"`
+	LDAPBindDn          string `yaml:"ldap.bind-dn" env:"OG_LDAP_BIND_DN"`
+	LDAPBindCredentials string `yaml:"ldap.bind-credentials" env:"OG_LDAP_BIND_CREDENTIALS"`
+	LDAPSearchBase      string `yaml:"ldap.search-base" env:"OG_LDAP_SEARCH_BASE"`
+	LDAPSearchFilter    string `yaml:"ldap.search-filter" env:"OG_LDAP_SEARCH_FILTER"`
+
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
 	StaticLinks   []StaticLink `yaml:"custom.static-links" env:"OG_CUSTOM_STATIC_LINK"`
@@ -103,6 +109,8 @@ func configWithDefaults() (*config, error) {
 	c.SshHost = "0.0.0.0"
 	c.SshPort = "2222"
 	c.SshKeygen = "ssh-keygen"
+
+	c.LDAPUrl = "ldap://0.0.0.0:389"
 
 	c.GitlabName = "GitLab"
 

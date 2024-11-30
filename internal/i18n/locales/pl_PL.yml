@@ -304,3 +304,4 @@ validation.not-enough: 'Nie wystarczająco %s'
 validation.invalid: 'Niepoprawny %s'
 
 html.title.admin-panel: 'Panel administracyjny'
+admin.invitations.delete_confirm: Czy chcesz usunąć to zaproszenie?

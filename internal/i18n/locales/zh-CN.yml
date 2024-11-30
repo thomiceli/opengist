@@ -294,3 +294,4 @@ auth.totp.code: 代码
 auth.totp.submit: 提交
 auth.totp.proceed: 继续
 auth.totp.save-recovery-codes: 请将您的恢复代码保存在安全的地方。在您无法访问身份验证应用程序时，可以使用这些代码恢复访问。
+admin.invitations.delete_confirm: 您想要删除此邀请吗？

@@ -1,12 +1,12 @@
-package web
+package handler
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/web/context"
 	"time"
 )
 
-func healthcheck(ctx echo.Context) error {
+func healthcheck(ctx *context.OGContext) error {
 	// Check database connection
 	dbOk := "ok"
 	httpStatus := 200
@@ -26,6 +26,6 @@ func healthcheck(ctx echo.Context) error {
 
 // metrics is a dummy handler to satisfy the /metrics endpoint (for Prometheus, Openmetrics, etc.)
 // until we have a proper metrics endpoint
-func metrics(ctx echo.Context) error {
+func metrics(ctx *context.OGContext) error {
 	return ctx.String(200, "")
 }

@@ -21,34 +21,34 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/memdb"
-	"github.com/thomiceli/opengist/internal/web"
+	"github.com/thomiceli/opengist/internal/web/server"
 )
 
 var databaseType string
 
-type testServer struct {
-	server        *web.Server
+type TestServer struct {
+	server        *server.Server
 	sessionCookie string
 }
 
-func newTestServer() (*testServer, error) {
-	s := &testServer{
-		server: web.NewServer(true, path.Join(config.GetHomeDir(), "tmp", "sessions"), true),
+func newTestServer() (*TestServer, error) {
+	s := &TestServer{
+		server: server.NewServer(true, path.Join(config.GetHomeDir(), "tmp", "sessions"), true),
 	}
 
 	go s.start()
 	return s, nil
 }
 
-func (s *testServer) start() {
+func (s *TestServer) start() {
 	s.server.Start()
 }
 
-func (s *testServer) stop() {
+func (s *TestServer) stop() {
 	s.server.Stop()
 }
 
-func (s *testServer) request(method, uri string, data interface{}, expectedCode int) error {
+func (s *TestServer) Request(method, uri string, data interface{}, expectedCode int) error {
 	var bodyReader io.Reader
 	if method == http.MethodPost || method == http.MethodPut {
 		values := structToURLValues(data)
@@ -133,11 +133,12 @@ func structToURLValues(s interface{}) url.Values {
 	return v
 }
 
-func setup(t *testing.T) *testServer {
+func Setup(t *testing.T) *TestServer {
 	var databaseDsn string
 	databaseType = os.Getenv("OPENGIST_TEST_DB")
 	switch databaseType {
 	case "sqlite":
+	default:
 		databaseDsn = "file::memory:"
 	case "postgres":
 		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
@@ -164,6 +165,9 @@ func setup(t *testing.T) *testServer {
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
 
+	err = os.MkdirAll(filepath.Join(homePath, "tests"), 0755)
+	require.NoError(t, err, "Could not create tests directory")
+
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "sessions"), 0755)
 	require.NoError(t, err, "Could not create sessions directory")
 
@@ -189,7 +193,7 @@ func setup(t *testing.T) *testServer {
 	return s
 }
 
-func teardown(t *testing.T, s *testServer) {
+func Teardown(t *testing.T, s *TestServer) {
 	s.stop()
 
 	//err := db.Close()
@@ -212,4 +216,14 @@ func teardown(t *testing.T, s *testServer) {
 
 	// err = index.Close()
 	// require.NoError(t, err, "Could not close index")
+}
+
+type settingSet struct {
+	key   string `form:"key"`
+	value string `form:"value"`
+}
+
+type invitationAdmin struct {
+	nbMax         string `form:"nbMax"`
+	expiredAtUnix string `form:"expiredAtUnix"`
 }

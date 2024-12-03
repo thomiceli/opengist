@@ -1,4 +1,4 @@
-package utils
+package auth
 
 import (
 	"crypto/rand"
@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type Argon2ID struct {
+type argon2ID struct {
 	format  string
 	version int
 	time    uint32
@@ -20,7 +20,7 @@ type Argon2ID struct {
 	threads uint8
 }
 
-var Argon2id = Argon2ID{
+var Argon2id = argon2ID{
 	format:  "$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
 	version: argon2.Version,
 	time:    1,
@@ -30,7 +30,7 @@ var Argon2id = Argon2ID{
 	threads: 4,
 }
 
-func (a Argon2ID) Hash(plain string) (string, error) {
+func (a argon2ID) Hash(plain string) (string, error) {
 	salt := make([]byte, a.saltLen)
 	if _, err := rand.Read(salt); err != nil {
 		return "", err
@@ -44,7 +44,7 @@ func (a Argon2ID) Hash(plain string) (string, error) {
 	), nil
 }
 
-func (a Argon2ID) Verify(plain, hash string) (bool, error) {
+func (a argon2ID) Verify(plain, hash string) (bool, error) {
 	if hash == "" {
 		return false, nil
 	}

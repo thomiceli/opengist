@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/thomiceli/opengist/internal/session"
 	"io"
 	"net/url"
 	"os"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -164,9 +164,9 @@ func InitLog() {
 	}
 
 	var logWriters []io.Writer
-	logOutputTypes := utils.RemoveDuplicates[string](
-		strings.Split(strings.ToLower(C.LogOutput), ","),
-	)
+	logOutputTypes := strings.Split(strings.ToLower(C.LogOutput), ",")
+	slices.Sort(logOutputTypes)
+	logOutputTypes = slices.Compact(logOutputTypes)
 
 	consoleWriter := zerolog.NewConsoleWriter(
 		func(w *zerolog.ConsoleWriter) {
@@ -244,7 +244,7 @@ func GetHomeDir() string {
 func SetupSecretKey() {
 	if C.SecretKey == "" {
 		path := filepath.Join(GetHomeDir(), "opengist-secret.key")
-		SecretKey, _ = utils.GenerateSecretKey(path)
+		SecretKey, _ = session.GenerateSecretKey(path)
 	} else {
 		SecretKey = []byte(C.SecretKey)
 	}

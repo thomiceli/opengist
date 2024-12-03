@@ -6,9 +6,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/thomiceli/opengist/internal/auth"
+	"github.com/thomiceli/opengist/internal/auth/password"
 	ogtotp "github.com/thomiceli/opengist/internal/auth/totp"
 	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/utils"
 	"slices"
 )
 
@@ -30,7 +31,7 @@ func GetTOTPByUserID(userID uint) (*TOTP, error) {
 
 func (totp *TOTP) StoreSecret(secret string) error {
 	secretBytes := []byte(secret)
-	encrypted, err := utils.AESEncrypt(config.SecretKey, secretBytes)
+	encrypted, err := auth.AESEncrypt(config.SecretKey, secretBytes)
 	if err != nil {
 		return err
 	}
@@ -45,7 +46,7 @@ func (totp *TOTP) ValidateCode(code string) (bool, error) {
 		return false, err
 	}
 
-	secretBytes, err := utils.AESDecrypt(config.SecretKey, ciphertext)
+	secretBytes, err := auth.AESDecrypt(config.SecretKey, ciphertext)
 	if err != nil {
 		return false, err
 	}
@@ -60,7 +61,7 @@ func (totp *TOTP) ValidateRecoveryCode(code string) (bool, error) {
 	}
 
 	for i, hashedCode := range hashedCodes {
-		ok, err := utils.Argon2id.Verify(code, hashedCode)
+		ok, err := password.VerifyPassword(code, hashedCode)
 		if err != nil {
 			return false, err
 		}
@@ -106,7 +107,7 @@ func generateRandomCodes() ([]string, []string, error) {
 		hexCode := hex.EncodeToString(bytes)
 		code := fmt.Sprintf("%s-%s", hexCode[:length/2], hexCode[length/2:])
 		plainCodes[i] = code
-		hashed, err := utils.Argon2id.Hash(code)
+		hashed, err := password.HashPassword(code)
 		if err != nil {
 			return nil, nil, err
 		}

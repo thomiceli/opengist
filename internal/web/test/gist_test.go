@@ -9,19 +9,19 @@ import (
 )
 
 func TestGists(t *testing.T) {
-	s := setup(t)
-	defer teardown(t, s)
+	s := Setup(t)
+	defer Teardown(t, s)
 
-	err := s.request("GET", "/", nil, 302)
+	err := s.Request("GET", "/", nil, 302)
 	require.NoError(t, err)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
 	register(t, s, user1)
 
-	err = s.request("GET", "/all", nil, 200)
+	err = s.Request("GET", "/all", nil, 200)
 	require.NoError(t, err)
 
-	err = s.request("POST", "/", nil, 200)
+	err = s.Request("POST", "/", nil, 200)
 	require.NoError(t, err)
 
 	gist1 := db.GistDTO{
@@ -33,7 +33,7 @@ func TestGists(t *testing.T) {
 		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
 		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
-	err = s.request("POST", "/", gist1, 302)
+	err = s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	gist1db, err := db.GetGistByID("1")
@@ -44,7 +44,7 @@ func TestGists(t *testing.T) {
 	require.Regexp(t, "[a-f0-9]{32}", gist1db.Uuid)
 	require.Equal(t, user1.Username, gist1db.User.Username)
 
-	err = s.request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 200)
+	err = s.Request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 200)
 	require.NoError(t, err)
 
 	gist1files, err := git.GetFilesOfRepository(gist1db.User.Username, gist1db.Uuid, "HEAD")
@@ -64,7 +64,7 @@ func TestGists(t *testing.T) {
 		Name:    []string{"", "gist2.txt", "gist3.txt"},
 		Content: []string{"", "yeah\ncool", "yeah\ncool gist actually"},
 	}
-	err = s.request("POST", "/", gist2, 200)
+	err = s.Request("POST", "/", gist2, 200)
 	require.NoError(t, err)
 
 	gist3 := db.GistDTO{
@@ -76,7 +76,7 @@ func TestGists(t *testing.T) {
 		Name:    []string{""},
 		Content: []string{"yeah"},
 	}
-	err = s.request("POST", "/", gist3, 302)
+	err = s.Request("POST", "/", gist3, 302)
 	require.NoError(t, err)
 
 	gist3db, err := db.GetGistByID("2")
@@ -86,26 +86,26 @@ func TestGists(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "gistfile1.txt", gist3files[0])
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/edit", nil, 200)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/edit", nil, 200)
 	require.NoError(t, err)
 
 	gist1.Name = []string{"gist1.txt"}
 	gist1.Content = []string{"only want one gist"}
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/edit", gist1, 302)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/edit", gist1, 302)
 	require.NoError(t, err)
 
 	gist1files, err = git.GetFilesOfRepository(gist1db.User.Username, gist1db.Uuid, "HEAD")
 	require.NoError(t, err)
 	require.Equal(t, 1, len(gist1files))
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/delete", nil, 302)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/delete", nil, 302)
 	require.NoError(t, err)
 }
 
 func TestVisibility(t *testing.T) {
-	s := setup(t)
-	defer teardown(t, s)
+	s := Setup(t)
+	defer Teardown(t, s)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
 	register(t, s, user1)
@@ -119,26 +119,26 @@ func TestVisibility(t *testing.T) {
 		Name:    []string{""},
 		Content: []string{"yeah"},
 	}
-	err := s.request("POST", "/", gist1, 302)
+	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	gist1db, err := db.GetGistByID("1")
 	require.NoError(t, err)
 	require.Equal(t, db.UnlistedVisibility, gist1db.Private)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.PrivateVisibility}, 302)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.PrivateVisibility}, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
 	require.Equal(t, db.PrivateVisibility, gist1db.Private)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.PublicVisibility}, 302)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.PublicVisibility}, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
 	require.Equal(t, db.PublicVisibility, gist1db.Private)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.UnlistedVisibility}, 302)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/visibility", db.VisibilityDTO{Private: db.UnlistedVisibility}, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
@@ -146,8 +146,8 @@ func TestVisibility(t *testing.T) {
 }
 
 func TestLikeFork(t *testing.T) {
-	s := setup(t)
-	defer teardown(t, s)
+	s := Setup(t)
+	defer Teardown(t, s)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
 	register(t, s, user1)
@@ -161,7 +161,7 @@ func TestLikeFork(t *testing.T) {
 		Name:    []string{""},
 		Content: []string{"yeah"},
 	}
-	err := s.request("POST", "/", gist1, 302)
+	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	s.sessionCookie = ""
@@ -176,7 +176,7 @@ func TestLikeFork(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(0), likeCount)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/like", nil, 302)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/like", nil, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
@@ -185,7 +185,7 @@ func TestLikeFork(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(1), likeCount)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/like", nil, 302)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/like", nil, 302)
 	require.NoError(t, err)
 	gist1db, err = db.GetGistByID("1")
 	require.NoError(t, err)
@@ -194,7 +194,7 @@ func TestLikeFork(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(0), likeCount)
 
-	err = s.request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/fork", nil, 302)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/fork", nil, 302)
 	require.NoError(t, err)
 	gist2db, err := db.GetGistByID("2")
 	require.NoError(t, err)
@@ -205,8 +205,8 @@ func TestLikeFork(t *testing.T) {
 }
 
 func TestCustomUrl(t *testing.T) {
-	s := setup(t)
-	defer teardown(t, s)
+	s := Setup(t)
+	defer Teardown(t, s)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
 	register(t, s, user1)
@@ -221,7 +221,7 @@ func TestCustomUrl(t *testing.T) {
 		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
 		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
-	err := s.request("POST", "/", gist1, 302)
+	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	gist1db, err := db.GetGistByID("1")
@@ -252,7 +252,7 @@ func TestCustomUrl(t *testing.T) {
 		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
 		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
-	err = s.request("POST", "/", gist2, 302)
+	err = s.Request("POST", "/", gist2, 302)
 	require.NoError(t, err)
 
 	gist2db, err := db.GetGistByID("2")

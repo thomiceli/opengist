@@ -485,6 +485,22 @@ func GcRepos() error {
 	return err
 }
 
+func ResetHooks() error {
+	entries, err := filepath.Glob(filepath.Join(config.GetHomeDir(), ReposDirectory, "*", "*"))
+	if err != nil {
+		return err
+	}
+
+	for _, e := range entries {
+		repoPath := strings.Split(e, string(os.PathSeparator))
+		if err := CreateDotGitFiles(repoPath[len(repoPath)-2], repoPath[len(repoPath)-1]); err != nil {
+			log.Error().Err(err).Msgf("Cannot reset hooks for repository %s/%s", repoPath[len(repoPath)-2], repoPath[len(repoPath)-1])
+		}
+	}
+
+	return nil
+}
+
 func HasNoCommits(user string, gist string) (bool, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
@@ -538,6 +554,10 @@ func CreateDotGitFiles(user string, gist string) error {
 	}
 
 	return nil
+}
+
+func DeleteUserDirectory(user string) error {
+	return os.RemoveAll(filepath.Join(config.GetHomeDir(), ReposDirectory, user))
 }
 
 func createDotGitHookFile(repositoryPath string, hook string, content string) error {

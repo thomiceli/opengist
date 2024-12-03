@@ -1,4 +1,4 @@
-package utils
+package session
 
 import (
 	"github.com/gorilla/securecookie"

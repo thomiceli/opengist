@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/utils"
+	validatorpkg "github.com/thomiceli/opengist/internal/validator"
 	"io"
 	"os"
 	"os/exec"
@@ -18,7 +18,7 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 	newGist := false
 	opts := pushOptions()
 	gistUrl := os.Getenv("OPENGIST_REPOSITORY_URL_INTERNAL")
-	validator := utils.NewValidator()
+	validator := validatorpkg.NewValidator()
 
 	scanner := bufio.NewScanner(in)
 	for scanner.Scan() {

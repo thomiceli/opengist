@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 )
 
@@ -65,7 +66,17 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 	}
 
 	// Delete all gists created by this user
-	return tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
+	err = tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
+	if err != nil {
+		return err
+	}
+
+	// Delete user directory
+	if err = git.DeleteUserDirectory(user.Username); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func UserExists(username string) (bool, error) {

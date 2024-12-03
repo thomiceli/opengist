@@ -1,4 +1,4 @@
-package web
+package git
 
 import (
 	"bytes"
@@ -6,7 +6,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/thomiceli/opengist/internal/utils"
+	"github.com/thomiceli/opengist/internal/auth/password"
+	"github.com/thomiceli/opengist/internal/web/context"
+	"github.com/thomiceli/opengist/internal/web/handlers"
 	"net/http"
 	"os"
 	"os/exec"
@@ -17,7 +19,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/db"
@@ -29,7 +30,7 @@ import (
 var routes = []struct {
 	gitUrl  string
 	method  string
-	handler func(ctx echo.Context) error
+	handler func(ctx *context.Context) error
 }{
 	{"(.*?)/git-upload-pack$", "POST", uploadPack},
 	{"(.*?)/git-receive-pack$", "POST", receivePack},
@@ -44,7 +45,7 @@ var routes = []struct {
 	{"(.*?)/objects/pack/pack-[0-9a-f]{40}\\.idx$", "GET", idxFile},
 }
 
-func gitHttp(ctx echo.Context) error {
+func GitHttp(ctx *context.Context) error {
 	for _, route := range routes {
 		matched, _ := regexp.MatchString(route.gitUrl, ctx.Request().URL.Path)
 		if ctx.Request().Method == route.method && matched {
@@ -52,7 +53,7 @@ func gitHttp(ctx echo.Context) error {
 				continue
 			}
 
-			gist := getData(ctx, "gist").(*db.Gist)
+			gist := ctx.GetData("gist").(*db.Gist)
 
 			isInit := strings.HasPrefix(ctx.Request().URL.Path, "/init/info/refs")
 			isInitReceive := strings.HasPrefix(ctx.Request().URL.Path, "/init/git-receive-pack")
@@ -65,13 +66,13 @@ func gitHttp(ctx echo.Context) error {
 			if _, err := os.Stat(repositoryPath); os.IsNotExist(err) {
 				if err != nil {
 					log.Info().Err(err).Msg("Repository directory does not exist")
-					return errorRes(404, "Repository directory does not exist", err)
+					return ctx.ErrorRes(404, "Repository directory does not exist", err)
 				}
 			}
 
-			setData(ctx, "repositoryPath", repositoryPath)
+			ctx.SetData("repositoryPath", repositoryPath)
 
-			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(ContextAuthInfo{ctx}, true)
+			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(handlers.ContextAuthInfo{ctx}, true)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Cannot check if unauthenticated access is allowed")
 			}
@@ -102,7 +103,7 @@ func gitHttp(ctx echo.Context) error {
 
 			if !isInit && !isInitReceive {
 				if gist.ID == 0 {
-					return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
+					return ctx.PlainText(404, "Check your credentials or make sure you have access to the Gist")
 				}
 
 				var userToCheckPermissions *db.User
@@ -112,29 +113,29 @@ func gitHttp(ctx echo.Context) error {
 					userToCheckPermissions = &gist.User
 				}
 
-				if ok, err := utils.Argon2id.Verify(authPassword, userToCheckPermissions.Password); !ok {
+				if ok, err := password.VerifyPassword(authPassword, userToCheckPermissions.Password); !ok {
 					if err != nil {
-						return errorRes(500, "Cannot verify password", err)
+						return ctx.ErrorRes(500, "Cannot verify password", err)
 					}
 					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-					return plainText(ctx, 404, "Check your credentials or make sure you have access to the Gist")
+					return ctx.PlainText(404, "Check your credentials or make sure you have access to the Gist")
 				}
 			} else {
 				var user *db.User
 				if user, err = db.GetUserByUsername(authUsername); err != nil {
 					if !errors.Is(err, gorm.ErrRecordNotFound) {
-						return errorRes(500, "Cannot get user", err)
+						return ctx.ErrorRes(500, "Cannot get user", err)
 					}
 					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-					return errorRes(401, "Invalid credentials", nil)
+					return ctx.ErrorRes(401, "Invalid credentials", nil)
 				}
 
-				if ok, err := utils.Argon2id.Verify(authPassword, user.Password); !ok {
+				if ok, err := password.VerifyPassword(authPassword, user.Password); !ok {
 					if err != nil {
-						return errorRes(500, "Cannot check for password", err)
+						return ctx.ErrorRes(500, "Cannot check for password", err)
 					}
 					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-					return errorRes(401, "Invalid credentials", nil)
+					return ctx.ErrorRes(401, "Invalid credentials", nil)
 				}
 
 				if isInit {
@@ -143,56 +144,56 @@ func gitHttp(ctx echo.Context) error {
 					gist.User = *user
 					uuidGist, err := uuid.NewRandom()
 					if err != nil {
-						return errorRes(500, "Error creating an UUID", err)
+						return ctx.ErrorRes(500, "Error creating an UUID", err)
 					}
 					gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
 					gist.Title = "gist:" + gist.Uuid
 
 					if err = gist.InitRepository(); err != nil {
-						return errorRes(500, "Cannot init repository in the file system", err)
+						return ctx.ErrorRes(500, "Cannot init repository in the file system", err)
 					}
 
 					if err = gist.Create(); err != nil {
-						return errorRes(500, "Cannot init repository in database", err)
+						return ctx.ErrorRes(500, "Cannot init repository in database", err)
 					}
 
 					if err := memdb.InsertGistInit(user.ID, gist); err != nil {
-						return errorRes(500, "Cannot save the URL for the new Gist", err)
+						return ctx.ErrorRes(500, "Cannot save the URL for the new Gist", err)
 					}
 
-					setData(ctx, "gist", gist)
+					ctx.SetData("gist", gist)
 				} else {
 					gistFromMemdb, err := memdb.GetGistInitAndDelete(user.ID)
 					if err != nil {
-						return errorRes(500, "Cannot get the gist link from the in memory database", err)
+						return ctx.ErrorRes(500, "Cannot get the gist link from the in memory database", err)
 					}
 
 					gist := gistFromMemdb.Gist
-					setData(ctx, "gist", gist)
-					setData(ctx, "repositoryPath", git.RepositoryPath(gist.User.Username, gist.Uuid))
+					ctx.SetData("gist", gist)
+					ctx.SetData("repositoryPath", git.RepositoryPath(gist.User.Username, gist.Uuid))
 				}
 			}
 
 			return route.handler(ctx)
 		}
 	}
-	return notFound("Gist not found")
+	return ctx.NotFound("Gist not found")
 }
 
-func uploadPack(ctx echo.Context) error {
+func uploadPack(ctx *context.Context) error {
 	return pack(ctx, "upload-pack")
 }
 
-func receivePack(ctx echo.Context) error {
+func receivePack(ctx *context.Context) error {
 	return pack(ctx, "receive-pack")
 }
 
-func pack(ctx echo.Context, serviceType string) error {
+func pack(ctx *context.Context, serviceType string) error {
 	noCacheHeaders(ctx)
 	defer ctx.Request().Body.Close()
 
 	if ctx.Request().Header.Get("Content-Type") != "application/x-git-"+serviceType+"-request" {
-		return errorRes(401, "Git client unsupported", nil)
+		return ctx.ErrorRes(401, "Git client unsupported", nil)
 	}
 	ctx.Response().Header().Set("Content-Type", "application/x-git-"+serviceType+"-result")
 
@@ -202,12 +203,12 @@ func pack(ctx echo.Context, serviceType string) error {
 	if ctx.Request().Header.Get("Content-Encoding") == "gzip" {
 		reqBody, err = gzip.NewReader(reqBody)
 		if err != nil {
-			return errorRes(500, "Cannot create gzip reader", err)
+			return ctx.ErrorRes(500, "Cannot create gzip reader", err)
 		}
 	}
 
-	repositoryPath := getData(ctx, "repositoryPath").(string)
-	gist := getData(ctx, "gist").(*db.Gist)
+	repositoryPath := ctx.GetData("repositoryPath").(string)
+	gist := ctx.GetData("gist").(*db.Gist)
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("git", serviceType, "--stateless-rpc", repositoryPath)
@@ -220,17 +221,17 @@ func pack(ctx echo.Context, serviceType string) error {
 	cmd.Env = append(cmd.Env, "OPENGIST_REPOSITORY_ID="+strconv.Itoa(int(gist.ID)))
 
 	if err = cmd.Run(); err != nil {
-		return errorRes(500, "Cannot run git "+serviceType+" ; "+stderr.String(), err)
+		return ctx.ErrorRes(500, "Cannot run git "+serviceType+" ; "+stderr.String(), err)
 	}
 
 	return nil
 }
 
-func infoRefs(ctx echo.Context) error {
+func infoRefs(ctx *context.Context) error {
 	noCacheHeaders(ctx)
 	var service string
 
-	gist := getData(ctx, "gist").(*db.Gist)
+	gist := ctx.GetData("gist").(*db.Gist)
 
 	serviceType := ctx.QueryParam("service")
 	if strings.HasPrefix(serviceType, "git-") {
@@ -239,14 +240,14 @@ func infoRefs(ctx echo.Context) error {
 
 	if service != "upload-pack" && service != "receive-pack" {
 		if err := gist.UpdateServerInfo(); err != nil {
-			return errorRes(500, "Cannot update server info", err)
+			return ctx.ErrorRes(500, "Cannot update server info", err)
 		}
 		return sendFile(ctx, "text/plain; charset=utf-8")
 	}
 
 	refs, err := gist.RPC(service)
 	if err != nil {
-		return errorRes(500, "Cannot run git "+service, err)
+		return ctx.ErrorRes(500, "Cannot run git "+service, err)
 	}
 
 	ctx.Response().Header().Set("Content-Type", "application/x-git-"+service+"-advertisement")
@@ -258,38 +259,38 @@ func infoRefs(ctx echo.Context) error {
 	return nil
 }
 
-func textFile(ctx echo.Context) error {
+func textFile(ctx *context.Context) error {
 	noCacheHeaders(ctx)
 	return sendFile(ctx, "text/plain")
 }
 
-func infoPacks(ctx echo.Context) error {
+func infoPacks(ctx *context.Context) error {
 	cacheHeadersForever(ctx)
 	return sendFile(ctx, "text/plain; charset=utf-8")
 }
 
-func looseObject(ctx echo.Context) error {
+func looseObject(ctx *context.Context) error {
 	cacheHeadersForever(ctx)
 	return sendFile(ctx, "application/x-git-loose-object")
 }
 
-func packFile(ctx echo.Context) error {
+func packFile(ctx *context.Context) error {
 	cacheHeadersForever(ctx)
 	return sendFile(ctx, "application/x-git-packed-objects")
 }
 
-func idxFile(ctx echo.Context) error {
+func idxFile(ctx *context.Context) error {
 	cacheHeadersForever(ctx)
 	return sendFile(ctx, "application/x-git-packed-objects-toc")
 }
 
-func noCacheHeaders(ctx echo.Context) {
+func noCacheHeaders(ctx *context.Context) {
 	ctx.Response().Header().Set("Expires", "Thu, 01 Jan 1970 00:00:00 UTC")
 	ctx.Response().Header().Set("Pragma", "no-cache")
 	ctx.Response().Header().Set("Cache-Control", "no-cache, max-age=0, must-revalidate")
 }
 
-func cacheHeadersForever(ctx echo.Context) {
+func cacheHeadersForever(ctx *context.Context) {
 	now := time.Now().Unix()
 	expires := now + 31536000
 	ctx.Response().Header().Set("Date", fmt.Sprintf("%d", now))
@@ -297,9 +298,9 @@ func cacheHeadersForever(ctx echo.Context) {
 	ctx.Response().Header().Set("Cache-Control", "public, max-age=31536000")
 }
 
-func basicAuth(ctx echo.Context) error {
+func basicAuth(ctx *context.Context) error {
 	ctx.Response().Header().Set("WWW-Authenticate", `Basic realm="."`)
-	return plainText(ctx, 401, "Requires authentication")
+	return ctx.PlainText(401, "Requires authentication")
 }
 
 func basicAuthDecode(encoded string) (string, string, error) {
@@ -312,12 +313,12 @@ func basicAuthDecode(encoded string) (string, string, error) {
 	return auth[0], auth[1], nil
 }
 
-func sendFile(ctx echo.Context, contentType string) error {
+func sendFile(ctx *context.Context, contentType string) error {
 	gitFile := "/" + strings.Join(strings.Split(ctx.Request().URL.Path, "/")[3:], "/")
-	gitFile = path.Join(getData(ctx, "repositoryPath").(string), gitFile)
+	gitFile = path.Join(ctx.GetData("repositoryPath").(string), gitFile)
 	fi, err := os.Stat(gitFile)
 	if os.IsNotExist(err) {
-		return errorRes(404, "File not found", nil)
+		return ctx.ErrorRes(404, "File not found", nil)
 	}
 	ctx.Response().Header().Set("Content-Type", contentType)
 	ctx.Response().Header().Set("Content-Length", fmt.Sprintf("%d", fi.Size()))

@@ -71,6 +71,7 @@ type config struct {
 	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
 	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
 
+	CustomName    string       `yaml:"custom.name" env:"OG_CUSTOM_NAME"`
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
 	StaticLinks   []StaticLink `yaml:"custom.static-links" env:"OG_CUSTOM_STATIC_LINK"`

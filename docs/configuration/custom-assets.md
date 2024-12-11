@@ -29,3 +29,17 @@ custom.favicon: favicon.png
 ```sh
 export OG_CUSTOM_FAVICON=favicon.png
 ```
+
+### Instance Name
+
+It is also possible to set a name for your instance, that would be displayed in the title bar instead of 'Opengist'.
+
+#### YAML
+```yaml
+custom.name: My Gists
+```
+
+#### Environment variable
+```sh
+export OG_CUSTOM_NAME="My Gists"
+```

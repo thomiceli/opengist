@@ -106,7 +106,7 @@ custom.name:
 
 # Custom assets
 # Add your own custom assets, that are files relatives to $opengist-home/custom/
-custom.logo: logo.svg
+custom.logo:
 custom.favicon:
 
 # Static pages in footer (like legal notices, privacy policy, etc.)

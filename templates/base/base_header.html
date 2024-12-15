@@ -46,9 +46,9 @@
     {{ end }}
 
     {{ if .htmlTitle }}
-        <title>{{ .htmlTitle }} - Opengist</title>
+        <title>{{ .htmlTitle }} - {{ if $.c.CustomName }}{{ $.c.CustomName }}{{ else }}Opengist{{ end }}</title>
     {{ else }}
-        <title>Opengist</title>
+        <title>{{ if $.c.CustomName }}{{ $.c.CustomName }}{{ else }}Opengist{{ end }}</title>
     {{ end }}
 </head>
 <body class="h-full">

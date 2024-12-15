@@ -38,7 +38,6 @@ git.default-branch:
 # For SQLite databases only.
 sqlite.journal-mode: WAL
 
-
 # HTTP server configuration
 # Host to bind to. Default: 0.0.0.0
 http.host: 0.0.0.0
@@ -72,7 +71,6 @@ ssh.external-domain:
 # Path or alias to ssh-keygen executable. Default: ssh-keygen
 ssh.keygen-executable: ssh-keygen
 
-
 # OAuth2 configuration
 # The callback/redirect URL must be http://opengist.url/oauth/<github|gitlab|gitea|openid-connect>/callback
 
@@ -102,6 +100,9 @@ oidc.secret:
 # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
 oidc.discovery-url:
 
+# Instance name
+# Set your own custom name to be displayed instead of 'Opengist'
+custom.name:
 
 # Custom assets
 # Add your own custom assets, that are files relatives to $opengist-home/custom/

@@ -3,7 +3,7 @@
 # https://github.com/thomiceli/opengist/blob/master/docs/configuration/cheat-sheet.md
 
 # Set the log level to one of the following: debug, info, warn, error, fatal. Default: warn
-log-level: warn
+log-level: info
 
 # Set the log output to one or more of the following: `stdout`, `file`. Default: stdout,file
 log-output: stdout,file
@@ -17,8 +17,8 @@ opengist-home:
 # Secret key used for session store & encrypt MFA data on database. Default: <randomized 32 bytes>
 secret-key:
 
-# URI of the database. Default: opengist.db (SQLite) is placed in opengist-home
-# SQLite:        file:/path/to/database
+# URI of the database. Default: opengist.db (SQLite)
+# SQLite:        file name
 # PostgreSQL:    postgres://user:password@host:port/database
 # MySQL/MariaDB: mysql://user:password@host:port/database
 db-uri: opengist.db
@@ -37,6 +37,7 @@ git.default-branch:
 # See https://www.sqlite.org/pragma.html#pragma_journal_mode
 # For SQLite databases only.
 sqlite.journal-mode: WAL
+
 
 # HTTP server configuration
 # Host to bind to. Default: 0.0.0.0
@@ -95,22 +96,22 @@ gitea.url: https://gitea.com/
 gitea.name: Gitea
 
 # To create a new OAuth2 application using OpenID Connect:
-oidc.client-key:
-oidc.secret:
+oidc.client-key: "opengist"
+oidc.secret: "WrtxMEoXCoE4M.52WQ4ea_Z0A6zISELu8zU4iN_4T3BEdLGHkc23mSqhr0R7a6-svSjgyC4l"
 # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
-oidc.discovery-url:
+oidc.discovery-url: "https://auth.planet-express.in/.well-known/openid-configuration"
 
 # LDAP authentication configuration
 # URL of the LDAP instance e.g: ldap://ldap.example.com:389
-ldap.url:
+ldap.url: "ldap://localhost:8888"
 # Bind DN to authenticate against the LDAP e.g: cn=read-only-admin,dc=example,dc=com
-ldap.bind-dn:
+ldap.bind-dn: "cn=ReadOnlyBind,ou=Applications,dc=planet-express,dc=in"
 # The password for the Bind DN.
-ldap.bind-credentials:
+ldap.bind-credentials: "qdfpvQJ7xfUl7hzJxVgd"
 # The Base DN to start search from e.g: dc=example,dc=com
-ldap.search-base:
+ldap.search-base: "ou=people,dc=planet-express,dc=in"
 # The filter to search against (the format string %s will be replaced with the username) e.g: (uid=%s)
-ldap.search-filter:
+ldap.search-filter: "(uid=%s)"
 
 # Instance name
 # Set your own custom name to be displayed instead of 'Opengist'

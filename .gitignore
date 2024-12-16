@@ -1,6 +1,7 @@
 node_modules/
 gist.db
 .idea/
+.vscode/
 .DS_Store
 /**/.DS_Store
 public/assets/*
@@ -9,3 +10,4 @@ opengist
 build/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+vendor/

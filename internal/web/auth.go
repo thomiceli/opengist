@@ -20,6 +20,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
+	"github.com/thomiceli/opengist/internal/ldap"
 	"github.com/thomiceli/opengist/internal/utils"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -140,6 +141,8 @@ func processLogin(ctx echo.Context) error {
 		return errorRes(403, tr(ctx, "error.login-disabled-form"), nil)
 	}
 
+	enableLDAP := getData(ctx, "EnableLdap")
+
 	var err error
 	sess := getSession(ctx)
 
@@ -158,6 +161,38 @@ func processLogin(ctx echo.Context) error {
 		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
 		addFlash(ctx, tr(ctx, "flash.auth.invalid-credentials"), "error")
 		return redirect(ctx, "/login")
+	}
+
+	if enableLDAP == true {
+		ok, err := ldap.Authenticate(user.Username, password)
+		if err != nil {
+			log.Warn().Msgf("Cannot check for LDAP password: %v", err)
+			log.Info().Msg("LDAP authentication failed for user: " + user.Username)
+		}
+
+		if !ok {
+			log.Warn().Msg("Invalid LDAP authentication attempt from " + ctx.RealIP())
+			log.Info().Msg("LDAP authentication failed for user: " + user.Username)
+		}
+
+		if ok {
+			hashedPassword, err := utils.Argon2id.Hash(password)
+			if err != nil {
+				log.Info().Msg("LDAP authentication failed for user: " + user.Username)
+				return errorRes(500, "Cannot hash password for user", err)
+			}
+
+			user.Password = hashedPassword
+
+			err = user.Update()
+			if err != nil {
+				log.Info().Msg("LDAP authentication failed for " + user.Username)
+				return errorRes(500, "Cannot update LDAP user "+user.Username, err)
+			}
+
+			log.Info().Msg("Synced local password from LDAP for user: " + user.Username)
+			log.Info().Msg("LDAP authentication succeeded for user: " + user.Username)
+		}
 	}
 
 	if ok, err := utils.Argon2id.Verify(password, user.Password); !ok {

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.8.4](https://github.com/thomiceli/opengist/compare/v1.8.3...v1.8.4) - 2024-12-15
+See here how to [update](/docs/update.md) Opengist.
+
+### Added
+- More translation strings (#398)
+- Custom instance names (#399)
+
+### Fixed
+- Prevent passwords managers autofill on filename inputs (#357)
+
 ## [1.8.3](https://github.com/thomiceli/opengist/compare/v1.8.2...v1.8.3) - 2024-11-26
 See here how to [update](/docs/update.md) Opengist.
 

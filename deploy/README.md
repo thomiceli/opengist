@@ -28,11 +28,11 @@ namespace: opengist
 
 resources:
   - namespace.yaml
-  - https://github.com/thomiceli/opengist/deploy/?ref:v1.8.3
+  - https://github.com/thomiceli/opengist/deploy/?ref:v1.8.4
 
 images:
   - name: ghcr.io/thomiceli/opengist
-    newTag: 1.8.3
+    newTag: 1.8.4
 
 patches:
   # Add your ingress

@@ -267,3 +267,24 @@ validation.not-enough: 'Nicht genug %s'
 validation.invalid: 'Ungültiges %s'
 
 html.title.admin-panel: 'Admin-Panel'
+auth.totp.regenerate-recovery-codes: Wiederherstellungscodes generieren
+auth.totp.already-enabled: TOTP ist bereits aktiv
+auth.totp.invalid-secret: Ungültiger TOTP Sicherheitsschlüssel
+auth.totp.disable: TOTP ausschalten
+auth.mfa.passkey: Hauptschlüssel
+auth.mfa.use-passkey: Hauptschlüssel nutzen
+auth.mfa.use-passkey-to-finish: Nutzen Sie einen Hauptschlüssel, um Authentisierung abzuschliessen
+auth.totp.invalid-code: Ungültiger TOTP Code
+auth.mfa: Multi-Faktor Authentisierung
+gist.delete.confirm: Sind Sie sich sicher, ob Sie dieses Gist löschen wollen?
+auth.mfa.passkeys: Hauptschlüssel
+auth.mfa.bind-passkey: Hauptschlüssel verbinden
+auth.mfa.login-with-passkey: Mit Hauptschlüssel einloggen
+auth.mfa.waiting-for-passkey-input: Auf Eingabe von Browser-Interaktion warten...
+auth.mfa.passkey-name: Name
+auth.mfa.delete-passkey: Löschen
+auth.mfa.passkey-added-at: Hinzugefügt
+auth.mfa.passkey-never-used: Niemals benutzt
+auth.mfa.passkey-last-used: Zuletzt benutzt
+auth.totp.code: Code
+auth.totp.proceed: Weiter

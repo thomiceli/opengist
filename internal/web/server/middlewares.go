@@ -10,6 +10,7 @@ import (
 	"github.com/thomiceli/opengist/internal/web/context"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"html/template"
 	"net/http"
 	"strings"
 	"time"
@@ -24,16 +25,16 @@ func (s *Server) useCustomContext() {
 	})
 }
 
-func (s *Server) RegisterMiddlewares(e *echo.Echo) {
-	e.Use(Middleware(dataInit).ToEcho())
-	e.Use(Middleware(locale).ToEcho())
+func (s *Server) RegisterMiddlewares() {
+	s.echo.Use(Middleware(dataInit).ToEcho())
+	s.echo.Use(Middleware(locale).ToEcho())
 
-	e.Pre(middleware.MethodOverrideWithConfig(middleware.MethodOverrideConfig{
+	s.echo.Pre(middleware.MethodOverrideWithConfig(middleware.MethodOverrideConfig{
 		Getter: middleware.MethodFromForm("_method"),
 	}))
-	e.Pre(middleware.RemoveTrailingSlash())
-	e.Pre(middleware.CORS())
-	e.Pre(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+	s.echo.Pre(middleware.RemoveTrailingSlash())
+	s.echo.Pre(middleware.CORS())
+	s.echo.Pre(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI: true, LogStatus: true, LogMethod: true,
 		LogValuesFunc: func(ctx echo.Context, v middleware.RequestLoggerValues) error {
 			log.Info().Str("uri", v.URI).Int("status", v.Status).Str("method", v.Method).
@@ -42,10 +43,10 @@ func (s *Server) RegisterMiddlewares(e *echo.Echo) {
 			return nil
 		},
 	}))
-	e.Use(middleware.Recover())
-	e.Use(middleware.Secure())
+	s.echo.Use(middleware.Recover())
+	s.echo.Use(middleware.Secure())
 
-	e.Use(Middleware(sessionInit).ToEcho())
+	s.echo.Use(Middleware(sessionInit).ToEcho())
 }
 
 func dataInit(next Handler) Handler {
@@ -155,7 +156,13 @@ func sessionInit(next Handler) Handler {
 
 func csrfInit(next Handler) Handler {
 	return func(ctx *context.OGContext) error {
-		setCsrfHtmlForm(ctx)
+		var csrf string
+		if csrfToken, ok := ctx.Get("csrf").(string); ok {
+			csrf = csrfToken
+		}
+		ctx.SetData("csrfHtml", template.HTML(`<input type="hidden" name="_csrf" value="`+csrf+`">`))
+		ctx.SetData("csrfHtml", template.HTML(`<input type="hidden" name="_csrf" value="`+csrf+`">`))
+
 		return next(ctx)
 	}
 }

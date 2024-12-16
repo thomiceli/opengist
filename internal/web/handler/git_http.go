@@ -44,7 +44,7 @@ var routes = []struct {
 	{"(.*?)/objects/pack/pack-[0-9a-f]{40}\\.idx$", "GET", idxFile},
 }
 
-func gitHttp(ctx *context.OGContext) error {
+func GitHttp(ctx *context.OGContext) error {
 	for _, route := range routes {
 		matched, _ := regexp.MatchString(route.gitUrl, ctx.Request().URL.Path)
 		if ctx.Request().Method == route.method && matched {

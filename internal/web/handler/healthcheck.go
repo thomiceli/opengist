@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func healthcheck(ctx *context.OGContext) error {
+func Healthcheck(ctx *context.OGContext) error {
 	// Check database connection
 	dbOk := "ok"
 	httpStatus := 200
@@ -24,8 +24,8 @@ func healthcheck(ctx *context.OGContext) error {
 	})
 }
 
-// metrics is a dummy handler to satisfy the /metrics endpoint (for Prometheus, Openmetrics, etc.)
+// Metrics is a dummy handler to satisfy the /metrics endpoint (for Prometheus, Openmetrics, etc.)
 // until we have a proper metrics endpoint
-func metrics(ctx *context.OGContext) error {
+func Metrics(ctx *context.OGContext) error {
 	return ctx.String(200, "")
 }

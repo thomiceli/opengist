@@ -37,7 +37,7 @@ const (
 	OpenIDConnect  = "openid-connect"
 )
 
-func register(ctx *context.OGContext) error {
+func Register(ctx *context.OGContext) error {
 	disableSignup := ctx.GetData("DisableSignup")
 	disableForm := ctx.GetData("DisableLoginForm")
 
@@ -58,7 +58,7 @@ func register(ctx *context.OGContext) error {
 	return ctx.HTML_("auth_form.html")
 }
 
-func processRegister(ctx *context.OGContext) error {
+func ProcessRegister(ctx *context.OGContext) error {
 	disableSignup := ctx.GetData("DisableSignup")
 
 	code := ctx.QueryParam("code")
@@ -127,7 +127,7 @@ func processRegister(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/")
 }
 
-func login(ctx *context.OGContext) error {
+func Login(ctx *context.OGContext) error {
 	ctx.SetData("title", ctx.TrH("auth.login"))
 	ctx.SetData("htmlTitle", ctx.TrH("auth.login"))
 	ctx.SetData("disableForm", ctx.GetData("DisableLoginForm"))
@@ -135,7 +135,7 @@ func login(ctx *context.OGContext) error {
 	return ctx.HTML_("auth_form.html")
 }
 
-func processLogin(ctx *context.OGContext) error {
+func ProcessLogin(ctx *context.OGContext) error {
 	if ctx.GetData("DisableLoginForm") == true {
 		return ctx.ErrorRes(403, ctx.Tr("error.login-disabled-form"), nil)
 	}
@@ -189,7 +189,7 @@ func processLogin(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/")
 }
 
-func mfa(ctx *context.OGContext) error {
+func Mfa(ctx *context.OGContext) error {
 	var err error
 
 	user := db.User{ID: ctx.GetSession().Values["mfaID"].(uint)}
@@ -205,7 +205,7 @@ func mfa(ctx *context.OGContext) error {
 	return ctx.HTML_("mfa.html")
 }
 
-func oauthCallback(ctx *context.OGContext) error {
+func OauthCallback(ctx *context.OGContext) error {
 	user, err := gothic.CompleteUserAuth(ctx.Response(), ctx.Request())
 	if err != nil {
 		return ctx.ErrorRes(400, ctx.Tr("error.complete-oauth-login", err.Error()), err)
@@ -311,7 +311,7 @@ func oauthCallback(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/")
 }
 
-func oauth(ctx *context.OGContext) error {
+func Oauth(ctx *context.OGContext) error {
 	provider := ctx.Param("provider")
 
 	httpProtocol := "http"
@@ -401,7 +401,7 @@ func oauth(ctx *context.OGContext) error {
 	return nil
 }
 
-func oauthUnlink(ctx *context.OGContext) error {
+func OauthUnlink(ctx *context.OGContext) error {
 	provider := ctx.Param("provider")
 
 	currUser := ctx.User
@@ -425,7 +425,7 @@ func oauthUnlink(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/settings")
 }
 
-func beginWebAuthnBinding(ctx *context.OGContext) error {
+func BeginWebAuthnBinding(ctx *context.OGContext) error {
 	credsCreation, jsonWaSession, err := webauthn.BeginBinding(ctx.User)
 	if err != nil {
 		return ctx.ErrorRes(500, "Cannot begin WebAuthn registration", err)
@@ -439,7 +439,7 @@ func beginWebAuthnBinding(ctx *context.OGContext) error {
 	return ctx.JSON(200, credsCreation)
 }
 
-func finishWebAuthnBinding(ctx *context.OGContext) error {
+func FinishWebAuthnBinding(ctx *context.OGContext) error {
 	sess := ctx.GetSession()
 	jsonWaSession, ok := sess.Values["webauthn_registration_session"].([]byte)
 	if !ok {
@@ -483,7 +483,7 @@ func finishWebAuthnBinding(ctx *context.OGContext) error {
 	return ctx.JSON_([]string{"OK"})
 }
 
-func beginWebAuthnLogin(ctx *context.OGContext) error {
+func BeginWebAuthnLogin(ctx *context.OGContext) error {
 	credsCreation, jsonWaSession, err := webauthn.BeginDiscoverableLogin()
 	if err != nil {
 		return ctx.JsonErrorRes(401, "Cannot begin WebAuthn login", err)
@@ -497,7 +497,7 @@ func beginWebAuthnLogin(ctx *context.OGContext) error {
 	return ctx.JSON_(credsCreation)
 }
 
-func finishWebAuthnLogin(ctx *context.OGContext) error {
+func FinishWebAuthnLogin(ctx *context.OGContext) error {
 	sess := ctx.GetSession()
 	sessionData, ok := sess.Values["webauthn_login_session"].([]byte)
 	if !ok {
@@ -518,7 +518,7 @@ func finishWebAuthnLogin(ctx *context.OGContext) error {
 	return ctx.JSON_([]string{"OK"})
 }
 
-func beginWebAuthnAssertion(ctx *context.OGContext) error {
+func BeginWebAuthnAssertion(ctx *context.OGContext) error {
 	sess := ctx.GetSession()
 
 	ogUser, err := db.GetUserById(sess.Values["mfaID"].(uint))
@@ -538,7 +538,7 @@ func beginWebAuthnAssertion(ctx *context.OGContext) error {
 	return ctx.JSON_(credsCreation)
 }
 
-func finishWebAuthnAssertion(ctx *context.OGContext) error {
+func FinishWebAuthnAssertion(ctx *context.OGContext) error {
 	sess := ctx.GetSession()
 	sessionData, ok := sess.Values["webauthn_assertion_session"].([]byte)
 	if !ok {
@@ -566,7 +566,7 @@ func finishWebAuthnAssertion(ctx *context.OGContext) error {
 	return ctx.JSON_([]string{"OK"})
 }
 
-func beginTotp(ctx *context.OGContext) error {
+func BeginTotp(ctx *context.OGContext) error {
 	user := ctx.User
 
 	if _, hasTotp, err := user.HasMFA(); err != nil {
@@ -599,7 +599,7 @@ func beginTotp(ctx *context.OGContext) error {
 
 }
 
-func finishTotp(ctx *context.OGContext) error {
+func FinishTotp(ctx *context.OGContext) error {
 	user := ctx.User
 
 	if _, hasTotp, err := user.HasMFA(); err != nil {
@@ -656,7 +656,7 @@ func finishTotp(ctx *context.OGContext) error {
 	return ctx.HTML_("totp.html")
 }
 
-func assertTotp(ctx *context.OGContext) error {
+func AssertTotp(ctx *context.OGContext) error {
 	var err error
 	dto := &db.TOTPDTO{}
 	if err := ctx.Bind(dto); err != nil {
@@ -704,7 +704,7 @@ func assertTotp(ctx *context.OGContext) error {
 	return ctx.RedirectTo(redirectUrl)
 }
 
-func disableTotp(ctx *context.OGContext) error {
+func DisableTotp(ctx *context.OGContext) error {
 	user := ctx.User
 	userTotp, err := db.GetTOTPByUserID(user.ID)
 	if err != nil {
@@ -719,7 +719,7 @@ func disableTotp(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/settings")
 }
 
-func regenerateTotpRecoveryCodes(ctx *context.OGContext) error {
+func RegenerateTotpRecoveryCodes(ctx *context.OGContext) error {
 	user := ctx.User
 	userTotp, err := db.GetTOTPByUserID(user.ID)
 	if err != nil {
@@ -735,7 +735,7 @@ func regenerateTotpRecoveryCodes(ctx *context.OGContext) error {
 	return ctx.HTML_("totp.html")
 }
 
-func logout(ctx *context.OGContext) error {
+func Logout(ctx *context.OGContext) error {
 	ctx.DeleteSession()
 	ctx.DeleteCsrfCookie()
 	return ctx.RedirectTo("/all")

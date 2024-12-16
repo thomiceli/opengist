@@ -18,7 +18,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func userSettings(ctx *context.OGContext) error {
+func UserSettings(ctx *context.OGContext) error {
 	user := ctx.User
 
 	keys, err := db.GetSSHKeysByUserID(user.ID)
@@ -46,7 +46,7 @@ func userSettings(ctx *context.OGContext) error {
 	return ctx.HTML_("settings.html")
 }
 
-func emailProcess(ctx *context.OGContext) error {
+func EmailProcess(ctx *context.OGContext) error {
 	user := ctx.User
 	email := ctx.FormValue("email")
 	var hash string
@@ -69,7 +69,7 @@ func emailProcess(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/settings")
 }
 
-func accountDeleteProcess(ctx *context.OGContext) error {
+func AccountDeleteProcess(ctx *context.OGContext) error {
 	user := ctx.User
 
 	if err := user.Delete(); err != nil {
@@ -79,7 +79,7 @@ func accountDeleteProcess(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/all")
 }
 
-func sshKeysProcess(ctx *context.OGContext) error {
+func SshKeysProcess(ctx *context.OGContext) error {
 	user := ctx.User
 
 	dto := new(db.SSHKeyDTO)
@@ -118,7 +118,7 @@ func sshKeysProcess(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/settings")
 }
 
-func sshKeysDelete(ctx *context.OGContext) error {
+func SshKeysDelete(ctx *context.OGContext) error {
 	user := ctx.User
 	keyId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -139,7 +139,7 @@ func sshKeysDelete(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/settings")
 }
 
-func passkeyDelete(ctx *context.OGContext) error {
+func PasskeyDelete(ctx *context.OGContext) error {
 	user := ctx.User
 	keyId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -159,7 +159,7 @@ func passkeyDelete(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/settings")
 }
 
-func passwordProcess(ctx *context.OGContext) error {
+func PasswordProcess(ctx *context.OGContext) error {
 	user := ctx.User
 
 	dto := new(db.UserDTO)
@@ -187,7 +187,7 @@ func passwordProcess(ctx *context.OGContext) error {
 	return ctx.RedirectTo("/settings")
 }
 
-func usernameProcess(ctx *context.OGContext) error {
+func UsernameProcess(ctx *context.OGContext) error {
 	user := ctx.User
 
 	dto := new(db.UserDTO)

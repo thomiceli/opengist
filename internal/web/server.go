@@ -251,6 +251,11 @@ func NewServer(isDev bool, sessionsPath string, ignoreCsrf bool) *Server {
 				CookiePath:     "/",
 				CookieHTTPOnly: true,
 				CookieSameSite: http.SameSiteStrictMode,
+				Skipper: func(ctx echo.Context) bool {
+					/* skip CSRF for embeds */
+					gistName := ctx.Param("gistname")
+					return filepath.Ext(gistName) == ".js"
+				},
 			}))
 			g1.Use(csrfInit)
 		}

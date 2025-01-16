@@ -4,7 +4,6 @@ import (
 	"github.com/thomiceli/opengist/internal/validator"
 	"net/http"
 
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
@@ -12,9 +11,7 @@ import (
 )
 
 type Server struct {
-	echo       *echo.Echo
-	flashStore *sessions.CookieStore     // session store for flash messages
-	UserStore  *sessions.FilesystemStore // session store for user sessions
+	echo *echo.Echo
 
 	dev          bool
 	sessionsPath string

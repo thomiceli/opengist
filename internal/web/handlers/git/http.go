@@ -72,7 +72,7 @@ func GitHttp(ctx *context.Context) error {
 
 			ctx.SetData("repositoryPath", repositoryPath)
 
-			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(handlers.ContextAuthInfo{ctx}, true)
+			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(handlers.ContextAuthInfo{Context: ctx}, true)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Cannot check if unauthenticated access is allowed")
 			}

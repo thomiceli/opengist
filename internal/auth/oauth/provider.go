@@ -1,7 +1,6 @@
 package oauth
 
 import (
-	"errors"
 	"fmt"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -47,7 +46,7 @@ func DefineProvider(provider string, url string) (Provider, error) {
 		return NewOIDCProvider(url), nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("unsupported provider %s", provider))
+	return nil, fmt.Errorf("unsupported provider %s", provider)
 }
 
 func CompleteUserAuth(ctx *context.Context) (CallbackProvider, error) {
@@ -67,7 +66,7 @@ func CompleteUserAuth(ctx *context.Context) (CallbackProvider, error) {
 		return NewOIDCCallbackProvider(&user), nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("unsupported provider %s", user.Provider))
+	return nil, fmt.Errorf("unsupported provider %s", user.Provider)
 }
 
 func urlJoin(base string, elem ...string) string {

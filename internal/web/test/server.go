@@ -196,10 +196,10 @@ func Setup(t *testing.T) *TestServer {
 func Teardown(t *testing.T, s *TestServer) {
 	s.stop()
 
-	//err := db.Close()
-	//require.NoError(t, err, "Could not close database")
+	err := db.Close()
+	require.NoError(t, err, "Could not close database")
 
-	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
 
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))

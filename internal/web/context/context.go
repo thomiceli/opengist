@@ -13,6 +13,10 @@ import (
 	"sync"
 )
 
+type dataKey string
+
+const dataKeyStr = "data"
+
 type Context struct {
 	echo.Context
 
@@ -55,7 +59,7 @@ func (ctx *Context) ErrorRes(code int, message string, err error) error {
 		skipLogger.Error().Err(err).Msg(message)
 	}
 
-	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), "data", ctx.data)))
+	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), dataKeyStr, ctx.data)))
 
 	return &echo.HTTPError{Code: code, Message: message, Internal: err}
 }

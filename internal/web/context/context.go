@@ -15,7 +15,7 @@ import (
 
 type dataKey string
 
-const dataKeyStr = "data"
+const dataKeyStr dataKey = "data"
 
 type Context struct {
 	echo.Context

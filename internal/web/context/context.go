@@ -15,7 +15,7 @@ import (
 
 type dataKey string
 
-const dataKeyStr dataKey = "data"
+const DataKeyStr dataKey = "data"
 
 type Context struct {
 	echo.Context
@@ -59,7 +59,7 @@ func (ctx *Context) ErrorRes(code int, message string, err error) error {
 		skipLogger.Error().Err(err).Msg(message)
 	}
 
-	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), dataKeyStr, ctx.data)))
+	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), DataKeyStr, ctx.data)))
 
 	return &echo.HTTPError{Code: code, Message: message, Internal: err}
 }

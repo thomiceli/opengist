@@ -67,7 +67,7 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 	var httpErr *echo.HTTPError
 	if errors.As(err, &httpErr) {
 		acceptJson := strings.Contains(ctx.Request().Header.Get("Accept"), "application/json")
-		data := ctx.Request().Context().Value("data").(echo.Map)
+		data := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
 		data["error"] = err
 		if acceptJson {
 			if err := ctx.JSON(httpErr.Code, httpErr); err != nil {

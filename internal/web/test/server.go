@@ -158,8 +158,6 @@ func Setup(t *testing.T) *TestServer {
 
 	git.ReposDirectory = path.Join("tests")
 
-	config.C.IndexEnabled = false
-	config.C.LogLevel = "debug"
 	config.InitLog()
 
 	homePath := config.GetHomeDir()
@@ -174,7 +172,7 @@ func Setup(t *testing.T) *TestServer {
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
 	require.NoError(t, err, "Could not create tmp repos directory")
 
-	err = db.Setup(databaseDsn, true)
+	err = db.Setup(databaseDsn, false)
 	require.NoError(t, err, "Could not initialize database")
 
 	if err != nil {

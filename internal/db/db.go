@@ -148,7 +148,7 @@ func Setup(dbUri string) error {
 		return err
 	}
 
-	if err = applyMigrations(db, dbInfo); err != nil {
+	if err = applyMigrations(dbInfo); err != nil {
 		return err
 	}
 

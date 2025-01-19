@@ -134,19 +134,6 @@ func structToURLValues(s interface{}) url.Values {
 }
 
 func Setup(t *testing.T) *TestServer {
-	var databaseDsn string
-	databaseType = os.Getenv("OPENGIST_TEST_DB")
-	switch databaseType {
-	case "sqlite":
-		databaseDsn = ":memory:"
-	case "postgres":
-		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
-	case "mysql":
-		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
-	default:
-		databaseDsn = ":memory:"
-	}
-
 	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
 
 	err := config.InitConfig("", io.Discard)
@@ -165,6 +152,21 @@ func Setup(t *testing.T) *TestServer {
 
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
+
+	var databaseDsn string
+	databaseType = os.Getenv("OPENGIST_TEST_DB")
+	switch databaseType {
+	case "sqlite":
+		databaseDsn = "file:" + filepath.Join(homePath, "tmp", "opengist.db")
+	case "postgres":
+		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
+	case "mysql":
+		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
+	default:
+		databaseDsn = ":memory:"
+	}
+
+	fmt.Println("ok")
 
 	err = os.MkdirAll(filepath.Join(homePath, "tests"), 0755)
 	require.NoError(t, err, "Could not create tests directory")
@@ -203,14 +205,8 @@ func Teardown(t *testing.T, s *TestServer) {
 	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
 
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "sessions"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	err = db.TruncateDatabase()
-	require.NoError(t, err, "Could not truncate database")
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp"))
+	require.NoError(t, err, "Could not remove tmp directory")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))
 	// require.NoError(t, err, "Could not remove repos directory")

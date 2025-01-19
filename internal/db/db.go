@@ -199,7 +199,7 @@ func setupSQLite(dbInfo databaseInfo) error {
 	}
 
 	if dbInfo.Database == ":memory:" {
-		dsn = ":memory:?_fk=true"
+		dsn = ":memory:?_fk=true&cache=shared"
 	} else {
 		u, err := url.Parse(dbInfo.Database)
 		if err != nil {

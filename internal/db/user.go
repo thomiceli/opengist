@@ -26,35 +26,50 @@ type User struct {
 }
 
 func (user *User) BeforeDelete(tx *gorm.DB) error {
-	// Decrement likes counter for all gists liked by this user
-	// The likes will be automatically deleted by the foreign key constraint
-	err := tx.Model(&Gist{}).
-		Omit("updated_at").
-		Where("id IN (?)", tx.
-			Select("gist_id").
-			Table("likes").
-			Where("user_id = ?", user.ID),
-		).
-		UpdateColumn("nb_likes", gorm.Expr("nb_likes - 1")).
-		Error
+	// First get the IDs in a separate query
+	var likedGistIDs []uint
+	err := tx.Table("likes").
+		Select("gist_id").
+		Where("user_id = ?", user.ID).
+		Pluck("gist_id", &likedGistIDs).Error
 	if err != nil {
 		return err
 	}
 
-	// Decrement forks counter for all gists forked by this user
-	err = tx.Model(&Gist{}).
-		Omit("updated_at").
-		Where("id IN (?)", tx.
-			Select("forked_id").
-			Table("gists").
-			Where("user_id = ?", user.ID),
-		).
-		UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).
-		Error
+	// Then update using the collected IDs
+	if len(likedGistIDs) > 0 {
+		err = tx.Model(&Gist{}).
+			Omit("updated_at").
+			Where("id IN ?", likedGistIDs).
+			UpdateColumn("nb_likes", gorm.Expr("nb_likes - 1")).
+			Error
+		if err != nil {
+			return err
+		}
+	}
+
+	// Same approach for forks
+	var forkedGistIDs []uint
+	err = tx.Table("gists").
+		Select("forked_id").
+		Where("user_id = ?", user.ID).
+		Pluck("forked_id", &forkedGistIDs).Error
 	if err != nil {
 		return err
 	}
 
+	if len(forkedGistIDs) > 0 {
+		err = tx.Model(&Gist{}).
+			Omit("updated_at").
+			Where("id IN ?", forkedGistIDs).
+			UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).
+			Error
+		if err != nil {
+			return err
+		}
+	}
+
+	// Rest of the delete operations remain the same
 	err = tx.Where("user_id = ?", user.ID).Delete(&SSHKey{}).Error
 	if err != nil {
 		return err
@@ -65,7 +80,6 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
-	// Delete all gists created by this user
 	err = tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 	if err != nil {
 		return err

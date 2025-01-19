@@ -147,7 +147,7 @@ func Setup(t *testing.T) *TestServer {
 	git.ReposDirectory = path.Join("tests")
 
 	config.C.IndexEnabled = false
-	config.C.LogLevel = "debug"
+	config.C.LogLevel = "error"
 	config.InitLog()
 
 	homePath := config.GetHomeDir()
@@ -165,8 +165,6 @@ func Setup(t *testing.T) *TestServer {
 	default:
 		databaseDsn = ":memory:"
 	}
-
-	fmt.Println("ok")
 
 	err = os.MkdirAll(filepath.Join(homePath, "tests"), 0755)
 	require.NoError(t, err, "Could not create tests directory")
@@ -202,7 +200,10 @@ func Teardown(t *testing.T, s *TestServer) {
 	//err := db.Close()
 	//require.NoError(t, err, "Could not close database")
 
-	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	err := db.TruncateDatabase()
+	require.NoError(t, err, "Could not truncate database")
+
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
 
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp"))

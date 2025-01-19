@@ -1,7 +1,7 @@
 package test
 
 import (
-	"fmt"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
@@ -199,7 +199,7 @@ func TestGitOperations(t *testing.T) {
 	require.NoError(t, err)
 
 	gitOperations := func(credentials, owner, url, filename string, expectErrorClone, expectErrorCheck, expectErrorPush bool) {
-		fmt.Println("Testing", credentials, url, expectErrorClone, expectErrorCheck, expectErrorPush)
+		log.Debug().Msgf("Testing %s %s %t %t %t", credentials, url, expectErrorClone, expectErrorCheck, expectErrorPush)
 		err := clientGitClone(credentials, owner, url)
 		if expectErrorClone {
 			require.Error(t, err)

@@ -50,7 +50,7 @@ func initialize(ctx *cli.Context) {
 	config.InitLog()
 
 	db.DeprecationDBFilename()
-	if err := db.Setup(config.C.DBUri, false); err != nil {
+	if err := db.Setup(config.C.DBUri); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database in hooks")
 	}
 }

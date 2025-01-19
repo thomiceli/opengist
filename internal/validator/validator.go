@@ -40,8 +40,7 @@ func ValidationMessages(err *error, locale *i18n.Locale) string {
 			messages[i] = locale.String("validation.should-not-include-sub-directory", e.Field())
 		case "alphanum":
 			messages[i] = locale.String("validation.should-only-contain-alphanumeric-characters", e.Field())
-		case "alphanumdash":
-		case "alphanumdashorempty":
+		case "alphanumdash", "alphanumdashorempty":
 			messages[i] = locale.String("validation.should-only-contain-alphanumeric-characters-and-dashes", e.Field())
 		case "min":
 			messages[i] = locale.String("validation.not-enough", e.Field())

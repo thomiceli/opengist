@@ -138,12 +138,13 @@ func Setup(t *testing.T) *TestServer {
 	databaseType = os.Getenv("OPENGIST_TEST_DB")
 	switch databaseType {
 	case "sqlite":
-	default:
-		databaseDsn = "file::memory:"
+		databaseDsn = ":memory:"
 	case "postgres":
 		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
 	case "mysql":
 		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
+	default:
+		databaseDsn = ":memory:"
 	}
 
 	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
@@ -158,6 +159,8 @@ func Setup(t *testing.T) *TestServer {
 
 	git.ReposDirectory = path.Join("tests")
 
+	config.C.IndexEnabled = false
+	config.C.LogLevel = "debug"
 	config.InitLog()
 
 	homePath := config.GetHomeDir()
@@ -172,7 +175,7 @@ func Setup(t *testing.T) *TestServer {
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
 	require.NoError(t, err, "Could not create tmp repos directory")
 
-	err = db.Setup(databaseDsn, false)
+	err = db.Setup(databaseDsn)
 	require.NoError(t, err, "Could not initialize database")
 
 	if err != nil {

@@ -26,50 +26,40 @@ type User struct {
 }
 
 func (user *User) BeforeDelete(tx *gorm.DB) error {
-	// First get the IDs in a separate query
-	var likedGistIDs []uint
-	err := tx.Table("likes").
-		Select("gist_id").
-		Where("user_id = ?", user.ID).
-		Pluck("gist_id", &likedGistIDs).Error
+	// Decrement likes counter using derived table
+	err := tx.Exec(`
+		UPDATE gists 
+		SET nb_likes = nb_likes - 1
+		WHERE id IN (
+			SELECT gist_id 
+			FROM (
+				SELECT gist_id 
+				FROM likes 
+				WHERE user_id = ?
+			) AS derived_likes
+		)
+	`, user.ID).Error
 	if err != nil {
 		return err
 	}
 
-	// Then update using the collected IDs
-	if len(likedGistIDs) > 0 {
-		err = tx.Model(&Gist{}).
-			Omit("updated_at").
-			Where("id IN ?", likedGistIDs).
-			UpdateColumn("nb_likes", gorm.Expr("nb_likes - 1")).
-			Error
-		if err != nil {
-			return err
-		}
-	}
-
-	// Same approach for forks
-	var forkedGistIDs []uint
-	err = tx.Table("gists").
-		Select("forked_id").
-		Where("user_id = ?", user.ID).
-		Pluck("forked_id", &forkedGistIDs).Error
+	// Decrement forks counter using derived table
+	err = tx.Exec(`
+		UPDATE gists 
+		SET nb_forks = nb_forks - 1
+		WHERE id IN (
+			SELECT forked_id 
+			FROM (
+				SELECT forked_id 
+				FROM gists 
+				WHERE user_id = ? AND forked_id IS NOT NULL
+			) AS derived_forks
+		)
+	`, user.ID).Error
 	if err != nil {
 		return err
 	}
 
-	if len(forkedGistIDs) > 0 {
-		err = tx.Model(&Gist{}).
-			Omit("updated_at").
-			Where("id IN ?", forkedGistIDs).
-			UpdateColumn("nb_forks", gorm.Expr("nb_forks - 1")).
-			Error
-		if err != nil {
-			return err
-		}
-	}
-
-	// Rest of the delete operations remain the same
 	err = tx.Where("user_id = ?", user.ID).Delete(&SSHKey{}).Error
 	if err != nil {
 		return err

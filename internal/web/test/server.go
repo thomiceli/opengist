@@ -209,6 +209,9 @@ func Teardown(t *testing.T, s *TestServer) {
 	require.NoError(t, err, "Could not remove repos directory")
 
 	if runtime.GOOS == "windows" {
+		err = db.Close()
+		require.NoError(t, err, "Could not close database")
+
 		time.Sleep(2 * time.Second)
 	}
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp"))

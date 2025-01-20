@@ -46,6 +46,12 @@ var DatabaseInfo *databaseInfo
 func parseDBURI(uri string) (*databaseInfo, error) {
 	info := &databaseInfo{}
 
+	if uri == ":memory:" {
+		info.Type = SQLite
+		info.Database = uri
+		return info, nil
+	}
+
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, fmt.Errorf("invalid URI: %v", err)
@@ -91,14 +97,14 @@ func parseDBURI(uri string) (*databaseInfo, error) {
 	return info, nil
 }
 
-func Setup(dbUri string, sharedCache bool) error {
+func Setup(dbUri string) error {
 	dbInfo, err := parseDBURI(dbUri)
 	if err != nil {
 		return err
 	}
 
 	log.Info().Msgf("Setting up a %s database connection", dbInfo.Type)
-	var setupFunc func(databaseInfo, bool) error
+	var setupFunc func(databaseInfo) error
 	switch dbInfo.Type {
 	case SQLite:
 		setupFunc = setupSQLite
@@ -114,7 +120,7 @@ func Setup(dbUri string, sharedCache bool) error {
 	retryInterval := 1 * time.Second
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		err = setupFunc(*dbInfo, sharedCache)
+		err = setupFunc(*dbInfo)
 		if err == nil {
 			log.Info().Msg("Database connection established")
 			break
@@ -142,7 +148,7 @@ func Setup(dbUri string, sharedCache bool) error {
 		return err
 	}
 
-	if err = applyMigrations(db, dbInfo); err != nil {
+	if err = applyMigrations(dbInfo); err != nil {
 		return err
 	}
 
@@ -183,37 +189,38 @@ func Ping() error {
 	return sql.Ping()
 }
 
-func setupSQLite(dbInfo databaseInfo, sharedCache bool) error {
+func setupSQLite(dbInfo databaseInfo) error {
 	var err error
+	var dsn string
 	journalMode := strings.ToUpper(config.C.SqliteJournalMode)
 
 	if !slices.Contains([]string{"DELETE", "TRUNCATE", "PERSIST", "MEMORY", "WAL", "OFF"}, journalMode) {
 		log.Warn().Msg("Invalid SQLite journal mode: " + journalMode)
 	}
 
-	u, err := url.Parse(dbInfo.Database)
-	if err != nil {
-		return err
-	}
+	if dbInfo.Database == ":memory:" {
+		dsn = ":memory:?_fk=true&cache=shared"
+	} else {
+		u, err := url.Parse(dbInfo.Database)
+		if err != nil {
+			return err
+		}
 
-	u.Scheme = "file"
-	q := u.Query()
-	q.Set("_fk", "true")
-	q.Set("_journal_mode", journalMode)
-	if sharedCache {
-		q.Set("cache", "shared")
+		u.Scheme = "file"
+		q := u.Query()
+		q.Set("_fk", "true")
+		q.Set("_journal_mode", journalMode)
+		u.RawQuery = q.Encode()
+		dsn = u.String()
 	}
-	u.RawQuery = q.Encode()
-	dsn := u.String()
 	db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger:         logger.Default.LogMode(logger.Silent),
 		TranslateError: true,
 	})
-
 	return err
 }
 
-func setupPostgres(dbInfo databaseInfo, sharedCache bool) error {
+func setupPostgres(dbInfo databaseInfo) error {
 	var err error
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbInfo.Host, dbInfo.Port, dbInfo.User, dbInfo.Password, dbInfo.Database)
 
@@ -225,7 +232,7 @@ func setupPostgres(dbInfo databaseInfo, sharedCache bool) error {
 	return err
 }
 
-func setupMySQL(dbInfo databaseInfo, sharedCache bool) error {
+func setupMySQL(dbInfo databaseInfo) error {
 	var err error
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbInfo.User, dbInfo.Password, dbInfo.Host, dbInfo.Port, dbInfo.Database)
 

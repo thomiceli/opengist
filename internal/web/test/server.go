@@ -11,9 +11,11 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
@@ -21,34 +23,34 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/memdb"
-	"github.com/thomiceli/opengist/internal/web"
+	"github.com/thomiceli/opengist/internal/web/server"
 )
 
 var databaseType string
 
-type testServer struct {
-	server        *web.Server
+type TestServer struct {
+	server        *server.Server
 	sessionCookie string
 }
 
-func newTestServer() (*testServer, error) {
-	s := &testServer{
-		server: web.NewServer(true, path.Join(config.GetHomeDir(), "tmp", "sessions"), true),
+func newTestServer() (*TestServer, error) {
+	s := &TestServer{
+		server: server.NewServer(true, path.Join(config.GetHomeDir(), "tmp", "sessions"), true),
 	}
 
 	go s.start()
 	return s, nil
 }
 
-func (s *testServer) start() {
+func (s *TestServer) start() {
 	s.server.Start()
 }
 
-func (s *testServer) stop() {
+func (s *TestServer) stop() {
 	s.server.Stop()
 }
 
-func (s *testServer) request(method, uri string, data interface{}, expectedCode int) error {
+func (s *TestServer) Request(method, uri string, data interface{}, expectedCode int) error {
 	var bodyReader io.Reader
 	if method == http.MethodPost || method == http.MethodPut {
 		values := structToURLValues(data)
@@ -133,18 +135,7 @@ func structToURLValues(s interface{}) url.Values {
 	return v
 }
 
-func setup(t *testing.T) *testServer {
-	var databaseDsn string
-	databaseType = os.Getenv("OPENGIST_TEST_DB")
-	switch databaseType {
-	case "sqlite":
-		databaseDsn = "file::memory:"
-	case "postgres":
-		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
-	case "mysql":
-		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
-	}
-
+func Setup(t *testing.T) *TestServer {
 	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
 
 	err := config.InitConfig("", io.Discard)
@@ -158,11 +149,27 @@ func setup(t *testing.T) *testServer {
 	git.ReposDirectory = path.Join("tests")
 
 	config.C.IndexEnabled = false
-	config.C.LogLevel = "debug"
+	config.C.LogLevel = "error"
 	config.InitLog()
 
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)
+
+	var databaseDsn string
+	databaseType = os.Getenv("OPENGIST_TEST_DB")
+	switch databaseType {
+	case "sqlite":
+		databaseDsn = "file:" + filepath.Join(homePath, "tmp", "opengist.db")
+	case "postgres":
+		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
+	case "mysql":
+		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
+	default:
+		databaseDsn = ":memory:"
+	}
+
+	err = os.MkdirAll(filepath.Join(homePath, "tests"), 0755)
+	require.NoError(t, err, "Could not create tests directory")
 
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "sessions"), 0755)
 	require.NoError(t, err, "Could not create sessions directory")
@@ -170,7 +177,7 @@ func setup(t *testing.T) *testServer {
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
 	require.NoError(t, err, "Could not create tmp repos directory")
 
-	err = db.Setup(databaseDsn, true)
+	err = db.Setup(databaseDsn)
 	require.NoError(t, err, "Could not initialize database")
 
 	if err != nil {
@@ -189,27 +196,40 @@ func setup(t *testing.T) *testServer {
 	return s
 }
 
-func teardown(t *testing.T, s *testServer) {
+func Teardown(t *testing.T, s *TestServer) {
 	s.stop()
 
 	//err := db.Close()
 	//require.NoError(t, err, "Could not close database")
 
-	err := os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "repos"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", "sessions"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	err = db.TruncateDatabase()
+	err := db.TruncateDatabase()
 	require.NoError(t, err, "Could not truncate database")
+
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	require.NoError(t, err, "Could not remove repos directory")
+
+	if runtime.GOOS == "windows" {
+		err = db.Close()
+		require.NoError(t, err, "Could not close database")
+
+		time.Sleep(2 * time.Second)
+	}
+	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp"))
+	require.NoError(t, err, "Could not remove tmp directory")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))
 	// require.NoError(t, err, "Could not remove repos directory")
 
 	// err = index.Close()
 	// require.NoError(t, err, "Could not close index")
+}
+
+type settingSet struct {
+	key   string `form:"key"`
+	value string `form:"value"`
+}
+
+type invitationAdmin struct {
+	nbMax         string `form:"nbMax"`
+	expiredAtUnix string `form:"expiredAtUnix"`
 }

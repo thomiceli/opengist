@@ -1,7 +1,7 @@
 package test
 
 import (
-	"fmt"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
@@ -12,13 +12,13 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-	s := setup(t)
-	defer teardown(t, s)
+	s := Setup(t)
+	defer Teardown(t, s)
 
-	err := s.request("GET", "/", nil, 302)
+	err := s.Request("GET", "/", nil, 302)
 	require.NoError(t, err)
 
-	err = s.request("GET", "/register", nil, 200)
+	err = s.Request("GET", "/register", nil, 200)
 	require.NoError(t, err)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
@@ -29,13 +29,13 @@ func TestRegister(t *testing.T) {
 	require.Equal(t, user1.Username, user1db.Username)
 	require.True(t, user1db.IsAdmin)
 
-	err = s.request("GET", "/", nil, 200)
+	err = s.Request("GET", "/", nil, 200)
 	require.NoError(t, err)
 
 	s.sessionCookie = ""
 
 	user2 := db.UserDTO{Username: "thomas", Password: "azeaze"}
-	err = s.request("POST", "/register", user2, 200)
+	err = s.Request("POST", "/register", user2, 200)
 	require.Error(t, err)
 
 	user3 := db.UserDTO{Username: "kaguya", Password: "kaguya"}
@@ -53,10 +53,10 @@ func TestRegister(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	s := setup(t)
-	defer teardown(t, s)
+	s := Setup(t)
+	defer Teardown(t, s)
 
-	err := s.request("GET", "/login", nil, 200)
+	err := s.Request("GET", "/login", nil, 200)
 	require.NoError(t, err)
 
 	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
@@ -72,38 +72,33 @@ func TestLogin(t *testing.T) {
 	user2 := db.UserDTO{Username: "thomas", Password: "azeaze"}
 	user3 := db.UserDTO{Username: "azeaze", Password: ""}
 
-	err = s.request("POST", "/login", user2, 302)
+	err = s.Request("POST", "/login", user2, 302)
 	require.Empty(t, s.sessionCookie)
 	require.Error(t, err)
 
-	err = s.request("POST", "/login", user3, 302)
+	err = s.Request("POST", "/login", user3, 302)
 	require.Empty(t, s.sessionCookie)
 	require.Error(t, err)
 }
 
-func register(t *testing.T, s *testServer, user db.UserDTO) {
-	err := s.request("POST", "/register", user, 302)
+func register(t *testing.T, s *TestServer, user db.UserDTO) {
+	err := s.Request("POST", "/register", user, 302)
 	require.NoError(t, err)
 }
 
-func login(t *testing.T, s *testServer, user db.UserDTO) {
-	err := s.request("POST", "/login", user, 302)
+func login(t *testing.T, s *TestServer, user db.UserDTO) {
+	err := s.Request("POST", "/login", user, 302)
 	require.NoError(t, err)
-}
-
-type settingSet struct {
-	key   string `form:"key"`
-	value string `form:"value"`
 }
 
 func TestAnonymous(t *testing.T) {
-	s := setup(t)
-	defer teardown(t, s)
+	s := Setup(t)
+	defer Teardown(t, s)
 
 	user := db.UserDTO{Username: "thomas", Password: "azeaze"}
 	register(t, s, user)
 
-	err := s.request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
+	err := s.Request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
 	require.NoError(t, err)
 
 	gist1 := db.GistDTO{
@@ -115,41 +110,41 @@ func TestAnonymous(t *testing.T) {
 		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
 		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
 	}
-	err = s.request("POST", "/", gist1, 302)
+	err = s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	gist1db, err := db.GetGistByID("1")
 	require.NoError(t, err)
 
-	err = s.request("GET", "/all", nil, 200)
+	err = s.Request("GET", "/all", nil, 200)
 	require.NoError(t, err)
 
 	cookie := s.sessionCookie
 	s.sessionCookie = ""
 
-	err = s.request("GET", "/all", nil, 302)
+	err = s.Request("GET", "/all", nil, 302)
 	require.NoError(t, err)
 
 	// Should redirect to login if RequireLogin
-	err = s.request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 302)
+	err = s.Request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 302)
 	require.NoError(t, err)
 
 	s.sessionCookie = cookie
 
-	err = s.request("PUT", "/admin-panel/set-config", settingSet{"allow-gists-without-login", "1"}, 200)
+	err = s.Request("PUT", "/admin-panel/set-config", settingSet{"allow-gists-without-login", "1"}, 200)
 	require.NoError(t, err)
 
 	s.sessionCookie = ""
 
 	// Should return results
-	err = s.request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 200)
+	err = s.Request("GET", "/"+gist1db.User.Username+"/"+gist1db.Uuid, nil, 200)
 	require.NoError(t, err)
 
 }
 
 func TestGitOperations(t *testing.T) {
-	s := setup(t)
-	defer teardown(t, s)
+	s := Setup(t)
+	defer Teardown(t, s)
 
 	admin := db.UserDTO{Username: "thomas", Password: "thomas"}
 	register(t, s, admin)
@@ -170,7 +165,7 @@ func TestGitOperations(t *testing.T) {
 			"yeah",
 		},
 	}
-	err := s.request("POST", "/", gist1, 302)
+	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
 
 	gist2 := db.GistDTO{
@@ -185,7 +180,7 @@ func TestGitOperations(t *testing.T) {
 			"cool",
 		},
 	}
-	err = s.request("POST", "/", gist2, 302)
+	err = s.Request("POST", "/", gist2, 302)
 	require.NoError(t, err)
 
 	gist3 := db.GistDTO{
@@ -200,11 +195,11 @@ func TestGitOperations(t *testing.T) {
 			"super",
 		},
 	}
-	err = s.request("POST", "/", gist3, 302)
+	err = s.Request("POST", "/", gist3, 302)
 	require.NoError(t, err)
 
 	gitOperations := func(credentials, owner, url, filename string, expectErrorClone, expectErrorCheck, expectErrorPush bool) {
-		fmt.Println("Testing", credentials, url, expectErrorClone, expectErrorCheck, expectErrorPush)
+		log.Debug().Msgf("Testing %s %s %t %t %t", credentials, url, expectErrorClone, expectErrorCheck, expectErrorPush)
 		err := clientGitClone(credentials, owner, url)
 		if expectErrorClone {
 			require.Error(t, err)
@@ -249,7 +244,7 @@ func TestGitOperations(t *testing.T) {
 	}
 
 	login(t, s, admin)
-	err = s.request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
+	err = s.Request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
 	require.NoError(t, err)
 
 	testsRequireLogin := []struct {
@@ -276,7 +271,7 @@ func TestGitOperations(t *testing.T) {
 	}
 
 	login(t, s, admin)
-	err = s.request("PUT", "/admin-panel/set-config", settingSet{"allow-gists-without-login", "1"}, 200)
+	err = s.Request("PUT", "/admin-panel/set-config", settingSet{"allow-gists-without-login", "1"}, 200)
 	require.NoError(t, err)
 
 	for _, test := range tests {

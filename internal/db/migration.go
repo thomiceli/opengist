@@ -3,7 +3,6 @@ package db
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"gorm.io/gorm"
 )
 
 type MigrationVersion struct {
@@ -11,10 +10,10 @@ type MigrationVersion struct {
 	Version uint
 }
 
-func applyMigrations(db *gorm.DB, dbInfo *databaseInfo) error {
+func applyMigrations(dbInfo *databaseInfo) error {
 	switch dbInfo.Type {
 	case SQLite:
-		return applySqliteMigrations(db)
+		return applySqliteMigrations()
 	case PostgreSQL, MySQL:
 		return nil
 	default:
@@ -23,7 +22,7 @@ func applyMigrations(db *gorm.DB, dbInfo *databaseInfo) error {
 
 }
 
-func applySqliteMigrations(db *gorm.DB) error {
+func applySqliteMigrations() error {
 	// Create migration table if it doesn't exist
 	if err := db.AutoMigrate(&MigrationVersion{}); err != nil {
 		log.Fatal().Err(err).Msg("Error creating migration version table")
@@ -37,7 +36,7 @@ func applySqliteMigrations(db *gorm.DB) error {
 	// Define migrations
 	migrations := []struct {
 		Version uint
-		Func    func(*gorm.DB) error
+		Func    func() error
 	}{
 		{1, v1_modifyConstraintToSSHKeys},
 		{2, v2_lowercaseEmails},
@@ -53,7 +52,7 @@ func applySqliteMigrations(db *gorm.DB) error {
 				return err
 			}
 
-			if err := m.Func(db); err != nil {
+			if err := m.Func(); err != nil {
 				log.Fatal().Err(err).Msg(fmt.Sprintf("Error applying migration %d:", m.Version))
 				tx.Rollback()
 				return err
@@ -73,7 +72,7 @@ func applySqliteMigrations(db *gorm.DB) error {
 }
 
 // Modify the constraint on the ssh_keys table to use ON DELETE CASCADE
-func v1_modifyConstraintToSSHKeys(db *gorm.DB) error {
+func v1_modifyConstraintToSSHKeys() error {
 	createSQL := `
 	CREATE TABLE ssh_keys_temp (
 		id integer primary key,
@@ -108,7 +107,7 @@ func v1_modifyConstraintToSSHKeys(db *gorm.DB) error {
 	return db.Exec(renameSQL).Error
 }
 
-func v2_lowercaseEmails(db *gorm.DB) error {
+func v2_lowercaseEmails() error {
 	// Copy the lowercase emails into the new column
 	copySQL := `UPDATE users SET email = lower(email);`
 	return db.Exec(copySQL).Error

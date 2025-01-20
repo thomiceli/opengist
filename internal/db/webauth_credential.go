@@ -73,8 +73,7 @@ func GetUserByCredentialID(credID binaryData) (*User, error) {
 		if err = db.Preload("User").Where("credential_id = decode(?, 'hex')", hexCredID).First(&credential).Error; err != nil {
 			return nil, err
 		}
-	case "mysql":
-	case "sqlite":
+	case "mysql", "sqlite":
 		hexCredID := hex.EncodeToString(credID)
 		if err = db.Preload("User").Where("credential_id = unhex(?)", hexCredID).First(&credential).Error; err != nil {
 			return nil, err
@@ -100,8 +99,7 @@ func GetCredentialByID(id binaryData) (*WebAuthnCredential, error) {
 		if err = db.Where("credential_id = decode(?, 'hex')", hexCredID).First(&cred).Error; err != nil {
 			return nil, err
 		}
-	case "mysql":
-	case "sqlite":
+	case "mysql", "sqlite":
 		hexCredID := hex.EncodeToString(id)
 		if err = db.Where("credential_id = unhex(?)", hexCredID).First(&cred).Error; err != nil {
 			return nil, err

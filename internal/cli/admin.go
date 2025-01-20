@@ -2,8 +2,8 @@ package cli
 
 import (
 	"fmt"
+	"github.com/thomiceli/opengist/internal/auth/password"
 	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -33,7 +33,7 @@ var CmdAdminResetPassword = cli.Command{
 			fmt.Printf("Cannot get user %s: %s\n", username, err)
 			return err
 		}
-		password, err := utils.Argon2id.Hash(plainPassword)
+		password, err := password.HashPassword(plainPassword)
 		if err != nil {
 			fmt.Printf("Cannot hash password for user %s: %s\n", username, err)
 			return err

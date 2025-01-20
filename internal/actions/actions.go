@@ -141,17 +141,8 @@ func syncGistPreviews() {
 
 func resetHooks() {
 	log.Info().Msg("Resetting Git server hooks for all repositories...")
-	entries, err := filepath.Glob(filepath.Join(config.GetHomeDir(), "repos", "*", "*"))
-	if err != nil {
-		log.Error().Err(err).Msg("Cannot read repos directories")
-		return
-	}
-
-	for _, e := range entries {
-		path := strings.Split(e, string(os.PathSeparator))
-		if err := git.CreateDotGitFiles(path[len(path)-2], path[len(path)-1]); err != nil {
-			log.Error().Err(err).Msgf("Cannot reset hooks for repository %s/%s", path[len(path)-2], path[len(path)-1])
-		}
+	if err := git.ResetHooks(); err != nil {
+		log.Error().Err(err).Msg("Error resetting hooks for repositories")
 	}
 }
 

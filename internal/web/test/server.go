@@ -11,6 +11,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -207,8 +208,9 @@ func Teardown(t *testing.T, s *TestServer) {
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
 
-	time.Sleep(100 * time.Millisecond)
-
+	if runtime.GOOS == "windows" {
+		time.Sleep(2 * time.Second)
+	}
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp"))
 	require.NoError(t, err, "Could not remove tmp directory")
 

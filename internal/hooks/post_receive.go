@@ -65,6 +65,11 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 		outputSb.WriteString(fmt.Sprintf("Gist title set to \"%s\"\n\n", opts["title"]))
 	}
 
+	if opts["description"] != "" && validator.Var(opts["description"], "max=1000") == nil {
+		gist.Description = opts["description"]
+		outputSb.WriteString(fmt.Sprintf("Gist description set to \"%s\"\n\n", opts["description"]))
+	}
+
 	if hasNoCommits, err := git.HasNoCommits(gist.User.Username, gist.Uuid); err != nil {
 		_, _ = fmt.Fprintln(er, "Failed to check if gist has no commits")
 		return fmt.Errorf("failed to check if gist has no commits: %w", err)

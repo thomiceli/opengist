@@ -81,6 +81,8 @@ type Gist struct {
 	Likes    []User `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Forked   *Gist  `gorm:"foreignKey:ForkedID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	ForkedID uint
+
+	Tags []GistTag `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type Like struct {
@@ -100,7 +102,7 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
-	err := db.Preload("User").Preload("Forked.User").
+	err := db.Preload("User").Preload("Forked.User").Preload("Tags").
 		Where("(gists.uuid like ? OR gists.url = ?) AND users.username like ?", gistUuid+"%", gistUuid, user).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
@@ -535,6 +537,40 @@ func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
 	return languages, nil
 }
 
+func (gist *Gist) UpdateTags(tags []string) error {
+	if err := db.Where("gist_id = ?", gist.ID).Delete(&GistTag{}).Error; err != nil {
+		return err
+	}
+
+	// Add new tags
+	now := time.Now().Unix()
+	var gistTags []GistTag
+	for _, tag := range tags {
+		normalizedTag := strings.ToLower(strings.TrimSpace(tag))
+		if normalizedTag == "" {
+			continue
+		}
+		gistTags = append(gistTags, GistTag{
+			GistID:    gist.ID,
+			Tag:       normalizedTag,
+			CreatedAt: now,
+		})
+	}
+
+	if len(gistTags) > 0 {
+		return db.Create(&gistTags).Error
+	}
+	return nil
+}
+
+func (gist *Gist) GetTags() ([]string, error) {
+	var tags []string
+	err := db.Model(&GistTag{}).
+		Where("gist_id = ?", gist.ID).
+		Pluck("tag", &tags).Error
+	return tags, err
+}
+
 // -- DTO -- //
 
 type GistDTO struct {
@@ -544,6 +580,7 @@ type GistDTO struct {
 	Files       []FileDTO `validate:"min=1,dive"`
 	Name        []string  `form:"name"`
 	Content     []string  `form:"content"`
+	Tags        []string  `validate:"max=10,dive,max=50" form:"tags"` // Max 10 tags, each max 50 chars
 	VisibilityDTO
 }
 
@@ -597,6 +634,11 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 		return nil, err
 	}
 
+	tags, err := gist.GetTags()
+	if err != nil {
+		return nil, err
+	}
+
 	indexedGist := &index.Gist{
 		GistID:     gist.ID,
 		Username:   gist.User.Username,
@@ -605,6 +647,7 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 		Filenames:  fileNames,
 		Extensions: exts,
 		Languages:  langs,
+		Tags:       tags,
 		CreatedAt:  gist.CreatedAt,
 		UpdatedAt:  gist.UpdatedAt,
 	}

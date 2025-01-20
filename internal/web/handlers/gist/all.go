@@ -171,6 +171,7 @@ func Search(ctx *context.Context) error {
 		Filename:  meta["filename"],
 		Extension: meta["extension"],
 		Language:  meta["language"],
+		Tag:       meta["tag"],
 	}, visibleGistsIds, pageInt)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error searching gists", err)

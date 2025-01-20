@@ -17,6 +17,12 @@ git push -o title=Gist123
 git push -o title="My Gist 123"
 ```
 
+## Change description
+
+```shell
+git push -o description="This is my gist description"
+```
+
 ## Change visibility
 
 ```shell

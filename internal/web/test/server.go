@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
@@ -205,6 +206,8 @@ func Teardown(t *testing.T, s *TestServer) {
 
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
+
+	time.Sleep(100 * time.Millisecond)
 
 	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp"))
 	require.NoError(t, err, "Could not remove tmp directory")

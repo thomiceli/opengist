@@ -58,6 +58,11 @@ func (s *Server) registerMiddlewares() {
 			CookiePath:     "/",
 			CookieHTTPOnly: true,
 			CookieSameSite: http.SameSiteStrictMode,
+			Skipper: func(ctx echo.Context) bool {
+				/* skip CSRF for embeds */
+				gistName := ctx.Param("gistname")
+				return filepath.Ext(gistName) == ".js"
+			},
 		}))
 		s.echo.Use(Middleware(csrfInit).toEcho())
 	}

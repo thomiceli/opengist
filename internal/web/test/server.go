@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -35,7 +34,7 @@ type TestServer struct {
 
 func newTestServer() (*TestServer, error) {
 	s := &TestServer{
-		server: server.NewServer(true, path.Join(config.GetHomeDir(), "tmp", "sessions"), true),
+		server: server.NewServer(true, filepath.Join(config.GetHomeDir(), "tmp", "sessions"), true),
 	}
 
 	go s.start()
@@ -146,7 +145,7 @@ func Setup(t *testing.T) *TestServer {
 
 	config.SetupSecretKey()
 
-	git.ReposDirectory = path.Join("tests")
+	git.ReposDirectory = filepath.Join("tests")
 
 	config.C.IndexEnabled = false
 	config.C.LogLevel = "error"
@@ -205,7 +204,7 @@ func Teardown(t *testing.T, s *TestServer) {
 	err := db.TruncateDatabase()
 	require.NoError(t, err, "Could not truncate database")
 
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tests"))
+	err = os.RemoveAll(filepath.Join(config.GetHomeDir(), "tests"))
 	require.NoError(t, err, "Could not remove repos directory")
 
 	if runtime.GOOS == "windows" {
@@ -214,7 +213,7 @@ func Teardown(t *testing.T, s *TestServer) {
 
 		time.Sleep(2 * time.Second)
 	}
-	err = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp"))
+	err = os.RemoveAll(filepath.Join(config.GetHomeDir(), "tmp"))
 	require.NoError(t, err, "Could not remove tmp directory")
 
 	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))

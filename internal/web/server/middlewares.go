@@ -17,6 +17,7 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -61,7 +62,15 @@ func (s *Server) registerMiddlewares() {
 			Skipper: func(ctx echo.Context) bool {
 				/* skip CSRF for embeds */
 				gistName := ctx.Param("gistname")
-				return filepath.Ext(gistName) == ".js"
+
+				/* skip CSRF for git clients */
+				matchUploadPack, _ := regexp.MatchString("(.*?)/git-upload-pack$", ctx.Request().URL.Path)
+				matchReceivePack, _ := regexp.MatchString("(.*?)/git-receive-pack$", ctx.Request().URL.Path)
+				return filepath.Ext(gistName) == ".js" || matchUploadPack || matchReceivePack
+			},
+			ErrorHandler: func(err error, c echo.Context) error {
+				log.Info().Err(err).Msg("CSRF error")
+				return err
 			},
 		}))
 		s.echo.Use(Middleware(csrfInit).toEcho())

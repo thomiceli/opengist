@@ -28,11 +28,14 @@ type Context struct {
 }
 
 func NewContext(c echo.Context, sessionPath string) *Context {
-	return &Context{
+	ctx := &Context{
 		Context: c,
 		data:    make(echo.Map),
 		store:   NewStore(sessionPath),
 	}
+
+	ctx.SetRequest(ctx.Request().WithContext(context.WithValue(ctx.Request().Context(), DataKeyStr, ctx.data)))
+	return ctx
 }
 
 func (ctx *Context) SetData(key string, value any) {

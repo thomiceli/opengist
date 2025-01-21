@@ -1,14 +1,15 @@
 package test
 
 import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"testing"
+
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
-	"os"
-	"os/exec"
-	"path"
-	"testing"
 )
 
 func TestRegister(t *testing.T) {
@@ -280,26 +281,26 @@ func TestGitOperations(t *testing.T) {
 }
 
 func clientGitClone(creds string, user string, url string) error {
-	return exec.Command("git", "clone", "http://"+creds+"@localhost:6157/"+user+"/"+url, path.Join(config.GetHomeDir(), "tmp", url)).Run()
+	return exec.Command("git", "clone", "http://"+creds+"@localhost:6157/"+user+"/"+url, filepath.Join(config.GetHomeDir(), "tmp", url)).Run()
 }
 
 func clientGitPush(url string) error {
-	f, err := os.Create(path.Join(config.GetHomeDir(), "tmp", url, "newfile.txt"))
+	f, err := os.Create(filepath.Join(config.GetHomeDir(), "tmp", url, "newfile.txt"))
 	if err != nil {
 		return err
 	}
 	f.Close()
 
-	_ = exec.Command("git", "-C", path.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt").Run()
-	_ = exec.Command("git", "-C", path.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file").Run()
-	err = exec.Command("git", "-C", path.Join(config.GetHomeDir(), "tmp", url), "push", "origin", "master").Run()
+	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt").Run()
+	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file").Run()
+	err = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", "origin", "master").Run()
 
-	_ = os.RemoveAll(path.Join(config.GetHomeDir(), "tmp", url))
+	_ = os.RemoveAll(filepath.Join(config.GetHomeDir(), "tmp", url))
 
 	return err
 }
 
 func clientCheckRepo(url string, file string) error {
-	_, err := os.ReadFile(path.Join(config.GetHomeDir(), "tmp", url, file))
+	_, err := os.ReadFile(filepath.Join(config.GetHomeDir(), "tmp", url, file))
 	return err
 }

@@ -54,6 +54,11 @@ func GistJson(ctx *context.Context) error {
 	renderedFiles := render.HighlightFiles(files)
 	ctx.SetData("files", renderedFiles)
 
+	topics, err := gist.GetTopics()
+	if err != nil {
+		return ctx.ErrorRes(500, "Error fetching topics for gist", err)
+	}
+
 	htmlbuf := bytes.Buffer{}
 	w := bufio.NewWriter(&htmlbuf)
 	if err = ctx.Echo().Renderer.Render(w, "gist_embed.html", ctx.DataMap(), ctx); err != nil {
@@ -80,6 +85,7 @@ func GistJson(ctx *context.Context) error {
 		"created_at":  time.Unix(gist.CreatedAt, 0).Format(time.RFC3339),
 		"visibility":  gist.VisibilityStr(),
 		"files":       renderedFiles,
+		"topics":      topics,
 		"embed": map[string]string{
 			"html":    htmlbuf.String(),
 			"css":     cssUrl,

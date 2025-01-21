@@ -1,7 +1,6 @@
 package db
 
-type GistTag struct {
-	GistID    uint   `gorm:"primaryKey"`
-	Tag       string `gorm:"primaryKey;size:50"`
-	CreatedAt int64
+type GistTopic struct {
+	GistID uint   `gorm:"primaryKey"`
+	Topic  string `gorm:"primaryKey;size:50"`
 }

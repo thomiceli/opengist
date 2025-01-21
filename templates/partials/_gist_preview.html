@@ -38,7 +38,18 @@
                 <h5 class="text-sm text-slate-500 pb-1">{{ .locale.Tr "gist.list.last-active" }} <span class="moment-timestamp">{{ .gist.UpdatedAt }}</span>
                     {{ if .gist.Forked }} • {{ .locale.Tr "gist.list.forked-from" }} <a href="{{ .c.ExternalUrl }}/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Identifier }}">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a> {{ end }}
                     {{ if .gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> {{ visibilityStr .gist.Private false }} </span>{{ end }}</h5>
-                <h6 class="text-xs text-slate-700 dark:text-slate-300 py-1">{{ .gist.Description }}</h6>
+                <div class="flex items-center gap-2 mb-2">
+                    {{ if len .gist.Description }}
+                        <h6 class="text-xs text-slate-700 dark:text-slate-300">{{ .gist.Description }}</h6>
+                    {{ end }}
+                    {{ if len .gist.TopicsSlice }}
+                    <div class="flex flex-wrap items-center gap-1">
+                        {{ range .gist.TopicsSlice }}
+                        <a href="{{ $.c.ExternalUrl }}/topics/{{ . }}" class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary-200 text-primary-900 hover:bg-primary-300 dark:bg-primary-950 dark:text-primary-200 dark:hover:bg-primary-900">{{ . }}</a>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+                </div>
             </div>
         </div>
         <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" class="text-slate-700 dark:text-slate-300">

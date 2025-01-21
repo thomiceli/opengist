@@ -102,6 +102,8 @@ func (s *Server) registerRoutes() {
 		r.GET("/:user/liked", gist.AllGists, checkRequireLogin)
 		r.GET("/:user/forked", gist.AllGists, checkRequireLogin)
 
+		r.GET("/topics/:topic", gist.AllGists, checkRequireLogin)
+
 		sC := r.SubGroup("/:user/:gistname")
 		{
 			sC.Use(makeCheckRequireLogin(true), gistInit)

@@ -18,6 +18,8 @@
                         <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "gist.list.all" }}</h1>
                     {{ else if eq .mode "search" }}
                         <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "gist.list.search-results" }}</h1>
+                    {{ else if eq .mode "topics" }}
+                        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "gist.list.topic-results" }} <span class="items-center px-2 py-0.5 rounded bg-primary-200 text-primary-900 hover:bg-primary-300 dark:bg-primary-950 dark:text-primary-200 dark:hover:bg-primary-900">{{ .topic }}</span></h1>
                     {{ end }}
                 {{ end }}
             </div>
@@ -58,7 +60,7 @@
             </div>
 
         </div>
-        {{ if and (ne .mode "all") (ne .mode "search") }}
+        {{ if and (ne .mode "all") (ne .mode "search") (ne .mode "topics") }}
         <div class="mt-4">
             <div class="sm:hidden">
                 <label for="tabs" class="sr-only">{{ .locale.Tr "gist.list.select-tab" }}</label>

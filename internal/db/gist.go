@@ -82,7 +82,7 @@ type Gist struct {
 	Forked   *Gist  `gorm:"foreignKey:ForkedID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	ForkedID uint
 
-	Tags []GistTag `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Topics []GistTopic `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type Like struct {
@@ -102,7 +102,7 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
-	err := db.Preload("User").Preload("Forked.User").Preload("Tags").
+	err := db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("(gists.uuid like ? OR gists.url = ?) AND users.username like ?", gistUuid+"%", gistUuid, user).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
@@ -121,7 +121,9 @@ func GetGistByID(gistId string) (*Gist, error) {
 
 func GetAllGistsForCurrentUser(currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
 	var gists []*Gist
-	err := db.Preload("User").Preload("Forked.User").
+	err := db.Preload("User").
+		Preload("Forked.User").
+		Preload("Topics").
 		Where("gists.private = 0 or gists.user_id = ?", currentUserId).
 		Limit(11).
 		Offset(offset * 10).
@@ -142,12 +144,18 @@ func GetAllGists(offset int) ([]*Gist, error) {
 	return gists, err
 }
 
-func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort string, order string) ([]*Gist, error) {
+func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort string, order string, topic string) ([]*Gist, error) {
 	var gists []*Gist
-	err := db.Preload("User").Preload("Forked.User").
+	tx := db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
-		Where("gists.title like ? or gists.description like ?", "%"+query+"%", "%"+query+"%").
-		Limit(11).
+		Where("gists.title like ? or gists.description like ?", "%"+query+"%", "%"+query+"%")
+
+	if topic != "" {
+		tx = tx.Joins("join gist_topics on gists.id = gist_topics.gist_id").
+			Where("gist_topics.topic = ?", topic)
+	}
+
+	err := tx.Limit(11).
 		Offset(offset * 10).
 		Order("gists." + sort + "_at " + order).
 		Find(&gists).Error
@@ -156,7 +164,7 @@ func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort st
 }
 
 func gistsFromUserStatement(fromUserId uint, currentUserId uint) *gorm.DB {
-	return db.Preload("User").Preload("Forked.User").
+	return db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("users.id = ?", fromUserId).
 		Joins("join users on gists.user_id = users.id")
@@ -179,7 +187,7 @@ func CountAllGistsFromUser(fromUserId uint, currentUserId uint) (int64, error) {
 }
 
 func likedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
-	return db.Preload("User").Preload("Forked.User").
+	return db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("likes.user_id = ?", fromUserId).
 		Joins("join likes on gists.id = likes.gist_id").
@@ -202,7 +210,7 @@ func CountAllGistsLikedByUser(fromUserId uint, currentUserId uint) (int64, error
 }
 
 func forkedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
-	return db.Preload("User").Preload("Forked.User").
+	return db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("gists.forked_id is not null and ((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("gists.user_id = ?", fromUserId).
 		Joins("join users on gists.user_id = users.id")
@@ -244,7 +252,7 @@ func GetAllGistsVisibleByUser(userId uint) ([]uint, error) {
 
 func GetAllGistsByIds(ids []uint) ([]*Gist, error) {
 	var gists []*Gist
-	err := db.Preload("User").Preload("Forked.User").
+	err := db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("id in ?", ids).
 		Find(&gists).Error
 
@@ -261,6 +269,12 @@ func (gist *Gist) CreateForked() error {
 }
 
 func (gist *Gist) Update() error {
+	// reset the topics
+	err := db.Model(&GistTopic{}).Where("gist_id = ?", gist.ID).Delete(&GistTopic{}).Error
+	if err != nil {
+		return err
+	}
+
 	return db.Omit("forked_id").Save(&gist).Error
 }
 
@@ -537,38 +551,20 @@ func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
 	return languages, nil
 }
 
-func (gist *Gist) UpdateTags(tags []string) error {
-	if err := db.Where("gist_id = ?", gist.ID).Delete(&GistTag{}).Error; err != nil {
-		return err
-	}
-
-	// Add new tags
-	now := time.Now().Unix()
-	var gistTags []GistTag
-	for _, tag := range tags {
-		normalizedTag := strings.ToLower(strings.TrimSpace(tag))
-		if normalizedTag == "" {
-			continue
-		}
-		gistTags = append(gistTags, GistTag{
-			GistID:    gist.ID,
-			Tag:       normalizedTag,
-			CreatedAt: now,
-		})
-	}
-
-	if len(gistTags) > 0 {
-		return db.Create(&gistTags).Error
-	}
-	return nil
+func (gist *Gist) GetTopics() ([]string, error) {
+	var topics []string
+	err := db.Model(&GistTopic{}).
+		Where("gist_id = ?", gist.ID).
+		Pluck("topic", &topics).Error
+	return topics, err
 }
 
-func (gist *Gist) GetTags() ([]string, error) {
-	var tags []string
-	err := db.Model(&GistTag{}).
-		Where("gist_id = ?", gist.ID).
-		Pluck("tag", &tags).Error
-	return tags, err
+func (gist *Gist) TopicsSlice() []string {
+	topics := make([]string, 0, len(gist.Topics))
+	for _, topic := range gist.Topics {
+		topics = append(topics, topic.Topic)
+	}
+	return topics
 }
 
 // -- DTO -- //
@@ -580,7 +576,7 @@ type GistDTO struct {
 	Files       []FileDTO `validate:"min=1,dive"`
 	Name        []string  `form:"name"`
 	Content     []string  `form:"content"`
-	Tags        []string  `validate:"max=10,dive,max=50" form:"tags"` // Max 10 tags, each max 50 chars
+	Topics      string    `validate:"gisttopics" form:"topics"`
 	VisibilityDTO
 }
 
@@ -599,6 +595,7 @@ func (dto *GistDTO) ToGist() *Gist {
 		Description: dto.Description,
 		Private:     dto.Private,
 		URL:         dto.URL,
+		Topics:      dto.TopicStrToSlice(),
 	}
 }
 
@@ -606,7 +603,17 @@ func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Title = dto.Title
 	gist.Description = dto.Description
 	gist.URL = dto.URL
+	gist.Topics = dto.TopicStrToSlice()
 	return gist
+}
+
+func (dto *GistDTO) TopicStrToSlice() []GistTopic {
+	topics := strings.Fields(dto.Topics)
+	gistTopics := make([]GistTopic, 0, len(topics))
+	for _, topic := range topics {
+		gistTopics = append(gistTopics, GistTopic{Topic: topic})
+	}
+	return gistTopics
 }
 
 // -- Index -- //
@@ -634,7 +641,7 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 		return nil, err
 	}
 
-	tags, err := gist.GetTags()
+	topics, err := gist.GetTopics()
 	if err != nil {
 		return nil, err
 	}
@@ -647,7 +654,7 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 		Filenames:  fileNames,
 		Extensions: exts,
 		Languages:  langs,
-		Tags:       tags,
+		Topics:     topics,
 		CreatedAt:  gist.CreatedAt,
 		UpdatedAt:  gist.UpdatedAt,
 	}

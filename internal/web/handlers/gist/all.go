@@ -40,6 +40,11 @@ func AllGists(ctx *context.Context) error {
 	ctx.SetData("sort", sortText)
 	ctx.SetData("order", orderText)
 
+	topicStr := ctx.Param("topic")
+	if topicStr != "" {
+
+	}
+
 	var gists []*db.Gist
 	var currentUserId uint
 	if userLogged != nil {
@@ -56,7 +61,13 @@ func AllGists(ctx *context.Context) error {
 			ctx.SetData("searchQuery", ctx.QueryParam("q"))
 			ctx.SetData("searchQueryUrl", template.URL("&q="+ctx.QueryParam("q")))
 			urlPage = "search"
-			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order)
+			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order, "")
+		} else if strings.Contains(urlctx, "topics") {
+			ctx.SetData("htmlTitle", ctx.TrH("gist.list.topic-results-topic", ctx.Param("topic")))
+			ctx.SetData("mode", "topics")
+			ctx.SetData("topic", ctx.Param("topic"))
+			urlPage = "topics/" + ctx.Param("topic")
+			gists, err = db.GetAllGistsFromSearch(currentUserId, "", pageInt-1, sort, order, topicStr)
 		} else if strings.HasSuffix(urlctx, "all") {
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all"))
 			ctx.SetData("mode", "all")
@@ -171,7 +182,7 @@ func Search(ctx *context.Context) error {
 		Filename:  meta["filename"],
 		Extension: meta["extension"],
 		Language:  meta["language"],
-		Tag:       meta["tag"],
+		Topic:     meta["topic"],
 	}, visibleGistsIds, pageInt)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error searching gists", err)

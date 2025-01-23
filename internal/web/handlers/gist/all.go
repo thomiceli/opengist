@@ -10,8 +10,6 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"gorm.io/gorm"
 	"html/template"
-	"regexp"
-	"strings"
 )
 
 func AllGists(ctx *context.Context) error {
@@ -40,11 +38,6 @@ func AllGists(ctx *context.Context) error {
 	ctx.SetData("sort", sortText)
 	ctx.SetData("order", orderText)
 
-	topicStr := ctx.Param("topic")
-	if topicStr != "" {
-
-	}
-
 	var gists []*db.Gist
 	var currentUserId uint
 	if userLogged != nil {
@@ -53,41 +46,25 @@ func AllGists(ctx *context.Context) error {
 		currentUserId = 0
 	}
 
+	mode := ctx.GetData("mode")
 	if fromUserStr == "" {
-		urlctx := ctx.Request().URL.Path
-		if strings.HasSuffix(urlctx, "search") {
+		if mode == "search" {
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.search-results"))
-			ctx.SetData("mode", "search")
 			ctx.SetData("searchQuery", ctx.QueryParam("q"))
 			ctx.SetData("searchQueryUrl", template.URL("&q="+ctx.QueryParam("q")))
 			urlPage = "search"
 			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order, "")
-		} else if strings.Contains(urlctx, "topics") {
+		} else if mode == "topics" {
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.topic-results-topic", ctx.Param("topic")))
-			ctx.SetData("mode", "topics")
 			ctx.SetData("topic", ctx.Param("topic"))
 			urlPage = "topics/" + ctx.Param("topic")
-			gists, err = db.GetAllGistsFromSearch(currentUserId, "", pageInt-1, sort, order, topicStr)
-		} else if strings.HasSuffix(urlctx, "all") {
+			gists, err = db.GetAllGistsFromSearch(currentUserId, "", pageInt-1, sort, order, ctx.Param("topic"))
+		} else if mode == "all" {
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all"))
-			ctx.SetData("mode", "all")
 			urlPage = "all"
 			gists, err = db.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
 		}
 	} else {
-		liked := false
-		forked := false
-
-		liked, err = regexp.MatchString(`/[^/]*/liked`, ctx.Request().URL.Path)
-		if err != nil {
-			return ctx.ErrorRes(500, "Error matching regexp", err)
-		}
-
-		forked, err = regexp.MatchString(`/[^/]*/forked`, ctx.Request().URL.Path)
-		if err != nil {
-			return ctx.ErrorRes(500, "Error matching regexp", err)
-		}
-
 		var fromUser *db.User
 
 		fromUser, err = db.GetUserByUsername(fromUserStr)
@@ -117,20 +94,17 @@ func AllGists(ctx *context.Context) error {
 			ctx.SetData("countForked", countForked)
 		}
 
-		if liked {
+		if mode == "liked" {
 			urlPage = fromUserStr + "/liked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-liked-by", fromUserStr))
-			ctx.SetData("mode", "liked")
 			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
-		} else if forked {
+		} else if mode == "forked" {
 			urlPage = fromUserStr + "/forked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-forked-by", fromUserStr))
-			ctx.SetData("mode", "forked")
 			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
-		} else {
+		} else if mode == "fromUser" {
 			urlPage = fromUserStr
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-from", fromUserStr))
-			ctx.SetData("mode", "fromUser")
 			gists, err = db.GetAllGistsFromUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		}
 	}

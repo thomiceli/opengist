@@ -405,3 +405,11 @@ func gistNewPushSoftInit(next Handler) Handler {
 		return next(ctx)
 	}
 }
+func setAllGistsMode(mode string) Middleware {
+	return func(next Handler) Handler {
+		return func(ctx *context.Context) error {
+			ctx.SetData("mode", mode)
+			return next(ctx)
+		}
+	}
+}

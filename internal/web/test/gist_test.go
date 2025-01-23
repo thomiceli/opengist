@@ -220,6 +220,7 @@ func TestCustomUrl(t *testing.T) {
 		},
 		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
 		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		Topics:  "",
 	}
 	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)

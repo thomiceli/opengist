@@ -112,7 +112,7 @@ func GetGist(user string, gistUuid string) (*Gist, error) {
 
 func GetGistByID(gistId string) (*Gist, error) {
 	gist := new(Gist)
-	err := db.Preload("User").Preload("Forked.User").
+	err := db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("gists.id = ?", gistId).
 		First(&gist).Error
 

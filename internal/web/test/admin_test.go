@@ -131,6 +131,7 @@ func TestAdminUser(t *testing.T) {
 		},
 		Name:    []string{"gist1.txt"},
 		Content: []string{"yeah"},
+		Topics:  "",
 	}
 	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
@@ -170,6 +171,7 @@ func TestAdminGist(t *testing.T) {
 		},
 		Name:    []string{"gist1.txt"},
 		Content: []string{"yeah"},
+		Topics:  "",
 	}
 	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)

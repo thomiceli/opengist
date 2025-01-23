@@ -32,6 +32,7 @@ func TestGists(t *testing.T) {
 		},
 		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
 		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		Topics:  "",
 	}
 	err = s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
@@ -63,6 +64,7 @@ func TestGists(t *testing.T) {
 		},
 		Name:    []string{"", "gist2.txt", "gist3.txt"},
 		Content: []string{"", "yeah\ncool", "yeah\ncool gist actually"},
+		Topics:  "",
 	}
 	err = s.Request("POST", "/", gist2, 200)
 	require.NoError(t, err)
@@ -75,6 +77,7 @@ func TestGists(t *testing.T) {
 		},
 		Name:    []string{""},
 		Content: []string{"yeah"},
+		Topics:  "",
 	}
 	err = s.Request("POST", "/", gist3, 302)
 	require.NoError(t, err)
@@ -118,6 +121,7 @@ func TestVisibility(t *testing.T) {
 		},
 		Name:    []string{""},
 		Content: []string{"yeah"},
+		Topics:  "",
 	}
 	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
@@ -160,6 +164,7 @@ func TestLikeFork(t *testing.T) {
 		},
 		Name:    []string{""},
 		Content: []string{"yeah"},
+		Topics:  "",
 	}
 	err := s.Request("POST", "/", gist1, 302)
 	require.NoError(t, err)
@@ -252,6 +257,7 @@ func TestCustomUrl(t *testing.T) {
 		},
 		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
 		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		Topics:  "",
 	}
 	err = s.Request("POST", "/", gist2, 302)
 	require.NoError(t, err)

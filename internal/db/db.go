@@ -208,7 +208,7 @@ func setupSQLite(dbInfo databaseInfo) error {
 
 		u.Scheme = "file"
 		q := u.Query()
-		q.Set("_fk", "true")
+		q.Set("_pragma", "foreign_keys(1)")
 		q.Set("_journal_mode", journalMode)
 		u.RawQuery = q.Encode()
 		dsn = u.String()

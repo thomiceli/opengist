@@ -21,7 +21,7 @@ func TestGists(t *testing.T) {
 	err = s.Request("GET", "/all", nil, 200)
 	require.NoError(t, err)
 
-	err = s.Request("POST", "/", nil, 200)
+	err = s.Request("POST", "/", nil, 400)
 	require.NoError(t, err)
 
 	gist1 := db.GistDTO{
@@ -66,7 +66,7 @@ func TestGists(t *testing.T) {
 		Content: []string{"", "yeah\ncool", "yeah\ncool gist actually"},
 		Topics:  "",
 	}
-	err = s.Request("POST", "/", gist2, 200)
+	err = s.Request("POST", "/", gist2, 400)
 	require.NoError(t, err)
 
 	gist3 := db.GistDTO{
@@ -89,7 +89,7 @@ func TestGists(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "gistfile1.txt", gist3files[0])
 
-	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/edit", nil, 200)
+	err = s.Request("POST", "/"+gist1db.User.Username+"/"+gist1db.Uuid+"/edit", nil, 400)
 	require.NoError(t, err)
 
 	gist1.Name = []string{"gist1.txt"}
@@ -267,4 +267,76 @@ func TestCustomUrl(t *testing.T) {
 
 	require.Equal(t, gist2db.Uuid, gist2db.Identifier())
 	require.NotEqual(t, gist2db.URL, gist2db.Identifier())
+}
+
+func TestTopics(t *testing.T) {
+	s := Setup(t)
+	defer Teardown(t, s)
+
+	user1 := db.UserDTO{Username: "thomas", Password: "thomas"}
+	register(t, s, user1)
+
+	gist1 := db.GistDTO{
+		Title:       "gist1",
+		URL:         "my-gist",
+		Description: "my first gist",
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		Topics:  "topic1 topic2 topic3",
+	}
+	err := s.Request("POST", "/", gist1, 302)
+	require.NoError(t, err)
+
+	gist1db, err := db.GetGistByID("1")
+	require.NoError(t, err)
+
+	require.Equal(t, []db.GistTopic{
+		{GistID: 1, Topic: "topic1"},
+		{GistID: 1, Topic: "topic2"},
+		{GistID: 1, Topic: "topic3"},
+	}, gist1db.Topics)
+
+	gist2 := db.GistDTO{
+		Title:       "gist2",
+		URL:         "my-gist",
+		Description: "my second gist",
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		Topics:  "topic1 topic2 topic3 topic2 topic4 topic1",
+	}
+	err = s.Request("POST", "/", gist2, 302)
+	require.NoError(t, err)
+
+	gist2db, err := db.GetGistByID("2")
+	require.NoError(t, err)
+	require.Equal(t, []db.GistTopic{
+		{GistID: 2, Topic: "topic1"},
+		{GistID: 2, Topic: "topic2"},
+		{GistID: 2, Topic: "topic3"},
+		{GistID: 2, Topic: "topic4"},
+	}, gist2db.Topics)
+
+	gist3 := db.GistDTO{
+		Title:       "gist3",
+		URL:         "my-gist",
+		Description: "my third gist",
+		VisibilityDTO: db.VisibilityDTO{
+			Private: 0,
+		},
+		Name:    []string{"gist1.txt", "gist2.txt", "gist3.txt"},
+		Content: []string{"yeah", "yeah\ncool", "yeah\ncool gist actually"},
+		Topics:  "topic1 topic2 topic3 topic4 topic5 topic6 topic7 topic8 topic9 topic10 topic11",
+	}
+	err = s.Request("POST", "/", gist3, 400)
+	require.NoError(t, err)
+
+	gist3.Topics = "topictoolongggggggggggggggggggggggggggggggggggggggg"
+	err = s.Request("POST", "/", gist3, 400)
+	require.NoError(t, err)
 }

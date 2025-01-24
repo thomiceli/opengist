@@ -92,10 +92,13 @@ func (s *Server) setFuncMap() {
 				return "https://www.gravatar.com/avatar/" + user.MD5Hash + "?d=identicon&s=200"
 			}
 
-			if s.dev {
-				return "http://localhost:16157/default.png"
+			return ""
+		},
+		"shouldGenerateAvatar": func(user *db.User, noGravatar bool) bool {
+			if user == nil {
+				return true
 			}
-			return config.C.ExternalUrl + "/" + context.ManifestEntries["default.png"].File
+			return user.AvatarURL == "" && (user.MD5Hash == "" || noGravatar)
 		},
 		"asset": func(file string) string {
 			if s.dev {
@@ -112,12 +115,6 @@ func (s *Server) setFuncMap() {
 		},
 		"dev": func() bool {
 			return s.dev
-		},
-		"defaultAvatar": func() string {
-			if s.dev {
-				return "http://localhost:16157/default.png"
-			}
-			return config.C.ExternalUrl + "/" + context.ManifestEntries["default.png"].File
 		},
 		"visibilityStr": func(visibility db.Visibility, lowercase bool) string {
 			s := "Public"

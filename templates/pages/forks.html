@@ -8,7 +8,11 @@
                 {{ range $gist := .forks }}
                 <li class="flex py-4">
                     <a href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}">
+                        {{ if not (shouldGenerateAvatar $gist.User $.DisableGravatar) }}
                         <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl $gist.User $.DisableGravatar }}" alt="{{ $gist.User.Username }}'s Avatar">
+                        {{ else }}
+                        <svg class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" data-jdenticon-value="{{ $gist.User.Username }}" width="48" height="48"></svg>
+                        {{ end }}
                     </a>
                     <div>
                         <a href="{{ $.c.ExternalUrl }}/{{ $gist.User.Username }}" class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $gist.User.Username }}</a>

@@ -6,7 +6,15 @@
                 {{if .fromUser}}
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="{{ .fromuser.Username }}'s Avatar">
+                        {{ if not (shouldGenerateAvatar .fromUser .DisableGravatar) }}
+                            <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="{{ .fromuser.Username }}'s Avatar">
+                        {{ else }}
+                            <svg class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700"
+                                 data-jdenticon-value="{{ .fromUser.Username }}"
+                                 width="48"
+                                 height="48">
+                            </svg>
+                        {{ end }}
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>

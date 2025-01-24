@@ -1,7 +1,6 @@
 import './style.scss';
 import './favicon-32.png';
 import './opengist.svg';
-import './default.png';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/cs';

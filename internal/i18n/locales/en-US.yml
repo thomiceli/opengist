@@ -45,6 +45,7 @@ gist.new.create-unlisted-button: Create unlisted gist
 gist.new.create-private-button: Create private gist
 gist.new.preview: Preview
 gist.new.create-a-new-gist: Create a new gist
+gist.new.topics: Topics (separate with spaces)
 
 gist.edit.editing: Editing
 gist.edit.edit-gist: Edit %s
@@ -74,6 +75,9 @@ gist.list.no-gists: No gists
 gist.list.all-liked-by: All gists liked by %s
 gist.list.all-forked-by: All gists forked by %s
 gist.list.all-from: All gists from %s
+gist.list.topic-results-topic: All gists matching topic %s
+gist.list.topic-results: All gists matching topic
+
 
 gist.search.found: gists found
 gist.search.no-results: No gists found
@@ -82,6 +86,8 @@ gist.search.help.title: gists with given title
 gist.search.help.filename: gists having files with given name
 gist.search.help.extension: gists having files with given extension
 gist.search.help.language: gists having files with given language
+gist.search.help.topic: gists with given topic
+
 
 gist.forks: Forks
 gist.forks.view: View fork
@@ -303,5 +309,6 @@ validation.should-only-contain-alphanumeric-characters: Field %s should only con
 validation.should-only-contain-alphanumeric-characters-and-dashes: Field %s should only contain alphanumeric characters and dashes
 validation.not-enough: Not enough %s
 validation.invalid: Invalid %s
+validation.invalid-gist-topics: Invalid gist topics, they must start with a letter or number, consist of 50 characters or less, and can include hyphens
 
 html.title.admin-panel: Admin panel

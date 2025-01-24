@@ -67,14 +67,14 @@ func ProcessCreate(ctx *context.Context) error {
 	if err != nil {
 		ctx.AddFlash(validator.ValidationMessages(&err, ctx.GetData("locale").(*i18n.Locale)), "error")
 		if isCreate {
-			return ctx.Html("create.html")
+			return ctx.HtmlWithCode(400, "create.html")
 		} else {
 			files, err := gist.Files("HEAD", false)
 			if err != nil {
 				return ctx.ErrorRes(500, "Error fetching files", err)
 			}
 			ctx.SetData("files", files)
-			return ctx.Html("edit.html")
+			return ctx.HtmlWithCode(400, "edit.html")
 		}
 	}
 

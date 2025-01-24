@@ -16,6 +16,7 @@ func NewValidator() *OpengistValidator {
 	_ = v.RegisterValidation("notreserved", validateReservedKeywords)
 	_ = v.RegisterValidation("alphanumdash", validateAlphaNumDash)
 	_ = v.RegisterValidation("alphanumdashorempty", validateAlphaNumDashOrEmpty)
+	_ = v.RegisterValidation("gisttopics", validateGistTopics)
 	return &OpengistValidator{v}
 }
 
@@ -46,6 +47,8 @@ func ValidationMessages(err *error, locale *i18n.Locale) string {
 			messages[i] = locale.String("validation.not-enough", e.Field())
 		case "notreserved":
 			messages[i] = locale.String("validation.invalid", e.Field())
+		case "gisttopics":
+			messages[i] = locale.String("validation.invalid-gist-topics")
 		}
 	}
 
@@ -71,4 +74,28 @@ func validateAlphaNumDash(fl validator.FieldLevel) bool {
 
 func validateAlphaNumDashOrEmpty(fl validator.FieldLevel) bool {
 	return regexp.MustCompile(`^$|^[a-zA-Z0-9-]+$`).MatchString(fl.Field().String())
+}
+
+func validateGistTopics(fl validator.FieldLevel) bool {
+	topicsInput := fl.Field().String()
+	if topicsInput == "" {
+		return true
+	}
+
+	topics := strings.Fields(topicsInput)
+
+	if len(topics) > 10 {
+		return false
+	}
+
+	for _, tag := range topics {
+		if len(tag) > 50 {
+			return false
+		}
+		if !regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(tag) {
+			return false
+		}
+	}
+
+	return true
 }

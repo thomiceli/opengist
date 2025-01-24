@@ -90,17 +90,19 @@ func (s *Server) registerRoutes() {
 			r.Any("/init/*", git.GitHttp, gistNewPushSoftInit)
 		}
 
-		r.GET("/all", gist.AllGists, checkRequireLogin)
+		r.GET("/all", gist.AllGists, checkRequireLogin, setAllGistsMode("all"))
 
 		if index.Enabled() {
 			r.GET("/search", gist.Search, checkRequireLogin)
 		} else {
-			r.GET("/search", gist.AllGists, checkRequireLogin)
+			r.GET("/search", gist.AllGists, checkRequireLogin, setAllGistsMode("search"))
 		}
 
-		r.GET("/:user", gist.AllGists, checkRequireLogin)
-		r.GET("/:user/liked", gist.AllGists, checkRequireLogin)
-		r.GET("/:user/forked", gist.AllGists, checkRequireLogin)
+		r.GET("/:user", gist.AllGists, checkRequireLogin, setAllGistsMode("fromUser"))
+		r.GET("/:user/liked", gist.AllGists, checkRequireLogin, setAllGistsMode("liked"))
+		r.GET("/:user/forked", gist.AllGists, checkRequireLogin, setAllGistsMode("forked"))
+
+		r.GET("/topics/:topic", gist.AllGists, checkRequireLogin, setAllGistsMode("topics"))
 
 		sC := r.SubGroup("/:user/:gistname")
 		{

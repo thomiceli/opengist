@@ -58,6 +58,9 @@
                     <div class="col-span-6 sm:col-span-3 mt-2">
                         <input type="text" value="{{ .gist.URL }}"  placeholder="{{ .locale.Tr "gist.new.url" }}" name="url" id="url" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md" maxlength="32">
                     </div>
+                    <div class="col-span-12 sm:col-span-9 mt-2">
+                        <input type="text" value="{{ topicsToStr .gist.Topics }}"  placeholder="{{ .locale.Tr "gist.new.topics" }}" name="topics" id="topics" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
+                    </div>
                 </div>
             </div>
             <div id="editors" class="space-y-4">

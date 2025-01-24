@@ -179,6 +179,16 @@ func (s *Server) setFuncMap() {
 			_, err := url.ParseRequestURI(s)
 			return err == nil
 		},
+		"topicsToStr": func(topics []db.GistTopic) string {
+			str := ""
+			for i, topic := range topics {
+				if i > 0 {
+					str += " "
+				}
+				str += topic.Topic
+			}
+			return str
+		},
 	}
 
 	t := template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html"))

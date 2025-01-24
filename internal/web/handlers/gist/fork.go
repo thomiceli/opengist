@@ -43,6 +43,7 @@ func Fork(ctx *context.Context) error {
 		UserID:          currentUser.ID,
 		ForkedID:        gist.ID,
 		NbFiles:         gist.NbFiles,
+		Topics:          gist.Topics,
 	}
 
 	if err = newGist.CreateForked(); err != nil {

@@ -8,6 +8,7 @@ type Gist struct {
 	Filenames  []string
 	Extensions []string
 	Languages  []string
+	Topics     []string
 	CreatedAt  int64
 	UpdatedAt  int64
 }
@@ -18,4 +19,5 @@ type SearchGistMetadata struct {
 	Filename  string
 	Extension string
 	Language  string
+	Topic     string
 }

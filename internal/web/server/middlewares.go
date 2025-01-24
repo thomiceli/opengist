@@ -49,7 +49,7 @@ func (s *Server) registerMiddlewares() {
 			return nil
 		},
 	}))
-	// s.echo.Use(middleware.Recover())
+	s.echo.Use(middleware.Recover())
 	s.echo.Use(middleware.Secure())
 	s.echo.Use(Middleware(sessionInit).toEcho())
 

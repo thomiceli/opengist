@@ -46,7 +46,7 @@ gist.new.create-private-button: 'Private Gist erstellen'
 gist.new.preview: 'Vorschau'
 gist.new.create-a-new-gist: 'Neue Gist erstellen'
 
-gist.edit.editing: 'Bearbeiten'
+gist.edit.editing: 'In Bearbeitung'
 gist.edit.edit-gist: '%s bearbeiten'
 gist.edit.change-visibility: 'Sichtbarkeit ändern'
 gist.edit.delete: 'Löschen'
@@ -142,7 +142,7 @@ auth.username: 'Benutzername'
 auth.password: 'Passwort'
 auth.register-instead: 'Stattdessen registrieren'
 auth.login-instead: 'Stattdessen anmelden'
-auth.oauth: 'Weiter mit %s Account'
+auth.oauth: 'Weiter mit %s Konto'
 
 error: 'Fehler'
 error.page-not-found: 'Seite nicht gefunden'
@@ -267,3 +267,39 @@ validation.not-enough: 'Nicht genug %s'
 validation.invalid: 'Ungültiges %s'
 
 html.title.admin-panel: 'Admin-Panel'
+auth.totp.regenerate-recovery-codes: Wiederherstellungscodes neu generieren
+auth.totp.already-enabled: TOTP ist bereits aktiv
+auth.totp.invalid-secret: Ungültiger TOTP Sicherheitsschlüssel
+auth.totp.disable: TOTP ausschalten
+auth.mfa.passkey: Hauptschlüssel
+auth.mfa.use-passkey: Hauptschlüssel nutzen
+auth.mfa.use-passkey-to-finish: Nutzen Sie einen Hauptschlüssel, um Authentisierung abzuschliessen
+auth.totp.invalid-code: Ungültiger TOTP Code
+auth.mfa: Multi-Faktor Authentisierung
+gist.delete.confirm: Sind Sie sich sicher, ob Sie dieses Gist löschen wollen?
+auth.mfa.passkeys: Hauptschlüssel
+auth.mfa.bind-passkey: Hauptschlüssel verbinden
+auth.mfa.login-with-passkey: Mit Hauptschlüssel einloggen
+auth.mfa.waiting-for-passkey-input: Auf Eingabe von Browser-Interaktion warten...
+auth.mfa.passkey-name: Name
+auth.mfa.delete-passkey: Löschen
+auth.mfa.passkey-added-at: Hinzugefügt
+auth.mfa.passkey-never-used: Niemals benutzt
+auth.mfa.passkey-last-used: Zuletzt benutzt
+auth.totp.code: Code
+auth.totp.proceed: Fortfahren
+admin.invitations.delete_confirm: Willst du diese Einladung löschen?
+flash.auth.passkey-deleted: Hauptschlüssel gelöscht
+flash.auth.passkey-registred: Hauptschlüssel %s wurde registriert
+auth.totp: Zeitbasiertes Einmal-Passwort (TOTP)
+auth.totp.use: TOTP einrichten
+auth.totp.help: TOTP ist eine Zwei-Faktor-Authentifizierungsmethode, welche ein gemeinsames Geheimnis verwendet, um ein Einmal-Passwort zu generieren.
+auth.totp.code-used: Der Wiederherstellungscode %s wurde verwendet. Dieser ist nun ungültig. Du solltest die Zwei-Faktor-Authentifizierung möglicherweise vorübergehend deaktivieren oder deine Codes neu generieren.
+auth.totp.disabled: TOTP erfolgreich deaktiviert
+auth.mfa.passkeys-help: Füge einen Passkey hinzu, um dich bei deinem Account anzumelden und ihn als Zwei-Faktor-Methode zu verwenden.
+auth.mfa.delete-passkey-confirm: Löschen des Hauptschlüssels bestätigen
+auth.totp.submit: Bestätigen
+auth.totp.scan-qr-code: Scanne den unten stehenden QR-Code mit deiner Authentifizierungs-App, um die Zwei-Faktor-Authentifizierung zu aktivieren, oder gib den folgenden Schlüssel ein und bestätige anschliessend mit dem generierten Code.
+auth.totp.enter-code: Gib den Code aus deiner Authentifizierungs-App ein
+auth.totp.save-recovery-codes: Speichere deine Wiederherstellungscodes an einem sicheren Ort. Du kannst diese Codes verwenden, um wieder Zugang zu deinem Account zu erlangen, wenn du den Zugriff auf deine Authentifizierungs-App verloren hast.
+error.not-in-mfa-session: Nutzer ist nicht in einer Zwei-Faktor-Sitzung

@@ -51,11 +51,10 @@ func AccountDeleteProcess(ctx *context.Context) error {
 func UsernameProcess(ctx *context.Context) error {
 	user := ctx.User
 
-	dto := new(db.UserDTO)
+	dto := new(db.UserUsernameDTO)
 	if err := ctx.Bind(dto); err != nil {
 		return ctx.ErrorRes(400, ctx.Tr("error.cannot-bind-data"), err)
 	}
-	dto.Password = user.Password
 
 	if err := ctx.Validate(dto); err != nil {
 		ctx.AddFlash(validator.ValidationMessages(&err, ctx.GetData("locale").(*i18n.Locale)), "error")

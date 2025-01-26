@@ -247,3 +247,7 @@ func (dto *UserDTO) ToUser() *User {
 		Password: dto.Password,
 	}
 }
+
+type UserUsernameDTO struct {
+	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
+}

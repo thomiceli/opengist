@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"errors"
-	"github.com/thomiceli/opengist/internal/web/context"
 	"html/template"
+	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/thomiceli/opengist/internal/web/context"
 )
 
 func GetPage(ctx *context.Context) int {
@@ -76,4 +78,14 @@ func ParseSearchQueryStr(query string) (string, map[string]string) {
 
 	content := strings.TrimSpace(contentBuilder.String())
 	return content, metadata
+}
+
+func GetContentTypeFromFilename(filename string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+	switch ext {
+	case ".css":
+		return "text/css"
+	default:
+		return "text/plain"
+	}
 }

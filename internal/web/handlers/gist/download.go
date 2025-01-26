@@ -3,9 +3,11 @@ package gist
 import (
 	"archive/zip"
 	"bytes"
+	"strconv"
+
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"strconv"
+	"github.com/thomiceli/opengist/internal/web/handlers"
 )
 
 func RawFile(ctx *context.Context) error {
@@ -18,7 +20,8 @@ func RawFile(ctx *context.Context) error {
 	if file == nil {
 		return ctx.NotFound("File not found")
 	}
-
+	contentType := handlers.GetContentTypeFromFilename(file.Filename)
+	ctx.Response().Header().Set("Content-Type", contentType)
 	return ctx.PlainText(200, file.Content)
 }
 

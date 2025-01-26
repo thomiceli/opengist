@@ -5,7 +5,11 @@
         <div class="flex ">
             <div class="div">
                 <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}">
-                    <img class="h-10 min-w-10 w-10 rounded-md mr-2 border border-gray-200 dark:border-gray-700 my-1" src="{{ avatarUrl .gist.User .DisableGravatar }}" alt="{{ .gist.User.Username }}'s Avatar">
+                    {{ if not (shouldGenerateAvatar .gist.User .DisableGravatar) }}
+                        <img class="h-10 min-w-10 w-10 rounded-md mr-2 border border-gray-200 dark:border-gray-700 my-1" src="{{ avatarUrl .gist.User .DisableGravatar }}" alt="{{ .gist.User.Username }}'s Avatar">
+                    {{ else }}
+                        <svg class="h-10 min-w-10 w-10 rounded-md mr-2 border border-gray-200 dark:border-gray-700 my-1" data-jdenticon-value="{{ .gist.User.Username }}" width="40" height="40"></svg>
+                    {{ end }}
                 </a>
             </div>
             <div class="flex-auto">

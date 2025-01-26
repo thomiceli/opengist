@@ -1,7 +1,6 @@
 import './style.scss';
 import './favicon-32.png';
 import './opengist.svg';
-import './default.png';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/cs';
@@ -13,10 +12,13 @@ import 'dayjs/locale/pt';
 import 'dayjs/locale/ru';
 import 'dayjs/locale/zh';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import jdenticon from 'jdenticon/standalone';
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 dayjs.locale(window.opengist_locale || 'en');
+
+jdenticon.update("[data-jdenticon-value]")
 
 document.addEventListener('DOMContentLoaded', () => {
     const themeMenu = document.getElementById('theme-menu')!;

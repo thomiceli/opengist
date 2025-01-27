@@ -1,6 +1,7 @@
 package gist
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
@@ -43,6 +44,7 @@ func ProcessCreate(ctx *context.Context) error {
 
 	dto.Files = make([]db.FileDTO, 0)
 	fileCounter := 0
+	fmt.Println((ctx.Request().PostForm))
 	for i := 0; i < len(ctx.Request().PostForm["content"]); i++ {
 		name := ctx.Request().PostForm["name"][i]
 		content := ctx.Request().PostForm["content"][i]
@@ -62,6 +64,8 @@ func ProcessCreate(ctx *context.Context) error {
 			Content:  escapedValue,
 		})
 	}
+	fmt.Println("ok")
+	ctx.SetData("dto", dto)
 
 	err = ctx.Validate(dto)
 	if err != nil {

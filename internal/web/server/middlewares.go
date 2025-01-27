@@ -49,7 +49,7 @@ func (s *Server) registerMiddlewares() {
 			return nil
 		},
 	}))
-	s.echo.Use(middleware.Recover())
+	//s.echo.Use(middleware.Recover())
 	s.echo.Use(middleware.Secure())
 	s.echo.Use(Middleware(sessionInit).toEcho())
 
@@ -79,9 +79,9 @@ func (s *Server) registerMiddlewares() {
 
 func (s *Server) errorHandler(err error, ctx echo.Context) {
 	var httpErr *echo.HTTPError
+	data := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
 	if errors.As(err, &httpErr) {
 		acceptJson := strings.Contains(ctx.Request().Header.Get("Accept"), "application/json")
-		data := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
 		data["error"] = err
 		if acceptJson {
 			if err := ctx.JSON(httpErr.Code, httpErr); err != nil {
@@ -96,7 +96,12 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 		return
 	}
 
-	log.Fatal().Err(err).Send()
+	log.Error().Err(err).Send()
+	httpErr = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	data["error"] = httpErr
+	if err := ctx.Render(500, "error", data); err != nil {
+		log.Fatal().Err(err).Send()
+	}
 }
 
 func dataInit(next Handler) Handler {

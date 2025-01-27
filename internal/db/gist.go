@@ -580,6 +580,10 @@ type GistDTO struct {
 	VisibilityDTO
 }
 
+func (dto *GistDTO) HasMetadata() bool {
+	return dto.Title != "" || dto.Description != "" || dto.URL != "" || dto.Topics != ""
+}
+
 type VisibilityDTO struct {
 	Private Visibility `validate:"number,min=0,max=2" form:"private"`
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/index"
-	"github.com/thomiceli/opengist/internal/memdb"
 	"github.com/thomiceli/opengist/internal/ssh"
 	"github.com/thomiceli/opengist/internal/web/server"
 	"github.com/urfave/cli/v2"
@@ -119,10 +118,6 @@ func Initialize(ctx *cli.Context) {
 	db.DeprecationDBFilename()
 	if err := db.Setup(config.C.DBUri); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")
-	}
-
-	if err := memdb.Setup(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize in memory database")
 	}
 
 	if err := webauthn.Init(config.C.ExternalUrl); err != nil {

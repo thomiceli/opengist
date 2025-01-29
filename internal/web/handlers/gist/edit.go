@@ -10,12 +10,12 @@ import (
 func Edit(ctx *context.Context) error {
 	gist := ctx.GetData("gist").(*db.Gist)
 
-	files, err := gist.Files("HEAD", false)
+	gistDto, err := gist.ToDTO()
 	if err != nil {
-		return ctx.ErrorRes(500, "Error fetching files from repository", err)
+		return ctx.ErrorRes(500, "Error getting gist data", err)
 	}
 
-	ctx.SetData("files", files)
+	ctx.SetData("dto", gistDto)
 	ctx.SetData("htmlTitle", ctx.TrH("gist.edit.edit-gist", gist.Title))
 
 	return ctx.Html("edit.html")

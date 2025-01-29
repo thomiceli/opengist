@@ -567,6 +567,32 @@ func (gist *Gist) TopicsSlice() []string {
 	return topics
 }
 
+func (gist *Gist) ToDTO() (*GistDTO, error) {
+	files, err := gist.Files("HEAD", false)
+	if err != nil {
+		return nil, err
+	}
+
+	fileDTOs := make([]FileDTO, 0, len(files))
+	for _, file := range files {
+		fileDTOs = append(fileDTOs, FileDTO{
+			Filename: file.Filename,
+			Content:  file.Content,
+		})
+	}
+
+	return &GistDTO{
+		Title:       gist.Title,
+		Description: gist.Description,
+		URL:         gist.URL,
+		Files:       fileDTOs,
+		VisibilityDTO: VisibilityDTO{
+			Private: gist.Private,
+		},
+		Topics: strings.Join(gist.TopicsSlice(), " "),
+	}, nil
+}
+
 // -- DTO -- //
 
 type GistDTO struct {
@@ -578,6 +604,10 @@ type GistDTO struct {
 	Content     []string  `form:"content"`
 	Topics      string    `validate:"gisttopics" form:"topics"`
 	VisibilityDTO
+}
+
+func (dto *GistDTO) HasMetadata() bool {
+	return dto.Title != "" || dto.Description != "" || dto.URL != "" || dto.Topics != ""
 }
 
 type VisibilityDTO struct {

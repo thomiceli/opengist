@@ -62,6 +62,7 @@ func ProcessCreate(ctx *context.Context) error {
 			Content:  escapedValue,
 		})
 	}
+	ctx.SetData("dto", dto)
 
 	err = ctx.Validate(dto)
 	if err != nil {

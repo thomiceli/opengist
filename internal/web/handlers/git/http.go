@@ -23,7 +23,6 @@ import (
 	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/memdb"
 	"gorm.io/gorm"
 )
 
@@ -157,18 +156,18 @@ func GitHttp(ctx *context.Context) error {
 						return ctx.ErrorRes(500, "Cannot init repository in database", err)
 					}
 
-					if err := memdb.InsertGistInit(user.ID, gist); err != nil {
-						return ctx.ErrorRes(500, "Cannot save the URL for the new Gist", err)
+					err = gist.SerialiseInitRepository()
+					if err != nil {
+						return ctx.ErrorRes(500, "Cannot serialise the repository", err)
 					}
 
 					ctx.SetData("gist", gist)
 				} else {
-					gistFromMemdb, err := memdb.GetGistInitAndDelete(user.ID)
+					gist, err = db.DeserialiseInitRepository(user.Username)
 					if err != nil {
-						return ctx.ErrorRes(500, "Cannot get the gist link from the in memory database", err)
+						return ctx.ErrorRes(500, "Cannot deserialise the repository", err)
 					}
 
-					gist := gistFromMemdb.Gist
 					ctx.SetData("gist", gist)
 					ctx.SetData("repositoryPath", git.RepositoryPath(gist.User.Username, gist.Uuid))
 				}

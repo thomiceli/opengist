@@ -1,6 +1,8 @@
 package db
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -565,6 +567,30 @@ func (gist *Gist) TopicsSlice() []string {
 		topics = append(topics, topic.Topic)
 	}
 	return topics
+}
+
+func (gist *Gist) SerialiseInitRepository() error {
+	var gobBuffer bytes.Buffer
+	encoder := gob.NewEncoder(&gobBuffer)
+	if err := encoder.Encode(gist); err != nil {
+		return fmt.Errorf("gob encoding error: %v", err)
+	}
+
+	return git.SerialiseInitRepository(gist.User.Username, gobBuffer.Bytes())
+}
+
+func DeserialiseInitRepository(user string) (*Gist, error) {
+	data, err := git.DeserialiseInitRepository(user)
+	if err != nil {
+		return nil, err
+	}
+
+	var gist Gist
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	if err := decoder.Decode(&gist); err != nil {
+		return nil, fmt.Errorf("gob decoding error: %v", err)
+	}
+	return &gist, nil
 }
 
 func (gist *Gist) ToDTO() (*GistDTO, error) {

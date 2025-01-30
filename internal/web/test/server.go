@@ -21,7 +21,6 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/memdb"
 	"github.com/thomiceli/opengist/internal/web/server"
 )
 
@@ -182,9 +181,6 @@ func Setup(t *testing.T) *TestServer {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Could not initialize database")
 	}
-
-	err = memdb.Setup()
-	require.NoError(t, err, "Could not initialize in memory database")
 
 	// err = index.Open(filepath.Join(homePath, "testsindex", "opengist.index"))
 	// require.NoError(t, err, "Could not open index")

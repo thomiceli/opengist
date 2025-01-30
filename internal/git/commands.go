@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net/url"
@@ -36,6 +37,10 @@ func (m *RevisionNotFoundError) Error() string {
 
 func RepositoryPath(user string, gist string) string {
 	return filepath.Join(config.GetHomeDir(), ReposDirectory, strings.ToLower(user), gist)
+}
+
+func UserRepositoriesPath(user string) string {
+	return filepath.Join(config.GetHomeDir(), ReposDirectory, strings.ToLower(user))
 }
 
 func RepositoryUrl(ctx echo.Context, user string, gist string) string {
@@ -558,6 +563,50 @@ func CreateDotGitFiles(user string, gist string) error {
 
 func DeleteUserDirectory(user string) error {
 	return os.RemoveAll(filepath.Join(config.GetHomeDir(), ReposDirectory, user))
+}
+
+func SerialiseInitRepository(user string, serialized []byte) error {
+	userRepositoryPath := UserRepositoriesPath(user)
+	initPath := filepath.Join(userRepositoryPath, "_init")
+
+	f, err := os.OpenFile(initPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	encodedData := base64.StdEncoding.EncodeToString(serialized)
+	_, err = f.Write(append([]byte(encodedData), '\n'))
+	return err
+}
+
+func DeserialiseInitRepository(user string) ([]byte, error) {
+	initPath := filepath.Join(UserRepositoriesPath(user), "_init")
+
+	content, err := os.ReadFile(initPath)
+	if err != nil {
+		return nil, err
+	}
+
+	idx := bytes.Index(content, []byte{'\n'})
+	if idx == -1 {
+		return base64.StdEncoding.DecodeString(string(content))
+	}
+
+	firstLine := content[:idx]
+	remaining := content[idx+1:]
+
+	if len(remaining) == 0 {
+		if err := os.Remove(initPath); err != nil {
+			return nil, fmt.Errorf("failed to remove file: %v", err)
+		}
+	} else {
+		if err := os.WriteFile(initPath, remaining, 0644); err != nil {
+			return nil, fmt.Errorf("failed to write remaining content: %v", err)
+		}
+	}
+
+	return base64.StdEncoding.DecodeString(string(firstLine))
 }
 
 func createDotGitHookFile(repositoryPath string, hook string, content string) error {

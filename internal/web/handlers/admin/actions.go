@@ -40,3 +40,9 @@ func AdminIndexGists(ctx *context.Context) error {
 	go actions.Run(actions.IndexGists)
 	return ctx.RedirectTo("/admin-panel")
 }
+
+func AdminSyncGistLanguages(ctx *context.Context) error {
+	ctx.AddFlash(ctx.Tr("flash.admin.sync-gist-languages"), "success")
+	go actions.Run(actions.SyncGistLanguages)
+	return ctx.RedirectTo("/admin-panel")
+}

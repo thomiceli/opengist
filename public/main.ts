@@ -161,6 +161,40 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    const searchUserGistsVisibility = document.getElementById('search-user-gists-visibility');
+    if (searchUserGistsVisibility) {
+        let dropdown = document.getElementById('search-user-gists-visibility-dropdown');
+        searchUserGistsVisibility.onclick = () => {
+            dropdown!.classList.toggle('hidden');
+        };
+
+        let buttons = dropdown.querySelectorAll('button');
+        buttons.forEach((button) => {
+            button.onclick = () => {
+                let value = document.getElementById('visibility-value') as HTMLInputElement;
+                value.textContent = button.dataset.visibilityStr;
+                dropdown!.classList.add('hidden');
+                dropdown.querySelector('input')!.value = button.dataset.visibility || '';
+            };
+        });
+    }
+
+    const searchUserGistsLanguage = document.getElementById('search-user-gists-language');
+    if (searchUserGistsLanguage) {
+        let dropdown = document.getElementById('search-user-gists-language-dropdown');
+        searchUserGistsLanguage.onclick = () => {
+            dropdown!.classList.toggle('hidden');
+        };
+        let buttons = dropdown.querySelectorAll('button');
+        buttons.forEach((button) => {
+            button.onclick = () => {
+                let value = document.getElementById('language-value') as HTMLInputElement;
+                value.textContent = button.dataset.languageStr;
+                dropdown!.classList.add('hidden');
+                dropdown.querySelector('input')!.value = button.dataset.language || '';
+            };
+        });
+    }
     document.getElementById('language-btn')!.onclick = () => {
         document.getElementById('language-list')!.classList.toggle('hidden');
     };

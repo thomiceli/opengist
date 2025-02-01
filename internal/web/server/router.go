@@ -82,6 +82,7 @@ func (s *Server) registerRoutes() {
 			sB.POST("/sync-previews", admin.AdminSyncGistPreviews)
 			sB.POST("/reset-hooks", admin.AdminResetHooks)
 			sB.POST("/index-gists", admin.AdminIndexGists)
+			sB.POST("/sync-languages", admin.AdminSyncGistLanguages)
 			sB.GET("/configuration", admin.AdminConfig)
 			sB.PUT("/set-config", admin.AdminSetConfig)
 		}

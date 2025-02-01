@@ -137,6 +137,7 @@ func ProcessCreate(ctx *context.Context) error {
 	}
 
 	gist.AddInIndex()
+	gist.UpdateLanguages()
 
 	return ctx.RedirectTo("/" + user.Username + "/" + gist.Identifier())
 }

@@ -87,7 +87,15 @@ gist.search.help.filename: gists having files with given name
 gist.search.help.extension: gists having files with given extension
 gist.search.help.language: gists having files with given language
 gist.search.help.topic: gists with given topic
-
+gist.search.placeholder.title: Title
+gist.search.placeholder.visibility: Visibility
+gist.search.placeholder.public: Public
+gist.search.placeholder.unlisted: Unlisted
+gist.search.placeholder.private: Private
+gist.search.placeholder.language: Language
+gist.search.placeholder.all: All
+gist.search.placeholder.topics: Topics
+gist.search.placeholder.search: Search
 
 gist.forks: Forks
 gist.forks.view: View fork
@@ -234,6 +242,7 @@ admin.actions.git-gc: Garbage collect all git repositories
 admin.actions.sync-previews: Synchronize all gists previews
 admin.actions.reset-hooks: Reset Git server hooks for all repositories
 admin.actions.index-gists: Index all gists
+admin.actions.sync-gist-languages: Synchronize all gists languages
 admin.id: ID
 admin.user: User
 admin.delete: Delete
@@ -279,6 +288,7 @@ flash.admin.git-gc: Garbage collecting repositories...
 flash.admin.sync-previews: Syncing Gist previews...
 flash.admin.reset-hooks: Resetting Git server hooks for all repositories...
 flash.admin.index-gists: Indexing all gists...
+flash.admin.sync-gist-languages: Syncing Gist languages...
 
 flash.auth.username-exists: Username already exists
 flash.auth.invalid-credentials: Invalid credentials

@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"github.com/gorilla/schema"
 	"html/template"
+	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -24,7 +26,68 @@ func GetPage(ctx *context.Context) int {
 	return pageInt
 }
 
-func Paginate[T any](ctx *context.Context, data []*T, pageInt int, perPage int, templateDataName string, urlPage string, labels int, urlParams ...string) error {
+type PaginationParams struct {
+	Page       int    `schema:"page,omitempty"`
+	Sort       string `schema:"sort,omitempty"`
+	Order      string `schema:"order,omitempty"`
+	Title      string `schema:"title,omitempty"`
+	Visibility string `schema:"visibility,omitempty"`
+	Language   string `schema:"language,omitempty"`
+	Topics     string `schema:"topics,omitempty"`
+	Query      string `schema:"q,omitempty"`
+
+	HasPrevious bool `schema:"-"` // Exclude from URL parameters
+	HasNext     bool `schema:"-"`
+}
+
+var encoder = schema.NewEncoder()
+
+func (p PaginationParams) String() string {
+	values := url.Values{}
+
+	err := encoder.Encode(p, values)
+	if err != nil {
+		return ""
+	}
+
+	if len(values) == 0 {
+		return ""
+	}
+	return "?" + values.Encode()
+}
+
+func (p PaginationParams) NextURL() template.URL {
+	p.Page++
+	return template.URL(p.String())
+}
+
+func (p PaginationParams) PreviousURL() template.URL {
+	p.Page--
+	return template.URL(p.String())
+}
+
+func (p PaginationParams) WithParams(pairs ...string) template.URL {
+	values := url.Values{}
+	_ = encoder.Encode(p, values)
+
+	// reset page
+	values.Del("page")
+
+	for i := 0; i < len(pairs); i += 2 {
+		values.Set(pairs[i], pairs[i+1])
+	}
+
+	return template.URL("?" + values.Encode())
+}
+
+func Paginate[T any](ctx *context.Context, data []*T, pageInt int, perPage int, templateDataName string, urlPage string, labels int, params *PaginationParams) error {
+	var paginationParams PaginationParams
+	if params == nil {
+		paginationParams = PaginationParams{}
+	} else {
+		paginationParams = *params
+	}
+	paginationParams.Page = pageInt
 	lenData := len(data)
 	if lenData == 0 && pageInt != 1 {
 		return errors.New("page not found")
@@ -34,15 +97,13 @@ func Paginate[T any](ctx *context.Context, data []*T, pageInt int, perPage int, 
 		if lenData > 1 {
 			data = data[:lenData-1]
 		}
-		ctx.SetData("nextPage", pageInt+1)
+		paginationParams.HasNext = true
 	}
 	if pageInt > 1 {
-		ctx.SetData("prevPage", pageInt-1)
+		paginationParams.HasPrevious = true
 	}
 
-	if len(urlParams) > 0 {
-		ctx.SetData("urlParams", template.URL(urlParams[0]))
-	}
+	ctx.SetData("pagination", paginationParams)
 
 	switch labels {
 	case 1:

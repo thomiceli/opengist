@@ -115,6 +115,54 @@
         {{ end }}
     </header>
     <main>
+        {{if eq .mode "fromUser"}}
+        <div class="grid grid-cols-12 gap-x-1">
+            <div class="col-span-3">
+                <input type="text" name="title" placeholder="{{ .locale.Tr "gist.search.placeholder.title"}}" class="bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-xs border-gray-200 dark:border-gray-700 rounded-md py-1.5" />
+            </div>
+            <div class="">
+                <div class="align-middle inline-flex items-center">
+                    <div class="relative text-left">
+                        <div>
+                            <button type="button" class="whitespace-nowrap inline-flex text-slate-700 dark:text-slate-300 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 leading-3" id="sort-giasts-button">
+                                <span class="text-gray-700 dark:text-gray-300">{{ .locale.Tr "gist.search.placeholder.visibility" }} : <span class="text-slate-700 dark:text-slate-300">{{.order}} {{.sort}}</span></span>
+                                <svg class="-mr-1 ml-2 h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="sort-gistas-dropdown" class="hidden absolute right-0 z-10 mt-2 w-max origin-top-right divide-y divide-gray-200 dark:divide-gray-700 rounded-md rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 shadow-lg ring-1 ring-white dark:ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                            <div class="" role="none">
+                                <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=created&order=desc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-t-md" role="menuitem">
+                                    {{ .locale.Tr "gist.list.order-by-desc" }} {{ .locale.Tr "gist.list.sort-by-created" }}
+                                </a>
+                            </div>
+                            <div class="" role="none">
+                                <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=created&order=asc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
+                                    {{ .locale.Tr "gist.list.order-by-asc" }} {{ .locale.Tr "gist.list.sort-by-created" }}
+                                </a>
+                            </div>
+                            <div class="" role="none">
+                                <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=updated&order=desc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500" role="menuitem">
+                                    {{ .locale.Tr "gist.list.order-by-desc" }} {{ .locale.Tr "gist.list.sort-by-updated" }}
+                                </a>
+                            </div>
+                            <div class="" role="none">
+                                <a href="{{ $.c.ExternalUrl }}/{{ .urlPage }}?sort=updated&order=asc{{.searchQueryUrl}}" class="text-slate-700 dark:text-slate-300 group flex items-center px-3 py-2 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:text-white hover:bg-primary-500 hover:rounded-b-md" role="menuitem">
+                                    {{ .locale.Tr "gist.list.order-by-asc" }} {{ .locale.Tr "gist.list.sort-by-updated" }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="">
+
+            </div>
+            <div class="">z</div>
+
+        </div>
+        {{ end }}
         <div>
             {{ if ne (len .gists) 0 }}
                 {{ range $gist := .gists }}

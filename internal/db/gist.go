@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -50,16 +51,16 @@ func (v Visibility) Next() Visibility {
 	}
 }
 
-func ParseVisibility[T string | int](v T) (Visibility, error) {
+func ParseVisibility[T string | int](v T) Visibility {
 	switch s := fmt.Sprint(v); s {
 	case "0", "public":
-		return PublicVisibility, nil
+		return PublicVisibility
 	case "1", "unlisted":
-		return UnlistedVisibility, nil
+		return UnlistedVisibility
 	case "2", "private":
-		return PrivateVisibility, nil
+		return PrivateVisibility
 	default:
-		return -1, fmt.Errorf("unknown visibility %q", s)
+		return PublicVisibility
 	}
 }
 
@@ -84,7 +85,8 @@ type Gist struct {
 	Forked   *Gist  `gorm:"foreignKey:ForkedID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	ForkedID uint
 
-	Topics []GistTopic `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Topics    []GistTopic    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Languages []GistLanguage `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type Like struct {
@@ -172,14 +174,33 @@ func gistsFromUserStatement(fromUserId uint, currentUserId uint) *gorm.DB {
 		Joins("join users on gists.user_id = users.id")
 }
 
-func GetAllGistsFromUser(fromUserId uint, currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
+func GetAllGistsFromUser(fromUserId uint, currentUserId uint, title string, language string, visibility string, topics []string, offset int, sort string, order string) ([]*Gist, error) {
 	var gists []*Gist
-	err := gistsFromUserStatement(fromUserId, currentUserId).Limit(11).
+	tx := gistsFromUserStatement(fromUserId, currentUserId).Limit(11).
 		Offset(offset * 10).
-		Order("gists." + sort + "_at " + order).
-		Find(&gists).Error
+		Order("gists." + sort + "_at " + order)
 
-	return gists, err
+	if title != "" {
+		tx = tx.Where("gists.title like ?", "%"+title+"%")
+	}
+
+	if language != "" {
+		tx = tx.Joins("join gist_languages on gists.id = gist_languages.gist_id").
+			Where("gist_languages.language = ?", language)
+	}
+
+	if visibility != "" {
+		tx = tx.Where("gists.private = ?", ParseVisibility(visibility))
+	}
+
+	if len(topics) > 0 {
+		fmt.Println(topics)
+		tx = tx.Joins("join gist_topics on gists.id = gist_topics.gist_id").
+			Where("gist_topics.topic in ?", topics)
+	}
+
+	tx.Find(&gists)
+	return gists, tx.Error
 }
 
 func CountAllGistsFromUser(fromUserId uint, currentUserId uint) (int64, error) {
@@ -593,6 +614,47 @@ func DeserialiseInitRepository(user string) (*Gist, error) {
 	return &gist, nil
 }
 
+func (gist *Gist) UpdateLanguages() {
+	languages, err := gist.GetLanguagesFromFiles()
+	if err != nil {
+		log.Error().Err(err).Msgf("Cannot get languages for gist %d", gist.ID)
+		return
+	}
+
+	slices.Sort(languages)
+	languages = slices.Compact(languages)
+
+	tx := db.Begin()
+	if tx.Error != nil {
+		log.Error().Err(tx.Error).Msgf("Cannot start transaction for gist %d", gist.ID)
+		return
+	}
+
+	if err := tx.Where("gist_id = ?", gist.ID).Delete(&GistLanguage{}).Error; err != nil {
+		tx.Rollback()
+		log.Error().Err(err).Msgf("Cannot delete languages for gist %d", gist.ID)
+		return
+	}
+
+	for _, language := range languages {
+		gistLanguage := &GistLanguage{
+			GistID:   gist.ID,
+			Language: language,
+		}
+		if err := tx.Create(gistLanguage).Error; err != nil {
+			tx.Rollback()
+			log.Error().Err(err).Msgf("Cannot create gist language %s for gist %d", language, gist.ID)
+			return
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		log.Error().Err(err).Msgf("Cannot commit transaction for gist %d", gist.ID)
+		return
+	}
+}
+
 func (gist *Gist) ToDTO() (*GistDTO, error) {
 	files, err := gist.Files("HEAD", false)
 	if err != nil {
@@ -684,6 +746,9 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 	wholeContent := ""
 	for _, file := range files {
 		wholeContent += file.Content
+		if !strings.HasSuffix(wholeContent, "\n") {
+			wholeContent += "\n"
+		}
 		exts = append(exts, filepath.Ext(file.Filename))
 	}
 

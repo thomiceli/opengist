@@ -10,6 +10,8 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"gorm.io/gorm"
 	"html/template"
+	"slices"
+	"strings"
 )
 
 func AllGists(ctx *context.Context) error {
@@ -104,8 +106,19 @@ func AllGists(ctx *context.Context) error {
 			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		} else if mode == "fromUser" {
 			urlPage = fromUserStr
+
+			title := ctx.QueryParam("title")
+			language := ctx.QueryParam("language")
+			visibility := ctx.QueryParam("visibility")
+			topics := strings.Fields(ctx.QueryParam("topics"))
+			if len(topics) > 10 {
+				topics = topics[:10]
+			}
+			slices.Sort(topics)
+			topics = slices.Compact(topics)
+
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-from", fromUserStr))
-			gists, err = db.GetAllGistsFromUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsFromUser(fromUser.ID, currentUserId, title, language, visibility, topics, pageInt-1, sort, order)
 		}
 	}
 

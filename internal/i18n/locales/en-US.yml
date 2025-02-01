@@ -87,7 +87,14 @@ gist.search.help.filename: gists having files with given name
 gist.search.help.extension: gists having files with given extension
 gist.search.help.language: gists having files with given language
 gist.search.help.topic: gists with given topic
-
+gist.search.placeholder.title: Title
+gist.search.placeholder.visibility: Visibility
+gist.search.placeholder.public: Public
+gist.search.placeholder.unlisted: Unlisted
+gist.search.placeholder.private: Private
+gist.search.placeholder.language: Language
+gist.search.placeholder.all: All
+gist.search.placeholder.topics: Topics
 
 gist.forks: Forks
 gist.forks.view: View fork

@@ -15,6 +15,7 @@ Written in [Go](https://go.dev), Opengist aims to be fast and easy to deploy.
 * [Init](usage/init-via-git.md) / Clone / Pull / Push snippets **via Git** over HTTP or SSH
 * Syntax highlighting ; markdown & CSV support
 * Search code in snippets ; browse users snippets, likes and forks
+* Add topics to snippets
 * Embed snippets in other websites
 * Revisions history
 * Like / Fork snippets

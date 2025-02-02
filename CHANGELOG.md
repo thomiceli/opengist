@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.9.0](https://github.com/thomiceli/opengist/compare/v1.8.4...v1.9.0) - 2025-02-02
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- Topics (tags) for Gists (#413)
+- Gist languages saved in database (#422)
+- Search gists on user profile with title, visibility, language & topics (#422)
+- Jdenticon for default avatars (#416)
+- Git push option for description (#412)
+- MIME type support for raw file serving (#417)
+
+### Fixed
+- Skip CSRF for embed gists (#402)
+- Remove CSRF check for Git HTTP packs (#408)
+- Replace path.Join with filepath.Join for file system paths (#414)
+- Empty password error when trying to change the username (#418)
+- Save content form on gist create error (#420)
+
+### Other
+- Refactor server code (#407)
+- Remove memdb for gist init (#421)
+- Added Opengist Docker images to Docker Hub
+
 ## [1.8.4](https://github.com/thomiceli/opengist/compare/v1.8.3...v1.8.4) - 2024-12-15
 See here how to [update](/docs/update.md) Opengist.
 

@@ -21,6 +21,7 @@ It is similar to [GitHub Gist](https://gist.github.com/), but open-source and co
 * [Init](/docs/usage/init-via-git.md) / Clone / Pull / Push snippets **via Git** over HTTP or SSH
 * Syntax highlighting ; markdown & CSV support
 * Search code in snippets; browse users snippets, likes and forks
+* Add topics to snippets
 * Embed snippets in other websites
 * Revisions history
 * Like / Fork snippets
@@ -37,7 +38,7 @@ It is similar to [GitHub Gist](https://gist.github.com/), but open-source and co
 Docker [images](https://github.com/thomiceli/opengist/pkgs/container/opengist) are available for each release :
 
 ```shell
-docker pull ghcr.io/thomiceli/opengist:1.8
+docker pull ghcr.io/thomiceli/opengist:1.9
 ```
 
 It can be used in a `docker-compose.yml` file :
@@ -49,7 +50,7 @@ It can be used in a `docker-compose.yml` file :
 ```yml
 services:
   opengist:
-    image: ghcr.io/thomiceli/opengist:1.8
+    image: ghcr.io/thomiceli/opengist:1.9
     container_name: opengist
     restart: unless-stopped
     ports:
@@ -76,9 +77,9 @@ Download the archive for your system from the release page [here](https://github
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.8.4/opengist1.8.4-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.9.0/opengist1.9.0-linux-amd64.tar.gz
 
-tar xzvf opengist1.8.4-linux-amd64.tar.gz
+tar xzvf opengist1.9.0-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`

@@ -42,7 +42,7 @@ func Likes(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error getting users who liked this gist", err)
 	}
 
-	if err = handlers.Paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Identifier()+"/likes", 1); err != nil {
+	if err = handlers.Paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Identifier()+"/likes", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 

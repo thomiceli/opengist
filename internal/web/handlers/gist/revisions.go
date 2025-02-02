@@ -19,7 +19,7 @@ func Revisions(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error fetching commits log", err)
 	}
 
-	if err := handlers.Paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions", 2); err != nil {
+	if err := handlers.Paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions", 2, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 

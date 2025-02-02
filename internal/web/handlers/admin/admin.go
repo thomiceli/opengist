@@ -48,6 +48,7 @@ func AdminIndex(ctx *context.Context) error {
 	ctx.SetData("syncGistPreviews", actions.IsRunning(actions.SyncGistPreviews))
 	ctx.SetData("resetHooks", actions.IsRunning(actions.ResetHooks))
 	ctx.SetData("indexGists", actions.IsRunning(actions.IndexGists))
+	ctx.SetData("syncGistLanguages", actions.IsRunning(actions.SyncGistLanguages))
 	return ctx.Html("admin_index.html")
 }
 
@@ -64,7 +65,7 @@ func AdminUsers(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Cannot get users", err)
 	}
 
-	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "admin-panel/users", 1); err != nil {
+	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "admin-panel/users", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 
@@ -82,7 +83,7 @@ func AdminGists(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Cannot get gists", err)
 	}
 
-	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "admin-panel/gists", 1); err != nil {
+	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "admin-panel/gists", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 

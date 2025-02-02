@@ -46,7 +46,7 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 	}
 
 	if slices.Contains([]string{"public", "unlisted", "private"}, opts["visibility"]) {
-		gist.Private, _ = db.ParseVisibility(opts["visibility"])
+		gist.Private = db.ParseVisibility(opts["visibility"])
 		outputSb.WriteString(fmt.Sprintf("Gist visibility set to %s\n\n", opts["visibility"]))
 	}
 

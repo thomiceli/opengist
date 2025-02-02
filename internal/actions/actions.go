@@ -23,6 +23,7 @@ const (
 	SyncGistPreviews
 	ResetHooks
 	IndexGists
+	SyncGistLanguages
 )
 
 var (
@@ -73,6 +74,8 @@ func Run(actionType int) {
 		functionToRun = resetHooks
 	case IndexGists:
 		functionToRun = indexGists
+	case SyncGistLanguages:
+		functionToRun = syncGistLanguages
 	default:
 		log.Error().Msg("Unknown action type")
 	}
@@ -164,5 +167,19 @@ func indexGists() {
 		if err = index.AddInIndex(indexedGist); err != nil {
 			log.Error().Err(err).Msgf("Cannot index gist %d", gist.ID)
 		}
+	}
+}
+
+func syncGistLanguages() {
+	log.Info().Msg("Syncing all Gist languages...")
+	gists, err := db.GetAllGistsRows()
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get gists")
+		return
+	}
+
+	for _, gist := range gists {
+		log.Info().Msgf("Syncing languages for gist %d", gist.ID)
+		gist.UpdateLanguages()
 	}
 }

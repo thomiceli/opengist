@@ -111,12 +111,12 @@ func AllGists(ctx *context.Context) error {
 			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
 		} else if mode == "fromUser" {
 			urlPage = fromUserStr
-			languages, err := db.GetGistLanguagesForUser(fromUser.ID, currentUserId)
-			if err != nil {
-				return ctx.ErrorRes(500, "Error fetching languages", err)
-			}
-			ctx.SetData("languages", languages)
 
+			if languages, err := db.GetGistLanguagesForUser(fromUser.ID, currentUserId); err != nil {
+				return ctx.ErrorRes(500, "Error fetching languages", err)
+			} else {
+				ctx.SetData("languages", languages)
+			}
 			title := ctx.QueryParam("title")
 			language := ctx.QueryParam("language")
 			visibility := ctx.QueryParam("visibility")

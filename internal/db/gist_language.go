@@ -14,13 +14,15 @@ func GetGistLanguagesForUser(fromUserId, currentUserId uint) ([]struct {
 		Count    int64
 	}
 
-	err := gistsFromUserStatement(fromUserId, currentUserId).Model(&GistLanguage{}).
+	err := db.Model(&GistLanguage{}).
 		Select("language, count(*) as count").
 		Joins("JOIN gists ON gists.id = gist_languages.gist_id").
-		Where("gists.user_id = ?", fromUserId).
+		Joins("JOIN users ON gists.user_id = users.id").
+		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
+		Where("users.id = ?", fromUserId).
 		Group("language").
 		Order("count DESC").
-		Limit(15). // Added limit of 15
+		Limit(15).
 		Find(&results).Error
 
 	return results, err

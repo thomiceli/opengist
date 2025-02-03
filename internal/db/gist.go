@@ -168,13 +168,6 @@ func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort st
 }
 
 func gistsFromUserStatement(fromUserId uint, currentUserId uint) *gorm.DB {
-	return db.
-		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
-		Where("users.id = ?", fromUserId).
-		Joins("join users on gists.user_id = users.id")
-}
-
-func gistsFromUserStatementWithPreloads(fromUserId uint, currentUserId uint) *gorm.DB {
 	return db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("users.id = ?", fromUserId).
@@ -185,7 +178,7 @@ func GetAllGistsFromUser(fromUserId uint, currentUserId uint, title string, lang
 	var gists []*Gist
 	var count int64
 
-	baseQuery := gistsFromUserStatementWithPreloads(fromUserId, currentUserId).Model(&Gist{})
+	baseQuery := gistsFromUserStatement(fromUserId, currentUserId).Model(&Gist{})
 
 	if title != "" {
 		baseQuery = baseQuery.Where("gists.title like ?", "%"+title+"%")
@@ -220,7 +213,7 @@ func GetAllGistsFromUser(fromUserId uint, currentUserId uint, title string, lang
 
 func CountAllGistsFromUser(fromUserId uint, currentUserId uint) (int64, error) {
 	var count int64
-	err := gistsFromUserStatementWithPreloads(fromUserId, currentUserId).Model(&Gist{}).Count(&count).Error
+	err := gistsFromUserStatement(fromUserId, currentUserId).Model(&Gist{}).Count(&count).Error
 	return count, err
 }
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.9.1](https://github.com/thomiceli/opengist/compare/v1.9.0...v1.9.1) - 2025-02-04
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- More translation strings (#401)
+
+### Fixed
+- SQL query for MySQL/Postgres on user profile (#424)
+- User avatar on gist likes list (#425)
+
+### Other
+- Update deps Golang & JS deps (#430)
+
 ## [1.9.0](https://github.com/thomiceli/opengist/compare/v1.8.4...v1.9.0) - 2025-02-02
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

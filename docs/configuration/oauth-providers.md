@@ -63,12 +63,14 @@ Opengist can be configured to use OAuth to authenticate users, with GitHub, Gite
 * Set 'Redirect URI' to `http://opengist.url/oauth/openid-connect/callback`
 * Copy the 'Client ID', 'Client Secret', and the discovery endpoint, and add them to the [configuration](cheat-sheet.md) :
   ```yaml
+  oidc.provider-name: <provider-name>
   oidc.client-key: <key>
   oidc.secret: <secret>
   # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
   oidc.discovery-url: http://auth.example.com/.well-known/openid-configuration
   ```
   ```shell
+  OG_OIDC_PROVIDER_NAME=<provider-name>
   OG_OIDC_CLIENT_KEY=<key>
   OG_OIDC_SECRET=<secret>
   # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration

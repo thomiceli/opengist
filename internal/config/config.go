@@ -67,6 +67,7 @@ type config struct {
 	GiteaUrl       string `yaml:"gitea.url" env:"OG_GITEA_URL"`
 	GiteaName      string `yaml:"gitea.name" env:"OG_GITEA_NAME"`
 
+	OIDCProviderName string `yaml:"oidc.provider-name" env:"OG_OIDC_PROVIDER_NAME"`
 	OIDCClientKey    string `yaml:"oidc.client-key" env:"OG_OIDC_CLIENT_KEY"`
 	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
 	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`

@@ -38,7 +38,9 @@ type config struct {
 	DBFilename string `yaml:"db-filename" env:"OG_DB_FILENAME"` // deprecated
 
 	IndexEnabled bool   `yaml:"index.enabled" env:"OG_INDEX_ENABLED"`
-	IndexDirname string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"`
+	BleveDirname string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"`
+	MeiliHost    string `yaml:"index.meili.host" env:"OG_MEILI_HOST"`
+	MeiliAPIKey  string `yaml:"index.meili.api-key" env:"OG_MEILI_API_KEY"`
 
 	GitDefaultBranch string `yaml:"git.default-branch" env:"OG_GIT_DEFAULT_BRANCH"`
 
@@ -92,7 +94,7 @@ func configWithDefaults() (*config, error) {
 	c.OpengistHome = ""
 	c.DBUri = "opengist.db"
 	c.IndexEnabled = true
-	c.IndexDirname = "opengist.index"
+	c.BleveDirname = "opengist.index"
 
 	c.SqliteJournalMode = "WAL"
 

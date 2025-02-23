@@ -98,7 +98,7 @@ func (s *Server) registerRoutes() {
 
 		r.GET("/all", gist.AllGists, checkRequireLogin, setAllGistsMode("all"))
 
-		if index.Enabled() {
+		if index.IndexEnabled() {
 			r.GET("/search", gist.Search, checkRequireLogin)
 		} else {
 			r.GET("/search", gist.AllGists, checkRequireLogin, setAllGistsMode("search"))

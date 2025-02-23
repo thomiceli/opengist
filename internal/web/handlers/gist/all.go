@@ -179,12 +179,6 @@ func Search(ctx *context.Context) error {
 		currentUserId = 0
 	}
 
-	var visibleGistsIds []uint
-	visibleGistsIds, err = db.GetAllGistsVisibleByUser(currentUserId)
-	if err != nil {
-		return ctx.ErrorRes(500, "Error fetching gists", err)
-	}
-
 	gistsIds, nbHits, langs, err := index.SearchGists(content, index.SearchGistMetadata{
 		Username:  meta["user"],
 		Title:     meta["title"],
@@ -192,7 +186,7 @@ func Search(ctx *context.Context) error {
 		Extension: meta["extension"],
 		Language:  meta["language"],
 		Topic:     meta["topic"],
-	}, visibleGistsIds, pageInt)
+	}, currentUserId, pageInt)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error searching gists", err)
 	}

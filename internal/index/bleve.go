@@ -10,37 +10,32 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/config"
 	"strconv"
-	"sync/atomic"
 )
 
-var atomicIndexer atomic.Pointer[Indexer]
-
-type Indexer struct {
-	Index bleve.Index
+type BleveIndexer struct {
+	index bleve.Index
+	path  string
 }
 
-func Enabled() bool {
-	return config.C.IndexEnabled
+func NewBleveIndexer(path string) *BleveIndexer {
+	return &BleveIndexer{path: path}
 }
 
-func Init(indexFilename string) {
-	atomicIndexer.Store(&Indexer{Index: nil})
-
+func (i *BleveIndexer) Init() {
 	go func() {
-		bleveIndex, err := open(indexFilename)
+		bleveIndex, err := i.open()
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to open index")
-			(*atomicIndexer.Load()).close()
+			log.Error().Err(err).Msg("Failed to open Bleve index")
+			i.Close()
 		}
-		atomicIndexer.Store(&Indexer{Index: bleveIndex})
-		log.Info().Msg("Indexer initialized")
+		i.index = bleveIndex
+		log.Info().Msg("Bleve indexer initialized")
 	}()
 }
 
-func open(indexFilename string) (bleve.Index, error) {
-	bleveIndex, err := bleve.Open(indexFilename)
+func (i *BleveIndexer) open() (bleve.Index, error) {
+	bleveIndex, err := bleve.Open(i.path)
 	if err == nil {
 		return bleveIndex, nil
 	}
@@ -73,67 +68,33 @@ func open(indexFilename string) (bleve.Index, error) {
 
 	docMapping.DefaultAnalyzer = "gistAnalyser"
 
-	return bleve.New(indexFilename, mapping)
+	return bleve.New(i.path, mapping)
 }
 
-func Close() {
-	(*atomicIndexer.Load()).close()
-}
-
-func (i *Indexer) close() {
-	if i == nil || i.Index == nil {
+func (i *BleveIndexer) Close() {
+	if i == nil || i.index == nil {
 		return
 	}
 
-	err := i.Index.Close()
+	err := i.index.Close()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to close bleve index")
+		log.Error().Err(err).Msg("Failed to close Bleve index")
 	}
-	log.Info().Msg("Indexer closed")
-	atomicIndexer.Store(&Indexer{Index: nil})
+	log.Info().Msg("Bleve indexer closed")
 }
 
-func checkForIndexer() error {
-	if (*atomicIndexer.Load()).Index == nil {
-		return errors.New("indexer is not initialized")
-	}
-
-	return nil
-}
-
-func AddInIndex(gist *Gist) error {
-	if !Enabled() {
-		return nil
-	}
-	if err := checkForIndexer(); err != nil {
-		return err
-	}
-
+func (i *BleveIndexer) Add(gist *Gist) error {
 	if gist == nil {
 		return errors.New("failed to add nil gist to index")
 	}
-	return (*atomicIndexer.Load()).Index.Index(strconv.Itoa(int(gist.GistID)), gist)
+	return (*atomicIndexer.Load()).(*BleveIndexer).index.Index(strconv.Itoa(int(gist.GistID)), gist)
 }
 
-func RemoveFromIndex(gistID uint) error {
-	if !Enabled() {
-		return nil
-	}
-	if err := checkForIndexer(); err != nil {
-		return err
-	}
-
-	return (*atomicIndexer.Load()).Index.Delete(strconv.Itoa(int(gistID)))
+func (i *BleveIndexer) Remove(gistID uint) error {
+	return (*atomicIndexer.Load()).(*BleveIndexer).index.Delete(strconv.Itoa(int(gistID)))
 }
 
-func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []uint, page int) ([]uint, uint64, map[string]int, error) {
-	if !Enabled() {
-		return nil, 0, nil, nil
-	}
-	if err := checkForIndexer(); err != nil {
-		return nil, 0, nil, err
-	}
-
+func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error) {
 	var err error
 	var indexerQuery query.Query
 	if queryStr != "" {
@@ -145,17 +106,16 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 		indexerQuery = contentQuery
 	}
 
-	repoQueries := make([]query.Query, 0, len(gistsIds))
+	privateQuery := bleve.NewBoolFieldQuery(false)
+	privateQuery.SetField("Private")
 
+	userIdMatch := float64(userId)
 	truee := true
-	for _, id := range gistsIds {
-		f := float64(id)
-		qq := bleve.NewNumericRangeInclusiveQuery(&f, &f, &truee, &truee)
-		qq.SetField("GistID")
-		repoQueries = append(repoQueries, qq)
-	}
+	userIdQuery := bleve.NewNumericRangeInclusiveQuery(&userIdMatch, &userIdMatch, &truee, &truee)
+	userIdQuery.SetField("UserID")
 
-	indexerQuery = bleve.NewConjunctionQuery(bleve.NewDisjunctionQuery(repoQueries...), indexerQuery)
+	accessQuery := bleve.NewDisjunctionQuery(privateQuery, userIdQuery)
+	indexerQuery = bleve.NewConjunctionQuery(accessQuery, indexerQuery)
 
 	addQuery := func(field, value string) {
 		if value != "" && value != "." {
@@ -182,7 +142,7 @@ func SearchGists(queryStr string, queryMetadata SearchGistMetadata, gistsIds []u
 	s.Fields = []string{"GistID"}
 	s.IncludeLocations = false
 
-	results, err := (*atomicIndexer.Load()).Index.Search(s)
+	results, err := (*atomicIndexer.Load()).(*BleveIndexer).index.Search(s)
 	if err != nil {
 		return nil, 0, nil, err
 	}

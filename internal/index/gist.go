@@ -2,6 +2,8 @@ package index
 
 type Gist struct {
 	GistID     uint
+	UserID     uint
+	Visibility uint
 	Username   string
 	Title      string
 	Content    string

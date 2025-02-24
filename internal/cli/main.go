@@ -126,7 +126,7 @@ func Initialize(ctx *cli.Context) {
 
 	if config.C.IndexEnabled {
 		log.Info().Msg("Index directory: " + filepath.Join(homePath, config.C.BleveDirname))
-		index.NewIndexer(index.Bleve)
+		index.NewIndexer(index.Meilisearch)
 	}
 }
 

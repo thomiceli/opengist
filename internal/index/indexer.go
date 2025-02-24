@@ -43,9 +43,7 @@ func NewIndexer(idxType IndexerType) {
 	case Meilisearch:
 		idx = NewMeiliIndexer(config.C.MeiliHost, config.C.MeiliAPIKey, "opengist")
 	default:
-		log.Warn().Err(err).Msg("Failed to create indexer")
-
-		err = fmt.Errorf("unknown indexer type: %s", idxType)
+		log.Warn().Msgf("Failed to create indexer, unknown indexer type: %s", idxType)
 		return
 	}
 

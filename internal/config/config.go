@@ -71,6 +71,8 @@ type config struct {
 	OIDCSecret       string `yaml:"oidc.secret" env:"OG_OIDC_SECRET"`
 	OIDCDiscoveryUrl string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
 
+	MetricsEnabled bool `yaml:"metrics.enabled" env:"OG_METRICS_ENABLED"`
+
 	CustomName    string       `yaml:"custom.name" env:"OG_CUSTOM_NAME"`
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
@@ -109,6 +111,8 @@ func configWithDefaults() (*config, error) {
 
 	c.GiteaUrl = "https://gitea.com"
 	c.GiteaName = "Gitea"
+
+	c.MetricsEnabled = false
 
 	return c, nil
 }

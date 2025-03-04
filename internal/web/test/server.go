@@ -49,55 +49,55 @@ func (s *TestServer) stop() {
 }
 
 func (s *TestServer) Request(method, uri string, data interface{}, expectedCode int, responsePtr ...*http.Response) error {
-    var bodyReader io.Reader
-    if method == http.MethodPost || method == http.MethodPut {
-        values := structToURLValues(data)
-        bodyReader = strings.NewReader(values.Encode())
-    }
+	var bodyReader io.Reader
+	if method == http.MethodPost || method == http.MethodPut {
+		values := structToURLValues(data)
+		bodyReader = strings.NewReader(values.Encode())
+	}
 
-    req := httptest.NewRequest(method, "http://localhost:6157"+uri, bodyReader)
-    w := httptest.NewRecorder()
+	req := httptest.NewRequest(method, "http://localhost:6157"+uri, bodyReader)
+	w := httptest.NewRecorder()
 
-    if method == http.MethodPost || method == http.MethodPut {
-        req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-    }
+	if method == http.MethodPost || method == http.MethodPut {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
 
-    if s.sessionCookie != "" {
-        req.AddCookie(&http.Cookie{Name: "session", Value: s.sessionCookie})
-    }
+	if s.sessionCookie != "" {
+		req.AddCookie(&http.Cookie{Name: "session", Value: s.sessionCookie})
+	}
 
-    s.server.ServeHTTP(w, req)
+	s.server.ServeHTTP(w, req)
 
-    if w.Code != expectedCode {
-        return fmt.Errorf("unexpected status code %d, expected %d", w.Code, expectedCode)
-    }
+	if w.Code != expectedCode {
+		return fmt.Errorf("unexpected status code %d, expected %d", w.Code, expectedCode)
+	}
 
-    if method == http.MethodPost {
-        if strings.Contains(uri, "/login") || strings.Contains(uri, "/register") {
-            cookie := ""
-            h := w.Header().Get("Set-Cookie")
-            parts := strings.Split(h, "; ")
-            for _, p := range parts {
-                if strings.HasPrefix(p, "session=") {
-                    cookie = p
-                    break
-                }
-            }
-            if cookie == "" {
-                return errors.New("unable to find access session token in response headers")
-            }
-            s.sessionCookie = strings.TrimPrefix(cookie, "session=")
-        } else if strings.Contains(uri, "/logout") {
-            s.sessionCookie = ""
-        }
-    }
+	if method == http.MethodPost {
+		if strings.Contains(uri, "/login") || strings.Contains(uri, "/register") {
+			cookie := ""
+			h := w.Header().Get("Set-Cookie")
+			parts := strings.Split(h, "; ")
+			for _, p := range parts {
+				if strings.HasPrefix(p, "session=") {
+					cookie = p
+					break
+				}
+			}
+			if cookie == "" {
+				return errors.New("unable to find access session token in response headers")
+			}
+			s.sessionCookie = strings.TrimPrefix(cookie, "session=")
+		} else if strings.Contains(uri, "/logout") {
+			s.sessionCookie = ""
+		}
+	}
 
-    // If a response pointer was provided, fill it with the response data
-    if len(responsePtr) > 0 && responsePtr[0] != nil {
-        *responsePtr[0] = *w.Result()
-    }
+	// If a response pointer was provided, fill it with the response data
+	if len(responsePtr) > 0 && responsePtr[0] != nil {
+		*responsePtr[0] = *w.Result()
+	}
 
-    return nil
+	return nil
 }
 
 func structToURLValues(s interface{}) url.Values {

@@ -46,6 +46,7 @@ export default defineConfig({
                     {text: 'Custom assets', link: '/custom-assets'},
                     {text: 'Custom links', link: '/custom-links'},
                     {text: 'Cheat Sheet', link: '/cheat-sheet'},
+                    {text: 'Metrics', link: '/metrics'},
                     {text: 'Admin panel', link: '/admin-panel'},
                 ], collapsed: false
             },

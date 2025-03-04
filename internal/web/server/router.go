@@ -1,6 +1,13 @@
 package server
 
 import (
+	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/index"
@@ -10,14 +17,9 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers/gist"
 	"github.com/thomiceli/opengist/internal/web/handlers/git"
 	"github.com/thomiceli/opengist/internal/web/handlers/health"
+	"github.com/thomiceli/opengist/internal/web/handlers/metrics"
 	"github.com/thomiceli/opengist/internal/web/handlers/settings"
 	"github.com/thomiceli/opengist/public"
-	"net/http"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 func (s *Server) registerRoutes() {
@@ -29,7 +31,10 @@ func (s *Server) registerRoutes() {
 		r.POST("/preview", gist.Preview, logged)
 
 		r.GET("/healthcheck", health.Healthcheck)
-		r.GET("/metrics", health.Metrics)
+
+		if config.C.MetricsEnabled {
+			r.GET("/metrics", metrics.Metrics)
+		}
 
 		r.GET("/register", auth.Register)
 		r.POST("/register", auth.ProcessRegister)

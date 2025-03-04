@@ -48,6 +48,9 @@ http.port: 6157
 # Enable or disable git operations (clone, pull, push) via HTTP (either `true` or `false`). Default: true
 http.git-enabled: true
 
+# Enable or disable the metrics endpoint (either `true` or `false`). Default: false
+metrics.enabled: false
+
 # SSH built-in server configuration
 # Note: it is not using the SSH daemon from your machine (yet)
 

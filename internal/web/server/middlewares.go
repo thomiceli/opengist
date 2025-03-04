@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
@@ -34,6 +35,10 @@ func (s *Server) useCustomContext() {
 func (s *Server) registerMiddlewares() {
 	s.echo.Use(Middleware(dataInit).toEcho())
 	s.echo.Use(Middleware(locale).toEcho())
+	if config.C.MetricsEnabled {
+		p := echoprometheus.NewMiddleware("opengist")
+		s.echo.Use(p)
+	}
 
 	s.echo.Pre(middleware.MethodOverrideWithConfig(middleware.MethodOverrideConfig{
 		Getter: middleware.MethodFromForm("_method"),

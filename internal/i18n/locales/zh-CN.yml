@@ -295,3 +295,19 @@ auth.totp.submit: 提交
 auth.totp.proceed: 继续
 auth.totp.save-recovery-codes: 请将您的恢复代码保存在安全的地方。在您无法访问身份验证应用程序时，可以使用这些代码恢复访问。
 admin.invitations.delete_confirm: 您想要删除此邀请吗？
+gist.new.topics: 主题（用空格分隔）
+validation.invalid-gist-topics: 无效的 Gists 主题，它们必须以字母或数字开头，长度不超过50个字符，并且可以包含连字符
+gist.list.topic-results-topic: '%s 与主题匹配的所有 Gists'
+admin.actions.sync-gist-languages: 同步所有 gists 语言
+flash.admin.sync-gist-languages: 正在同步 Gist 语言...
+gist.list.topic-results: 所有匹配主题的 Gist
+gist.search.help.topic: 具有给定主题的 Gists
+gist.search.placeholder.title: 标题
+gist.search.placeholder.visibility: 可见性
+gist.search.placeholder.private: 私密
+gist.search.placeholder.language: 语言
+gist.search.placeholder.all: 所有
+gist.search.placeholder.topics: 话题
+gist.search.placeholder.search: 搜索
+gist.search.placeholder.public: 公开
+gist.search.placeholder.unlisted: 未列出的

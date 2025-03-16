@@ -141,12 +141,17 @@ func ParseSearchQueryStr(query string) (string, map[string]string) {
 	return content, metadata
 }
 
-func GetContentTypeFromFilename(filename string) string {
+func GetContentTypeFromFilename(filename string) (ret string) {
 	ext := strings.ToLower(filepath.Ext(filename))
+
 	switch ext {
 	case ".css":
-		return "text/css"
+		ret = "text/css"
 	default:
-		return "text/plain"
+		ret = "text/plain"
 	}
+
+	// add charset=utf-8, if not, unicode charset will be broken
+	ret += "; charset=utf-8"
+	return
 }

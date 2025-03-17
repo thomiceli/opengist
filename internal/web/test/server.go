@@ -48,7 +48,7 @@ func (s *TestServer) stop() {
 	s.server.Stop()
 }
 
-func (s *TestServer) Request(method, uri string, data interface{}, expectedCode int) error {
+func (s *TestServer) Request(method, uri string, data interface{}, expectedCode int, responsePtr ...*http.Response) error {
 	var bodyReader io.Reader
 	if method == http.MethodPost || method == http.MethodPut {
 		values := structToURLValues(data)
@@ -90,6 +90,11 @@ func (s *TestServer) Request(method, uri string, data interface{}, expectedCode 
 		} else if strings.Contains(uri, "/logout") {
 			s.sessionCookie = ""
 		}
+	}
+
+	// If a response pointer was provided, fill it with the response data
+	if len(responsePtr) > 0 && responsePtr[0] != nil {
+		*responsePtr[0] = *w.Result()
 	}
 
 	return nil
@@ -157,7 +162,7 @@ func Setup(t *testing.T) *TestServer {
 	databaseType = os.Getenv("OPENGIST_TEST_DB")
 	switch databaseType {
 	case "sqlite":
-		databaseDsn = "file:" + filepath.Join(homePath, "tmp", "opengist.db")
+		databaseDsn = "file:" + filepath.Join(homePath, "tmp", "opengist_test.db")
 	case "postgres":
 		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
 	case "mysql":

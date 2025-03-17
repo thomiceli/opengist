@@ -21,7 +21,9 @@ func RawFile(ctx *context.Context) error {
 		return ctx.NotFound("File not found")
 	}
 	contentType := handlers.GetContentTypeFromFilename(file.Filename)
+	ContentDisposition := handlers.GetContentDisposition(file.Filename)
 	ctx.Response().Header().Set("Content-Type", contentType)
+	ctx.Response().Header().Set("Content-Disposition", ContentDisposition)
 	return ctx.PlainText(200, file.Content)
 }
 

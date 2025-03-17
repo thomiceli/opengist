@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"errors"
-	"github.com/gorilla/schema"
 	"html/template"
 	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/gorilla/schema"
 
 	"github.com/thomiceli/opengist/internal/web/context"
 )
@@ -154,4 +155,8 @@ func GetContentTypeFromFilename(filename string) (ret string) {
 	// add charset=utf-8, if not, unicode charset will be broken
 	ret += "; charset=utf-8"
 	return
+}
+
+func GetContentDisposition(filename string) string {
+	return "inline; filename=\"" + filename + "\""
 }

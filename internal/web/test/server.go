@@ -161,14 +161,12 @@ func Setup(t *testing.T) *TestServer {
 	var databaseDsn string
 	databaseType = os.Getenv("OPENGIST_TEST_DB")
 	switch databaseType {
-	case "sqlite":
-		databaseDsn = "file:" + filepath.Join(homePath, "tmp", "opengist_test.db")
 	case "postgres":
 		databaseDsn = "postgres://postgres:opengist@localhost:5432/opengist_test"
 	case "mysql":
 		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
 	default:
-		databaseDsn = ":memory:"
+		databaseDsn = "file:" + filepath.Join(homePath, "tmp", "opengist_test.db")
 	}
 
 	err = os.MkdirAll(filepath.Join(homePath, "tests"), 0755)

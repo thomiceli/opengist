@@ -65,6 +65,7 @@ func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
 func (i *MeiliIndexer) Close() {
 	if i.client != nil {
 		i.client.Close()
+		log.Info().Msg("Meilisearch indexer closed")
 	}
 	i.client = nil
 }

@@ -73,7 +73,7 @@ func Close() {
 		return
 	}
 
-	idx := (*atomicIndexer.Load()).(Indexer)
+	idx := *atomicIndexer.Load()
 	if idx == nil {
 		return
 	}
@@ -87,7 +87,7 @@ func AddInIndex(gist *Gist) error {
 		return nil
 	}
 
-	idx := (*atomicIndexer.Load()).(Indexer)
+	idx := *atomicIndexer.Load()
 	if idx == nil {
 		return fmt.Errorf("indexer is not initialized")
 	}
@@ -100,7 +100,7 @@ func RemoveFromIndex(gistID uint) error {
 		return nil
 	}
 
-	idx := (*atomicIndexer.Load()).(Indexer)
+	idx := *atomicIndexer.Load()
 	if idx == nil {
 		return fmt.Errorf("indexer is not initialized")
 	}
@@ -113,7 +113,7 @@ func SearchGists(query string, metadata SearchGistMetadata, userId uint, page in
 		return nil, 0, nil, nil
 	}
 
-	idx := (*atomicIndexer.Load()).(Indexer)
+	idx := *atomicIndexer.Load()
 	if idx == nil {
 		return nil, 0, nil, fmt.Errorf("indexer is not initialized")
 	}
@@ -122,7 +122,7 @@ func SearchGists(query string, metadata SearchGistMetadata, userId uint, page in
 }
 
 func DepreactionIndexDirname() {
-	if config.C.IndexEnabled == true {
+	if config.C.IndexEnabled {
 		log.Warn().Msg("The 'index.enabled'/'OG_INDEX_ENABLED' configuration option is deprecated and will be removed in a future version. Please use 'index'/'OG_INDEX' instead.")
 	}
 

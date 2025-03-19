@@ -40,6 +40,9 @@ func (i *MeiliIndexer) Init() {
 func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
 	client := meilisearch.New(i.host, meilisearch.WithAPIKey(i.apikey))
 	indexResult, err := client.GetIndex(i.indexName)
+	if err != nil {
+		return nil, err
+	}
 
 	if indexResult != nil {
 		return indexResult.IndexManager, nil

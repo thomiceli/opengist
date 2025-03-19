@@ -151,7 +151,7 @@ func Setup(t *testing.T) *TestServer {
 
 	git.ReposDirectory = filepath.Join("tests")
 
-	config.C.IndexEnabled = false
+	config.C.Index = ""
 	config.C.LogLevel = "error"
 	config.InitLog()
 

@@ -19,8 +19,9 @@
             <dt>Opengist home</dt><dd>{{ .c.OpengistHome }}</dd>
             <dt>Database type</dt><dd>{{ .dbtype }}{{ if eq .dbtype "SQLite" }} ({{ .c.SqliteJournalMode }}){{ end }}</dd>
             <dt>Database name</dt><dd>{{ .dbname }}</dd>
-            <dt>Index Enabled</dt><dd>{{ .c.IndexEnabled }}</dd>
-            <dt>Index Dirname</dt><dd>{{ .c.IndexDirname }}</dd>
+            <dt>Index</dt><dd>{{ .c.Index }}</dd>
+            <dt>MeiliSearch Host</dt><dd>{{ .c.MeiliHost }}</dd>
+            <dt>MeiliSearch API Key</dt><dd>{{ if .c.MeiliAPIKey }}&#60;defined&#62;{{ end }}</dd>
             <dt>Git default branch</dt><dd>{{ .c.GitDefaultBranch }}</dd>
             <div class="relative col-span-3 mt-4">
                 <div class="absolute inset-0 flex items-center" aria-hidden="true">

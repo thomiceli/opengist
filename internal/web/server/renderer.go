@@ -171,7 +171,7 @@ func (s *Server) setFuncMap() {
 
 			return strings.TrimSpace(resultBuilder.String())
 		},
-		"indexEnabled": index.Enabled,
+		"indexEnabled": index.IndexEnabled,
 		"isUrl": func(s string) bool {
 			_, err := url.ParseRequestURI(s)
 			return err == nil

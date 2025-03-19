@@ -70,6 +70,8 @@ func EditVisibility(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error updating this gist", err)
 	}
 
+	gist.AddInIndex()
+
 	ctx.AddFlash(ctx.Tr("flash.gist.visibility-changed"), "success")
 	return ctx.RedirectTo("/" + gist.User.Username + "/" + gist.Identifier())
 }

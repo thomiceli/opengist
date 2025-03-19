@@ -40,6 +40,10 @@ func (v Visibility) String() string {
 	}
 }
 
+func (v Visibility) Uint() uint {
+	return uint(v)
+}
+
 func (v Visibility) Next() Visibility {
 	switch v {
 	case PublicVisibility:
@@ -788,6 +792,8 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 
 	indexedGist := &index.Gist{
 		GistID:     gist.ID,
+		UserID:     gist.UserID,
+		Visibility: gist.Private.Uint(),
 		Username:   gist.User.Username,
 		Title:      gist.Title,
 		Content:    wholeContent,
@@ -803,7 +809,7 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 }
 
 func (gist *Gist) AddInIndex() {
-	if !index.Enabled() {
+	if !index.IndexEnabled() {
 		return
 	}
 
@@ -821,7 +827,7 @@ func (gist *Gist) AddInIndex() {
 }
 
 func (gist *Gist) RemoveFromIndex() {
-	if !index.Enabled() {
+	if !index.IndexEnabled() {
 		return
 	}
 

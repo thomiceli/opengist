@@ -124,9 +124,9 @@ func Initialize(ctx *cli.Context) {
 		log.Error().Err(err).Msg("Failed to initialize WebAuthn")
 	}
 
-	if config.C.IndexEnabled {
-		log.Info().Msg("Index directory: " + filepath.Join(homePath, config.C.IndexDirname))
-		index.Init(filepath.Join(homePath, config.C.IndexDirname))
+	index.DepreactionIndexDirname()
+	if index.IndexEnabled() {
+		index.NewIndexer(index.IndexType())
 	}
 }
 
@@ -136,7 +136,7 @@ func shutdown() {
 		log.Error().Err(err).Msg("Failed to close database")
 	}
 
-	if config.C.IndexEnabled {
+	if index.IndexEnabled() {
 		log.Info().Msg("Shutting down index...")
 		index.Close()
 	}

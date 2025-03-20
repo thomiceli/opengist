@@ -4,6 +4,9 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
+
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/auth/oauth"
 	"github.com/thomiceli/opengist/internal/config"
@@ -12,7 +15,6 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func Oauth(ctx *context.Context) error {
@@ -110,7 +112,8 @@ func OauthCallback(ctx *context.Context) error {
 			return ctx.ErrorRes(500, "Cannot create user", err)
 		}
 
-		if userDB.ID == 1 {
+		// if oidc admin group is not configured set first user as admin
+		if config.C.OIDCAdminGroup == "" && userDB.ID == 1 {
 			if err = userDB.SetAdmin(); err != nil {
 				return ctx.ErrorRes(500, "Cannot set user admin", err)
 			}
@@ -133,6 +136,32 @@ func OauthCallback(ctx *context.Context) error {
 					log.Error().Err(err).Msg("Could not create ssh key")
 				}
 			}
+		}
+	}
+
+	// update is admin status from oidc group
+	if config.C.OIDCAdminGroup != "" {
+		groupClaimName := config.C.OIDCGroupClaimName
+		if groupClaimName == "" {
+			log.Error().Msg("No OIDC group claim name configured")
+		} else if groups, ok := user.RawData[groupClaimName].([]interface{}); ok {
+			var groupNames []string
+			for _, group := range groups {
+				if groupName, ok := group.(string); ok {
+					groupNames = append(groupNames, groupName)
+				}
+			}
+			isOIDCAdmin := slices.Contains(groupNames, config.C.OIDCAdminGroup)
+			log.Debug().Bool("isOIDCAdmin", isOIDCAdmin).Str("user", user.Name).Msg("User is in admin group")
+
+			if userDB.IsAdmin != isOIDCAdmin {
+				userDB.IsAdmin = isOIDCAdmin
+				if err = userDB.Update(); err != nil {
+					return ctx.ErrorRes(500, "Cannot set user admin", err)
+				}
+			}
+		} else {
+			log.Error().Msg("No groups found in user data")
 		}
 	}
 

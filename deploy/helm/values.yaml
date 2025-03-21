@@ -1,0 +1,126 @@
+# Default values for opengist.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+namespace: ""
+
+## Opengist YAML Application Config. See more at https://opengist.io/docs/configuration/cheat-sheet.html
+config:
+  log-level: "warn"
+  log-output: "stdout"
+##
+
+image:
+  repository: ghcr.io/thomiceli/opengist
+  pullPolicy: IfNotPresent
+  tag: ""
+  digest: ""
+
+imagePullSecrets: []
+
+replicaCount: 1
+
+strategy:
+  type: "RollingUpdate"
+  rollingUpdate:
+    maxSurge: "100%"
+    maxUnavailable: 0
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext: {}
+
+podDisruptionBudget: {}
+
+service:
+  http:
+    type: ClusterIP
+    port: 6157
+    clusterIP: None
+    loadBalancerIP:
+    nodePort:
+    externalTrafficPolicy:
+    externalIPs:
+    ipFamilyPolicy:
+    ipFamilies:
+    loadBalancerSourceRanges: [ ]
+    annotations: { }
+    labels: { }
+    loadBalancerClass:
+
+  ssh:
+    enabled: true
+    type: ClusterIP
+    port: 2222
+    clusterIP: None
+    loadBalancerIP:
+    nodePort:
+    externalTrafficPolicy:
+    externalIPs:
+    ipFamilyPolicy:
+    ipFamilies:
+    hostPort:
+    loadBalancerSourceRanges: [ ]
+    annotations: { }
+    labels: { }
+    loadBalancerClass:
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: gist.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+
+podAnnotations: {}
+
+podLabels: {}
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+#This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+deployment:
+  env: []
+  terminationGracePeriodSeconds: 60
+  labels: {}
+  annotations: {}
+
+volumes: []
+
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

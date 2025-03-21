@@ -25,29 +25,34 @@ func NewMeiliIndexer(host, apikey, indexName string) *MeiliIndexer {
 	}
 }
 
-func (i *MeiliIndexer) Init() {
+func (i *MeiliIndexer) Init() error {
+	errChan := make(chan error, 1)
+
 	go func() {
 		meiliIndex, err := i.open()
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to open Meilisearch index")
 			i.Close()
+			errChan <- err
+			return
 		}
 		i.index = meiliIndex
 		log.Info().Msg("Meilisearch indexer initialized")
+		errChan <- nil
 	}()
+
+	return <-errChan
 }
 
 func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
-	client := meilisearch.New(i.host, meilisearch.WithAPIKey(i.apikey))
-	indexResult, err := client.GetIndex(i.indexName)
-	if err != nil {
-		return nil, err
-	}
+	i.client = meilisearch.New(i.host, meilisearch.WithAPIKey(i.apikey))
+	indexResult, err := i.client.GetIndex(i.indexName)
 
-	if indexResult != nil {
+	if indexResult != nil && err == nil {
 		return indexResult.IndexManager, nil
 	}
-	_, err = client.CreateIndex(&meilisearch.IndexConfig{
+
+	_, err = i.client.CreateIndex(&meilisearch.IndexConfig{
 		Uid:        i.indexName,
 		PrimaryKey: "GistID",
 	})
@@ -55,14 +60,14 @@ func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
 		return nil, err
 	}
 
-	_, _ = client.Index(i.indexName).UpdateSettings(&meilisearch.Settings{
+	_, _ = i.client.Index(i.indexName).UpdateSettings(&meilisearch.Settings{
 		FilterableAttributes: []string{"GistID", "UserID", "Visibility", "Username", "Title", "Filenames", "Extensions", "Languages", "Topics"},
 		DisplayedAttributes:  []string{"GistID"},
 		SearchableAttributes: []string{"Content", "Username", "Title", "Filenames", "Extensions", "Languages", "Topics"},
 		RankingRules:         []string{"words"},
 	})
 
-	return client.Index(i.indexName), nil
+	return i.client.Index(i.indexName), nil
 }
 
 func (i *MeiliIndexer) Close() {

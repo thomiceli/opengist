@@ -126,7 +126,7 @@ func Initialize(ctx *cli.Context) {
 
 	index.DepreactionIndexDirname()
 	if index.IndexEnabled() {
-		index.NewIndexer(index.IndexType())
+		go index.NewIndexer(index.IndexType())
 	}
 }
 

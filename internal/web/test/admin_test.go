@@ -212,13 +212,10 @@ func TestAdminInvitation(t *testing.T) {
 	require.NoError(t, err)
 	invitation1, err := db.GetInvitationByID(1)
 	require.NoError(t, err)
-	require.Equal(t, invitation1, &db.Invitation{
-		ID:        1,
-		Code:      invitation1.Code,
-		ExpiresAt: time.Now().Unix() + 604800,
-		NbUsed:    0,
-		NbMax:     10,
-	})
+	require.Equal(t, uint(1), invitation1.ID)
+	require.Equal(t, uint(0), invitation1.NbUsed)
+	require.Equal(t, uint(10), invitation1.NbMax)
+	require.InDelta(t, time.Now().Unix()+604800, invitation1.ExpiresAt, 10)
 
 	err = s.Request("POST", "/admin-panel/invitations", invitationAdmin{
 		nbMax:         "aa",

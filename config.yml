@@ -106,6 +106,10 @@ oidc.client-key:
 oidc.secret:
 # Discovery endpoint of the OpenID provider. Generally something like http://auth.example.com/.well-known/openid-configuration
 oidc.discovery-url:
+# The name of the claim containing the groups
+oidc.group-claim-name:
+# The name of the group that should receive admin rights
+oidc.admin-group:
 
 # Instance name
 # Set your own custom name to be displayed instead of 'Opengist'

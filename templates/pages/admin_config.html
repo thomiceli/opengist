@@ -69,6 +69,8 @@
             <dt>OIDC client Key</dt><dd>{{ if .c.OIDCClientKey }}&#60;defined&#62;{{ end }}</dd>
             <dt>OIDC Secret</dt><dd>{{ if .c.OIDCSecret }}&#60;defined&#62;{{ end }}</dd>
             <dt>OIDC Discovery URL</dt><dd>{{ if .c.OIDCDiscoveryUrl }}&#60;defined&#62;{{ end }}</dd>
+            <dt>OIDC Group Claim Name</dt><dd>{{ .c.OIDCGroupClaimName }}</dd>
+            <dt>OIDC Admin Group</dt><dd>{{ .c.OIDCAdminGroup }}</dd>
         </dl>
     </div>
     <div>

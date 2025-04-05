@@ -1,0 +1,201 @@
+## Kubernetes workload configuration for Opengist
+nameOverride: ""
+fullnameOverride: ""
+namespace: ""
+
+## Opengist YAML Application Config. See more at https://opengist.io/docs/configuration/cheat-sheet.html
+## This will create a Kubernetes secret with the key `config.yml` containing the YAML configuration mounted in the pod.
+config:
+  log-level: "warn"
+  log-output: "stdout"
+
+## If defined, the existing secret will be used instead of creating a new one.
+## The secret must contain a key named `config.yml` with the YAML configuration.
+configExistingSecret: ""
+
+## Define the image repository and tag to use.
+image:
+  repository: ghcr.io/thomiceli/opengist
+  pullPolicy: Always
+  tag: "1.10.0"
+  digest: ""
+imagePullSecrets: []
+# - name: "image-pull-secret"
+
+## Define the deployment replica count
+replicaCount: 1
+
+## Define the deployment strategy type
+strategy:
+  type: "RollingUpdate"
+  rollingUpdate:
+    maxSurge: "100%"
+    maxUnavailable: 0
+
+## Security Context settings
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+podSecurityContext:
+  fsGroup: 1000
+securityContext: {}
+# allowPrivilegeEscalation: false
+
+## Pod Disruption Budget settings
+## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+podDisruptionBudget: {}
+#  maxUnavailable: 1
+#  minAvailable: 1
+
+## Set the Kubernetes service type
+## ref: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  http:
+    type: ClusterIP
+    clusterIP:
+    port: 6157
+    nodePort:
+    loadBalancerIP:
+    externalIPs: []
+    labels: {}
+    annotations: {}
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy:
+
+  ssh:
+    enabled: true
+    type: ClusterIP
+    clusterIP:
+    port: 2222
+    nodePort:
+    loadBalancerIP:
+    externalIPs: []
+    labels: {}
+    annotations: {}
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy:
+
+## HTTP Ingress for Opengist
+## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: false
+  className: ""
+  labels: {}
+    # node-role.kubernetes.io/ingress: platform
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: opengist.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+    # - secretName: opengist-tls
+    #   hosts:
+    #     - opengist.example.com
+
+## Service Account for Opengist pods
+## ref: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+## Set persistence using a Persistent Volume Claim
+## If more than 2 replicas are set, the access mode must be ReadWriteMany
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+persistence:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  labels: {}
+  annotations:
+    helm.sh/resource-policy: keep
+  size: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  subPath: ""
+
+extraVolumes: []
+extraVolumeMounts: []
+
+## Additional pod labels and annotations
+podLabels: {}
+podAnnotations: {}
+
+## Configure resource requests and limits
+## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+
+## Configure the liveness and readiness probes
+## ref: https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 200
+  timeoutSeconds: 1
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 5
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  timeoutSeconds: 1
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+## Define autoscaling configuration using Horizontal Pod Autoscaler
+## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+  annotations: {}
+
+## Additional deployment configuration
+deployment:
+  env: []
+  terminationGracePeriodSeconds: 60
+  labels: {}
+  annotations: {}
+
+## Set pod assignment with node labels
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+## Use PostgreSQL as a database, using Bitnami's PostgreSQL Helm chart
+## ref: https://artifacthub.io/packages/helm/bitnami/postgresql/16.5.6
+postgresql:
+  enabled: false
+  global:
+    postgresql:
+      auth:
+        username: opengist
+        password: opengist
+        database: opengist
+      service:
+        ports:
+          postgresql: 5432
+  primary:
+    persistence:
+      size: 10Gi
+
+
+## Use Meilisearch as a code indexer, using Meilisearch's Helm chart
+## ref: https://github.com/meilisearch/meilisearch-kubernetes/tree/meilisearch-0.12.0
+meilisearch:
+  enabled: false
+  environment:
+    MEILI_ENV: "production"
+  auth:
+    existingMasterKeySecret:

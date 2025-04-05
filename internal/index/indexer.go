@@ -11,7 +11,7 @@ import (
 var atomicIndexer atomic.Pointer[Indexer]
 
 type Indexer interface {
-	Init()
+	Init() error
 	Close()
 	Add(gist *Gist) error
 	Remove(gistID uint) error
@@ -64,7 +64,9 @@ func NewIndexer(idxType IndexerType) {
 		return
 	}
 
-	idx.Init()
+	if err := idx.Init(); err != nil {
+		return
+	}
 	atomicIndexer.Store(&idx)
 }
 
@@ -73,12 +75,12 @@ func Close() {
 		return
 	}
 
-	idx := *atomicIndexer.Load()
+	idx := atomicIndexer.Load()
 	if idx == nil {
 		return
 	}
 
-	idx.Close()
+	(*idx).Close()
 	atomicIndexer.Store(nil)
 }
 
@@ -87,12 +89,12 @@ func AddInIndex(gist *Gist) error {
 		return nil
 	}
 
-	idx := *atomicIndexer.Load()
+	idx := atomicIndexer.Load()
 	if idx == nil {
 		return fmt.Errorf("indexer is not initialized")
 	}
 
-	return idx.Add(gist)
+	return (*idx).Add(gist)
 }
 
 func RemoveFromIndex(gistID uint) error {
@@ -100,12 +102,12 @@ func RemoveFromIndex(gistID uint) error {
 		return nil
 	}
 
-	idx := *atomicIndexer.Load()
+	idx := atomicIndexer.Load()
 	if idx == nil {
 		return fmt.Errorf("indexer is not initialized")
 	}
 
-	return idx.Remove(gistID)
+	return (*idx).Remove(gistID)
 }
 
 func SearchGists(query string, metadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error) {
@@ -113,12 +115,12 @@ func SearchGists(query string, metadata SearchGistMetadata, userId uint, page in
 		return nil, 0, nil, nil
 	}
 
-	idx := *atomicIndexer.Load()
+	idx := atomicIndexer.Load()
 	if idx == nil {
 		return nil, 0, nil, fmt.Errorf("indexer is not initialized")
 	}
 
-	return idx.Search(query, metadata, userId, page)
+	return (*idx).Search(query, metadata, userId, page)
 }
 
 func DepreactionIndexDirname() {

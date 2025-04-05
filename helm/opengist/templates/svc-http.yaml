@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opengist.fullname" . }}-http
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "opengist.labels" . | nindent 4 }}
+    {{- if .Values.service.http.labels }}
+    {{- toYaml .Values.service.http.labels  | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.http.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+spec:
+  type: {{ .Values.service.http.type }}
+  {{- if eq .Values.service.http.type "LoadBalancer" }}
+  {{- if and .Values.service.http.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.http.loadBalancerIP  }}
+  {{- end }}
+  {{- if .Values.service.http.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+  {{- range .Values.service.http.loadBalancerSourceRanges }}
+    - {{ . }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.service.http.externalIPs }}
+  externalIPs:
+    {{- toYaml .Values.service.http.externalIPs | nindent 4 }}
+  {{- end }}
+  {{- if .Values.service.http.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.http.externalTrafficPolicy }}
+  {{- end }}
+  {{- if and .Values.service.http.clusterIP (eq .Values.service.http.type "ClusterIP") }}
+  clusterIP: {{ .Values.service.http.clusterIP }}
+  {{- end }}
+  ports:
+    - name: http
+      port: {{ .Values.service.http.port }}
+    {{- if  .Values.service.http.nodePort }}
+      nodePort: {{ .Values.service.http.nodePort }}
+    {{- end }}
+      targetPort: {{ index .Values.config "http.port" }}
+  selector:
+    {{- include "opengist.selectorLabels" . | nindent 4 }}

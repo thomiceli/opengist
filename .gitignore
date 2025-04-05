@@ -5,7 +5,9 @@ gist.db
 /**/.DS_Store
 public/assets/*
 public/manifest.json
+./opengist
 opengist
 build/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+helm/opengist/charts/

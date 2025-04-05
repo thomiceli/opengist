@@ -1,0 +1,9 @@
+dependencies:
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 16.5.6
+- name: meilisearch
+  repository: https://meilisearch.github.io/meilisearch-kubernetes
+  version: 0.12.0
+digest: sha256:31084e570aa16e3a26317aeb6d0d5dec62540c314ee4f703374e6e7827399fa6
+generated: "2025-03-27T11:34:51.840778733+01:00"

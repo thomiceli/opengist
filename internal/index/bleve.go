@@ -22,16 +22,23 @@ func NewBleveIndexer(path string) *BleveIndexer {
 	return &BleveIndexer{path: path}
 }
 
-func (i *BleveIndexer) Init() {
+func (i *BleveIndexer) Init() error {
+	errChan := make(chan error, 1)
+
 	go func() {
 		bleveIndex, err := i.open()
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to open Bleve index")
 			i.Close()
+			errChan <- err
+			return
 		}
 		i.index = bleveIndex
 		log.Info().Msg("Bleve indexer initialized")
+		errChan <- nil
 	}()
+
+	return <-errChan
 }
 
 func (i *BleveIndexer) open() (bleve.Index, error) {

@@ -1,0 +1,28 @@
+{{- if .Values.persistence.enabled }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "opengist.fullname" . }}-data
+  namespace: {{ .Release.Namespace }}
+{{- with .Values.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "opengist.labels" . | nindent 4 }}
+    {{- if .Values.persistence.labels }}
+    {{- toYaml .Values.persistence.labels | nindent 4 }}
+    {{- end }}
+spec:
+  accessModes:
+  {{- if gt .Values.replicaCount 1.0 }}
+    - ReadWriteMany
+  {{- else }}
+    {{- .Values.persistence.accessModes | toYaml | nindent 4 }}
+  {{- end }}
+  volumeMode: Filesystem
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+{{- end }}

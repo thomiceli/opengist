@@ -1,0 +1,64 @@
+{{- if .Values.service.ssh.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opengist.fullname" . }}-ssh
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "opengist.labels" . | nindent 4 }}
+    {{- if .Values.service.ssh.labels }}
+    {{- toYaml .Values.service.ssh.labels  | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.http.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.ssh.type }}
+  {{- if eq .Values.service.ssh.type "LoadBalancer" }}
+  {{- if .Values.service.ssh.loadBalancerClass }}
+  loadBalancerClass: {{ .Values.service.ssh.loadBalancerClass }}
+  {{- end }}
+  {{- if .Values.service.ssh.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.ssh.loadBalancerIP }}
+  {{- end -}}
+  {{- if .Values.service.ssh.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+  {{- range .Values.service.ssh.loadBalancerSourceRanges }}
+    - {{ . }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- if and .Values.service.ssh.clusterIP (eq .Values.service.ssh.type "ClusterIP") }}
+  clusterIP: {{ .Values.service.ssh.clusterIP }}
+  {{- end }}
+  {{- if .Values.service.ssh.externalIPs }}
+  externalIPs:
+    {{- toYaml .Values.service.ssh.externalIPs | nindent 4 }}
+  {{- end }}
+  {{- if .Values.service.ssh.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.service.ssh.ipFamilyPolicy }}
+  {{- end }}
+  {{- with .Values.service.ssh.ipFamilies }}
+  ipFamilies:
+  {{- toYaml . | nindent 4 }}
+  {{- end -}}
+  {{- if .Values.service.ssh.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.ssh.externalTrafficPolicy }}
+  {{- end }}
+  ports:
+    - name: ssh
+      port: {{ .Values.service.ssh.port }}
+      {{- if .Values.service.ssh.nodePort }}
+      nodePort: {{ .Values.service.ssh.nodePort }}
+      {{- end }}
+      {{- if index .Values.config "ssh.port" }}
+      targetPort: {{ index .Values.config "ssh.port" }}
+      {{- else }}
+      targetPort: 2222
+      {{- end }}
+      protocol: TCP
+
+  selector:
+    {{- include "opengist.selectorLabels" . | nindent 4 }}
+{{- end }}

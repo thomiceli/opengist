@@ -1,0 +1,52 @@
+name: Build / Deploy Helm Chart
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.3.0
+        with:
+          version: 'latest'
+
+      - name: Update Helm chart dependencies
+        run: |
+          cd ./helm/opengist
+          helm dependency update
+
+      - name: Package Helm chart
+        run: |
+          cd ./helm
+          helm package ./opengist
+
+          # First time, create the index
+          if [ ! -f index.yaml ]; then
+            helm repo index --url https://helm.opengist.io .
+          else
+            # For subsequent runs, merge with existing index
+            helm repo index --url https://helm.opengist.io --merge index.yaml .
+          fi
+
+      - name: Deploy to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "./helm/*.tgz,./helm/index.yaml"
+          target: ${{ secrets.HELM_SERVER_PATH }}
+
+      - name: Update remote helm repository
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            ${{ secrets.UPDATE_HELM_REPO }}

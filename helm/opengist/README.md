@@ -4,10 +4,19 @@
 
 Opengist Helm chart for Kubernetes.
 
+* [Install](#install)
 * [Configuration](#configuration)
 * [Dependencies](#dependencies)
   * [Meilisearch Indexer](#meilisearch-indexer)
   * [PostgreSQL Database](#postgresql-database)
+
+## Install
+
+```bash
+helm repo add opengist https://helm.opengist.io
+ 
+helm install opengist opengist/opengist
+```
 
 ## Configuration
 

@@ -2,9 +2,6 @@ name: Build / Deploy Helm Chart
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "feat/helm"
 
 jobs:
   build-and-deploy:

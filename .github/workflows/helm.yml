@@ -2,10 +2,9 @@ name: Build / Deploy Helm Chart
 
 on:
   workflow_dispatch:
-  # Uncomment below to also trigger on tag releases when ready
-  # push:
-  #   tags:
-  #     - 'v*'
+  push:
+    branches:
+      - "feat/helm"
 
 jobs:
   build-and-deploy:

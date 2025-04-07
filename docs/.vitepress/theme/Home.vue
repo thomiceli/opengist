@@ -19,7 +19,7 @@ export default {
         <div class="mx-auto  lg:text-center">
           <img class="rotating h-36 mx-auto my-8 " src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg" alt="" >
           <a target="_blank" href="https://github.com/thomiceli/opengist/releases" class="inline-flex items-center rounded-full bg-indigo-100 hover:bg-indigo-200 px-4 py-1.5 text-lg font-medium text-indigo-700">
-              <span class="pr-1">Released 1.9</span>
+              <span class="pr-1">Released 1.10</span>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
             </svg>

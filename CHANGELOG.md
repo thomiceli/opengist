@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.10.0](https://github.com/thomiceli/opengist/compare/v1.9.1...v1.10.0) - 2025-04-07
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### 🔴 Deprecations
+_Removed in the next SemVer MAJOR version of Opengist._
+* Use the configuration option `index`/`OG_INDEX` **instead of** `index.enabled`/`OG_INDEX_ENABLED`. The default value is `bleve`.
+* The configuration `index.dirname`/`OG_INDEX_DIRNAME` will be removed. If you're using Bleve, the path of the index will be `opengist.index`.
+
+### Added
+- Helm Chart (#454)
+- Meilisearch indexer (#444)
+- Prometheus metrics (#439)
+- Config to name the OIDC provider (#435)
+- Read admin group from OIDC token claim (#445)
+- More translation strings (#438)
+
+### Fixed
+- Garbled text display issues for non-English Unicode characters in browsers (#441)
+- Test database when running `go test` (#442)
+- Allow lag between admin invitation creation and test assertion (#452)
+- gist.html using relative URL (#451)
+- Do not hide file delete button on gist edit page (#447)
+
+### Other
+- Update deps Golang & JS deps (#455)
+
 ## [1.9.1](https://github.com/thomiceli/opengist/compare/v1.9.0...v1.9.1) - 2025-02-04
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

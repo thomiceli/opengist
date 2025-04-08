@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
 )
@@ -29,6 +30,7 @@ func UserSettings(ctx *context.Context) error {
 	ctx.SetData("hasTotp", hasTotp)
 	ctx.SetData("hasPassword", user.Password != "")
 	ctx.SetData("disableForm", ctx.GetData("DisableLoginForm"))
+	ctx.SetData("disableUnlinkAccount", config.C.OIDCDisableUnlinkAccount)
 	ctx.SetData("htmlTitle", ctx.TrH("settings"))
 	return ctx.Html("settings.html")
 }

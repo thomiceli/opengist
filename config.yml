@@ -110,6 +110,9 @@ oidc.discovery-url:
 oidc.group-claim-name:
 # The name of the group that should receive admin rights
 oidc.admin-group:
+# If set to true, use the local part of the email address (before @) as username,
+# regardless of the nickname provided by the identity provider. Default: false
+oidc.email-local-part-as-username: false
 
 # Instance name
 # Set your own custom name to be displayed instead of 'Opengist'

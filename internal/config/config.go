@@ -83,6 +83,12 @@ type config struct {
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
 	StaticLinks   []StaticLink `yaml:"custom.static-links" env:"OG_CUSTOM_STATIC_LINK"`
+
+	SettingDisableSignup          bool `yaml:"setting.disable_signup" env:"OG_SETTING_DISABLE_SIGNUP"`
+	SettingRequireLogin           bool `yaml:"setting.require_login" env:"OG_SETTING_REQUIRE_LOGIN"`
+	SettingAllowGistsWithoutLogin bool `yaml:"setting.allow_gists_without_login" env:"OG_SETTING_ALLOW_GISTS_WITHOUT_LOGIN"`
+	SettingDisableLoginForm       bool `yaml:"setting.disable_login_form" env:"OG_SETTING_DISABLE_LOGIN_FORM"`
+	SettingDisableGravatar        bool `yaml:"setting.disable_gravatar" env:"OG_SETTING_DISABLE_GRAVATAR"`
 }
 
 type StaticLink struct {

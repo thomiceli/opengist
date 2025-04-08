@@ -127,3 +127,16 @@ custom.static-links:
 #    path: https://gitea.com
 #  - name: Legal notices
 #    path: legal.html
+
+# Initial settings
+# These settings can only be changed via the admin interface once set
+# Disable user registration. Default: false
+setting.disable_signup: false
+# Require users to be logged in to view gists. Default: false
+setting.require_login: false
+# Allow anonymous users to create gists. Default: false
+setting.allow_gists_without_login: false
+# Disable the built-in login form. Useful when using only OAuth providers. Default: false
+setting.disable_login_form: false
+# Disable Gravatar for user avatars. Default: false
+setting.disable_gravatar: false

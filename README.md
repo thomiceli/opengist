@@ -28,7 +28,7 @@ It is similar to [GitHub Gist](https://gist.github.com/), but open-source and co
 * Download raw files or as a ZIP archive
 * OAuth2 login with GitHub, GitLab, Gitea, and OpenID Connect
 * Restrict or unrestrict snippets visibility to anonymous users
-* Docker support
+* Docker support / Helm Chart
 * [More...](/docs/introduction.md#features)
 
 ## Quick start

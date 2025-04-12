@@ -1,6 +1,7 @@
 node_modules/
 gist.db
 .idea/
+.vscode/
 .DS_Store
 /**/.DS_Store
 public/assets/*
@@ -11,3 +12,4 @@ build/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
 helm/opengist/charts/
+vendor/

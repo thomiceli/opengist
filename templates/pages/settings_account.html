@@ -1,0 +1,162 @@
+{{ template "header" .}}
+{{ template "settings_header" .}}
+<div class="relative mx-auto max-w-[40rem] space-y-8">
+    <div class="sm:grid {{ if not .disableForm }}grid-cols-2{{ else }}grid-cols-1{{ end }} gap-x-4 md:gap-x-8 space-y-8 md:space-y-0">
+        <div class="w-full">
+            <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10 h-full">
+                <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+                    {{ .locale.Tr "settings.change-username" }}
+                </h2>
+                <form class="space-y-6" action="{{ $.c.ExternalUrl }}/settings/username" method="post">
+                    <div>
+                        <div class="mt-1">
+                            <input id="username-change" name="username" type="text" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <input type="hidden" name="_method" value="PUT">
+
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        {{ .locale.Tr "settings.change-username" }}
+                    </button>
+                    {{ .csrfHtml }}
+                </form>
+            </div>
+        </div>
+        {{ if not .disableForm }}
+        <div class="w-full">
+            <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+                    {{if .hasPassword}}
+                    {{ .locale.Tr "settings.change-password" }}
+                    {{else}}
+                    {{ .locale.Tr "settings.create-password" }}
+                    {{end}}
+                </h2>
+                <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
+                    {{if .hasPassword}}
+                    {{ .locale.Tr "settings.change-password-help" }}
+                    {{else}}
+                    {{ .locale.Tr "settings.create-password-help" }}
+                    {{end}}
+                </h3>
+                <form class="space-y-6" action="{{ $.c.ExternalUrl }}/settings/password" method="post">
+                    <div>
+                        <label for="password-change" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> {{ .locale.Tr "settings.password-label-title" }} </label>
+                        <div class="mt-1">
+                            <input id="password-change" name="password" type="password" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <input type="hidden" name="_method" value="PUT">
+
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        {{if .hasPassword}}
+                        {{ .locale.Tr "settings.change-password" }}
+                        {{else}}
+                        {{ .locale.Tr "settings.create-password" }}
+                        {{end}}
+                    </button>
+                    {{ .csrfHtml }}
+                </form>
+            </div>
+        </div>
+        {{ end }}
+    </div>
+    <div class="w-full">
+        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+                {{ .locale.Tr "settings.email" }}
+            </h2>
+            <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
+                {{ .locale.Tr "settings.email-help" }}
+            </h3>
+            <form class="space-y-6" action="{{ $.c.ExternalUrl }}/settings/email" method="post">
+                <div>
+                    <div class="mt-1">
+                        <input id="email" name="email" value="{{ .userLogged.Email }}" type="email" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                    </div>
+                </div>
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "settings.email-set" }}</button>
+                {{ .csrfHtml }}
+            </form>
+        </div>
+    </div>
+    {{ if or .githubOauth .gitlabOauth .giteaOauth .oidcOauth }}
+    <div class="w-full">
+        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300 mb-2">
+                {{ .locale.Tr "settings.link-accounts" }}
+            </h2>
+            <div class="gap-y-2">
+
+                {{ if .githubOauth }}
+                {{ if .userLogged.GithubID }}
+                <a href="{{ $.c.ExternalUrl }}/oauth/github/unlink" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
+                   onclick="return confirm('Are you sure you want to unlink your GitHub account? You may lose access to Opengist if it\'s your only way to log in.')">
+                    {{ .locale.Tr "settings.unlink-github-account" }}
+                </a>
+                {{ else }}
+                <a href="{{ $.c.ExternalUrl }}/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                    {{ .locale.Tr "settings.link-github-account" }}
+                </a>
+                {{ end }}
+                {{ end }}
+
+                {{ if .gitlabOauth }}
+                {{ if .userLogged.GitlabID }}
+                <a href="{{ $.c.ExternalUrl }}/oauth/gitlab/unlink" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
+                   onclick="return confirm('Are you sure you want to unlink your GitLab account? You may lose access to Opengist if it\'s your only way to log in.')">
+                    {{ .locale.Tr "settings.unlink-gitlab-account" }}
+                </a>
+                {{ else }}
+                <a href="{{ $.c.ExternalUrl }}/oauth/gitlab" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                    {{ .locale.Tr "settings.link-gitlab-account" }}
+                </a>
+                {{ end }}
+                {{ end }}
+
+                {{ if .giteaOauth }}
+                {{ if .userLogged.GiteaID }}
+                <a href="{{ $.c.ExternalUrl }}/oauth/gitea/unlink" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
+                   onclick="return confirm('Are you sure you want to unlink your Gitea account? You may lose access to Opengist if it\'s your only way to log in.')">
+                    {{ .locale.Tr "settings.unlink-gitea-account" }}
+                </a>
+                {{ else }}
+                <a href="{{ $.c.ExternalUrl }}/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                    {{ .locale.Tr "settings.link-gitea-account" }}
+                </a>
+                {{ end }}
+                {{ end }}
+                {{ if .oidcOauth }}
+                {{ if .userLogged.OIDCID }}
+                <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect/unlink" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
+                   onclick="return confirm('Are you sure you want to unlink your OpenID account? You may lose access to Opengist if it\'s your only way to log in.')">
+                    Unlink OpenID account
+                </a>
+                {{ else }}
+                <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
+                    Link OpenID account
+                </a>
+                {{ end }}
+                {{ end }}
+            </div>
+        </div>
+    </div>
+    {{ end }}
+
+
+    <div class="w-full">
+        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+                {{ .locale.Tr "settings.delete-account" }}
+            </h2>
+            <form class="space-y-6" action="{{ $.c.ExternalUrl }}/settings/account" method="post">
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit" onclick="return confirm('{{ .locale.Tr "settings.delete-account-confirm" }}')" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 mt-2">{{ .locale.Tr "settings.delete-account" }}</button>
+                {{ .csrfHtml }}
+            </form>
+        </div>
+    </div>
+</div>
+
+{{ template "settings_footer" .}}
+{{ template "footer" .}}

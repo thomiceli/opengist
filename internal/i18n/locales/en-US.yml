@@ -148,6 +148,10 @@ settings.create-password-help: Create your password to login to Opengist via HTT
 settings.change-password: Change password
 settings.change-password-help: Change your password to login to Opengist via HTTP
 settings.password-label-title: Password
+settings.header.account: Account
+settings.header.mfa: MFA
+settings.header.ssh: SSH
+settings.header.style: Style
 
 auth.signup-disabled: Administrator has disabled signing up
 auth.login: Login

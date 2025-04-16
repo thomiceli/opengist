@@ -1,0 +1,91 @@
+{{ template "header" .}}
+{{ template "settings_header" .}}
+<div class="relative mx-auto max-w-[40rem] space-y-8">
+    <div class="w-full">
+        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+                {{ .locale.Tr "auth.totp" }}
+            </h2>
+            <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
+                {{ .locale.Tr "auth.totp.help" }}
+            </h3>
+            {{ if .hasTotp }}
+            <div class="flex">
+                <form method="post" action="{{ $.c.ExternalUrl }}/settings/totp" onconfirm="" class="mr-2">
+                    <input type="hidden" name="_method" value="DELETE" />
+                    {{ .csrfHtml }}
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ .locale.Tr "auth.totp.disable" }}</button>
+                </form>
+                <form method="post" action="{{ $.c.ExternalUrl }}/settings/totp/regenerate" onconfirm="">
+                    {{ .csrfHtml }}
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.totp.regenerate-recovery-codes" }}</button>
+                </form>
+            </div>
+            {{ else }}
+            <a href="{{ $.c.ExternalUrl }}/settings/totp/generate" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.totp.use" }}</a>
+            {{ end }}
+        </div>
+    </div>
+
+    <div class="sm:grid grid-cols-2 gap-x-4 md:gap-x-8">
+        <div class="w-full">
+            <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+                    {{ .locale.Tr "auth.mfa.passkeys" }}
+                </h2>
+                <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
+                    {{ .locale.Tr "auth.mfa.passkeys-help" }}
+                </h3>
+                <form class="space-y-6" id="webauthn">
+                    <div>
+                        <label for="passkeyname" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "auth.mfa.passkey-name" }}</label>
+                        <div class="mt-1">
+                            <input id="passkeyname" name="passkeyname" type="text" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" />
+                        </div>
+                    </div>
+                    {{ .csrfHtml }}
+                    <button id="bind-passkey-button" type="button" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.mfa.bind-passkey" }}</button>
+                </form>
+                <div class="flex items-center justify-center mt-4">
+                    <p id="login-passkey-wait" class="hidden text-sm font-medium items-center text-slate-700 dark:text-slate-300">{{ .locale.Tr "auth.mfa.waiting-for-passkey-input" }}</p>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="mt-6 flow-root">
+                <ul role="list" class="-my-5 divide-y divide-gray-300 dark:divide-gray-700 list-none">
+                    {{ if .passkeys }}
+                    {{ range $passkey := .passkeys }}
+                    <li class="py-5">
+                        <div class="inline-flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mr-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                            </svg>
+                            <div>
+                                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ .Name }}</h3>
+                                <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "auth.mfa.passkey-added-at" }} <span class="moment-timestamp-date">{{ .CreatedAt }}</span></p>
+                                {{ if eq .LastUsedAt 0 }}
+                                <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "auth.mfa.passkey-never-used" }}</p>
+                                {{ else }}
+                                <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "auth.mfa.passkey-last-used" }} <span class="moment-timestamp">{{ .LastUsedAt }}</span></p>
+                                {{ end }}
+                            </div>
+                            <form action="{{ $.c.ExternalUrl }}/settings/passkeys/{{.ID}}" method="post" class="inline-block">
+                                <input type="hidden" name="_method" value="DELETE">
+                                {{ $.csrfHtml }}
+                                <button type="submit" onclick="return confirm('{{ $.locale.Tr "auth.mfa.delete-passkey-confirm" }}');" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ $.locale.Tr "auth.mfa.delete-passkey" }}</button>
+                            </form>
+                        </div>
+                    </li>
+                    {{ end }}
+                    {{ end }}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="{{ asset "webauthn.ts" }}"></script>
+</div>
+
+{{ template "settings_footer" .}}
+{{ template "footer" .}}

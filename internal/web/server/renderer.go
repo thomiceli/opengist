@@ -186,6 +186,7 @@ func (s *Server) setFuncMap() {
 			}
 			return str
 		},
+		"style": func() {},
 	}
 
 	t := template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html"))

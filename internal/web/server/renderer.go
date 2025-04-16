@@ -186,6 +186,10 @@ func (s *Server) setFuncMap() {
 			}
 			return str
 		},
+		"hexToRgb": func(hex string) string {
+			h, _ := strconv.ParseUint(strings.TrimPrefix(hex, "#"), 16, 32)
+			return fmt.Sprintf("%d, %d, %d,", (h>>16)&0xFF, (h>>8)&0xFF, h&0xFF)
+		},
 	}
 
 	t := template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html"))

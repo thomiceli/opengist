@@ -1,23 +1,25 @@
 package db
 
 import (
+	"encoding/json"
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID        uint   `gorm:"primaryKey"`
-	Username  string `gorm:"uniqueIndex,size:191"`
-	Password  string
-	IsAdmin   bool
-	CreatedAt int64
-	Email     string
-	MD5Hash   string // for gravatar, if no Email is specified, the value is random
-	AvatarURL string
-	GithubID  string
-	GitlabID  string
-	GiteaID   string
-	OIDCID    string `gorm:"column:oidc_id"`
+	ID               uint   `gorm:"primaryKey"`
+	Username         string `gorm:"uniqueIndex,size:191"`
+	Password         string
+	IsAdmin          bool
+	CreatedAt        int64
+	Email            string
+	MD5Hash          string // for gravatar, if no Email is specified, the value is random
+	AvatarURL        string
+	GithubID         string
+	GitlabID         string
+	GiteaID          string
+	OIDCID           string `gorm:"column:oidc_id"`
+	StylePreferences string
 
 	Gists               []Gist               `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys             []SSHKey             `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
@@ -234,6 +236,15 @@ func (user *User) HasMFA() (bool, bool, error) {
 	return webauthn, totp, err
 }
 
+func (user *User) GetStyle() *UserStyleDTO {
+	style := new(UserStyleDTO)
+	err := json.Unmarshal([]byte(user.StylePreferences), style)
+	if err != nil {
+		return nil
+	}
+	return style
+}
+
 // -- DTO -- //
 
 type UserDTO struct {
@@ -250,4 +261,19 @@ func (dto *UserDTO) ToUser() *User {
 
 type UserUsernameDTO struct {
 	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
+}
+
+type UserStyleDTO struct {
+	SoftWrap         bool   `form:"softwrap" json:"soft_wrap"`
+	RemovedLineColor string `form:"removedlinecolor" json:"removed_line_color" validate:"min=0,max=7"`
+	AddedLineColor   string `form:"addedlinecolor" json:"added_line_color" validate:"min=0,max=7"`
+	GitLineColor     string `form:"gitlinecolor" json:"git_line_color" validate:"min=0,max=7"`
+}
+
+func (dto *UserStyleDTO) ToJson() string {
+	data, err := json.Marshal(dto)
+	if err != nil {
+		return "{}"
+	}
+	return string(data)
 }

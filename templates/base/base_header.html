@@ -50,6 +50,16 @@
     {{ else }}
         <title>{{ if $.c.CustomName }}{{ $.c.CustomName }}{{ else }}Opengist{{ end }}</title>
     {{ end }}
+
+    {{ if .currentStyle }}
+    <style>
+        :root {
+            --red-diff: rgba({{ hexToRgb .currentStyle.RemovedLineColor }} 0.1);
+            --green-diff: rgba({{ hexToRgb .currentStyle.AddedLineColor }} 0.1);
+            --git-diff: rgba({{ hexToRgb .currentStyle.GitLineColor }} 0.38);
+        }
+    </style>
+    {{ end }}
 </head>
 <body class="h-full">
 <div id="app" class="text-gray-700 dark:text-white min-h-full bg-white dark:bg-gray-900">

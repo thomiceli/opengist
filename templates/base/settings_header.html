@@ -1,0 +1,28 @@
+{{ define "settings_header" }}
+<div class="py-10">
+    <header class="pb-4">
+        <div>
+            <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "settings" }}</h1>
+        </div>
+    </header>
+    <main>
+        <div class="mb-4">
+            <div class="">
+                <nav class="flex space-x-4" aria-label="Tabs">
+                    <a href="{{ $.c.ExternalUrl }}/settings" class="{{ if eq .settingsHeaderPage "account" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}">{{ .locale.Tr "settings.header.account" }} </a>
+                    <a href="{{ $.c.ExternalUrl }}/settings/mfa" class="{{ if eq .settingsHeaderPage "mfa" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">{{ .locale.Tr "settings.header.mfa" }}</a>
+                    <a href="{{ $.c.ExternalUrl }}/settings/ssh" class="{{ if eq .settingsHeaderPage "ssh" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">{{ .locale.Tr "settings.header.ssh" }}</a>
+                    <a href="{{ $.c.ExternalUrl }}/settings/style" class="{{ if eq .settingsHeaderPage "style" }}bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 px-3 py-2 font-medium text-sm rounded-md
+                    {{ else }} text-gray-600 dark:text-gray-400 hover:text-gray-400 dark:hover:text-slate-300 px-3 py-2 font-medium text-sm rounded-md {{ end }}" aria-current="page">{{ .locale.Tr "settings.header.style" }}</a>
+                </nav>
+            </div>
+        </div>
+{{ end }}
+
+{{ if false }}
+{{/* prevent IDE errors */}}
+</main></div>
+{{ end }}

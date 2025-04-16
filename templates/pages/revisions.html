@@ -54,7 +54,7 @@
                             {{ else if eq $file.Content "" }}
                                 <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.empty-file" }}</p>
                             {{ else }}
-                            <table class="code chroma table-code w-full whitespace-pre" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
+                            <table class="code chroma table-code w-full {{ if $.currentStyle }}{{ if $.currentStyle.SoftWrap }}whitespace-pre-wrap{{ else }}whitespace-pre{{ end }}{{ else }}whitespace-pre{{ end }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
                                 <tbody>
                                 {{ $left  := 0 }}
                                 {{ $right := 0 }}
@@ -83,7 +83,7 @@
                                                     {{ $right = inc $right }}
                                                 {{ end }}
                                             {{ end }}
-                                            <td class="select-none" style="width: 2%;">{{ if ne (index $line 0) 64 }}{{ slice $line 0 1 }}{{ end }}</td>
+                                            <td class="select-none" style="width: 2%; vertical-align: top;">{{ if ne (index $line 0) 64 }}{{ slice $line 0 1 }}{{ end }}</td>
                                             <td>{{ if ne (index $line 0) 64 }}{{ slice $line 1 }}{{ else }}{{ $line }}{{ end }}</td>
                                         </tr>
                                         {{end}}

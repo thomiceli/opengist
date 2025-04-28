@@ -82,7 +82,7 @@ func (p *GitLabCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 func (p *GitLabCallbackProvider) UpdateUserDB(user *db.User) {
 	user.GitlabID = p.User.UserID
 
-	resp, err := http.Get(urlJoin(config.C.GitlabUrl, "/api/v4/avatar?email=", p.User.Email))
+	resp, err := http.Get(urlJoin(config.C.GitlabUrl, "/api/v4/avatar?size=400&email=", p.User.Email))
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get user avatar from GitLab")
 		return

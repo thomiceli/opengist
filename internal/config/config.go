@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/thomiceli/opengist/internal/session"
 	"io"
 	"net/url"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/session"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -76,6 +77,8 @@ type config struct {
 	OIDCDiscoveryUrl   string `yaml:"oidc.discovery-url" env:"OG_OIDC_DISCOVERY_URL"`
 	OIDCGroupClaimName string `yaml:"oidc.group-claim-name" env:"OG_OIDC_GROUP_CLAIM_NAME"`
 	OIDCAdminGroup     string `yaml:"oidc.admin-group" env:"OG_OIDC_ADMIN_GROUP"`
+
+	DisableChangeUsernameEmail bool `yaml:"disable-change-username-email" env:"OG_DISABLE_CHANGE_USERNAME_EMAIL"`
 
 	MetricsEnabled bool `yaml:"metrics.enabled" env:"OG_METRICS_ENABLED"`
 

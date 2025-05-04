@@ -275,6 +275,7 @@ func sessionInit(next Handler) Handler {
 			if user != nil {
 				ctx.User = user
 				ctx.SetData("userLogged", user)
+				ctx.SetData("currentStyle", user.GetStyle())
 			}
 			return next(ctx)
 		}

@@ -10,6 +10,12 @@
     }
 }
 
+:root {
+    --red-diff: rgba(255, 0, 0, .1);
+    --green-diff: rgba(0, 255, 128, .1);
+    --git-diff: rgba(143, 143, 143, 0.38);
+}
+
 html {
     @apply bg-gray-50 dark:bg-gray-800;
 }
@@ -41,18 +47,19 @@ pre {
 .code .line-num {
     width: 4%;
     text-align: right;
+    vertical-align: top;
 }
 
 .red-diff {
-    background-color: rgba(255, 0, 0, .1);
+    background-color: var(--red-diff);
 }
 
 .green-diff {
-    background-color: rgba(0, 255, 128, .1);
+    background-color: var(--green-diff);
 }
 
 .gray-diff {
-    background-color: rgba(143, 143, 143, 0.38);
+    background-color: var(--git-diff);
     @apply py-4 !important
 }
 

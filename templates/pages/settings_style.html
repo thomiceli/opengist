@@ -1,0 +1,110 @@
+{{ template "header" .}}
+{{ template "settings_header" .}}
+<div class="relative mx-auto max-w-[40rem] space-y-8">
+    <div class="w-full">
+        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+                {{ .locale.Tr "settings.style.gist-code" }}
+            </h2>
+            <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto mt-4">
+                <div class="border-b-1 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 my-auto block">
+                    <div class="ml-4 py-1.5 flex">
+
+                    <span class="flex-auto inline-flex items-center text-sm text-slate-700 dark:text-slate-300 filename">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                        <a href="#" class="hover:text-primary-600 ml-2 mr-1">file.txt</a>
+                        <span class="hidden sm:block">
+                            <span class="text-gray-400"> · 95 B · Text</span>
+                        </span>
+                    </span>
+                    <span class="isolate inline-flex rounded-md shadow-sm mr-2">
+                    <button class="relative inline-flex items-center rounded-l-md bg-white text-gray-500 dark:text-slate-300 float-right px-2.5 py-1 leading-4 text-xs font-medium dark:bg-gray-600 border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none">
+                      {{ $.locale.Tr "gist.raw" }}
+                    </button>
+                    <button type="button" class="relative -ml-px inline-flex items-center bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700 copy-gist-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                        </svg>
+                    </button>
+                    <button class="relative -ml-px inline-flex items-center rounded-r-md bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                      </svg>
+                    </button>
+                    </span>
+                    </div>
+                </div>
+                <div class="overflow-auto">
+                    <div class="code">
+                        <table class="chroma table-code w-full {{ if .currentStyle }}{{ if .currentStyle.SoftWrap }}whitespace-pre-wrap{{ else }}whitespace-pre{{ end }}{{ else }}whitespace-pre{{ end }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
+                            <tbody>
+                            <tr>
+                                <td class="select-none line-num px-4">1</td><td class="line-code break-all">This is a string</td>
+                            </tr>
+                            <tr>
+                                <td class="select-none line-num px-4">2</td><td class="line-code break-all">This is a really really really really really really really really long string</td>
+                            </tr>
+                            <tr>
+                                <td class="select-none line-num px-4">3</td><td class="line-code break-all"></td>
+                            </tr>
+                            <tr class="red-diff">
+                                <td class="select-none line-num px-4">4</td><td class="line-code break-all">- code removed</td>
+                            </tr>
+                            <tr class="red-diff">
+                                <td class="select-none line-num px-4">5</td><td class="line-code break-all">- another pretty pretty pretty pretty pretty pretty long code removed</td>
+                            </tr>
+                            <tr class="green-diff">
+                                <td class="select-none line-num px-4">6</td><td class="line-code break-all">+ code added</td>
+                            </tr>
+                            <tr class="green-diff">
+                                <td class="select-none line-num px-4">7</td><td class="line-code break-all">+ added a line which help to demonstrate the difference between enabling and disabling soft wrap</td>
+                            </tr>
+                            <tr>
+                                <td class="select-none line-num px-4">8</td><td class="line-code break-all"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex">
+                <form method="post" action="{{ $.c.ExternalUrl }}/settings/style" class="mr-2">
+                    <div class="mt-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                        <div class="flex items-center">
+                            <input id="no-soft-wrap" value="false" name="softwrap" type="radio" {{ if .currentStyle }}{{ if not .currentStyle.SoftWrap }}checked{{ end }}{{ else }}checked{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden [&:not(:checked)]:before:hidden">
+                            <label for="no-soft-wrap" class="ml-3 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "settings.style.no-soft-wrap" }}</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="soft-wrap" value="true" name="softwrap" type="radio" {{ if .currentStyle }}{{ if .currentStyle.SoftWrap }}checked{{ end }}{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden [&:not(:checked)]:before:hidden">
+                            <label for="soft-wrap" class="ml-3 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "settings.style.soft-wrap" }}</label>
+                        </div>
+                    </div>
+                    <div class="mt-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                        <div class="flex-2">
+                            <label for="removedlinecolor" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ .locale.Tr "settings.style.removed-lines-color" }}</label>
+                            <input type="color" value="{{ if .currentStyle }}{{ .currentStyle.RemovedLineColor }}{{ else }}#ff0000{{ end }}" id="removedlinecolor" name="removedlinecolor">
+                        </div>
+                        <div class="flex-2">
+                            <label for="addedlinecolor" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ .locale.Tr "settings.style.added-lines-color" }}</label>
+                            <input type="color" value="{{ if .currentStyle }}{{ .currentStyle.AddedLineColor }}{{ else }}#00ff80{{ end }}" id="addedlinecolor" name="addedlinecolor">
+                        </div>
+                        <div class="flex-2">
+                            <label for="gitlinecolor" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ .locale.Tr "settings.style.git-lines-color" }}</label>
+                            <input type="color" value="{{ if .currentStyle }}{{ .currentStyle.GitLineColor }}{{ else }}#8f8f8f{{ end }}" id="gitlinecolor" name="gitlinecolor">
+                        </div>
+                    </div>
+                    {{ .csrfHtml }}
+                    <button type="submit" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "settings.style.save-style" }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="{{ asset "style_preferences.ts" }}"></script>
+
+{{ template "settings_footer" .}}
+{{ template "footer" .}}

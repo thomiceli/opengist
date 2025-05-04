@@ -56,7 +56,11 @@ func (s *Server) registerRoutes() {
 		sA := r.SubGroup("/settings")
 		{
 			sA.Use(logged)
-			sA.GET("", settings.UserSettings)
+			sA.GET("", settings.UserAccount)
+			sA.GET("/mfa", settings.UserMFA)
+			sA.GET("/ssh", settings.UserSSHKeys)
+			sA.GET("/style", settings.UserStyle)
+			sA.POST("/style", settings.ProcessUserStyle)
 			sA.POST("/email", settings.EmailProcess)
 			sA.DELETE("/account", settings.AccountDeleteProcess)
 			sA.POST("/ssh-keys", settings.SshKeysProcess)

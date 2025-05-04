@@ -74,11 +74,11 @@
                     <div class="code">
                         {{ $fileslug := slug $file.Filename }}
                         {{ if ne $file.Content "" }}
-                            <table class="chroma table-code w-full whitespace-pre" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
+                            <table class="chroma table-code w-full {{ if $.currentStyle }}{{ if $.currentStyle.SoftWrap }}whitespace-pre-wrap{{ else }}whitespace-pre{{ end }}{{ else }}whitespace-pre{{ end }}" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
                                 <tbody>
                                 {{ $ii := "1" }}
                                 {{ $i := toInt $ii }}
-                                {{ range $line := $file.Lines }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code">{{ $line | safe }}</td></tr>{{ $i = inc $i }}{{ end }}
+                                {{ range $line := $file.Lines }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code break-all">{{ $line | safe }}</td></tr>{{ $i = inc $i }}{{ end }}
                                 </tbody>
                             </table>
                         {{ end }}

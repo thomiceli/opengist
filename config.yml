@@ -110,6 +110,9 @@ oidc.discovery-url:
 oidc.group-claim-name:
 # The name of the group that should receive admin rights
 oidc.admin-group:
+# If set to true, users will not be able to unlink their OIDC accounts from the settings page.
+# This ensures users remain authenticated through the configured identity provider.
+oidc.disable-unlink-account: false
 
 # Instance name
 # Set your own custom name to be displayed instead of 'Opengist'

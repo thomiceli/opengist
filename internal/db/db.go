@@ -39,12 +39,15 @@ type databaseInfo struct {
 	User     string
 	Password string
 	Database string
+	SSLMode  string
 }
 
 var DatabaseInfo *databaseInfo
 
 func parseDBURI(uri string) (*databaseInfo, error) {
 	info := &databaseInfo{}
+
+	info.SSLMode = "disable"
 
 	if uri == ":memory:" {
 		info.Type = SQLite
@@ -83,6 +86,13 @@ func parseDBURI(uri string) (*databaseInfo, error) {
 	if u.User != nil {
 		info.User = u.User.Username()
 		info.Password, _ = u.User.Password()
+	}
+
+	if u.RawQuery != "" {
+		q, _ := url.ParseQuery(u.RawQuery)
+		if sslmode := q.Get("sslmode"); sslmode != "" && info.Type == PostgreSQL {
+			info.SSLMode = sslmode
+		}
 	}
 
 	switch info.Type {
@@ -222,7 +232,7 @@ func setupSQLite(dbInfo databaseInfo) error {
 
 func setupPostgres(dbInfo databaseInfo) error {
 	var err error
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbInfo.Host, dbInfo.Port, dbInfo.User, dbInfo.Password, dbInfo.Database)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbInfo.Host, dbInfo.Port, dbInfo.User, dbInfo.Password, dbInfo.Database, dbInfo.SSLMode)
 
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger:         logger.Default.LogMode(logger.Silent),

@@ -164,12 +164,19 @@ func Setup(dbUri string) error {
 
 	// Default admin setting values
 	return initAdminSettings(map[string]string{
-		SettingDisableSignup:          "0",
-		SettingRequireLogin:           "0",
-		SettingAllowGistsWithoutLogin: "0",
-		SettingDisableLoginForm:       "0",
-		SettingDisableGravatar:        "0",
+		SettingDisableSignup:          boolToString(config.C.SettingDisableSignup),
+		SettingRequireLogin:           boolToString(config.C.SettingRequireLogin),
+		SettingAllowGistsWithoutLogin: boolToString(config.C.SettingAllowGistsWithoutLogin),
+		SettingDisableLoginForm:       boolToString(config.C.SettingDisableLoginForm),
+		SettingDisableGravatar:        boolToString(config.C.SettingDisableGravatar),
 	})
+}
+
+func boolToString(value bool) string {
+	if value {
+		return "1"
+	}
+	return "0"
 }
 
 func Close() error {

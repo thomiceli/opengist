@@ -90,7 +90,7 @@ func OauthCallback(ctx *context.Context) error {
 			return ctx.ErrorRes(500, "Cannot get user", err)
 		}
 
-		if user.NickName == "" {
+		if user.NickName == "" || config.C.OIDCEmailLocalPartAsUsername {
 			user.NickName = strings.Split(user.Email, "@")[0]
 		}
 

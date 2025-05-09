@@ -26,6 +26,7 @@ jobs:
           helm package ./opengist
 
           # First time, create the index
+          wget -q https://helm.opengist.io/index.yaml
           if [ ! -f index.yaml ]; then
             helm repo index --url https://helm.opengist.io .
           else

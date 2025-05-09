@@ -32,6 +32,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.deployment.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -49,6 +52,10 @@ spec:
               mountPath: /init/config
             - name: config-volume
               mountPath: /config-volume
+          {{- if .Values.deployment.env }}
+          env:
+            {{- toYaml .Values.deployment.env | nindent 12 }}
+          {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

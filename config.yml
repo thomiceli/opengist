@@ -111,6 +111,18 @@ oidc.group-claim-name:
 # The name of the group that should receive admin rights
 oidc.admin-group:
 
+# LDAP authentication configuration
+# URL of the LDAP instance e.g: ldap://ldap.example.com:389 ; if not set, LDAP authentication is disabled
+ldap.url:
+# Bind DN to authenticate against the LDAP e.g: cn=read-only-admin,dc=example,dc=com
+ldap.bind-dn:
+# The password for the Bind DN.
+ldap.bind-credentials:
+# The Base DN to start search from e.g: ou=People,dc=example,dc=com
+ldap.search-base:
+# The filter to search against (the format string %s will be replaced with the username) e.g: (uid=%s)
+ldap.search-filter:
+
 # Instance name
 # Set your own custom name to be displayed instead of 'Opengist'
 custom.name:

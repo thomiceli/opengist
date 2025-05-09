@@ -79,6 +79,12 @@ type config struct {
 
 	MetricsEnabled bool `yaml:"metrics.enabled" env:"OG_METRICS_ENABLED"`
 
+	LDAPUrl             string `yaml:"ldap.url" env:"OG_LDAP_URL"`
+	LDAPBindDn          string `yaml:"ldap.bind-dn" env:"OG_LDAP_BIND_DN"`
+	LDAPBindCredentials string `yaml:"ldap.bind-credentials" env:"OG_LDAP_BIND_CREDENTIALS"`
+	LDAPSearchBase      string `yaml:"ldap.search-base" env:"OG_LDAP_SEARCH_BASE"`
+	LDAPSearchFilter    string `yaml:"ldap.search-filter" env:"OG_LDAP_SEARCH_FILTER"`
+
 	CustomName    string       `yaml:"custom.name" env:"OG_CUSTOM_NAME"`
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`

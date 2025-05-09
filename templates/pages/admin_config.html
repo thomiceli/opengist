@@ -71,6 +71,19 @@
             <dt>OIDC Discovery URL</dt><dd>{{ if .c.OIDCDiscoveryUrl }}&#60;defined&#62;{{ end }}</dd>
             <dt>OIDC Group Claim Name</dt><dd>{{ .c.OIDCGroupClaimName }}</dd>
             <dt>OIDC Admin Group</dt><dd>{{ .c.OIDCAdminGroup }}</dd>
+            <div class="relative col-span-3 mt-4">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">LDAP</span>
+                </div>
+            </div>
+            <dt>LDAP URL</dt><dd>{{ .c.LDAPUrl }}</dd>
+            <dt>LDAP Bind DN</dt><dd>{{ .c.LDAPBindDn }}</dd>
+            <dt>LDAP Bind Credentials</dt><dd>{{ if .c.LDAPBindCredentials }}&#60;defined&#62;{{ end }}</dd>
+            <dt>LDAP Search Base</dt><dd>{{ .c.LDAPSearchBase }}</dd>
+            <dt>LDAP Search Filter</dt><dd>{{ .c.LDAPSearchFilter }}</dd>
         </dl>
     </div>
     <div>

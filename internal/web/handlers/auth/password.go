@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/auth/ldap"
 	passwordpkg "github.com/thomiceli/opengist/internal/auth/password"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
@@ -114,6 +115,7 @@ func ProcessLogin(ctx *context.Context) error {
 		return ctx.ErrorRes(403, ctx.Tr("error.login-disabled-form"), nil)
 	}
 
+	var user *db.User
 	var err error
 	sess := ctx.GetSession()
 
@@ -121,26 +123,16 @@ func ProcessLogin(ctx *context.Context) error {
 	if err = ctx.Bind(dto); err != nil {
 		return ctx.ErrorRes(400, ctx.Tr("error.cannot-bind-data"), err)
 	}
-	password := dto.Password
 
-	var user *db.User
-
-	if user, err = db.GetUserByUsername(dto.Username); err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return ctx.ErrorRes(500, "Cannot get user", err)
+	if ldap.Enabled() {
+		if user, err = tryLdapLogin(ctx, dto.Username, dto.Password); err != nil {
+			return err
 		}
-		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-		ctx.AddFlash(ctx.Tr("flash.auth.invalid-credentials"), "error")
-		return ctx.RedirectTo("/login")
 	}
-
-	if ok, err := passwordpkg.VerifyPassword(password, user.Password); !ok {
-		if err != nil {
-			return ctx.ErrorRes(500, "Cannot check for password", err)
+	if user == nil {
+		if user, err = tryDbLogin(ctx, dto.Username, dto.Password); user == nil {
+			return err
 		}
-		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-		ctx.AddFlash(ctx.Tr("flash.auth.invalid-credentials"), "error")
-		return ctx.RedirectTo("/login")
 	}
 
 	// handle MFA
@@ -167,4 +159,60 @@ func Logout(ctx *context.Context) error {
 	ctx.DeleteSession()
 	ctx.DeleteCsrfCookie()
 	return ctx.RedirectTo("/all")
+}
+
+func tryDbLogin(ctx *context.Context, username, password string) (user *db.User, err error) {
+	if user, err = db.GetUserByUsername(username); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ctx.ErrorRes(500, "Cannot get user", err)
+		}
+
+		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
+		ctx.AddFlash(ctx.Tr("flash.auth.invalid-credentials"), "error")
+		return nil, ctx.RedirectTo("/login")
+	}
+
+	if ok, err := passwordpkg.VerifyPassword(password, user.Password); !ok {
+		if err != nil {
+			return nil, ctx.ErrorRes(500, "Cannot check for password", err)
+		}
+		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
+		ctx.AddFlash(ctx.Tr("flash.auth.invalid-credentials"), "error")
+		return nil, ctx.RedirectTo("/login")
+	}
+
+	return user, nil
+}
+
+func tryLdapLogin(ctx *context.Context, username, password string) (user *db.User, err error) {
+	ok, err := ldap.Authenticate(username, password)
+	if err != nil {
+		log.Info().Err(err).Msgf("LDAP authentication error")
+		return nil, ctx.ErrorRes(500, "Cannot get user", err)
+	}
+
+	if !ok {
+		log.Warn().Msg("Invalid LDAP authentication attempt from " + ctx.RealIP())
+		return nil, nil
+	}
+
+	if user, err = db.GetUserByUsername(username); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ctx.ErrorRes(500, "Cannot get user", err)
+		}
+	}
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		user = &db.User{
+			Username: username,
+		}
+		if err = user.Create(); err != nil {
+			log.Warn().Err(err).Msg("Cannot create user after LDAP authentication")
+			return nil, ctx.ErrorRes(500, "Cannot create user", err)
+		}
+
+		return user, nil
+	}
+
+	return user, nil
 }

@@ -12,7 +12,6 @@ type AdminSetting struct {
 const (
 	SettingDisableSignup          = "disable-signup"
 	SettingRequireLogin           = "require-login"
-	SettingEnableLDAP             = "enable-ldap"
 	SettingAllowGistsWithoutLogin = "allow-gists-without-login"
 	SettingDisableLoginForm       = "disable-login-form"
 	SettingDisableGravatar        = "disable-gravatar"

@@ -45,8 +45,6 @@ Here you can change a limited number of settings without restarting the instance
     - Forbid the creation of new accounts.
 - Require login
     - Enforce users to be logged in to see gists.
-- Enable LDAP
-    - Allow users to use LDAP authentication. If LDAP authentication fails, it will try local authentication.
 - Allow individual gists without login
     - Allow individual gists to be viewed and downloaded without login, while requiring login for discovering gists.
 - Disable login form

@@ -118,8 +118,6 @@ func configWithDefaults() (*config, error) {
 	c.SshPort = "2222"
 	c.SshKeygen = "ssh-keygen"
 
-	c.LDAPUrl = "ldap://0.0.0.0:389"
-
 	c.GitlabName = "GitLab"
 
 	c.GiteaUrl = "https://gitea.com"

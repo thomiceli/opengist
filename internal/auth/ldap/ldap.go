@@ -6,6 +6,10 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 )
 
+func Enabled() bool {
+	return config.C.LDAPUrl != ""
+}
+
 // Authenticate attempts to authenticate a user against the configured LDAP instance.
 func Authenticate(username, password string) (bool, error) {
 	l, err := ldap.DialURL(config.C.LDAPUrl)

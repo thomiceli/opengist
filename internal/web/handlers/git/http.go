@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/thomiceli/opengist/internal/auth/ldap"
 	"github.com/thomiceli/opengist/internal/auth/password"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
@@ -112,12 +113,28 @@ func GitHttp(ctx *context.Context) error {
 					userToCheckPermissions = &gist.User
 				}
 
-				if ok, err := password.VerifyPassword(authPassword, userToCheckPermissions.Password); !ok {
-					if err != nil {
-						return ctx.ErrorRes(500, "Cannot verify password", err)
+				// ldap
+				ldapSuccess := false
+				if ldap.Enabled() {
+					if ok, err := ldap.Authenticate(userToCheckPermissions.Username, authPassword); !ok {
+						if err != nil {
+							log.Warn().Err(err).Msg("LDAP authentication error")
+						}
+						log.Warn().Msg("Invalid LDAP authentication attempt from " + ctx.RealIP())
+					} else {
+						ldapSuccess = true
 					}
-					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-					return ctx.PlainText(404, "Check your credentials or make sure you have access to the Gist")
+				}
+
+				// password
+				if !ldapSuccess {
+					if ok, err := password.VerifyPassword(authPassword, userToCheckPermissions.Password); !ok {
+						if err != nil {
+							return ctx.ErrorRes(500, "Cannot verify password", err)
+						}
+						log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
+						return ctx.PlainText(404, "Check your credentials or make sure you have access to the Gist")
+					}
 				}
 			} else {
 				var user *db.User
@@ -128,13 +145,25 @@ func GitHttp(ctx *context.Context) error {
 					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
 					return ctx.ErrorRes(401, "Invalid credentials", nil)
 				}
-
-				if ok, err := password.VerifyPassword(authPassword, user.Password); !ok {
-					if err != nil {
-						return ctx.ErrorRes(500, "Cannot check for password", err)
+				ldapSuccess := false
+				if ldap.Enabled() {
+					if ok, err := ldap.Authenticate(user.Username, authPassword); !ok {
+						if err != nil {
+							log.Warn().Err(err).Msg("LDAP authentication error")
+						}
+						log.Warn().Msg("Invalid LDAP authentication attempt from " + ctx.RealIP())
+					} else {
+						ldapSuccess = true
 					}
-					log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
-					return ctx.ErrorRes(401, "Invalid credentials", nil)
+				}
+				if !ldapSuccess {
+					if ok, err := password.VerifyPassword(authPassword, user.Password); !ok {
+						if err != nil {
+							return ctx.ErrorRes(500, "Cannot check for password", err)
+						}
+						log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
+						return ctx.ErrorRes(401, "Invalid credentials", nil)
+					}
 				}
 
 				if isInit {

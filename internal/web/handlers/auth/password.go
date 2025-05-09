@@ -124,7 +124,7 @@ func ProcessLogin(ctx *context.Context) error {
 		return ctx.ErrorRes(400, ctx.Tr("error.cannot-bind-data"), err)
 	}
 
-	if ldap.Enabled() == true {
+	if ldap.Enabled() {
 		if user, err = tryLdapLogin(ctx, dto.Username, dto.Password); err != nil {
 			return err
 		}

@@ -672,7 +672,7 @@ func convertUTF8ToOctal(name string) string {
 }
 
 func convertURLToOctal(name string) string {
-	decoded, err := url.QueryUnescape(name)
+	decoded, err := url.PathUnescape(name)
 	if err != nil {
 		return name
 	}

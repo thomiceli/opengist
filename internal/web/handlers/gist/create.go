@@ -52,7 +52,7 @@ func ProcessCreate(ctx *context.Context) error {
 			name = "gistfile" + strconv.Itoa(fileCounter) + ".txt"
 		}
 
-		escapedValue, err := url.QueryUnescape(content)
+		escapedValue, err := url.PathUnescape(content)
 		if err != nil {
 			return ctx.ErrorRes(400, ctx.Tr("error.invalid-character-unescaped"), err)
 		}

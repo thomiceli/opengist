@@ -12,15 +12,18 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/util"
 	"go.abhg.dev/goldmark/mermaid"
+	"regexp"
 )
 
 func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
 	var buf bytes.Buffer
 	err := newMarkdown().Convert([]byte(gist.Preview), &buf)
 
+	// remove links in Markdown Preview, quick fix for now
+	re := regexp.MustCompile(`<a\b[^>]*>(.*?)</a>`)
 	return RenderedGist{
 		Gist: gist,
-		HTML: buf.String(),
+		HTML: re.ReplaceAllString(buf.String(), `$1`),
 	}, err
 }
 

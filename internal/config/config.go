@@ -31,6 +31,7 @@ type config struct {
 
 	LogLevel     string `yaml:"log-level" env:"OG_LOG_LEVEL"`
 	LogOutput    string `yaml:"log-output" env:"OG_LOG_OUTPUT"`
+	LogPath      string `yaml:"log-path" env:"OG_LOG_PATH"`
 	ExternalUrl  string `yaml:"external-url" env:"OG_EXTERNAL_URL"`
 	OpengistHome string `yaml:"opengist-home" env:"OG_OPENGIST_HOME"`
 
@@ -152,6 +153,10 @@ func InitConfig(configPath string, out io.Writer) error {
 		c.OpengistHome = filepath.Join(homeDir, ".opengist")
 	}
 
+	if c.LogPath == "" {
+		c.LogPath = filepath.Join(GetHomeDir(), "log")
+	}
+
 	if err = checks(c); err != nil {
 		return err
 	}
@@ -169,7 +174,7 @@ func InitConfig(configPath string, out io.Writer) error {
 }
 
 func InitLog() {
-	if err := os.MkdirAll(filepath.Join(GetHomeDir(), "log"), 0755); err != nil {
+	if err := os.MkdirAll(C.LogPath, 0755); err != nil {
 		panic(err)
 	}
 
@@ -210,7 +215,7 @@ func InitLog() {
 			logWriters = append(logWriters, consoleWriter)
 			defer func() { log.Debug().Msg("Logging to stdout") }()
 		case "file":
-			file, err := os.OpenFile(filepath.Join(GetHomeDir(), "log", "opengist.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			file, err := os.OpenFile(filepath.Join(C.LogPath, "opengist.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				panic(err)
 			}

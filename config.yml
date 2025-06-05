@@ -8,6 +8,9 @@ log-level: warn
 # Set the log output to one or more of the following: `stdout`, `file`. Default: stdout,file
 log-output: stdout,file
 
+# Set the path to the log file.
+log-path: /tmp/logaaa
+
 # Public URL to access to Opengist
 external-url:
 

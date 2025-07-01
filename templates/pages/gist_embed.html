@@ -3,8 +3,8 @@
     {{ range $file := .files }}
         <div class="rounded-md border-1 border-gray-100 dark:border-gray-800 overflow-auto mb-4">
             <div class="border-b-1 border-gray-100 dark:border-gray-700 text-xs p-2 pl-4 bg-gray-50 dark:bg-gray-800 text-gray-400">
-                <a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}#file-{{ slug $file.Filename }}"><span class="font-bold text-gray-700 dark:text-gray-200">{{ $file.Filename }}</span> · {{ $file.HumanSize }} · {{ $file.Type }}</a>
-                <span class="float-right"><a target="_blank" href="{{ $.baseHttpUrl }}">Hosted via Opengist</a> · <span class="text-gray-700 dark:text-gray-200 font-bold"><a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}">view raw</a></span></span>
+                <a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}#file-{{ slug $file.Filename }}"><span class="font-bold text-gray-700 dark:text-gray-200">{{ $file.Filename }}</span> &middot; {{ $file.HumanSize }} &middot; {{ $file.Type }}</a>
+                <span class="float-right"><a target="_blank" href="{{ $.baseHttpUrl }}">Hosted via Opengist</a> &middot; <span class="text-gray-700 dark:text-gray-200 font-bold"><a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}">view raw</a></span></span>
             </div>
             {{ if $file.Truncated }}
                 <div class="text-xs px-4 bg-gray-50 py-1.5 border-b-1 border-gray-100 dark:border-gray-700">

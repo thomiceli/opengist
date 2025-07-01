@@ -155,7 +155,7 @@ async function loginWithPasskey() {
         }
 
         setTimeout(() => {
-            window.location.href = '/';
+            window.location.href = `${baseUrl}`;
         }, 100);
     } catch (error) {
         console.error('Login error:', error);

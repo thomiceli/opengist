@@ -25,6 +25,7 @@ func (p *OIDCProvider) RegisterProvider() error {
 		"openid",
 		"email",
 		"profile",
+		config.C.OIDCGroupClaimName,
 	)
 
 	if err != nil {

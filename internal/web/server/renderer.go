@@ -58,6 +58,9 @@ func (s *Server) setFuncMap() {
 		"isMarkdown": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".md"
 		},
+		"isJupyter": func(i string) bool {
+			return strings.ToLower(filepath.Ext(i)) == ".ipynb"
+		},
 		"httpStatusText": http.StatusText,
 		"loadedTime": func(startTime time.Time) string {
 			return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"

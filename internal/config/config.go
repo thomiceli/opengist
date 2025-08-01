@@ -51,6 +51,8 @@ type config struct {
 	HttpPort string `yaml:"http.port" env:"OG_HTTP_PORT"`
 	HttpGit  bool   `yaml:"http.git-enabled" env:"OG_HTTP_GIT_ENABLED"`
 
+	UnixSocketPermissions string `yaml:"unix-socket-permissions" env:"OG_UNIX_SOCKET_PERMISSIONS"`
+
 	SshGit            bool   `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"`
 	SshHost           string `yaml:"ssh.host" env:"OG_SSH_HOST"`
 	SshPort           string `yaml:"ssh.port" env:"OG_SSH_PORT"`
@@ -112,6 +114,8 @@ func configWithDefaults() (*config, error) {
 	c.HttpHost = "0.0.0.0"
 	c.HttpPort = "6157"
 	c.HttpGit = true
+
+	c.UnixSocketPermissions = "0666"
 
 	c.SshGit = true
 	c.SshHost = "0.0.0.0"

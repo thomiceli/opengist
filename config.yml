@@ -43,6 +43,7 @@ sqlite.journal-mode: WAL
 
 # HTTP server configuration
 # Host to bind to. Default: 0.0.0.0
+# Use an IP address for network binding. Use a path for Unix socket binding (e.g. /run/opengist.sock)
 http.host: 0.0.0.0
 
 # Port to bind to. Default: 6157
@@ -50,6 +51,9 @@ http.port: 6157
 
 # Enable or disable git operations (clone, pull, push) via HTTP (either `true` or `false`). Default: true
 http.git-enabled: true
+
+# File permissions for Unix socket (octal format). Default: 0666
+unix-socket-permissions: 0666
 
 # Enable or disable the metrics endpoint (either `true` or `false`). Default: false
 metrics.enabled: false

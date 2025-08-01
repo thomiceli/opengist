@@ -36,11 +36,12 @@ var CmdStart = cli.Command{
 
 		Initialize(ctx)
 
-		go server.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions"), false).Start()
+		server := server.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions"), false)
+		go server.Start()
 		go ssh.Start()
 
 		<-stopCtx.Done()
-		shutdown()
+		shutdown(server)
 		return nil
 	},
 }
@@ -130,7 +131,7 @@ func Initialize(ctx *cli.Context) {
 	}
 }
 
-func shutdown() {
+func shutdown(server *server.Server) {
 	log.Info().Msg("Shutting down database...")
 	if err := db.Close(); err != nil {
 		log.Error().Err(err).Msg("Failed to close database")
@@ -140,6 +141,8 @@ func shutdown() {
 		log.Info().Msg("Shutting down index...")
 		index.Close()
 	}
+
+	server.Stop()
 
 	log.Info().Msg("Shutdown complete")
 }

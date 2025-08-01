@@ -15,7 +15,6 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
-	"strings"
 	"syscall"
 )
 
@@ -143,12 +142,7 @@ func shutdown(server *server.Server) {
 		index.Close()
 	}
 
-	// Stop the server - determine type based on config
-	if strings.Contains(config.C.HttpHost, "/") || strings.Contains(config.C.HttpHost, "\\") {
-		server.StopUnixSocket()
-	} else {
-		server.Stop()
-	}
+	server.Stop()
 
 	log.Info().Msg("Shutdown complete")
 }

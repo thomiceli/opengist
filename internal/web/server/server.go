@@ -117,12 +117,21 @@ func (s *Server) startUnixSocket() {
 }
 
 func (s *Server) Stop() {
+	if isSocketPath(config.C.HttpHost) {
+		s.stopUnixSocket()
+	} else {
+		s.stopHTTP()
+	}
+}
+
+func (s *Server) stopHTTP() {
+	log.Info().Msg("Stopping HTTP server...")
 	if err := s.echo.Close(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to stop HTTP server")
 	}
 }
 
-func (s *Server) StopUnixSocket() {
+func (s *Server) stopUnixSocket() {
 	log.Info().Msg("Stopping Unix socket server...")
 
 	var socketPath string

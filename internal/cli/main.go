@@ -38,7 +38,7 @@ var CmdStart = cli.Command{
 		Initialize(ctx)
 
 		server := server.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions"), false)
-		go server.StartAuto()
+		go server.Start()
 		go ssh.Start()
 
 		<-stopCtx.Done()

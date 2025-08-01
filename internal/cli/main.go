@@ -15,6 +15,7 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"strings"
 	"syscall"
 )
 
@@ -37,7 +38,7 @@ var CmdStart = cli.Command{
 		Initialize(ctx)
 
 		server := server.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions"), false)
-		go server.StartUnixSocket()
+		go server.StartAuto()
 		go ssh.Start()
 
 		<-stopCtx.Done()
@@ -142,7 +143,12 @@ func shutdown(server *server.Server) {
 		index.Close()
 	}
 
-	server.StopUnixSocket()
+	// Stop the server - determine type based on config
+	if strings.Contains(config.C.HttpHost, "/") || strings.Contains(config.C.HttpHost, "\\") {
+		server.StopUnixSocket()
+	} else {
+		server.Stop()
+	}
 
 	log.Info().Msg("Shutdown complete")
 }

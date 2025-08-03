@@ -1,6 +1,9 @@
+@import "highlight.js/styles/github.min.css";
+
 :root {
     @import "github-markdown-css/github-markdown-light";
     @import './catppuccin-latte';
+    @import './ipynb';
 }
 
 .dark {

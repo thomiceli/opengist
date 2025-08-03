@@ -1,4 +1,5 @@
 import hljs from 'highlight.js';
+import latex from './latex';
 import showdown from 'showdown';
 
 class IPynb {
@@ -76,7 +77,7 @@ class IPynb {
       case 'markdown':
         const converter = new showdown.Converter();
         cellElement.classList.add('markdown-cell');
-        cellElement.innerHTML = `<div class="markdown-body">${converter.makeHtml(source)}}</div>`;
+        cellElement.innerHTML = `<div class="markdown-body">${converter.makeHtml(latex.render(source))}</div>`;
         break;
       case 'code':
         cellElement.classList.add('code-cell');

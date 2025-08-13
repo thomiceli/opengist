@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/auth/ldap"
 	passwordpkg "github.com/thomiceli/opengist/internal/auth/password"
@@ -124,14 +125,23 @@ func ProcessLogin(ctx *context.Context) error {
 		return ctx.ErrorRes(400, ctx.Tr("error.cannot-bind-data"), err)
 	}
 
-	if ldap.Enabled() {
-		if user, err = tryLdapLogin(ctx, dto.Username, dto.Password); err != nil {
-			return err
-		}
-	}
-	if user == nil {
+	localUser, err := db.GetUserByUsername(dto.Username)
+	hasLocalPassword := err == nil && localUser.Password != ""
+
+	if hasLocalPassword {
 		if user, err = tryDbLogin(ctx, dto.Username, dto.Password); user == nil {
 			return err
+		}
+	} else {
+		if ldap.Enabled() {
+			if user, err = tryLdapLogin(ctx, dto.Username, dto.Password); err != nil {
+				return err
+			}
+		}
+		if user == nil {
+			if user, err = tryDbLogin(ctx, dto.Username, dto.Password); user == nil {
+				return err
+			}
 		}
 	}
 

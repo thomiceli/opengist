@@ -59,6 +59,21 @@ class IPynb {
           imgEl.src = `data:${imgType};base64,${output.data[imgType]}`;
           outputElement.innerHTML += imgEl.outerHTML;
         }
+      } else if (output.output_type === 'execute_result') {
+        if (output.data['text/plain']) {
+          outputElement.innerHTML += `<pre>${output.data['text/plain']}</pre>`;
+        }
+        if (output.data['text/html']) {
+          outputElement.innerHTML += output.data['text/html'];
+        }
+        if (output.data['image/png']) {
+          const imgEl = document.createElement('img');
+          imgEl.src = `data:image/png;base64,${output.data['image/png']}`;
+          outputElement.appendChild(imgEl);
+        }
+      } else if (output.output_type === 'stdout' || output.output_type === 'stderr') {
+        outputElement.classList.add(output.output_type);
+        outputElement.textContent = output.text.join('');
       } else if (output.output_type === 'error') {
         outputElement.classList.add('error');
         outputElement.textContent = `Error: ${output.ename}: ${output.evalue}`;

@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let allEditorsdom = document.querySelectorAll("#editors > .editor");
     let firstEditordom = allEditorsdom[0];
 
+    const fileUploadEditorMaxSize = 100 * 1024;  // 100 KB
     const txtFacet = Facet.define<string>({
         combine(values) {
             return values;
@@ -292,8 +293,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             fileUploadContainer!.appendChild(removeFileBtn);
 
-            // Hide the editor
-            editor.dom.classList.add("hidden-important");
+            // Hide the editor if the file is too large
+            if (file.size > fileUploadEditorMaxSize) {
+                editor.dom.classList.add("hidden-important");
+            }
 
             // set the filename input to the name of the uploaded file
             formfilename!.value = file.name;

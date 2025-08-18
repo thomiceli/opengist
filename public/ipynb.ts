@@ -43,7 +43,10 @@ class IPynb {
       outputElement.classList.add('jupyter-output');
 
       if (output.output_type === 'stream') {
-        outputElement.textContent = output.text.join('\n');
+        const textElement = document.createElement('pre');
+        textElement.classList.add('stream-output');
+        textElement.textContent = output.text.join('');
+        outputElement.appendChild(textElement);
       } else if (output.output_type === 'display_data' || output.output_type === 'execute_result') {
         if (output.data['text/plain']) {
           outputElement.innerHTML += `\n<pre>${output.data['text/plain']}</pre>`;
@@ -71,9 +74,6 @@ class IPynb {
           imgEl.src = `data:image/png;base64,${output.data['image/png']}`;
           outputElement.appendChild(imgEl);
         }
-      } else if (output.output_type === 'stdout' || output.output_type === 'stderr') {
-        outputElement.classList.add(output.output_type);
-        outputElement.textContent = output.text.join('');
       } else if (output.output_type === 'error') {
         outputElement.classList.add('error');
         outputElement.textContent = `Error: ${output.ename}: ${output.evalue}`;

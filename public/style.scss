@@ -1,13 +1,14 @@
-@import "highlight.js/styles/github.min.css";
 @import "katex/dist/katex.min.css";
 
 :root {
+    @import "highlight.js/scss/github";
     @import "github-markdown-css/github-markdown-light";
     @import './catppuccin-latte';
     @import './ipynb';
 }
 
 .dark {
+    @import "highlight.js/scss/github-dark";
     @import "github-markdown-css/github-markdown-dark";
     @import './catppuccin-macchiato';
 }

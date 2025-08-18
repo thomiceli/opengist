@@ -3,7 +3,7 @@
 # https://github.com/thomiceli/opengist/blob/master/docs/configuration/cheat-sheet.md
 
 # Set the log level to one of the following: debug, info, warn, error, fatal. Default: warn
-log-level: warn
+log-level: debug
 
 # Set the log output to one or more of the following: `stdout`, `file`. Default: stdout,file
 log-output: stdout,file

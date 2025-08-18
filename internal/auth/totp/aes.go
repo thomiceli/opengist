@@ -1,4 +1,4 @@
-package auth
+package totp
 
 import (
 	"crypto/aes"

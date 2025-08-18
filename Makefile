@@ -50,7 +50,7 @@ watch_backend:
 	OG_DEV=1 npx nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run -ldflags "-X $(VERSION_PKG)=$(GIT_TAG)" . --config config.yml'
 
 watch:
-	@sh ./scripts/watch.sh
+	@bash ./scripts/watch.sh
 
 clean:
 	@echo "Cleaning up build artifacts..."

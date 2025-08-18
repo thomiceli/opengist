@@ -10,6 +10,24 @@ document.addEventListener("DOMContentLoaded", () => {
     let allEditorsdom = document.querySelectorAll("#editors > .editor");
     let firstEditordom = allEditorsdom[0];
 
+    // Constants for file upload validation
+    const maxUploadFileSize = 10 * 1024 * 1024; // 10 MB
+    const whilelistedImageMimeTypes = [
+      new RegExp("image/.*"),
+    ]
+    const whilelistedTextMimeTypes = [
+      new RegExp("text/.*"),
+      new RegExp("application/(|(.*\\+))json"),
+      new RegExp("application/(|(.*\\+))xml"),
+      new RegExp("application/(|(.*\\+))yaml"),
+      new RegExp("application/(|(.*\\+))javascript"),
+      new RegExp("application/(|(.*\\+))x-.*"),
+    ]
+    const whilelistedMimeTypes = [
+      ...whilelistedImageMimeTypes,
+      ...whilelistedTextMimeTypes,
+    ]
+
     const txtFacet = Facet.define<string>({
         combine(values) {
             return values;
@@ -104,6 +122,14 @@ document.addEventListener("DOMContentLoaded", () => {
             let newWrapMode = (e.target as HTMLInputElement).value;
             setLineWrapping(editor, newWrapMode === "soft");
         };
+
+        dom.querySelector<HTMLInputElement>(".file-upload-container input[type='file']")!
+          .addEventListener("change", (e) => {
+            onFileInputChange(e, {
+                formfilename,
+                editor,
+            });
+          });
 
         dom.addEventListener("drop", (e) => {
             e.preventDefault(); // prevent the browser from opening the dropped file
@@ -257,6 +283,56 @@ document.addEventListener("DOMContentLoaded", () => {
         deleteBtn.previousElementSibling.classList.add("rounded-l-md");
         deleteBtn.previousElementSibling.classList.remove("rounded-md");
         checkForFirstDeleteButton();
+    }
+
+    function onFileInputChange(
+      e: Event,
+      {formfilename, editor}: {
+        formfilename: HTMLInputElement | null,
+        editor: EditorView
+      }
+    ) {
+        let fileInput = e.target as HTMLInputElement;
+        if (fileInput.files && fileInput.files.length > 0) {
+            // check if the file type is allowed
+            if (!whilelistedMimeTypes.some(mime => mime.test(fileInput.files[0].type))) {
+                alert("File type not allowed. Please upload a valid text or image file.");
+                return false;
+            }
+
+            // check if the file size is within limits
+            if (fileInput.files[0].size > maxUploadFileSize) {
+                alert(`File size exceeds the limit of ${maxUploadFileSize / 1024 / 1024} MB.`);
+                return false;
+            }
+
+            const fileUploadContainer = fileInput.closest(".file-upload-container")
+            const removeFileBtn = document.createElement("button");
+            removeFileBtn.className = "btn btn-secondary btn-sm ml-2";
+            removeFileBtn.innerText = "❌"
+            removeFileBtn.onclick = () => {
+                fileInput.value = "";
+                formfilename!.value = "";
+                editor.dispatch({
+                    changes: {from: 0, to: editor.state.doc.length, insert: ""},
+                });
+                fileUploadContainer!.removeChild(removeFileBtn);
+            }
+
+            fileUploadContainer!.appendChild(removeFileBtn);
+
+            // set the filename input to the name of the uploaded file
+            formfilename!.value = fileInput.files[0].name;
+            // read the file content and set it in the editor
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                editor.dispatch({
+                    changes: {from: 0, to: editor.state.doc.length, insert: event.target!.result as string},
+                });
+            };
+            reader.readAsText(fileInput.files[0]);
+            console.log("File read successfully", fileInput.files[0]);
+        }
     }
 
     document.onsubmit = () => {

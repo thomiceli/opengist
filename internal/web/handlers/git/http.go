@@ -6,10 +6,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/thomiceli/opengist/internal/auth/ldap"
-	"github.com/thomiceli/opengist/internal/auth/password"
-	"github.com/thomiceli/opengist/internal/web/context"
-	"github.com/thomiceli/opengist/internal/web/handlers"
 	"net/http"
 	"os"
 	"os/exec"
@@ -18,6 +14,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/auth/ldap"
+	"github.com/thomiceli/opengist/internal/auth/password"
+	"github.com/thomiceli/opengist/internal/web/context"
+	"github.com/thomiceli/opengist/internal/web/handlers"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -185,16 +186,15 @@ func GitHttp(ctx *context.Context) error {
 						return ctx.ErrorRes(500, "Cannot init repository in database", err)
 					}
 
-					err = gist.SerialiseInitRepository()
+					err = db.AddInitGistToQueue(gist.ID, user.ID)
 					if err != nil {
-						return ctx.ErrorRes(500, "Cannot serialise the repository", err)
+						return ctx.ErrorRes(500, "Cannot add inited gist to the queue", err)
 					}
-
 					ctx.SetData("gist", gist)
 				} else {
-					gist, err = db.DeserialiseInitRepository(user.Username)
+					gist, err = db.GetInitGistInQueueForUser(user.ID)
 					if err != nil {
-						return ctx.ErrorRes(500, "Cannot deserialise the repository", err)
+						return ctx.ErrorRes(500, "Cannot retrieve inited gist from the queue", err)
 					}
 
 					ctx.SetData("gist", gist)

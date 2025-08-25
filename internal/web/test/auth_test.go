@@ -203,28 +203,6 @@ func TestGitOperations(t *testing.T) {
 	err = s.Request("POST", "/", gist3, 302)
 	require.NoError(t, err)
 
-	gitOperations := func(credentials, owner, url, filename, pushOptions string, expectErrorClone, expectErrorCheck, expectErrorPush bool) {
-		log.Debug().Msgf("Testing %s %s %t %t %t", credentials, url, expectErrorClone, expectErrorCheck, expectErrorPush)
-		err := clientGitClone(credentials, owner, url)
-		if expectErrorClone {
-			require.Error(t, err)
-		} else {
-			require.NoError(t, err)
-		}
-		err = clientCheckRepo(url, filename)
-		if expectErrorCheck {
-			require.Error(t, err)
-		} else {
-			require.NoError(t, err)
-		}
-		err = clientGitPush(url, pushOptions)
-		if expectErrorPush {
-			require.Error(t, err)
-		} else {
-			require.NoError(t, err)
-		}
-	}
-
 	tests := []struct {
 		credentials      string
 		user             string
@@ -246,7 +224,7 @@ func TestGitOperations(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		gitOperations(test.credentials, test.user, test.url, "kaguya-file.txt", test.pushOptions, test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
+		gitCloneCheckPush(t, test.credentials, test.user, test.url, "kaguya-file.txt", test.pushOptions, test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
 	}
 
 	login(t, s, admin)
@@ -274,7 +252,7 @@ func TestGitOperations(t *testing.T) {
 	}
 
 	for _, test := range testsRequireLogin {
-		gitOperations(test.credentials, test.user, test.url, "kaguya-file.txt", test.pushOptions, test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
+		gitCloneCheckPush(t, test.credentials, test.user, test.url, "kaguya-file.txt", test.pushOptions, test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
 	}
 
 	login(t, s, admin)
@@ -282,7 +260,7 @@ func TestGitOperations(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, test := range tests {
-		gitOperations(test.credentials, test.user, test.url, "kaguya-file.txt", test.pushOptions, test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
+		gitCloneCheckPush(t, test.credentials, test.user, test.url, "kaguya-file.txt", test.pushOptions, test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
 	}
 }
 
@@ -297,40 +275,24 @@ func TestGitInit(t *testing.T) {
 	s.sessionCookie = ""
 	register(t, s, db.UserDTO{Username: "kaguya", Password: "kaguya"})
 
-	gitOperations := func(credentials, owner, url, filename, pushOptions string, expectErrorPush bool) {
-		log.Debug().Msgf("Testing %s %s %t", credentials, url, expectErrorPush)
-		err := clientGitInit(url)
-		require.NoError(t, err)
-		if url == "init" {
-			err = clientGitSetRemote(url, "origin", "http://"+credentials+"@localhost:6157/init/")
-		} else {
-			err = clientGitSetRemote(url, "origin", "http://"+credentials+"@localhost:6157/"+owner+"/"+url)
-		}
-		require.NoError(t, err)
-		err = clientGitPush(url, pushOptions)
-		if expectErrorPush {
-			require.Error(t, err)
-		} else {
-			require.NoError(t, err)
-		}
-	}
-
 	testsNewWithPush := []struct {
-		credentials     string
-		user            string
-		url             string
-		pushOptions     string
-		expectErrorPush bool
+		credentials      string
+		user             string
+		url              string
+		pushOptions      string
+		expectErrorClone bool
+		expectErrorCheck bool
+		expectErrorPush  bool
 	}{
-		{"", "kaguya", "gist1", "", true},
-		{"kaguya:wrongpass", "kaguya", "gist2", "", true},
-		{"fujiwara:fujiwara", "kaguya", "gist3", "", true},
-		{"kaguya:kaguya", "kaguya", "gist4", "", false},
-		{"kaguya:kaguya", "kaguya", "gist5/g", "", true},
+		{"", "kaguya", "gist1", "", true, true, true},
+		{"kaguya:wrongpass", "kaguya", "gist2", "", true, true, true},
+		{"fujiwara:fujiwara", "kaguya", "gist3", "", true, true, true},
+		{"kaguya:kaguya", "kaguya", "gist4", "", false, false, false},
+		{"kaguya:kaguya", "kaguya", "gist5/g", "", true, true, true},
 	}
 
 	for _, test := range testsNewWithPush {
-		gitOperations(test.credentials, test.user, test.url, "newfile.txt", test.pushOptions, test.expectErrorPush)
+		gitInitPush(t, test.credentials, test.user, test.url, "newfile.txt", test.pushOptions, test.expectErrorPush)
 	}
 
 	gist1db, err := db.GetGistByID("1")
@@ -338,7 +300,7 @@ func TestGitInit(t *testing.T) {
 	require.Equal(t, "kaguya", gist1db.User.Username)
 
 	for _, test := range testsNewWithPush {
-		gitOperations(test.credentials, test.user, test.url, "newfile.txt", test.pushOptions, test.expectErrorPush)
+		gitCloneCheckPush(t, test.credentials, test.user, test.url, "newfile.txt", test.pushOptions, test.expectErrorClone, test.expectErrorCheck, test.expectErrorPush)
 	}
 
 	count, err := db.CountAll(db.Gist{})
@@ -358,7 +320,7 @@ func TestGitInit(t *testing.T) {
 	}
 
 	for _, test := range testsNewWithInit {
-		gitOperations(test.credentials, "kaguya", test.url, "newfile.txt", test.pushOptions, test.expectErrorPush)
+		gitInitPush(t, test.credentials, "kaguya", test.url, "newfile.txt", test.pushOptions, test.expectErrorPush)
 	}
 
 	count, err = db.CountAll(db.Gist{})
@@ -383,8 +345,8 @@ func clientGitPush(url string, pushOptions string) error {
 	if err != nil {
 		return err
 	}
-	f.WriteString("new file")
-	f.Close()
+	_, _ = f.WriteString("new file")
+	_ = f.Close()
 
 	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt").Run()
 	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file").Run()
@@ -409,4 +371,44 @@ func clientGitSetRemote(path string, remoteName string, remoteUrl string) error 
 func clientCheckRepo(url string, file string) error {
 	_, err := os.ReadFile(filepath.Join(config.GetHomeDir(), "tmp", url, file))
 	return err
+}
+
+func gitCloneCheckPush(t *testing.T, credentials, owner, url, filename, pushOptions string, expectErrorClone, expectErrorCheck, expectErrorPush bool) {
+	log.Debug().Msgf("Testing %s %s %t %t %t", credentials, url, expectErrorClone, expectErrorCheck, expectErrorPush)
+	err := clientGitClone(credentials, owner, url)
+	if expectErrorClone {
+		require.Error(t, err)
+	} else {
+		require.NoError(t, err)
+	}
+	err = clientCheckRepo(url, filename)
+	if expectErrorCheck {
+		require.Error(t, err)
+	} else {
+		require.NoError(t, err)
+	}
+	err = clientGitPush(url, pushOptions)
+	if expectErrorPush {
+		require.Error(t, err)
+	} else {
+		require.NoError(t, err)
+	}
+}
+
+func gitInitPush(t *testing.T, credentials, owner, url, filename, pushOptions string, expectErrorPush bool) {
+	log.Debug().Msgf("Testing %s %s %t", credentials, url, expectErrorPush)
+	err := clientGitInit(url)
+	require.NoError(t, err)
+	if url == "init" {
+		err = clientGitSetRemote(url, "origin", "http://"+credentials+"@localhost:6157/init/")
+	} else {
+		err = clientGitSetRemote(url, "origin", "http://"+credentials+"@localhost:6157/"+owner+"/"+url)
+	}
+	require.NoError(t, err)
+	err = clientGitPush(url, pushOptions)
+	if expectErrorPush {
+		require.Error(t, err)
+	} else {
+		require.NoError(t, err)
+	}
 }

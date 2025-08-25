@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let editorsjs: EditorView[] = [];
     let editorsParentdom = document.getElementById("editors")!;
     let allEditorsdom = document.querySelectorAll("#editors > .editor");
-    let firstEditordom = allEditorsdom[0];
+    let firstEditordom = allEditorsdom[0].cloneNode(true) as HTMLElement;
 
     const fileUploadEditorMaxSize = 100 * 1024;  // 100 KB
     const txtFacet = Facet.define<string>({
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // removing the previous codemirror editor
         let newEditorDomCM = newEditorDom.querySelector(".cm-editor");
-        newEditorDomCM!.remove();
+        newEditorDomCM?.remove();
 
         // creating the new codemirror editor and append it in the editor div
         editorsjs.push(newEditor(newEditorDom));

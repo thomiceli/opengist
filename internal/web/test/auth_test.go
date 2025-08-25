@@ -212,9 +212,9 @@ func TestGitOperations(t *testing.T) {
 		expectErrorCheck bool
 		expectErrorPush  bool
 	}{
-		{"", "kaguya", "kaguya-pub-gist", "", false, false, true},
-		{"", "kaguya", "kaguya-unl-gist", "", false, false, true},
-		{"", "kaguya", "kaguya-priv-gist", "", true, true, true},
+		{":", "kaguya", "kaguya-pub-gist", "", false, false, true},
+		{":", "kaguya", "kaguya-unl-gist", "", false, false, true},
+		{":", "kaguya", "kaguya-priv-gist", "", true, true, true},
 		{"kaguya:kaguya", "kaguya", "kaguya-pub-gist", "", false, false, false},
 		{"kaguya:kaguya", "kaguya", "kaguya-unl-gist", "", false, false, false},
 		{"kaguya:kaguya", "kaguya", "kaguya-priv-gist", "", false, false, false},
@@ -240,9 +240,9 @@ func TestGitOperations(t *testing.T) {
 		expectErrorCheck bool
 		expectErrorPush  bool
 	}{
-		{"", "kaguya", "kaguya-pub-gist", "", true, true, true},
-		{"", "kaguya", "kaguya-unl-gist", "", true, true, true},
-		{"", "kaguya", "kaguya-priv-gist", "", true, true, true},
+		{":", "kaguya", "kaguya-pub-gist", "", true, true, true},
+		{":", "kaguya", "kaguya-unl-gist", "", true, true, true},
+		{":", "kaguya", "kaguya-priv-gist", "", true, true, true},
 		{"kaguya:kaguya", "kaguya", "kaguya-pub-gist", "", false, false, false},
 		{"kaguya:kaguya", "kaguya", "kaguya-unl-gist", "", false, false, false},
 		{"kaguya:kaguya", "kaguya", "kaguya-priv-gist", "", false, false, false},
@@ -284,7 +284,7 @@ func TestGitInit(t *testing.T) {
 		expectErrorCheck bool
 		expectErrorPush  bool
 	}{
-		{"", "kaguya", "gist1", "", true, true, true},
+		{":", "kaguya", "gist1", "", true, true, true},
 		{"kaguya:wrongpass", "kaguya", "gist2", "", true, true, true},
 		{"fujiwara:fujiwara", "kaguya", "gist3", "", true, true, true},
 		{"kaguya:kaguya", "kaguya", "gist4", "", false, false, false},
@@ -313,7 +313,7 @@ func TestGitInit(t *testing.T) {
 		pushOptions     string
 		expectErrorPush bool
 	}{
-		{"", "init", "", true},
+		{":", "init", "", true},
 		{"fujiwara:wrongpass", "init", "", true},
 		{"kaguya:kaguya", "init", "", false},
 		{"fujiwara:fujiwara", "init", "", false},

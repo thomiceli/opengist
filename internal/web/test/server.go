@@ -157,7 +157,7 @@ func Setup(t *testing.T) *TestServer {
 	config.C.GitDefaultBranch = "master"
 	config.InitLog()
 
-	err = exec.Command("git", "config", "--global", "init.DefaultBranch", "master").Run()
+	err = exec.Command("git", "config", "--global", "--type", "bool", "push.autoSetupRemote", "true").Run()
 	require.NoError(t, err, "Could not set git default branch to master")
 
 	homePath := config.GetHomeDir()

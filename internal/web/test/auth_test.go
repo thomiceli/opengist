@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -349,23 +348,12 @@ func clientGitPush(url string, pushOptions string, file string) error {
 	_, _ = f.WriteString("new file")
 	_ = f.Close()
 
-	cmd1 := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", file)
-	cmd1.Stdout = os.Stdout
-	cmd1.Stderr = os.Stderr
-	err = cmd1.Run()
-	fmt.Println("added")
-	cmd2 := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file")
-	cmd2.Stdout = os.Stdout
-	cmd2.Stderr = os.Stderr
-	err = cmd2.Run()
-	fmt.Println("committed")
+	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", file).Run()
+	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file").Run()
 	if pushOptions != "" {
 		err = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", pushOptions, "origin").Run()
 	} else {
-		cmd := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", "origin")
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
+		err = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", "origin").Run()
 	}
 	_ = os.RemoveAll(filepath.Join(config.GetHomeDir(), "tmp", url))
 

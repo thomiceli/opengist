@@ -348,8 +348,14 @@ func clientGitPush(url string, pushOptions string) error {
 	_, _ = f.WriteString("new file")
 	_ = f.Close()
 
-	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt").Run()
-	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file").Run()
+	cmd1 := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt")
+	cmd1.Stdout = os.Stdout
+	cmd1.Stderr = os.Stderr
+	err = cmd1.Run()
+	cmd2 := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file")
+	cmd2.Stdout = os.Stdout
+	cmd2.Stderr = os.Stderr
+	err = cmd2.Run()
 	if pushOptions != "" {
 		err = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", pushOptions, "origin").Run()
 	} else {

@@ -158,7 +158,11 @@ func Setup(t *testing.T) *TestServer {
 	config.InitLog()
 
 	err = exec.Command("git", "config", "--global", "--type", "bool", "push.autoSetupRemote", "true").Run()
-	require.NoError(t, err, "Could not set git default branch to master")
+	require.NoError(t, err)
+	err = exec.Command("git", "config", "--global", "user.email", "test@opengist.io").Run()
+	require.NoError(t, err)
+	err = exec.Command("git", "config", "--global", "user.name", "test").Run()
+	require.NoError(t, err)
 
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)

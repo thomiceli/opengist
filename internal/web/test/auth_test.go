@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -340,22 +341,24 @@ func clientGitClone(creds string, user string, url string) error {
 	return exec.Command("git", "clone", "http://"+creds+"@localhost:6157/"+user+"/"+url, filepath.Join(config.GetHomeDir(), "tmp", url)).Run()
 }
 
-func clientGitPush(url string, pushOptions string) error {
-	f, err := os.Create(filepath.Join(config.GetHomeDir(), "tmp", url, "newfile.txt"))
+func clientGitPush(url string, pushOptions string, file string) error {
+	f, err := os.Create(filepath.Join(config.GetHomeDir(), "tmp", url, file))
 	if err != nil {
 		return err
 	}
 	_, _ = f.WriteString("new file")
 	_ = f.Close()
 
-	cmd1 := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt")
+	cmd1 := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", file)
 	cmd1.Stdout = os.Stdout
 	cmd1.Stderr = os.Stderr
 	err = cmd1.Run()
+	fmt.Println("added")
 	cmd2 := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file")
 	cmd2.Stdout = os.Stdout
 	cmd2.Stderr = os.Stderr
 	err = cmd2.Run()
+	fmt.Println("committed")
 	if pushOptions != "" {
 		err = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", pushOptions, "origin").Run()
 	} else {
@@ -396,7 +399,7 @@ func gitCloneCheckPush(t *testing.T, credentials, owner, url, filename, pushOpti
 	} else {
 		require.NoError(t, err)
 	}
-	err = clientGitPush(url, pushOptions)
+	err = clientGitPush(url, pushOptions, filename)
 	if expectErrorPush {
 		require.Error(t, err)
 	} else {
@@ -414,7 +417,7 @@ func gitInitPush(t *testing.T, credentials, owner, url, filename, pushOptions st
 		err = clientGitSetRemote(url, "origin", "http://"+credentials+"@localhost:6157/"+owner+"/"+url)
 	}
 	require.NoError(t, err)
-	err = clientGitPush(url, pushOptions)
+	err = clientGitPush(url, pushOptions, filename)
 	if expectErrorPush {
 		require.Error(t, err)
 	} else {

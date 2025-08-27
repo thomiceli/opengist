@@ -364,10 +364,6 @@ func clientGitPush(url string, pushOptions string) error {
 }
 
 func clientGitInit(path string) error {
-	err := exec.Command("git", "config", "--global", "init.DefaultBranch", "master").Run()
-	if err != nil {
-		return err
-	}
 	return exec.Command("git", "init", filepath.Join(config.GetHomeDir(), "tmp", path)).Run()
 }
 

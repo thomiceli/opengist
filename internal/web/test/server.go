@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -153,7 +154,11 @@ func Setup(t *testing.T) *TestServer {
 
 	config.C.Index = ""
 	config.C.LogLevel = "error"
+	config.C.GitDefaultBranch = "master"
 	config.InitLog()
+
+	err = exec.Command("git", "config", "--global", "init.DefaultBranch", "master").Run()
+	require.NoError(t, err, "Could not set git default branch to master")
 
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)

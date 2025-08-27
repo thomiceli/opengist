@@ -364,7 +364,7 @@ func clientGitPush(url string, pushOptions string) error {
 }
 
 func clientGitInit(path string) error {
-	return exec.Command("git", "init", filepath.Join(config.GetHomeDir(), "tmp", path)).Run()
+	return exec.Command("git", "init", "--initial-branch=master", filepath.Join(config.GetHomeDir(), "tmp", path)).Run()
 }
 
 func clientGitSetRemote(path string, remoteName string, remoteUrl string) error {

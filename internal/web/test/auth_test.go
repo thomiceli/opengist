@@ -351,9 +351,9 @@ func clientGitPush(url string, pushOptions string) error {
 	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "add", "newfile.txt").Run()
 	_ = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "commit", "-m", "new file").Run()
 	if pushOptions != "" {
-		err = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", pushOptions, "origin", "main").Run()
+		err = exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", pushOptions, "origin").Run()
 	} else {
-		cmd := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", "origin", "main")
+		cmd := exec.Command("git", "-C", filepath.Join(config.GetHomeDir(), "tmp", url), "push", "origin")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err = cmd.Run()

@@ -61,6 +61,9 @@ func (s *Server) setFuncMap() {
 		"isCsv": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".csv"
 		},
+		"isJupyter": func(i string) bool {
+			return strings.ToLower(filepath.Ext(i)) == ".ipynb"
+		},
 		"isSvg": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".svg"
 		},

@@ -1,3 +1,5 @@
+import './ipynb';
+
 document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {
     el.addEventListener('click', event => {
         if (event.target && (event.target as HTMLElement).matches('.line-num')) {
@@ -74,6 +76,3 @@ if (document.getElementById('gist').dataset.own) {
         el.disabled = true;
     });
 }
-
-
-

@@ -1,0 +1,15 @@
+.jupyter.notebook {
+  padding: 0.5rem;
+}
+
+.jupyter.notebook pre {
+  font-size: 0.8em !important;
+}
+
+.jupyter.notebook .jupyter-cell {
+  padding: 0.5rem;
+}
+
+.jupyter.notebook .jupyter-cell.code-cell {
+  filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
+}

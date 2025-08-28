@@ -8,8 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let editorsjs: EditorView[] = [];
     let editorsParentdom = document.getElementById("editors")!;
     let allEditorsdom = document.querySelectorAll("#editors > .editor");
-    let firstEditordom = allEditorsdom[0];
+    let firstEditordom = allEditorsdom[0].cloneNode(true) as HTMLElement;
 
+    const fileUploadEditorMaxSize = 100 * 1024;  // 100 KB
     const txtFacet = Facet.define<string>({
         combine(values) {
             return values;
@@ -104,6 +105,14 @@ document.addEventListener("DOMContentLoaded", () => {
             let newWrapMode = (e.target as HTMLInputElement).value;
             setLineWrapping(editor, newWrapMode === "soft");
         };
+
+        dom.querySelector<HTMLInputElement>(".file-upload-container input[type='file']")!
+          .addEventListener("change", (e) => {
+            onFileInputChange(e, {
+                formfilename,
+                editor,
+            });
+          });
 
         dom.addEventListener("drop", (e) => {
             e.preventDefault(); // prevent the browser from opening the dropped file
@@ -210,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // removing the previous codemirror editor
         let newEditorDomCM = newEditorDom.querySelector(".cm-editor");
-        newEditorDomCM!.remove();
+        newEditorDomCM?.remove();
 
         // creating the new codemirror editor and append it in the editor div
         editorsjs.push(newEditor(newEditorDom));
@@ -219,9 +228,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     document.querySelector<HTMLFormElement>("form#create")!.onsubmit = () => {
-        let j = 0;
-        document.querySelectorAll<HTMLInputElement>(".form-filecontent").forEach((e) => {
-            e.value = encodeURIComponent(editorsjs[j++].state.doc.toString());
+        document.querySelectorAll<HTMLInputElement>(".form-filecontent").forEach((e, j) => {
+            e.value = encodeURIComponent(editorsjs[j].state.doc.toString());
         });
     };
 
@@ -257,6 +265,52 @@ document.addEventListener("DOMContentLoaded", () => {
         deleteBtn.previousElementSibling.classList.add("rounded-l-md");
         deleteBtn.previousElementSibling.classList.remove("rounded-md");
         checkForFirstDeleteButton();
+    }
+
+    function onFileInputChange(
+      e: Event,
+      {formfilename, editor}: {
+        formfilename: HTMLInputElement | null,
+        editor: EditorView
+      }
+    ) {
+        let fileInput = e.target as HTMLInputElement;
+        if (fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const fileUploadContainer = fileInput.closest(".file-upload-container")
+            const removeFileBtn = document.createElement("button");
+            removeFileBtn.className = "btn btn-secondary btn-sm ml-2";
+            removeFileBtn.innerText = "❌"
+            removeFileBtn.onclick = () => {
+                fileInput.value = "";
+                formfilename!.value = "";
+                editor.dispatch({
+                    changes: {from: 0, to: editor.state.doc.length, insert: ""},
+                });
+                fileUploadContainer!.removeChild(removeFileBtn);
+                editor.dom.classList.remove("hidden-important");
+            }
+
+            fileUploadContainer!.appendChild(removeFileBtn);
+
+            // Hide the editor if the file is too large
+            if (file.size > fileUploadEditorMaxSize) {
+                editor.dom.classList.add("hidden-important");
+            }
+
+            // set the filename input to the name of the uploaded file
+            formfilename!.value = file.name;
+
+            // read the file content and set it in the editor
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                editor.dispatch({
+                    changes: {from: 0, to: editor.state.doc.length, insert: event.target!.result as string},
+                });
+            };
+
+            reader.readAsText(file);
+        }
     }
 
     document.onsubmit = () => {

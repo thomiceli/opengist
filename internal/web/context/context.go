@@ -2,15 +2,16 @@ package context
 
 import (
 	"context"
+	"html/template"
+	"net/http"
+	"sync"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
-	"html/template"
-	"net/http"
-	"sync"
 )
 
 type dataKey string
@@ -57,7 +58,7 @@ func (ctx *Context) DataMap() echo.Map {
 }
 
 func (ctx *Context) ErrorRes(code int, message string, err error) error {
-	if code >= 500 {
+	if code >= 500 && err != nil {
 		var skipLogger = log.With().CallerWithSkipFrameCount(3).Logger()
 		skipLogger.Error().Err(err).Msg(message)
 	}

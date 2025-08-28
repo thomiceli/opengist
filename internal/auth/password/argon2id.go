@@ -1,4 +1,4 @@
-package auth
+package password
 
 import (
 	"crypto/rand"
@@ -6,8 +6,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/argon2"
 	"strings"
+
+	"golang.org/x/crypto/argon2"
 )
 
 type argon2ID struct {

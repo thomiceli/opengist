@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -153,7 +154,15 @@ func Setup(t *testing.T) *TestServer {
 
 	config.C.Index = ""
 	config.C.LogLevel = "error"
+	config.C.GitDefaultBranch = "master"
 	config.InitLog()
+
+	err = exec.Command("git", "config", "--global", "--type", "bool", "push.autoSetupRemote", "true").Run()
+	require.NoError(t, err)
+	err = exec.Command("git", "config", "--global", "user.email", "test@opengist.io").Run()
+	require.NoError(t, err)
+	err = exec.Command("git", "config", "--global", "user.name", "test").Run()
+	require.NoError(t, err)
 
 	homePath := config.GetHomeDir()
 	log.Info().Msg("Data directory: " + homePath)

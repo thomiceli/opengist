@@ -7,7 +7,6 @@ import (
 
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"github.com/thomiceli/opengist/internal/web/handlers"
 )
 
 func RawFile(ctx *context.Context) error {
@@ -20,10 +19,8 @@ func RawFile(ctx *context.Context) error {
 	if file == nil {
 		return ctx.NotFound("File not found")
 	}
-	contentType := handlers.GetContentTypeFromFilename(file.Filename)
-	ContentDisposition := handlers.GetContentDisposition(file.Filename)
-	ctx.Response().Header().Set("Content-Type", contentType)
-	ctx.Response().Header().Set("Content-Disposition", ContentDisposition)
+	ctx.Response().Header().Set("Content-Type", file.MimeType().ContentType)
+	ctx.Response().Header().Set("Content-Disposition", "inline; filename=\""+file.Filename+"\"")
 	return ctx.PlainText(200, file.Content)
 }
 
@@ -38,7 +35,7 @@ func DownloadFile(ctx *context.Context) error {
 		return ctx.NotFound("File not found")
 	}
 
-	ctx.Response().Header().Set("Content-Type", "text/plain")
+	ctx.Response().Header().Set("Content-Type", file.MimeType().ContentType)
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+file.Filename)
 	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(file.Content)))
 	_, err = ctx.Response().Write([]byte(file.Content))

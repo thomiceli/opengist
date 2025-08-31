@@ -5,12 +5,13 @@ import (
 	"bytes"
 	gojson "encoding/json"
 	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/render"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"net/url"
-	"time"
 )
 
 func GistIndex(ctx *context.Context) error {
@@ -34,7 +35,8 @@ func GistIndex(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error fetching files", err)
 	}
 
-	renderedFiles := render.HighlightFiles(files)
+	renderedFiles := render.RenderFiles(files)
+	fmt.Println(len(renderedFiles))
 
 	ctx.SetData("page", "code")
 	ctx.SetData("commit", revision)
@@ -51,7 +53,7 @@ func GistJson(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error fetching files", err)
 	}
 
-	renderedFiles := render.HighlightFiles(files)
+	renderedFiles := render.RenderFiles(files)
 	ctx.SetData("files", renderedFiles)
 
 	topics, err := gist.GetTopics()
@@ -106,7 +108,7 @@ func GistJs(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error fetching files", err)
 	}
 
-	renderedFiles := render.HighlightFiles(files)
+	renderedFiles := render.RenderFiles(files)
 	ctx.SetData("files", renderedFiles)
 
 	htmlbuf := bytes.Buffer{}

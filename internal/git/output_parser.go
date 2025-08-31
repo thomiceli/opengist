@@ -3,7 +3,6 @@ package git
 import (
 	"bufio"
 	"bytes"
-	"encoding/csv"
 	"fmt"
 	"io"
 	"strings"
@@ -20,10 +19,12 @@ type File struct {
 	IsDeleted   bool   `json:"-"`
 }
 
-type CsvFile struct {
-	File
-	Header []string
-	Rows   [][]string
+func (f *File) MimeType() MimeType {
+	bytesContent := []byte(f.Content)
+	if len(bytesContent) > 512 {
+		return DetectMimeType(bytesContent[:512])
+	}
+	return DetectMimeType(bytesContent)
 }
 
 type Commit struct {
@@ -343,28 +344,4 @@ func skipToNextCommit(input *bufio.Reader) (line string, err error) {
 		line += tail
 	}
 	return line, err
-}
-
-func ParseCsv(file *File) (*CsvFile, error) {
-
-	reader := csv.NewReader(strings.NewReader(file.Content))
-	records, err := reader.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-
-	header := records[0]
-	numColumns := len(header)
-
-	for i := 1; i < len(records); i++ {
-		if len(records[i]) != numColumns {
-			return nil, fmt.Errorf("CSV file has invalid row at index %d", i)
-		}
-	}
-
-	return &CsvFile{
-		File:   *file,
-		Header: header,
-		Rows:   records[1:],
-	}, nil
 }

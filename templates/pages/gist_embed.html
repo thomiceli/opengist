@@ -11,18 +11,17 @@
                     {{ $.locale.Tr "gist.file-truncated" }} <a target="_blank" class="text-primary-600" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
                 </div>
             {{ end }}
-            {{ $csv := csvFile $file.File }}
-            {{ if $csv }}
+            {{ if $file.MimeType.IsCSV }}
             <table class="csv-table">
                 <thead>
                 <tr>
-                    {{ range $csv.Header }}
+                    {{ range $file.Header }}
                         <th>{{ . }}</th>
                     {{ end }}
                 </tr>
                 </thead>
                 <tbody>
-                {{ range $csv.Rows }}
+                {{ range $file.Rows }}
                     <tr>
                         {{ range . }}
                             <td>{{ . }}</td>

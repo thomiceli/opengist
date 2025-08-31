@@ -23,6 +23,7 @@ gist.header.download-zip: Download ZIP
 
 gist.raw: Raw
 gist.file-truncated: This file has been truncated.
+gist.file-raw: This file can't be rendered.
 gist.watch-full-file: View the full file.
 gist.file-not-valid: This file is not a valid CSV file.
 gist.no-content: No files found

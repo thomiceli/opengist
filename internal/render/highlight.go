@@ -5,22 +5,24 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
-	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"path"
-	"sync"
 )
 
-type RenderedFile struct {
+type HighlightedFile struct {
 	*git.File
 	Type  string   `json:"type"`
 	Lines []string `json:"-"`
 	HTML  string   `json:"-"`
+}
+
+func (r HighlightedFile) getFile() *git.File {
+	return r.File
 }
 
 type RenderedGist struct {
@@ -29,22 +31,18 @@ type RenderedGist struct {
 	HTML  string
 }
 
-func HighlightFile(file *git.File) (RenderedFile, error) {
+func highlightFile(file *git.File) (HighlightedFile, error) {
+	fmt.Println(file.MimeType().ContentType)
+	rendered := HighlightedFile{
+		File: file,
+	}
+	if !file.MimeType().IsText() {
+		return rendered, nil
+	}
 	style := newStyle()
 	lexer := newLexer(file.Filename)
 
-	if lexer.Config().Name == "markdown" {
-		return MarkdownFile(file)
-	}
-	if lexer.Config().Name == "XML" && path.Ext(file.Filename) == ".svg" {
-		return RenderSvgFile(file), nil
-	}
-
 	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))
-
-	rendered := RenderedFile{
-		File: file,
-	}
 
 	iterator, err := lexer.Tokenise(nil, file.Content+"\n")
 	if err != nil {
@@ -72,38 +70,6 @@ func HighlightFile(file *git.File) (RenderedFile, error) {
 	rendered.Type = parseFileTypeName(*lexer.Config())
 
 	return rendered, err
-}
-
-func HighlightFiles(files []*git.File) []RenderedFile {
-	const numWorkers = 10
-	jobs := make(chan int, numWorkers)
-	renderedFiles := make([]RenderedFile, len(files))
-	var wg sync.WaitGroup
-
-	worker := func() {
-		for idx := range jobs {
-			rendered, err := HighlightFile(files[idx])
-			if err != nil {
-				log.Error().Err(err).Msg("Error rendering gist preview for " + files[idx].Filename)
-			}
-			renderedFiles[idx] = rendered
-		}
-		wg.Done()
-	}
-
-	for i := 0; i < numWorkers; i++ {
-		wg.Add(1)
-		go worker()
-	}
-
-	for i := range files {
-		jobs <- i
-	}
-	close(jobs)
-
-	wg.Wait()
-
-	return renderedFiles
 }
 
 func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {
@@ -146,18 +112,12 @@ func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {
 	return rendered, err
 }
 
-func RenderSvgFile(file *git.File) RenderedFile {
-	rendered := RenderedFile{
+func renderSvgFile(file *git.File) HighlightedFile {
+	return HighlightedFile{
 		File: file,
+		HTML: `<img src="data:image/svg+xml;base64,` + base64.StdEncoding.EncodeToString([]byte(file.Content)) + `" />`,
+		Type: "SVG",
 	}
-
-	encoded := base64.StdEncoding.EncodeToString([]byte(file.Content))
-	content := `<img src="data:image/svg+xml;base64,` + encoded + `" />`
-
-	rendered.HTML = content
-	rendered.Type = "SVG"
-
-	return rendered
 }
 
 func parseFileTypeName(config chroma.Config) string {

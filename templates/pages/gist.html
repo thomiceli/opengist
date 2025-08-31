@@ -3,7 +3,6 @@
     {{ if .files }}
         <div class="grid gap-y-4">
         {{ range $file := .files }}
-        {{ $csv := csvFile $file.File }}
         <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto" data-file="{{ $file.Filename }}">
             <div class="border-b-1 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 my-auto block">
                 <div class="ml-4 py-1.5 flex">
@@ -22,11 +21,13 @@
                       <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" class="relative inline-flex items-center rounded-l-md bg-white text-gray-500 dark:text-slate-300 float-right px-2.5 py-1 leading-4 text-xs font-medium dark:bg-gray-600 border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none">
                         {{ $.locale.Tr "gist.raw" }}
                       </a>
+                    {{ if $file.MimeType.IsText }}
                       <button type="button" class="relative -ml-px inline-flex items-center bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700 copy-gist-btn">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
                           </svg>
                       </button>
+                    {{ end }}
                         <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/download/{{ $.commit }}/{{$file.Filename}}" class="relative -ml-px inline-flex items-center rounded-r-md bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -36,29 +37,35 @@
 
                     <div class="hidden gist-content">{{ $file.Content }}</div>
                 </div>
-                {{ if $file.Truncated }}
+                {{ if and $file.Truncated $file.MimeType.IsText }}
                 <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
                     {{ $.locale.Tr "gist.file-truncated" }} <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
                 </div>
                 {{ end }}
-                {{ if and (not $csv) (isCsv $file.Filename) }}
+                {{ if not $file.MimeType.CanBeRendered }}
+                <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
+                    {{ $.locale.Tr "gist.file-raw" }} <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
+                </div>
+                {{ end }}
+                {{ if and (not $file.MimeType.IsText) (isCsv $file.Filename) }}
                 <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
                     {{ $.locale.Tr "gist.file-not-valid" }}
                 </div>
                 {{ end }}
             </div>
             <div class="overflow-auto">
-                {{ if $csv }}
+                {{ if $file.MimeType.IsText }}
+                {{ if $file.MimeType.IsCSV }}
                     <table class="csv-table">
                         <thead>
                             <tr>
-                                {{ range $csv.Header }}
+                                {{ range $file.Header }}
                                     <th>{{ . }}</th>
                                 {{ end }}
                             </tr>
                         </thead>
                         <tbody>
-                            {{ range $csv.Rows }}
+                            {{ range $file.Rows }}
                                 <tr>
                                     {{ range . }}
                                         <td>{{ . }}</td>
@@ -83,6 +90,25 @@
                             </table>
                         {{ end }}
                     </div>
+                {{ end }}
+                {{ else if $file.MimeType.IsImage }}
+                    <div class="p-8 flex justify-center">
+                        <img src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" alt="{{ $file.Filename }}" class="max-h-screen object-contain">
+                    </div>
+                {{ else if or $file.MimeType.IsAudio }}
+                    <div class="p-8 flex justify-center">
+                        <audio controls class="w-full max-w-lg">
+                            <source src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" type="{{ $file.MimeType.ContentType }}">
+                        </audio>
+                    </div>
+                {{ else if $file.MimeType.IsVideo }}
+                    <div class="p-8 flex justify-center">
+                        <video controls class="w-full max-w-lg">
+                            <source src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" type="{{ $file.MimeType.ContentType }}">
+                        </video>
+                    </div>
+                {{ else if $file.MimeType.IsPDF }}
+                    <div class="pdf" data-src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}"></div>
                 {{ end }}
             </div>
         </div>

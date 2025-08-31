@@ -4,7 +4,6 @@ import (
 	"errors"
 	"html/template"
 	"net/url"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -140,23 +139,4 @@ func ParseSearchQueryStr(query string) (string, map[string]string) {
 
 	content := strings.TrimSpace(contentBuilder.String())
 	return content, metadata
-}
-
-func GetContentTypeFromFilename(filename string) (ret string) {
-	ext := strings.ToLower(filepath.Ext(filename))
-
-	switch ext {
-	case ".css":
-		ret = "text/css"
-	default:
-		ret = "text/plain"
-	}
-
-	// add charset=utf-8, if not, unicode charset will be broken
-	ret += "; charset=utf-8"
-	return
-}
-
-func GetContentDisposition(filename string) string {
-	return "inline; filename=\"" + filename + "\""
 }

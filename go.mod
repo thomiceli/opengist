@@ -7,6 +7,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.20.0
 	github.com/blevesearch/bleve/v2 v2.5.0
 	github.com/dustin/go-humanize v1.0.1
+	github.com/gabriel-vasile/mimetype v1.4.8
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-ldap/ldap/v3 v3.4.8
 	github.com/go-playground/validator/v10 v10.26.0
@@ -66,7 +67,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/fxamacker/cbor/v2 v2.8.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.5 // indirect
 	github.com/go-chi/chi/v5 v5.2.1 // indirect

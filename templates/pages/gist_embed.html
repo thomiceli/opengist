@@ -6,11 +6,17 @@
                 <a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}#file-{{ slug $file.Filename }}"><span class="font-bold text-gray-700 dark:text-gray-200">{{ $file.Filename }}</span> &middot; {{ $file.HumanSize }} &middot; {{ $file.Type }}</a>
                 <span class="float-right"><a target="_blank" href="{{ $.baseHttpUrl }}">Hosted via Opengist</a> &middot; <span class="text-gray-700 dark:text-gray-200 font-bold"><a target="_blank" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}">view raw</a></span></span>
             </div>
-            {{ if $file.Truncated }}
+            {{ if and $file.Truncated $file.MimeType.IsText }}
                 <div class="text-xs px-4 bg-gray-50 py-1.5 border-b-1 border-gray-100 dark:border-gray-700">
                     {{ $.locale.Tr "gist.file-truncated" }} <a target="_blank" class="text-primary-600" href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
                 </div>
             {{ end }}
+            {{ if or (not $file.MimeType.CanBeRendered) $file.MimeType.IsPDF }}
+            <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
+                {{ $.locale.Tr "gist.file-raw" }} <a href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
+            </div>
+            {{ end }}
+            {{ if $file.MimeType.IsText }}
             {{ if $file.MimeType.IsCSV }}
             <table class="csv-table">
                 <thead>
@@ -31,7 +37,7 @@
             </table>
             {{ else if isMarkdown $file.Filename }}
             <div class="chroma markdown markdown-body p-8">{{ $file.HTML | safe }}</div>
-            {{ else if isSvg $file.Filename }}
+            {{ else if $file.MimeType.IsSVG }}
             <div class="p-8 flex justify-center">{{ $file.HTML | safe }}</div>
             {{ else }}
             <div class="code dark:bg-gray-900">
@@ -47,7 +53,25 @@
             {{ end }}
             </div>
             {{ end }}
-
+            {{ else if $file.MimeType.IsImage }}
+            <div class="p-8 flex justify-center">
+                <img src="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}" alt="{{ $file.Filename }}" class="max-h-screen object-contain">
+            </div>
+            {{ else if $file.MimeType.IsAudio }}
+            <div class="p-8 flex justify-center">
+                <audio controls class="w-full max-w-lg">
+                    <source src="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}" type="{{ $file.MimeType.ContentType }}">
+                </audio>
+            </div>
+            {{ else if $file.MimeType.IsVideo }}
+            <div class="p-8 flex justify-center">
+                <video controls class="w-full max-w-lg">
+                    <source src="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}" type="{{ $file.MimeType.ContentType }}">
+                </video>
+            </div>
+            {{ else if $file.MimeType.IsPDF }}
+            <div class="pdf" data-src="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/HEAD/{{$file.Filename}}"></div>
+            {{ end }}
         </div>
     {{ end }}
     </div>

@@ -47,7 +47,7 @@
                     {{ $.locale.Tr "gist.file-raw" }} <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
                 </div>
                 {{ end }}
-                {{ if and (not $file.MimeType.IsText) (isCsv $file.Filename) }}
+                {{ if and (not $file.MimeType.IsText) ($file.MimeType.IsCSV) }}
                 <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
                     {{ $.locale.Tr "gist.file-not-valid" }}
                 </div>
@@ -75,7 +75,7 @@
                     </table>
                 {{ else if isMarkdown $file.Filename }}
                     <div class="chroma markdown markdown-body p-8">{{ $file.HTML | safe }}</div>
-                {{ else if isSvg $file.Filename }}
+                {{ else if $file.MimeType.IsSVG }}
                     <div class="p-8 flex justify-center">{{ $file.HTML | safe }}</div>
                 {{ else }}
                     <div class="code">
@@ -95,7 +95,7 @@
                     <div class="p-8 flex justify-center">
                         <img src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" alt="{{ $file.Filename }}" class="max-h-screen object-contain">
                     </div>
-                {{ else if or $file.MimeType.IsAudio }}
+                {{ else if $file.MimeType.IsAudio }}
                     <div class="p-8 flex justify-center">
                         <audio controls class="w-full max-w-lg">
                             <source src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" type="{{ $file.MimeType.ContentType }}">

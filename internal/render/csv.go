@@ -10,9 +10,9 @@ import (
 
 type CSVFile struct {
 	*git.File
-	Type   string `json:"type"`
-	Header []string
-	Rows   [][]string
+	Type   string     `json:"type"`
+	Header []string   `json:"-"`
+	Rows   [][]string `json:"-"`
 }
 
 func (r CSVFile) getFile() *git.File {

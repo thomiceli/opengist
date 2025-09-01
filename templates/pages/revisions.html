@@ -49,6 +49,8 @@
                         <div class="overflow-auto">
                             {{ if $file.Truncated }}
                                 <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.diff-truncated" }}</p>
+                            {{ else if $file.IsBinary }}
+                                <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.binary-file-changes" }}</p>
                             {{ else if and (eq $file.Content "") (ne $file.OldFilename "") }}
                                 <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.file-renamed-no-changes" }}</p>
                             {{ else if eq $file.Content "" }}

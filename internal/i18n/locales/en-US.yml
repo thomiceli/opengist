@@ -116,6 +116,7 @@ gist.revision.file-renamed: renamed to
 gist.revision.diff-truncated: Diff is too large to be shown
 gist.revision.file-renamed-no-changes: File renamed without changes
 gist.revision.empty-file: Empty file
+gist.revision.binary-file-changes: Binary file changes are not shown
 gist.revision.no-changes: No changes
 gist.revision.no-revisions: No revisions to show
 gist.revision-of: Revision of %s

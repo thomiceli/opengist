@@ -58,12 +58,6 @@ func (s *Server) setFuncMap() {
 		"isMarkdown": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".md"
 		},
-		"isCsv": func(i string) bool {
-			return strings.ToLower(filepath.Ext(i)) == ".csv"
-		},
-		"isSvg": func(i string) bool {
-			return strings.ToLower(filepath.Ext(i)) == ".svg"
-		},
 		"httpStatusText": http.StatusText,
 		"loadedTime": func(startTime time.Time) string {
 			return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"

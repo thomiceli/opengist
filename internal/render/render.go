@@ -50,7 +50,7 @@ func RenderFiles(files []*git.File) []RenderedFile {
 }
 
 func processFile(file *git.File) RenderedFile {
-	mt := file.MimeType()
+	mt := file.MimeType
 	if mt.IsCSV() {
 		rendered, err := renderCsvFile(file)
 		if err != nil {
@@ -68,6 +68,7 @@ func processFile(file *git.File) RenderedFile {
 		return rendered
 	} else if mt.CanBeEmbedded() {
 		rendered := NonHighlightedFile{File: file, Type: mt.RenderType()}
+		file.Content = ""
 		return rendered
 	} else if mt.CanBeRendered() {
 		rendered, err := highlightFile(file)
@@ -77,6 +78,7 @@ func processFile(file *git.File) RenderedFile {
 		return rendered
 	} else {
 		rendered := NonHighlightedFile{File: file, Type: mt.RenderType()}
+		file.Content = ""
 		return rendered
 	}
 }

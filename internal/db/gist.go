@@ -418,12 +418,20 @@ func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
 
 	var files []*git.File
 	for _, fileCat := range filesCat {
+		var shortContent string
+		if len(fileCat.Content) > 512 {
+			shortContent = fileCat.Content[:512]
+		} else {
+			shortContent = fileCat.Content
+		}
+
 		files = append(files, &git.File{
 			Filename:  fileCat.Name,
 			Size:      fileCat.Size,
 			HumanSize: humanize.IBytes(fileCat.Size),
 			Content:   fileCat.Content,
 			Truncated: fileCat.Truncated,
+			MimeType:  git.DetectMimeType([]byte(shortContent)),
 		})
 	}
 	return files, err
@@ -444,12 +452,20 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 		return nil, err
 	}
 
+	var shortContent string
+	if len(content) > 512 {
+		shortContent = content[:512]
+	} else {
+		shortContent = content
+	}
+
 	return &git.File{
 		Filename:  filename,
 		Size:      size,
 		HumanSize: humanize.IBytes(size),
 		Content:   content,
 		Truncated: truncated,
+		MimeType:  git.DetectMimeType([]byte(shortContent)),
 	}, err
 }
 

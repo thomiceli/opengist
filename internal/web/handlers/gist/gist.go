@@ -36,7 +36,6 @@ func GistIndex(ctx *context.Context) error {
 	}
 
 	renderedFiles := render.RenderFiles(files)
-	fmt.Println(len(renderedFiles))
 
 	ctx.SetData("page", "code")
 	ctx.SetData("commit", revision)

@@ -32,11 +32,10 @@ type RenderedGist struct {
 }
 
 func highlightFile(file *git.File) (HighlightedFile, error) {
-	fmt.Println(file.MimeType().ContentType)
 	rendered := HighlightedFile{
 		File: file,
 	}
-	if !file.MimeType().IsText() {
+	if !file.MimeType.IsText() {
 		return rendered, nil
 	}
 	style := newStyle()

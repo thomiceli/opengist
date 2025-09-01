@@ -5,26 +5,21 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 )
 
 type File struct {
-	Filename    string `json:"filename"`
-	Size        uint64 `json:"size"`
-	HumanSize   string `json:"human_size"`
-	OldFilename string `json:"-"`
-	Content     string `json:"content"`
-	Truncated   bool   `json:"truncated"`
-	IsCreated   bool   `json:"-"`
-	IsDeleted   bool   `json:"-"`
-}
-
-func (f *File) MimeType() MimeType {
-	bytesContent := []byte(f.Content)
-	if len(bytesContent) > 512 {
-		return DetectMimeType(bytesContent[:512])
-	}
-	return DetectMimeType(bytesContent)
+	Filename    string   `json:"filename"`
+	Size        uint64   `json:"size"`
+	HumanSize   string   `json:"human_size"`
+	OldFilename string   `json:"-"`
+	Content     string   `json:"content"`
+	Truncated   bool     `json:"truncated"`
+	IsCreated   bool     `json:"-"`
+	IsDeleted   bool     `json:"-"`
+	IsBinary    bool     `json:"-"`
+	MimeType    MimeType `json:"-"`
 }
 
 type Commit struct {
@@ -62,6 +57,8 @@ func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) 
 
 	return string(buf), truncated, nil
 }
+
+var reLogBinaryNames = regexp.MustCompile(`Binary files (.+) and (.+) differ`)
 
 // inspired from https://github.com/go-gitea/gitea/blob/main/services/gitdiff/gitdiff.go
 func parseLog(out io.Reader, maxFiles int, maxBytes int) ([]*Commit, error) {
@@ -207,6 +204,20 @@ loopLog:
 						currentFile.IsCreated = true
 					case strings.HasPrefix(line, "deleted file"):
 						currentFile.IsDeleted = true
+					case strings.HasPrefix(line, "Binary files"):
+						currentFile.IsBinary = true
+						names := reLogBinaryNames.FindStringSubmatch(line)
+						if names[1][2:] != names[2][2:] {
+							if currentFile.IsCreated {
+								currentFile.Filename = convertOctalToUTF8(names[2])[2:]
+							}
+							if currentFile.IsDeleted {
+								currentFile.Filename = convertOctalToUTF8(names[1])[2:]
+							}
+						} else {
+							currentFile.OldFilename = convertOctalToUTF8(names[1])[2:]
+							currentFile.Filename = convertOctalToUTF8(names[2])[2:]
+						}
 					case strings.HasPrefix(line, "--- "):
 						name := convertOctalToUTF8(line[4 : len(line)-1])
 						if parseRename && currentFile.IsDeleted {

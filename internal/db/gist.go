@@ -676,10 +676,15 @@ func (gist *Gist) ToDTO() (*GistDTO, error) {
 
 	fileDTOs := make([]FileDTO, 0, len(files))
 	for _, file := range files {
-		fileDTOs = append(fileDTOs, FileDTO{
+		f := FileDTO{
 			Filename: file.Filename,
-			Content:  file.Content,
-		})
+		}
+		if file.MimeType.CanBeEdited() {
+			f.Content = file.Content
+		} else {
+			f.Binary = true
+		}
+		fileDTOs = append(fileDTOs, f)
 	}
 
 	return &GistDTO{
@@ -718,6 +723,7 @@ type VisibilityDTO struct {
 type FileDTO struct {
 	Filename string `validate:"excludes=\x2f,excludes=\x5c,max=255"`
 	Content  string `validate:"required"`
+	Binary   bool
 }
 
 func (dto *GistDTO) ToGist() *Gist {

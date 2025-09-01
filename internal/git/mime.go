@@ -51,6 +51,10 @@ func (mt MimeType) CanBeRendered() bool {
 	return mt.IsText() || mt.IsImage() || mt.IsSVG() || mt.IsPDF() || mt.IsAudio() || mt.IsVideo()
 }
 
+func (mt MimeType) CanBeEdited() bool {
+	return mt.IsText() || mt.IsSVG()
+}
+
 func (mt MimeType) RenderType() string {
 	t := strings.Split(mt.ContentType, "/")
 	str := ""

@@ -380,6 +380,17 @@ func SetFileContent(gistTmpId string, filename string, content string) error {
 	return os.WriteFile(filepath.Join(repositoryPath, filename), []byte(content), 0644)
 }
 
+func MoveFileToRepository(gistTmpId string, filename string, sourcePath string) error {
+	repositoryPath := TmpRepositoryPath(gistTmpId)
+	destPath := filepath.Join(repositoryPath, filename)
+
+	if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+		return err
+	}
+
+	return os.Rename(sourcePath, destPath)
+}
+
 func AddAll(gistTmpId string) error {
 	tmpPath := TmpRepositoryPath(gistTmpId)
 

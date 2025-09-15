@@ -2,11 +2,15 @@ package gist
 
 import (
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/internal/validator"
 	"github.com/thomiceli/opengist/internal/web/context"
@@ -44,10 +48,16 @@ func ProcessCreate(ctx *context.Context) error {
 
 	dto.Files = make([]db.FileDTO, 0)
 	fileCounter := 0
-	for i := 0; i < len(ctx.Request().PostForm["content"]); i++ {
-		name := ctx.Request().PostForm["name"][i]
-		content := ctx.Request().PostForm["content"][i]
 
+	names := ctx.Request().PostForm["name"]
+	contents := ctx.Request().PostForm["content"]
+
+	// Process files from text editors
+	for i, content := range contents {
+		if content == "" {
+			continue
+		}
+		name := names[i]
 		if name == "" {
 			fileCounter += 1
 			name = "gistfile" + strconv.Itoa(fileCounter) + ".txt"
@@ -59,9 +69,56 @@ func ProcessCreate(ctx *context.Context) error {
 		}
 
 		dto.Files = append(dto.Files, db.FileDTO{
-			Filename: strings.Trim(name, " "),
+			Filename: strings.TrimSpace(name),
 			Content:  escapedValue,
 		})
+	}
+
+	// Process uploaded files from UUID arrays
+	fileUUIDs := ctx.Request().PostForm["uploadedfile_uuid"]
+	fileFilenames := ctx.Request().PostForm["uploadedfile_filename"]
+	if len(fileUUIDs) == len(fileFilenames) {
+		for i, fileUUID := range fileUUIDs {
+			filePath := filepath.Join(filepath.Join(config.GetHomeDir(), "uploads"), fileUUID)
+
+			if _, err := os.Stat(filePath); err != nil {
+				continue
+			}
+
+			dto.Files = append(dto.Files, db.FileDTO{
+				Filename:   fileFilenames[i],
+				SourcePath: filePath,
+				Content:    "", // Empty since we're using SourcePath
+			})
+		}
+	}
+
+	// Process binary file operations (edit mode)
+	binaryOldNames := ctx.Request().PostForm["binary_old_name"]
+	binaryNewNames := ctx.Request().PostForm["binary_new_name"]
+	if len(binaryOldNames) == len(binaryNewNames) {
+		for i, oldName := range binaryOldNames {
+			newName := binaryNewNames[i]
+
+			if newName == "" { // deletion
+				continue
+			}
+
+			if !isCreate {
+				gistOld := ctx.GetData("gist").(*db.Gist)
+
+				fileContent, _, err := git.GetFileContent(gistOld.User.Username, gistOld.Uuid, "HEAD", oldName, false)
+				if err != nil {
+					continue
+				}
+
+				dto.Files = append(dto.Files, db.FileDTO{
+					Filename: newName,
+					Content:  fileContent,
+					Binary:   true,
+				})
+			}
+		}
 	}
 	ctx.SetData("dto", dto)
 
@@ -101,22 +158,11 @@ func ProcessCreate(ctx *context.Context) error {
 	}
 
 	if gist.Title == "" {
-		if ctx.Request().PostForm["name"][0] == "" {
+		if dto.Files[0].Filename == "" {
 			gist.Title = "gist:" + gist.Uuid
 		} else {
-			gist.Title = ctx.Request().PostForm["name"][0]
+			gist.Title = dto.Files[0].Filename
 		}
-	}
-
-	if len(dto.Files) > 0 {
-		split := strings.Split(dto.Files[0].Content, "\n")
-		if len(split) > 10 {
-			gist.Preview = strings.Join(split[:10], "\n")
-		} else {
-			gist.Preview = dto.Files[0].Content
-		}
-
-		gist.PreviewFilename = dto.Files[0].Filename
 	}
 
 	if err = gist.InitRepository(); err != nil {
@@ -139,6 +185,9 @@ func ProcessCreate(ctx *context.Context) error {
 
 	gist.AddInIndex()
 	gist.UpdateLanguages()
+	if err = gist.UpdatePreviewAndCount(true); err != nil {
+		return ctx.ErrorRes(500, "Error updating preview and count", err)
+	}
 
 	return ctx.RedirectTo("/" + user.Username + "/" + gist.Identifier())
 }

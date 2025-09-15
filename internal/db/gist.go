@@ -487,8 +487,14 @@ func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
 	}
 
 	for _, file := range *files {
-		if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
-			return err
+		if file.SourcePath != "" { // if it's an uploaded file
+			if err := git.MoveFileToRepository(gist.Uuid, file.Filename, file.SourcePath); err != nil {
+				return err
+			}
+		} else { // else it's a text editor file
+			if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -546,19 +552,28 @@ func (gist *Gist) UpdatePreviewAndCount(withTimestampUpdate bool) error {
 		gist.Preview = ""
 		gist.PreviewFilename = ""
 	} else {
-		file, err := gist.File("HEAD", filesStr[0], true)
-		if err != nil {
-			return err
-		}
+		for _, fileStr := range filesStr {
+			file, err := gist.File("HEAD", fileStr, true)
+			if err != nil {
+				return err
+			}
+			if file == nil {
+				continue
+			}
+			gist.Preview = ""
+			gist.PreviewFilename = file.Filename
 
-		split := strings.Split(file.Content, "\n")
-		if len(split) > 10 {
-			gist.Preview = strings.Join(split[:10], "\n")
-		} else {
-			gist.Preview = file.Content
-		}
+			if !file.MimeType.CanBeEdited() {
+				continue
+			}
 
-		gist.PreviewFilename = file.Filename
+			split := strings.Split(file.Content, "\n")
+			if len(split) > 10 {
+				gist.Preview = strings.Join(split[:10], "\n")
+			} else {
+				gist.Preview = file.Content
+			}
+		}
 	}
 
 	if withTimestampUpdate {
@@ -721,9 +736,10 @@ type VisibilityDTO struct {
 }
 
 type FileDTO struct {
-	Filename string `validate:"excludes=\x2f,excludes=\x5c,max=255"`
-	Content  string `validate:"required"`
-	Binary   bool
+	Filename   string `validate:"excludes=\x2f,excludes=\x5c,max=255"`
+	Content    string
+	Binary     bool
+	SourcePath string // Path to uploaded file, used instead of Content when present
 }
 
 func (dto *GistDTO) ToGist() *Gist {

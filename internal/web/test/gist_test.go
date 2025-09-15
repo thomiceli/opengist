@@ -66,7 +66,7 @@ func TestGists(t *testing.T) {
 		Content: []string{"", "yeah\ncool", "yeah\ncool gist actually"},
 		Topics:  "",
 	}
-	err = s.Request("POST", "/", gist2, 400)
+	err = s.Request("POST", "/", gist2, 302)
 	require.NoError(t, err)
 
 	gist3 := db.GistDTO{
@@ -82,7 +82,7 @@ func TestGists(t *testing.T) {
 	err = s.Request("POST", "/", gist3, 302)
 	require.NoError(t, err)
 
-	gist3db, err := db.GetGistByID("2")
+	gist3db, err := db.GetGistByID("3")
 	require.NoError(t, err)
 
 	gist3files, err := git.GetFilesOfRepository(gist3db.User.Username, gist3db.Uuid, "HEAD")

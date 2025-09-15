@@ -29,6 +29,8 @@ func (s *Server) registerRoutes() {
 		r.GET("/", gist.Create, logged)
 		r.POST("/", gist.ProcessCreate, logged)
 		r.POST("/preview", gist.Preview, logged)
+		r.POST("/upload", gist.Upload, logged)
+		r.DELETE("/upload/:uuid", gist.DeleteUpload, logged)
 
 		r.GET("/healthcheck", health.Healthcheck)
 

@@ -28,6 +28,7 @@ gist.file-binary-edit: This file is binary.
 gist.watch-full-file: View the full file.
 gist.file-not-valid: This file is not a valid CSV file.
 gist.no-content: No files found
+gist.preview-non-available: Preview not available
 
 gist.new.new_gist: New gist
 gist.new.title: Title
@@ -48,6 +49,8 @@ gist.new.create-private-button: Create private gist
 gist.new.preview: Preview
 gist.new.create-a-new-gist: Create a new gist
 gist.new.topics: Topics (separate with spaces)
+gist.new.drop-files: Drop files here or click to upload
+gist.new.any-file-type: Upload any file type
 
 gist.edit.editing: Editing
 gist.edit.edit-gist: Edit %s
@@ -218,6 +221,8 @@ error.cannot-bind-data: Cannot bind data
 error.invalid-number: Invalid number
 error.invalid-character-unescaped: Invalid character unescaped
 error.not-in-mfa-session: User is not in a MFA session
+error.no-file-uploaded: No file uploaded
+error.cannot-open-file: Cannot open uploaded file
 
 header.menu.all: All
 header.menu.new: New

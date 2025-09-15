@@ -117,7 +117,11 @@ document.addEventListener("DOMContentLoaded", () => {
         let deleteBtns = dom.querySelector<HTMLButtonElement>("button.delete-file");
         if (deleteBtns !== null) {
             deleteBtns.onclick = () => {
-                editorsjs.splice(editorsjs.indexOf(editor), 1);
+                // For both text and binary files, just remove from DOM
+                if (!dom.hasAttribute('data-binary-original-name')) {
+                    // Only remove from editors array for text files
+                    editorsjs.splice(editorsjs.indexOf(editor), 1);
+                }
                 dom.remove();
                 checkForFirstDeleteButton();
             };
@@ -200,20 +204,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (formFileContent !== null) {
             let currEditor = newEditor(el, el.querySelector<HTMLInputElement>(".form-filecontent")!.value);
             editorsjs.push(currEditor);
+        } else if (el.hasAttribute('data-binary-original-name')) {
+            // For binary files, just set up the delete button
+            let deleteBtn = el.querySelector<HTMLButtonElement>("button.delete-file");
+            if (deleteBtn) {
+                deleteBtn.onclick = () => {
+                    el.remove();
+                    checkForFirstDeleteButton();
+                };
+            }
         }
     });
 
     checkForFirstDeleteButton();
 
     document.getElementById("add-file")!.onclick = () => {
-        let newEditorDom = firstEditordom.cloneNode(true) as HTMLElement;
-
-        // reset the filename of the new cloned element
-        newEditorDom.querySelector<HTMLInputElement>('input[name="name"]')!.value = "";
-
-        // removing the previous codemirror editor
-        let newEditorDomCM = newEditorDom.querySelector(".cm-editor");
-        newEditorDomCM!.remove();
+        const template = document.getElementById("editor-template")!;
+        const newEditorDom = template.firstElementChild!.cloneNode(true) as HTMLElement;
 
         // creating the new codemirror editor and append it in the editor div
         editorsjs.push(newEditor(newEditorDom));
@@ -223,9 +230,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelector<HTMLFormElement>("form#create")!.onsubmit = () => {
         let j = 0;
-        document.querySelectorAll<HTMLInputElement>(".form-filecontent").forEach((e) => {
-            e.value = encodeURIComponent(editorsjs[j++].state.doc.toString());
+        document.querySelectorAll<HTMLInputElement>(".form-filecontent").forEach((el) => {
+            if (j < editorsjs.length) {
+                el.value = encodeURIComponent(editorsjs[j++].state.doc.toString());
+            }
         });
+
+        const fileInput = document.getElementById("file-upload") as HTMLInputElement;
+        if (fileInput) {
+            fileInput.remove();
+        }
+
+        const form = document.querySelector<HTMLFormElement>("form#create")!;
+
+        uploadedFileUUIDs.forEach((fileData) => {
+            const uuidInput = document.createElement('input');
+            uuidInput.type = 'hidden';
+            uuidInput.name = 'uploadedfile_uuid';
+            uuidInput.value = fileData.uuid;
+            form.appendChild(uuidInput);
+
+            const filenameInput = document.createElement('input');
+            filenameInput.type = 'hidden';
+            filenameInput.name = 'uploadedfile_filename';
+            filenameInput.value = fileData.filename;
+            form.appendChild(filenameInput);
+        });
+
+        const binaryFiles = document.querySelectorAll('[data-binary-original-name]');
+        binaryFiles.forEach((fileDiv) => {
+            const originalName = fileDiv.getAttribute('data-binary-original-name');
+            const fileNameInput = fileDiv.querySelector('.form-filename') as HTMLInputElement;
+
+            if (fileNameInput) {
+                fileNameInput.removeAttribute('name');
+            }
+
+            const oldNameInput = document.createElement('input');
+            oldNameInput.type = 'hidden';
+            oldNameInput.name = 'binary_old_name';
+            oldNameInput.value = originalName || '';
+            form.appendChild(oldNameInput);
+
+            const newNameInput = document.createElement('input');
+            newNameInput.type = 'hidden';
+            newNameInput.name = 'binary_new_name';
+            newNameInput.value = fileNameInput?.value || '';
+            form.appendChild(newNameInput);
+        });
+
+        window.onbeforeunload = null;
     };
 
     document.getElementById('gist-metadata-btn')!.onclick = (el) => {
@@ -242,16 +296,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function checkForFirstDeleteButton() {
-        let deleteBtn = editorsParentdom.querySelector<HTMLButtonElement>("button.delete-file")!;
-        if (editorsjs.length === 1) {
-            deleteBtn.classList.add("hidden");
-            deleteBtn.previousElementSibling.classList.remove("rounded-l-md");
-            deleteBtn.previousElementSibling.classList.add("rounded-md");
-        } else {
-            deleteBtn.classList.remove("hidden");
-            deleteBtn.previousElementSibling.classList.add("rounded-l-md");
-            deleteBtn.previousElementSibling.classList.remove("rounded-md");
-        }
+        // Count total files (both text and binary)
+        const totalFiles = editorsParentdom.querySelectorAll('.editor').length;
+
+        // Hide/show all delete buttons based on total file count
+        const deleteButtons = editorsParentdom.querySelectorAll<HTMLButtonElement>("button.delete-file");
+        deleteButtons.forEach(deleteBtn => {
+            if (totalFiles <= 1) {
+                deleteBtn.classList.add("hidden");
+                deleteBtn.previousElementSibling?.classList.remove("rounded-l-md");
+                deleteBtn.previousElementSibling?.classList.add("rounded-md");
+            } else {
+                deleteBtn.classList.remove("hidden");
+                deleteBtn.previousElementSibling?.classList.add("rounded-l-md");
+                deleteBtn.previousElementSibling?.classList.remove("rounded-md");
+            }
+        });
     }
 
     function showDeleteButton(editorDom: HTMLElement) {
@@ -262,7 +322,140 @@ document.addEventListener("DOMContentLoaded", () => {
         checkForFirstDeleteButton();
     }
 
-    document.onsubmit = () => {
-        window.onbeforeunload = null;
+    // File upload functionality
+    let uploadedFileUUIDs: {uuid: string, filename: string}[] = [];
+    const fileUploadInput = document.getElementById("file-upload") as HTMLInputElement;
+    const uploadedFilesContainer = document.getElementById("uploaded-files")!;
+    const fileUploadZone = document.getElementById("file-upload-zone")!.querySelector('.border-dashed') as HTMLElement;
+
+    // Handle file selection
+    const handleFiles = (files: FileList) => {
+        Array.from(files).forEach(file => {
+            if (!uploadedFileUUIDs.find(f => f.filename === file.name)) {
+                uploadFile(file);
+            }
+        });
     };
+
+    // Upload file to server
+    const uploadFile = async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // @ts-ignore
+        const baseUrl = window.opengist_base_url || '';
+        const csrf = document.querySelector<HTMLInputElement>('form#create input[name="_csrf"]')?.value;
+
+        try {
+            const response = await fetch(`${baseUrl}/upload`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData,
+                headers: {
+                    'X-CSRF-Token': csrf || ''
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                uploadedFileUUIDs.push({uuid: result.uuid, filename: result.filename});
+                addFileToUI(result.filename, result.uuid, file.size);
+            } else {
+                console.error('Upload failed:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+        }
+    };
+
+    // Add file to UI
+    const addFileToUI = (filename: string, uuid: string, fileSize: number) => {
+        const fileElement = document.createElement('div');
+        fileElement.className = 'flex items-stretch bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden';
+        fileElement.dataset.uuid = uuid;
+
+        fileElement.innerHTML = `
+            <div class="flex items-center space-x-3 px-3 py-1 flex-1">
+                <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"></path>
+                </svg>
+                <div>
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">${filename}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${formatFileSize(fileSize)}</p>
+                </div>
+            </div>
+            <button type="button" class="remove-file flex items-center justify-center px-4 border-l-1 dark:border-l-1 text-rose-600 dark:text-rose-400 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 hover:border-rose-600 dark:hover:border-rose-700 dark:hover:text-white focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        `;
+
+        // Remove file handler
+        fileElement.querySelector('.remove-file')!.addEventListener('click', async () => {
+            // Remove from server
+            try {
+                // @ts-ignore
+                const baseUrl = window.opengist_base_url || '';
+                const csrf = document.querySelector<HTMLInputElement>('form#create input[name="_csrf"]')?.value;
+
+                await fetch(`${baseUrl}/upload/${uuid}`, {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRF-Token': csrf || ''
+                    }
+                });
+            } catch (error) {
+                console.error('Error deleting file:', error);
+            }
+
+            // Remove from UI and local array
+            uploadedFileUUIDs = uploadedFileUUIDs.filter(f => f.uuid !== uuid);
+            fileElement.remove();
+        });
+
+        uploadedFilesContainer.appendChild(fileElement);
+    };
+
+    // Format file size
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    };
+
+    // File input change handler
+    fileUploadInput.addEventListener('change', (e) => {
+        const files = (e.target as HTMLInputElement).files;
+        if (files) {
+            handleFiles(files);
+            // Clear the input value immediately so it doesn't get submitted with the form
+            (e.target as HTMLInputElement).value = '';
+        }
+    });
+
+    // Drag and drop handlers
+    fileUploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadZone.classList.add('border-primary-400', 'dark:border-primary-500');
+    });
+
+    fileUploadZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        fileUploadZone.classList.remove('border-primary-400', 'dark:border-primary-500');
+    });
+
+    fileUploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadZone.classList.remove('border-primary-400', 'dark:border-primary-500');
+        
+        const files = e.dataTransfer?.files;
+        if (files) {
+            handleFiles(files);
+        }
+    });
+
 });

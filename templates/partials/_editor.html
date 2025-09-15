@@ -1,5 +1,5 @@
 {{ define "_editor" }}
-<div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 editor">
+<div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 editor"{{ if .Binary }} data-binary-original-name="{{ .Filename }}"{{ end }}>
     <div class="border-b-1 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 my-auto flex">
         <p class="mx-2 my-2 inline-flex">
             <input type="text" name="name" value="{{ .Filename }}" placeholder="{{ $.locale.Tr "gist.new.filename-with-extension" }}" style="line-height: 0.05em" class="form-filename bg-white dark:bg-gray-900 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-l-md gist-title" autocomplete="off" data-lpignore data-bwignore data-1p-ignore>

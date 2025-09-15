@@ -2,6 +2,8 @@ package render
 
 import (
 	"bytes"
+	"regexp"
+
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -12,7 +14,6 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/util"
 	"go.abhg.dev/goldmark/mermaid"
-	"regexp"
 )
 
 func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
@@ -27,11 +28,11 @@ func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
 	}, err
 }
 
-func MarkdownFile(file *git.File) (RenderedFile, error) {
+func renderMarkdownFile(file *git.File) (HighlightedFile, error) {
 	var buf bytes.Buffer
 	err := newMarkdownWithSvgExtension().Convert([]byte(file.Content), &buf)
 
-	return RenderedFile{
+	return HighlightedFile{
 		File: file,
 		HTML: buf.String(),
 		Type: "Markdown",

@@ -1,14 +1,15 @@
 package gist
 
 import (
+	"net/url"
+	"strconv"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/internal/validator"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"net/url"
-	"strconv"
-	"strings"
 )
 
 func Create(ctx *context.Context) error {

@@ -4,16 +4,6 @@ import (
 	gojson "encoding/json"
 	"errors"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/index"
-	"github.com/thomiceli/opengist/internal/web/context"
-	"github.com/thomiceli/opengist/internal/web/handlers"
-	"github.com/thomiceli/opengist/public"
-	"github.com/thomiceli/opengist/templates"
 	htmlpkg "html"
 	"html/template"
 	"io"
@@ -24,6 +14,16 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/web/context"
+	"github.com/thomiceli/opengist/internal/web/handlers"
+	"github.com/thomiceli/opengist/public"
+	"github.com/thomiceli/opengist/templates"
 )
 
 type Template struct {
@@ -57,24 +57,6 @@ func (s *Server) setFuncMap() {
 		},
 		"isMarkdown": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".md"
-		},
-		"isCsv": func(i string) bool {
-			return strings.ToLower(filepath.Ext(i)) == ".csv"
-		},
-		"isSvg": func(i string) bool {
-			return strings.ToLower(filepath.Ext(i)) == ".svg"
-		},
-		"csvFile": func(file *git.File) *git.CsvFile {
-			if strings.ToLower(filepath.Ext(file.Filename)) != ".csv" {
-				return nil
-			}
-
-			csvFile, err := git.ParseCsv(file)
-			if err != nil {
-				return nil
-			}
-
-			return csvFile
 		},
 		"httpStatusText": http.StatusText,
 		"loadedTime": func(startTime time.Time) string {

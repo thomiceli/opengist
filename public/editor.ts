@@ -196,8 +196,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let arr = Array.from(allEditorsdom);
     arr.forEach((el: HTMLElement) => {
         // in case we edit the gist contents
-        let currEditor = newEditor(el, el.querySelector<HTMLInputElement>(".form-filecontent")!.value);
-        editorsjs.push(currEditor);
+        let formFileContent =el.querySelector<HTMLInputElement>(".form-filecontent")
+        if (formFileContent !== null) {
+            let currEditor = newEditor(el, el.querySelector<HTMLInputElement>(".form-filecontent")!.value);
+            editorsjs.push(currEditor);
+        }
     });
 
     checkForFirstDeleteButton();

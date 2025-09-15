@@ -66,7 +66,7 @@
             <div id="editors" class="space-y-4">
                 {{ if .dto.Files }}
                     {{ range .dto.Files }}
-                        {{ template "_editor" dict "Filename" .Filename "Content" .Content "locale" $.locale }}
+                        {{ template "_editor" dict "Filename" .Filename "Content" .Content "Binary" .Binary "locale" $.locale }}
                     {{ end }}
                 {{ else }}
                     {{ template "_editor" . }}

@@ -189,3 +189,7 @@ dl.dl-config dd {
 .hidden-important {
     @apply hidden !important;
 }
+
+.pdfobject-container {
+    @apply min-h-[700px] h-[700px] !important;
+}

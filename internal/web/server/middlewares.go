@@ -3,6 +3,13 @@ package server
 import (
 	"errors"
 	"fmt"
+	"html/template"
+	"net/http"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -15,12 +22,6 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"html/template"
-	"net/http"
-	"path/filepath"
-	"regexp"
-	"strings"
-	"time"
 )
 
 func (s *Server) useCustomContext() {
@@ -54,7 +55,7 @@ func (s *Server) registerMiddlewares() {
 			return nil
 		},
 	}))
-	//s.echo.Use(middleware.Recover())
+	s.echo.Use(middleware.Recover())
 	s.echo.Use(middleware.Secure())
 	s.echo.Use(Middleware(sessionInit).toEcho())
 

@@ -1,3 +1,5 @@
+import PDFObject from 'pdfobject';
+
 document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {
     el.addEventListener('click', event => {
         if (event.target && (event.target as HTMLElement).matches('.line-num')) {
@@ -75,5 +77,7 @@ if (document.getElementById('gist').dataset.own) {
     });
 }
 
-
+document.querySelectorAll(".pdf").forEach((el) => {
+    PDFObject.embed(el.dataset.src || "", el);
+})
 

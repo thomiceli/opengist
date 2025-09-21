@@ -18,7 +18,7 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>
-                        <p class="text-sm text-slate-500">{{ .locale.Tr "gist.list.joined" }} <span class="moment-timestamp">{{.fromUser.CreatedAt}}</span></p>
+                        <p class="text-sm text-slate-500">{{ .locale.Tr "gist.list.joined" }} <span>{{.fromUser.CreatedAt | humanTimeDiff}}</span></p>
                     </div>
                 </div>
                 {{ else }}

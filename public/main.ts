@@ -55,15 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('user-menu').classList.toggle('hidden');
     })
 
-    document.querySelectorAll('.moment-timestamp').forEach((e: HTMLElement) => {
-        e.title = dayjs.unix(parseInt(e.innerHTML)).format('LLLL');
-        e.innerHTML = dayjs.unix(parseInt(e.innerHTML)).fromNow();
-    });
-
-    document.querySelectorAll('.moment-timestamp-date').forEach((e: HTMLElement) => {
-        e.innerHTML = dayjs.unix(parseInt(e.innerHTML)).format('DD/MM/YYYY HH:mm');
-    });
-
     document.querySelectorAll('form').forEach((form: HTMLFormElement) => {
         form.onsubmit = () => {
             form.querySelectorAll('input[type=datetime-local]').forEach((input: HTMLInputElement) => {

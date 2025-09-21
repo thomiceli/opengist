@@ -179,6 +179,10 @@ func (s *Server) setFuncMap() {
 		"humanTimeDiff": func(t int64) string {
 			return humanize.Time(time.Unix(t, 0))
 		},
+		"humanTimeDiffStr": func(timestamp string) string {
+			t, _ := strconv.ParseInt(timestamp, 10, 64)
+			return humanize.Time(time.Unix(t, 0))
+		},
 		"humanDate": func(t int64) string {
 			return time.Unix(t, 0).Format("02/01/2006 15:04")
 		},

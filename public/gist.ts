@@ -1,6 +1,5 @@
 import './ipynb';
 import PDFObject from 'pdfobject';
-import './ipynb';
 
 document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {
     el.addEventListener('click', event => {

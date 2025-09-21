@@ -42,11 +42,11 @@
                             <div>
                                 <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ .Title }}</h3>
                                 <p class="mt-1 text-xs text-slate-600 dark:text-slate-400 line-clamp-2 code" style="overflow-wrap: anywhere">SHA256:{{.SHA}}</p>
-                                <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-added-at" }} <span class="moment-timestamp-date">{{ .CreatedAt }}</span></p>
+                                <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-added-at" }} <span>{{ .CreatedAt | humanDate }}</span></p>
                                 {{ if eq .LastUsedAt 0 }}
                                 <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-never-used" }}</p>
                                 {{ else }}
-                                <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-last-used" }} <span class="moment-timestamp">{{ .LastUsedAt }}</span></p>
+                                <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.ssh-key-last-used" }} <span>{{ .LastUsedAt | humanTimeDiff }}</span></p>
                                 {{ end }}
                             </div>
                             <form action="{{ $.c.ExternalUrl }}/settings/ssh-keys/{{.ID}}" method="post" class="inline-block">

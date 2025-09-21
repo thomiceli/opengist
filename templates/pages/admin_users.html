@@ -18,7 +18,7 @@
             <tr>
                 <td class="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-slate-700 dark:text-slate-300 sm:pl-0">{{ $user.ID }}</td>
                 <td class="whitespace-nowrap px-2 py-2 text-sm text-slate-700 dark:text-slate-300"><a href="{{ $.c.ExternalUrl }}/{{ $user.Username }}">{{ $user.Username }}</a></td>
-                <td class="whitespace-nowrap px-2 py-2 text-sm text-slate-700 dark:text-slate-300"><span class="moment-timestamp-date">{{ $user.CreatedAt }}</span></td>
+                <td class="whitespace-nowrap px-2 py-2 text-sm text-slate-700 dark:text-slate-300"><span>{{ $user.CreatedAt | humanDate }}</span></td>
                 <td class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                     <form action="{{ $.c.ExternalUrl }}/admin-panel/users/{{ $user.ID }}/delete" method="POST">
                         {{ $.csrfHtml }}

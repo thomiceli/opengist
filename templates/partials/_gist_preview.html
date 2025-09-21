@@ -39,7 +39,7 @@
                     </div>
 
                 </div>
-                <h5 class="text-sm text-slate-500 pb-1">{{ .locale.Tr "gist.list.last-active" }} <span class="moment-timestamp">{{ .gist.UpdatedAt }}</span>
+                <h5 class="text-sm text-slate-500 pb-1">{{ .locale.Tr "gist.list.last-active" }} <span>{{ .gist.UpdatedAt | humanTimeDiff }}</span>
                     {{ if .gist.Forked }} • {{ .locale.Tr "gist.list.forked-from" }} <a href="{{ .c.ExternalUrl }}/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Identifier }}">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a> {{ end }}
                     {{ if .gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> {{ visibilityStr .gist.Private false }} </span>{{ end }}</h5>
                 <div class="flex items-center gap-2 mb-2">

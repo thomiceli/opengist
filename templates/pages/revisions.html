@@ -16,7 +16,7 @@
                 {{ else }}
                     <svg class="h-5 w-5 rounded-full inline" data-jdenticon-value="{{ $commit.AuthorName }}" width="20" height="20"></svg>
                 {{ end }}
-                <span class="font-bold">{{if $user}}<a href="{{ $.c.ExternalUrl }}/{{$user.Username}}" class="text-slate-300 hover:text-slate-300 hover:underline">{{ $commit.AuthorName }}</a>{{else}}{{ $commit.AuthorName }}{{end}}</span> {{ $.locale.Tr "gist.revision.revised" }} <span class="moment-timestamp font-bold">{{ $commit.Timestamp }}</span>. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/rev/{{ $commit.Hash }}">{{ $.locale.Tr "gist.revision.go-to-revision" }}</a></h3>
+                <span class="font-bold">{{if $user}}<a href="{{ $.c.ExternalUrl }}/{{$user.Username}}" class="text-slate-300 hover:text-slate-300 hover:underline">{{ $commit.AuthorName }}</a>{{else}}{{ $commit.AuthorName }}{{end}}</span> {{ $.locale.Tr "gist.revision.revised" }} <span class="font-bold">{{ $commit.Timestamp | humanTimeDiffStr }}</span>. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/rev/{{ $commit.Hash }}">{{ $.locale.Tr "gist.revision.go-to-revision" }}</a></h3>
                 {{ if ne $commit.Changed "" }}
                     <p class="text-sm float-right py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-flex">

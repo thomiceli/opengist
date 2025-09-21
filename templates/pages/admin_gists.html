@@ -26,7 +26,7 @@
                 <td class="whitespace-nowrap px-2 py-2 text-sm text-slate-700 dark:text-slate-300">{{ $gist.Private }}</td>
                 <td class="whitespace-nowrap px-2 py-2 text-sm text-slate-700 dark:text-slate-300">{{ $gist.NbFiles }}</td>
                 <td class="whitespace-nowrap px-2 py-2 text-sm text-slate-700 dark:text-slate-300">{{ $gist.NbLikes }}</td>
-                <td class="whitespace-nowrap px-2 py-2 text-sm text-slate-700 dark:text-slate-300"><span class="moment-timestamp-date">{{ $gist.CreatedAt }}</span></td>
+                <td class="whitespace-nowrap px-2 py-2 text-sm text-slate-700 dark:text-slate-300"><span>{{ $gist.CreatedAt | humanDate }}</span></td>
                 <td class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                     <form action="{{ $.c.ExternalUrl }}/admin-panel/gists/{{ $gist.ID }}/delete" method="POST">
                         {{ $.csrfHtml }}

@@ -77,6 +77,8 @@
                     <div class="chroma markdown markdown-body p-8">{{ $file.HTML | safe }}</div>
                 {{ else if $file.MimeType.IsSVG }}
                     <div class="p-8 flex justify-center">{{ $file.HTML | safe }}</div>
+                {{ else if isJupyter $file.Filename }}
+                  <div class="p-8 jupyter notebook"><pre>{{ $file.Content }}</pre></div>
                 {{ else }}
                     <div class="code">
                         {{ $fileslug := slug $file.Filename }}

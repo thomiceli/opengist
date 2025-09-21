@@ -202,6 +202,11 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 			return nil, err
 		}
 
+		// Don't truncate Jupyter notebooks
+		if strings.HasSuffix(file.Name, ".ipynb") {
+			truncate = false
+		}
+
 		sizeToRead := size
 		if truncate && sizeToRead > truncateLimit {
 			sizeToRead = truncateLimit

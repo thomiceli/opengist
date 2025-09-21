@@ -23,7 +23,9 @@
     "cssnano": "^5.1.15",
     "dayjs": "^1.11.9",
     "github-markdown-css": "^5.5.0",
+    "highlight.js": "^11.11.1",
     "jdenticon": "^3.3.0",
+    "katex": "^0.16.22",
     "nodemon": "^2.0.22",
     "pdfobject": "^2.3.1",
     "postcss": "^8.4.32",
@@ -33,6 +35,7 @@
     "postcss-loader": "^7.1.0",
     "postcss-selector-namespace": "^3.0.1",
     "sass": "^1.62.1",
+    "showdown": "^2.1.0",
     "sugarss": "^4.0.1",
     "tailwindcss": "^3.2.7",
     "vite": "^4.5.3"

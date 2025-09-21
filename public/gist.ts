@@ -1,3 +1,4 @@
+import './ipynb';
 import PDFObject from 'pdfobject';
 
 document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {
@@ -80,4 +81,3 @@ if (document.getElementById('gist').dataset.own) {
 document.querySelectorAll(".pdf").forEach((el) => {
     PDFObject.embed(el.dataset.src || "", el);
 })
-

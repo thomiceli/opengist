@@ -190,6 +190,16 @@ dl.dl-config dd {
     @apply hidden !important;
 }
 
+/*
+ * A hack to ensure that Jupyter output images are always rendered with a
+ * neutral background color, even if the image itself does not have one, since
+ * Jupyter usually outputs images with transparent or light backgrounds.
+ */
+.dark .jupyter-output img {
+  background-color: #888;
+}
+
+
 .pdfobject-container {
     @apply min-h-[700px] h-[700px] !important;
 }

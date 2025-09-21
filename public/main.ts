@@ -1,22 +1,7 @@
 import './style.scss';
 import './favicon-32.png';
 import './opengist.svg';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/cs';
-import 'dayjs/locale/de';
-import 'dayjs/locale/es';
-import 'dayjs/locale/fr';
-import 'dayjs/locale/hu';
-import 'dayjs/locale/pt';
-import 'dayjs/locale/ru';
-import 'dayjs/locale/zh';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
 import jdenticon from 'jdenticon/standalone';
-
-dayjs.extend(relativeTime);
-dayjs.extend(localizedFormat);
-dayjs.locale(window.opengist_locale || 'en');
 
 jdenticon.update("[data-jdenticon-value]")
 
@@ -58,11 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('form').forEach((form: HTMLFormElement) => {
         form.onsubmit = () => {
             form.querySelectorAll('input[type=datetime-local]').forEach((input: HTMLInputElement) => {
-                console.log(dayjs(input.value).unix());
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
                 hiddenInput.name = 'expiredAtUnix'
-                hiddenInput.value = dayjs(input.value).unix().toString();
+                hiddenInput.value = Math.floor(new Date(input.value).getTime() / 1000).toString();
                 form.appendChild(hiddenInput);
             });
             return true;

@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.11.0](https://github.com/thomiceli/opengist/compare/v1.10.0...v1.11.0) - 2025-09-21
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- LDAP authentication (#470)
+- Listen to Unix websocket (#484)
+- Binary files support (#503)
+- Support for rendering .ipynb Jupyter/IPython notebooks (#491)
+- File upload on gist creation/edition (#507)
+- Read psql sslmode from db uri (#462)
+- OIDC group claim name to OpenID request (#490)
+- Reworked user settings page (#467)
+- Style preference tab for user (#467)
+- Init gist with regular urls via git CLI (http) (#501)
+
+### Fixed
+- Gitlab avatar (#461)
+- Correct German spelling, use consistent wording (#468)
+- Filename unescape (#474)
+- Fix Markdown preview links (#475)
+- Replace Unicode characters with HTML entity codes in embed template (#480)
+- Redirect to $baseUrl after auth with passkey instead of / (#482)
+- Human date on iOS devices (#510)
+
+### Docs
+- Add Proxmox VE Helper-Script (#473)
+
+### Other
+- Use Helm deployment.env[] values (#471)
+- Update Helm Postgres version
+- Use database for Gist init queue (#498)
+- Update go dep chroma (#493)
+
 ## [1.10.0](https://github.com/thomiceli/opengist/compare/v1.9.1...v1.10.0) - 2025-04-07
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

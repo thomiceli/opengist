@@ -266,3 +266,67 @@ validation.invalid: Geçersiz %s
 
 html.title.admin-panel: Yönetici paneli
 settings.ssh-key-exists: SSH anahtarı zaten mevcut
+gist.search.help.topic: Verilen konuyla ilgili gist'ler
+gist.search.placeholder.unlisted: Listelenmemiş
+settings.header.style: Stil
+auth.mfa.passkey: Parola Anahtarı
+auth.mfa.waiting-for-passkey-input: Tarayıcı etkileşiminden gelecek girdi bekleniyor...
+settings.header.account: Hesap
+settings.style.no-soft-wrap: Yumuşak Satır Kaydırma Yok
+auth.totp: Zamana Dayalı Tek Kullanımlık Parola (TOTP)
+flash.admin.sync-gist-languages: Gist dilleri senkronize ediliyor...
+auth.mfa.passkeys-help: Hesabınıza giriş yapmak ve çok faktörlü kimlik doğrulama yöntemi olarak kullanmak için bir geçiş anahtarı ekleyin.
+validation.invalid-gist-topics: Geçersiz gist konuları, harf veya rakamla başlamalı, 50 karakterden uzun olmamalı ve tire içerebilir.
+auth.totp.enter-recovery-key: veya cihazınızı kaybettiyseniz kurtarma anahtarını kullanın
+auth.totp.save-recovery-codes: Kurtarma kodlarınızı güvenli bir yerde saklayın. Bu kodları, kimlik doğrulayıcı uygulamanıza erişimi kaybetmeniz durumunda hesabınıza yeniden erişmek için kullanabilirsiniz.
+error.not-in-mfa-session: Kullanıcı çok faktörlü kimlik doğrulama oturumunda değil
+admin.invitations.delete_confirm: Bu daveti silmek istiyor musunuz?
+auth.totp.help: TOTP, paylaşılan bir gizli anahtarı kullanarak tek kullanımlık bir parola üreten, iki faktörlü kimlik doğrulama yöntemidir.
+auth.totp.use: TOTP kullan
+auth.totp.regenerate-recovery-codes: Kurtarma kodlarını yeniden oluştur
+auth.totp.already-enabled: TOTP zaten etkinleştirilmiş
+auth.totp.invalid-secret: Geçersiz TOTP gizli anahtarı
+auth.totp.invalid-code: Geçersiz TOTP kodu
+auth.totp.code-used: '%s kurtarma kodu kullanıldı, artık geçersiz. Şu anda çok faktörlü kimlik doğrulamayı devre dışı bırakmak veya kodlarınızı yeniden oluşturmak isteyebilirsiniz.'
+flash.auth.passkey-registred: '%s geçiş anahtarı kaydedildi'
+gist.new.topics: Konular (boşluklarla ayır)
+gist.list.topic-results-topic: Tüm %s konusuyla eşleşen gist'ler
+gist.list.topic-results: Konuyla eşleşen tüm gist'ler
+gist.search.placeholder.title: Başlık
+gist.search.placeholder.visibility: Görünürlük
+gist.search.placeholder.public: Halka açık
+gist.search.placeholder.private: Özel
+gist.search.placeholder.language: Lisan
+gist.search.placeholder.all: Tümü
+gist.search.placeholder.topics: Başlıklar
+gist.search.placeholder.search: Ara
+gist.delete.confirm: Bu Gist'i silmek istediğinizden emin misiniz?
+flash.auth.passkey-deleted: Geçiş anahtarı silindi
+settings.header.mfa: ÇFKD
+settings.header.ssh: SSH
+settings.style.gist-code: Gist kodu
+settings.style.soft-wrap: Yumuşak Satır Kaydırma
+settings.style.removed-lines-color: Silinen satırların rengi
+settings.style.added-lines-color: Eklenen satırların rengi
+settings.style.git-lines-color: Git satırların rengi
+settings.style.save-style: Stili kaydet
+auth.mfa: Çok Faktörlü Kimlik Doğrulama
+auth.mfa.passkeys: Parola Anahtarları
+auth.mfa.use-passkey: Parola Anahtarı kullan
+auth.mfa.bind-passkey: Parola Anahtarı bağla
+auth.mfa.login-with-passkey: Parola Anahtarı ile Giriş yap
+auth.mfa.use-passkey-to-finish: Kimlik doğrulamayı tamamlamak için bir geçiş anahtarı kullanın
+auth.mfa.passkey-name: İsim
+auth.mfa.delete-passkey: Sil
+auth.mfa.passkey-added-at: Eklendi
+auth.mfa.passkey-never-used: Hiç kullanılmadı
+auth.mfa.passkey-last-used: Son kullanım
+auth.mfa.delete-passkey-confirm: Geçiş Anahtarının silinmesini onaylayın
+auth.totp.disabled: TOTP başarıyla devre dışı bırakıldı
+auth.totp.disable: TOTP devre dışı bırak
+auth.totp.enter-code: Kimlik Doğrulayıcı uygulamasındaki kodu girin
+auth.totp.code: Kod
+auth.totp.submit: Kaydet
+auth.totp.proceed: Onayla
+auth.totp.scan-qr-code: İki faktörlü kimlik doğrulamayı etkinleştirmek için aşağıdaki QR kodunu kimlik doğrulayıcı uygulamanızla tarayın veya aşağıdaki metni girin, ardından oluşturulan kodla onaylayın.
+admin.actions.sync-gist-languages: Tüm gist dillerini senkronize et

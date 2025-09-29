@@ -9,7 +9,7 @@ import (
 )
 
 type RenderedFile interface {
-	getFile() *git.File
+	InternalType() string
 }
 
 type NonHighlightedFile struct {
@@ -17,8 +17,8 @@ type NonHighlightedFile struct {
 	Type string `json:"type"`
 }
 
-func (r NonHighlightedFile) getFile() *git.File {
-	return r.File
+func (r NonHighlightedFile) InternalType() string {
+	return "NonHighlightedFile"
 }
 
 func RenderFiles(files []*git.File) []RenderedFile {
@@ -54,7 +54,11 @@ func processFile(file *git.File) RenderedFile {
 	if mt.IsCSV() {
 		rendered, err := renderCsvFile(file)
 		if err != nil {
-			log.Error().Err(err).Msg("Error parsing CSV file for " + file.Filename)
+			rendered, err := highlightFile(file)
+			if err != nil {
+				log.Error().Err(err).Msg("Error rendering gist preview for " + file.Filename)
+			}
+			return rendered
 		}
 		return rendered
 	} else if mt.IsText() && filepath.Ext(file.Filename) == ".md" {

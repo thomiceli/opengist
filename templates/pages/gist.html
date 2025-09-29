@@ -55,7 +55,7 @@
             </div>
             <div class="overflow-auto">
                 {{ if $file.MimeType.IsText }}
-                {{ if $file.MimeType.IsCSV }}
+                {{ if eq $file.InternalType "CSVFile" }}
                     <table class="csv-table">
                         <thead>
                             <tr>

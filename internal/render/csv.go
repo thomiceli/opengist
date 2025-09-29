@@ -15,8 +15,8 @@ type CSVFile struct {
 	Rows   [][]string `json:"-"`
 }
 
-func (r CSVFile) getFile() *git.File {
-	return r.File
+func (r CSVFile) InternalType() string {
+	return "CSVFile"
 }
 
 func renderCsvFile(file *git.File) (*CSVFile, error) {

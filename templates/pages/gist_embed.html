@@ -17,7 +17,7 @@
             </div>
             {{ end }}
             {{ if $file.MimeType.IsText }}
-            {{ if $file.MimeType.IsCSV }}
+            {{ if eq $file.InternalType "CSVFile" }}
             <table class="csv-table">
                 <thead>
                 <tr>

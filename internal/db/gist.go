@@ -431,7 +431,7 @@ func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
 			HumanSize: humanize.IBytes(fileCat.Size),
 			Content:   fileCat.Content,
 			Truncated: fileCat.Truncated,
-			MimeType:  git.DetectMimeType([]byte(shortContent)),
+			MimeType:  git.DetectMimeType([]byte(shortContent), filepath.Ext(fileCat.Name)),
 		})
 	}
 	return files, err
@@ -465,7 +465,7 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 		HumanSize: humanize.IBytes(size),
 		Content:   content,
 		Truncated: truncated,
-		MimeType:  git.DetectMimeType([]byte(shortContent)),
+		MimeType:  git.DetectMimeType([]byte(shortContent), filepath.Ext(filename)),
 	}, err
 }
 

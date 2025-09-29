@@ -9,6 +9,7 @@ import (
 
 type MimeType struct {
 	ContentType string
+	extension   string
 }
 
 func (mt MimeType) IsText() bool {
@@ -16,7 +17,8 @@ func (mt MimeType) IsText() bool {
 }
 
 func (mt MimeType) IsCSV() bool {
-	return strings.Contains(mt.ContentType, "text/csv")
+	return strings.Contains(mt.ContentType, "text/csv") &&
+		(strings.HasSuffix(mt.extension, ".csv"))
 }
 
 func (mt MimeType) IsImage() bool {
@@ -84,6 +86,6 @@ func (mt MimeType) RenderType() string {
 	return "Binary"
 }
 
-func DetectMimeType(data []byte) MimeType {
-	return MimeType{mimetype.Detect(data).String()}
+func DetectMimeType(data []byte, extension string) MimeType {
+	return MimeType{mimetype.Detect(data).String(), extension}
 }

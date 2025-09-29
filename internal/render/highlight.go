@@ -21,8 +21,8 @@ type HighlightedFile struct {
 	HTML  string   `json:"-"`
 }
 
-func (r HighlightedFile) getFile() *git.File {
-	return r.File
+func (r HighlightedFile) InternalType() string {
+	return "HighlightedFile"
 }
 
 type RenderedGist struct {

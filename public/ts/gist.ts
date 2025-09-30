@@ -1,4 +1,4 @@
-import './ipynb';
+import '../ts/ipynb.ts';
 import PDFObject from 'pdfobject';
 
 document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {

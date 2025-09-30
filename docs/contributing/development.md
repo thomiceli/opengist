@@ -32,6 +32,7 @@ Requirements:
 ```shell
 git clone git@github.com:thomiceli/opengist.git
 cd opengist
+make install
 make watch
 ```
 

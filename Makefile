@@ -19,7 +19,6 @@ install:
 build_frontend:
 	@echo "Building frontend assets..."
 	npx vite -c public/vite.config.js build
-	@EMBED=1 npx postcss 'public/assets/embed-*.css' -c public/postcss.config.js --replace # until we can .nest { @tailwind } in Sass
 
 build_backend:
 	@echo "Building Opengist binary..."
@@ -39,23 +38,23 @@ build_dev_docker:
 	docker build -t $(BINARY_NAME)-dev:latest --target dev .
 
 run_dev_docker:
-	docker run -v .:/opengist -p 6157:6157 -p 16157:16157 -p 2222:2222 -v $(HOME)/.opengist-dev:/root/.opengist --rm $(BINARY_NAME)-dev:latest
+	docker run -v .:/opengist -v /opengist/node_modules -p 6157:6157 -p 16157:16157 -p 2222:2222 -v $(HOME)/.opengist-dev:/root/.opengist --rm $(BINARY_NAME)-dev:latest
 
 watch_frontend:
 	@echo "Building frontend assets..."
-	npx vite -c public/vite.config.js dev --port 16157 --host
+	npx vite -c public/vite.config.js --port 16157 --host
 
 watch_backend:
 	@echo "Building Opengist binary..."
 	OG_DEV=1 npx nodemon --watch '**/*' -e html,yml,go,js --signal SIGTERM --exec 'go run -ldflags "-X $(VERSION_PKG)=$(GIT_TAG)" . --config config.yml'
 
 watch:
-	@bash ./scripts/watch.sh
+	@sh ./scripts/watch.sh
 
 clean:
 	@echo "Cleaning up build artifacts..."
-	@rm -f $(BINARY_NAME) public/manifest.json
-	@rm -rf public/assets build
+	@rm -f $(BINARY_NAME)
+	@rm -rf public/assets public/.vite build
 
 clean_docker:
 	@echo "Cleaning up Docker image..."

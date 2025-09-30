@@ -145,5 +145,6 @@ func (ctx *Context) Tr(key string, args ...any) string {
 var ManifestEntries map[string]Asset
 
 type Asset struct {
-	File string `json:"file"`
+	File string   `json:"file"`
+	Css  []string `json:"css"`
 }

@@ -1,6 +1,6 @@
 {{ define "header" }}
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full {{ if eq (mainTheme .currentStyle) "dark"}} dark{{ end }}" data-theme="{{ mainTheme .currentStyle }}">
 <head>
     <meta charset="UTF-8" />
     {{ if .NoIndex }}
@@ -13,37 +13,32 @@
         window.opengist_base_url = "{{ $.c.ExternalUrl }}";
         window.opengist_locale = "{{ .locale.Code }}".substring(0, 2);
         const checkTheme = () => {
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark')
-            } else {
+            if (document.documentElement.dataset.theme === "auto") {
+            window.matchMedia('(prefers-color-scheme: dark)').matches ?
+                document.documentElement.classList.add('dark') :
                 document.documentElement.classList.remove('dark')
             }
         }
 
         checkTheme()
 
-        window.matchMedia('(prefers-color-scheme: dark)')
-            .addEventListener('change', ({matches}) => {
-                    checkTheme()
-                }
-            )
-
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkTheme);
     </script>
     {{ if $.c.CustomFavicon }}
         <link rel="icon" type="image/png" sizes="32x32" href="{{ custom $.c.CustomFavicon }}">
     {{ else }}
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset "favicon-32.png" }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset "img/favicon-32.png" }}">
     {{ end }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     {{ if dev }}
         <script type="module" src="{{ asset "@vite/client" }}"></script>
-        <link rel="stylesheet" href="{{ asset "style.scss" }}" />
-        <script type="module" src="{{ asset "main.ts" }}"></script>
+        <link rel="stylesheet" href="{{ assetCss (print "css/" (mainTheme .currentStyle ) ".css") }}" />
     {{ else }}
-        <link rel="stylesheet" href="{{ asset "main.css" }}" />
-        <script type="module" src="{{ asset "main.ts" }}"></script>
+        <link rel="stylesheet" href="{{ assetCss "ts/main.ts" }}" />
+        <link rel="stylesheet" href="{{ assetCss (print "ts/" (mainTheme .currentStyle ) ".ts") }}" />
     {{ end }}
+    <script type="module" src="{{ asset "ts/main.ts" }}"></script>
 
     {{ if .htmlTitle }}
         <title>{{ .htmlTitle }} - {{ if $.c.CustomName }}{{ $.c.CustomName }}{{ else }}Opengist{{ end }}</title>
@@ -79,22 +74,22 @@
                             </svg>
                         </button>
                     </div>
-                    <div class="flex-shrink-0 items-center hidden sm:flex">
+                    <div class="shrink-0 items-center hidden sm:flex">
                         <a href="{{ $.c.ExternalUrl }}/">
                             {{ if $.c.CustomLogo }}
                                 <img src="{{ custom $.c.CustomLogo }}" class="object-cover h-12">
                             {{ else }}
-                                <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                                <img src="{{ asset "img/opengist.svg" }}" class="object-cover h-12 w-12">
                             {{ end }}
                         </a>
                     </div>
                     <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-                        <div class="flex-shrink-0 items-center flex sm:hidden">
+                        <div class="shrink-0 items-center flex sm:hidden">
                             <a href="{{ $.c.ExternalUrl }}/">
                                 {{ if $.c.CustomLogo }}
                                     <img src="{{ custom $.c.CustomLogo }}" class="object-cover h-12">
                                 {{ else }}
-                                    <img src="{{ asset "opengist.svg" }}" class="object-cover h-12 w-12">
+                                    <img src="{{ asset "img/opengist.svg" }}" class="object-cover h-12 w-12">
                                 {{ end }}
                             </a>
                         </div>
@@ -199,44 +194,6 @@
                                 <p class="text-slate-700 dark:text-slate-300 mr-1">{{ .locale.Tr "header.menu.login" }}</p>
                             </a>
                         {{ end }}
-
-                        <div class="hidden sm:block ml-2 border-l-1 border-gray-200 dark:border-gray-600 rounded-md"><br /></div>
-                        <div id="theme-btn" class="sm:flex items-center ml-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md px-3 py-2">
-                            <div>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-primary-500 dark:hidden">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-                                </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-primary-500 hidden dark:block">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                                </svg>
-                            </div>
-                            <div class="relative sm:inline-block text-left">
-                            <div id="theme-menu" class="hidden font-medium absolute right-0 z-10 mt-12 origin-top-right divide-y dark:divide-gray-600 divide-gray-100 rounded-md dark:bg-gray-800 bg-white shadow-lg ring-1 ring-gray-50 dark:ring-gray-700 focus:outline-none">
-                                <div class="py-1" role="none">
-                                    <!-- Active: "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900", Not Active: "text-gray-300 dark:text-gray-700" -->
-                                    <button id="light-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-3 h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-500">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-                                        </svg>
-                                        {{ .locale.Tr "header.menu.light" }}
-                                    </button>
-                                    <button id="dark-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-full hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-3 h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-500">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                                        </svg>
-                                        {{ .locale.Tr "header.menu.dark" }}
-                                    </button>
-                                    <button id="system-mode" class="dark:text-slate-300 text-slate-700 group flex items-center px-3 py-1.5 text-sm w-max hover:text-slate-500 dark:hover:text-slate-400" role="menuitem" tabindex="-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-3 h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-slate-500">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
-                                        </svg>
-                                        {{ .locale.Tr "header.menu.system" }}
-                                    </button>
-                                </div>
-                            </div>
-                            </div>
-
-                        </div>
                     </div>
                 </div>
             </div>
@@ -288,7 +245,7 @@
             {{range .flashErrors}}
                 <div class="mt-4 rounded-md bg-gray-50 dark:bg-gray-800 border-l-4 border-rose-400 p-4">
                     <div class="flex">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <svg class="h-5 w-5 text-rose-600 dark:text-rose-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                             </svg>
@@ -302,7 +259,7 @@
             {{range .flashSuccess}}
                 <div class="mt-4 rounded-md bg-gray-50 dark:bg-gray-800 border-l-4 border-primary-500 dark:border-primary-400 p-4">
                     <div class="flex">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500 dark:text-primary-400" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                             </svg>
@@ -316,7 +273,7 @@
             {{range .flashWarnings}}
                 <div class="mt-4 rounded-md bg-gray-50 dark:bg-gray-800 border-l-4 border-yellow-500 dark:border-yellow-400 p-4">
                     <div class="flex">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 dark:text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                             </svg>

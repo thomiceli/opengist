@@ -1,0 +1,4 @@
+@import "highlight.js/styles/github.min.css";
+@import "@catppuccin/highlightjs/css/catppuccin-latte.css";
+@import "github-markdown-css/github-markdown.css";
+@import './catppuccin-latte.css';

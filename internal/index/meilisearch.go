@@ -1,12 +1,14 @@
 package index
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/meilisearch/meilisearch-go"
-	"github.com/rs/zerolog/log"
 	"strconv"
 	"strings"
+
+	"github.com/meilisearch/meilisearch-go"
+	"github.com/rs/zerolog/log"
 )
 
 type MeiliIndexer struct {
@@ -82,7 +84,8 @@ func (i *MeiliIndexer) Add(gist *Gist) error {
 	if gist == nil {
 		return errors.New("failed to add nil gist to index")
 	}
-	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.AddDocuments(gist, "GistID")
+	primaryKey := "GistID"
+	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.AddDocuments(gist, &primaryKey)
 	return err
 }
 
@@ -127,16 +130,20 @@ func (i *MeiliIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 
 	gistIds := make([]uint, 0, len(response.Hits))
 	for _, hit := range response.Hits {
-		if gistID, ok := hit.(map[string]interface{})["GistID"].(float64); ok {
-			gistIds = append(gistIds, uint(gistID))
+		if gistIDRaw, ok := hit["GistID"]; ok {
+			var gistID float64
+			if err := json.Unmarshal(gistIDRaw, &gistID); err == nil {
+				gistIds = append(gistIds, uint(gistID))
+			}
 		}
 	}
 
 	languageCounts := make(map[string]int)
-	if facets, ok := response.FacetDistribution.(map[string]interface{})["Languages"]; ok {
-		for language, count := range facets.(map[string]interface{}) {
-			if countValue, ok := count.(float64); ok {
-				languageCounts[language] = int(countValue)
+	if len(response.FacetDistribution) > 0 {
+		var facetDist map[string]map[string]int
+		if err := json.Unmarshal(response.FacetDistribution, &facetDist); err == nil {
+			if facets, ok := facetDist["Languages"]; ok {
+				languageCounts = facets
 			}
 		}
 	}

@@ -1,43 +1,13 @@
-import './style.scss';
-import './favicon-32.png';
-import './opengist.svg';
+import '../css/tailwind.css';
+import '../img/favicon-32.png';
+import '../img/opengist.svg';
 import jdenticon from 'jdenticon/standalone';
 
 jdenticon.update("[data-jdenticon-value]")
 
 document.addEventListener('DOMContentLoaded', () => {
-    const themeMenu = document.getElementById('theme-menu')!;
-
-    document.getElementById('light-mode')!.onclick = (e) => {
-        e.stopPropagation()
-        localStorage.theme = 'light';
-        themeMenu.classList.toggle('hidden');
-        // @ts-ignore
-        checkTheme()
-    }
-
-    document.getElementById('dark-mode')!.onclick = (e) => {
-        e.stopPropagation()
-        localStorage.theme = 'dark';
-        themeMenu.classList.toggle('hidden');
-        // @ts-ignore
-        checkTheme()
-    }
-
-    document.getElementById('system-mode')!.onclick = (e) => {
-        e.stopPropagation()
-        localStorage.removeItem('theme');
-        themeMenu.classList.toggle('hidden');
-        // @ts-ignore
-        checkTheme();
-    }
-
-    document.getElementById('theme-btn')!.onclick = () => {
-        themeMenu.classList.toggle('hidden');
-    }
-
     document.getElementById('user-btn')?.addEventListener("click" , () => {
-        document.getElementById('user-menu').classList.toggle('hidden');
+        document.getElementById('user-menu')!.classList.toggle('hidden');
     })
 
     document.querySelectorAll('form').forEach((form: HTMLFormElement) => {

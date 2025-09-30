@@ -6,6 +6,7 @@ gist.db
 /**/.DS_Store
 public/assets/*
 public/manifest.json
+public/.vite/*
 ./opengist
 opengist
 build/

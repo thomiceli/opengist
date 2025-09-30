@@ -1,16 +1,8 @@
-FROM alpine:3.19 AS base
+FROM alpine:3.22 AS base
 
 RUN apk update && \
         apk add --no-cache \
         make \
-        shadow \
-        openssl \
-        openssh \
-        curl \
-        wget \
-        git \
-        gnupg \
-        xz \
         gcc \
         musl-dev \
         libstdc++
@@ -29,6 +21,14 @@ COPY . .
 
 
 FROM base AS dev
+RUN apk add --no-cache \
+    openssl \
+    openssh-server \
+    curl \
+    wget \
+    git \
+    gnupg \
+    xz
 
 EXPOSE 6157 2222 16157
 VOLUME /opengist
@@ -41,29 +41,21 @@ FROM base AS build
 RUN make
 
 
-FROM alpine:3.19 as prod
+FROM alpine:3.22 AS prod
 
 RUN apk update && \
     apk add --no-cache \
     shadow \
-    openssl \
-    openssh \
+    openssh-server \
     curl \
-    wget \
-    git \
-    gnupg \
-    xz \
-    gcc \
-    musl-dev \
-    libstdc++
+    git
 
 RUN addgroup -S opengist && \
     adduser -S -G opengist -s /bin/ash -g 'Opengist User' opengist
 
-COPY --from=build --chown=opengist:opengist /opengist/config.yml config.yml
-
 WORKDIR /app/opengist
 
+COPY --from=build --chown=opengist:opengist /opengist/config.yml /config.yml
 COPY --from=build --chown=opengist:opengist /opengist/opengist .
 COPY --from=build --chown=opengist:opengist /opengist/docker ./docker
 

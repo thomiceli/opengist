@@ -17,7 +17,7 @@ configExistingSecret: ""
 image:
   repository: ghcr.io/thomiceli/opengist
   pullPolicy: Always
-  tag: "1.11.0"
+  tag: "1.11.1"
   digest: ""
 imagePullSecrets: []
 # - name: "image-pull-secret"

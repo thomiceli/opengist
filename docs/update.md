@@ -27,9 +27,9 @@ Stop the running instance; then like your first installation of Opengist, downlo
 
 ```shell
 # example for linux amd64
-wget https://github.com/thomiceli/opengist/releases/download/v1.11.0/opengist1.11.0-linux-amd64.tar.gz
+wget https://github.com/thomiceli/opengist/releases/download/v1.11.1/opengist1.11.1-linux-amd64.tar.gz
 
-tar xzvf opengist1.11.0-linux-amd64.tar.gz
+tar xzvf opengist1.11.1-linux-amd64.tar.gz
 cd opengist
 chmod +x opengist
 ./opengist # with or without `--config config.yml`

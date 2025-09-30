@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.11.1](https://github.com/thomiceli/opengist/compare/v1.11.0...v1.11.1) - 2025-09-30
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- More translation strings (#511)
+
+### Fixed
+- CSV errors for rendering (#514)
+
+### Other
+- Reset default log level to warn
+
 ## [1.11.0](https://github.com/thomiceli/opengist/compare/v1.10.0...v1.11.0) - 2025-09-21
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

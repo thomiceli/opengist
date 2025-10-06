@@ -15,12 +15,12 @@
     "@codemirror/commands": "^6.9.0",
     "@codemirror/lang-javascript": "^6.2.4",
     "@codemirror/language": "^6.11.3",
-    "@codemirror/state": "^6.2.0",
+    "@codemirror/state": "^6.5.2",
     "@codemirror/text": "^0.19.6",
-    "@codemirror/view": "^6.9.3",
+    "@codemirror/view": "^6.38.4",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.1.13",
+    "@tailwindcss/vite": "^4.1.14",
     "codemirror": "^6.0.2",
     "github-markdown-css": "^5.8.1",
     "highlight.js": "^11.11.1",
@@ -29,7 +29,6 @@
     "marked": "^16.3.0",
     "nodemon": "^3.1.10",
     "pdfobject": "^2.3.1",
-    "showdown": "^2.1.0",
     "tailwindcss": "^4.1.14",
     "vite": "^7.1.9"
   }

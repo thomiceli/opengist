@@ -69,7 +69,7 @@ func (ctx *Context) ErrorRes(code int, message string, err error) error {
 }
 
 func (ctx *Context) RedirectTo(location string) error {
-	return ctx.Context.Redirect(302, config.C.ExternalUrl+location)
+	return ctx.Redirect(302, config.C.ExternalUrl+location)
 }
 
 func (ctx *Context) Html(template string) error {

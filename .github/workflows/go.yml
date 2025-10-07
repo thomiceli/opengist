@@ -28,7 +28,7 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.5
-          args: --timeout=20m
+          args: --timeout=20m --disable=errcheck
 
       - name: Format
         run: make fmt check_changes

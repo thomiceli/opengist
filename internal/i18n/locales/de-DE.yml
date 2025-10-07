@@ -303,3 +303,35 @@ auth.totp.scan-qr-code: Scanne den unten stehenden QR-Code mit deiner Authentifi
 auth.totp.enter-code: Gib den Code aus deiner Authentifizierungs-App ein
 auth.totp.save-recovery-codes: Speichere deine Wiederherstellungscodes an einem sicheren Ort. Du kannst diese Codes verwenden, um wieder Zugang zu deinem Account zu erlangen, wenn du den Zugriff auf deine Authentifizierungs-App verloren hast.
 error.not-in-mfa-session: Nutzer ist nicht in einer Zwei-Faktor-Sitzung
+gist.revision.binary-file-changes: Änderungen an Binärdateien werden nicht angezeigt
+error.no-file-uploaded: Keine Datei hochgeladen
+flash.admin.sync-gist-languages: Gist-Sprachen werden synchronisiert …
+validation.invalid-gist-topics: Ungültige Gist-Themen. Sie müssen mit einem Buchstaben oder einer Zahl beginnen, dürfen maximal 50 Zeichen lang sein und dürfen Bindestriche enthalten
+gist.new.topics: Themen (durch Leerzeichen getrennt)
+gist.preview-non-available: Vorschau nicht verfügbar
+gist.new.drop-files: Dateien hier ablegen oder zum Hochladen klicken
+gist.new.any-file-type: Laden Sie einen beliebigen Dateityp hoch
+gist.list.topic-results-topic: Alle Gists mit dem Thema %s
+gist.file-raw: Diese Datei kann nicht gerendert werden.
+gist.file-binary-edit: Diese Datei ist binär.
+gist.search.placeholder.title: Titel
+gist.search.placeholder.visibility: Sichtbarkeit
+gist.search.placeholder.public: Öffentlich
+gist.search.placeholder.unlisted: Nicht gelistet
+gist.search.placeholder.private: Privat
+gist.search.placeholder.language: Sprache
+gist.search.placeholder.all: Alle
+gist.search.placeholder.topics: Themen
+gist.search.placeholder.search: Suche
+gist.search.help.topic: gists zum gegebenen Thema
+settings.header.account: Konto
+settings.header.mfa: MFA
+settings.header.ssh: SSH
+settings.header.style: Stil
+settings.style.removed-lines-color: Farbe entfernter Linien
+settings.style.added-lines-color: Farbe hinzugefügter Linien
+settings.style.git-lines-color: Git Linien Farbe
+settings.style.save-style: Stil Speichern
+auth.totp.enter-recovery-key: oder einen Wiederherstellungsschlüssel, wenn Sie Ihr Gerät verloren haben
+error.cannot-open-file: Die hochgeladene Datei kann nicht geöffnet werden
+admin.actions.sync-gist-languages: Synchronisieren Sie alle Gists-Sprachen

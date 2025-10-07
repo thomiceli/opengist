@@ -19,7 +19,8 @@ func AESEncrypt(key, text []byte) ([]byte, error) {
 	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
 		return nil, err
 	}
-
+	// TODO: remove deprecated
+	//nolint:staticcheck
 	stream := cipher.NewCFBEncrypter(block, iv)
 	stream.XORKeyStream(ciphertext[aes.BlockSize:], text)
 
@@ -38,7 +39,8 @@ func AESDecrypt(key, ciphertext []byte) ([]byte, error) {
 
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
-
+	// TODO: remove deprecated
+	//nolint:staticcheck
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(ciphertext, ciphertext)
 

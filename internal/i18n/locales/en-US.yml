@@ -165,6 +165,10 @@ settings.style.removed-lines-color: Removed lines color
 settings.style.added-lines-color: Added lines color
 settings.style.git-lines-color: Git lines color
 settings.style.save-style: Save style
+settings.style.theme: Theme
+settings.style.theme-light: Light
+settings.style.theme-dark: Dark
+settings.style.theme-auto: Auto
 
 auth.signup-disabled: Administrator has disabled signing up
 auth.login: Login

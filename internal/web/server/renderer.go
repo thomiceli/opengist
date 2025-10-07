@@ -92,6 +92,12 @@ func (s *Server) setFuncMap() {
 			}
 			return config.C.ExternalUrl + "/" + context.ManifestEntries[file].File
 		},
+		"assetCss": func(file string) string {
+			if s.dev {
+				return "http://localhost:16157/" + file
+			}
+			return config.C.ExternalUrl + "/" + context.ManifestEntries[file].Css[0]
+		},
 		"custom": func(file string) string {
 			assetpath, err := url.JoinPath("/", "assets", file)
 			if err != nil {
@@ -186,6 +192,17 @@ func (s *Server) setFuncMap() {
 		"humanDate": func(t int64) string {
 			return time.Unix(t, 0).Format("02/01/2006 15:04")
 		},
+		"mainTheme": func(theme *db.UserStyleDTO) string {
+			if theme == nil {
+				return "auto"
+			}
+
+			if theme.Theme == "" {
+				return "auto"
+			}
+
+			return theme.Theme
+		},
 	}
 
 	t := template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html"))
@@ -206,7 +223,7 @@ func (s *Server) setFuncMap() {
 }
 
 func (s *Server) parseManifestEntries() {
-	file, err := public.Files.Open("manifest.json")
+	file, err := public.Files.Open(".vite/manifest.json")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to open manifest.json")
 	}

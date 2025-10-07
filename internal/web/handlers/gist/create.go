@@ -22,10 +22,7 @@ func Create(ctx *context.Context) error {
 }
 
 func ProcessCreate(ctx *context.Context) error {
-	isCreate := false
-	if ctx.Request().URL.Path == "/" {
-		isCreate = true
-	}
+	isCreate := ctx.Request().URL.Path == "/"
 
 	err := ctx.Request().ParseForm()
 	if err != nil {
@@ -151,7 +148,7 @@ func ProcessCreate(ctx *context.Context) error {
 		if err != nil {
 			return ctx.ErrorRes(500, "Error creating an UUID", err)
 		}
-		gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
+		gist.Uuid = strings.ReplaceAll(uuidGist.String(), "-", "")
 
 		gist.UserID = user.ID
 		gist.User = *user

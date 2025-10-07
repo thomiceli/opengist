@@ -231,7 +231,7 @@ func createGist(user *db.User, url string) (*db.Gist, error) {
 	if err != nil {
 		return nil, err
 	}
-	gist.Uuid = strings.Replace(uuidGist.String(), "-", "", -1)
+	gist.Uuid = strings.ReplaceAll(uuidGist.String(), "-", "")
 	gist.Title = "gist:" + gist.Uuid
 
 	if url != "" {

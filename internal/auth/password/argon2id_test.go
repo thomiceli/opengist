@@ -8,34 +8,34 @@ import (
 
 func TestArgon2ID_Hash(t *testing.T) {
 	tests := []struct {
-		name     string
-		plain    string
-		wantErr  bool
+		name    string
+		plain   string
+		wantErr bool
 	}{
 		{
-			name:     "basic password",
-			plain:    "password123",
-			wantErr:  false,
+			name:    "basic password",
+			plain:   "password123",
+			wantErr: false,
 		},
 		{
-			name:     "empty string",
-			plain:    "",
-			wantErr:  false,
+			name:    "empty string",
+			plain:   "",
+			wantErr: false,
 		},
 		{
-			name:     "long password",
-			plain:    strings.Repeat("a", 10000),
-			wantErr:  false,
+			name:    "long password",
+			plain:   strings.Repeat("a", 10000),
+			wantErr: false,
 		},
 		{
-			name:     "unicode password",
-			plain:    "パスワード🔒",
-			wantErr:  false,
+			name:    "unicode password",
+			plain:   "パスワード🔒",
+			wantErr: false,
 		},
 		{
-			name:     "special characters",
-			plain:    "!@#$%^&*()_+-=[]{}|;:',.<>?/`~",
-			wantErr:  false,
+			name:    "special characters",
+			plain:   "!@#$%^&*()_+-=[]{}|;:',.<>?/`~",
+			wantErr: false,
 		},
 	}
 
@@ -180,51 +180,6 @@ func TestArgon2ID_Verify(t *testing.T) {
 	}
 }
 
-func TestArgon2ID_VerifyWithDifferentParameters(t *testing.T) {
-	// Test that we can verify hashes created with different argon2 parameters
-	tests := []struct {
-		name       string
-		password   string
-		// Hash with different parameters than the default
-		customHash string
-	}{
-		{
-			name:     "different memory parameter",
-			password: "test123",
-			// This would be a hash with m=32768 instead of default 65536
-			customHash: "$argon2id$v=19$m=32768,t=1,p=4$c2FsdDEyMzQ1Njc4OTAxMg$YourHashHere",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Generate a fresh hash with our test password
-			hash, err := Argon2id.Hash(tt.password)
-			if err != nil {
-				t.Fatalf("Failed to hash: %v", err)
-			}
-
-			// Verify it works
-			match, err := Argon2id.Verify(tt.password, hash)
-			if err != nil {
-				t.Errorf("Verify failed: %v", err)
-			}
-			if !match {
-				t.Error("Password did not match its own hash")
-			}
-
-			// Verify wrong password fails
-			match, err = Argon2id.Verify("wrongpassword", hash)
-			if err != nil {
-				t.Errorf("Verify with wrong password returned error: %v", err)
-			}
-			if match {
-				t.Error("Wrong password should not match")
-			}
-		})
-	}
-}
-
 func TestArgon2ID_SaltUniqueness(t *testing.T) {
 	password := "testpassword"
 	iterations := 10
@@ -342,5 +297,131 @@ func TestArgon2ID_CaseModification(t *testing.T) {
 	}
 	if match {
 		t.Error("Password verification should be case-sensitive")
+	}
+}
+
+func TestArgon2ID_InvalidParameters(t *testing.T) {
+	password := "testpassword"
+
+	tests := []struct {
+		name    string
+		hash    string
+		wantErr bool
+	}{
+		{
+			name:    "negative memory parameter",
+			hash:    "$argon2id$v=19$m=-1,t=1,p=4$dGVzdHNhbHQ$testhash",
+			wantErr: true,
+		},
+		{
+			name:    "negative time parameter",
+			hash:    "$argon2id$v=19$m=65536,t=-1,p=4$dGVzdHNhbHQ$testhash",
+			wantErr: true,
+		},
+		{
+			name:    "negative parallelism parameter",
+			hash:    "$argon2id$v=19$m=65536,t=1,p=-4$dGVzdHNhbHQ$testhash",
+			wantErr: true,
+		},
+		{
+			name:    "zero memory parameter",
+			hash:    "$argon2id$v=19$m=0,t=1,p=4$dGVzdHNhbHQ$testhash",
+			wantErr: false, // argon2 may handle this, we just test parsing
+		},
+		{
+			name:    "missing parameter value",
+			hash:    "$argon2id$v=19$m=,t=1,p=4$dGVzdHNhbHQ$testhash",
+			wantErr: true,
+		},
+		{
+			name:    "non-numeric parameter",
+			hash:    "$argon2id$v=19$m=abc,t=1,p=4$dGVzdHNhbHQ$testhash",
+			wantErr: true,
+		},
+		{
+			name:    "missing parameters separator",
+			hash:    "$argon2id$v=19$m=65536 t=1 p=4$dGVzdHNhbHQ$testhash",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := Argon2id.Verify(password, tt.hash)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Argon2id.Verify() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestArgon2ID_ConcurrentHashing(t *testing.T) {
+	password := "testpassword"
+	concurrency := 10
+
+	type result struct {
+		hash string
+		err  error
+	}
+
+	results := make(chan result, concurrency)
+
+	// Generate hashes concurrently
+	for i := 0; i < concurrency; i++ {
+		go func() {
+			hash, err := Argon2id.Hash(password)
+			results <- result{hash: hash, err: err}
+		}()
+	}
+
+	// Collect results
+	hashes := make(map[string]bool)
+	for i := 0; i < concurrency; i++ {
+		res := <-results
+		if res.err != nil {
+			t.Errorf("Concurrent hash %d failed: %v", i, res.err)
+			continue
+		}
+
+		// Check for duplicates
+		if hashes[res.hash] {
+			t.Errorf("Duplicate hash generated in concurrent test")
+		}
+		hashes[res.hash] = true
+
+		// Verify each hash works
+		match, err := Argon2id.Verify(password, res.hash)
+		if err != nil || !match {
+			t.Errorf("Hash %d failed verification: err=%v, match=%v", i, err, match)
+		}
+	}
+}
+
+func TestArgon2ID_VeryLongPassword(t *testing.T) {
+	// Test with extremely long password (100KB)
+	password := strings.Repeat("a", 100*1024)
+
+	hash, err := Argon2id.Hash(password)
+	if err != nil {
+		t.Fatalf("Failed to hash very long password: %v", err)
+	}
+
+	match, err := Argon2id.Verify(password, hash)
+	if err != nil {
+		t.Fatalf("Failed to verify very long password: %v", err)
+	}
+
+	if !match {
+		t.Error("Very long password failed verification")
+	}
+
+	// Verify wrong password still fails
+	wrongPassword := strings.Repeat("b", 100*1024)
+	match, err = Argon2id.Verify(wrongPassword, hash)
+	if err != nil {
+		t.Errorf("Verify returned error: %v", err)
+	}
+	if match {
+		t.Error("Wrong very long password should not match")
 	}
 }

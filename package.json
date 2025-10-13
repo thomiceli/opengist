@@ -25,7 +25,7 @@
     "github-markdown-css": "^5.8.1",
     "highlight.js": "^11.11.1",
     "jdenticon": "^3.3.0",
-    "katex": "^0.16.23",
+    "katex": "^0.16.25",
     "marked": "^16.4.0",
     "nodemon": "^3.1.10",
     "pdfobject": "^2.3.1",

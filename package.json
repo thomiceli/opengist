@@ -30,6 +30,6 @@
     "nodemon": "^3.1.10",
     "pdfobject": "^2.3.1",
     "tailwindcss": "^4.1.14",
-    "vite": "^7.1.9"
+    "vite": "^7.1.11"
   }
 }

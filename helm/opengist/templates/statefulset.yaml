@@ -1,11 +1,21 @@
 {{- if .Values.statefulSet.enabled }}
 {{- $replicas := int .Values.replicaCount }}
-{{- $dburi := default "" (index .Values.config "db-uri") }}
-{{- if and (gt $replicas 1) (or (eq $dburi "") (hasPrefix $dburi "file:") (not (or (hasPrefix $dburi "postgres") (hasPrefix $dburi "mysql") (hasPrefix $dburi "mariadb")))) }}
-{{- fail (printf "StatefulSet replicaCount=%d requires PostgreSQL/MySQL db-uri; detected '%s' (SQLite or unsupported)" $replicas $dburi) }}
+{{- $dburi := "" }}
+{{- if and .Values.config (hasKey .Values.config "dbUri") }}
+  {{- $dburi = (index .Values.config "dbUri") }}
+{{- else if and .Values.config (hasKey .Values.config "db-uri") }}
+  {{- $dburi = (index .Values.config "db-uri") }}
 {{- end }}
-{{- if and (gt $replicas 1) .Values.persistence.enabled (eq .Values.persistence.existingClaim "") }}
-{{- fail "StatefulSet with replicaCount>1 requires persistence.existingClaim referencing a RWX volume" }}
+{{- $scheme := "" }}
+{{- if ne $dburi "" }}
+  {{- $parts := splitList "://" $dburi }}
+  {{- if gt (len $parts) 0 }}
+    {{- $scheme = lower (index $parts 0) }}
+  {{- end }}
+{{- end }}
+{{- $multiAllowed := or (eq $scheme "postgres") (eq $scheme "postgresql") (eq $scheme "mysql") (eq $scheme "mariadb") }}
+{{- if and (gt $replicas 1) (not $multiAllowed) }}
+  {{- fail (printf "replicaCount=%d requires PostgreSQL/MySQL config.dbUri; scheme '%s' unsupported" $replicas $scheme) }}
 {{- end }}
 apiVersion: apps/v1
 kind: StatefulSet

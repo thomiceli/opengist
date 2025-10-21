@@ -79,3 +79,56 @@ Then define the connection string in your Opengist config:
 db-uri: postgres://user:password@opengist-postgresql:5432/opengist
 ```
 Note: `opengist-postgresql` is the name of the K8S Service deployed by this chart.
+
+### Database Configuration
+
+You can supply an externally managed database connection explicitly via `config.db-uri` (PostgreSQL/MySQL) or enable the bundled PostgreSQL subchart.
+
+Behavior:
+
+* If `postgresql.enabled: true` and `config.db-uri` is omitted, the chart auto-generates:
+  `postgres://<username>:<password>@<release-name>-postgresql:<port>/<database>` using values under `postgresql.global.postgresql.auth.*`.
+* If any of username/password/database are missing, templating fails fast with an error message.
+* If you prefer an external database or a different Postgres distribution, set `postgresql.enabled: false` and provide `config.db-uri` yourself.
+
+**Licensing note**: Bitnami's PostgreSQL distribution may have licensing constraints. For strictly open alternatives use an external managed PostgreSQL/MySQL service and disable the subchart.
+
+### Multi-Replica Requirements
+
+Running more than one Opengist replica (Deployment or StatefulSet) requires:
+
+1. Non-SQLite database (`config.db-uri` must start with `postgres://` or `mysql://`).
+2. Shared RWX storage if using StatefulSet with `replicaCount > 1` (provide `persistence.existingClaim`).
+
+The chart will fail fast during templating if these conditions are not met when scaling above 1 replica.
+
+Examples:
+
+* External PostgreSQL:
+
+```yaml
+postgresql:
+  enabled: false
+config:
+  db-uri: postgres://user:pass@db-host:5432/opengist
+  index: meilisearch
+statefulSet:
+  enabled: true
+replicaCount: 2
+persistence:
+  existingClaim: opengist-shared-rwx
+```
+
+Bundled PostgreSQL (auto db-uri):
+
+```yaml
+postgresql:
+  enabled: true
+config:
+  index: meilisearch
+statefulSet:
+  enabled: true
+replicaCount: 2
+persistence:
+  existingClaim: opengist-shared-rwx
+```

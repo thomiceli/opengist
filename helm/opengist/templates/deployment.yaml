@@ -95,7 +95,11 @@ spec:
         - name: opengist-data
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
+            {{- if .Values.persistence.existingClaim }}
+            claimName: {{ .Values.persistence.existingClaim }}
+            {{- else }}
             claimName: {{ include "opengist.fullname" . }}-data
+            {{- end }}
           {{- else }}
           emptyDir: {}
           {{- end }}

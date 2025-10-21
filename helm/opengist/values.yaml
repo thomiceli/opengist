@@ -32,12 +32,19 @@ strategy:
     maxSurge: "100%"
     maxUnavailable: 0
 
-## Optionally use a StatefulSet instead of a Deployment
-## When enabled, the chart will render a StatefulSet. Replica count >1 is NOT supported by Opengist.
+## StatefulSet configuration
+## If enabled, the chart will render a StatefulSet.
+## NOTE: 'replicaCount' should be set to 1 if using a StatefulSet and SQLite as the database.
 ## Persistence behavior in StatefulSet mode:
 ##  - If persistence.enabled AND persistence.existingClaim is set, that claim is mounted directly (no volumeClaimTemplates).
-##  - Else if persistence.enabled, a volumeClaimTemplate is created (one PVC per replica, expected replicaCount=1).
-##  - Else an emptyDir is used.
+##  - If persistence.enabled, a volumeClaimTemplate is created (one PVC per replica).
+##  - Otherwise an emptyDir is used.
+## Multi-replica requirements (replicaCount > 1):
+## - Use an external DB: config.db-uri must start with postgres:// or mysql://
+## - SQLite (empty db-uri or file: paths) is NOT supported with multiple replicas; chart will fail fast.
+## - Provide persistence.existingClaim pointing to a RWX (ReadWriteMany) volume shared by all pods.
+## - Without existingClaim, volumeClaimTemplates create per-pod PVCs and are only valid for replicaCount=1.
+
 statefulSet:
   enabled: false
   podManagementPolicy: OrderedReady

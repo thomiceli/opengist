@@ -32,6 +32,18 @@ strategy:
     maxSurge: "100%"
     maxUnavailable: 0
 
+## Optionally use a StatefulSet instead of a Deployment
+## When enabled, the chart will render a StatefulSet. Replica count >1 is NOT supported by Opengist.
+## Persistence behavior in StatefulSet mode:
+##  - If persistence.enabled AND persistence.existingClaim is set, that claim is mounted directly (no volumeClaimTemplates).
+##  - Else if persistence.enabled, a volumeClaimTemplate is created (one PVC per replica, expected replicaCount=1).
+##  - Else an emptyDir is used.
+statefulSet:
+  enabled: false
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+
 ## Security Context settings
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 podSecurityContext:

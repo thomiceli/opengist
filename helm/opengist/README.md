@@ -132,7 +132,7 @@ Behavior:
 Running more than one Opengist replica (Deployment or StatefulSet) requires:
 
 1. Non-SQLite database (`config.db-uri` must start with `postgres://` or `mysql://`).
-2. Shared RWX storage if using StatefulSet with `replicaCount > 1` (provide `persistence.existingClaim`).
+2. Shared RWX storage if using StatefulSet with `replicaCount > 1` (provide `persistence.existingClaim`). The chart now fails fast if you attempt `replicaCount > 1` without an explicit shared claim to prevent silent data divergence across per‑pod PVCs.
 
 The chart will fail fast during templating if these conditions are not met when scaling above 1 replica.
 
@@ -166,3 +166,84 @@ replicaCount: 2
 persistence:
   existingClaim: opengist-shared-rwx
 ```
+
+#### Recovering from an initial misconfiguration
+
+If you previously scaled a StatefulSet above 1 replica **without** an `existingClaim`, each pod received its own PVC and only one held the authoritative `/opengist` data. To consolidate:
+
+1. Scale down to 1 replica (keep the pod with the desired data):
+
+```bash
+kubectl scale sts/opengist --replicas=1
+```
+
+1. (Optional) Inspect other PVCs and manually copy any missing files by temporarily attaching them to a debug pod.
+1. Create or provision a ReadWriteMany (NFS / CephFS / Longhorn RWX / etc.) PersistentVolumeClaim named (for example) `opengist-shared-rwx`.
+1. Update values with `persistence.existingClaim: opengist-shared-rwx` and re‑deploy.
+1. Scale back up:
+
+```bash
+kubectl scale sts/opengist --replicas=2
+```
+
+Going forward, all replicas mount the same shared volume and data remains consistent.
+
+### Persistence Modes
+
+The chart supports two persistence strategies controlled by `persistence.mode`:
+
+| Mode        | Behavior | Scaling | Storage Objects | Recommended Use |
+|-------------|----------|---------|-----------------|-----------------|
+| `perReplica` (default) | One PVC per pod via StatefulSet `volumeClaimTemplates` (RWO) when no `existingClaim` | Safe only at `replicaCount=1` unless you supply `existingClaim` | One PVC per replica | Local dev, quick single-node trials |
+| `shared`    | Single RWX PVC (existing or auto-created) mounted by all pods | Horizontally scalable | One shared PVC | Production / HA |
+
+Minimal examples:
+
+Per-replica (single node):
+
+```yaml
+statefulSet:
+  enabled: true
+persistence:
+  mode: perReplica
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+```
+
+Shared (scale ready) with an existing RWX claim:
+
+```yaml
+statefulSet:
+  enabled: true
+replicaCount: 2
+persistence:
+  mode: shared
+  existingClaim: opengist-shared-rwx
+```
+
+Shared with chart-created RWX PVC:
+
+```yaml
+statefulSet:
+  enabled: true
+replicaCount: 2
+persistence:
+  mode: shared
+  existingClaim: ""    # leave empty
+  create:
+    enabled: true
+    accessModes: [ReadWriteMany]
+    size: 10Gi
+```
+
+When `mode=shared` and `existingClaim` is empty, the chart creates a single PVC named `<release>-shared` (suffix configurable via `persistence.create.nameSuffix`).
+
+Fail-fast conditions:
+
+* `replicaCount>1` & missing external DB (still enforced).
+* `replicaCount>1` & persistence disabled.
+* `replicaCount>1` & neither `existingClaim` nor `mode=shared`.
+* `mode=shared` & create.enabled=true but `accessModes` lacks `ReadWriteMany`.
+
+Migration (perReplica → shared): scale down to 1, create RWX claim (or rely on create.enabled), copy data, switch mode to shared, scale up.

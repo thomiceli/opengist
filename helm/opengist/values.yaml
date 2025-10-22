@@ -123,7 +123,15 @@ serviceAccount:
 ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 persistence:
   enabled: true
+  ## Persistence mode selects how storage is provisioned/mounted:
+  ##  - perReplica (default): volumeClaimTemplate per pod (RWO). Safe ONLY for replicaCount=1 unless you manually provide existingClaim.
+  ##  - shared: single shared RWX PVC (either an existingClaim or a chart-created PVC via persistence.create.*) allowing horizontal scale.
+  mode: perReplica
+
+  ## If you already created a shared RWX claim, set its name here. Overrides create.* when non-empty.
   existingClaim: ""
+
+  ## Parameters used when mode=perReplica (volumeClaimTemplates) OR as defaults for create.*
   storageClass: ""
   labels: {}
   annotations:
@@ -132,6 +140,17 @@ persistence:
   accessModes:
     - ReadWriteOnce
   subPath: ""
+
+  ## Shared mode dynamic PVC creation (used only when mode=shared AND existingClaim="")
+  create:
+    enabled: true
+    nameSuffix: shared
+    storageClass: ""
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    labels: {}
+    annotations: {}
 
 extraVolumes: []
 extraVolumeMounts: []

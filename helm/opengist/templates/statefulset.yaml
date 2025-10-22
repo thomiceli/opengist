@@ -14,8 +14,36 @@
   {{- end }}
 {{- end }}
 {{- $multiAllowed := or (eq $scheme "postgres") (eq $scheme "postgresql") (eq $scheme "mysql") (eq $scheme "mariadb") }}
+{{- $p := .Values.persistence }}
+{{- $mode := default "perReplica" $p.mode }}
+{{- $hasExisting := ne (default "" $p.existingClaim) "" }}
+{{- $isShared := eq $mode "shared" }}
 {{- if and (gt $replicas 1) (not $multiAllowed) }}
-  {{- fail (printf "replicaCount=%d requires PostgreSQL/MySQL config.dbUri; scheme '%s' unsupported" $replicas $scheme) }}
+  {{- fail (printf "replicaCount=%d requires PostgreSQL/MySQL config.db-uri; scheme '%s' unsupported" $replicas $scheme) }}
+{{- end }}
+{{- if and (gt $replicas 1) (not $p.enabled) }}
+  {{- fail (printf "replicaCount=%d requires persistence.enabled=true" $replicas) }}
+{{- end }}
+{{- if and (gt $replicas 1) (not (or $hasExisting $isShared)) }}
+  {{- fail (printf "replicaCount=%d requires either persistence.existingClaim (shared RWX PVC) OR persistence.mode=shared to create one; perReplica PVCs would diverge" $replicas) }}
+{{- end }}
+{{- if and (gt $replicas 1) $isShared (not $hasExisting) (hasKey $p "create") (not (get $p.create "enabled")) }}
+  {{- fail (printf "persistence.mode=shared but neither existingClaim nor create.enabled=true provided") }}
+{{- end }}
+{{- if and (gt $replicas 1) $isShared (not $hasExisting) $p.create.enabled }}
+  {{- $am := list }}
+  {{- if hasKey $p.create "accessModes" }}
+    {{- $am = $p.create.accessModes }}
+  {{- end }}
+  {{- $rwxOk := false }}
+  {{- range $am }}
+    {{- if or (eq . "ReadWriteMany") (eq . "RWX") }}
+      {{- $rwxOk = true }}
+    {{- end }}
+  {{- end }}
+  {{- if not $rwxOk }}
+    {{- fail "persistence.mode=shared create.accessModes must include ReadWriteMany for multi-replica" }}
+  {{- end }}
 {{- end }}
 apiVersion: apps/v1
 kind: StatefulSet
@@ -124,11 +152,21 @@ spec:
             defaultMode: 511
         - name: config-volume
           emptyDir: {}
-        {{- if and .Values.persistence.enabled .Values.persistence.existingClaim }}
+        {{- if .Values.persistence.enabled }}
+          {{- if ne (default "" .Values.persistence.existingClaim) "" }}
         - name: opengist-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
-        {{- else if not .Values.persistence.enabled }}
+          {{- else if eq (default "perReplica" .Values.persistence.mode) "shared" }}
+            {{- /* Shared mode with chart-created PVC */}}
+        - name: opengist-data
+          persistentVolumeClaim:
+            claimName: {{ include "opengist.fullname" . }}-{{ default "shared" .Values.persistence.create.nameSuffix }}
+          {{- else if not .Values.persistence.enabled }}
+        - name: opengist-data
+          emptyDir: {}
+          {{- end }}
+        {{- else }}
         - name: opengist-data
           emptyDir: {}
         {{- end }}
@@ -147,7 +185,11 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
+  {{- if and .Values.persistence.enabled (ne (default "" .Values.persistence.existingClaim) "") }}
+    {{- /* existingClaim path: no volumeClaimTemplates */}}
+  {{- else if and .Values.persistence.enabled (eq (default "perReplica" .Values.persistence.mode) "shared") }}
+    {{- /* shared mode uses standalone PVC (rendered separately if create.enabled) */}}
+  {{- else if and .Values.persistence.enabled (eq (default "perReplica" .Values.persistence.mode) "perReplica") }}
   volumeClaimTemplates:
     - metadata:
         name: opengist-data

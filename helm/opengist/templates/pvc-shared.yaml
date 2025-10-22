@@ -1,0 +1,32 @@
+{{- /* Shared PVC (single) for persistence.mode=shared when no existingClaim is provided */}}
+{{- if and .Values.statefulSet.enabled .Values.persistence.enabled (eq (default "perReplica" .Values.persistence.mode) "shared") (ne (default "" .Values.persistence.existingClaim) "") | not }}{{- end }}
+{{- if and .Values.statefulSet.enabled .Values.persistence.enabled (eq (default "perReplica" .Values.persistence.mode) "shared") (eq (default "" .Values.persistence.existingClaim) "") .Values.persistence.create.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "opengist.fullname" . }}-{{ default "shared" .Values.persistence.create.nameSuffix }}
+  labels:
+    {{- include "opengist.labels" . | nindent 4 }}
+    {{- with .Values.persistence.create.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.persistence.create.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- if .Values.persistence.create.accessModes }}
+    {{- toYaml .Values.persistence.create.accessModes | nindent 4 }}
+    {{- else }}
+    - ReadWriteMany
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ default .Values.persistence.size .Values.persistence.create.size }}
+  volumeMode: Filesystem
+  {{- $sc := default .Values.persistence.storageClass .Values.persistence.create.storageClass }}
+  {{- if $sc }}
+  storageClassName: {{ $sc | quote }}
+  {{- end }}
+{{- end }}

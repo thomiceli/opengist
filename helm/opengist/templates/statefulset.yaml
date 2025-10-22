@@ -1,4 +1,14 @@
 {{- if .Values.statefulSet.enabled }}
+{{- /*
+========================================
+VALIDATION BLOCK: Multi-replica requirements
+========================================
+Enforces constraints for scaling beyond 1 replica:
+  1. Database: Must use PostgreSQL/MySQL (not SQLite)
+  2. Persistence: Must be enabled
+  3. Storage sharing: Must use either existingClaim or mode=shared with create.enabled
+  4. Access mode: For mode=shared + create, must specify ReadWriteMany
+*/}}
 {{- $replicas := int .Values.replicaCount }}
 {{- $dburi := "" }}
 {{- if and .Values.config (hasKey .Values.config "dbUri") }}
@@ -18,18 +28,28 @@
 {{- $mode := default "perReplica" $p.mode }}
 {{- $hasExisting := ne (default "" $p.existingClaim) "" }}
 {{- $isShared := eq $mode "shared" }}
+
+{{- /* Fail fast: Database validation */}}
 {{- if and (gt $replicas 1) (not $multiAllowed) }}
   {{- fail (printf "replicaCount=%d requires PostgreSQL/MySQL config.db-uri; scheme '%s' unsupported" $replicas $scheme) }}
 {{- end }}
+
+{{- /* Fail fast: Persistence must be enabled */}}
 {{- if and (gt $replicas 1) (not $p.enabled) }}
   {{- fail (printf "replicaCount=%d requires persistence.enabled=true" $replicas) }}
 {{- end }}
+
+{{- /* Fail fast: Prevent per-replica PVC divergence */}}
 {{- if and (gt $replicas 1) (not (or $hasExisting $isShared)) }}
   {{- fail (printf "replicaCount=%d requires either persistence.existingClaim (shared RWX PVC) OR persistence.mode=shared to create one; perReplica PVCs would diverge" $replicas) }}
 {{- end }}
+
+{{- /* Fail fast: Shared mode requires PVC source */}}
 {{- if and (gt $replicas 1) $isShared (not $hasExisting) (hasKey $p "create") (not (get $p.create "enabled")) }}
   {{- fail (printf "persistence.mode=shared but neither existingClaim nor create.enabled=true provided") }}
 {{- end }}
+
+{{- /* Fail fast: Auto-created shared PVC must be RWX */}}
 {{- if and (gt $replicas 1) $isShared (not $hasExisting) $p.create.enabled }}
   {{- $am := list }}
   {{- if hasKey $p.create "accessModes" }}
@@ -152,13 +172,24 @@ spec:
             defaultMode: 511
         - name: config-volume
           emptyDir: {}
+        {{- /* 
+        ========================================
+        VOLUME MOUNTING DECISION TREE
+        ========================================
+        Priority order:
+          1. existingClaim (user-provided PVC) → mount directly
+          2. mode=shared (chart-created PVC)   → mount shared PVC
+          3. mode=perReplica                   → use volumeClaimTemplates (defined below)
+          4. persistence disabled              → use emptyDir (ephemeral)
+        */}}
         {{- if .Values.persistence.enabled }}
           {{- if ne (default "" .Values.persistence.existingClaim) "" }}
+            {{- /* User-provided existing claim: mount directly */}}
         - name: opengist-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
           {{- else if eq (default "perReplica" .Values.persistence.mode) "shared" }}
-            {{- /* Shared mode with chart-created PVC */}}
+            {{- /* Chart creates shared PVC (via pvc-shared.yaml), reference by name */}}
         - name: opengist-data
           persistentVolumeClaim:
             claimName: {{ include "opengist.fullname" . }}-{{ default "shared" .Values.persistence.create.nameSuffix }}
@@ -185,10 +216,28 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+  {{- /* 
+  ========================================
+  VOLUMECLAIMTEMPLATES DECISION TREE
+  ========================================
+  volumeClaimTemplates are ONLY used for perReplica mode when:
+    - persistence.enabled=true
+    - persistence.existingClaim is empty
+    - persistence.mode=perReplica (default)
+  
+  This creates one PVC per replica (RWO typically).
+  
+  NOT used when:
+    - existingClaim is set (PVC already exists, referenced in volumes above)
+    - mode=shared (standalone PVC created via pvc-shared.yaml)
+    - persistence disabled (emptyDir used)
+  
+  WARNING: perReplica + replicaCount>1 causes data divergence. Use shared mode for multi-replica.
+  */}}
   {{- if and .Values.persistence.enabled (ne (default "" .Values.persistence.existingClaim) "") }}
-    {{- /* existingClaim path: no volumeClaimTemplates */}}
+    {{- /* existingClaim path: no volumeClaimTemplates, already mounted above */}}
   {{- else if and .Values.persistence.enabled (eq (default "perReplica" .Values.persistence.mode) "shared") }}
-    {{- /* shared mode uses standalone PVC (rendered separately if create.enabled) */}}
+    {{- /* shared mode: no volumeClaimTemplates, standalone PVC rendered via pvc-shared.yaml */}}
   {{- else if and .Values.persistence.enabled (eq (default "perReplica" .Values.persistence.mode) "perReplica") }}
   volumeClaimTemplates:
     - metadata:

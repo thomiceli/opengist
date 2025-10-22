@@ -188,6 +188,83 @@ kubectl scale sts/opengist --replicas=2
 
 Going forward, all replicas mount the same shared volume and data remains consistent.
 
+### Quick Start Examples
+
+Common deployment scenarios with copy-paste configurations:
+
+#### Scenario 1: Single replica with SQLite (default)
+
+Minimal local development setup with ephemeral or persistent storage:
+
+```yaml
+# Ephemeral (emptyDir)
+statefulSet:
+  enabled: true
+replicaCount: 1
+persistence:
+  enabled: false
+
+# OR with persistent RWO storage
+statefulSet:
+  enabled: true
+replicaCount: 1
+persistence:
+  enabled: true
+  mode: perReplica  # default
+```
+
+#### Scenario 2: Multi-replica with external PostgreSQL + existing RWX PVC
+
+Production HA setup with your own database and storage:
+
+```yaml
+statefulSet:
+  enabled: true
+replicaCount: 2
+postgresql:
+  enabled: false
+config:
+  db-uri: "postgres://user:pass@db-host:5432/opengist"
+  index: meilisearch  # required for multi-replica
+persistence:
+  enabled: true
+  mode: shared
+  existingClaim: "opengist-shared-rwx"  # pre-created RWX PVC
+meilisearch:
+  enabled: true
+```
+
+#### Scenario 3: Multi-replica with bundled PostgreSQL + auto-created RWX PVC
+
+Chart manages both database and storage:
+
+```yaml
+statefulSet:
+  enabled: true
+replicaCount: 2
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        username: opengist
+        password: changeme
+        database: opengist
+config:
+  index: meilisearch
+persistence:
+  enabled: true
+  mode: shared
+  existingClaim: ""  # empty to trigger auto-creation
+  create:
+    enabled: true
+    accessModes: [ReadWriteMany]
+    storageClass: "nfs-client"  # your RWX-capable storage class
+    size: 20Gi
+meilisearch:
+  enabled: true
+```
+
 ### Persistence Modes
 
 The chart supports two persistence strategies controlled by `persistence.mode`:
@@ -197,7 +274,7 @@ The chart supports two persistence strategies controlled by `persistence.mode`:
 | `perReplica` (default) | One PVC per pod via StatefulSet `volumeClaimTemplates` (RWO) when no `existingClaim` | Safe only at `replicaCount=1` unless you supply `existingClaim` | One PVC per replica | Local dev, quick single-node trials |
 | `shared`    | Single RWX PVC (existing or auto-created) mounted by all pods | Horizontally scalable | One shared PVC | Production / HA |
 
-Minimal examples:
+Configuration examples:
 
 Per-replica (single node):
 
@@ -247,3 +324,57 @@ Fail-fast conditions:
 * `mode=shared` & create.enabled=true but `accessModes` lacks `ReadWriteMany`.
 
 Migration (perReplica → shared): scale down to 1, create RWX claim (or rely on create.enabled), copy data, switch mode to shared, scale up.
+
+### Troubleshooting
+
+#### Common Errors and Solutions
+
+##### Error: "replicaCount=2 requires PostgreSQL/MySQL config.db-uri; scheme 'sqlite' unsupported"
+
+* **Cause**: Multi-replica with SQLite database
+* **Solution**: Either scale down to `replicaCount: 1` or configure external database:
+
+```yaml
+config:
+  db-uri: "postgres://user:pass@host:5432/opengist"
+```
+
+##### Error: "replicaCount=2 requires either persistence.existingClaim OR persistence.mode=shared"
+
+* **Cause**: Multi-replica without shared storage
+* **Solution**: Choose one approach:
+
+```yaml
+# Option A: Use existing PVC
+persistence:
+  existingClaim: "my-rwx-pvc"
+
+# Option B: Let chart create PVC
+persistence:
+  mode: shared
+  create:
+    enabled: true
+    accessModes: [ReadWriteMany]
+```
+
+##### Error: "persistence.mode=shared create.accessModes must include ReadWriteMany for multi-replica"
+
+* **Cause**: Chart-created PVC lacks RWX access mode
+* **Solution**: Ensure RWX is specified:
+
+```yaml
+persistence:
+  create:
+    accessModes:
+      - ReadWriteMany
+```
+
+##### Pods mount different data (data divergence)
+
+* **Cause**: Previously scaled with `perReplica` mode and `replicaCount > 1`
+* **Solution**: Follow recovery steps in "Recovering from an initial misconfiguration" section above
+
+##### PVC creation fails: "no storage class available with ReadWriteMany"
+
+* **Cause**: Cluster lacks RWX-capable storage provisioner
+* **Solution**: Install a storage provider (NFS, CephFS, Longhorn) or use external managed storage and provide `existingClaim`

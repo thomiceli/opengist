@@ -1,4 +1,20 @@
-{{- /* Shared PVC (single) for persistence.mode=shared when no existingClaim is provided */}}
+{{- /*
+This template creates a standalone PersistentVolumeClaim for shared persistence mode.
+
+Rendering conditions:
+  - statefulSet.enabled=true
+  - persistence.enabled=true
+  - persistence.mode=shared
+  - persistence.existingClaim is empty/unset
+  - persistence.create.enabled=true
+
+When rendered, this PVC is mounted by ALL replicas in the StatefulSet (typically with ReadWriteMany
+access mode for multi-replica deployments). This avoids per-replica volumeClaimTemplates and enables
+horizontal scaling with a single shared storage backend.
+
+If persistence.existingClaim is set, this template does NOT render; the StatefulSet instead references
+the existing claim name directly.
+*/}}
 {{- if and .Values.statefulSet.enabled .Values.persistence.enabled (eq (default "perReplica" .Values.persistence.mode) "shared") (ne (default "" .Values.persistence.existingClaim) "") | not }}{{- end }}
 {{- if and .Values.statefulSet.enabled .Values.persistence.enabled (eq (default "perReplica" .Values.persistence.mode) "shared") (eq (default "" .Values.persistence.existingClaim) "") .Values.persistence.create.enabled }}
 apiVersion: v1

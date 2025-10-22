@@ -33,17 +33,26 @@ strategy:
     maxUnavailable: 0
 
 ## StatefulSet configuration
-## If enabled, the chart will render a StatefulSet.
-## NOTE: 'replicaCount' should be set to 1 if using a StatefulSet and SQLite as the database.
-## Persistence behavior in StatefulSet mode:
-##  - If persistence.enabled AND persistence.existingClaim is set, that claim is mounted directly (no volumeClaimTemplates).
-##  - If persistence.enabled, a volumeClaimTemplate is created (one PVC per replica).
-##  - Otherwise an emptyDir is used.
+## Enables StatefulSet workload instead of Deployment (required for volumeClaimTemplates or stable pod identities).
+##
+## Single-replica SQLite example (default behavior):
+##   statefulSet.enabled: true
+##   replicaCount: 1
+##   persistence.mode: perReplica  # or omit (default)
+##   # Creates one PVC per pod via volumeClaimTemplates (RWO)
+##
 ## Multi-replica requirements (replicaCount > 1):
-## - Use an external DB: config.db-uri must start with postgres:// or mysql://
-## - SQLite (empty db-uri or file: paths) is NOT supported with multiple replicas; chart will fail fast.
-## - Provide persistence.existingClaim pointing to a RWX (ReadWriteMany) volume shared by all pods.
-## - Without existingClaim, volumeClaimTemplates create per-pod PVCs and are only valid for replicaCount=1.
+##   1. External database: config.db-uri must be postgres:// or mysql:// (SQLite NOT supported)
+##   2. Shared storage: Use ONE of:
+##      a) Existing claim:  persistence.existingClaim: "my-rwx-pvc"
+##      b) Chart-created:   persistence.mode: shared + persistence.create.enabled: true + accessModes: [ReadWriteMany]
+##   3. Chart will FAIL FAST if constraints are not met to prevent data divergence
+##
+## Persistence decision tree:
+##   - persistence.existingClaim set         → mount that PVC directly (no volumeClaimTemplates)
+##   - persistence.mode=shared + create.*    → chart creates single RWX PVC, all pods mount it
+##   - persistence.mode=perReplica (default) → volumeClaimTemplates (one PVC/pod, RWO typically)
+##   - persistence.enabled=false             → emptyDir (ephemeral)
 
 statefulSet:
   enabled: false
@@ -118,39 +127,66 @@ serviceAccount:
   annotations: {}
   name: ""
 
-## Set persistence using a Persistent Volume Claim
-## If more than 2 replicas are set, the access mode must be ReadWriteMany
+## Persistent storage for /opengist data directory
 ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 persistence:
   enabled: true
-  ## Persistence mode selects how storage is provisioned/mounted:
-  ##  - perReplica (default): volumeClaimTemplate per pod (RWO). Safe ONLY for replicaCount=1 unless you manually provide existingClaim.
-  ##  - shared: single shared RWX PVC (either an existingClaim or a chart-created PVC via persistence.create.*) allowing horizontal scale.
+
+  ## Persistence mode controls how storage is provisioned:
+  ##
+  ## perReplica (DEFAULT):
+  ##   - StatefulSet creates one PVC per replica via volumeClaimTemplates
+  ##   - Typically RWO (ReadWriteOnce) storage
+  ##   - Safe ONLY for replicaCount=1 (multi-replica causes data divergence)
+  ##   - Use when: single-node dev/test, no horizontal scaling needed
+  ##
+  ## shared:
+  ##   - Single RWX (ReadWriteMany) PVC shared by all replicas
+  ##   - Required for replicaCount > 1
+  ##   - Two provisioning paths:
+  ##     a) existingClaim: "my-rwx-pvc" (you manage the PVC lifecycle)
+  ##     b) existingClaim: "" + create.enabled: true (chart creates PVC automatically)
+  ##   - Use when: multi-replica HA, horizontal scaling, shared file access
+  ##
+  ## WARNING: Switching modes after initial deploy requires manual data migration:
+  ##   1. Scale down to 1 replica
+  ##   2. Create/provision RWX PVC and copy data
+  ##   3. Update values: mode=shared, existingClaim or create.enabled
+  ##   4. Scale up
   mode: perReplica
 
-  ## If you already created a shared RWX claim, set its name here. Overrides create.* when non-empty.
+  ## Reference an existing PVC (takes precedence over create.*)
+  ## When set:
+  ##   - Chart will NOT create a PVC
+  ##   - StatefulSet mounts this claim directly (no volumeClaimTemplates)
+  ##   - Must be RWX for replicaCount > 1
+  ## Example: existingClaim: "opengist-shared-rwx"
   existingClaim: ""
 
-  ## Parameters used when mode=perReplica (volumeClaimTemplates) OR as defaults for create.*
-  storageClass: ""
+  ## Common persistence parameters (apply to perReplica mode OR as defaults for create.*)
+  storageClass: ""       # Empty = cluster default
   labels: {}
   annotations:
-    helm.sh/resource-policy: keep
+    helm.sh/resource-policy: keep  # Prevents PVC deletion on helm uninstall
   size: 5Gi
   accessModes:
-    - ReadWriteOnce
-  subPath: ""
+    - ReadWriteOnce      # perReplica default; override to [ReadWriteMany] if using existingClaim
+  subPath: ""            # Optional subpath within volume
 
-  ## Shared mode dynamic PVC creation (used only when mode=shared AND existingClaim="")
+  ## Chart-managed PVC creation (ONLY for mode=shared when existingClaim is empty)
+  ## Renders templates/pvc-shared.yaml
   create:
     enabled: true
-    nameSuffix: shared
-    storageClass: ""
-    size: 5Gi
+    nameSuffix: shared   # PVC name: <release-name>-shared
+    storageClass: ""     # Empty = cluster default; override if you need specific storage class
+    size: 5Gi            # Override top-level persistence.size if needed
     accessModes:
-      - ReadWriteMany
+      - ReadWriteMany    # REQUIRED for multi-replica; NFS/CephFS/Longhorn RWX/etc.
     labels: {}
     annotations: {}
+    ## Example for specific storage:
+    ##   storageClass: "nfs-client"
+    ##   size: 20Gi
 
 extraVolumes: []
 extraVolumeMounts: []

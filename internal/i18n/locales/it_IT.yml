@@ -267,3 +267,77 @@ validation.invalid: '%s non valido'
 
 html.title.admin-panel: 'Pannello amministratore'
 settings.ssh-key-exists: Questa chiave SSH esiste già
+gist.new.drop-files: Rilascia i file qui oppure fai click per caricarli
+gist.delete.confirm: Sei sicuro di voler eliminare questo gist?
+gist.list.topic-results-topic: Tutti i gist corrispondenti all'argomento %s
+gist.search.placeholder.language: Lingua
+error.no-file-uploaded: Nessun file caricato
+gist.revision.binary-file-changes: I cambiamenti al file binario non sono visualizzati
+error.cannot-open-file: Impossibile aprire il file caricato
+admin.invitations.delete_confirm: Vuoi davvero cancellare questo invito?
+gist.new.topics: Argomenti (da separare con uno spazio)
+gist.search.placeholder.visibility: Visibilità
+settings.style.theme: Tema
+settings.style.theme-light: Chiaro
+settings.style.theme-dark: Scuro
+settings.style.theme-auto: Automatico
+auth.mfa: Autenticazione a due fattori
+auth.mfa.passkey: Passkey
+auth.mfa.passkeys: Passkeys
+auth.mfa.passkeys-help: Aggiungi una passkey per accedere al tuo account e per usare l'autenticazione a due fattori.
+auth.mfa.passkey-name: Nome
+auth.mfa.delete-passkey: Elimina
+auth.mfa.passkey-added-at: Aggiunta
+auth.mfa.passkey-never-used: Mai usata
+auth.mfa.passkey-last-used: Ultima usata
+auth.mfa.delete-passkey-confirm: Conferma l'eliminazione della passkey
+auth.totp: Time based one-time password (TOTP)
+auth.totp.help: Il TOTP è un metodo di autenticazione a due fattori che usa una chiave segreta per generare una one-time password (OTP).
+error.not-in-mfa-session: Non stai usando l'autenticazione a due fattori
+admin.actions.sync-gist-languages: Sincronizza tutte le lingue dei gist
+flash.admin.sync-gist-languages: Sincronizzazione delle lingue gist...
+flash.auth.passkey-registred: Passkey %s registrata
+flash.auth.passkey-deleted: Passkey eliminata
+validation.invalid-gist-topics: 'Argomenti del gist non validi: devono iniziare con una lettera o un numero ed essere composti da al massimo 50 caratteri. Possono includere trattini'
+gist.file-raw: Questo file non può essere visualizzato.
+gist.file-binary-edit: Questo file è in formato binario.
+gist.preview-non-available: Anteprima non disponibile
+gist.new.any-file-type: Carica qualsiasi tipo di file
+gist.list.topic-results: Tutti i gist corrispondenti all'argomento
+gist.search.help.topic: Gist con l'argomento dato
+gist.search.placeholder.title: Titolo
+gist.search.placeholder.public: Pubblico
+gist.search.placeholder.unlisted: Non in elenco
+gist.search.placeholder.private: Privato
+gist.search.placeholder.all: Tutti
+gist.search.placeholder.topics: Argomenti
+gist.search.placeholder.search: Ricerca
+auth.mfa.use-passkey: Usa la passkey
+auth.mfa.bind-passkey: Associa passkey
+auth.mfa.login-with-passkey: Entra con passkey
+auth.mfa.waiting-for-passkey-input: In attesa di input dal browser...
+auth.mfa.use-passkey-to-finish: Usa una passkey per terminare l'autenticazione
+settings.header.account: Account
+settings.header.mfa: Autenticazione a due fattori
+settings.header.ssh: SSH
+settings.header.style: Stile
+settings.style.gist-code: Codice gist
+settings.style.removed-lines-color: Colore delle linee rimosse
+settings.style.added-lines-color: Colore delle linee aggiunte
+settings.style.git-lines-color: Colore delle linee di git
+settings.style.save-style: Salva stile
+auth.totp.scan-qr-code: Scannerizza il QR qua sotto con la tua app di autenticazione per abilitare l'autenticazione a due fattori, oppure inserisci la seguente stringa, conferma poi con il codice generato.
+auth.totp.use: Usa TOTP
+auth.totp.regenerate-recovery-codes: Rigenera i codici di recupero
+auth.totp.already-enabled: Il TOTP è gia attivo
+auth.totp.invalid-secret: Chiave TOTP non valida
+auth.totp.invalid-code: Codice TOTP non valido
+auth.totp.code-used: Il codice di recupero %s è già stato usato e ora non è più valido. Potresti voler disabilitare l'autenticazione a due fattori per ora o generare nuovi codici di sicurezza.
+auth.totp.disabled: Il TOTP è stato disabilitato con successo
+auth.totp.disable: Disabilita TOTP
+auth.totp.enter-code: Inserisci il codice dall'app Authenticator
+auth.totp.enter-recovery-key: oppure una chiave di recupero se hai perso il tuo dispositivo
+auth.totp.code: Codice
+auth.totp.submit: Invia
+auth.totp.proceed: Procedi
+auth.totp.save-recovery-codes: Salva i tuoi codici di recupero in un posto sicuro. Puoi usare questi codici per recuperare l'accesso al tuo account se non hai accesso alla tua app di autenticazione.

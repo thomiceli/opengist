@@ -2,6 +2,8 @@ package index
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
@@ -10,7 +12,6 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/rs/zerolog/log"
-	"strconv"
 )
 
 type BleveIndexer struct {
@@ -53,6 +54,8 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 
 	docMapping := bleve.NewDocumentMapping()
 	docMapping.AddFieldMappingsAt("GistID", bleve.NewNumericFieldMapping())
+	docMapping.AddFieldMappingsAt("UserID", bleve.NewNumericFieldMapping())
+	docMapping.AddFieldMappingsAt("Visibility", bleve.NewNumericFieldMapping())
 	docMapping.AddFieldMappingsAt("Content", bleve.NewTextFieldMapping())
 
 	mapping := bleve.NewIndexMapping()
@@ -74,6 +77,7 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 	}
 
 	docMapping.DefaultAnalyzer = "gistAnalyser"
+	mapping.DefaultMapping = docMapping
 
 	return bleve.New(i.path, mapping)
 }
@@ -113,15 +117,17 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 		indexerQuery = contentQuery
 	}
 
-	privateQuery := bleve.NewBoolFieldQuery(false)
-	privateQuery.SetField("Private")
+	// Visibility filtering: show public gists (Visibility=0) OR user's own gists
+	visibilityZero := float64(0)
+	truee := true
+	publicQuery := bleve.NewNumericRangeInclusiveQuery(&visibilityZero, &visibilityZero, &truee, &truee)
+	publicQuery.SetField("Visibility")
 
 	userIdMatch := float64(userId)
-	truee := true
 	userIdQuery := bleve.NewNumericRangeInclusiveQuery(&userIdMatch, &userIdMatch, &truee, &truee)
 	userIdQuery.SetField("UserID")
 
-	accessQuery := bleve.NewDisjunctionQuery(privateQuery, userIdQuery)
+	accessQuery := bleve.NewDisjunctionQuery(publicQuery, userIdQuery)
 	indexerQuery = bleve.NewConjunctionQuery(accessQuery, indexerQuery)
 
 	addQuery := func(field, value string) {

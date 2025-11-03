@@ -206,8 +206,8 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-runewidth v0.0.19 h1:v++JhqYnZuu5jSKrk9RbgF5v4CGUjqRfBm05byFGLdw=
 github.com/mattn/go-runewidth v0.0.19/go.mod h1:XBkDxAl56ILZc9knddidhrOlY5R/pDhgLpndooCuJAs=
-github.com/meilisearch/meilisearch-go v0.34.0 h1:P+Ohdx4/PCxXaoI5wNi0LMwPkuiNrF/kGIzBrKYS4tw=
-github.com/meilisearch/meilisearch-go v0.34.0/go.mod h1:cUVJZ2zMqTvvwIMEEAdsWH+zrHsrLpAw6gm8Lt1MXK0=
+github.com/meilisearch/meilisearch-go v0.34.1 h1:tIPRWZ3GCsq6fnW7hxryNI7EejBWmTIZ9+YOwTho4PA=
+github.com/meilisearch/meilisearch-go v0.34.1/go.mod h1:cUVJZ2zMqTvvwIMEEAdsWH+zrHsrLpAw6gm8Lt1MXK0=
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=

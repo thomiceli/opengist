@@ -5,7 +5,7 @@ go 1.25.1
 require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0
 	github.com/alecthomas/chroma/v2 v2.20.0
-	github.com/blevesearch/bleve/v2 v2.5.3
+	github.com/blevesearch/bleve/v2 v2.5.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gabriel-vasile/mimetype v1.4.10
 	github.com/glebarez/sqlite v1.11.0
@@ -77,7 +77,6 @@ require (
 	github.com/go-webauthn/x v0.1.25 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
-	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/go-tpm v0.9.6 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect

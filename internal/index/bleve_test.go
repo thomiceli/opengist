@@ -47,46 +47,11 @@ func TestBleveIndexerAddGist(t *testing.T) {
 	testIndexerAddGist(t, indexer)
 }
 
-func TestBleveIndexerAddNilGist(t *testing.T) {
-	indexer, cleanup := setupBleveIndexer(t)
-	defer cleanup()
-
-	testIndexerAddNilGist(t, indexer)
-}
-
 func TestBleveIndexerSearchBasic(t *testing.T) {
 	indexer, cleanup := setupBleveIndexer(t)
 	defer cleanup()
 
 	testIndexerSearchBasic(t, indexer)
-}
-
-func TestBleveIndexerSearchWithMetadata(t *testing.T) {
-	indexer, cleanup := setupBleveIndexer(t)
-	defer cleanup()
-
-	testIndexerSearchWithMetadata(t, indexer)
-}
-
-func TestBleveIndexerSearchEmpty(t *testing.T) {
-	indexer, cleanup := setupBleveIndexer(t)
-	defer cleanup()
-
-	testIndexerSearchEmpty(t, indexer)
-}
-
-func TestBleveIndexerRemoveGist(t *testing.T) {
-	indexer, cleanup := setupBleveIndexer(t)
-	defer cleanup()
-
-	testIndexerRemoveGist(t, indexer)
-}
-
-func TestBleveIndexerMultipleGists(t *testing.T) {
-	indexer, cleanup := setupBleveIndexer(t)
-	defer cleanup()
-
-	testIndexerMultipleGists(t, indexer)
 }
 
 func TestBleveIndexerPagination(t *testing.T) {

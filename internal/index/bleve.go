@@ -109,8 +109,10 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 	var err error
 	var indexerQuery query.Query
 	if queryStr != "" {
-		contentQuery := bleve.NewMatchPhraseQuery(queryStr)
-		contentQuery.FieldVal = "Content"
+		// Use match query with fuzzy matching for more flexible content search
+		contentQuery := bleve.NewMatchQuery(queryStr)
+		contentQuery.SetField("Content")
+		contentQuery.SetFuzziness(2)
 		indexerQuery = contentQuery
 	} else {
 		contentQuery := bleve.NewMatchAllQuery()

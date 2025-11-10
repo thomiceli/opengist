@@ -308,7 +308,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// Old content should not be found
-		gistIDsOld, _, _, _ := indexer.Search("Original content", SearchGistMetadata{}, 11, 1)
+		gistIDsOld, _, _, _ := indexer.Search("Original", SearchGistMetadata{}, 11, 1)
 		for _, id := range gistIDsOld {
 			if id == 1006 {
 				t.Error("Should not find gist by old content after update")
@@ -559,7 +559,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 
 	// Test 7: Search with no results
 	t.Run("SearchNoResults", func(t *testing.T) {
-		gistIDs, total, _, err := indexer.Search("nonexistentquerystring12345", SearchGistMetadata{}, 1, 1)
+		gistIDs, total, _, err := indexer.Search("nonexistentquery", SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Search with no results failed: %v", err)
 		}
@@ -766,7 +766,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 
 	// Test 5: Empty results pagination
 	t.Run("EmptyResultsPagination", func(t *testing.T) {
-		gistIDs, total, _, err := indexer.Search("nonexistentquery12345xyz", SearchGistMetadata{}, 1, 1)
+		gistIDs, total, _, err := indexer.Search("nonexistentquery", SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Empty search failed: %v", err)
 		}

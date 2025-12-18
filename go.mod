@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0
-	github.com/alecthomas/chroma/v2 v2.20.0
+	github.com/alecthomas/chroma/v2 v2.21.1
 	github.com/blevesearch/bleve/v2 v2.5.3
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gabriel-vasile/mimetype v1.4.10

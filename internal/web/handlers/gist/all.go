@@ -2,6 +2,9 @@ package gist
 
 import (
 	"errors"
+	"slices"
+	"strings"
+
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/index"
@@ -9,8 +12,6 @@ import (
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"gorm.io/gorm"
-	"slices"
-	"strings"
 )
 
 func AllGists(ctx *context.Context) error {
@@ -188,6 +189,7 @@ func Search(ctx *context.Context) error {
 		Extension: meta["extension"],
 		Language:  meta["language"],
 		Topic:     meta["topic"],
+		All:       meta["all"],
 	}, currentUserId, pageInt)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error searching gists", err)

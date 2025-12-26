@@ -69,53 +69,53 @@ func TestVerifyPassword(t *testing.T) {
 	}
 
 	tests := []struct {
-		name       string
-		password   string
-		hash       string
-		wantMatch  bool
-		wantErr    bool
+		name      string
+		password  string
+		hash      string
+		wantMatch bool
+		wantErr   bool
 	}{
 		{
-			name:       "correct password",
-			password:   testPassword,
-			hash:       testHash,
-			wantMatch:  true,
-			wantErr:    false,
+			name:      "correct password",
+			password:  testPassword,
+			hash:      testHash,
+			wantMatch: true,
+			wantErr:   false,
 		},
 		{
-			name:       "incorrect password",
-			password:   "wrongpassword",
-			hash:       testHash,
-			wantMatch:  false,
-			wantErr:    false,
+			name:      "incorrect password",
+			password:  "wrongpassword",
+			hash:      testHash,
+			wantMatch: false,
+			wantErr:   false,
 		},
 		{
-			name:       "empty password against valid hash",
-			password:   "",
-			hash:       testHash,
-			wantMatch:  false,
-			wantErr:    false,
+			name:      "empty password against valid hash",
+			password:  "",
+			hash:      testHash,
+			wantMatch: false,
+			wantErr:   false,
 		},
 		{
-			name:       "empty hash",
-			password:   testPassword,
-			hash:       "",
-			wantMatch:  false,
-			wantErr:    false,
+			name:      "empty hash",
+			password:  testPassword,
+			hash:      "",
+			wantMatch: false,
+			wantErr:   false,
 		},
 		{
-			name:       "invalid hash format",
-			password:   testPassword,
-			hash:       "invalid",
-			wantMatch:  false,
-			wantErr:    true,
+			name:      "invalid hash format",
+			password:  testPassword,
+			hash:      "invalid",
+			wantMatch: false,
+			wantErr:   true,
 		},
 		{
-			name:       "malformed hash - wrong prefix",
-			password:   testPassword,
-			hash:       "$bcrypt$invalid$hash",
-			wantMatch:  false,
-			wantErr:    true,
+			name:      "malformed hash - wrong prefix",
+			password:  testPassword,
+			hash:      "$bcrypt$invalid$hash",
+			wantMatch: false,
+			wantErr:   true,
 		},
 	}
 

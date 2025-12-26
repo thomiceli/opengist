@@ -1,0 +1,346 @@
+gist.public: Публичен
+gist.unlisted: Скрит
+gist.private: Частен
+
+gist.header.like: Харесване
+gist.header.unlike: Премахване на харесването
+gist.header.fork: Форкване
+gist.header.edit: Редактиране
+gist.header.delete: Изтриване
+gist.header.forked-from: Форкнато от
+gist.header.last-active: Последна активност
+gist.header.select-tab: Избор на раздел
+gist.header.code: Код
+gist.header.revisions: Ревизии
+gist.header.revision: Ревизия
+gist.header.clone-http: Клониране чрез %s
+gist.header.clone-http-help: Клониране с Git чрез HTTP основна автентикация.
+gist.header.clone-ssh: Клониране чрез SSH
+gist.header.clone-ssh-help: Клониране с Git чрез SSH ключ.
+gist.header.embed: Вграждане
+gist.header.embed-help: Вграждане на този gist във вашия уебсайт.
+gist.header.download-zip: Изтегляне на ZIP
+
+gist.raw: Raw
+gist.file-truncated: Този файл е съкратен.
+gist.file-raw: Този файл не може да бъде визуализиран.
+gist.file-binary-edit: Този файл е бинарен.
+gist.watch-full-file: Виж целия файл.
+gist.file-not-valid: Този файл не е валиден CSV файл.
+gist.no-content: Не са намерени файлове
+gist.preview-non-available: Прегледът не е наличен
+
+gist.new.new_gist: Нов gist
+gist.new.title: Заглавие
+gist.new.description: Описание
+gist.new.url: URL адрес
+gist.new.filename-with-extension: Име на файла с разширение
+gist.new.indent-mode: Режим на отстъп
+gist.new.indent-mode-space: Интервал
+gist.new.indent-mode-tab: Табулация
+gist.new.indent-size: Размер на отстъпа
+gist.new.wrap-mode: Режим на пренасяне
+gist.new.wrap-mode-no: Без пренасяне
+gist.new.wrap-mode-soft: Меко пренасяне
+gist.new.add-file: Добавяне на файл
+gist.new.create-public-button: Създаване на публичен gist
+gist.new.create-unlisted-button: Създаване на скрит gist
+gist.new.create-private-button: Създаване на частен gist
+gist.new.preview: Преглед
+gist.new.create-a-new-gist: Създаване на нов gist
+gist.new.topics: Теми (разделете с интервали)
+gist.new.drop-files: Пуснете файловете тук или кликнете за качване
+gist.new.any-file-type: Качване на всякакъв тип файлове
+
+gist.edit.editing: Редактиране
+gist.edit.edit-gist: Редактиране на %s
+gist.edit.change-visibility: Направи
+gist.edit.delete: Изтриване
+gist.edit.cancel: Отказ
+gist.edit.save: Запазване
+gist.delete.confirm: Сигурни ли сте, че искате да изтриете този gist?
+gist.list.joined: Присъединяване
+gist.list.all: Всички gists
+gist.list.search-results: Резултати от търсенето
+gist.list.sort: Сортиране
+gist.list.sort-by-created: създаден на
+gist.list.sort-by-updated: обновен на
+gist.list.order-by-asc: Най-стари
+gist.list.order-by-desc: Най-нови
+gist.list.select-tab: Избор на раздел
+gist.list.liked: Харесани
+gist.list.likes: харесвания
+gist.list.forked: Форкнати
+gist.list.forked-from: Форкнато от
+gist.list.forks: форкове
+gist.list.files: файла
+gist.list.last-active: Последна активност
+gist.list.no-gists: Няма налични gists
+gist.list.all-liked-by: Всички gists, харесани от %s
+gist.list.all-forked-by: Всички gists, форкнати от %s
+gist.list.all-from: Всички gists от %s
+gist.list.topic-results-topic: Всички gists по тема %s
+gist.list.topic-results: Всички gists, съвпадащи с темата
+
+
+gist.search.found: намерени gists
+gist.search.no-results: Няма намерени gists
+gist.search.help.user: gists, създадени от потребител
+gist.search.help.title: gists със заглавие
+gist.search.help.filename: gists с файлове с име
+gist.search.help.extension: gists с файлове с разширение
+gist.search.help.language: gists с файлове на език
+gist.search.help.topic: gists с тема
+gist.search.placeholder.title: Заглавие
+gist.search.placeholder.visibility: Видимост
+gist.search.placeholder.public: Публичен
+gist.search.placeholder.unlisted: Скрит
+gist.search.placeholder.private: Частен
+gist.search.placeholder.language: Език
+gist.search.placeholder.all: Всички
+gist.search.placeholder.topics: Теми
+gist.search.placeholder.search: Търсене...
+
+gist.forks: Форкове
+gist.forks.view: Преглед на форка
+gist.forks.no: Няма публични форкове
+gist.forks.for: Форкове за %s
+
+gist.likes: Харесвания
+gist.likes.no: Все още няма харесвания
+gist.likes.for: Харесвания за %s
+
+gist.revisions: Ревизии
+gist.revision.revised: ревизира този gist
+gist.revision.go-to-revision: Към ревизията
+gist.revision.file-created: файлът е създаден
+gist.revision.file-deleted: файлът е изтрит
+gist.revision.file-renamed: преименуван на
+gist.revision.diff-truncated: Разликата (diff) е твърде голяма за показване
+gist.revision.file-renamed-no-changes: Файлът е преименуван без промени по съдържанието
+gist.revision.empty-file: Празен файл
+gist.revision.binary-file-changes: Промените в бинарни файлове не се показват
+gist.revision.no-changes: Няма промени
+gist.revision.no-revisions: Няма ревизии за показване
+gist.revision-of: Ревизия на %s
+
+settings: Настройки
+settings.email: Имейл
+settings.email-help: Използва се за коммити и Gravatar
+settings.email-set: Задаване на имейл
+settings.link-accounts: Свързване на акаунти
+settings.link-github-account: Свързване на GitHub акаунт
+settings.link-gitlab-account: Свързване на GitLab акаунт
+settings.link-gitea-account: Свързване на Gitea акаунт
+settings.unlink-github-account: Премахване на връзката с GitHub
+settings.unlink-gitlab-account: Премахване на връзката с GitLab
+settings.unlink-gitea-account: Премахване на връзката с Gitea
+settings.delete-account: Изтриване на акаунта
+settings.delete-account-confirm: Сигурни ли сте, че искате да изтриете акаунта си?
+settings.add-ssh-key: Добавяне на SSH ключ
+settings.add-ssh-key-help: Използва се само за pull/push на gists чрез Git през SSH
+settings.add-ssh-key-title: Заглавие
+settings.add-ssh-key-content: Клуч (Key)
+settings.delete-ssh-key: Изтриване
+settings.delete-ssh-key-confirm: Потвърдете изтриването на SSH ключа
+settings.ssh-key-added-at: Добавен на
+settings.ssh-key-never-used: Никога не е използван
+settings.ssh-key-last-used: Последно използван
+settings.ssh-key-exists: Този SSH ключ вече съществува
+settings.change-username: Промяна на потребителското име
+settings.create-password: Създаване на парола
+settings.create-password-help: Създайте парола за влизане в Opengist чрез HTTP
+settings.change-password: Промяна на паролата
+settings.change-password-help: Променете паролата си за влизане в Opengist чрез HTTP
+settings.password-label-title: Парола
+settings.header.account: Акаунт
+settings.header.mfa: Двуфакторна автентикация (MFA)
+settings.header.ssh: SSH
+settings.header.style: Стил
+settings.style.gist-code: Код на gist
+settings.style.no-soft-wrap: Без пренасяне на редовете
+settings.style.soft-wrap: Меко пренасяне на редовете
+settings.style.removed-lines-color: Цвят на премахнатите редове
+settings.style.added-lines-color: Цвят на добавените редове
+settings.style.git-lines-color: Цвят на Git редовете
+settings.style.save-style: Запазване на стила
+settings.style.theme: Тема
+settings.style.theme-light: Светла
+settings.style.theme-dark: Тъмна
+settings.style.theme-auto: Автоматична
+
+auth.signup-disabled: Администраторът е изключил свободните регистрации
+auth.login: Вход
+auth.signup: Регистрация
+auth.new-account: Нов акаунт
+auth.username: Потребителско име
+auth.password: Парола
+auth.register-instead: Към регистрация
+auth.login-instead: Към вход
+auth.oauth: Продължете с акаунт в %s
+auth.mfa: Многофакторна автентикация
+auth.mfa.passkey: Passkey
+auth.mfa.passkeys: Passkeys
+auth.mfa.use-passkey: Използване на passkey
+auth.mfa.bind-passkey: Свързване на passkey
+auth.mfa.login-with-passkey: Вход с passkey
+auth.mfa.waiting-for-passkey-input: Изчакване на вход от браузъра...
+auth.mfa.use-passkey-to-finish: Използвайте passkey, за да завършите автентикацията
+auth.mfa.passkeys-help: Добавете passkey за достъп до акаунта си и като метод за MFA.
+auth.mfa.passkey-name: Име
+auth.mfa.delete-passkey: Изтриване
+auth.mfa.passkey-added-at: Добавен на
+auth.mfa.passkey-never-used: Никога не е използван
+auth.mfa.passkey-last-used: Последно използван
+auth.mfa.delete-passkey-confirm: Потвърдете изтриването на passkey
+auth.totp: Еднократна парола (TOTP)
+auth.totp.help: TOTP е метод за двуфакторна автентикация, използващ споделен таен ключ за генериране на еднократна парола.
+auth.totp.use: Използване на TOTP
+auth.totp.regenerate-recovery-codes: Генериране на нови кодове за възстановяване
+auth.totp.already-enabled: TOTP вече е активиран
+auth.totp.invalid-secret: Невалиден TOTP таен ключ
+auth.totp.invalid-code: Невалиден TOTP код
+auth.totp.code-used: Кодът за възстановяване %s беше използван и вече е невалиден. Препоръчително е да генерирате нови кодове.
+auth.totp.disabled: TOTP е деактивиран успешно
+auth.totp.disable: Деактивиране на TOTP
+auth.totp.enter-code: Въведете кода от приложението Authenticator
+auth.totp.enter-recovery-key: или код за възстановяване, ако сте загубили устройството си
+auth.totp.code: Код
+auth.totp.submit: Изпращане
+auth.totp.proceed: Продължи
+auth.totp.save-recovery-codes: Запазете кодовете си за възстановяване на сигурно място. Те ще ви помогнат да влезете в акаунта си, ако загубите достъп до приложението.
+auth.totp.scan-qr-code: Сканирайте QR кода по-долу с вашето приложение за автентикация, за да активирате MFA, или въведете ръчно кода, след което потвърдете с генерирания низ.
+
+
+error: Грешка
+error.page-not-found: Страницата не е намерена
+error.bad-request: Невалидна заявка (Bad request)
+error.signup-disabled: Регистрацията е изключена
+error.signup-disabled-form: Регистрацията чрез форма е изключена
+error.login-disabled-form: Влизането чрез форма е изключено
+error.complete-oauth-login: "Автентикацията не може да бъде завършена: %s"
+error.oauth-unsupported: Неподдържан доставчик
+error.cannot-bind-data: Данните не могат да бъдат свързани
+error.invalid-number: Невалидно число
+error.invalid-character-unescaped: Невалиден неекраниран символ
+error.not-in-mfa-session: Потребителят не е в активна MFA сесия
+error.no-file-uploaded: Не е качен файл
+error.cannot-open-file: Каченият файл не може да бъде отворен
+
+header.menu.all: Всички
+header.menu.new: Нов
+header.menu.search: Търсене
+header.menu.my-gists: Моите gists
+header.menu.liked: Харесани
+header.menu.admin: Админ
+header.menu.settings: Настройки
+header.menu.logout: Изход
+header.menu.register: Регистрация
+header.menu.login: Вход
+header.menu.light: Светла
+header.menu.dark: Тъмна
+header.menu.system: Системна
+footer.powered-by: Базирано на %s
+
+pagination.older: По-стари
+pagination.newer: По-нови
+pagination.previous: Предишна
+pagination.next: Следваща
+
+admin.admin_panel: Административен панел
+admin.general: Общи
+admin.users: Потребители
+admin.gists: Gists
+admin.configuration: Конфигурация
+admin.invitations: Покани
+admin.invitations.create: Създаване на покана
+admin.versions: Версии
+admin.ssh_keys: SSH ключове
+admin.stats: Статистика
+admin.actions: Действия
+admin.actions.sync-fs: Синхронизиране на gists от файловата система
+admin.actions.sync-db: Синхронизиране на gists от базата данни
+admin.actions.git-gc: Почистване на излишните данни (Git GC) на всички хранилища
+admin.actions.sync-previews: Синхронизиране на всички визуализации
+admin.actions.reset-hooks: Нулиране на Git server hooks за всички хранилища
+admin.actions.index-gists: Индексиране на всички gists
+admin.actions.sync-gist-languages: Синхронизиране на езиците на всички gists
+admin.id: ID
+admin.user: Потребител
+admin.delete: Изтриване
+admin.created_at: Създаден на
+
+admin.config-link: Тази конфигурация може да бъде %s чрез YAML файл и/или променливи на средата.
+admin.config-link-overriden: презаписана
+admin.disable-signup: Изключване на регистрацията
+admin.disable-signup_help: Забранява създаването на нови акаунти.
+admin.require-login: Изискване на вход
+admin.require-login_help: Налага на потребителите да са влезли, за да виждат gists.
+admin.allow-gists-without-login: Позволяване на отделни gists без вход
+admin.allow-gists-without-login_help: Позволява отделни gists да бъдат разглеждани и изтегляни без вход, но изисква вход за откриване на gists в списъците.
+admin.disable-login: Изключване на формата за вход
+admin.disable-login_help: Забранява влизането чрез стандартната форма, за да наложи използването на OAuth доставчици.
+admin.disable-gravatar: Изключване на Gravatar
+admin.disable-gravatar_help: Изключва използването на Gravatar като доставчик на аватари.
+
+admin.users.delete_confirm: Сигурни ли сте, че искате да изтриете този потребител?
+
+admin.gists.title: Заглавие
+admin.gists.private: Частен?
+admin.gists.nb-files: Брой файлове
+admin.gists.nb-likes: Брой харесвания
+admin.gists.delete_confirm: Сигурни ли сте, че искате да изтриете този gist?
+
+admin.invitations.help: Поканите могат да се използват за създаване на акаунт, дори ако свободната регистрация е изключена.
+admin.invitations.max_uses: Макс. употреби
+admin.invitations.expires_at: Изтича на
+admin.invitations.code: Код
+admin.invitations.copy_link: Копиране на линк
+admin.invitations.uses: Употреби
+admin.invitations.expired: Изтекъл
+admin.invitations.delete_confirm: Сигурни ли сте, че искате да изтриете тази покана?
+
+flash.admin.user-deleted: Потребителят беше изтрит
+flash.admin.gist-deleted: Gist беше изтрит
+flash.admin.invitation-created: Поканата беше създадена
+flash.admin.invitation-deleted: Поканата беше изтрита
+flash.admin.sync-fs: Синхронизиране на хранилищата от файловата система...
+flash.admin.sync-db: Синхронизиране на хранилищата от базата данни...
+flash.admin.git-gc: Почистване на излишните данни в хранилищата...
+flash.admin.sync-previews: Синхронизиране на визуализациите...
+flash.admin.reset-hooks: Нулиране на Git server hooks за всички хранилища...
+flash.admin.index-gists: Индексиране на всички gists...
+flash.admin.sync-gist-languages: Синхронизиране на езиците...
+
+flash.auth.username-exists: Потребителското име вече съществува
+flash.auth.invalid-credentials: Невалидни данни за вход
+flash.auth.account-linked-oauth: Акаунтът е свързан с %s
+flash.auth.account-unlinked-oauth: Връзката на акаунта с %s е премахната
+flash.auth.user-sshkeys-not-retrievable: Ключовете на потребителя не могат да бъдат извлечени
+flash.auth.user-sshkeys-not-created: SSH ключът не можа да бъде създаден
+flash.auth.must-be-logged-in: Трябва да сте влезли, за да имате достъп до gists
+flash.auth.passkey-registred: Passkey %s е регистриран
+flash.auth.passkey-deleted: Passkey е изтрит
+
+flash.gist.visibility-changed: Видимостта на gist е променена
+flash.gist.deleted: Gist беше изтрит
+flash.gist.fork-own-gist: Не можете да форквате собствените си gists
+flash.gist.forked: Gist беше форкнат успешно
+
+flash.user.email-updated: Имейлът е актуализиран
+flash.user.invalid-ssh-key: Невалиден SSH ключ
+flash.user.ssh-key-added: SSH ключът е добавен
+flash.user.ssh-key-deleted: SSH ключът е изтрит
+flash.user.password-updated: Паролата е актуализирана
+flash.user.username-updated: Потребителското име е актуализирано
+
+validation.is-too-long: Полето %s е твърде дълго
+validation.should-not-be-empty: Полето %s не трябва да бъде празно
+validation.should-not-include-sub-directory: Полето %s не трябва да съдържа поддиректория
+validation.should-only-contain-alphanumeric-characters: Полето %s трябва да съдържа само буквено-цифрови знаци
+validation.should-only-contain-alphanumeric-characters-and-dashes: Полето %s трябва да съдържа само буквено-цифрови знаци и тирета
+validation.not-enough: Недостатъчно %s
+validation.invalid: Невалиден %s
+validation.invalid-gist-topics: Невалидни теми — трябва да започват с буква или цифра, да са до 50 знака и могат да включват тирета
+
+html.title.admin-panel: Административен панел

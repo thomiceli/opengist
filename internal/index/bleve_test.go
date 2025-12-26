@@ -47,6 +47,20 @@ func TestBleveIndexerAddGist(t *testing.T) {
 	testIndexerAddGist(t, indexer)
 }
 
+func TestBleveIndexerAllFieldSearch(t *testing.T) {
+	indexer, cleanup := setupBleveIndexer(t)
+	defer cleanup()
+
+	testIndexerAllFieldSearch(t, indexer)
+}
+
+func TestBleveIndexerFuzzySearch(t *testing.T) {
+	indexer, cleanup := setupBleveIndexer(t)
+	defer cleanup()
+
+	testIndexerFuzzySearch(t, indexer)
+}
+
 func TestBleveIndexerSearchBasic(t *testing.T) {
 	indexer, cleanup := setupBleveIndexer(t)
 	defer cleanup()

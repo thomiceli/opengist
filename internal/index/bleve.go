@@ -132,20 +132,49 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 	accessQuery := bleve.NewDisjunctionQuery(publicQuery, userIdQuery)
 	indexerQuery = bleve.NewConjunctionQuery(accessQuery, indexerQuery)
 
-	addQuery := func(field, value string) {
-		if value != "" && value != "." {
-			q := bleve.NewMatchPhraseQuery(value)
-			q.FieldVal = field
-			indexerQuery = bleve.NewConjunctionQuery(indexerQuery, q)
-		}
-	}
+	// Handle "All" field - search across all metadata fields with OR logic
+	if queryMetadata.All != "" {
+		allQueries := make([]query.Query, 0)
 
-	addQuery("Username", queryMetadata.Username)
-	addQuery("Title", queryMetadata.Title)
-	addQuery("Extensions", "."+queryMetadata.Extension)
-	addQuery("Filenames", queryMetadata.Filename)
-	addQuery("Languages", queryMetadata.Language)
-	addQuery("Topics", queryMetadata.Topic)
+		// Create match phrase queries for each field
+		fields := []struct {
+			field string
+			value string
+		}{
+			{"Username", queryMetadata.All},
+			{"Title", queryMetadata.All},
+			{"Extensions", "." + queryMetadata.All},
+			{"Filenames", queryMetadata.All},
+			{"Languages", queryMetadata.All},
+			{"Topics", queryMetadata.All},
+		}
+
+		for _, f := range fields {
+			q := bleve.NewMatchPhraseQuery(f.value)
+			q.FieldVal = f.field
+			allQueries = append(allQueries, q)
+		}
+
+		// Combine all field queries with OR (disjunction)
+		allDisjunction := bleve.NewDisjunctionQuery(allQueries...)
+		indexerQuery = bleve.NewConjunctionQuery(indexerQuery, allDisjunction)
+	} else {
+		// Original behavior: add each metadata field with AND logic
+		addQuery := func(field, value string) {
+			if value != "" && value != "." {
+				q := bleve.NewMatchPhraseQuery(value)
+				q.FieldVal = field
+				indexerQuery = bleve.NewConjunctionQuery(indexerQuery, q)
+			}
+		}
+
+		addQuery("Username", queryMetadata.Username)
+		addQuery("Title", queryMetadata.Title)
+		addQuery("Extensions", "."+queryMetadata.Extension)
+		addQuery("Filenames", queryMetadata.Filename)
+		addQuery("Languages", queryMetadata.Language)
+		addQuery("Topics", queryMetadata.Topic)
+	}
 
 	languageFacet := bleve.NewFacetRequest("Languages", 10)
 

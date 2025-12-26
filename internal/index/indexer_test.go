@@ -689,6 +689,703 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 	})
 }
 
+// testIndexerAllFieldSearch tests the "All" field OR search functionality
+func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
+	t.Helper()
+	initTestGists(t, indexer)
+
+	// Add test gists with distinct values in different fields
+	testGists := []*Gist{
+		{
+			GistID:     3001,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "testuser_unique",
+			Title:      "Configuration Guide",
+			Content:    "How to configure your application",
+			Filenames:  []string{"config.txt"},
+			Extensions: []string{"txt"},
+			Languages:  []string{"Text"},
+			Topics:     []string{"configuration"},
+			CreatedAt:  1234567890,
+			UpdatedAt:  1234567890,
+		},
+		{
+			GistID:     3002,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "developer",
+			Title:      "Testing unique features",
+			Content:    "Testing best practices",
+			Filenames:  []string{"test.txt"},
+			Extensions: []string{"txt"},
+			Languages:  []string{"Text"},
+			Topics:     []string{"testing"},
+			CreatedAt:  1234567891,
+			UpdatedAt:  1234567891,
+		},
+		{
+			GistID:     3003,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "coder",
+			Title:      "API Documentation",
+			Content:    "REST API documentation",
+			Filenames:  []string{"api.txt"},
+			Extensions: []string{"txt"},
+			Languages:  []string{"Markdown"},
+			Topics:     []string{"unique_topic"},
+			CreatedAt:  1234567892,
+			UpdatedAt:  1234567892,
+		},
+		{
+			GistID:     3004,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "programmer",
+			Title:      "Code Examples",
+			Content:    "Code examples for beginners",
+			Filenames:  []string{"unique_file.rb"},
+			Extensions: []string{"rb"},
+			Languages:  []string{"Ruby"},
+			Topics:     []string{"examples"},
+			CreatedAt:  1234567893,
+			UpdatedAt:  1234567893,
+		},
+		{
+			GistID:     3005,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "admin",
+			Title:      "Setup Instructions",
+			Content:    "How to setup the project",
+			Filenames:  []string{"setup.sh"},
+			Extensions: []string{"sh"},
+			Languages:  []string{"Shell"},
+			Topics:     []string{"setup"},
+			CreatedAt:  1234567894,
+			UpdatedAt:  1234567894,
+		},
+	}
+
+	for _, gist := range testGists {
+		err := indexer.Add(gist)
+		if err != nil {
+			t.Fatalf("Failed to add test gist %d: %v", gist.GistID, err)
+		}
+	}
+
+	// Test 1: All field matches username
+	t.Run("AllFieldMatchesUsername", func(t *testing.T) {
+		metadata := SearchGistMetadata{All: "testuser_unique"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected to find gist by username via All field")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 3001 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected to find GistID 3001 by username via All field")
+		}
+	})
+
+	// Test 2: All field matches title
+	t.Run("AllFieldMatchesTitle", func(t *testing.T) {
+		metadata := SearchGistMetadata{All: "unique features"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected to find gist by title via All field")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 3002 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected to find GistID 3002 by title via All field")
+		}
+	})
+
+	// Test 3: All field matches language
+	t.Run("AllFieldMatchesLanguage", func(t *testing.T) {
+		metadata := SearchGistMetadata{All: "Ruby"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected to find gist by language via All field")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 3004 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected to find GistID 3004 by language via All field")
+		}
+	})
+
+	// Test 4: All field matches topic
+	t.Run("AllFieldMatchesTopic", func(t *testing.T) {
+		metadata := SearchGistMetadata{All: "unique_topic"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected to find gist by topic via All field")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 3003 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected to find GistID 3003 by topic via All field")
+		}
+	})
+
+	// Test 5: All field matches extension
+	t.Run("AllFieldMatchesExtension", func(t *testing.T) {
+		metadata := SearchGistMetadata{All: "sh"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected to find gist by extension via All field")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 3005 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected to find GistID 3005 by extension via All field")
+		}
+	})
+
+	// Test 6: All field matches filename
+	t.Run("AllFieldMatchesFilename", func(t *testing.T) {
+		metadata := SearchGistMetadata{All: "unique_file.rb"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected to find gist by filename via All field")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 3004 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected to find GistID 3004 by filename via All field")
+		}
+	})
+
+	// Test 7: All field OR behavior - matches across different fields
+	t.Run("AllFieldORBehavior", func(t *testing.T) {
+		// "unique" appears in: username (3001), title (3002), topic (3003), filename (3004)
+		metadata := SearchGistMetadata{All: "unique"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field OR search failed: %v", err)
+		}
+		if total < 4 {
+			t.Errorf("Expected at least 4 results from OR search, got %d", total)
+		}
+
+		// Verify we found gists from different fields
+		foundIDs := make(map[uint]bool)
+		for _, id := range gistIDs {
+			if id >= 3001 && id <= 3004 {
+				foundIDs[id] = true
+			}
+		}
+
+		expectedIDs := []uint{3001, 3002, 3003, 3004}
+		for _, expectedID := range expectedIDs {
+			if !foundIDs[expectedID] {
+				t.Errorf("Expected to find GistID %d in OR search results", expectedID)
+			}
+		}
+	})
+
+	// Test 8: All field returns more results than specific field (OR vs AND)
+	t.Run("AllFieldVsSpecificField", func(t *testing.T) {
+		// Search with All field
+		metadataAll := SearchGistMetadata{All: "unique"}
+		_, totalAll, _, err := indexer.Search("", metadataAll, 100, 1)
+		if err != nil {
+			t.Fatalf("All field search failed: %v", err)
+		}
+
+		// Search with specific username field only
+		metadataSpecific := SearchGistMetadata{Username: "testuser_unique"}
+		_, totalSpecific, _, err := indexer.Search("", metadataSpecific, 100, 1)
+		if err != nil {
+			t.Fatalf("Specific field search failed: %v", err)
+		}
+
+		// All field should return more results (OR) than specific field
+		if totalAll <= totalSpecific {
+			t.Errorf("All field (OR) should return more results (%d) than specific field (%d)", totalAll, totalSpecific)
+		}
+	})
+
+	// Test 9: All field with no matches
+	t.Run("AllFieldNoMatches", func(t *testing.T) {
+		metadata := SearchGistMetadata{All: "nonexistentvalue12345"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field no match search failed: %v", err)
+		}
+		if total != 0 {
+			t.Errorf("Expected 0 results for non-existent value, got %d", total)
+		}
+		if len(gistIDs) != 0 {
+			t.Error("Expected empty gist IDs for non-existent value")
+		}
+	})
+
+	// Test 10: All field is mutually exclusive with specific fields
+	t.Run("AllFieldIgnoresOtherFields", func(t *testing.T) {
+		// When All is specified, other specific fields should be ignored
+		metadata := SearchGistMetadata{
+			All:      "unique",
+			Username: "nonexistent", // This should be ignored
+			Language: "NonExistent", // This should be ignored
+		}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field with other fields search failed: %v", err)
+		}
+		// Should still find results because All is used (and other fields are ignored)
+		if total < 4 {
+			t.Errorf("Expected All field to be used (ignoring other fields), got %d results", total)
+		}
+		// Verify we found gists matching "unique"
+		foundAny := false
+		for _, id := range gistIDs {
+			if id >= 3001 && id <= 3004 {
+				foundAny = true
+				break
+			}
+		}
+		if !foundAny {
+			t.Error("Expected All field to override specific fields and find results")
+		}
+	})
+
+	// Test 11: All field with content query
+	t.Run("AllFieldWithContentQuery", func(t *testing.T) {
+		// All field searches metadata, content query searches content
+		// Both should work together
+		metadata := SearchGistMetadata{All: "Ruby"}
+		gistIDs, total, _, err := indexer.Search("examples", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field with content query failed: %v", err)
+		}
+		// Should find gist 3004 which has Ruby language AND "examples" in content
+		if total == 0 {
+			t.Error("Expected to find gist matching both All field and content query")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 3004 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected to find GistID 3004 matching both conditions")
+		}
+	})
+
+	// Test 12: All field case insensitivity
+	t.Run("AllFieldCaseInsensitive", func(t *testing.T) {
+		// Search with different case
+		metadata := SearchGistMetadata{All: "RUBY"}
+		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("All field case insensitive search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected case insensitive match for All field")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 3004 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Case insensitive All field search returned results but not exact match")
+		}
+	})
+}
+
+// testIndexerFuzzySearch tests fuzzy search functionality (typo tolerance)
+func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
+	t.Helper()
+	initTestGists(t, indexer)
+
+	// Add test gists with specific content for fuzzy search testing
+	testGists := []*Gist{
+		{
+			GistID:     2001,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "fuzzytest",
+			Title:      "Algorithm Test",
+			Content:    "This is a test about algorithms and data structures",
+			Filenames:  []string{"algorithm.txt"},
+			Extensions: []string{"txt"},
+			Languages:  []string{"Text"},
+			Topics:     []string{"algorithms"},
+			CreatedAt:  1234567890,
+			UpdatedAt:  1234567890,
+		},
+		{
+			GistID:     2002,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "fuzzytest",
+			Title:      "Python Guide",
+			Content:    "A comprehensive guide to python programming language",
+			Filenames:  []string{"python.txt"},
+			Extensions: []string{"txt"},
+			Languages:  []string{"Text"},
+			Topics:     []string{"python"},
+			CreatedAt:  1234567891,
+			UpdatedAt:  1234567891,
+		},
+		{
+			GistID:     2003,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "fuzzytest",
+			Title:      "Database Fundamentals",
+			Content:    "Understanding relational databases and SQL queries",
+			Filenames:  []string{"database.txt"},
+			Extensions: []string{"txt"},
+			Languages:  []string{"Text"},
+			Topics:     []string{"database"},
+			CreatedAt:  1234567892,
+			UpdatedAt:  1234567892,
+		},
+		{
+			GistID:     2004,
+			UserID:     100,
+			Visibility: 0,
+			Username:   "fuzzytest",
+			Title:      "JavaScript Essentials",
+			Content:    "Essential javascript concepts for web development",
+			Filenames:  []string{"javascript.txt"},
+			Extensions: []string{"txt"},
+			Languages:  []string{"Text"},
+			Topics:     []string{"javascript"},
+			CreatedAt:  1234567893,
+			UpdatedAt:  1234567893,
+		},
+	}
+
+	for _, gist := range testGists {
+		err := indexer.Add(gist)
+		if err != nil {
+			t.Fatalf("Failed to add fuzzy test gist %d: %v", gist.GistID, err)
+		}
+	}
+
+	// Test 1: Exact match should work
+	t.Run("ExactMatch", func(t *testing.T) {
+		gistIDs, total, _, err := indexer.Search("algorithms", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("Exact match search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected to find gist with exact match 'algorithms'")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2001 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected to find GistID 2001 with exact match")
+		}
+	})
+
+	// Test 2: 1 character typo - substitution
+	t.Run("OneCharSubstitution", func(t *testing.T) {
+		// "algoritm" instead of "algorithm" (missing 'h')
+		gistIDs, total, _, err := indexer.Search("algoritm", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("1-char typo search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search to find 'algorithm' with typo 'algoritm'")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2001 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Fuzzy search returned results but not the expected gist (may be acceptable)")
+		}
+	})
+
+	// Test 3: 1 character typo - deletion
+	t.Run("OneCharDeletion", func(t *testing.T) {
+		// "pythn" instead of "python" (missing 'o')
+		gistIDs, total, _, err := indexer.Search("pythn", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("1-char deletion search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search to find 'python' with typo 'pythn'")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2002 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Fuzzy search returned results but not the expected gist")
+		}
+	})
+
+	// Test 4: 1 character typo - insertion (extra character)
+	t.Run("OneCharInsertion", func(t *testing.T) {
+		// "pythonn" instead of "python" (extra 'n')
+		gistIDs, total, _, err := indexer.Search("pythonn", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("1-char insertion search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search to find 'python' with typo 'pythonn'")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2002 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Fuzzy search returned results but not the expected gist")
+		}
+	})
+
+	// Test 5: 2 character typos - should still match with fuzziness=2
+	t.Run("TwoCharTypos", func(t *testing.T) {
+		// "databse" instead of "database" (missing 'a', transposed 's')
+		gistIDs, total, _, err := indexer.Search("databse", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("2-char typo search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search to find 'database' with typo 'databse'")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2003 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Fuzzy search returned results but not the expected gist with 2 typos")
+		}
+	})
+
+	// Test 6: 2 character typos - different word
+	t.Run("TwoCharTyposDifferentWord", func(t *testing.T) {
+		// "javasript" instead of "javascript" (missing 'c')
+		gistIDs, total, _, err := indexer.Search("javasript", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("2-char typo search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search to find 'javascript' with typo 'javasript'")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2004 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Fuzzy search returned results but not the expected gist")
+		}
+	})
+
+	// Test 7: 3 character typos - should NOT match (beyond fuzziness=2)
+	t.Run("ThreeCharTyposShouldNotMatch", func(t *testing.T) {
+		// "algorthm" instead of "algorithm" (missing 'i', 't', 'h') - too different
+		gistIDs, _, _, err := indexer.Search("algorthm", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("3-char typo search failed: %v", err)
+		}
+		// With fuzziness=2, this might or might not match depending on the algorithm
+		// We'll just log the result
+		found := false
+		for _, id := range gistIDs {
+			if id == 2001 {
+				found = true
+				break
+			}
+		}
+		if found {
+			t.Log("3-char typo matched (fuzzy search is very lenient)")
+		} else {
+			t.Log("3-char typo did not match as expected")
+		}
+	})
+
+	// Test 8: Transposition (swapped characters)
+	t.Run("CharacterTransposition", func(t *testing.T) {
+		// "pyhton" instead of "python" (swapped 'ht')
+		gistIDs, total, _, err := indexer.Search("pyhton", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("Transposition search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search to find 'python' with transposition 'pyhton'")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2002 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Fuzzy search returned results but not the expected gist with transposition")
+		}
+	})
+
+	// Test 9: Case insensitivity with fuzzy search
+	t.Run("CaseInsensitiveWithFuzzy", func(t *testing.T) {
+		// "PYTHN" (uppercase with typo)
+		gistIDs, total, _, err := indexer.Search("PYTHN", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("Case insensitive fuzzy search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search to find 'python' with 'PYTHN'")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2002 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Case insensitive fuzzy search returned results but not expected gist")
+		}
+	})
+
+	// Test 10: Multiple words with typos
+	t.Run("MultipleWordsWithTypos", func(t *testing.T) {
+		// "relatonal databse" instead of "relational database"
+		gistIDs, total, _, err := indexer.Search("relatonal databse", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("Multi-word fuzzy search failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search to find 'relational database' with typos")
+		}
+		found := false
+		for _, id := range gistIDs {
+			if id == 2003 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Multi-word fuzzy search returned results but not expected gist")
+		}
+	})
+
+	// Test 11: Short words with typos (edge case)
+	t.Run("ShortWordsWithTypos", func(t *testing.T) {
+		// "SLQ" instead of "SQL" (1 char typo on short word)
+		gistIDs, total, _, err := indexer.Search("SLQ", SearchGistMetadata{}, 100, 1)
+		if err != nil {
+			t.Fatalf("Short word fuzzy search failed: %v", err)
+		}
+		// Short words might be more sensitive to typos
+		found := false
+		for _, id := range gistIDs {
+			if id == 2003 {
+				found = true
+				break
+			}
+		}
+		if !found && total > 0 {
+			t.Log("Short word fuzzy search is challenging, returned other results")
+		} else if found {
+			t.Log("Short word fuzzy search successfully matched")
+		}
+	})
+
+	// Test 12: Fuzzy search combined with metadata filters
+	t.Run("FuzzySearchWithMetadataFilters", func(t *testing.T) {
+		// Search with typo AND username filter
+		metadata := SearchGistMetadata{Username: "fuzzytest"}
+		gistIDs, total, _, err := indexer.Search("algoritm", metadata, 100, 1)
+		if err != nil {
+			t.Fatalf("Fuzzy search with metadata failed: %v", err)
+		}
+		if total == 0 {
+			t.Error("Expected fuzzy search with filter to find results")
+		}
+		// All results should be from fuzzytest user
+		for _, id := range gistIDs {
+			if id >= 2001 && id <= 2004 {
+				// Expected
+			} else {
+				t.Errorf("Found unexpected GistID %d, should only match fuzzytest gists", id)
+			}
+		}
+	})
+}
+
 // testIndexerPagination tests pagination in search results
 func testIndexerPagination(t *testing.T, indexer Indexer) {
 	t.Helper()

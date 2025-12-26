@@ -22,4 +22,5 @@ type SearchGistMetadata struct {
 	Extension string
 	Language  string
 	Topic     string
+	All       string
 }

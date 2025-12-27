@@ -475,7 +475,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 	// Test 2: Search by specific language - Go
 	t.Run("SearchByLanguage", func(t *testing.T) {
 		metadata := SearchGistMetadata{Language: "Go"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 1, 1)
+		_, total, _, err := indexer.Search("", metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Search by language failed: %v", err)
 		}

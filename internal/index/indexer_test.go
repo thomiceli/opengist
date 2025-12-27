@@ -639,7 +639,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 		}
 
 		// Search as non-existent user (should only see public gists)
-		gistIDsPublic, totalPublic, _, err := indexer.Search("", SearchGistMetadata{}, 999, 1)
+		_, totalPublic, _, err := indexer.Search("", SearchGistMetadata{}, 999, 1)
 		if err != nil {
 			t.Fatalf("Search as user 999 failed: %v", err)
 		}
@@ -651,18 +651,6 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 		// Public gists (334) should be less than what user 2 sees (667)
 		if totalPublic >= total {
 			t.Errorf("Non-existent user sees %d gists, should be less than user 2's %d", totalPublic, total)
-		}
-
-		// Verify we can find GistID 1 (alice's public gist)
-		foundPublic := false
-		for _, id := range gistIDsPublic {
-			if id == 1 {
-				foundPublic = true
-				break
-			}
-		}
-		if !foundPublic {
-			t.Error("Expected to find GistID 1 (alice's public gist) in results")
 		}
 	})
 

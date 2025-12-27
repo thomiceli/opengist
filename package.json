@@ -20,7 +20,7 @@
     "@codemirror/view": "^6.39.7",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.1.14",
+    "@tailwindcss/vite": "^4.1.18",
     "codemirror": "^6.0.2",
     "github-markdown-css": "^5.8.1",
     "highlight.js": "^11.11.1",

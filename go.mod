@@ -7,7 +7,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.20.0
 	github.com/blevesearch/bleve/v2 v2.5.3
 	github.com/dustin/go-humanize v1.0.1
-	github.com/gabriel-vasile/mimetype v1.4.10
+	github.com/gabriel-vasile/mimetype v1.4.12
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/go-playground/validator/v10 v10.28.0

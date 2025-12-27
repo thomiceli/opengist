@@ -10,7 +10,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.12
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-ldap/ldap/v3 v3.4.12
-	github.com/go-playground/validator/v10 v10.28.0
+	github.com/go-playground/validator/v10 v10.30.1
 	github.com/go-webauthn/webauthn v0.14.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/schema v1.4.1

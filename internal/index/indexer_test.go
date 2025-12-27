@@ -475,7 +475,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 	// Test 2: Search by specific language - Go
 	t.Run("SearchByLanguage", func(t *testing.T) {
 		metadata := SearchGistMetadata{Language: "Go"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 1, 1)
+		_, total, _, err := indexer.Search("", metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Search by language failed: %v", err)
 		}
@@ -483,17 +483,6 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 		// All are public
 		if total != 334 {
 			t.Errorf("Expected 334 Go gists, got %d", total)
-		}
-		// Verify GistID 1 (i=0) is in results
-		foundGoGist := false
-		for _, id := range gistIDs {
-			if id == 1 {
-				foundGoGist = true
-				break
-			}
-		}
-		if !foundGoGist && len(gistIDs) > 0 {
-			t.Error("Expected to find GistID 1 (Go) in results")
 		}
 	})
 

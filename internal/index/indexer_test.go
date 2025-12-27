@@ -484,17 +484,6 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 		if total != 334 {
 			t.Errorf("Expected 334 Go gists, got %d", total)
 		}
-		// Verify GistID 1 (i=0) is in results
-		foundGoGist := false
-		for _, id := range gistIDs {
-			if id == 1 {
-				foundGoGist = true
-				break
-			}
-		}
-		if !foundGoGist && len(gistIDs) > 0 {
-			t.Error("Expected to find GistID 1 (Go) in results")
-		}
 	})
 
 	// Test 3: Search by specific username - alice

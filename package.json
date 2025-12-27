@@ -27,7 +27,7 @@
     "jdenticon": "^3.3.0",
     "katex": "^0.16.27",
     "marked": "^16.4.1",
-    "nodemon": "^3.1.10",
+    "nodemon": "^3.1.11",
     "pdfobject": "^2.3.1",
     "tailwindcss": "^4.1.18",
     "vite": "^7.3.0"

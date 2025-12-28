@@ -54,13 +54,13 @@ services:
     container_name: opengist
     restart: unless-stopped
     ports:
-      - "6157:6157" # HTTP port
-      - "2222:2222" # SSH port, can be removed if you don't use SSH
+      - "6157:6157" # HTTP порт
+      - "2222:2222" # SSH порт, той може да бъде премахнат, ако не използвате SSH
     volumes:
       - "$HOME/.opengist:/opengist"
 ```
 
-You can define which user/group should run the container and own the files by setting the `UID` and `GID` environment variables :
+Можете да определите кой потребител/група трябва да стартира контейнера и да притежава файловете, като зададете променливите на средата `UID` и `GID`:
 
 ```yml
 services:
@@ -73,7 +73,7 @@ services:
 
 ### Via binary
 
-Download the archive for your system from the release page [here](https://github.com/thomiceli/opengist/releases/latest), and extract it.
+Изтеглете архива за вашата система от страницата с изданията [тук](https://github.com/thomiceli/opengist/releases/latest), и го извлечете.
 
 ```shell
 # example for linux amd64

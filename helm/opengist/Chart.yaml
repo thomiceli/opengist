@@ -2,7 +2,7 @@ apiVersion: v2
 name: opengist
 description: Opengist Helm chart for Kubernetes
 type: application
-version: 0.4.0
+version: 0.5.0
 appVersion: 1.11.1
 home: https://opengist.io
 icon: https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg

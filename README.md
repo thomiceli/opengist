@@ -2,9 +2,9 @@
 
 <img height="108px" src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg" alt="Opengist" align="right" />
 
-Opengist is a **self-hosted** Pastebin **powered by Git**. All snippets are stored in a Git repository and can be
-read and/or modified using standard Git commands, or with the web interface.
-It is similar to [GitHub Gist](https://gist.github.com/), but open-source and could be self-hosted.
+Opengist е **self-hosted** Pastebin, **базиран на Git**. Всички снипети се съхраняват в Git хранилище и могат да бъдат
+четени и/или променяни чрез стандартни Git команди или през уеб интерфейса.
+Подобен е на [GitHub Gist](https://gist.github.com/), но е с отворен код и може да бъде self-hosted.
 
 [Home Page](https://opengist.io) • [Documentation](https://opengist.io/docs) • [Discord](https://discord.gg/9Pm3X5scZT) • [Demo](https://demo.opengist.io)
 
@@ -17,35 +17,35 @@ It is similar to [GitHub Gist](https://gist.github.com/), but open-source and co
 
 ## Features
 
-* Create public, unlisted or private snippets
-* [Init](/docs/usage/init-via-git.md) / Clone / Pull / Push snippets **via Git** over HTTP or SSH
-* Syntax highlighting ; markdown & CSV support
-* Search code in snippets; browse users snippets, likes and forks
-* Add topics to snippets
-* Embed snippets in other websites
-* Revisions history
-* Like / Fork snippets
-* Download raw files or as a ZIP archive
-* OAuth2 login with GitHub, GitLab, Gitea, and OpenID Connect
-* Restrict or unrestrict snippets visibility to anonymous users
-* Docker support / Helm Chart
+* Създаване на публични, скрити (unlisted) или частни снипети
+* [Init](/docs/usage/init-via-git.md) / Clone / Pull / Push на снипети **чрез Git** по HTTP или SSH
+* Syntax highlighting; поддръжка на markdown и CSV
+* Търсене в кода на снипети; разглеждане на снипети на потребители, харесвания и fork-ове
+* Добавяне на теми (topics) към снипети
+* Вграждане (embed) на снипети в други уебсайтове
+* История на ревизиите
+* Харесване (Like) / Fork на снипети
+* Изтегляне на raw файлове или като ZIP архив
+* OAuth2 вход с GitHub, GitLab, Gitea и OpenID Connect
+* Ограничаване или премахване на ограниченията за видимост на снипети за анонимни потребители
+* Docker поддръжка / Helm Chart
 * [More...](/docs/introduction.md#features)
 
 ## Quick start
 
 ### With Docker
 
-Docker [images](https://github.com/thomiceli/opengist/pkgs/container/opengist) are available for each release :
+Docker [images](https://github.com/thomiceli/opengist/pkgs/container/opengist) са налични за всяко издание:
 
 ```shell
 docker pull ghcr.io/thomiceli/opengist:1.11
 ```
 
-It can be used in a `docker-compose.yml` file :
+Може да се използва в `docker-compose.yml` файл:
 
-1. Create a `docker-compose.yml` file with the following content
-2. Run `docker compose up -d`
-3. Opengist is now running on port 6157, you can browse http://localhost:6157
+1. Създайте `docker-compose.yml` файл със следното съдържание
+2. Стартирайте `docker compose up -d`
+3. Opengist вече работи на порт 6157, можете да го отворите на http://localhost:6157
 
 ```yml
 services:
@@ -55,12 +55,12 @@ services:
     restart: unless-stopped
     ports:
       - "6157:6157" # HTTP порт
-      - "2222:2222" # SSH порт, той може да бъде премахнат, ако не използвате SSH
+      - "2222:2222" # SSH порт, може да бъде премахнат, ако не използвате SSH
     volumes:
       - "$HOME/.opengist:/opengist"
 ```
 
-Можете да определите кой потребител/група трябва да стартира контейнера и да притежава файловете, като зададете променливите на средата `UID` и `GID`:
+Можете да определите кой потребител/група да стартира контейнера и да притежава файловете, като зададете променливите на средата `UID` и `GID`:
 
 ```yml
 services:
@@ -73,7 +73,7 @@ services:
 
 ### Via binary
 
-Изтеглете архива за вашата система от страницата с изданията [тук](https://github.com/thomiceli/opengist/releases/latest), и го извлечете.
+Изтеглете архива за вашата система от страницата с изданията [тук](https://github.com/thomiceli/opengist/releases/latest) и го извлечете.
 
 ```shell
 # example for linux amd64
@@ -85,11 +85,11 @@ chmod +x opengist
 ./opengist # with or without `--config config.yml`
 ```
 
-Opengist is now running on port 6157, you can browse http://localhost:6157
+Opengist вече работи на порт 6157, можете да го отворите на http://localhost:6157
 
 ### From source
 
-Requirements: [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.23+), [Node.js](https://nodejs.org/en/download/) (16+), [Make](https://linux.die.net/man/1/make) (optional, but easier)
+Изисквания: [Git](https://git-scm.com/downloads) (2.28+), [Go](https://go.dev/doc/install) (1.23+), [Node.js](https://nodejs.org/en/download/) (16+), [Make](https://linux.die.net/man/1/make) (по избор, но улеснява процеса)
 
 ```shell
 git clone https://github.com/thomiceli/opengist
@@ -98,17 +98,16 @@ make
 ./opengist
 ```
 
-Opengist is now running on port 6157, you can browse http://localhost:6157
+Opengist вече работи на порт 6157, можете да го отворите на http://localhost:6157
 
 ---
 
-To create and run a development environment, see [run-development.md](/docs/contributing/development.md).
+За създаване и стартиране на development среда вижте [run-development.md](/docs/contributing/development.md).
 
 ## Documentation
 
-The documentation is available at [https://opengist.io/](https://opengist.io/) or in the [/docs](/docs) directory.
-
+Документацията е налична на [https://opengist.io/](https://opengist.io/) или в директорията [/docs](/docs).
 
 ## License
 
-Opengist is licensed under the [AGPL-3.0 license](/LICENSE).
+Opengist е лицензиран под [AGPL-3.0 license](/LICENSE).

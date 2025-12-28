@@ -18,7 +18,7 @@
     "@codemirror/state": "^6.5.3",
     "@codemirror/text": "^0.19.6",
     "@codemirror/view": "^6.39.7",
-    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
     "codemirror": "^6.0.2",

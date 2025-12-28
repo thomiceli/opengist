@@ -2,12 +2,13 @@ package gist
 
 import (
 	"errors"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func Fork(ctx *context.Context) error {
@@ -34,7 +35,7 @@ func Fork(ctx *context.Context) error {
 	}
 
 	newGist := &db.Gist{
-		Uuid:            strings.Replace(uuidGist.String(), "-", "", -1),
+		Uuid:            strings.ReplaceAll(uuidGist.String(), "-", ""),
 		Title:           gist.Title,
 		Preview:         gist.Preview,
 		PreviewFilename: gist.PreviewFilename,

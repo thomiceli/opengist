@@ -1,9 +1,28 @@
 {{ template "header" .}}
 {{ template "settings_header" .}}
-<div class="relative mx-auto max-w-[40rem] space-y-8">
+<div class="relative mx-auto max-w-160 space-y-8">
     <div class="w-full">
         <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300 mb-4">
+                {{ .locale.Tr "settings.style.theme" }}
+            </h2>
+            <form method="post" action="{{ $.c.ExternalUrl }}/settings/style" class="mr-2">
+                <div class="mt-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                    <div class="flex items-center">
+                        <input id="theme-light" value="light" name="theme" type="radio" {{ if .currentStyle }}{{ if eq .currentStyle.Theme "light" }}checked{{ end }}{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden not-checked:before:hidden">
+                        <label for="theme-light" class="ml-3 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "settings.style.theme-light" }}</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="theme-dark" value="dark" name="theme" type="radio" {{ if .currentStyle }}{{ if eq .currentStyle.Theme "dark" }}checked{{ end }}{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden not-checked:before:hidden">
+                        <label for="theme-dark" class="ml-3 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "settings.style.theme-dark" }}</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="theme-auto" value="auto" name="theme" type="radio" {{ if .currentStyle }}{{ if eq .currentStyle.Theme "auto" }}checked{{ else if not .currentStyle.Theme }}checked{{ end }}{{ else }}checked{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden not-checked:before:hidden">
+                        <label for="theme-auto" class="ml-3 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "settings.style.theme-auto" }}</label>
+                    </div>
+                </div>
+
+            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300 mt-8 mb-4">
                 {{ .locale.Tr "settings.style.gist-code" }}
             </h2>
             <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto mt-4">
@@ -70,15 +89,13 @@
                 </div>
             </div>
 
-            <div class="flex">
-                <form method="post" action="{{ $.c.ExternalUrl }}/settings/style" class="mr-2">
                     <div class="mt-6 space-y-6 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                         <div class="flex items-center">
-                            <input id="no-soft-wrap" value="false" name="softwrap" type="radio" {{ if .currentStyle }}{{ if not .currentStyle.SoftWrap }}checked{{ end }}{{ else }}checked{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden [&:not(:checked)]:before:hidden">
+                            <input id="no-soft-wrap" value="false" name="softwrap" type="radio" {{ if .currentStyle }}{{ if not .currentStyle.SoftWrap }}checked{{ end }}{{ else }}checked{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden not-checked:before:hidden">
                             <label for="no-soft-wrap" class="ml-3 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "settings.style.no-soft-wrap" }}</label>
                         </div>
                         <div class="flex items-center">
-                            <input id="soft-wrap" value="true" name="softwrap" type="radio" {{ if .currentStyle }}{{ if .currentStyle.SoftWrap }}checked{{ end }}{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden [&:not(:checked)]:before:hidden">
+                            <input id="soft-wrap" value="true" name="softwrap" type="radio" {{ if .currentStyle }}{{ if .currentStyle.SoftWrap }}checked{{ end }}{{ end }} class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden not-checked:before:hidden">
                             <label for="soft-wrap" class="ml-3 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "settings.style.soft-wrap" }}</label>
                         </div>
                     </div>
@@ -98,13 +115,12 @@
                     </div>
                     {{ .csrfHtml }}
                     <button type="submit" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "settings.style.save-style" }}</button>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 
-<script type="module" src="{{ asset "style_preferences.ts" }}"></script>
+<script type="module" src="{{ asset "ts/style_preferences.ts" }}"></script>
 
 {{ template "settings_footer" .}}
 {{ template "footer" .}}

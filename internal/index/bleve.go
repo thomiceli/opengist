@@ -2,6 +2,8 @@ package index
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
@@ -10,7 +12,6 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/rs/zerolog/log"
-	"strconv"
 )
 
 type BleveIndexer struct {
@@ -53,6 +54,8 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 
 	docMapping := bleve.NewDocumentMapping()
 	docMapping.AddFieldMappingsAt("GistID", bleve.NewNumericFieldMapping())
+	docMapping.AddFieldMappingsAt("UserID", bleve.NewNumericFieldMapping())
+	docMapping.AddFieldMappingsAt("Visibility", bleve.NewNumericFieldMapping())
 	docMapping.AddFieldMappingsAt("Content", bleve.NewTextFieldMapping())
 
 	mapping := bleve.NewIndexMapping()
@@ -74,6 +77,7 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 	}
 
 	docMapping.DefaultAnalyzer = "gistAnalyser"
+	mapping.DefaultMapping = docMapping
 
 	return bleve.New(i.path, mapping)
 }
@@ -105,39 +109,72 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 	var err error
 	var indexerQuery query.Query
 	if queryStr != "" {
-		contentQuery := bleve.NewMatchPhraseQuery(queryStr)
-		contentQuery.FieldVal = "Content"
+		// Use match query with fuzzy matching for more flexible content search
+		contentQuery := bleve.NewMatchQuery(queryStr)
+		contentQuery.SetField("Content")
+		contentQuery.SetFuzziness(2)
 		indexerQuery = contentQuery
 	} else {
 		contentQuery := bleve.NewMatchAllQuery()
 		indexerQuery = contentQuery
 	}
 
-	privateQuery := bleve.NewBoolFieldQuery(false)
-	privateQuery.SetField("Private")
+	// Visibility filtering: show public gists (Visibility=0) OR user's own gists
+	visibilityZero := float64(0)
+	truee := true
+	publicQuery := bleve.NewNumericRangeInclusiveQuery(&visibilityZero, &visibilityZero, &truee, &truee)
+	publicQuery.SetField("Visibility")
 
 	userIdMatch := float64(userId)
-	truee := true
 	userIdQuery := bleve.NewNumericRangeInclusiveQuery(&userIdMatch, &userIdMatch, &truee, &truee)
 	userIdQuery.SetField("UserID")
 
-	accessQuery := bleve.NewDisjunctionQuery(privateQuery, userIdQuery)
+	accessQuery := bleve.NewDisjunctionQuery(publicQuery, userIdQuery)
 	indexerQuery = bleve.NewConjunctionQuery(accessQuery, indexerQuery)
 
-	addQuery := func(field, value string) {
-		if value != "" && value != "." {
-			q := bleve.NewMatchPhraseQuery(value)
-			q.FieldVal = field
-			indexerQuery = bleve.NewConjunctionQuery(indexerQuery, q)
-		}
-	}
+	// Handle "All" field - search across all metadata fields with OR logic
+	if queryMetadata.All != "" {
+		allQueries := make([]query.Query, 0)
 
-	addQuery("Username", queryMetadata.Username)
-	addQuery("Title", queryMetadata.Title)
-	addQuery("Extensions", "."+queryMetadata.Extension)
-	addQuery("Filenames", queryMetadata.Filename)
-	addQuery("Languages", queryMetadata.Language)
-	addQuery("Topics", queryMetadata.Topic)
+		// Create match phrase queries for each field
+		fields := []struct {
+			field string
+			value string
+		}{
+			{"Username", queryMetadata.All},
+			{"Title", queryMetadata.All},
+			{"Extensions", "." + queryMetadata.All},
+			{"Filenames", queryMetadata.All},
+			{"Languages", queryMetadata.All},
+			{"Topics", queryMetadata.All},
+		}
+
+		for _, f := range fields {
+			q := bleve.NewMatchPhraseQuery(f.value)
+			q.FieldVal = f.field
+			allQueries = append(allQueries, q)
+		}
+
+		// Combine all field queries with OR (disjunction)
+		allDisjunction := bleve.NewDisjunctionQuery(allQueries...)
+		indexerQuery = bleve.NewConjunctionQuery(indexerQuery, allDisjunction)
+	} else {
+		// Original behavior: add each metadata field with AND logic
+		addQuery := func(field, value string) {
+			if value != "" && value != "." {
+				q := bleve.NewMatchPhraseQuery(value)
+				q.FieldVal = field
+				indexerQuery = bleve.NewConjunctionQuery(indexerQuery, q)
+			}
+		}
+
+		addQuery("Username", queryMetadata.Username)
+		addQuery("Title", queryMetadata.Title)
+		addQuery("Extensions", "."+queryMetadata.Extension)
+		addQuery("Filenames", queryMetadata.Filename)
+		addQuery("Languages", queryMetadata.Language)
+		addQuery("Topics", queryMetadata.Topic)
+	}
 
 	languageFacet := bleve.NewFacetRequest("Languages", 10)
 

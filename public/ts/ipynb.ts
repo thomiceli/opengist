@@ -1,6 +1,6 @@
 import hljs from 'highlight.js';
 import latex from './latex';
-import showdown from 'showdown';
+import { marked } from 'marked';
 
 class IPynb {
   private element: HTMLElement;
@@ -90,9 +90,8 @@ class IPynb {
 
     switch (cell.cell_type) {
       case 'markdown':
-        const converter = new showdown.Converter();
         cellElement.classList.add('markdown-cell');
-        cellElement.innerHTML = `<div class="markdown-body">${converter.makeHtml(latex.render(source))}</div>`;
+        cellElement.innerHTML = `<div class="markdown-body">${marked.parse(latex.render(source))}</div>`;
         break;
       case 'code':
         cellElement.classList.add('code-cell');

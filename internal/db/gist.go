@@ -395,7 +395,7 @@ func (gist *Gist) GetForks(currentUserId uint, offset int) ([]*Gist, error) {
 }
 
 func (gist *Gist) CanWrite(user *User) bool {
-	return !(user == nil) && (gist.UserID == user.ID)
+	return user != nil && gist.UserID == user.ID
 }
 
 func (gist *Gist) InitRepository() error {

@@ -1,0 +1,53 @@
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source "../../templates/pages/gist_embed.html";
+
+@theme {
+    /* Custom gray palette */
+    --color-gray-50: #EEEFF1;
+    --color-gray-100: #DEDFE3;
+    --color-gray-200: #BABCC5;
+    --color-gray-300: #999CA8;
+    --color-gray-400: #75798A;
+    --color-gray-500: #585B68;
+    --color-gray-600: #464853;
+    --color-gray-700: #363840;
+    --color-gray-800: #232429;
+    --color-gray-900: #131316;
+
+    /* Primary color palette */
+    --color-primary-50: #d6e1ff;
+    --color-primary-100: #d1dfff;
+    --color-primary-200: #b9d2fe;
+    --color-primary-300: #84b1fb;
+    --color-primary-400: #74a4f6;
+    --color-primary-500: #588fee;
+    --color-primary-600: #3c79e2;
+    --color-primary-700: #356fc0;
+    --color-primary-800: #2b5da3;
+    --color-primary-900: #1f4b8c;
+    --color-primary-950: #192b57;
+
+    /* Border width extension */
+    --border-width-1: 1px;
+}
+
+.opengist-embed {
+    @import "tailwindcss";
+    @layer base {
+        ul, ol {
+            list-style: revert;
+        }
+
+        button:not(:disabled),
+        [role="button"]:not(:disabled) {
+            cursor: pointer;
+        }
+
+        @import './ipynb.css';
+        @import "./style.css";
+    }
+}

@@ -1,10 +1,11 @@
 package auth
 
 import (
+	"net/url"
+
 	"github.com/thomiceli/opengist/internal/auth/totp"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"net/url"
 )
 
 func BeginTotp(ctx *context.Context) error {
@@ -25,7 +26,7 @@ func BeginTotp(ctx *context.Context) error {
 	sess := ctx.GetSession()
 	generatedSecret, _ := sess.Values["generatedSecret"].([]byte)
 
-	totpSecret, qrcode, err, generatedSecret := totp.GenerateQRCode(ctx.User.Username, ogUrl.Hostname(), generatedSecret)
+	totpSecret, qrcode, generatedSecret, err := totp.GenerateQRCode(ctx.User.Username, ogUrl.Hostname(), generatedSecret)
 	if err != nil {
 		return ctx.ErrorRes(500, "Cannot generate TOTP QR code", err)
 	}

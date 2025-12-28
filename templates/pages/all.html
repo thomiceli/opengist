@@ -5,7 +5,7 @@
             <div class="flex-auto">
                 {{if .fromUser}}
                 <div class="flex items-center">
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         {{ if not (shouldGenerateAvatar .fromUser .DisableGravatar) }}
                             <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="{{ .fromuser.Username }}'s Avatar">
                         {{ else }}

@@ -69,7 +69,7 @@ func (ctx *Context) ErrorRes(code int, message string, err error) error {
 }
 
 func (ctx *Context) RedirectTo(location string) error {
-	return ctx.Context.Redirect(302, config.C.ExternalUrl+location)
+	return ctx.Redirect(302, config.C.ExternalUrl+location)
 }
 
 func (ctx *Context) Html(template string) error {
@@ -145,5 +145,6 @@ func (ctx *Context) Tr(key string, args ...any) string {
 var ManifestEntries map[string]Asset
 
 type Asset struct {
-	File string `json:"file"`
+	File string   `json:"file"`
+	Css  []string `json:"css"`
 }

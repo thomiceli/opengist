@@ -97,8 +97,10 @@ func GistJson(ctx *context.Context) error {
 }
 
 func GistJs(ctx *context.Context) error {
+	theme := "light"
 	if _, exists := ctx.QueryParams()["dark"]; exists {
 		ctx.SetData("dark", "dark")
+		theme = "dark"
 	}
 
 	gist := ctx.GetData("gist").(*db.Gist)
@@ -117,16 +119,21 @@ func GistJs(ctx *context.Context) error {
 	}
 	_ = w.Flush()
 
-	cssUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["embed.css"].File)
+	cssUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["ts/embed.ts"].Css[0])
 	if err != nil {
 		return ctx.ErrorRes(500, "Error joining css url", err)
 	}
 
-	js, err := escapeJavaScriptContent(htmlbuf.String(), cssUrl)
+	themeUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["ts/"+theme+".ts"].Css[0])
+	if err != nil {
+		return ctx.ErrorRes(500, "Error joining theme url", err)
+	}
+
+	js, err := escapeJavaScriptContent(htmlbuf.String(), cssUrl, themeUrl)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error escaping JavaScript content", err)
 	}
-	ctx.Response().Header().Set("Content-Type", "application/javascript")
+	ctx.Response().Header().Set("Content-Type", "text/javascript")
 	return ctx.PlainText(200, js)
 }
 
@@ -141,7 +148,7 @@ func Preview(ctx *context.Context) error {
 	return ctx.PlainText(200, previewStr)
 }
 
-func escapeJavaScriptContent(htmlContent, cssUrl string) (string, error) {
+func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, error) {
 	jsonContent, err := gojson.Marshal(htmlContent)
 	if err != nil {
 		return "", fmt.Errorf("failed to encode content: %w", err)
@@ -152,11 +159,18 @@ func escapeJavaScriptContent(htmlContent, cssUrl string) (string, error) {
 		return "", fmt.Errorf("failed to encode CSS URL: %w", err)
 	}
 
+	jsonThemeUrl, err := gojson.Marshal(themeUrl)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode Theme URL: %w", err)
+	}
+
 	js := fmt.Sprintf(`
+        document.write('<link rel="stylesheet" href=%s>');
         document.write('<link rel="stylesheet" href=%s>');
         document.write(%s);
     `,
 		string(jsonCssUrl),
+		string(jsonThemeUrl),
 		string(jsonContent),
 	)
 

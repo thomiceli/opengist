@@ -2,6 +2,9 @@ package gist
 
 import (
 	"errors"
+	"slices"
+	"strings"
+
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/index"
@@ -9,8 +12,6 @@ import (
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"gorm.io/gorm"
-	"slices"
-	"strings"
 )
 
 func AllGists(ctx *context.Context) error {
@@ -54,18 +55,19 @@ func AllGists(ctx *context.Context) error {
 
 	mode := ctx.GetData("mode")
 	if fromUserStr == "" {
-		if mode == "search" {
+		switch mode {
+		case "search":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.search-results"))
 			ctx.SetData("searchQuery", ctx.QueryParam("q"))
 			pagination.Query = ctx.QueryParam("q")
 			urlPage = "search"
 			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order, "")
-		} else if mode == "topics" {
+		case "topics":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.topic-results-topic", ctx.Param("topic")))
 			ctx.SetData("topic", ctx.Param("topic"))
 			urlPage = "topics/" + ctx.Param("topic")
 			gists, err = db.GetAllGistsFromSearch(currentUserId, "", pageInt-1, sort, order, ctx.Param("topic"))
-		} else if mode == "all" {
+		case "all":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all"))
 			urlPage = "all"
 			gists, err = db.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
@@ -101,15 +103,16 @@ func AllGists(ctx *context.Context) error {
 			ctx.SetData("countForked", countForked)
 		}
 
-		if mode == "liked" {
+		switch mode {
+		case "liked":
 			urlPage = fromUserStr + "/liked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-liked-by", fromUserStr))
 			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
-		} else if mode == "forked" {
+		case "forked":
 			urlPage = fromUserStr + "/forked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-forked-by", fromUserStr))
 			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
-		} else if mode == "fromUser" {
+		case "fromUser":
 			urlPage = fromUserStr
 
 			if languages, err := db.GetGistLanguagesForUser(fromUser.ID, currentUserId); err != nil {
@@ -186,6 +189,7 @@ func Search(ctx *context.Context) error {
 		Extension: meta["extension"],
 		Language:  meta["language"],
 		Topic:     meta["topic"],
+		All:       meta["all"],
 	}, currentUserId, pageInt)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error searching gists", err)

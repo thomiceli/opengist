@@ -85,12 +85,12 @@ func (i *MeiliIndexer) Add(gist *Gist) error {
 		return errors.New("failed to add nil gist to index")
 	}
 	primaryKey := "GistID"
-	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.AddDocuments(gist, &primaryKey)
+	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.AddDocuments(gist, &meilisearch.DocumentOptions{PrimaryKey: &primaryKey})
 	return err
 }
 
 func (i *MeiliIndexer) Remove(gistID uint) error {
-	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.DeleteDocument(strconv.Itoa(int(gistID)))
+	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.DeleteDocument(strconv.Itoa(int(gistID)), nil)
 	return err
 }
 

@@ -4,6 +4,7 @@ RUN apk update && \
         apk add --no-cache \
         make \
         gcc \
+        git \
         musl-dev \
         libstdc++
 

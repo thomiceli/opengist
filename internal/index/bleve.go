@@ -3,7 +3,6 @@ package index
 import (
 	"errors"
 	"strconv"
-	// "fmt"
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"
@@ -12,7 +11,6 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/token/length"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
 	"github.com/blevesearch/bleve/v2/analysis/token/unicodenorm"
-	// "github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 
 	bleveUnicode "github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/search/query"
@@ -58,10 +56,10 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 	}
 
 	// ==========================================
-    // 1. 定义索引规则 (Mapping)
+    // 1️⃣ Define mapping rules
 	mapping := bleve.NewIndexMapping()
 
-	// 定义过滤器：去除长度小于 2 的无意义字符 (如 a, b, 1)
+	// Length Filter
 	if err = mapping.AddCustomTokenFilter("length_filter_min2", map[string]interface{}{
 		"type": length.Name,
 		"min":  2.0,
@@ -69,7 +67,7 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 		return nil, err
 	}
 
-	// 定义过滤器：Unicode 标准化
+	// Unicode Normalize Filter
 	if err = mapping.AddCustomTokenFilter("unicodeNormalize", map[string]any{
 		"type": unicodenorm.Name,
 		"form": unicodenorm.NFC,
@@ -77,27 +75,27 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 		return nil, err
 	}
 
-	// --- 分析器 1: 【拆分模式】 (用于搜局部) 效果: "UserLogin" -> "user", "login" ---
+	// --- Analyzer 1: Split mode (for partial search) Effect: "UserLogin" -> "user", "login" ---
 	if err = mapping.AddCustomAnalyzer("code_split", map[string]interface{}{
 		"type":      custom.Name,
 		"tokenizer": bleveUnicode.Name,
 		"token_filters": []string{
 			"unicodeNormalize",
-			camelcase.Name,       // 核心：拆分驼峰
-			lowercase.Name,       // 转小写
-			"length_filter_min2", // 去掉拆分后太短的
+			camelcase.Name,       // Core: split camel case
+			lowercase.Name,       // To lowercase
+			"length_filter_min2", // Remove too short tokens after splitting
 		},
 	}); err != nil {
 		return nil, err
 	}
 
-	// --- 分析器 2: 【精确模式】 (用于搜全词) 效果: "UserLogin" -> "userlogin" ---
+	// --- Analyzer 2: Exact mode (for full word search) Effect: "UserLogin" -> "userlogin" ---
 	if err = mapping.AddCustomAnalyzer("code_exact", map[string]interface{}{
 		"type":      custom.Name,
 		"tokenizer": bleveUnicode.Name,
 		"token_filters": []string{
 			"unicodeNormalize",
-			lowercase.Name,       // 只转小写，不拆分！
+			lowercase.Name,       // To lowercase only, no splitting!
 			"length_filter_min2",
 		},
 	}); err != nil {
@@ -105,12 +103,13 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 	}
 
 	docMapping := bleve.NewDocumentMapping()
-	// 数值字段
+
+	// Numeric fields
 	docMapping.AddFieldMappingsAt("GistID", bleve.NewNumericFieldMapping())
 	docMapping.AddFieldMappingsAt("UserID", bleve.NewNumericFieldMapping())
 	docMapping.AddFieldMappingsAt("Visibility", bleve.NewNumericFieldMapping())
 
-	// Metadata 字段 (标题、文件名等，通常适合拆分搜)
+	// Metadata fields (title, filenames, etc., usually suitable for split search)
 	metaMapping := bleve.NewTextFieldMapping()
 	metaMapping.Analyzer = "code_split"
 	docMapping.AddFieldMappingsAt("Username", metaMapping)
@@ -121,23 +120,23 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 	docMapping.AddFieldMappingsAt("Topics", metaMapping)
 
 
-	// --- 核心 Content 字段的双重映射 ---
+	// --- Core Content field dual mapping ---
     
-    // 映射 A: Content (精确匹配) 存: "userlogin"
+    // Mapping A: Content (exact match) store: "userlogin"
 	contentExact := bleve.NewTextFieldMapping()
-	contentExact.Name = "Content" // 字段名
+	contentExact.Name = "Content" // Field name
 	contentExact.Analyzer = "code_exact"
 	contentExact.Store = false
 	contentExact.IncludeTermVectors = true
 
-	// 映射 B: ContentSplit (拆分匹配) 存: "user", "login"
+	// Mapping B: ContentSplit (split match) store: "user", "login"
 	contentSplit := bleve.NewTextFieldMapping()
-	contentSplit.Name = "ContentSplit" // 虚拟字段名
+	contentSplit.Name = "ContentSplit" // Virtual field name
 	contentSplit.Analyzer = "code_split"
 	contentSplit.Store = false
 	contentSplit.IncludeTermVectors = true
 
-	// 将同一个 Content 内容，同时塞进这两个映射里
+	// Combine both mappings into the document mapping
 	docMapping.AddFieldMappingsAt("Content", contentExact, contentSplit)
 	mapping.DefaultMapping = docMapping
 	return bleve.New(i.path, mapping)
@@ -172,11 +171,11 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 	var indexerQuery query.Query
 	
 	// ==========================================
-    // 3. 搜索逻辑 (同时搜两个字段)
+    // Search Query Construction
 	if queryStr != "" {
 		queryStr = strings.ToLower(strings.TrimSpace(queryStr))
 
-        // 查 Content (精确): 权重高，匹配 "userlogin"
+        // Search Content (exact): higher weight, matches "userlogin"
 		qExact := bleve.NewMatchQuery(queryStr)
 		qExact.SetField("Content")
 		qExact.SetBoost(2.0)
@@ -186,7 +185,7 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 		qSplit.SetBoost(1.0)
 
 		qPrefix := bleve.NewPrefixQuery(queryStr)
-		qPrefix.SetField("Content") // 查精确字段
+		qPrefix.SetField("Content") // Search exact field
 		qPrefix.SetBoost(1.5)
 		
 		qWildcard := bleve.NewWildcardQuery("*" + queryStr + "*")
@@ -194,7 +193,7 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 		qWildcard.SetBoost(0.5)
 
 
-        // Metadata 查询
+        // Metadata queries
         titleQuery := bleve.NewMatchQuery(queryStr)
         titleQuery.SetField("Title")
         titleQuery.SetBoost(3.0)
@@ -212,7 +211,7 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
         filenameQuery.SetBoost(2.5)
 
 		queries := []query.Query{qExact, qSplit, titleQuery, usernameQuery, filenameQuery}
-		runes := []rune(queryStr)		// for chinese length
+		runes := []rune(queryStr)		// For Chinese length
 		qLen := len(runes)
 
 		// Protect for cpu loading when query is too short
@@ -225,24 +224,24 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 		if qLen >= 4 {
 			qWildcard := bleve.NewWildcardQuery("*" + queryStr + "*")
 			qWildcard.SetField("Content")
-			qWildcard.SetBoost(0.5) // 权重设低一点，作为补充
+			qWildcard.SetBoost(0.5)
 			queries = append(queries, qWildcard)
 			
-			// 给标题也加个通配符，标题短，搜起来快
 			titleWildcard := bleve.NewWildcardQuery("*" + queryStr + "*")
 			titleWildcard.SetField("Title")
 			titleWildcard.SetBoost(1.5)
 			queries = append(queries, titleWildcard)
 		}
 
-        // 只要满足任意一个即可 (Disjunction)
 		indexerQuery = bleve.NewDisjunctionQuery(queries...)
 	} else {
 		contentQuery := bleve.NewMatchAllQuery()
 		indexerQuery = contentQuery
 	}
 
-	// 权限过滤
+	
+	// ==========================================
+	// Permission filtering
 	visibilityZero := float64(0)
 	truee := true
 	publicQuery := bleve.NewNumericRangeInclusiveQuery(&visibilityZero, &visibilityZero, &truee, &truee)
@@ -255,7 +254,6 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 	accessQuery := bleve.NewDisjunctionQuery(publicQuery, userIdQuery)
 	indexerQuery = bleve.NewConjunctionQuery(accessQuery, indexerQuery)
 
-	// 处理 All 和其他 Metadata
 	if queryMetadata.All != "" {
 		allQueries := make([]query.Query, 0)
 		fields := []string{"Username", "Title", "Filenames", "Languages", "Topics"}
@@ -264,7 +262,6 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 			q.SetField(f)
 			allQueries = append(allQueries, q)
 		}
-        // Extension 单独处理
         extQ := bleve.NewMatchQuery("." + queryMetadata.All)
         extQ.SetField("Extensions")
         allQueries = append(allQueries, extQ)
@@ -294,37 +291,13 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 	s := bleve.NewSearchRequestOptions(indexerQuery, perPage+1, offset, false)
 	s.AddFacet("languageFacet", languageFacet)
     
-    // 返回这些字段以便调试
 	s.Fields = []string{"GistID", "Title", "Username", "Filenames"}
-	s.IncludeLocations = true // 开启位置匹配，方便调试
+	s.IncludeLocations = true 		// For debugging
 
 	results, err := (*atomicIndexer.Load()).(*BleveIndexer).index.Search(s)
 	if err != nil {
 		return nil, 0, nil, err
 	}
-
-	// ==========================================
-    // 4. Debug 打印
-    // if queryStr != "" {
-    //     fmt.Println("\n================= 🔍 DEBUG SEARCH ================= ")
-    //     fmt.Printf("关键词: [%s]  找到: %d 个\n", queryStr, results.Total)
-        
-    //     for i, hit := range results.Hits {
-    //         title := hit.Fields["Title"]
-    //         // 简单的打印，只显示匹配了哪些字段
-    //         var matchedFields []string
-    //         if hit.Locations != nil {
-    //             for field := range hit.Locations {
-    //                 matchedFields = append(matchedFields, field)
-    //             }
-    //         }
-            
-    //         fmt.Printf("#%d [ID:%s] Score:%.2f Title:%v 匹配字段:%v\n", 
-    //             i+1, hit.ID, hit.Score, title, matchedFields)
-    //     }
-    //     fmt.Println("===================================================\n")
-    // }
-
 
 	gistIds := make([]uint, 0, len(results.Hits))
 	for _, hit := range results.Hits {

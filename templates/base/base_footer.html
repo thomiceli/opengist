@@ -38,6 +38,66 @@
     </div>
 </div>
 </div>
+
+<script>
+(function() {
+    function applyHighlight() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let query = urlParams.get('q');
+        
+        if (!query || query.trim().length === 0) return;
+        query = query.trim();
+
+        const escapedText = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedText})`, 'gi');
+
+        function highlightNode(rootElement) {
+            if (rootElement.dataset.highlighted === query) return;
+            
+            const walker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, null, false);
+            const nodesToReplace = [];
+
+            while (walker.nextNode()) {
+                const node = walker.currentNode;
+                if (node.nodeValue.match(regex) && node.parentNode.className !== 'search-highlight') {
+                    nodesToReplace.push(node);
+                }
+            }
+
+            nodesToReplace.forEach(node => {
+                const span = document.createElement('span');
+                span.className = 'search-highlight';
+                span.innerHTML = node.nodeValue.replace(regex, '<mark style="background-color: #ffeb3b; color: #000; padding: 0; border-radius: 2px; font-weight: bold;">$1</mark>');
+                node.parentNode.replaceChild(span, node);
+            });
+            
+            rootElement.dataset.highlighted = query;
+        }
+
+        const selectors = [
+            '.chroma', 
+            '.gist-content', 
+            '.code-inner', 
+            'td.code', 
+            'pre code',
+            '.markdown-body'
+        ];
+        
+        const codeBlocks = document.querySelectorAll(selectors.join(','));
+        
+        if (codeBlocks.length > 0) {
+            // console.log('🔍 [Highlight] Found code blocks:', codeBlocks.length, 'Query:', query);
+            codeBlocks.forEach(block => highlightNode(block));
+        } else {
+            // console.log('⚠️ [Highlight] No code blocks found. Check CSS selectors.');
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", applyHighlight);
+    document.body.addEventListener('htmx:afterSettle', applyHighlight);
+})();
+</script>
+
 </body>
 </html>
 

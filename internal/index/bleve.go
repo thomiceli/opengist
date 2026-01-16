@@ -177,19 +177,31 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 		queryStr = strings.ToLower(strings.TrimSpace(queryStr))
 
         // 查 Content (精确): 权重高，匹配 "userlogin"
-		q1 := bleve.NewMatchQuery(queryStr)
-		q1.SetField("Content")
-		q1.SetBoost(1.5)		// ⚠️ 删掉了 Fuzziness=2，代码搜索不需要模糊
+		qExact := bleve.NewMatchQuery(queryStr)
+		qExact.SetField("Content")
+		qExact.SetBoost(2.0)
 
-        // 查 ContentSplit (拆分): 权重低，匹配 "login"
-		q2 := bleve.NewMatchQuery(queryStr)
-		q2.SetField("ContentSplit")
-		q2.SetBoost(1.0)
+		qSplit := bleve.NewMatchQuery(queryStr)
+		qSplit.SetField("ContentSplit")
+		qSplit.SetBoost(1.0)
+
+		qPrefix := bleve.NewPrefixQuery(queryStr)
+		qPrefix.SetField("Content") // 查精确字段
+		qPrefix.SetBoost(1.5)
+		
+		qWildcard := bleve.NewWildcardQuery("*" + queryStr + "*")
+		qWildcard.SetField("Content")
+		qWildcard.SetBoost(0.5)
+
 
         // Metadata 查询
         titleQuery := bleve.NewMatchQuery(queryStr)
         titleQuery.SetField("Title")
         titleQuery.SetBoost(3.0)
+
+		titleWildcard := bleve.NewWildcardQuery("*" + queryStr + "*")
+		titleWildcard.SetField("Title")
+		titleWildcard.SetBoost(1.5)
 
         usernameQuery := bleve.NewMatchQuery(queryStr)
         usernameQuery.SetField("Username")
@@ -199,14 +211,32 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
         filenameQuery.SetField("Filenames")
         filenameQuery.SetBoost(2.5)
 
+		queries := []query.Query{qExact, qSplit, titleQuery, usernameQuery, filenameQuery}
+		runes := []rune(queryStr)		// for chinese length
+		qLen := len(runes)
+
+		// Protect for cpu loading when query is too short
+		if qLen >= 2 {
+			qPrefix := bleve.NewPrefixQuery(queryStr)
+			qPrefix.SetField("Content")
+			qPrefix.SetBoost(1.5)
+			queries = append(queries, qPrefix)
+		}
+		if qLen >= 4 {
+			qWildcard := bleve.NewWildcardQuery("*" + queryStr + "*")
+			qWildcard.SetField("Content")
+			qWildcard.SetBoost(0.5) // 权重设低一点，作为补充
+			queries = append(queries, qWildcard)
+			
+			// 给标题也加个通配符，标题短，搜起来快
+			titleWildcard := bleve.NewWildcardQuery("*" + queryStr + "*")
+			titleWildcard.SetField("Title")
+			titleWildcard.SetBoost(1.5)
+			queries = append(queries, titleWildcard)
+		}
+
         // 只要满足任意一个即可 (Disjunction)
-		indexerQuery = bleve.NewDisjunctionQuery(
-            q1, 
-            q2, 
-            titleQuery,
-            usernameQuery, 
-            filenameQuery,
-        )
+		indexerQuery = bleve.NewDisjunctionQuery(queries...)
 	} else {
 		contentQuery := bleve.NewMatchAllQuery()
 		indexerQuery = contentQuery

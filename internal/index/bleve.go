@@ -3,7 +3,7 @@ package index
 import (
 	"errors"
 	"strconv"
-	"fmt"
+	// "fmt"
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"

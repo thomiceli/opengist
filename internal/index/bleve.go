@@ -275,25 +275,25 @@ func (i *BleveIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 
 	// ==========================================
     // 4. Debug 打印
-    if queryStr != "" {
-        fmt.Println("\n================= 🔍 DEBUG SEARCH ================= ")
-        fmt.Printf("关键词: [%s]  找到: %d 个\n", queryStr, results.Total)
+    // if queryStr != "" {
+    //     fmt.Println("\n================= 🔍 DEBUG SEARCH ================= ")
+    //     fmt.Printf("关键词: [%s]  找到: %d 个\n", queryStr, results.Total)
         
-        for i, hit := range results.Hits {
-            title := hit.Fields["Title"]
-            // 简单的打印，只显示匹配了哪些字段
-            var matchedFields []string
-            if hit.Locations != nil {
-                for field := range hit.Locations {
-                    matchedFields = append(matchedFields, field)
-                }
-            }
+    //     for i, hit := range results.Hits {
+    //         title := hit.Fields["Title"]
+    //         // 简单的打印，只显示匹配了哪些字段
+    //         var matchedFields []string
+    //         if hit.Locations != nil {
+    //             for field := range hit.Locations {
+    //                 matchedFields = append(matchedFields, field)
+    //             }
+    //         }
             
-            fmt.Printf("#%d [ID:%s] Score:%.2f Title:%v 匹配字段:%v\n", 
-                i+1, hit.ID, hit.Score, title, matchedFields)
-        }
-        fmt.Println("===================================================\n")
-    }
+    //         fmt.Printf("#%d [ID:%s] Score:%.2f Title:%v 匹配字段:%v\n", 
+    //             i+1, hit.ID, hit.Score, title, matchedFields)
+    //     }
+    //     fmt.Println("===================================================\n")
+    // }
 
 
 	gistIds := make([]uint, 0, len(results.Hits))

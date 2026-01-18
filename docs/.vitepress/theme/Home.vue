@@ -17,7 +17,7 @@ export default {
     <header class="hero">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <div class="mx-auto  lg:text-center">
-          <img class="rotating h-36 mx-auto my-8 " src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg" alt="" >
+          <img class="rotating h-36 mx-auto my-8 " src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/img/opengist.svg" alt="" >
           <a target="_blank" href="https://github.com/thomiceli/opengist/releases" class="inline-flex items-center rounded-full bg-indigo-100 hover:bg-indigo-200 px-4 py-1.5 text-lg font-medium text-indigo-700">
               <span class="pr-1">Released 1.11</span>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">

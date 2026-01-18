@@ -5,7 +5,7 @@ type: application
 version: 0.4.0
 appVersion: 1.11.1
 home: https://opengist.io
-icon: https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg
+icon: https://raw.githubusercontent.com/thomiceli/opengist/master/public/img/opengist.svg
 sources:
   - https://github.com/thomiceli/opengist
 dependencies:

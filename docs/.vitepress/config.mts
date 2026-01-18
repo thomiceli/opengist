@@ -11,7 +11,7 @@ export default defineConfig({
     },
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
-        logo: 'https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg',
+        logo: 'https://raw.githubusercontent.com/thomiceli/opengist/master/public/img/opengist.svg',
         logoLink: '/',
         nav: [
             { text: 'Demo', link: 'https://demo.opengist.io' },

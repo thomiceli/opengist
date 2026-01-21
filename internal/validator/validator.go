@@ -92,7 +92,7 @@ func validateGistTopics(fl validator.FieldLevel) bool {
 		if len(tag) > 50 {
 			return false
 		}
-		if !regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(tag) {
+		if !regexp.MustCompile(`^[\p{L}\p{N}-]+$`).MatchString(tag) {
 			return false
 		}
 	}

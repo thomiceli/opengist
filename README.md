@@ -2,8 +2,6 @@
 
 Opengist е self-hosted Pastebin, базиран на Git, с български превод. Всички снипети се съхраняват в Git хранилище и могат да се четат и/или променят чрез стандартни Git команди или уеб интерфейса. Подобен е на **GitHub Gist**, но е с отворен код и може да бъде self-hosted.
 
-**[Docker Image](https://github.com/fedya-dev/opengist/pkgs/container/opengist)** • **[Documentation](https://opengist.io/)**
-
 ---
 
 ## ✨ Функционалности

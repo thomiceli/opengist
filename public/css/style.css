@@ -92,7 +92,10 @@ code.hljs {
 
 .cm-editor {
     height: 337px;
-    max-height: 337px;
+    min-height: 100px;
+    max-height: none;
+    resize: vertical;
+    overflow: hidden;
 }
 
 .line-code.selected {

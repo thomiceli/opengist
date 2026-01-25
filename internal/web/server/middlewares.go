@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"syscall"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -91,12 +92,18 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 		data["error"] = err
 		if acceptJson {
 			if err := ctx.JSON(httpErr.Code, httpErr); err != nil {
+				if (errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET)) {
+					return
+				}
 				log.Fatal().Err(err).Send()
 			}
 			return
 		}
 
 		if err := ctx.Render(httpErr.Code, "error", data); err != nil {
+			if (errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET)) {
+				return
+			}
 			log.Fatal().Err(err).Send()
 		}
 		return
@@ -106,6 +113,9 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 	httpErr = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	data["error"] = httpErr
 	if err := ctx.Render(500, "error", data); err != nil {
+		if (errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET)) {
+			return
+		}
 		log.Fatal().Err(err).Send()
 	}
 }

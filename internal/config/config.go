@@ -79,7 +79,9 @@ type config struct {
 	OIDCGroupClaimName string `yaml:"oidc.group-claim-name" env:"OG_OIDC_GROUP_CLAIM_NAME"`
 	OIDCAdminGroup     string `yaml:"oidc.admin-group" env:"OG_OIDC_ADMIN_GROUP"`
 
-	MetricsEnabled bool `yaml:"metrics.enabled" env:"OG_METRICS_ENABLED"`
+	MetricsEnabled bool   `yaml:"metrics.enabled" env:"OG_METRICS_ENABLED"`
+	MetricsHost    string `yaml:"metrics.host" env:"OG_METRICS_HOST"`
+	MetricsPort    string `yaml:"metrics.port" env:"OG_METRICS_PORT"`
 
 	LDAPUrl             string `yaml:"ldap.url" env:"OG_LDAP_URL"`
 	LDAPBindDn          string `yaml:"ldap.bind-dn" env:"OG_LDAP_BIND_DN"`
@@ -128,6 +130,8 @@ func configWithDefaults() (*config, error) {
 	c.GiteaName = "Gitea"
 
 	c.MetricsEnabled = false
+	c.MetricsHost = "0.0.0.0"
+	c.MetricsPort = "6158"
 
 	return c, nil
 }

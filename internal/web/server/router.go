@@ -17,7 +17,6 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers/gist"
 	"github.com/thomiceli/opengist/internal/web/handlers/git"
 	"github.com/thomiceli/opengist/internal/web/handlers/health"
-	"github.com/thomiceli/opengist/internal/web/handlers/metrics"
 	"github.com/thomiceli/opengist/internal/web/handlers/settings"
 	"github.com/thomiceli/opengist/public"
 )
@@ -33,10 +32,6 @@ func (s *Server) registerRoutes() {
 		r.DELETE("/upload/:uuid", gist.DeleteUpload, logged)
 
 		r.GET("/healthcheck", health.Healthcheck)
-
-		if config.C.MetricsEnabled {
-			r.GET("/metrics", metrics.Metrics)
-		}
 
 		r.GET("/register", auth.Register)
 		r.POST("/register", auth.ProcessRegister)

@@ -67,6 +67,11 @@ spec:
             - name: http
               containerPort: {{ .Values.service.http.port }}
               protocol: TCP
+          {{- if index .Values.config "metrics.enabled" }}
+            - name: metrics
+              containerPort: {{ .Values.service.metrics.port }}
+              protocol: TCP
+          {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             {{- toYaml (omit .Values.livenessProbe "enabled") | nindent 12 }}

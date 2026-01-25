@@ -31,7 +31,7 @@ RUN apk add --no-cache \
     gnupg \
     xz
 
-EXPOSE 6157 2222 16157
+EXPOSE 6157 6158 2222 16157
 
 RUN git config --global --add safe.directory /opengist
 RUN make install
@@ -64,7 +64,7 @@ COPY --from=build --chown=opengist:opengist /opengist/config.yml /config.yml
 COPY --from=build --chown=opengist:opengist /opengist/opengist .
 COPY --from=build --chown=opengist:opengist /opengist/docker ./docker
 
-EXPOSE 6157 2222
+EXPOSE 6157 6158 2222
 VOLUME /opengist
 HEALTHCHECK --interval=60s --timeout=30s --start-period=15s --retries=3 CMD curl -f http://localhost:6157/healthcheck || exit 1
 ENTRYPOINT ["./docker/entrypoint.sh"]

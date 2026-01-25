@@ -140,6 +140,11 @@ spec:
               containerPort: {{ .Values.service.ssh.port }}
               protocol: TCP
           {{- end }}
+          {{- if index .Values.config "metrics.enabled" }}
+            - name: metrics
+              containerPort: {{ .Values.service.metrics.port }}
+              protocol: TCP
+          {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             {{- toYaml (omit .Values.livenessProbe "enabled") | nindent 12 }}
@@ -172,7 +177,7 @@ spec:
             defaultMode: 511
         - name: config-volume
           emptyDir: {}
-        {{- /* 
+        {{- /*
         ========================================
         VOLUME MOUNTING DECISION TREE
         ========================================
@@ -216,7 +221,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- /* 
+  {{- /*
   ========================================
   VOLUMECLAIMTEMPLATES DECISION TREE
   ========================================
@@ -224,14 +229,14 @@ spec:
     - persistence.enabled=true
     - persistence.existingClaim is empty
     - persistence.mode=perReplica (default)
-  
+
   This creates one PVC per replica (RWO typically).
-  
+
   NOT used when:
     - existingClaim is set (PVC already exists, referenced in volumes above)
     - mode=shared (standalone PVC created via pvc-shared.yaml)
     - persistence disabled (emptyDir used)
-  
+
   WARNING: perReplica + replicaCount>1 causes data divergence. Use shared mode for multi-replica.
   */}}
   {{- if and .Values.persistence.enabled (ne (default "" .Values.persistence.existingClaim) "") }}

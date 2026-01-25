@@ -1,15 +1,15 @@
 package test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/thomiceli/opengist/internal/db"
 	"io"
-	"net/http"
-	"os"
+	"net/http/httptest"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/thomiceli/opengist/internal/db"
 )
 
 var (
@@ -41,22 +41,12 @@ var (
 // - Total number of SSH keys
 //
 // The test follows these steps:
-// 1. Enables metrics via environment variable
-// 2. Sets up test environment
-// 3. Registers and logs in an admin user
-// 4. Creates a gist and adds an SSH key
-// 5. Queries the metrics endpoint
-// 6. Verifies the reported metrics match expected values
-//
-// Environment variables:
-//   - OG_METRICS_ENABLED: Set to "true" for this test
+// 1. Sets up test environment
+// 2. Registers and logs in an admin user
+// 3. Creates a gist and adds an SSH key
+// 4. Creates a metrics server and queries the /metrics endpoint
+// 5. Verifies the reported metrics match expected values
 func TestMetrics(t *testing.T) {
-	originalValue := os.Getenv("OG_METRICS_ENABLED")
-
-	os.Setenv("OG_METRICS_ENABLED", "true")
-
-	defer os.Setenv("OG_METRICS_ENABLED", originalValue)
-
 	s := Setup(t)
 	defer Teardown(t, s)
 
@@ -72,12 +62,16 @@ func TestMetrics(t *testing.T) {
 	err = s.Request("POST", "/settings/ssh-keys", SSHKey, 302)
 	require.NoError(t, err)
 
-	var metricsRes http.Response
-	err = s.Request("GET", "/metrics", nil, 200, &metricsRes)
-	require.NoError(t, err)
+	// Create a metrics server and query it
+	metricsServer := NewTestMetricsServer()
 
-	body, err := io.ReadAll(metricsRes.Body)
-	defer metricsRes.Body.Close()
+	req := httptest.NewRequest("GET", "/metrics", nil)
+	w := httptest.NewRecorder()
+	metricsServer.ServeHTTP(w, req)
+
+	require.Equal(t, 200, w.Code)
+
+	body, err := io.ReadAll(w.Body)
 	require.NoError(t, err)
 
 	lines := strings.Split(string(body), "\n")

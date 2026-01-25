@@ -22,6 +22,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/web/handlers/metrics"
 	"github.com/thomiceli/opengist/internal/web/server"
 )
 
@@ -239,4 +240,8 @@ type settingSet struct {
 type invitationAdmin struct {
 	nbMax         string `form:"nbMax"`
 	expiredAtUnix string `form:"expiredAtUnix"`
+}
+
+func NewTestMetricsServer() *metrics.Server {
+	return metrics.NewServer()
 }

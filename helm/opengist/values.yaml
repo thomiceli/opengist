@@ -102,8 +102,7 @@ service:
     loadBalancerSourceRanges: []
     externalTrafficPolicy:
 
-  # A metrics K8S service on port 6158 is created when the following Opengist config is set to true
-  # metrics.enabled: true
+  # A metrics K8S service on port 6158 is created when the Opengist config metrics.enabled: true
   metrics:
     type: ClusterIP
     clusterIP:
@@ -115,9 +114,10 @@ service:
     # A service monitor can be used to work with your Prometheus setup.
     serviceMonitor:
       enabled: true
+      labels: {}
+      #  release: kube-prom-stack
       interval:
       scrapeTimeout:
-      labels: {}
       annotations: {}
       relabelings: []
       metricRelabelings: []

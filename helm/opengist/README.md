@@ -63,7 +63,7 @@ config:
 
 This will:
 1. Start a metrics server on port 6158 inside the container
-2. Create a Kubernetes Service exposing the metrics port (if `service.metrics.enabled: true`)
+2. Create a Kubernetes Service exposing the metrics ports
 
 ### Available Metrics
 

@@ -16,7 +16,7 @@ const (
 type AccessToken struct {
 	ID         uint `gorm:"primaryKey"`
 	Name       string
-	TokenHash  string `gorm:"uniqueIndex"` // SHA-256 hash of the token
+	TokenHash  string `gorm:"uniqueIndex,size:64"` // SHA-256 hash of the token
 	CreatedAt  int64
 	ExpiresAt  int64 // 0 means no expiration
 	LastUsedAt int64

@@ -51,6 +51,10 @@ func (s *TestServer) stop() {
 }
 
 func (s *TestServer) Request(method, uri string, data interface{}, expectedCode int, responsePtr ...*http.Response) error {
+	return s.RequestWithHeaders(method, uri, data, expectedCode, nil, responsePtr...)
+}
+
+func (s *TestServer) RequestWithHeaders(method, uri string, data interface{}, expectedCode int, headers map[string]string, responsePtr ...*http.Response) error {
 	var bodyReader io.Reader
 	if method == http.MethodPost || method == http.MethodPut {
 		values := structToURLValues(data)
@@ -62,6 +66,10 @@ func (s *TestServer) Request(method, uri string, data interface{}, expectedCode 
 
 	if method == http.MethodPost || method == http.MethodPut {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
+
+	for key, value := range headers {
+		req.Header.Set(key, value)
 	}
 
 	if s.sessionCookie != "" {

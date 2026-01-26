@@ -157,7 +157,7 @@ settings.password-label-title: Password
 settings.header.account: Account
 settings.header.mfa: MFA
 settings.header.ssh: SSH
-settings.header.tokens: Tokens
+settings.header.tokens: Access tokens
 settings.header.style: Style
 settings.style.gist-code: Gist code
 settings.style.no-soft-wrap: No Soft Wrap

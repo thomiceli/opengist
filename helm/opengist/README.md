@@ -6,6 +6,7 @@ Opengist Helm chart for Kubernetes.
 
 * [Install](#install)
 * [Configuration](#configuration)
+* [Metrics & Monitoring](#metrics--monitoring)
 * [Dependencies](#dependencies)
   * [Meilisearch Indexer](#meilisearch-indexer)
   * [PostgreSQL Database](#postgresql-database)
@@ -45,6 +46,76 @@ If defined, this existing secret will be used instead of creating a new one.
 
 ```yaml
 configExistingSecret: <name of the secret>
+```
+
+## Metrics & Monitoring
+
+Opengist exposes Prometheus metrics on a separate port (default: `6158`). The metrics server runs independently from the main HTTP server for security.
+
+### Enabling Metrics
+
+To enable metrics, set `metrics.enabled: true` in your Opengist config:
+
+```yaml
+config:
+  metrics.enabled: true
+```
+
+This will:
+1. Start a metrics server on port 6158 inside the container
+2. Create a Kubernetes Service exposing the metrics ports
+
+### Available Metrics
+
+| Metric Name | Type | Description |
+|-------------|------|-------------|
+| `opengist_users_total` | Gauge | Total number of registered users |
+| `opengist_gists_total` | Gauge | Total number of gists |
+| `opengist_ssh_keys_total` | Gauge | Total number of SSH keys |
+| `opengist_request_duration_seconds_*` | Histogram | HTTP request duration metrics |
+
+### ServiceMonitor for Prometheus Operator
+
+If you're using [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator), you can enable automatic service discovery with a ServiceMonitor:
+
+```yaml
+config:
+  metrics.enabled: true
+
+service:
+  metrics:
+    serviceMonitor:
+      enabled: true
+      labels:
+        release: prometheus  # match your Prometheus serviceMonitorSelector
+```
+
+### Manual Prometheus Configuration
+
+If you're not using Prometheus Operator, you can configure Prometheus to scrape the metrics endpoint directly:
+
+```yaml
+scrape_configs:
+  - job_name: 'opengist'
+    static_configs:
+      - targets: ['opengist-metrics:6158']
+    metrics_path: /metrics
+```
+
+Or use Kubernetes service discovery:
+
+```yaml
+scrape_configs:
+  - job_name: 'opengist'
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_component]
+        regex: metrics
+        action: keep
+      - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+        regex: opengist
+        action: keep
 ```
 
 ## Dependencies

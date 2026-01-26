@@ -55,8 +55,14 @@ http.git-enabled: true
 # File permissions for Unix socket (octal format). Default: 0666
 unix-socket-permissions: 0666
 
-# Enable or disable the metrics endpoint (either `true` or `false`). Default: false
+# Enable or disable the Prometheus metrics server (either `true` or `false`). Default: false
 metrics.enabled: false
+
+# The host on which the metrics server should bind. Default: 0.0.0.0
+metrics.host: 0.0.0.0
+
+# The port on which the metrics server should listen. Default: 6158
+metrics.port: 6158
 
 # SSH built-in server configuration
 # Note: it is not using the SSH daemon from your machine (yet)

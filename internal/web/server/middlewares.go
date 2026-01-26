@@ -37,8 +37,7 @@ func (s *Server) registerMiddlewares() {
 	s.echo.Use(Middleware(dataInit).toEcho())
 	s.echo.Use(Middleware(locale).toEcho())
 	if config.C.MetricsEnabled {
-		p := echoprometheus.NewMiddleware("opengist")
-		s.echo.Use(p)
+		s.echo.Use(echoprometheus.NewMiddleware("opengist"))
 	}
 
 	s.echo.Pre(middleware.MethodOverrideWithConfig(middleware.MethodOverrideConfig{

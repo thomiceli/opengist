@@ -9,6 +9,7 @@ import (
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/ssh"
+	"github.com/thomiceli/opengist/internal/web/handlers/metrics"
 	"github.com/thomiceli/opengist/internal/web/server"
 	"github.com/urfave/cli/v2"
 	"os"
@@ -36,12 +37,18 @@ var CmdStart = cli.Command{
 
 		Initialize(ctx)
 
-		server := server.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions"), false)
-		go server.Start()
+		httpServer := server.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions"), false)
+		go httpServer.Start()
 		go ssh.Start()
 
+		var metricsServer *metrics.Server
+		if config.C.MetricsEnabled {
+			metricsServer = metrics.NewServer()
+			go metricsServer.Start()
+		}
+
 		<-stopCtx.Done()
-		shutdown(server)
+		shutdown(httpServer, metricsServer)
 		return nil
 	},
 }
@@ -131,7 +138,7 @@ func Initialize(ctx *cli.Context) {
 	}
 }
 
-func shutdown(server *server.Server) {
+func shutdown(httpServer *server.Server, metricsServer *metrics.Server) {
 	log.Info().Msg("Shutting down database...")
 	if err := db.Close(); err != nil {
 		log.Error().Err(err).Msg("Failed to close database")
@@ -142,7 +149,11 @@ func shutdown(server *server.Server) {
 		index.Close()
 	}
 
-	server.Stop()
+	httpServer.Stop()
+
+	if metricsServer != nil {
+		metricsServer.Stop()
+	}
 
 	log.Info().Msg("Shutdown complete")
 }

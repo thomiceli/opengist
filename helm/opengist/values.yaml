@@ -8,6 +8,7 @@ namespace: ""
 config:
   log-level: "warn"
   log-output: "stdout"
+  metrics.enabled: false
 
 ## If defined, the existing secret will be used instead of creating a new one.
 ## The secret must contain a key named `config.yml` with the YAML configuration.
@@ -100,6 +101,26 @@ service:
     annotations: {}
     loadBalancerSourceRanges: []
     externalTrafficPolicy:
+
+  # A metrics K8S service on port 6158 is created when the Opengist config metrics.enabled: true
+  metrics:
+    type: ClusterIP
+    clusterIP:
+    port: 6158
+    nodePort:
+    labels: {}
+    annotations: {}
+
+    # A service monitor can be used to work with your Prometheus setup.
+    serviceMonitor:
+      enabled: true
+      labels: {}
+      #  release: kube-prom-stack
+      interval:
+      scrapeTimeout:
+      annotations: {}
+      relabelings: []
+      metricRelabelings: []
 
 ## HTTP Ingress for Opengist
 ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/

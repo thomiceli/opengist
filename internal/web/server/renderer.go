@@ -192,6 +192,9 @@ func (s *Server) setFuncMap() {
 		"humanDate": func(t int64) string {
 			return time.Unix(t, 0).Format("02/01/2006 15:04")
 		},
+		"humanDateOnly": func(t int64) string {
+			return time.Unix(t, 0).Format("02/01/2006")
+		},
 		"mainTheme": func(theme *db.UserStyleDTO) string {
 			if theme == nil {
 				return "auto"

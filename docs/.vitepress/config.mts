@@ -55,6 +55,7 @@ export default defineConfig({
                 text: 'Usage', base: '/docs/usage', items: [
                     {text: 'Init via Git', link: '/init-via-git'},
                     {text: 'Embed Gist', link: '/embed'},
+                    {text: 'Access Tokens', link: '/access-tokens'},
                     {text: 'Gist as JSON', link: '/gist-json'},
                     {text: 'Import Gists from Github', link: '/import-from-github-gist'},
                     {text: 'Git push options', link: '/git-push-options'},

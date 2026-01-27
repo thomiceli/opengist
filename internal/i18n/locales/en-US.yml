@@ -157,6 +157,7 @@ settings.password-label-title: Password
 settings.header.account: Account
 settings.header.mfa: MFA
 settings.header.ssh: SSH
+settings.header.tokens: Access tokens
 settings.header.style: Style
 settings.style.gist-code: Gist code
 settings.style.no-soft-wrap: No Soft Wrap
@@ -169,6 +170,26 @@ settings.style.theme: Theme
 settings.style.theme-light: Light
 settings.style.theme-dark: Dark
 settings.style.theme-auto: Auto
+settings.create-token: Create access token
+settings.create-token-help: Access tokens can be used to access the API
+settings.token-name: Name
+settings.token-permissions: Permissions
+settings.token-gist-permission: Gists
+settings.token-permission-none: No access
+settings.token-permission-read: Read
+settings.token-permission-read-write: Read & Write
+settings.delete-token: Delete
+settings.delete-token-confirm: Confirm deletion of access token
+settings.token-created-at: Created
+settings.token-never-used: Never used
+settings.token-last-used: Last used
+settings.token-expiration: Expiration
+settings.token-expiration-help: Leave empty for no expiration
+settings.token-expires-at: Expires
+settings.token-no-expiration: No expiration
+settings.token-expired: expired
+settings.token-created: Token created, make sure to copy it now, you won't be able to see it again!
+settings.token-deleted: Access token deleted
 
 auth.signup-disabled: Administrator has disabled signing up
 auth.login: Login

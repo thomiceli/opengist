@@ -326,6 +326,40 @@ func loadSettings(ctx *context.Context) error {
 	return nil
 }
 
+// getUserByToken checks the Authorization header for token-based auth.
+// Expects format: Authorization: Token <token>
+// Returns the user if the token is valid and has gist read permission, nil otherwise.
+func getUserByToken(ctx *context.Context) *db.User {
+	authHeader := ctx.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return nil
+	}
+
+	if !strings.HasPrefix(authHeader, "Token ") {
+		return nil
+	}
+
+	plainToken := strings.TrimPrefix(authHeader, "Token ")
+
+	accessToken, err := db.GetAccessTokenByToken(plainToken)
+	if err != nil {
+		return nil
+	}
+
+	if accessToken.IsExpired() {
+		return nil
+	}
+
+	if !accessToken.HasGistReadPermission() {
+		return nil
+	}
+
+	// Update last used timestamp
+	_ = accessToken.UpdateLastUsed()
+
+	return &accessToken.User
+}
+
 func gistInit(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		currUser := ctx.User
@@ -352,7 +386,12 @@ func gistInit(next Handler) Handler {
 
 		if gist.Private == db.PrivateVisibility {
 			if currUser == nil || currUser.ID != gist.UserID {
-				return ctx.NotFound("Gist not found")
+				// Check for token-based auth via Authorization header
+				if tokenUser := getUserByToken(ctx); tokenUser != nil && tokenUser.ID == gist.UserID {
+					// Token is valid and belongs to gist owner, allow access
+				} else {
+					return ctx.NotFound("Gist not found")
+				}
 			}
 		}
 

@@ -25,6 +25,7 @@ type User struct {
 	SSHKeys             []SSHKey             `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	Liked               []Gist               `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	WebAuthnCredentials []WebAuthnCredential `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
+	AccessTokens        []AccessToken        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 }
 
 func (user *User) BeforeDelete(tx *gorm.DB) error {
@@ -68,6 +69,11 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 	}
 
 	err = tx.Where("user_id = ?", user.ID).Delete(&WebAuthnCredential{}).Error
+	if err != nil {
+		return err
+	}
+
+	err = tx.Where("user_id = ?", user.ID).Delete(&AccessToken{}).Error
 	if err != nil {
 		return err
 	}

@@ -51,6 +51,10 @@ func (s *TestServer) stop() {
 }
 
 func (s *TestServer) Request(method, uri string, data interface{}, expectedCode int, responsePtr ...*http.Response) error {
+	return s.RequestWithHeaders(method, uri, data, expectedCode, nil, responsePtr...)
+}
+
+func (s *TestServer) RequestWithHeaders(method, uri string, data interface{}, expectedCode int, headers map[string]string, responsePtr ...*http.Response) error {
 	var bodyReader io.Reader
 	if method == http.MethodPost || method == http.MethodPut {
 		values := structToURLValues(data)
@@ -62,6 +66,10 @@ func (s *TestServer) Request(method, uri string, data interface{}, expectedCode 
 
 	if method == http.MethodPost || method == http.MethodPut {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
+
+	for key, value := range headers {
+		req.Header.Set(key, value)
 	}
 
 	if s.sessionCookie != "" {
@@ -120,6 +128,9 @@ func structToURLValues(s interface{}) url.Values {
 			if field.Type.Kind() == reflect.Int {
 				fieldValue := rValue.Field(i).Int()
 				v.Add(tag, strconv.FormatInt(fieldValue, 10))
+			} else if field.Type.Kind() == reflect.Uint {
+				fieldValue := rValue.Field(i).Uint()
+				v.Add(tag, strconv.FormatUint(fieldValue, 10))
 			} else if field.Type.Kind() == reflect.Slice {
 				fieldValue := rValue.Field(i).Interface().([]string)
 				for _, va := range fieldValue {

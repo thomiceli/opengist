@@ -18,13 +18,13 @@ func TestAccessTokensCRUD(t *testing.T) {
 
 	// Access tokens page requires login
 	s.sessionCookie = ""
-	err := s.Request("GET", "/settings/tokens", nil, 302)
+	err := s.Request("GET", "/settings/access-tokens", nil, 302)
 	require.NoError(t, err)
 
 	login(t, s, user1)
 
 	// Access tokens page
-	err = s.Request("GET", "/settings/tokens", nil, 200)
+	err = s.Request("GET", "/settings/access-tokens", nil, 200)
 	require.NoError(t, err)
 
 	// Create a token with read permission
@@ -32,7 +32,7 @@ func TestAccessTokensCRUD(t *testing.T) {
 		Name:      "test-token",
 		ScopeGist: db.ReadPermission,
 	}
-	err = s.Request("POST", "/settings/tokens", tokenDTO, 302)
+	err = s.Request("POST", "/settings/access-tokens", tokenDTO, 302)
 	require.NoError(t, err)
 
 	// Verify token was created in database
@@ -50,7 +50,7 @@ func TestAccessTokensCRUD(t *testing.T) {
 		ScopeGist: db.ReadWritePermission,
 		ExpiresAt: tomorrow,
 	}
-	err = s.Request("POST", "/settings/tokens", tokenDTO2, 302)
+	err = s.Request("POST", "/settings/access-tokens", tokenDTO2, 302)
 	require.NoError(t, err)
 
 	tokens, err = db.GetAccessTokensByUserID(1)
@@ -58,7 +58,7 @@ func TestAccessTokensCRUD(t *testing.T) {
 	require.Len(t, tokens, 2)
 
 	// Delete the first token
-	err = s.Request("DELETE", "/settings/tokens/1", nil, 302)
+	err = s.Request("DELETE", "/settings/access-tokens/1", nil, 302)
 	require.NoError(t, err)
 
 	tokens, err = db.GetAccessTokensByUserID(1)

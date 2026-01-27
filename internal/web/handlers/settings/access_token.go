@@ -33,7 +33,7 @@ func AccessTokensProcess(ctx *context.Context) error {
 
 	if err := ctx.Validate(dto); err != nil {
 		ctx.AddFlash(validator.ValidationMessages(&err, ctx.GetData("locale").(*i18n.Locale)), "error")
-		return ctx.RedirectTo("/settings/tokens")
+		return ctx.RedirectTo("/settings/access-tokens")
 	}
 
 	token := dto.ToAccessToken()
@@ -51,19 +51,19 @@ func AccessTokensProcess(ctx *context.Context) error {
 	// Show the token once to the user
 	ctx.AddFlash(ctx.Tr("settings.token-created"), "success")
 	ctx.AddFlash(plainToken, "success")
-	return ctx.RedirectTo("/settings/tokens")
+	return ctx.RedirectTo("/settings/access-tokens")
 }
 
 func AccessTokensDelete(ctx *context.Context) error {
 	user := ctx.User
 	tokenID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		return ctx.RedirectTo("/settings/tokens")
+		return ctx.RedirectTo("/settings/access-tokens")
 	}
 
 	token, err := db.GetAccessTokenByID(uint(tokenID))
 	if err != nil || token.UserID != user.ID {
-		return ctx.RedirectTo("/settings/tokens")
+		return ctx.RedirectTo("/settings/access-tokens")
 	}
 
 	if err := token.Delete(); err != nil {
@@ -71,5 +71,5 @@ func AccessTokensDelete(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("settings.token-deleted"), "success")
-	return ctx.RedirectTo("/settings/tokens")
+	return ctx.RedirectTo("/settings/access-tokens")
 }

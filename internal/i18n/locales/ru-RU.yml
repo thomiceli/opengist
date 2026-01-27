@@ -185,17 +185,17 @@ gist.list.all-from: 'Все фрагменты от %s'
 gist.search.found: 'фрагментов найдено'
 gist.search.no-results: 'Не найден ни один фрагмент'
 gist.search.help.user: 'фрагментов создано пользователем'
-gist.search.help.title: ''
-gist.search.help.filename: ''
-gist.search.help.extension: ''
-gist.search.help.language: ''
-gist.forks.for: ''
-gist.likes.for: ''
-gist.revision-of: ''
-settings.link-gitlab-account: ''
-settings.unlink-gitlab-account: ''
-settings.change-username: ''
-settings.create-password: ''
+gist.search.help.title: 'фрагментов с указанным заголовком'
+gist.search.help.filename: 'фрагменты содержащие файлы с указанным именем'
+gist.search.help.extension: 'фрагменты, содержащие файлы с указанным расширением'
+gist.search.help.language: 'фрагменты, содержащие файлы с указанным языком'
+gist.forks.for: 'Форки фрагмента %s'
+gist.likes.for: 'Лайки фрагмента %s'
+gist.revision-of: 'Ревизия фрагмента %s'
+settings.link-gitlab-account: 'Привязать учётную запись Gitlab'
+settings.unlink-gitlab-account: 'Отвязать учётную запись GitHub'
+settings.change-username: 'Сменить имя пользователя'
+settings.create-password: 'Создать пароль'
 settings.create-password-help: ''
 settings.change-password: ''
 settings.change-password-help: ''
@@ -257,3 +257,24 @@ validation.should-only-contain-alphanumeric-characters-and-dashes: ''
 validation.not-enough: ''
 validation.invalid: ''
 html.title.admin-panel: ''
+settings.ssh-key-exists: SSH-ключ уже существует
+gist.file-binary-edit: Этот файл является бинарным.
+gist.preview-non-available: Предпросмотр недоступен
+gist.file-raw: Не удалось отобразить файл.
+gist.new.topics: Темы (через пробел)
+gist.list.topic-results-topic: Все фрагменты с темой %s
+gist.search.help.topic: фрагменты с заданной темой
+gist.search.placeholder.title: Заголовок
+gist.search.placeholder.visibility: Видимость
+gist.search.placeholder.public: Публичный
+gist.search.placeholder.unlisted: Скрытый
+gist.search.placeholder.private: Приватный
+gist.search.placeholder.language: Язык
+gist.search.placeholder.all: Все
+gist.search.placeholder.topics: Темы
+gist.search.placeholder.search: Поиск
+gist.new.drop-files: Перетащите файлы сюда или нажмите для загрузки
+gist.new.any-file-type: Поддерживаются файлы любого типа
+gist.delete.confirm: Вы уверены, что хотите удалить этот gist?
+gist.list.topic-results: Все фрагменты с этой темой
+gist.revision.binary-file-changes: Изменения в бинарных файлах не отображаются

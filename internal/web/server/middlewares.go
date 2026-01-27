@@ -2,13 +2,13 @@ package server
 
 import (
 	"errors"
-	"syscall"
 	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -92,7 +92,7 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 		data["error"] = err
 		if acceptJson {
 			if err := ctx.JSON(httpErr.Code, httpErr); err != nil {
-				if (errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET)) {
+				if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
 					return
 				}
 				log.Fatal().Err(err).Send()
@@ -101,7 +101,7 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 		}
 
 		if err := ctx.Render(httpErr.Code, "error", data); err != nil {
-			if (errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET)) {
+			if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
 				return
 			}
 			log.Fatal().Err(err).Send()
@@ -109,11 +109,14 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 		return
 	}
 
+	if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
+		return
+	}
 	log.Error().Err(err).Send()
 	httpErr = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	data["error"] = httpErr
 	if err := ctx.Render(500, "error", data); err != nil {
-		if (errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET)) {
+		if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
 			return
 		}
 		log.Fatal().Err(err).Send()

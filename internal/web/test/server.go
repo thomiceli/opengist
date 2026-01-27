@@ -128,6 +128,9 @@ func structToURLValues(s interface{}) url.Values {
 			if field.Type.Kind() == reflect.Int {
 				fieldValue := rValue.Field(i).Int()
 				v.Add(tag, strconv.FormatInt(fieldValue, 10))
+			} else if field.Type.Kind() == reflect.Uint {
+				fieldValue := rValue.Field(i).Uint()
+				v.Add(tag, strconv.FormatUint(fieldValue, 10))
 			} else if field.Type.Kind() == reflect.Slice {
 				fieldValue := rValue.Field(i).Interface().([]string)
 				for _, va := range fieldValue {

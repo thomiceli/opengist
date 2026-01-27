@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.12.0](https://github.com/thomiceli/opengist/compare/v1.11.1...v1.12.0) - 2026-01-27
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- Access tokens (#602)
+- Fuzzy search for gist search (#555)
+- Allow Unicode letters/numbers in topics (#597)
+- Resize editor height (#600)
+- More translation strings (#516) (#604)
+
+### Fixed
+- Don't panic on Go TCP errors (#601)
+
+### Other
+- Reduce footprint of Docker image (#515)
+- Update Go + JS deps (#603)
+- Configure Dependabot for updates on Go and NPM (#449)
+
+### [Helm Chart](helm/opengist)
+- Use existing pvc claim of provided (#547)
+- Adds StatefulSet support (#549)
+- Move Prom metrics to a dedicated port + support ServiceMonitor (#599)
+
 ## [1.11.1](https://github.com/thomiceli/opengist/compare/v1.11.0...v1.11.1) - 2025-09-30
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

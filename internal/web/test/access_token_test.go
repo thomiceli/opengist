@@ -359,3 +359,90 @@ func TestAccessTokenLastUsedUpdate(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEqual(t, int64(0), tokenFromDB.LastUsedAt)
 }
+
+func TestAccessTokenWithRequireLogin(t *testing.T) {
+	s := Setup(t)
+	defer Teardown(t, s)
+
+	admin := db.UserDTO{Username: "thomas", Password: "thomas"}
+	register(t, s, admin)
+
+	gist1 := db.GistDTO{
+		Title:       "private-gist",
+		Description: "my private gist",
+		VisibilityDTO: db.VisibilityDTO{
+			Private: db.PrivateVisibility,
+		},
+		Name:    []string{"file.txt"},
+		Content: []string{"content"},
+	}
+	err := s.Request("POST", "/", gist1, 302)
+	require.NoError(t, err)
+
+	gist1db, err := db.GetGistByID("1")
+	require.NoError(t, err)
+
+	gist2 := db.GistDTO{
+		Title:       "public-gist",
+		Description: "my public gist",
+		VisibilityDTO: db.VisibilityDTO{
+			Private: db.PublicVisibility,
+		},
+		Name:    []string{"public.txt"},
+		Content: []string{"public content"},
+	}
+	err = s.Request("POST", "/", gist2, 302)
+	require.NoError(t, err)
+
+	gist2db, err := db.GetGistByID("2")
+	require.NoError(t, err)
+
+	token := &db.AccessToken{
+		Name:      "read-token",
+		UserID:    1,
+		ScopeGist: db.ReadPermission,
+	}
+	plainToken, err := token.GenerateToken()
+	require.NoError(t, err)
+	err = token.Create()
+	require.NoError(t, err)
+
+	err = s.Request("PUT", "/admin-panel/set-config", settingSet{"require-login", "1"}, 200)
+	require.NoError(t, err)
+
+	s.sessionCookie = ""
+
+	err = s.Request("GET", "/thomas/"+gist1db.Uuid, nil, 302)
+	require.NoError(t, err)
+
+	err = s.Request("GET", "/thomas/"+gist2db.Uuid, nil, 302)
+	require.NoError(t, err)
+
+	headers := map[string]string{"Authorization": "Token " + plainToken}
+	err = s.RequestWithHeaders("GET", "/thomas/"+gist1db.Uuid, nil, 200, headers)
+	require.NoError(t, err)
+
+	err = s.RequestWithHeaders("GET", "/thomas/"+gist2db.Uuid, nil, 200, headers)
+	require.NoError(t, err)
+
+	err = s.RequestWithHeaders("GET", "/thomas/"+gist1db.Uuid+"/raw/HEAD/file.txt", nil, 200, headers)
+	require.NoError(t, err)
+
+	invalidHeaders := map[string]string{"Authorization": "Token invalid_token"}
+	err = s.RequestWithHeaders("GET", "/thomas/"+gist1db.Uuid, nil, 302, invalidHeaders)
+	require.NoError(t, err)
+
+	noPermToken := &db.AccessToken{
+		Name:      "no-perm-token",
+		UserID:    1,
+		ScopeGist: db.NoPermission,
+	}
+	noPermPlain, err := noPermToken.GenerateToken()
+	require.NoError(t, err)
+	err = noPermToken.Create()
+	require.NoError(t, err)
+
+	noPermHeaders := map[string]string{"Authorization": "Token " + noPermPlain}
+	err = s.RequestWithHeaders("GET", "/thomas/"+gist1db.Uuid, nil, 302, noPermHeaders)
+	require.NoError(t, err)
+}

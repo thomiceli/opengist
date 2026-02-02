@@ -206,6 +206,9 @@ func makeCheckRequireLogin(isSingleGistAccess bool) Middleware {
 				return next(ctx)
 			}
 
+			if getUserByToken(ctx) != nil {
+				return next(ctx)
+			}
 			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(handlers.ContextAuthInfo{Context: ctx}, isSingleGistAccess)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to check if unauthenticated access is allowed")
@@ -354,7 +357,6 @@ func getUserByToken(ctx *context.Context) *db.User {
 		return nil
 	}
 
-	// Update last used timestamp
 	_ = accessToken.UpdateLastUsed()
 
 	return &accessToken.User

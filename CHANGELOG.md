@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.12.1](https://github.com/thomiceli/opengist/compare/v1.12.0...v1.12.1) - 2026-02-03
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- More translation strings (#605)
+
+### Fixed
+- Allow Access Tokens with Required Login (#611)
+- Make text files renderable with mimetypes different than text/plain (#612)
+- Improve security on raw files endpoint (#613)
+
+> Admins of Opengist instances may want to run "Synchronize all gists previews" in the admin panel.
+
 ## [1.12.0](https://github.com/thomiceli/opengist/compare/v1.11.1...v1.12.0) - 2026-01-27
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

@@ -36,10 +36,10 @@ jobs:
 
       - name: Push to docs repository
         run: |
-          git clone https://${{ secrets.DOCS_REPO_TOKEN }}@github.com/${{ secrets.DOCS_REPO }}.git target-repo
+          git clone https://${{ secrets.STATIC_REPO_TOKEN }}@github.com/${{ secrets.STATIC_REPO }}.git target-repo
           mkdir -p target-repo/helm
-          cp helm/*.tgz target-repo/helm/
-          cp helm/index.yaml target-repo/helm/
+          cp helm/*.tgz target-repo/srv/helm/
+          cp helm/index.yaml target-repo/srv/helm/
           cd target-repo
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

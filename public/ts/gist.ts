@@ -1,5 +1,4 @@
 import '../ts/ipynb.ts';
-import PDFObject from 'pdfobject';
 
 document.querySelectorAll<HTMLElement>('.table-code').forEach((el) => {
     el.addEventListener('click', event => {
@@ -77,7 +76,3 @@ if (document.getElementById('gist').dataset.own) {
         el.disabled = true;
     });
 }
-
-document.querySelectorAll(".pdf").forEach((el) => {
-    PDFObject.embed(el.dataset.src || "", el);
-})

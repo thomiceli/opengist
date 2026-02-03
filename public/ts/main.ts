@@ -2,8 +2,13 @@ import '../css/tailwind.css';
 import '../img/favicon-32.png';
 import '../img/opengist.svg';
 import jdenticon from 'jdenticon/standalone';
+import PDFObject from 'pdfobject';
 
 jdenticon.update("[data-jdenticon-value]")
+
+document.querySelectorAll(".pdf").forEach((el) => {
+    PDFObject.embed(el.dataset.src || "", el);
+})
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('user-btn')?.addEventListener("click" , () => {

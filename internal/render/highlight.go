@@ -27,8 +27,9 @@ func (r HighlightedFile) InternalType() string {
 
 type RenderedGist struct {
 	*db.Gist
-	Lines []string
-	HTML  string
+	Lines           []string
+	HTML            string
+	PreviewMimeType *git.MimeType
 }
 
 func highlightFile(file *git.File) (HighlightedFile, error) {
@@ -74,6 +75,18 @@ func highlightFile(file *git.File) (HighlightedFile, error) {
 func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {
 	rendered := RenderedGist{
 		Gist: gist,
+	}
+
+	if gist.PreviewMimeType != "" {
+		mt := &git.MimeType{ContentType: gist.PreviewMimeType}
+		if mt.CanBeEmbedded() {
+			rendered.PreviewMimeType = mt
+			return rendered, nil
+		}
+	}
+
+	if gist.Preview == "" {
+		return rendered, nil
 	}
 
 	style := newStyle()

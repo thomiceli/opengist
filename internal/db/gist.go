@@ -73,6 +73,7 @@ type Gist struct {
 	URL             string
 	Preview         string
 	PreviewFilename string
+	PreviewMimeType string
 	Description     string
 	Private         Visibility // 0: public, 1: unlisted, 2: private
 	UserID          uint
@@ -551,6 +552,7 @@ func (gist *Gist) UpdatePreviewAndCount(withTimestampUpdate bool) error {
 	if len(filesStr) == 0 {
 		gist.Preview = ""
 		gist.PreviewFilename = ""
+		gist.PreviewMimeType = ""
 	} else {
 		for _, fileStr := range filesStr {
 			file, err := gist.File("HEAD", fileStr, true)
@@ -562,6 +564,7 @@ func (gist *Gist) UpdatePreviewAndCount(withTimestampUpdate bool) error {
 			}
 			gist.Preview = ""
 			gist.PreviewFilename = file.Filename
+			gist.PreviewMimeType = file.MimeType.ContentType
 
 			if !file.MimeType.CanBeEdited() {
 				continue

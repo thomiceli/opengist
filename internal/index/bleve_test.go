@@ -119,18 +119,19 @@ func TestBleveIndexerUnicodeSearch(t *testing.T) {
 
 	// Add a gist with Unicode content
 	gist := &Gist{
-		GistID:     100,
-		UserID:     100,
-		Visibility: 0,
-		Username:   "testuser",
-		Title:      "Unicode Test",
-		Content:    "Hello world with unicode characters: café résumé naïve",
-		Filenames:  []string{"test.txt"},
-		Extensions: []string{".txt"},
-		Languages:  []string{"Text"},
-		Topics:     []string{"unicode"},
-		CreatedAt:  1234567890,
-		UpdatedAt:  1234567890,
+		GistID:      100,
+		UserID:      100,
+		Visibility:  0,
+		Username:    "testuser",
+		Title:       "Unicode Test",
+		Description: "Descrition with Unicode characters: Café résumé naive",
+		Content:     "Hello world with unicode characters: café résumé naïve",
+		Filenames:   []string{"test.txt"},
+		Extensions:  []string{".txt"},
+		Languages:   []string{"Text"},
+		Topics:      []string{"unicode"},
+		CreatedAt:   1234567890,
+		UpdatedAt:   1234567890,
 	}
 
 	err := indexer.Add(gist)
@@ -139,7 +140,7 @@ func TestBleveIndexerUnicodeSearch(t *testing.T) {
 	}
 
 	// Search for unicode content
-	gistIDs, total, _, err := indexer.Search("café", SearchGistMetadata{}, 100, 1)
+	gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "café"}, 100, 1)
 	if err != nil {
 		t.Fatalf("Search failed: %v", err)
 	}

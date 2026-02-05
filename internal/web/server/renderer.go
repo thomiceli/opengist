@@ -147,7 +147,10 @@ func (s *Server) setFuncMap() {
 			return dict, nil
 		},
 		"addMetadataToSearchQuery": func(input, key, value string) string {
-			content, metadata := handlers.ParseSearchQueryStr(input)
+			metadata := handlers.ParseSearchQueryStr(input)
+			// extract free-text content (stored under "all") and remove it from metadata
+			content := metadata["all"]
+			delete(metadata, "all")
 
 			metadata[key] = value
 

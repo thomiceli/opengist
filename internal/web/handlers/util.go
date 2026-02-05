@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/schema"
-
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/web/context"
 )
 
@@ -119,10 +119,16 @@ func Paginate[T any](ctx *context.Context, data []*T, pageInt int, perPage int, 
 	return nil
 }
 
-func ParseSearchQueryStr(query string) (string, map[string]string) {
+// ParseSearchQueryStr parses a search query string and returns a map of metadata.
+// The query string is split into words and each word is checked if it contains a colon (:).
+// If a word contains a colon, it is split into a key-value pair and added to the metadata map.
+// If a word does not contain a colon, it is added to an "all" key in the metadata map.
+// The "all" key is used to search all fields in the index.
+// The function returns the metadata map.
+func ParseSearchQueryStr(query string) map[string]string {
 	words := strings.Fields(query)
 	metadata := make(map[string]string)
-	var contentBuilder strings.Builder
+	var allFieldsBuilder strings.Builder
 
 	for _, word := range words {
 		if strings.Contains(word, ":") {
@@ -133,10 +139,18 @@ func ParseSearchQueryStr(query string) (string, map[string]string) {
 				metadata[key] = value
 			}
 		} else {
-			contentBuilder.WriteString(word + " ")
+			// Add to all fields search by default
+			allFieldsBuilder.WriteString(word + " ")
 		}
 	}
 
-	content := strings.TrimSpace(contentBuilder.String())
-	return content, metadata
+	// Set the all fields search content
+	allContent := strings.TrimSpace(allFieldsBuilder.String())
+	if allContent != "" {
+		metadata["all"] = allContent
+	}
+
+	log.Debug().Msgf("Metadata: %v", metadata)
+
+	return metadata
 }

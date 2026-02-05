@@ -806,18 +806,19 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 	}
 
 	indexedGist := &index.Gist{
-		GistID:     gist.ID,
-		UserID:     gist.UserID,
-		Visibility: gist.Private.Uint(),
-		Username:   gist.User.Username,
-		Title:      gist.Title,
-		Content:    wholeContent,
-		Filenames:  fileNames,
-		Extensions: exts,
-		Languages:  langs,
-		Topics:     topics,
-		CreatedAt:  gist.CreatedAt,
-		UpdatedAt:  gist.UpdatedAt,
+		GistID:      gist.ID,
+		UserID:      gist.UserID,
+		Visibility:  gist.Private.Uint(),
+		Username:    gist.User.Username,
+		Description: gist.Description,
+		Title:       gist.Title,
+		Content:     wholeContent,
+		Filenames:   fileNames,
+		Extensions:  exts,
+		Languages:   langs,
+		Topics:      topics,
+		CreatedAt:   gist.CreatedAt,
+		UpdatedAt:   gist.UpdatedAt,
 	}
 
 	return indexedGist, nil

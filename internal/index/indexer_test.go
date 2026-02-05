@@ -71,7 +71,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// Verify gist is searchable
-		gistIDs, total, _, err := indexer.Search("test gist", SearchGistMetadata{}, 11, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "test gist"}, 11, 1)
 		if err != nil {
 			t.Fatalf("Search failed: %v", err)
 		}
@@ -114,7 +114,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 
 		// Search by Rust language
 		metadata := SearchGistMetadata{Language: "Rust"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 11, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 11, 1)
 		if err != nil {
 			t.Fatalf("Search by Rust language failed: %v", err)
 		}
@@ -156,7 +156,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// Search for unicode content
-		_, total, _, err := indexer.Search("café", SearchGistMetadata{}, 11, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{All: "café"}, 11, 1)
 		if err != nil {
 			t.Fatalf("Search for unicode failed: %v", err)
 		}
@@ -189,7 +189,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// User 11 should see their own private gist
-		gistIDs, total, _, err := indexer.Search("private gist", SearchGistMetadata{}, 11, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "private gist"}, 11, 1)
 		if err != nil {
 			t.Fatalf("Search for private gist as owner failed: %v", err)
 		}
@@ -205,7 +205,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// User 999 should NOT see user 11's private gist
-		gistIDs2, _, _, err := indexer.Search("private gist", SearchGistMetadata{}, 999, 1)
+		gistIDs2, _, _, err := indexer.Search(SearchGistMetadata{All: "private gist"}, 999, 1)
 		if err != nil {
 			t.Fatalf("Search for private gist as other user failed: %v", err)
 		}
@@ -239,7 +239,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// Should still be searchable by content
-		_, total, _, err := indexer.Search("Minimal", SearchGistMetadata{}, 11, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{All: "Minimal"}, 11, 1)
 		if err != nil {
 			t.Fatalf("Search for minimal gist failed: %v", err)
 		}
@@ -292,7 +292,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// Search should find updated content, not original
-		gistIDs, total, _, err := indexer.Search("new information", SearchGistMetadata{}, 11, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "new information"}, 11, 1)
 		if err != nil {
 			t.Fatalf("Search for updated content failed: %v", err)
 		}
@@ -308,7 +308,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// Old content should not be found
-		gistIDsOld, _, _, _ := indexer.Search("Original", SearchGistMetadata{}, 11, 1)
+		gistIDsOld, _, _, _ := indexer.Search(SearchGistMetadata{All: "Original"}, 11, 1)
 		for _, id := range gistIDsOld {
 			if id == 1006 {
 				t.Error("Should not find gist by old content after update")
@@ -340,7 +340,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 
 		// Search by username
 		metadata := SearchGistMetadata{Username: "newuser"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 12, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 12, 1)
 		if err != nil {
 			t.Fatalf("Search by username failed: %v", err)
 		}
@@ -383,7 +383,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 
 		// Search by one of the topics
 		metadata := SearchGistMetadata{Topic: "microservices"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 11, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 11, 1)
 		if err != nil {
 			t.Fatalf("Search by topic failed: %v", err)
 		}
@@ -427,7 +427,7 @@ func testIndexerAddGist(t *testing.T, indexer Indexer) {
 		}
 
 		// Search for content from the middle
-		gistIDs, total, _, err := indexer.Search("Line 500", SearchGistMetadata{}, 11, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "Line 500"}, 11, 1)
 		if err != nil {
 			t.Fatalf("Search in long content failed: %v", err)
 		}
@@ -451,7 +451,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 
 	// Test 1: Search by content - all init gists have "searchable content"
 	t.Run("SearchByContent", func(t *testing.T) {
-		gistIDs, total, languageCounts, err := indexer.Search("searchable", SearchGistMetadata{}, 1, 1)
+		gistIDs, total, languageCounts, err := indexer.Search(SearchGistMetadata{All: "searchable"}, 1, 1)
 		if err != nil {
 			t.Fatalf("Search failed: %v", err)
 		}
@@ -475,7 +475,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 	// Test 2: Search by specific language - Go
 	t.Run("SearchByLanguage", func(t *testing.T) {
 		metadata := SearchGistMetadata{Language: "Go"}
-		_, total, _, err := indexer.Search("", metadata, 1, 1)
+		_, total, _, err := indexer.Search(metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Search by language failed: %v", err)
 		}
@@ -489,7 +489,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 	// Test 3: Search by specific username - alice
 	t.Run("SearchByUsername", func(t *testing.T) {
 		metadata := SearchGistMetadata{Username: "alice"}
-		_, total, _, err := indexer.Search("", metadata, 1, 1)
+		_, total, _, err := indexer.Search(metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Search by username failed: %v", err)
 		}
@@ -503,7 +503,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 	// Test 4: Search by extension - Python (bob's private files)
 	t.Run("SearchByExtension", func(t *testing.T) {
 		metadata := SearchGistMetadata{Extension: "py"}
-		_, total, _, err := indexer.Search("", metadata, 1, 1)
+		_, total, _, err := indexer.Search(metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Search by extension failed: %v", err)
 		}
@@ -518,7 +518,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 	// Test 5: Search by topic - algorithms
 	t.Run("SearchByTopic", func(t *testing.T) {
 		metadata := SearchGistMetadata{Topic: "algorithms"}
-		_, total, _, err := indexer.Search("", metadata, 1, 1)
+		_, total, _, err := indexer.Search(metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Search by topic failed: %v", err)
 		}
@@ -535,7 +535,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 			Language: "Go",
 			Username: "alice",
 		}
-		_, total, _, err := indexer.Search("", metadata, 1, 1)
+		_, total, _, err := indexer.Search(metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Search with combined filters failed: %v", err)
 		}
@@ -548,7 +548,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 
 	// Test 7: Search with no results
 	t.Run("SearchNoResults", func(t *testing.T) {
-		gistIDs, total, _, err := indexer.Search("nonexistentquery", SearchGistMetadata{}, 1, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "nonexistentquery"}, 1, 1)
 		if err != nil {
 			t.Fatalf("Search with no results failed: %v", err)
 		}
@@ -562,7 +562,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 
 	// Test 8: Empty query returns all accessible gists
 	t.Run("SearchEmptyQuery", func(t *testing.T) {
-		gistIDs, total, languageCounts, err := indexer.Search("", SearchGistMetadata{}, 1, 1)
+		gistIDs, total, languageCounts, err := indexer.Search(SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Empty search failed: %v", err)
 		}
@@ -586,7 +586,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 	t.Run("SearchPagination", func(t *testing.T) {
 		// As user 1, we have 334 gists total
 		// Page 1
-		gistIDs1, total, _, err := indexer.Search("searchable", SearchGistMetadata{}, 1, 1)
+		gistIDs1, total, _, err := indexer.Search(SearchGistMetadata{All: "searchable"}, 1, 1)
 		if err != nil {
 			t.Fatalf("Page 1 search failed: %v", err)
 		}
@@ -598,7 +598,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 		}
 
 		// Page 2
-		gistIDs2, _, _, err := indexer.Search("searchable", SearchGistMetadata{}, 1, 2)
+		gistIDs2, _, _, err := indexer.Search(SearchGistMetadata{All: "searchable"}, 1, 2)
 		if err != nil {
 			t.Fatalf("Page 2 search failed: %v", err)
 		}
@@ -619,7 +619,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 		// Search as user 2 (bob)
 		// bob has 333 gists at i=1,4,7,... with visibility=1 (private)
 		// As user 2, bob sees: alice's 334 public gists + bob's own 333 gists = 667 total
-		_, total, _, err := indexer.Search("", SearchGistMetadata{}, 2, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{}, 2, 1)
 		if err != nil {
 			t.Fatalf("Search as user 2 failed: %v", err)
 		}
@@ -628,7 +628,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 		}
 
 		// Search as non-existent user (should only see public gists)
-		_, totalPublic, _, err := indexer.Search("", SearchGistMetadata{}, 999, 1)
+		_, totalPublic, _, err := indexer.Search(SearchGistMetadata{}, 999, 1)
 		if err != nil {
 			t.Fatalf("Search as user 999 failed: %v", err)
 		}
@@ -645,7 +645,7 @@ func testIndexerSearchBasic(t *testing.T, indexer Indexer) {
 
 	// Test 11: Language facets validation
 	t.Run("LanguageFacets", func(t *testing.T) {
-		_, _, languageCounts, err := indexer.Search("", SearchGistMetadata{}, 1, 1)
+		_, _, languageCounts, err := indexer.Search(SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Search for facets failed: %v", err)
 		}
@@ -755,7 +755,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	// Test 1: All field matches username
 	t.Run("AllFieldMatchesUsername", func(t *testing.T) {
 		metadata := SearchGistMetadata{All: "testuser_unique"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field search failed: %v", err)
 		}
@@ -777,7 +777,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	// Test 2: All field matches title
 	t.Run("AllFieldMatchesTitle", func(t *testing.T) {
 		metadata := SearchGistMetadata{All: "unique features"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field search failed: %v", err)
 		}
@@ -799,7 +799,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	// Test 3: All field matches language
 	t.Run("AllFieldMatchesLanguage", func(t *testing.T) {
 		metadata := SearchGistMetadata{All: "Ruby"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field search failed: %v", err)
 		}
@@ -821,7 +821,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	// Test 4: All field matches topic
 	t.Run("AllFieldMatchesTopic", func(t *testing.T) {
 		metadata := SearchGistMetadata{All: "unique_topic"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field search failed: %v", err)
 		}
@@ -843,7 +843,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	// Test 5: All field matches extension
 	t.Run("AllFieldMatchesExtension", func(t *testing.T) {
 		metadata := SearchGistMetadata{All: "sh"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field search failed: %v", err)
 		}
@@ -865,7 +865,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	// Test 6: All field matches filename
 	t.Run("AllFieldMatchesFilename", func(t *testing.T) {
 		metadata := SearchGistMetadata{All: "unique_file.rb"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field search failed: %v", err)
 		}
@@ -888,7 +888,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	t.Run("AllFieldORBehavior", func(t *testing.T) {
 		// "unique" appears in: username (3001), title (3002), topic (3003), filename (3004)
 		metadata := SearchGistMetadata{All: "unique"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field OR search failed: %v", err)
 		}
@@ -916,14 +916,14 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	t.Run("AllFieldVsSpecificField", func(t *testing.T) {
 		// Search with All field
 		metadataAll := SearchGistMetadata{All: "unique"}
-		_, totalAll, _, err := indexer.Search("", metadataAll, 100, 1)
+		_, totalAll, _, err := indexer.Search(metadataAll, 100, 1)
 		if err != nil {
 			t.Fatalf("All field search failed: %v", err)
 		}
 
 		// Search with specific username field only
 		metadataSpecific := SearchGistMetadata{Username: "testuser_unique"}
-		_, totalSpecific, _, err := indexer.Search("", metadataSpecific, 100, 1)
+		_, totalSpecific, _, err := indexer.Search(metadataSpecific, 100, 1)
 		if err != nil {
 			t.Fatalf("Specific field search failed: %v", err)
 		}
@@ -937,7 +937,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	// Test 9: All field with no matches
 	t.Run("AllFieldNoMatches", func(t *testing.T) {
 		metadata := SearchGistMetadata{All: "nonexistentvalue12345"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field no match search failed: %v", err)
 		}
@@ -957,7 +957,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 			Username: "nonexistent", // This should be ignored
 			Language: "NonExistent", // This should be ignored
 		}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field with other fields search failed: %v", err)
 		}
@@ -983,7 +983,9 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 		// All field searches metadata, content query searches content
 		// Both should work together
 		metadata := SearchGistMetadata{All: "Ruby"}
-		gistIDs, total, _, err := indexer.Search("examples", metadata, 100, 1)
+		// Use All field for content search
+		metadata.All = "examples"
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field with content query failed: %v", err)
 		}
@@ -1007,7 +1009,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 	t.Run("AllFieldCaseInsensitive", func(t *testing.T) {
 		// Search with different case
 		metadata := SearchGistMetadata{All: "RUBY"}
-		gistIDs, total, _, err := indexer.Search("", metadata, 100, 1)
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field case insensitive search failed: %v", err)
 		}
@@ -1101,7 +1103,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 
 	// Test 1: Exact match should work
 	t.Run("ExactMatch", func(t *testing.T) {
-		gistIDs, total, _, err := indexer.Search("algorithms", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "algorithms"}, 100, 1)
 		if err != nil {
 			t.Fatalf("Exact match search failed: %v", err)
 		}
@@ -1123,7 +1125,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 2: 1 character typo - substitution
 	t.Run("OneCharSubstitution", func(t *testing.T) {
 		// "algoritm" instead of "algorithm" (missing 'h')
-		gistIDs, total, _, err := indexer.Search("algoritm", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "algoritm"}, 100, 1)
 		if err != nil {
 			t.Fatalf("1-char typo search failed: %v", err)
 		}
@@ -1145,7 +1147,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 3: 1 character typo - deletion
 	t.Run("OneCharDeletion", func(t *testing.T) {
 		// "pythn" instead of "python" (missing 'o')
-		gistIDs, total, _, err := indexer.Search("pythn", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "pythn"}, 100, 1)
 		if err != nil {
 			t.Fatalf("1-char deletion search failed: %v", err)
 		}
@@ -1167,7 +1169,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 4: 1 character typo - insertion (extra character)
 	t.Run("OneCharInsertion", func(t *testing.T) {
 		// "pythonn" instead of "python" (extra 'n')
-		gistIDs, total, _, err := indexer.Search("pythonn", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "pythonn"}, 100, 1)
 		if err != nil {
 			t.Fatalf("1-char insertion search failed: %v", err)
 		}
@@ -1189,7 +1191,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 5: 2 character typos - should still match with fuzziness=2
 	t.Run("TwoCharTypos", func(t *testing.T) {
 		// "databse" instead of "database" (missing 'a', transposed 's')
-		gistIDs, total, _, err := indexer.Search("databse", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "databse"}, 100, 1)
 		if err != nil {
 			t.Fatalf("2-char typo search failed: %v", err)
 		}
@@ -1211,7 +1213,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 6: 2 character typos - different word
 	t.Run("TwoCharTyposDifferentWord", func(t *testing.T) {
 		// "javasript" instead of "javascript" (missing 'c')
-		gistIDs, total, _, err := indexer.Search("javasript", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "javasript"}, 100, 1)
 		if err != nil {
 			t.Fatalf("2-char typo search failed: %v", err)
 		}
@@ -1233,7 +1235,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 7: 3 character typos - should NOT match (beyond fuzziness=2)
 	t.Run("ThreeCharTyposShouldNotMatch", func(t *testing.T) {
 		// "algorthm" instead of "algorithm" (missing 'i', 't', 'h') - too different
-		gistIDs, _, _, err := indexer.Search("algorthm", SearchGistMetadata{}, 100, 1)
+		gistIDs, _, _, err := indexer.Search(SearchGistMetadata{All: "algorthm"}, 100, 1)
 		if err != nil {
 			t.Fatalf("3-char typo search failed: %v", err)
 		}
@@ -1256,7 +1258,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 8: Transposition (swapped characters)
 	t.Run("CharacterTransposition", func(t *testing.T) {
 		// "pyhton" instead of "python" (swapped 'ht')
-		gistIDs, total, _, err := indexer.Search("pyhton", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "pyhton"}, 100, 1)
 		if err != nil {
 			t.Fatalf("Transposition search failed: %v", err)
 		}
@@ -1278,7 +1280,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 9: Case insensitivity with fuzzy search
 	t.Run("CaseInsensitiveWithFuzzy", func(t *testing.T) {
 		// "PYTHN" (uppercase with typo)
-		gistIDs, total, _, err := indexer.Search("PYTHN", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "PYTHN"}, 100, 1)
 		if err != nil {
 			t.Fatalf("Case insensitive fuzzy search failed: %v", err)
 		}
@@ -1300,7 +1302,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 10: Multiple words with typos
 	t.Run("MultipleWordsWithTypos", func(t *testing.T) {
 		// "relatonal databse" instead of "relational database"
-		gistIDs, total, _, err := indexer.Search("relatonal databse", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "relatonal databse"}, 100, 1)
 		if err != nil {
 			t.Fatalf("Multi-word fuzzy search failed: %v", err)
 		}
@@ -1322,7 +1324,7 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	// Test 11: Short words with typos (edge case)
 	t.Run("ShortWordsWithTypos", func(t *testing.T) {
 		// "SLQ" instead of "SQL" (1 char typo on short word)
-		gistIDs, total, _, err := indexer.Search("SLQ", SearchGistMetadata{}, 100, 1)
+		gistIDs, total, _, err := indexer.Search(SearchGistMetadata{All: "SLQ"}, 100, 1)
 		if err != nil {
 			t.Fatalf("Short word fuzzy search failed: %v", err)
 		}
@@ -1345,7 +1347,8 @@ func testIndexerFuzzySearch(t *testing.T, indexer Indexer) {
 	t.Run("FuzzySearchWithMetadataFilters", func(t *testing.T) {
 		// Search with typo AND username filter
 		metadata := SearchGistMetadata{Username: "fuzzytest"}
-		gistIDs, total, _, err := indexer.Search("algoritm", metadata, 100, 1)
+		metadata.All = "algoritm"
+		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("Fuzzy search with metadata failed: %v", err)
 		}
@@ -1371,7 +1374,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 	// Test 1: Basic pagination - pages should be different
 	t.Run("BasicPagination", func(t *testing.T) {
 		// Search as user 1 (alice) - should see 334 public gists
-		gistIDs1, total, _, err := indexer.Search("", SearchGistMetadata{}, 1, 1)
+		gistIDs1, total, _, err := indexer.Search(SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Page 1 search failed: %v", err)
 		}
@@ -1382,7 +1385,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 			t.Fatal("Expected results on page 1")
 		}
 
-		gistIDs2, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 2)
+		gistIDs2, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 2)
 		if err != nil {
 			t.Fatalf("Page 2 search failed: %v", err)
 		}
@@ -1398,7 +1401,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 
 	// Test 2: Page size - verify results per page (page size = 10)
 	t.Run("PageSizeVerification", func(t *testing.T) {
-		gistIDs1, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 1)
+		gistIDs1, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Page 1 search failed: %v", err)
 		}
@@ -1410,11 +1413,11 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 
 	// Test 3: Total count consistency across pages
 	t.Run("TotalCountConsistency", func(t *testing.T) {
-		_, total1, _, err := indexer.Search("", SearchGistMetadata{}, 1, 1)
+		_, total1, _, err := indexer.Search(SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Page 1 search failed: %v", err)
 		}
-		_, total2, _, err := indexer.Search("", SearchGistMetadata{}, 1, 2)
+		_, total2, _, err := indexer.Search(SearchGistMetadata{}, 1, 2)
 		if err != nil {
 			t.Fatalf("Page 2 search failed: %v", err)
 		}
@@ -1429,7 +1432,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 	// Test 4: Out of bounds page
 	t.Run("OutOfBoundsPage", func(t *testing.T) {
 		// Page 100 is way beyond 334 results with page size 10
-		gistIDs, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 100)
+		gistIDs, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 100)
 		if err != nil {
 			t.Fatalf("Out of bounds page search failed: %v", err)
 		}
@@ -1440,7 +1443,8 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 
 	// Test 5: Empty results pagination
 	t.Run("EmptyResultsPagination", func(t *testing.T) {
-		gistIDs, total, _, err := indexer.Search("nonexistentquery", SearchGistMetadata{}, 1, 1)
+		metadata := SearchGistMetadata{All: "nonexistentquery"}
+		gistIDs, total, _, err := indexer.Search(metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Empty search failed: %v", err)
 		}
@@ -1454,11 +1458,11 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 
 	// Test 6: No duplicate IDs across pages (accounting for +1 overlap for hasMore indicator)
 	t.Run("NoDuplicateIDs", func(t *testing.T) {
-		gistIDs1, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 1)
+		gistIDs1, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Page 1 search failed: %v", err)
 		}
-		gistIDs2, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 2)
+		gistIDs2, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 2)
 		if err != nil {
 			t.Fatalf("Page 2 search failed: %v", err)
 		}
@@ -1489,7 +1493,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 	t.Run("PaginationWithFilters", func(t *testing.T) {
 		// Filter by alice's username - should get 334 gists
 		metadata := SearchGistMetadata{Username: "alice"}
-		gistIDs1, total, _, err := indexer.Search("", metadata, 1, 1)
+		gistIDs1, total, _, err := indexer.Search(metadata, 1, 1)
 		if err != nil {
 			t.Fatalf("Filtered page 1 search failed: %v", err)
 		}
@@ -1500,7 +1504,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 			t.Error("Expected results on filtered page 1")
 		}
 
-		gistIDs2, _, _, err := indexer.Search("", metadata, 1, 2)
+		gistIDs2, _, _, err := indexer.Search(metadata, 1, 2)
 		if err != nil {
 			t.Fatalf("Filtered page 2 search failed: %v", err)
 		}
@@ -1518,7 +1522,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 	t.Run("LastPageVerification", func(t *testing.T) {
 		// With 334 results and page size 10, page 34 should have 4 results
 		// Let's just verify the last page has some results
-		gistIDs34, total, _, err := indexer.Search("", SearchGistMetadata{}, 1, 34)
+		gistIDs34, total, _, err := indexer.Search(SearchGistMetadata{}, 1, 34)
 		if err != nil {
 			t.Fatalf("Last page search failed: %v", err)
 		}
@@ -1530,7 +1534,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 		}
 
 		// Page 35 should be empty
-		gistIDs35, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 35)
+		gistIDs35, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 35)
 		if err != nil {
 			t.Fatalf("Beyond last page search failed: %v", err)
 		}
@@ -1541,15 +1545,15 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 
 	// Test 9: Multiple pages have different results
 	t.Run("MultiplePagesDifferent", func(t *testing.T) {
-		gistIDs1, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 1)
+		gistIDs1, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Page 1 search failed: %v", err)
 		}
-		gistIDs10, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 10)
+		gistIDs10, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 10)
 		if err != nil {
 			t.Fatalf("Page 10 search failed: %v", err)
 		}
-		gistIDs20, _, _, err := indexer.Search("", SearchGistMetadata{}, 1, 20)
+		gistIDs20, _, _, err := indexer.Search(SearchGistMetadata{}, 1, 20)
 		if err != nil {
 			t.Fatalf("Page 20 search failed: %v", err)
 		}
@@ -1568,7 +1572,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 	// Test 10: Pagination with different users (visibility filtering)
 	t.Run("PaginationWithVisibility", func(t *testing.T) {
 		// User 2 (bob) sees 667 gists (334 public alice + 333 own private)
-		gistIDs1Bob, totalBob, _, err := indexer.Search("", SearchGistMetadata{}, 2, 1)
+		gistIDs1Bob, totalBob, _, err := indexer.Search(SearchGistMetadata{}, 2, 1)
 		if err != nil {
 			t.Fatalf("Bob page 1 search failed: %v", err)
 		}
@@ -1580,7 +1584,7 @@ func testIndexerPagination(t *testing.T, indexer Indexer) {
 		}
 
 		// User 1 (alice) sees 334 gists
-		_, totalAlice, _, err := indexer.Search("", SearchGistMetadata{}, 1, 1)
+		_, totalAlice, _, err := indexer.Search(SearchGistMetadata{}, 1, 1)
 		if err != nil {
 			t.Fatalf("Alice page 1 search failed: %v", err)
 		}

@@ -88,10 +88,12 @@ gist.search.found: gists found
 gist.search.no-results: No gists found
 gist.search.help.user: gists created by user
 gist.search.help.title: gists with given title
+gist.search.help.description: gists with given description
 gist.search.help.filename: gists having files with given name
 gist.search.help.extension: gists having files with given extension
 gist.search.help.language: gists having files with given language
 gist.search.help.topic: gists with given topic
+gist.search.help.content: search within snippet content
 gist.search.placeholder.title: Title
 gist.search.placeholder.visibility: Visibility
 gist.search.placeholder.public: Public

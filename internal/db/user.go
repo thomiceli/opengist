@@ -258,6 +258,11 @@ type UserDTO struct {
 	Password string `form:"password" validate:"required"`
 }
 
+type OAuthRegisterDTO struct {
+	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
+	Email    string `form:"email" validate:"omitempty,email"`
+}
+
 func (dto *UserDTO) ToUser() *User {
 	return &User{
 		Username: dto.Username,

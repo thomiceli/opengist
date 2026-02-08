@@ -3,6 +3,8 @@ package oauth
 import (
 	gocontext "context"
 	"errors"
+	"slices"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/openidConnect"
@@ -77,6 +79,31 @@ func (p *OIDCCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 func (p *OIDCCallbackProvider) UpdateUserDB(user *db.User) {
 	user.OIDCID = p.User.UserID
 	user.AvatarURL = p.User.AvatarURL
+}
+
+func (p *OIDCCallbackProvider) IsAdmin() bool {
+	if config.C.OIDCAdminGroup == "" {
+		return false
+	}
+
+	groupClaimName := config.C.OIDCGroupClaimName
+	if groupClaimName == "" {
+		return false
+	}
+
+	groups, ok := p.User.RawData[groupClaimName].([]interface{})
+	if !ok {
+		return false
+	}
+
+	var groupNames []string
+	for _, group := range groups {
+		if groupName, ok := group.(string); ok {
+			groupNames = append(groupNames, groupName)
+		}
+	}
+
+	return slices.Contains(groupNames, config.C.OIDCAdminGroup)
 }
 
 func NewOIDCCallbackProvider(user *goth.User) CallbackProvider {

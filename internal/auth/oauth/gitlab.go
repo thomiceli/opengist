@@ -111,6 +111,10 @@ func (p *GitLabCallbackProvider) UpdateUserDB(user *db.User) {
 	user.AvatarURL = field.(string)
 }
 
+func (p *GitLabCallbackProvider) IsAdmin() bool {
+	return false
+}
+
 func NewGitLabCallbackProvider(user *goth.User) CallbackProvider {
 	return &GitLabCallbackProvider{
 		User: user,

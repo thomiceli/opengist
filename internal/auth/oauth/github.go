@@ -77,6 +77,10 @@ func (p *GitHubCallbackProvider) UpdateUserDB(user *db.User) {
 	user.AvatarURL = "https://avatars.githubusercontent.com/u/" + p.User.UserID + "?v=4"
 }
 
+func (p *GitHubCallbackProvider) IsAdmin() bool {
+	return false
+}
+
 func NewGitHubCallbackProvider(user *goth.User) CallbackProvider {
 	return &GitHubCallbackProvider{
 		User: user,

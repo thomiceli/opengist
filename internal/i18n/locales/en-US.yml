@@ -200,6 +200,13 @@ auth.password: Password
 auth.register-instead: Register instead
 auth.login-instead: Login instead
 auth.oauth: Continue with %s account
+auth.oauth.no-provider: OAuth provider not found
+auth.oauth.complete-registration: Complete your registration
+auth.oauth.complete-registration-button: Create account
+auth.oauth.signing-in-with: Signing in with %s
+auth.oauth.cancel: Cancel
+auth.oauth.existing-account: Existing account?
+auth.oauth.already-have-account: If you already have an Opengist account, login first and link your %s account from your settings.
 auth.mfa: Multi-factor authentication
 auth.mfa.passkey: Passkey
 auth.mfa.passkeys: Passkeys
@@ -241,7 +248,7 @@ error.signup-disabled: Signing up is disabled
 error.signup-disabled-form: Signing up via registration form is disabled
 error.login-disabled-form: Logging in via login form is disabled
 error.complete-oauth-login: "Cannot complete user auth: %s"
-error.oauth-unsupported: Unsupported provider
+error.oauth-unsupported: Unsupported OAuth2 provider
 error.cannot-bind-data: Cannot bind data
 error.invalid-number: Invalid number
 error.invalid-character-unescaped: Invalid character unescaped
@@ -343,6 +350,8 @@ flash.auth.user-sshkeys-not-created: Could not create ssh key
 flash.auth.must-be-logged-in: You must be logged in to access gists
 flash.auth.passkey-registred: Passkey %s registered
 flash.auth.passkey-deleted: Passkey deleted
+flash.auth.oauth-session-expired: OAuth2 session expired, please try again
+flash.auth.oauth-already-linked: This %s account is already linked to another user
 
 flash.gist.visibility-changed: Gist visibility has been changed
 flash.gist.deleted: Gist has been deleted

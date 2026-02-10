@@ -1,10 +1,11 @@
 package gist
 
 import (
+	"strconv"
+
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/render"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"strconv"
 )
 
 func Edit(ctx *context.Context) error {

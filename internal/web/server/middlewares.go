@@ -28,7 +28,7 @@ import (
 func (s *Server) useCustomContext() {
 	s.echo.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cc := context.NewContext(c, s.sessionsPath)
+			cc := context.NewContext(c, filepath.Join(config.GetHomeDir(), "sessions"))
 			return next(cc)
 		}
 	})
@@ -58,29 +58,27 @@ func (s *Server) registerMiddlewares() {
 	s.echo.Use(middleware.Recover())
 	s.echo.Use(middleware.Secure())
 	s.echo.Use(Middleware(sessionInit).toEcho())
+	s.echo.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		TokenLookup:    "form:_csrf,header:X-CSRF-Token",
+		CookiePath:     "/",
+		CookieHTTPOnly: true,
+		CookieSameSite: http.SameSiteStrictMode,
+		Skipper: func(ctx echo.Context) bool {
+			/* skip CSRF for embeds */
+			gistName := ctx.Param("gistname")
 
-	if !s.ignoreCsrf {
-		s.echo.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-			TokenLookup:    "form:_csrf,header:X-CSRF-Token",
-			CookiePath:     "/",
-			CookieHTTPOnly: true,
-			CookieSameSite: http.SameSiteStrictMode,
-			Skipper: func(ctx echo.Context) bool {
-				/* skip CSRF for embeds */
-				gistName := ctx.Param("gistname")
+			/* skip CSRF for git clients */
+			matchUploadPack, _ := regexp.MatchString("(.*?)/git-upload-pack$", ctx.Request().URL.Path)
+			matchReceivePack, _ := regexp.MatchString("(.*?)/git-receive-pack$", ctx.Request().URL.Path)
+			return (filepath.Ext(gistName) == ".js" && ctx.Request().Method == "GET") || matchUploadPack || matchReceivePack
+		},
+		ErrorHandler: func(err error, c echo.Context) error {
+			log.Info().Err(err).Msg("CSRF error")
+			return err
+		},
+	}))
+	s.echo.Use(Middleware(csrfInit).toEcho())
 
-				/* skip CSRF for git clients */
-				matchUploadPack, _ := regexp.MatchString("(.*?)/git-upload-pack$", ctx.Request().URL.Path)
-				matchReceivePack, _ := regexp.MatchString("(.*?)/git-receive-pack$", ctx.Request().URL.Path)
-				return (filepath.Ext(gistName) == ".js" && ctx.Request().Method == "GET") || matchUploadPack || matchReceivePack
-			},
-			ErrorHandler: func(err error, c echo.Context) error {
-				log.Info().Err(err).Msg("CSRF error")
-				return err
-			},
-		}))
-		s.echo.Use(Middleware(csrfInit).toEcho())
-	}
 }
 
 func (s *Server) errorHandler(err error, ctx echo.Context) {
@@ -159,10 +157,10 @@ func dataInit(next Handler) Handler {
 
 func writePermission(next Handler) Handler {
 	return func(ctx *context.Context) error {
-		gist := ctx.GetData("gist")
+		gist := ctx.GetData("gist").(*db.Gist)
 		user := ctx.User
-		if !gist.(*db.Gist).CanWrite(user) {
-			return ctx.RedirectTo("/" + gist.(*db.Gist).User.Username + "/" + gist.(*db.Gist).Identifier())
+		if !gist.CanWrite(user) {
+			return ctx.ErrorRes(403, "You don't have permission to edit this gist", nil)
 		}
 		return next(ctx)
 	}

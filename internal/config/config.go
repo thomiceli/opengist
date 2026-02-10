@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/thomiceli/opengist/internal/session"
 	"io"
 	"net/url"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/session"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

@@ -936,7 +936,7 @@ func testIndexerAllFieldSearch(t *testing.T, indexer Indexer) {
 
 	// Test 9: All field with no matches
 	t.Run("AllFieldNoMatches", func(t *testing.T) {
-		metadata := SearchGistMetadata{All: "nonexistentvalue12345"}
+		metadata := SearchGistMetadata{All: "nonexistentvalue"}
 		gistIDs, total, _, err := indexer.Search(metadata, 100, 1)
 		if err != nil {
 			t.Fatalf("All field no match search failed: %v", err)

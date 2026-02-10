@@ -2,15 +2,16 @@ package oauth
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"io"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 const (
@@ -32,6 +33,7 @@ type CallbackProvider interface {
 	GetProviderUserID(user *db.User) bool
 	GetProviderUserSSHKeys() ([]string, error)
 	UpdateUserDB(user *db.User)
+	IsAdmin() bool
 }
 
 func DefineProvider(provider string, url string) (Provider, error) {
@@ -67,6 +69,29 @@ func CompleteUserAuth(ctx *context.Context) (CallbackProvider, error) {
 	}
 
 	return nil, fmt.Errorf("unsupported provider %s", user.Provider)
+}
+
+func NewCallbackProviderFromSession(provider string, userID string, nickname string, email string, avatarURL string) (CallbackProvider, error) {
+	user := &goth.User{
+		Provider:  provider,
+		UserID:    userID,
+		NickName:  nickname,
+		Email:     email,
+		AvatarURL: avatarURL,
+	}
+
+	switch provider {
+	case GitHubProviderString:
+		return NewGitHubCallbackProvider(user), nil
+	case GitLabProviderString:
+		return NewGitLabCallbackProvider(user), nil
+	case GiteaProviderString:
+		return NewGiteaCallbackProvider(user), nil
+	case OpenIDConnectString:
+		return NewOIDCCallbackProvider(user), nil
+	}
+
+	return nil, fmt.Errorf("unsupported provider %s", provider)
 }
 
 func urlJoin(base string, elem ...string) string {

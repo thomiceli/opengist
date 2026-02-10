@@ -199,6 +199,17 @@ func inMFASession(next Handler) Handler {
 	}
 }
 
+func inOAuthRegisterSession(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		sess := ctx.GetSession()
+		_, ok := sess.Values["oauthProvider"].(string)
+		if !ok {
+			return ctx.RedirectTo("/login")
+		}
+		return next(ctx)
+	}
+}
+
 func makeCheckRequireLogin(isSingleGistAccess bool) Middleware {
 	return func(next Handler) Handler {
 		return func(ctx *context.Context) error {

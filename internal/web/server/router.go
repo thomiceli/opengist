@@ -38,6 +38,8 @@ func (s *Server) registerRoutes() {
 		r.GET("/login", auth.Login)
 		r.POST("/login", auth.ProcessLogin)
 		r.GET("/logout", auth.Logout)
+		r.GET("/oauth/register", auth.OauthRegister, inOAuthRegisterSession)
+		r.POST("/oauth/register", auth.ProcessOauthRegister, inOAuthRegisterSession)
 		r.GET("/oauth/:provider", auth.Oauth)
 		r.GET("/oauth/:provider/callback", auth.OauthCallback)
 		r.GET("/oauth/:provider/unlink", auth.OauthUnlink, logged)

@@ -720,13 +720,17 @@ func (gist *Gist) ToDTO() (*GistDTO, error) {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string    `validate:"max=250" form:"title"`
-	Description string    `validate:"max=1000" form:"description"`
-	URL         string    `validate:"max=32,alphanumdashorempty" form:"url"`
-	Files       []FileDTO `validate:"min=1,dive"`
-	Name        []string  `form:"name"`
-	Content     []string  `form:"content"`
-	Topics      string    `validate:"gisttopics" form:"topics"`
+	Title              string    `validate:"max=250" form:"title"`
+	Description        string    `validate:"max=1000" form:"description"`
+	URL                string    `validate:"max=32,alphanumdashorempty" form:"url"`
+	Files              []FileDTO `validate:"min=1,dive"`
+	Name               []string  `form:"name"`
+	Content            []string  `form:"content"`
+	Topics             string    `validate:"gisttopics" form:"topics"`
+	UploadedFilesUUID  []string  `validate:"omitempty,dive,required,uuid" form:"uploadedfile_uuid"`
+	UploadedFilesNames []string  `validate:"omitempty,dive,required" form:"uploadedfile_filename"`
+	BinaryFileOldName  []string  `form:"binary_old_name"`
+	BinaryFileNewName  []string  `form:"binary_new_name"`
 	VisibilityDTO
 }
 

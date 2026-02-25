@@ -30,7 +30,7 @@ func RawFile(ctx *context.Context) error {
 	if file.MimeType.CanBeEmbedded() {
 		ctx.Response().Header().Set("Content-Type", file.MimeType.ContentType)
 	} else if file.MimeType.IsText() {
-		ctx.Response().Header().Set("Content-Type", "text/plain")
+		ctx.Response().Header().Set("Content-Type", "text/plain; charset=utf-8")
 	} else {
 		ctx.Response().Header().Set("Content-Type", "application/octet-stream")
 	}

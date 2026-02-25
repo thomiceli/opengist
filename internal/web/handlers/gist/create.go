@@ -70,7 +70,10 @@ func ProcessCreate(ctx *context.Context) error {
 	fileFilenames := dto.UploadedFilesNames
 	if len(fileUUIDs) == len(fileFilenames) {
 		for i, fileUUID := range fileUUIDs {
-			filePath := filepath.Join(filepath.Join(config.GetHomeDir(), "uploads"), fileUUID)
+			if !uuidRegex.MatchString(filepath.Base(fileUUID)) {
+				continue
+			}
+			filePath := filepath.Join(config.GetHomeDir(), "uploads", fileUUID)
 
 			if _, err := os.Stat(filePath); err != nil {
 				continue

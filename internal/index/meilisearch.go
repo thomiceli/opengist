@@ -63,9 +63,9 @@ func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
 	}
 
 	_, _ = i.client.Index(i.indexName).UpdateSettings(&meilisearch.Settings{
-		FilterableAttributes: []string{"GistID", "UserID", "Visibility", "Username", "Title", "Filenames", "Extensions", "Languages", "Topics"},
+		FilterableAttributes: []string{"GistID", "UserID", "Visibility", "Username", "Title", "Description", "Filenames", "Extensions", "Languages", "Topics"},
 		DisplayedAttributes:  []string{"GistID"},
-		SearchableAttributes: []string{"Content", "Username", "Title", "Filenames", "Extensions", "Languages", "Topics"},
+		SearchableAttributes: []string{"Content", "Username", "Title", "Description", "Filenames", "Extensions", "Languages", "Topics"},
 		RankingRules:         []string{"words"},
 	})
 
@@ -94,7 +94,7 @@ func (i *MeiliIndexer) Remove(gistID uint) error {
 	return err
 }
 
-func (i *MeiliIndexer) Search(queryStr string, queryMetadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error) {
+func (i *MeiliIndexer) Search(queryMetadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error) {
 	searchRequest := &meilisearch.SearchRequest{
 		Offset:               int64((page - 1) * 10),
 		Limit:                11,
@@ -113,6 +113,7 @@ func (i *MeiliIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 	}
 	addFilter("Username", queryMetadata.Username)
 	addFilter("Title", queryMetadata.Title)
+	addFilter("Description", queryMetadata.Description)
 	addFilter("Filenames", queryMetadata.Filename)
 	addFilter("Extensions", queryMetadata.Extension)
 	addFilter("Languages", queryMetadata.Language)
@@ -122,7 +123,13 @@ func (i *MeiliIndexer) Search(queryStr string, queryMetadata SearchGistMetadata,
 		searchRequest.Filter = strings.Join(filters, " AND ")
 	}
 
-	response, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.Search(queryStr, searchRequest)
+	// build query string from provided metadata. Prefer `All`, fall back to `Content`.
+	query := queryMetadata.All
+	if query == "" {
+		query = queryMetadata.Content
+	}
+
+	response, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.Search(query, searchRequest)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to search Meilisearch index")
 		return nil, 0, nil, err

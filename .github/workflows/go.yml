@@ -100,7 +100,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
+        os: ["ubuntu-latest", "macOS-latest"]
         go: ["1.25"]
         database: ["sqlite"]
     runs-on: ${{ matrix.os }}

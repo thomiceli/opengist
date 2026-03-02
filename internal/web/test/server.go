@@ -233,6 +233,10 @@ func Setup(t *testing.T) *Server {
 	err = db.Setup(databaseDsn)
 	require.NoError(t, err, "Could not initialize database")
 
+	t.Cleanup(func() {
+		db.Close()
+	})
+
 	if index.IndexEnabled() {
 		go index.NewIndexer(index.IndexType())
 	}

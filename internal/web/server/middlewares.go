@@ -72,7 +72,7 @@ func (s *Server) registerMiddlewares() {
 				/* skip CSRF for git clients */
 				matchUploadPack, _ := regexp.MatchString("(.*?)/git-upload-pack$", ctx.Request().URL.Path)
 				matchReceivePack, _ := regexp.MatchString("(.*?)/git-receive-pack$", ctx.Request().URL.Path)
-				return filepath.Ext(gistName) == ".js" || matchUploadPack || matchReceivePack
+				return (filepath.Ext(gistName) == ".js" && ctx.Request().Method == "GET") || matchUploadPack || matchReceivePack
 			},
 			ErrorHandler: func(err error, c echo.Context) error {
 				log.Info().Err(err).Msg("CSRF error")
@@ -319,7 +319,6 @@ func csrfInit(next Handler) Handler {
 		if csrfToken, ok := ctx.Get("csrf").(string); ok {
 			csrf = csrfToken
 		}
-		ctx.SetData("csrfHtml", template.HTML(`<input type="hidden" name="_csrf" value="`+csrf+`">`))
 		ctx.SetData("csrfHtml", template.HTML(`<input type="hidden" name="_csrf" value="`+csrf+`">`))
 
 		return next(ctx)

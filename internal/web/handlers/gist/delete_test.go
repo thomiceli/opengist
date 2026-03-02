@@ -47,6 +47,7 @@ func TestDeleteGist(t *testing.T) {
 		_, err = os.Stat(gistPath)
 		require.Error(t, err, "Gist should not exist on filesystem after deletion")
 		require.True(t, os.IsNotExist(err), "Filesystem should return 'not exist' error")
+		require.Equal(t, uint(0), gistCheck.ID, "Gist should be not in database after deletion")
 	})
 
 	t.Run("DeleteOthersGist", func(t *testing.T) {

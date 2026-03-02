@@ -35,6 +35,14 @@
     --border-width-1: 1px;
 }
 
+@layer base {
+    :host {
+        --tw-border-style: solid;
+        --tw-border-width: 0;
+        display: block;
+    }
+}
+
 .opengist-embed {
     @import "tailwindcss";
     @layer base {

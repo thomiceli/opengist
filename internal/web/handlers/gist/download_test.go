@@ -15,7 +15,7 @@ func TestDownloadZip(t *testing.T) {
 	defer webtest.Teardown(t)
 
 	t.Run("MultipleFiles", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"0")
+		_, _, username, identifier := s.CreateGist(t, "0")
 
 		resp := s.Request(t, "GET", "/"+username+"/"+identifier+"/archive/HEAD", nil, 200)
 
@@ -42,13 +42,13 @@ func TestDownloadZip(t *testing.T) {
 	})
 
 	t.Run("PrivateGist", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"2")
+		_, _, username, identifier := s.CreateGist(t, "2")
 
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/archive/HEAD", nil, 404)
 	})
 
 	t.Run("NonExistentRevision", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"0")
+		_, _, username, identifier := s.CreateGist(t, "0")
 
 		// TODO: return 404
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/archive/zz", nil, 0)
@@ -60,7 +60,7 @@ func TestRawFile(t *testing.T) {
 	defer webtest.Teardown(t)
 
 	t.Run("ExistingFile", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"0")
+		_, _, username, identifier := s.CreateGist(t, "0")
 
 		resp := s.Request(t, "GET", "/"+username+"/"+identifier+"/raw/HEAD/file.txt", nil, 200)
 
@@ -74,19 +74,19 @@ func TestRawFile(t *testing.T) {
 	})
 
 	t.Run("NonExistentFile", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"0")
+		_, _, username, identifier := s.CreateGist(t, "0")
 
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/raw/HEAD/nonexistent.txt", nil, 404)
 	})
 
 	t.Run("NonExistentRevision", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"0")
+		_, _, username, identifier := s.CreateGist(t, "0")
 
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/raw/zz/file.txt", nil, 404)
 	})
 
 	t.Run("PrivateGist", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"2")
+		_, _, username, identifier := s.CreateGist(t, "2")
 
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/raw/HEAD/file.txt", nil, 404)
 	})
@@ -97,7 +97,7 @@ func TestDownloadFile(t *testing.T) {
 	defer webtest.Teardown(t)
 
 	t.Run("ExistingFile", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"0")
+		_, _, username, identifier := s.CreateGist(t, "0")
 
 		resp := s.Request(t, "GET", "/"+username+"/"+identifier+"/download/HEAD/file.txt", nil, 200)
 
@@ -112,7 +112,7 @@ func TestDownloadFile(t *testing.T) {
 	})
 
 	t.Run("NonExistentFile", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"0")
+		_, _, username, identifier := s.CreateGist(t, "0")
 
 		resp := s.Request(t, "GET", "/"+username+"/"+identifier+"/download/HEAD/nonexistent.txt", nil, 404)
 
@@ -123,7 +123,7 @@ func TestDownloadFile(t *testing.T) {
 	})
 
 	t.Run("NonExistentRevision", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"0")
+		_, _, username, identifier := s.CreateGist(t, "0")
 
 		resp := s.Request(t, "GET", "/"+username+"/"+identifier+"/download/zz/file.txt", nil, 404)
 
@@ -134,7 +134,7 @@ func TestDownloadFile(t *testing.T) {
 	})
 
 	t.Run("PrivateGist", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t,"2")
+		_, _, username, identifier := s.CreateGist(t, "2")
 
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/download/HEAD/file.txt", nil, 404)
 	})

@@ -3,16 +3,17 @@ package settings
 import (
 	"crypto/md5"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/internal/validator"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 func EmailProcess(ctx *context.Context) error {
@@ -61,18 +62,22 @@ func UsernameProcess(ctx *context.Context) error {
 		return ctx.RedirectTo("/settings")
 	}
 
-	if exists, err := db.UserExists(dto.Username); err != nil || exists {
-		ctx.AddFlash(ctx.Tr("flash.auth.username-exists"), "error")
-		return ctx.RedirectTo("/settings")
+	if strings.ToLower(dto.Username) != strings.ToLower(user.Username) {
+		if exists, err := db.UserExists(dto.Username); err != nil || exists {
+			ctx.AddFlash(ctx.Tr("flash.auth.username-exists"), "error")
+			return ctx.RedirectTo("/settings")
+		}
 	}
 
 	sourceDir := filepath.Join(config.GetHomeDir(), git.ReposDirectory, strings.ToLower(user.Username))
 	destinationDir := filepath.Join(config.GetHomeDir(), git.ReposDirectory, strings.ToLower(dto.Username))
 
-	if _, err := os.Stat(sourceDir); !os.IsNotExist(err) {
-		err := os.Rename(sourceDir, destinationDir)
-		if err != nil {
-			return ctx.ErrorRes(500, "Cannot rename user directory", err)
+	if sourceDir != destinationDir {
+		if _, err := os.Stat(sourceDir); !os.IsNotExist(err) {
+			err := os.Rename(sourceDir, destinationDir)
+			if err != nil {
+				return ctx.ErrorRes(500, "Cannot rename user directory", err)
+			}
 		}
 	}
 

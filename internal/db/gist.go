@@ -71,6 +71,7 @@ type Gist struct {
 	Uuid            string
 	Title           string
 	URL             string
+	URLNormalized   string
 	Preview         string
 	PreviewFilename string
 	PreviewMimeType string
@@ -98,6 +99,11 @@ type Like struct {
 	CreatedAt int64
 }
 
+func (gist *Gist) BeforeSave(_ *gorm.DB) error {
+	gist.URLNormalized = strings.ToLower(gist.URL)
+	return nil
+}
+
 func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 	// Decrement fork counter if the gist was forked
 	err := tx.Model(&Gist{}).
@@ -110,7 +116,8 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
 	err := db.Preload("User").Preload("Forked.User").Preload("Topics").
-		Where("(gists.uuid like ? OR gists.url = ?) AND users.username like ?", gistUuid+"%", gistUuid, user).
+		Where("(gists.uuid LIKE ? OR gists.url_normalized = ?) AND users.username_normalized = ?",
+			strings.ToLower(gistUuid)+"%", strings.ToLower(gistUuid), strings.ToLower(user)).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
 

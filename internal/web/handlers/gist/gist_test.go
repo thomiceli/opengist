@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -290,4 +291,37 @@ func TestGistAccess(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetGistCaseInsensitive(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "THOmas")
+	s.Login(t, "THOmas")
+
+	s.Request(t, "POST", "/", url.Values{
+		"title":   {"Test"},
+		"name":    {"file.txt"},
+		"content": {"hello world"},
+		"url":     {"my-GIST"},
+		"private": {"0"},
+	}, 302)
+
+	gist, err := db.GetGistByID("1")
+	require.NoError(t, err)
+
+	s.Logout()
+
+	t.Run("URL", func(t *testing.T) {
+		s.Request(t, "GET", "/thomas/my-gist", nil, 200)
+		s.Request(t, "GET", "/THOMAS/MY-GIST", nil, 200)
+		s.Request(t, "GET", "/thomas/MY-GIST", nil, 200)
+		s.Request(t, "GET", "/THOMAS/my-gist", nil, 200)
+	})
+
+	t.Run("UUID", func(t *testing.T) {
+		s.Request(t, "GET", "/thomas/"+strings.ToLower(gist.Uuid), nil, 200)
+		s.Request(t, "GET", "/THOMAS/"+strings.ToUpper(gist.Uuid), nil, 200)
+	})
 }

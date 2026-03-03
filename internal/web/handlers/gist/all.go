@@ -164,6 +164,18 @@ func AllGists(ctx *context.Context) error {
 	return ctx.Html("all.html")
 }
 
+// Search handles the search page for gists.
+//
+// It takes a query parameter "q" which is a search query in the format:
+// "user:username title:title description:description filename:filename language:language topic:topic"
+//
+// It also takes a page parameter "page" which is the page number to display.
+//
+// It returns an error if the search query is invalid or if the page number is invalid.
+//
+// It returns the search results as a list of rendered gists, along with the total number of results, the languages found, and the search query.
+//
+// The search results are paginated, with 10 results per page.
 func Search(ctx *context.Context) error {
 	var err error
 
@@ -171,7 +183,7 @@ func Search(ctx *context.Context) error {
 		Query: ctx.QueryParam("q"),
 	}
 
-	content, meta := handlers.ParseSearchQueryStr(ctx.QueryParam("q"))
+	metadata := handlers.ParseSearchQueryStr(ctx.QueryParam("q"))
 	pageInt := handlers.GetPage(ctx)
 
 	var currentUserId uint
@@ -182,14 +194,17 @@ func Search(ctx *context.Context) error {
 		currentUserId = 0
 	}
 
-	gistsIds, nbHits, langs, err := index.SearchGists(content, index.SearchGistMetadata{
-		Username:  meta["user"],
-		Title:     meta["title"],
-		Filename:  meta["filename"],
-		Extension: meta["extension"],
-		Language:  meta["language"],
-		Topic:     meta["topic"],
-		All:       meta["all"],
+	// Search gists in the index and fetch the gists IDs from the database
+	gistsIds, nbHits, langs, err := index.SearchGists(index.SearchGistMetadata{
+		Username:    metadata["user"],
+		Title:       metadata["title"],
+		Description: metadata["description"],
+		Filename:    metadata["filename"],
+		Extension:   metadata["extension"],
+		Language:    metadata["language"],
+		Topic:       metadata["topic"],
+		Content:     metadata["content"],
+		All:         metadata["all"],
 	}, currentUserId, pageInt)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error searching gists", err)

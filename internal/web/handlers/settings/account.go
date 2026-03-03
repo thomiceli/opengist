@@ -62,7 +62,7 @@ func UsernameProcess(ctx *context.Context) error {
 		return ctx.RedirectTo("/settings")
 	}
 
-	if strings.ToLower(dto.Username) != strings.ToLower(user.Username) {
+	if !strings.EqualFold(dto.Username, user.Username) {
 		if exists, err := db.UserExists(dto.Username); err != nil || exists {
 			ctx.AddFlash(ctx.Tr("flash.auth.username-exists"), "error")
 			return ctx.RedirectTo("/settings")

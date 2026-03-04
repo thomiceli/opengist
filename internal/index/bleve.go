@@ -141,15 +141,20 @@ func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int
 		}
 	}
 
-	// Fuzzy query factory
+	// Exact+fuzzy query factory: exact match is boosted so it ranks above fuzzy-only matches
 	factoryFuzzyQuery := func(field, value string) query.Query {
-		query := bleve.NewMatchQuery(value)
-		query.SetField(field)
-		query.SetFuzziness(2)
-		return query
+		exact := bleve.NewMatchPhraseQuery(value)
+		exact.SetField(field)
+		exact.SetBoost(2.0)
+
+		fuzzy := bleve.NewMatchQuery(value)
+		fuzzy.SetField(field)
+		fuzzy.SetFuzziness(2)
+
+		return bleve.NewDisjunctionQuery(exact, fuzzy)
 	}
 
-	// Fuzzy search
+	// Exact+fuzzy search
 	addFuzzy := func(field, value string) {
 		if value != "" && value != "." {
 			indexerQuery = bleve.NewConjunctionQuery(indexerQuery, factoryFuzzyQuery(field, value))

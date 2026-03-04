@@ -139,15 +139,15 @@ func ParseSearchQueryStr(query string) map[string]string {
 				metadata[key] = value
 			}
 		} else {
-			// Add to all fields search by default
+			// Add to content search by default
 			allFieldsBuilder.WriteString(word + " ")
 		}
 	}
 
-	// Set the all fields search content
+	// Set the content search field
 	allContent := strings.TrimSpace(allFieldsBuilder.String())
 	if allContent != "" {
-		metadata["all"] = allContent
+		metadata["content"] = allContent
 	}
 
 	log.Debug().Msgf("Metadata: %v", metadata)

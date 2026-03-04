@@ -93,7 +93,7 @@ gist.search.help.filename: gists having files with given name
 gist.search.help.extension: gists having files with given extension
 gist.search.help.language: gists having files with given language
 gist.search.help.topic: gists with given topic
-gist.search.help.content: search within snippet content
+gist.search.help.all: search all fields
 gist.search.placeholder.title: Title
 gist.search.placeholder.visibility: Visibility
 gist.search.placeholder.public: Public

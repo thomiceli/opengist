@@ -94,6 +94,8 @@ type config struct {
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
 	StaticLinks   []StaticLink `yaml:"custom.static-links" env:"OG_CUSTOM_STATIC_LINK"`
+
+	DefaultLang string `yaml:"default-lang" env:"OG_DEFAULT_LANG"`
 }
 
 type StaticLink struct {
@@ -133,6 +135,8 @@ func configWithDefaults() (*config, error) {
 	c.MetricsEnabled = false
 	c.MetricsHost = "0.0.0.0"
 	c.MetricsPort = "6158"
+
+	c.DefaultLang = "zh-CN"
 
 	return c, nil
 }

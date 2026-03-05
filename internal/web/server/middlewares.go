@@ -266,6 +266,15 @@ func locale(next Handler) Handler {
 			lang = i18n.Locales.MatchTag(tags)
 		}
 
+		// 4.Use configured default language if still not set
+		if len(lang) == 0 {
+			lang = config.C.DefaultLang
+			// Validate the configured default language
+			if !i18n.Locales.HasLocale(lang) {
+				lang = "en-US"
+			}
+		}
+
 		if changeLang {
 			ctx.SetCookie(&http.Cookie{Name: "lang", Value: lang, Path: "/", MaxAge: 1<<31 - 1})
 		}

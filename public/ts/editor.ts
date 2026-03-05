@@ -524,13 +524,32 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(result => {
             if (result.success && result.topics && result.topics.length > 0) {
+                // Get current topics as a set to avoid duplicates
                 const currentTopics = topicsInput.value.trim();
-                const newTopics = result.topics.join(' ');
-                topicsInput.value = currentTopics ? currentTopics + ' ' + newTopics : newTopics;
+                const existingTopics = new Set(currentTopics ? currentTopics.split(/\s+/).filter(t => t) : []);
+                
+                // Add only new topics that don't already exist
+                const addedTopics: string[] = [];
+                result.topics.forEach((topic: string) => {
+                    if (!existingTopics.has(topic)) {
+                        existingTopics.add(topic);
+                        addedTopics.push(topic);
+                    }
+                });
+                
+                // Update input with merged topics
+                topicsInput.value = Array.from(existingTopics).join(' ');
+                
                 if (statusEl) {
-                    statusEl.textContent = `Added ${result.topics.length} topic(s)`;
-                    statusEl.classList.remove('text-rose-500');
-                    statusEl.classList.add('text-green-500');
+                    if (addedTopics.length > 0) {
+                        statusEl.textContent = `Added ${addedTopics.length} topic(s)`;
+                        statusEl.classList.remove('text-rose-500');
+                        statusEl.classList.add('text-green-500');
+                    } else {
+                        statusEl.textContent = 'All topics already exist';
+                        statusEl.classList.remove('text-rose-500');
+                        statusEl.classList.add('text-green-500');
+                    }
                 }
             } else {
                 if (statusEl) {

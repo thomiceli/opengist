@@ -179,6 +179,10 @@ ldap.search-filter:
 # Set your own custom name to be displayed instead of 'Opengist'
 custom.name:
 
+# Default language for the UI. Default: zh-CN
+# Available languages: en-US, zh-CN, zh-TW, fr-FR, de-DE, es-ES, ja-JP, it_IT, pt-BR, ru-RU, tr-TR, pl_PL, hu-HU, uk-UK, cs-CZ
+default-lang: zh-CN
+
 # Custom assets
 # Add your own custom assets, that are files relatives to $opengist-home/custom/
 custom.logo:

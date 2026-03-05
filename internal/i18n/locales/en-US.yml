@@ -51,6 +51,7 @@ gist.new.create-a-new-gist: Create a new gist
 gist.new.topics: Topics (separate with spaces)
 gist.new.drop-files: Drop files here or click to upload
 gist.new.any-file-type: Upload any file type
+gist.new.ai-recommend-topics: AI Recommend
 
 gist.edit.editing: Editing
 gist.edit.edit-gist: Edit %s
@@ -311,6 +312,22 @@ admin.disable-login: Disable login form
 admin.disable-login_help: Forbid logging in via the login form to force using OAuth providers instead.
 admin.disable-gravatar: Disable Gravatar
 admin.disable-gravatar_help: Disable the usage of Gravatar as an avatar provider.
+admin.ai-enabled: Enable AI topic recommendation
+admin.ai-enabled_help: Allow users to get AI-powered topic suggestions for their gists.
+admin.ai-configuration: AI Configuration
+admin.ai-api-type: API Type
+admin.ai-api-type_help: Select the AI API provider
+admin.ai-base-url: Base URL
+admin.ai-base-url_help: API base URL (e.g., http://localhost:11434 for Ollama or https://api.openai.com for OpenAI)
+admin.ai-api-key: API Key
+admin.ai-api-key_help: Required for OpenAI and compatible APIs, optional for Ollama
+admin.ai-model: Model
+admin.ai-model_help: Model name to use (e.g., qwen2.5-coder:3b for Ollama or gpt-3.5-turbo for OpenAI)
+admin.ai-system-prompt: System Prompt
+admin.ai-system-prompt_help: System prompt for the AI model
+admin.ai-user-prompt-template: User Prompt Template
+admin.ai-user-prompt-template_help: Template for user prompt. Use {{.Title}}, {{.Description}}, {{.Content}}, {{.Filenames}} as placeholders
+admin.ai-save-settings: Save AI Settings
 
 admin.users.delete_confirm: Do you want to delete this user ?
 

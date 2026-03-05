@@ -451,11 +451,110 @@ document.addEventListener("DOMContentLoaded", () => {
     fileUploadZone.addEventListener('drop', (e) => {
         e.preventDefault();
         fileUploadZone.classList.remove('border-primary-400', 'dark:border-primary-500');
-        
+
         const files = e.dataTransfer?.files;
         if (files) {
             handleFiles(files);
         }
     });
+
+    // AI topic recommendation
+    const aiRecommendBtn = document.getElementById('ai-recommend-topics');
+    if (aiRecommendBtn) {
+        aiRecommendBtn.addEventListener('click', recommendTopics);
+    }
+
+    function recommendTopics() {
+        // @ts-ignore
+        const baseUrl = window.opengist_base_url || '';
+        const csrf = document.querySelector<HTMLInputElement>('form#create input[name="_csrf"]')?.value || '';
+        
+        const title = (document.getElementById('title') as HTMLInputElement)?.value || '';
+        const description = (document.getElementById('description') as HTMLInputElement)?.value || '';
+        const topicsInput = document.getElementById('topics') as HTMLInputElement;
+        
+        // Get content from all editors
+        const editors = document.querySelectorAll('.editor');
+        let content = '';
+        const filenames: string[] = [];
+        
+        editors.forEach((editor) => {
+            const filenameEl = editor.querySelector('.form-filename') as HTMLInputElement;
+            if (filenameEl) {
+                filenames.push(filenameEl.value);
+            }
+            // Get content from codemirror editor if available
+            const cmEditor = editor.querySelector('.cm-content') as HTMLElement;
+            if (cmEditor) {
+                content += cmEditor.textContent + '\n\n';
+            }
+        });
+        
+        const loadingIcon = document.getElementById('ai-loading-icon') as SVGElement;
+        const statusEl = document.getElementById('ai-recommend-status') as HTMLElement;
+        
+        if (loadingIcon) loadingIcon.classList.remove('hidden');
+        if (statusEl) {
+            statusEl.textContent = '';
+            statusEl.classList.remove('text-rose-500', 'text-green-500');
+        }
+        aiRecommendBtn.disabled = true;
+        
+        // @ts-ignore
+        const data = new URLSearchParams();
+        data.append('title', title);
+        data.append('description', description);
+        data.append('content', content.substring(0, 5000)); // Limit content length
+        data.append('filenames', filenames.join(','));
+        data.append('_csrf', csrf);
+        
+        fetch(`${baseUrl}/api/ai/recommend-topics`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: data,
+            headers: {
+                'X-CSRF-Token': csrf
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(result => {
+            if (result.success && result.topics && result.topics.length > 0) {
+                const currentTopics = topicsInput.value.trim();
+                const newTopics = result.topics.join(' ');
+                topicsInput.value = currentTopics ? currentTopics + ' ' + newTopics : newTopics;
+                if (statusEl) {
+                    statusEl.textContent = `Added ${result.topics.length} topic(s)`;
+                    statusEl.classList.remove('text-rose-500');
+                    statusEl.classList.add('text-green-500');
+                }
+            } else {
+                if (statusEl) {
+                    statusEl.textContent = result.error || 'No topics recommended';
+                    statusEl.classList.add('text-rose-500');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error recommending topics:', error);
+            if (statusEl) {
+                statusEl.textContent = 'Error: ' + (error.message || 'Failed to get recommendations');
+                statusEl.classList.add('text-rose-500');
+            }
+        })
+        .finally(() => {
+            if (loadingIcon) loadingIcon.classList.add('hidden');
+            aiRecommendBtn.disabled = false;
+            setTimeout(() => {
+                if (statusEl) {
+                    statusEl.textContent = '';
+                }
+            }, 5000);
+        });
+    }
 
 });

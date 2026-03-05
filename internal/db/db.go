@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm/logger"
 
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/ai"
 	"github.com/thomiceli/opengist/internal/config"
 	"gorm.io/gorm"
 )
@@ -170,6 +171,13 @@ func Setup(dbUri string) error {
 		SettingAllowGistsWithoutLogin: "0",
 		SettingDisableLoginForm:       "0",
 		SettingDisableGravatar:        "0",
+		SettingAIEnabled:              "0",
+		SettingAIAPIType:              "ollama",
+		SettingAIBaseURL:              "http://localhost:11434",
+		SettingAIAPIKey:               "",
+		SettingAIModel:                "qwen2.5-coder:3b",
+		SettingAISystemPrompt:         ai.GetDefaultSystemPrompt(),
+		SettingAIUserPrompt:           ai.GetDefaultUserPromptTemplate(),
 	})
 }
 

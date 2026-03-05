@@ -27,7 +27,17 @@
                     </div>
 
                     <div class="col-span-12 sm:col-span-9 mt-2">
-                        <input type="text" placeholder="{{ .locale.Tr "gist.new.topics" }}" value="{{ .dto.Topics }}" name="topics" id="topics" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
+                        <div class="flex">
+                            <input type="text" placeholder="{{ .locale.Tr "gist.new.topics" }}" value="{{ .dto.Topics }}" name="topics" id="topics" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
+                            <button type="button" id="ai-recommend-topics" class="ml-2 inline-flex items-center px-3 py-2 border border-transparent border-primary-200 dark:border-primary-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 whitespace-nowrap">
+                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white hidden" id="ai-loading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{ .locale.Tr "gist.new.ai-recommend-topics" }}
+                            </button>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" id="ai-recommend-status"></p>
                     </div>
                 </div>
             </div>

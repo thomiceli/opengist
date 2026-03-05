@@ -15,6 +15,15 @@ const (
 	SettingAllowGistsWithoutLogin = "allow-gists-without-login"
 	SettingDisableLoginForm       = "disable-login-form"
 	SettingDisableGravatar        = "disable-gravatar"
+
+	// AI settings
+	SettingAIEnabled        = "ai-enabled"
+	SettingAIAPIType        = "ai-api-type"
+	SettingAIBaseURL        = "ai-base-url"
+	SettingAIAPIKey         = "ai-api-key"
+	SettingAIModel          = "ai-model"
+	SettingAISystemPrompt   = "ai-system-prompt"
+	SettingAIUserPrompt     = "ai-user-prompt-template"
 )
 
 func GetSetting(key string) (string, error) {

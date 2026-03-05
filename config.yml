@@ -121,6 +121,48 @@ oidc.group-claim-name:
 # The name of the group that should receive admin rights
 oidc.admin-group:
 
+# AI topic recommendation configuration
+# Enable or disable AI-powered topic recommendations (either `true` or `false`). Default: false
+ai.enabled: false
+
+# AI API type (either `ollama` or `openai`). Default: ollama
+ai.api-type: ollama
+
+# API base URL. Default: http://localhost:11434
+# For Ollama: http://localhost:11434
+# For OpenAI: https://api.openai.com
+# For DashScope: https://dashscope.aliyuncs.com/compatible-mode/v1
+ai.base-url: http://localhost:11434
+
+# API key for the AI service (optional for Ollama). Default: (empty)
+ai.api-key:
+
+# Model name to use. Default: qwen2.5-coder:3b
+# For Ollama: qwen2.5-coder:3b, llama2, etc.
+# For OpenAI: gpt-3.5-turbo, gpt-4, etc.
+# For DashScope: qwen-plus, qwen-turbo, etc.
+ai.model: qwen2.5-coder:3b
+
+# System prompt for the AI model
+ai.system-prompt: |
+  You are a helpful assistant that suggests relevant topic tags for code snippets. Respond with ONLY 3-5 space-separated topic tags. Each tag should be lowercase, alphanumeric, and hyphenated if needed. Do not include any explanations or additional text.
+
+# User prompt template for the AI model
+# Available placeholders: {{.Title}}, {{.Description}}, {{.Content}}, {{.Filenames}}
+ai.user-prompt-template: |
+  Please suggest relevant topic tags for the following code snippet:
+
+  {{if .Title}}Title: {{.Title}}
+  {{end}}{{if .Description}}Description: {{.Description}}
+  {{end}}{{if .Filenames}}Filenames: {{.Filenames}}
+  {{end}}
+  Content:
+  ```
+  {{.Content}}
+  ```
+
+  Respond with ONLY 3-5 space-separated topic tags (e.g., python web-framework api).
+
 # LDAP authentication configuration
 # URL of the LDAP instance e.g: ldap://ldap.example.com:389 ; if not set, LDAP authentication is disabled
 ldap.url:

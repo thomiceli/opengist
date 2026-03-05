@@ -132,6 +132,28 @@ func AdminConfig(ctx *context.Context) error {
 	ctx.SetData("dbtype", db.DatabaseInfo.Type.String())
 	ctx.SetData("dbname", db.DatabaseInfo.Database)
 
+	// Load AI settings
+	aiEnabled, _ := db.GetSetting(db.SettingAIEnabled)
+	ctx.SetData("AIEnabled", aiEnabled == "1")
+
+	aiAPIType, _ := db.GetSetting(db.SettingAIAPIType)
+	ctx.SetData("AIAPIType", aiAPIType)
+
+	aiBaseURL, _ := db.GetSetting(db.SettingAIBaseURL)
+	ctx.SetData("AIBaseURL", aiBaseURL)
+
+	aiAPIKey, _ := db.GetSetting(db.SettingAIAPIKey)
+	ctx.SetData("AIAPIKey", aiAPIKey)
+
+	aiModel, _ := db.GetSetting(db.SettingAIModel)
+	ctx.SetData("AIModel", aiModel)
+
+	aiSystemPrompt, _ := db.GetSetting(db.SettingAISystemPrompt)
+	ctx.SetData("AISystemPrompt", aiSystemPrompt)
+
+	aiUserPrompt, _ := db.GetSetting(db.SettingAIUserPrompt)
+	ctx.SetData("AIUserPrompt", aiUserPrompt)
+
 	return ctx.Html("admin_config.html")
 }
 

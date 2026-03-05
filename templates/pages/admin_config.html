@@ -84,6 +84,19 @@
             <dt>LDAP Bind Credentials</dt><dd>{{ if .c.LDAPBindCredentials }}&#60;defined&#62;{{ end }}</dd>
             <dt>LDAP Search Base</dt><dd>{{ .c.LDAPSearchBase }}</dd>
             <dt>LDAP Search Filter</dt><dd>{{ .c.LDAPSearchFilter }}</dd>
+            <div class="relative col-span-3 mt-4">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">AI</span>
+                </div>
+            </div>
+            <dt>AI Enabled</dt><dd>{{ .AIEnabled }}</dd>
+            <dt>AI API Type</dt><dd>{{ .AIAPIType }}</dd>
+            <dt>AI Base URL</dt><dd>{{ if .AIBaseURL }}&#60;defined&#62;{{ end }}</dd>
+            <dt>AI API Key</dt><dd>{{ if .AIAPIKey }}&#60;defined&#62;{{ end }}</dd>
+            <dt>AI Model</dt><dd>{{ .AIModel }}</dd>
         </dl>
     </div>
     <div>
@@ -143,7 +156,60 @@
                     </button>
                 </div>
             </li>
+            <li class="list-none gap-x-4 py-5">
+                <div class="flex items-center justify-between">
+                    <span class="flex grow flex-col">
+                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.ai-enabled" }}</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.ai-enabled_help" }}</span>
+                    </span>
+                    <button type="button" id="ai-enabled" data-bool="{{ .AIEnabled }}" class="toggle-button {{ if .AIEnabled }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
+                        <span aria-hidden="true" class="{{ if .AIEnabled }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                    </button>
+                </div>
+            </li>
         </ul>
+        <div class="mt-6 p-6 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-medium text-slate-700 dark:text-slate-300 mb-4">{{ .locale.Tr "admin.ai-configuration" }}</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="ai-api-type" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.ai-api-type" }}</label>
+                    <select id="ai-api-type" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-black shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm text-slate-700 dark:text-slate-300">
+                        <option value="ollama" {{ if eq .AIAPIType "ollama" }}selected{{ end }}>Ollama</option>
+                        <option value="openai" {{ if eq .AIAPIType "openai" }}selected{{ end }}>OpenAI / Compatible</option>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ .locale.Tr "admin.ai-api-type_help" }}</p>
+                </div>
+                <div>
+                    <label for="ai-base-url" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.ai-base-url" }}</label>
+                    <input type="text" id="ai-base-url" value="{{ .AIBaseURL }}" placeholder="http://localhost:11434" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-black shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm text-slate-700 dark:text-slate-300">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ .locale.Tr "admin.ai-base-url_help" }}</p>
+                </div>
+                <div id="ai-api-key-container" {{ if eq .AIAPIType "ollama" }}class="hidden"{{ end }}>
+                    <label for="ai-api-key" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.ai-api-key" }}</label>
+                    <input type="password" id="ai-api-key" value="{{ .AIAPIKey }}" placeholder="sk-..." class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-black shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm text-slate-700 dark:text-slate-300">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ .locale.Tr "admin.ai-api-key_help" }}</p>
+                </div>
+                <div>
+                    <label for="ai-model" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.ai-model" }}</label>
+                    <input type="text" id="ai-model" value="{{ .AIModel }}" placeholder="qwen2.5-coder:3b" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-black shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm text-slate-700 dark:text-slate-300">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ .locale.Tr "admin.ai-model_help" }}</p>
+                </div>
+                <div>
+                    <label for="ai-system-prompt" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.ai-system-prompt" }}</label>
+                    <textarea id="ai-system-prompt" rows="3" placeholder="System prompt" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-black shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm text-slate-700 dark:text-slate-300">{{ .AISystemPrompt }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ .locale.Tr "admin.ai-system-prompt_help" }}</p>
+                </div>
+                <div>
+                    <label for="ai-user-prompt-template" class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.ai-user-prompt-template" }}</label>
+                    <textarea id="ai-user-prompt-template" rows="8" placeholder="User prompt template" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-black shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm text-slate-700 dark:text-slate-300 font-mono">{{ .AIUserPrompt }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ .locale.Tr "admin.ai-user-prompt-template_help" }}</p>
+                </div>
+                <button type="button" id="save-ai-settings" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    {{ .locale.Tr "admin.ai-save-settings" }}
+                </button>
+                <span id="ai-save-status" class="ml-2 text-sm text-gray-500 dark:text-gray-400"></span>
+            </div>
+        </div>
         {{ .csrfHtml }}
     </div>
 </div>

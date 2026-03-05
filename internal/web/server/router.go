@@ -30,6 +30,7 @@ func (s *Server) registerRoutes() {
 		r.POST("/preview", gist.Preview, logged)
 		r.POST("/upload", gist.Upload, logged)
 		r.DELETE("/upload/:uuid", gist.DeleteUpload, logged)
+		r.POST("/api/ai/recommend-topics", gist.RecommendTopics, logged)
 
 		r.GET("/healthcheck", health.Healthcheck)
 

@@ -1,4 +1,4 @@
-name: ci
+name: docker_images
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    environment: dockerhub
     steps:
       - name: Set up Docker
         uses: docker/setup-docker-action@v4

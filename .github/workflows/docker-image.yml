@@ -29,7 +29,7 @@ jobs:
         # Scope for the authentication token
         scope: # optional
         # Log out from the Docker registry at the end of a job
-        logout: # optional, default is true
+        logout: true
         # Raw authentication to registries, defined as YAML objects
         registry-auth: # optional
             

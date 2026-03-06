@@ -26,6 +26,13 @@ jobs:
             echo "::error::Variable NAME is empty! Check your repository settings."
             exit 1
           fi
+      - name: Generate Unique Tag
+        id: meta_tag
+        run: |
+          DATE=$(date +'%Y%m%d')
+          SHA=${{ github.sha }}
+          SHORT_SHA=${SHA:0:7}
+          echo "tag=v${DATE}-${SHORT_SHA}" >> $GITHUB_OUTPUT
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -39,5 +46,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          load: true
-          tags: ${{ vars.NAME }}/openlist:latest
+          push: true
+          tags: |
+            ${{ vars.NAME }}/opengist:${{ steps.meta_tag.outputs.tag }}
+            ${{ vars.NAME }}/opengist:latest

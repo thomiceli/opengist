@@ -25,7 +25,7 @@ jobs:
         # Password or personal access token used to log against the Docker registry
         password: ${{secrets.TOKEN}}
         # Specifies whether the given registry is ECR (auto, true or false)
-        ecr: # optional
+        ecr: false
         # Scope for the authentication token
         scope: # optional
         # Log out from the Docker registry at the end of a job

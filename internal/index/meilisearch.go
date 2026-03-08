@@ -9,6 +9,7 @@ import (
 
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/config"
 )
 
 type MeiliIndexer struct {
@@ -123,9 +124,25 @@ func (i *MeiliIndexer) Search(queryMetadata SearchGistMetadata, userId uint, pag
 		searchRequest.Filter = strings.Join(filters, " AND ")
 	}
 
-	// build query string from provided metadata. Prefer `All`, fall back to `Content`.
+	// build query string from provided metadata. Prefer `All`, then `Default`, fall back to `Content`.
 	query := queryMetadata.All
-	if query == "" {
+	if query == "" && queryMetadata.Default != "" {
+		query = queryMetadata.Default
+		var fields []string
+		for _, f := range strings.Split(config.C.SearchDefault, ",") {
+			f = strings.TrimSpace(f)
+			if f == "all" {
+				fields = AllSearchFields
+				break
+			}
+			if indexField, ok := SearchFieldMap[f]; ok {
+				fields = append(fields, indexField)
+			}
+		}
+		if len(fields) > 0 {
+			searchRequest.AttributesToSearchOn = fields
+		}
+	} else if query == "" {
 		query = queryMetadata.Content
 	}
 

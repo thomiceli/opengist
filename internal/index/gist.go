@@ -1,5 +1,18 @@
 package index
 
+var AllSearchFields = []string{"Username", "Title", "Description", "Filenames", "Extensions", "Languages", "Topics", "Content"}
+
+var SearchFieldMap = map[string]string{
+	"user":        "Username",
+	"title":       "Title",
+	"description": "Description",
+	"filename":    "Filenames",
+	"extension":   "Extensions",
+	"language":    "Languages",
+	"topic":       "Topics",
+	"content":     "Content",
+}
+
 type Gist struct {
 	GistID      uint
 	UserID      uint
@@ -26,4 +39,5 @@ type SearchGistMetadata struct {
 	Language    string
 	Topic       string
 	All         string
+	Default     string
 }

@@ -3,6 +3,7 @@ package index
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
@@ -12,6 +13,7 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/config"
 )
 
 type BleveIndexer struct {
@@ -174,21 +176,24 @@ func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int
 	accessQuery := bleve.NewDisjunctionQuery(publicQuery, userIdQuery)
 	indexerQuery = bleve.NewConjunctionQuery(accessQuery, indexerQuery)
 
+	buildFieldQuery := func(field, value string) query.Query {
+		switch field {
+		case "Title", "Description", "Filenames", "Content":
+			return factoryFuzzyQuery(field, value)
+		case "Extensions":
+			return factoryQuery(field, "."+value)
+		default: // Username, Languages, Topics
+			return factoryQuery(field, value)
+		}
+	}
+
 	// Handle "All" field - search across all metadata fields with OR logic
 	if metadata.All != "" {
-		allQueries := make([]query.Query, 0)
-		allQueries = append(allQueries, factoryQuery("Username", metadata.All))
-		allQueries = append(allQueries, factoryFuzzyQuery("Title", metadata.All))
-		allQueries = append(allQueries, factoryFuzzyQuery("Description", metadata.All))
-		allQueries = append(allQueries, factoryQuery("Extensions", "."+metadata.All))
-		allQueries = append(allQueries, factoryFuzzyQuery("Filenames", metadata.All))
-		allQueries = append(allQueries, factoryQuery("Languages", metadata.All))
-		allQueries = append(allQueries, factoryQuery("Topics", metadata.All))
-		allQueries = append(allQueries, factoryFuzzyQuery("Content", metadata.All))
-
-		// Combine all field queries with OR (disjunction)
-		allDisjunction := bleve.NewDisjunctionQuery(allQueries...)
-		indexerQuery = bleve.NewConjunctionQuery(indexerQuery, allDisjunction)
+		allQueries := make([]query.Query, 0, len(AllSearchFields))
+		for _, field := range AllSearchFields {
+			allQueries = append(allQueries, buildFieldQuery(field, metadata.All))
+		}
+		indexerQuery = bleve.NewConjunctionQuery(indexerQuery, bleve.NewDisjunctionQuery(allQueries...))
 	} else {
 		// Original behavior: add each metadata field with AND logic
 		addQuery("Username", metadata.Username)
@@ -199,6 +204,30 @@ func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int
 		addQuery("Languages", metadata.Language)
 		addQuery("Topics", metadata.Topic)
 		addFuzzy("Content", metadata.Content)
+
+		// Handle default search fields from config with OR logic
+		if metadata.Default != "" {
+			var fields []string
+			for _, f := range strings.Split(config.C.SearchDefault, ",") {
+				f = strings.TrimSpace(f)
+				if f == "all" {
+					fields = AllSearchFields
+					break
+				}
+				if indexField, ok := SearchFieldMap[f]; ok {
+					fields = append(fields, indexField)
+				}
+			}
+			if len(fields) == 1 {
+				indexerQuery = bleve.NewConjunctionQuery(indexerQuery, buildFieldQuery(fields[0], metadata.Default))
+			} else if len(fields) > 1 {
+				defaultQueries := make([]query.Query, 0, len(fields))
+				for _, field := range fields {
+					defaultQueries = append(defaultQueries, buildFieldQuery(field, metadata.Default))
+				}
+				indexerQuery = bleve.NewConjunctionQuery(indexerQuery, bleve.NewDisjunctionQuery(defaultQueries...))
+			}
+		}
 	}
 
 	languageFacet := bleve.NewFacetRequest("Languages", 10)

@@ -205,6 +205,7 @@ func Search(ctx *context.Context) error {
 		Topic:       metadata["topic"],
 		Content:     metadata["content"],
 		All:         metadata["all"],
+		Default:     metadata["default"],
 	}, currentUserId, pageInt)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error searching gists", err)

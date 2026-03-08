@@ -77,7 +77,7 @@ gist.list.all-from: Всі gists від %s
 gist.search.found: gists знайдено
 gist.search.no-results: Не знайдено gists
 gist.search.help.user: gists створені користувачем
-gist.search.help.title: gists з наданим ім'ям 
+gist.search.help.title: gists з наданим ім'ям
 gist.search.help.filename: gists мають файли з наданим ім'ям
 gist.search.help.extension: gists мають файли з наданим розширенням
 gist.search.help.language: gists мають файли з наданою мовою

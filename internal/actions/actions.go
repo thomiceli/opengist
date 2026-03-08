@@ -150,7 +150,12 @@ func resetHooks() {
 }
 
 func indexGists() {
-	log.Info().Msg("Indexing all Gists...")
+	log.Info().Msg("Rebuilding index from scratch...")
+	if err := index.ResetIndex(); err != nil {
+		log.Error().Err(err).Msg("Cannot reset index")
+		return
+	}
+
 	gists, err := db.GetAllGistsRows()
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get gists")

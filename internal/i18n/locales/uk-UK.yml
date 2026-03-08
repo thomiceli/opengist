@@ -192,7 +192,7 @@ admin.actions.sync-db: Синхронізувати gists з базою дани
 admin.actions.git-gc: Збір сміття з репозиторіїв Git
 admin.actions.sync-previews: Синхронізувати всі gists перегляди
 admin.actions.reset-hooks: Скинути серверні Git hooks для всіх репозиторіїв
-admin.actions.index-gists: Проіндексувати всі gists
+admin.actions.index-gists: Перебудувати пошуковий індекс
 admin.id: ID
 admin.user: Користувач
 admin.delete: Видалити
@@ -236,7 +236,7 @@ flash.admin.sync-db: Синхронізація репозиторіїв за б
 flash.admin.git-gc: Збір сміття з репозиторіїв...
 flash.admin.sync-previews: Синхронізація Gist переглядів...
 flash.admin.reset-hooks: Скидання cерверниз Git hooks для всіх репозиторіїв...
-flash.admin.index-gists: Індексація всіх gists...
+flash.admin.index-gists: Перебудова пошукового індексу...
 
 flash.auth.username-exists: Це ім'я користувача вже існує
 flash.auth.invalid-credentials: Недійсні облікові дані

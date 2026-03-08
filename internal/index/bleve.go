@@ -2,6 +2,8 @@ package index
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/blevesearch/bleve/v2"
@@ -80,6 +82,15 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 	mapping.DefaultMapping = docMapping
 
 	return bleve.New(i.path, mapping)
+}
+
+func (i *BleveIndexer) Reset() error {
+	i.Close()
+	if err := os.RemoveAll(i.path); err != nil {
+		return fmt.Errorf("failed to remove Bleve index directory: %w", err)
+	}
+	log.Info().Msg("Bleve index directory removed, re-creating index")
+	return i.Init()
 }
 
 func (i *BleveIndexer) Close() {

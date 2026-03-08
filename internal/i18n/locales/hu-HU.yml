@@ -170,7 +170,7 @@ admin.actions.sync-db: Gistek szinkronizálása az adatbázissal
 admin.actions.git-gc: Használatlan git repository-k eltávolítása
 admin.actions.sync-previews: Gist előnézetek szinkronizálása
 admin.actions.reset-hooks: Git server hook-ok alaphelyzetbe állítása minden repository-nál
-admin.actions.index-gists: Gistek indexelése
+admin.actions.index-gists: Keresési index újraépítése
 admin.id: Azonosító
 admin.user: Felhasználó
 admin.delete: Törlés

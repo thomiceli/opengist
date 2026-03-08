@@ -193,7 +193,7 @@ admin.actions.reset-hooks: Réinitialiser les hooks de Git pour tous les dépôt
 gist.new.url: URL
 gist.search.no-results: Aucun gist trouvé
 settings.unlink-gitlab-account: Détacher le compte GitLab
-admin.actions.index-gists: Indexer tous les gists
+admin.actions.index-gists: Reconstruire l'index de recherche
 gist.new.preview: 'Aperçu'
 gist.new.create-a-new-gist: 'Créer un nouveau gist'
 gist.edit.edit-gist: 'Modifier %s'
@@ -231,7 +231,7 @@ flash.admin.sync-db: 'Synchronisation des dépôts à partir de la base de donn�
 flash.admin.git-gc: 'Nettoyage des dépôts...'
 flash.admin.sync-previews: 'Synchronisation des aperçus du Gist...'
 flash.admin.reset-hooks: 'Réinitialisation des hooks du serveur Git pour tous les dépôts...'
-flash.admin.index-gists: 'Indexation de tous les gists...'
+flash.admin.index-gists: 'Reconstruction de l''index de recherche...'
 flash.auth.username-exists: 'Nom d''utilisateur déjà utilisé'
 flash.auth.invalid-credentials: 'Identifiants non valides'
 flash.auth.account-linked-oauth: 'Compte lié à %s'

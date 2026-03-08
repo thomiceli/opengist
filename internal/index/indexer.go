@@ -2,10 +2,11 @@ package index
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"github.com/thomiceli/opengist/internal/config"
 	"path/filepath"
 	"sync/atomic"
+
+	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/config"
 )
 
 var atomicIndexer atomic.Pointer[Indexer]
@@ -13,6 +14,7 @@ var atomicIndexer atomic.Pointer[Indexer]
 type Indexer interface {
 	Init() error
 	Close()
+	Reset() error
 	Add(gist *Gist) error
 	Remove(gistID uint) error
 	Search(query string, metadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error)
@@ -82,6 +84,19 @@ func Close() {
 
 	(*idx).Close()
 	atomicIndexer.Store(nil)
+}
+
+func ResetIndex() error {
+	if !IndexEnabled() {
+		return nil
+	}
+
+	idx := atomicIndexer.Load()
+	if idx == nil {
+		return fmt.Errorf("indexer is not initialized")
+	}
+
+	return (*idx).Reset()
 }
 
 func AddInIndex(gist *Gist) error {

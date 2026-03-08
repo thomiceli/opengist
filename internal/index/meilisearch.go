@@ -72,6 +72,21 @@ func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
 	return i.client.Index(i.indexName), nil
 }
 
+func (i *MeiliIndexer) Reset() error {
+	if i.client != nil {
+		taskInfo, err := i.client.DeleteIndex(i.indexName)
+		if err != nil {
+			return fmt.Errorf("failed to delete Meilisearch index: %w", err)
+		}
+		_, err = i.client.WaitForTask(taskInfo.TaskUID, 0)
+		if err != nil {
+			return fmt.Errorf("failed to wait for Meilisearch index deletion: %w", err)
+		}
+		log.Info().Msg("Meilisearch index deleted, re-creating index")
+	}
+	return i.Init()
+}
+
 func (i *MeiliIndexer) Close() {
 	if i.client != nil {
 		i.client.Close()

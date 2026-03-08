@@ -3,7 +3,7 @@
 # https://github.com/thomiceli/opengist/blob/master/docs/configuration/cheat-sheet.md
 
 # Set the log level to one of the following: debug, info, warn, error, fatal. Default: warn
-log-level: debug
+log-level: warn
 
 # Set the log output to one or more of the following: `stdout`, `file`. Default: stdout,file
 log-output: stdout,file
@@ -24,10 +24,10 @@ secret-key:
 db-uri: opengist.db
 
 # Define the code indexer (either `bleve`, `meilisearch`, or empty for no index). Default: bleve
-index: meilisearch
+index: bleve
 
 # Set the host for the Meiliseach server
-index.meili.host: http://localhost:7700
+index.meili.host:
 
 # Set the API key for the Meiliseach server
 index.meili.api-key:

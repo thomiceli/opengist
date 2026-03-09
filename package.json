@@ -22,7 +22,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.1",
     "codemirror": "^6.0.2",
-    "github-markdown-css": "^5.8.1",
+    "github-markdown-css": "^5.9.0",
     "highlight.js": "^11.11.1",
     "jdenticon": "^3.3.0",
     "katex": "^0.16.33",

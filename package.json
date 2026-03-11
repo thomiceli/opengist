@@ -13,7 +13,7 @@
   "devDependencies": {
     "@catppuccin/highlightjs": "^1.0.1",
     "@codemirror/commands": "^6.10.1",
-    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/language": "^6.12.2",
     "@codemirror/state": "^6.5.4",
     "@codemirror/text": "^0.19.6",

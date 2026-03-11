@@ -32,6 +32,10 @@ index.meili.host:
 # Set the API key for the Meiliseach server
 index.meili.api-key:
 
+# Set the default search fields. Can contain multiple fields (e.g., `content,username`).
+# Fields: content,user,title,description,filename,extension,language,topic. Default: content
+search.default: content
+
 # Default branch name used by Opengist when initializing Git repositories.
 # If not set, uses the Git default branch name. See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup#_new_default_branch
 git.default-branch:

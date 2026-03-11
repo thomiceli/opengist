@@ -10,6 +10,7 @@ import (
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
+	"github.com/blevesearch/bleve/v2/analysis/token/length"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
 	"github.com/blevesearch/bleve/v2/analysis/token/unicodenorm"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
@@ -56,14 +57,9 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 		return nil, err
 	}
 
-	docMapping := bleve.NewDocumentMapping()
-	docMapping.AddFieldMappingsAt("GistID", bleve.NewNumericFieldMapping())
-	docMapping.AddFieldMappingsAt("UserID", bleve.NewNumericFieldMapping())
-	docMapping.AddFieldMappingsAt("Visibility", bleve.NewNumericFieldMapping())
-	docMapping.AddFieldMappingsAt("Content", bleve.NewTextFieldMapping())
-
 	mapping := bleve.NewIndexMapping()
 
+	// Token filters
 	if err = mapping.AddCustomTokenFilter("unicodeNormalize", map[string]any{
 		"type": unicodenorm.Name,
 		"form": unicodenorm.NFC,
@@ -71,16 +67,74 @@ func (i *BleveIndexer) open() (bleve.Index, error) {
 		return nil, err
 	}
 
-	if err = mapping.AddCustomAnalyzer("gistAnalyser", map[string]interface{}{
-		"type":          custom.Name,
-		"char_filters":  []string{},
-		"tokenizer":     unicode.Name,
-		"token_filters": []string{"unicodeNormalize", camelcase.Name, lowercase.Name},
+	if err = mapping.AddCustomTokenFilter("lengthMin2", map[string]interface{}{
+		"type": length.Name,
+		"min":  2.0,
 	}); err != nil {
 		return nil, err
 	}
 
-	docMapping.DefaultAnalyzer = "gistAnalyser"
+	// Analyzer: split mode (camelCase splitting for partial search)
+	// "CPUCard" -> ["cpu", "card"]
+	if err = mapping.AddCustomAnalyzer("codeSplit", map[string]interface{}{
+		"type":          custom.Name,
+		"char_filters":  []string{},
+		"tokenizer":     unicode.Name,
+		"token_filters": []string{"unicodeNormalize", camelcase.Name, lowercase.Name, "lengthMin2"},
+	}); err != nil {
+		return nil, err
+	}
+
+	// Analyzer: exact mode (no camelCase splitting for full-word search)
+	// "CPUCard" -> ["cpucard"]
+	if err = mapping.AddCustomAnalyzer("codeExact", map[string]interface{}{
+		"type":          custom.Name,
+		"char_filters":  []string{},
+		"tokenizer":     unicode.Name,
+		"token_filters": []string{"unicodeNormalize", lowercase.Name},
+	}); err != nil {
+		return nil, err
+	}
+
+	// Analyzer: keyword with lowercase (for Languages - single token, no splitting)
+	if err = mapping.AddCustomAnalyzer("lowercaseKeyword", map[string]interface{}{
+		"type":          custom.Name,
+		"char_filters":  []string{},
+		"tokenizer":     "single",
+		"token_filters": []string{lowercase.Name},
+	}); err != nil {
+		return nil, err
+	}
+
+	// Document mapping
+	docMapping := bleve.NewDocumentMapping()
+	docMapping.AddFieldMappingsAt("GistID", bleve.NewNumericFieldMapping())
+	docMapping.AddFieldMappingsAt("UserID", bleve.NewNumericFieldMapping())
+	docMapping.AddFieldMappingsAt("Visibility", bleve.NewNumericFieldMapping())
+
+	// Content: dual indexing (exact + split)
+	// "Content" uses the property name so Bleve resolves its analyzer correctly
+	contentExact := bleve.NewTextFieldMapping()
+	contentExact.Name = "Content"
+	contentExact.Analyzer = "codeExact"
+	contentExact.Store = false
+	contentExact.IncludeTermVectors = true
+
+	contentSplit := bleve.NewTextFieldMapping()
+	contentSplit.Name = "ContentSplit"
+	contentSplit.Analyzer = "codeSplit"
+	contentSplit.Store = false
+	contentSplit.IncludeTermVectors = true
+
+	docMapping.AddFieldMappingsAt("Content", contentExact, contentSplit)
+
+	// Languages: keyword analyzer (preserves as single token)
+	languageFieldMapping := bleve.NewTextFieldMapping()
+	languageFieldMapping.Analyzer = "lowercaseKeyword"
+	docMapping.AddFieldMappingsAt("Languages", languageFieldMapping)
+
+	// All other text fields use codeSplit as default
+	docMapping.DefaultAnalyzer = "codeSplit"
 	mapping.DefaultMapping = docMapping
 
 	return bleve.New(i.path, mapping)
@@ -154,23 +208,74 @@ func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int
 		}
 	}
 
-	// Exact+fuzzy query factory: exact match is boosted so it ranks above fuzzy-only matches
-	factoryFuzzyQuery := func(field, value string) query.Query {
+	// Query factory for text fields: exact match boosted + match query + prefix
+	factoryTextQuery := func(field, value string) query.Query {
 		exact := bleve.NewMatchPhraseQuery(value)
 		exact.SetField(field)
 		exact.SetBoost(2.0)
 
 		fuzzy := bleve.NewMatchQuery(value)
 		fuzzy.SetField(field)
-		fuzzy.SetFuzziness(2)
+		fuzzy.SetFuzziness(1)
+		fuzzy.SetOperator(query.MatchQueryOperatorAnd)
 
-		return bleve.NewDisjunctionQuery(exact, fuzzy)
+		queries := []query.Query{exact, fuzzy}
+
+		if len([]rune(value)) >= 2 {
+			prefix := bleve.NewPrefixQuery(strings.ToLower(value))
+			prefix.SetField(field)
+			prefix.SetBoost(1.5)
+			queries = append(queries, prefix)
+		}
+
+		if len([]rune(value)) >= 4 {
+			wildcard := bleve.NewWildcardQuery("*" + strings.ToLower(value) + "*")
+			wildcard.SetField(field)
+			wildcard.SetBoost(0.5)
+			queries = append(queries, wildcard)
+		}
+
+		return bleve.NewDisjunctionQuery(queries...)
 	}
 
-	// Exact+fuzzy search
-	addFuzzy := func(field, value string) {
+	// Query factory for Content: searches both exact (Content) and split (ContentSplit) fields
+	factoryContentQuery := func(value string) query.Query {
+		// Exact field (no camelCase split): matches "cpucard"
+		exactMatch := bleve.NewMatchQuery(value)
+		exactMatch.SetField("Content")
+		exactMatch.SetOperator(query.MatchQueryOperatorAnd)
+		exactMatch.SetBoost(2.0)
+
+		// Split field (camelCase split): matches "cpu", "card"
+		splitMatch := bleve.NewMatchQuery(value)
+		splitMatch.SetField("ContentSplit")
+		splitMatch.SetFuzziness(1)
+		splitMatch.SetOperator(query.MatchQueryOperatorAnd)
+		splitMatch.SetBoost(1.0)
+
+		queries := []query.Query{exactMatch, splitMatch}
+
+		if len([]rune(value)) >= 2 {
+			prefix := bleve.NewPrefixQuery(strings.ToLower(value))
+			prefix.SetField("Content")
+			prefix.SetBoost(1.5)
+			queries = append(queries, prefix)
+		}
+
+		if len([]rune(value)) >= 4 {
+			wildcard := bleve.NewWildcardQuery("*" + strings.ToLower(value) + "*")
+			wildcard.SetField("Content")
+			wildcard.SetBoost(0.5)
+			queries = append(queries, wildcard)
+		}
+
+		return bleve.NewDisjunctionQuery(queries...)
+	}
+
+	// Text field search
+	addTextQuery := func(field, value string) {
 		if value != "" && value != "." {
-			indexerQuery = bleve.NewConjunctionQuery(indexerQuery, factoryFuzzyQuery(field, value))
+			indexerQuery = bleve.NewConjunctionQuery(indexerQuery, factoryTextQuery(field, value))
 		}
 	}
 
@@ -189,8 +294,10 @@ func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int
 
 	buildFieldQuery := func(field, value string) query.Query {
 		switch field {
-		case "Title", "Description", "Filenames", "Content":
-			return factoryFuzzyQuery(field, value)
+		case "Content":
+			return factoryContentQuery(value)
+		case "Title", "Description", "Filenames":
+			return factoryTextQuery(field, value)
 		case "Extensions":
 			return factoryQuery(field, "."+value)
 		default: // Username, Languages, Topics
@@ -208,13 +315,15 @@ func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int
 	} else {
 		// Original behavior: add each metadata field with AND logic
 		addQuery("Username", metadata.Username)
-		addFuzzy("Title", metadata.Title)
-		addFuzzy("Description", metadata.Description)
+		addTextQuery("Title", metadata.Title)
+		addTextQuery("Description", metadata.Description)
 		addQuery("Extensions", "."+metadata.Extension)
-		addFuzzy("Filenames", metadata.Filename)
+		addTextQuery("Filenames", metadata.Filename)
 		addQuery("Languages", metadata.Language)
 		addQuery("Topics", metadata.Topic)
-		addFuzzy("Content", metadata.Content)
+		if metadata.Content != "" {
+			indexerQuery = bleve.NewConjunctionQuery(indexerQuery, factoryContentQuery(metadata.Content))
+		}
 
 		// Handle default search fields from config with OR logic
 		if metadata.Default != "" {

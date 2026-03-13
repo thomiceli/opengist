@@ -16,7 +16,7 @@ require (
 	github.com/gorilla/schema v1.4.1
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
-	github.com/labstack/echo-contrib v0.17.4
+	github.com/labstack/echo-contrib v0.18.0
 	github.com/labstack/echo/v4 v4.15.1
 	github.com/markbates/goth v1.82.0
 	github.com/meilisearch/meilisearch-go v0.36.1

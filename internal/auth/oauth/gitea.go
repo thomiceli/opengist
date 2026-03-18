@@ -2,16 +2,15 @@ package oauth
 
 import (
 	gocontext "context"
-	gojson "encoding/json"
+
+	"net/http"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/gitea"
-	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"io"
-	"net/http"
 )
 
 type GiteaProvider struct {
@@ -80,34 +79,7 @@ func (p *GiteaCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 
 func (p *GiteaCallbackProvider) UpdateUserDB(user *db.User) {
 	user.GiteaID = p.User.UserID
-
-	resp, err := http.Get(urlJoin(config.C.GiteaUrl, "/api/v1/users/", p.User.UserID))
-	if err != nil {
-		log.Error().Err(err).Msg("Cannot get user from Gitea")
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Error().Err(err).Msg("Cannot read Gitea response body")
-		return
-	}
-
-	var result map[string]interface{}
-	err = gojson.Unmarshal(body, &result)
-	if err != nil {
-		log.Error().Err(err).Msg("Cannot unmarshal Gitea response body")
-		return
-	}
-
-	field, ok := result["avatar_url"]
-	if !ok {
-		log.Error().Msg("Field 'avatar_url' not found in Gitea JSON response")
-		return
-	}
-
-	user.AvatarURL = field.(string)
+	user.AvatarURL = p.User.AvatarURL
 }
 
 func NewGiteaCallbackProvider(user *goth.User) CallbackProvider {

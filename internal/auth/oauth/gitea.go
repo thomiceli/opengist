@@ -81,7 +81,14 @@ func (p *GiteaCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 func (p *GiteaCallbackProvider) UpdateUserDB(user *db.User) {
 	user.GiteaID = p.User.UserID
 
-	resp, err := http.Get(urlJoin(config.C.GiteaUrl, "/api/v1/users/", p.User.UserID))
+	req, err := http.NewRequest("GET", urlJoin(config.C.GiteaUrl, "/api/v1/user"), http.NoBody)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot create Gitea API request")
+		return
+	}
+	req.Header.Set("Authorization", "token "+p.User.AccessToken)
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get user from Gitea")
 		return

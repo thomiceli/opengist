@@ -131,6 +131,19 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if or .Values.deployment.env .Values.deployment.envFromSecrets }}
+          env:
+          {{- if .Values.deployment.env }}
+            {{- toYaml .Values.deployment.env | nindent 12 }}
+          {{- end }}
+          {{- range .Values.deployment.envFromSecrets }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+          {{- end }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.http.port }}

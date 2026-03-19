@@ -258,6 +258,13 @@ autoscaling:
 ## Additional deployment configuration
 deployment:
   env: []
+  ## Load environment variables from specific secret keys
+  ## Each entry creates an env.valueFrom.secretKeyRef in the container spec
+  ## ref: https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+  envFromSecrets: []
+  # - name: OG_OIDC_SECRET
+  #   secretName: opengist-oidc-client-secret
+  #   secretKey: client_secret
   terminationGracePeriodSeconds: 60
   labels: {}
   annotations: {}

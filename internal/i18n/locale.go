@@ -20,10 +20,25 @@ type LocaleStore struct {
 	Locales map[string]*Locale
 }
 
+// rtlLocales contains language codes that are written right-to-left
+var rtlLocales = map[string]bool{
+	"ar": true,
+	"he": true,
+	"fa": true,
+	"ur": true,
+}
+
 type Locale struct {
 	Code     string
 	Name     string
 	Messages map[string]string
+}
+
+// IsRTL returns true if the locale uses right-to-left text direction
+func (l *Locale) IsRTL() bool {
+	// Check by BCP 47 language tag prefix (e.g. "ar" from "ar-SA")
+	parts := strings.SplitN(l.Code, "-", 2)
+	return rtlLocales[strings.ToLower(parts[0])]
 }
 
 // NewLocaleStore creates a new LocaleStore
@@ -55,6 +70,8 @@ func (store *LocaleStore) loadLocaleFromYAML(localeCode, path string) error {
 		name = "English"
 	case language.EuropeanSpanish:
 		name = "Español"
+	case language.Arabic:
+		name = "العربية"
 	}
 
 	locale := &Locale{

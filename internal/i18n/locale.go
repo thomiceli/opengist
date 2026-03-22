@@ -139,3 +139,17 @@ func (l *Locale) Tr(key string, args ...any) template.HTML {
 
 	return template.HTML(fmt.Sprintf(message, args...))
 }
+
+// rtlLocales contains the set of locale codes that use right-to-left text direction.
+var rtlLocales = map[string]bool{
+	"ar-SA": true,
+	"ar":    true,
+	"he":    true,
+	"fa":    true,
+	"ur":    true,
+}
+
+// IsRTL returns true if the locale uses right-to-left text direction.
+func (l *Locale) IsRTL() bool {
+	return rtlLocales[l.Code]
+}

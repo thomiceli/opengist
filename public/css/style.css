@@ -2,6 +2,7 @@
     --red-diff: rgba(255, 0, 0, .1);
     --green-diff: rgba(0, 255, 128, .1);
     --git-diff: rgba(143, 143, 143, 0.38);
+    --font-mono: Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
 html {
@@ -25,7 +26,7 @@ pre {
 }
 
 .code {
-    font-family: Menlo,Consolas,Liberation Mono,monospace;
+    font-family: var(--font-mono);
 }
 
 .code .line-num {
@@ -238,7 +239,7 @@ dl.dl-config dd {
 [dir="rtl"] .cm-content {
     direction: ltr;
     text-align: left;
-    font-family: Menlo, Consolas, 'Liberation Mono', monospace;
+    font-family: var(--font-mono);
 }
 
 /* Line numbers in RTL */

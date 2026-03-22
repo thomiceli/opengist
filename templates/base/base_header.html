@@ -1,6 +1,6 @@
 {{ define "header" }}
 <!DOCTYPE html>
-<html lang="en" class="h-full {{ if eq (mainTheme .currentStyle) "dark"}} dark{{ end }}" data-theme="{{ mainTheme .currentStyle }}">
+<html lang="{{ .locale.Code }}" dir="{{ if .locale.IsRTL }}rtl{{ else }}ltr{{ end }}" class="h-full {{ if eq (mainTheme .currentStyle) "dark"}} dark{{ end }}" data-theme="{{ mainTheme .currentStyle }}">
 <head>
     <meta charset="UTF-8" />
     {{ if .NoIndex }}
@@ -30,6 +30,12 @@
         <link rel="icon" type="image/png" sizes="32x32" href="{{ asset "img/favicon-32.png" }}">
     {{ end }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {{ if .locale.IsRTL }}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap">
+    {{ end }}
 
     {{ if dev }}
         <script type="module" src="{{ asset "@vite/client" }}"></script>

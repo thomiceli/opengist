@@ -2,6 +2,7 @@
     --red-diff: rgba(255, 0, 0, .1);
     --green-diff: rgba(0, 255, 128, .1);
     --git-diff: rgba(143, 143, 143, 0.38);
+    --font-mono: Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
 html {
@@ -25,7 +26,7 @@ pre {
 }
 
 .code {
-    font-family: Menlo,Consolas,Liberation Mono,monospace;
+    font-family: var(--font-mono);
 }
 
 .code .line-num {
@@ -192,4 +193,72 @@ dl.dl-config dd {
 
 .pdfobject-container {
     @apply min-h-[700px] h-[700px];
+}
+
+/* ─── Arabic / RTL Support ──────────────────────────────────────────────── */
+
+:root:lang(ar),
+[dir="rtl"] {
+    font-family: 'Tajawal', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.7;
+    letter-spacing: 0;
+}
+
+/* Flip inline spacing for RTL nav items */
+[dir="rtl"] .sm\:ml-6 {
+    margin-left: 0;
+    margin-right: 1.5rem;
+}
+
+[dir="rtl"] .sm\:ml-3,
+[dir="rtl"] .ml-3 {
+    margin-left: 0;
+    margin-right: 0.75rem;
+}
+
+[dir="rtl"] .mr-1 {
+    margin-right: 0;
+    margin-left: 0.25rem;
+}
+
+/* Text alignment for RTL */
+[dir="rtl"] .text-left {
+    text-align: right;
+}
+
+[dir="rtl"] .text-right {
+    text-align: left;
+}
+
+/* Code blocks stay LTR even in RTL mode */
+[dir="rtl"] pre,
+[dir="rtl"] code,
+[dir="rtl"] .code,
+[dir="rtl"] .cm-editor,
+[dir="rtl"] .cm-line,
+[dir="rtl"] .cm-content {
+    direction: ltr;
+    text-align: left;
+    font-family: var(--font-mono);
+}
+
+/* Line numbers in RTL */
+[dir="rtl"] .line-num {
+    text-align: left;
+}
+
+/* Inset shadow for selected line flipped */
+[dir="rtl"] .line-code.selected {
+    box-shadow: inset -4px 0 0 rgb(255, 213, 65) !important;
+}
+
+[dir="rtl"] .dark .line-code.selected {
+    box-shadow: inset -4px 0 0 rgb(161, 128, 21) !important;
+}
+
+/* Footer language picker RTL */
+[dir="rtl"] #language-list {
+    right: auto;
+    left: 0;
+    transform-origin: bottom-left;
 }

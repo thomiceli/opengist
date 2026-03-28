@@ -210,6 +210,11 @@ dl.dl-config dd {
     margin-right: 1.5rem;
 }
 
+[dir="rtl"] .sm\:mr-6 {
+    margin-right: 0;
+    margin-left: 1.5rem;
+}
+
 [dir="rtl"] .sm\:ml-3,
 [dir="rtl"] .ml-3 {
     margin-left: 0;
@@ -221,6 +226,28 @@ dl.dl-config dd {
     margin-left: 0.25rem;
 }
 
+/* Navigation bar RTL adjustments */
+[dir="rtl"] nav .space-x-4 > * + * {
+    margin-left: 0;
+    margin-right: 1rem;
+}
+
+[dir="rtl"] nav .space-x-8 > * + * {
+    margin-left: 0;
+    margin-right: 2rem;
+}
+
+/* Absolute positioning flip for RTL mobile menu button */
+[dir="rtl"] .absolute.inset-y-0.left-0 {
+    left: auto;
+    right: 0;
+}
+
+[dir="rtl"] .absolute.inset-y-0.right-0 {
+    right: auto;
+    left: 0;
+}
+
 /* Text alignment for RTL */
 [dir="rtl"] .text-left {
     text-align: right;
@@ -229,6 +256,16 @@ dl.dl-config dd {
 [dir="rtl"] .text-right {
     text-align: left;
 }
+
+/* Padding/margin directional flips */
+[dir="rtl"] .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+[dir="rtl"] .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+[dir="rtl"] .pl-4 { padding-left: 0; padding-right: 1rem; }
+[dir="rtl"] .pr-4 { padding-right: 0; padding-left: 1rem; }
+[dir="rtl"] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+[dir="rtl"] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+[dir="rtl"] .ml-4 { margin-left: 0; margin-right: 1rem; }
+[dir="rtl"] .mr-4 { margin-right: 0; margin-left: 1rem; }
 
 /* Code blocks stay LTR even in RTL mode */
 [dir="rtl"] pre,
@@ -254,6 +291,47 @@ dl.dl-config dd {
 
 [dir="rtl"] .dark .line-code.selected {
     box-shadow: inset -4px 0 0 rgb(161, 128, 21) !important;
+}
+
+/* Form inputs directional */
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="password"],
+[dir="rtl"] input[type="search"],
+[dir="rtl"] textarea {
+    text-align: right;
+    direction: rtl;
+}
+
+/* Dropdown/select menus */
+[dir="rtl"] select {
+    text-align: right;
+    direction: rtl;
+}
+
+/* Border adjustments for RTL tabs/nav */
+[dir="rtl"] .border-l {
+    border-left: none;
+    border-right-width: 1px;
+}
+
+[dir="rtl"] .border-r {
+    border-right: none;
+    border-left-width: 1px;
+}
+
+/* Pagination RTL */
+[dir="rtl"] .pagination .older { order: 1; }
+[dir="rtl"] .pagination .newer { order: -1; }
+
+/* Gist header actions alignment */
+[dir="rtl"] .gist-actions {
+    flex-direction: row-reverse;
+}
+
+/* SVG icons that indicate direction */
+[dir="rtl"] .icon-arrow-right {
+    transform: scaleX(-1);
 }
 
 /* Footer language picker RTL */

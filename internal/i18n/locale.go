@@ -156,3 +156,5 @@ func (l *Locale) Tr(key string, args ...any) template.HTML {
 
 	return template.HTML(fmt.Sprintf(message, args...))
 }
+
+

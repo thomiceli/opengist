@@ -47,7 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const colorhash = () => {
         Array.from(document.querySelectorAll('.table-code .selected')).forEach((el) => el.classList.remove('selected'));
-        const lineEl = document.querySelector<HTMLElement>(location.hash);
+        if (!location.hash) {
+            return;
+        }
+
+        // Hash fragments may be percent-encoded in the URL (for non-ASCII filenames).
+        // Decode and resolve by id to avoid selector parsing issues.
+        let hashId = location.hash.slice(1);
+        try {
+            hashId = decodeURIComponent(hashId);
+        } catch {
+            // Keep the raw hash id when decoding fails.
+        }
+
+        const lineEl = document.getElementById(hashId);
         if (lineEl) {
             const nextSibling = lineEl.nextSibling;
             if (nextSibling instanceof HTMLElement) {

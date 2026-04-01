@@ -165,10 +165,39 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
 	}
 
 	js := fmt.Sprintf(`
-        document.write('<link rel="stylesheet" href=%s>');
-        document.write('<link rel="stylesheet" href=%s>');
-        document.write(%s);
-    `,
+(function() {
+    if (!customElements.get('opengist-embed')) {
+        customElements.define('opengist-embed', class extends HTMLElement {
+            constructor() {
+                super();
+                this.attachShadow({ mode: 'open' });
+            }
+            
+            init(css1, css2, content) {
+                this.shadowRoot.innerHTML = %s
+                    <style>
+                        @import url(${css1});
+                        @import url(${css2});
+                        :host { display: block; all: initial; font-family: sans-serif; }
+                    </style>
+                    <div class="container">${content}</div>
+                %s;
+            }
+        });
+    }
+
+    var currentScript = document.currentScript || (function() {
+        var scripts = document.getElementsByTagName('script');
+        return scripts[scripts.length - 1];
+    })();
+
+    const instance = document.createElement('opengist-embed');
+    instance.init(%s, %s, %s);
+ 	currentScript.parentNode.insertBefore(instance, currentScript.nextSibling);
+})();
+`,
+		"`",
+		"`",
 		string(jsonCssUrl),
 		string(jsonThemeUrl),
 		string(jsonContent),

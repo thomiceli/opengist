@@ -82,6 +82,10 @@ func (p *GiteaCallbackProvider) UpdateUserDB(user *db.User) {
 	user.AvatarURL = p.User.AvatarURL
 }
 
+func (p *GiteaCallbackProvider) IsAdmin() bool {
+	return false
+}
+
 func NewGiteaCallbackProvider(user *goth.User) CallbackProvider {
 	return &GiteaCallbackProvider{
 		User: user,

@@ -2,7 +2,9 @@ package db
 
 import (
 	"fmt"
+
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 type MigrationVersion struct {
@@ -12,60 +14,74 @@ type MigrationVersion struct {
 
 func applyMigrations(dbInfo *databaseInfo) error {
 	switch dbInfo.Type {
-	case SQLite:
-		return applySqliteMigrations()
-	case PostgreSQL, MySQL:
-		return nil
+	case SQLite, PostgreSQL, MySQL:
+		return applyAllMigrations(dbInfo.Type)
 	default:
 		return fmt.Errorf("unknown database type: %s", dbInfo.Type)
 	}
-
 }
 
-func applySqliteMigrations() error {
-	// Create migration table if it doesn't exist
+func applyAllMigrations(dbType databaseType) error {
 	if err := db.AutoMigrate(&MigrationVersion{}); err != nil {
 		log.Fatal().Err(err).Msg("Error creating migration version table")
 		return err
 	}
 
-	// Get the current migration version
 	var currentVersion MigrationVersion
 	db.First(&currentVersion)
 
-	// Define migrations
 	migrations := []struct {
 		Version uint
+		DBTypes []databaseType // nil = all types
 		Func    func() error
 	}{
-		{1, v1_modifyConstraintToSSHKeys},
-		{2, v2_lowercaseEmails},
-		// Add more migrations here as needed
+		{1, []databaseType{SQLite}, v1_modifyConstraintToSSHKeys},
+		{2, []databaseType{SQLite}, v2_lowercaseEmails},
+		{3, nil, v3_normalizedColumns},
 	}
 
-	// Apply migrations
 	for _, m := range migrations {
-		if m.Version > currentVersion.Version {
-			tx := db.Begin()
-			if err := tx.Error; err != nil {
-				log.Fatal().Err(err).Msg("Error starting transaction")
-				return err
-			}
+		if m.Version <= currentVersion.Version {
+			continue
+		}
 
-			if err := m.Func(); err != nil {
-				log.Fatal().Err(err).Msg(fmt.Sprintf("Error applying migration %d:", m.Version))
-				tx.Rollback()
-				return err
-			} else {
-				if err = tx.Commit().Error; err != nil {
-					log.Fatal().Err(err).Msg(fmt.Sprintf("Error committing migration %d:", m.Version))
-					return err
+		// Skip migrations not intended for this DB type
+		if len(m.DBTypes) > 0 {
+			applicable := false
+			for _, t := range m.DBTypes {
+				if t == dbType {
+					applicable = true
+					break
 				}
+			}
+			if !applicable {
+				// Advance version so we don't retry on next startup
 				currentVersion.Version = m.Version
 				db.Save(&currentVersion)
-				log.Info().Msg(fmt.Sprintf("Migration %d applied successfully", m.Version))
+				continue
 			}
 		}
+
+		tx := db.Begin()
+		if err := tx.Error; err != nil {
+			log.Fatal().Err(err).Msg("Error starting transaction")
+			return err
+		}
+
+		if err := m.Func(); err != nil {
+			tx.Rollback()
+			log.Fatal().Err(err).Msg(fmt.Sprintf("Error applying migration %d:", m.Version))
+			return err
+		}
+
+		if err := tx.Commit().Error; err != nil {
+			log.Fatal().Err(err).Msg(fmt.Sprintf("Error committing migration %d:", m.Version))
+			return err
+		}
+
+		currentVersion.Version = m.Version
+		db.Save(&currentVersion)
+		log.Info().Msg(fmt.Sprintf("Migration %d applied successfully", m.Version))
 	}
 
 	return nil
@@ -111,4 +127,13 @@ func v2_lowercaseEmails() error {
 	// Copy the lowercase emails into the new column
 	copySQL := `UPDATE users SET email = lower(email);`
 	return db.Exec(copySQL).Error
+}
+
+func v3_normalizedColumns() error {
+	if err := db.Model(&User{}).Where("username_normalized = '' OR username_normalized IS NULL").
+		Updates(map[string]interface{}{"username_normalized": gorm.Expr("LOWER(username)")}).Error; err != nil {
+		return err
+	}
+	return db.Model(&Gist{}).Where("url_normalized = '' OR url_normalized IS NULL").
+		Updates(map[string]interface{}{"url_normalized": gorm.Expr("LOWER(url)")}).Error
 }

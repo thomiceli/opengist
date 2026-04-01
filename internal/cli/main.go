@@ -2,6 +2,12 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"path"
+	"path/filepath"
+	"syscall"
+
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/auth/webauthn"
 	"github.com/thomiceli/opengist/internal/config"
@@ -12,11 +18,6 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers/metrics"
 	"github.com/thomiceli/opengist/internal/web/server"
 	"github.com/urfave/cli/v2"
-	"os"
-	"os/signal"
-	"path"
-	"path/filepath"
-	"syscall"
 )
 
 var CmdVersion = cli.Command{
@@ -37,7 +38,7 @@ var CmdStart = cli.Command{
 
 		Initialize(ctx)
 
-		httpServer := server.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions"), false)
+		httpServer := server.NewServer(os.Getenv("OG_DEV") == "1")
 		go httpServer.Start()
 		go ssh.Start()
 

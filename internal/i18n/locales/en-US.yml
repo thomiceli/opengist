@@ -88,10 +88,12 @@ gist.search.found: gists found
 gist.search.no-results: No gists found
 gist.search.help.user: gists created by user
 gist.search.help.title: gists with given title
+gist.search.help.description: gists with given description
 gist.search.help.filename: gists having files with given name
 gist.search.help.extension: gists having files with given extension
 gist.search.help.language: gists having files with given language
 gist.search.help.topic: gists with given topic
+gist.search.help.all: search all fields
 gist.search.placeholder.title: Title
 gist.search.placeholder.visibility: Visibility
 gist.search.placeholder.public: Public
@@ -200,6 +202,13 @@ auth.password: Password
 auth.register-instead: Register instead
 auth.login-instead: Login instead
 auth.oauth: Continue with %s account
+auth.oauth.no-provider: OAuth provider not found
+auth.oauth.complete-registration: Complete your registration
+auth.oauth.complete-registration-button: Create account
+auth.oauth.signing-in-with: Signing in with %s
+auth.oauth.cancel: Cancel
+auth.oauth.existing-account: Existing account?
+auth.oauth.already-have-account: If you already have an Opengist account, login first and link your %s account from your settings.
 auth.mfa: Multi-factor authentication
 auth.mfa.passkey: Passkey
 auth.mfa.passkeys: Passkeys
@@ -241,7 +250,7 @@ error.signup-disabled: Signing up is disabled
 error.signup-disabled-form: Signing up via registration form is disabled
 error.login-disabled-form: Logging in via login form is disabled
 error.complete-oauth-login: "Cannot complete user auth: %s"
-error.oauth-unsupported: Unsupported provider
+error.oauth-unsupported: Unsupported OAuth2 provider
 error.cannot-bind-data: Cannot bind data
 error.invalid-number: Invalid number
 error.invalid-character-unescaped: Invalid character unescaped
@@ -285,7 +294,7 @@ admin.actions.sync-db: Synchronize gists from database
 admin.actions.git-gc: Garbage collect all git repositories
 admin.actions.sync-previews: Synchronize all gists previews
 admin.actions.reset-hooks: Reset Git server hooks for all repositories
-admin.actions.index-gists: Index all gists
+admin.actions.index-gists: Rebuild search index
 admin.actions.sync-gist-languages: Synchronize all gists languages
 admin.id: ID
 admin.user: User
@@ -331,7 +340,7 @@ flash.admin.sync-db: Syncing repositories from database...
 flash.admin.git-gc: Garbage collecting repositories...
 flash.admin.sync-previews: Syncing Gist previews...
 flash.admin.reset-hooks: Resetting Git server hooks for all repositories...
-flash.admin.index-gists: Indexing all gists...
+flash.admin.index-gists: Rebuilding search index...
 flash.admin.sync-gist-languages: Syncing Gist languages...
 
 flash.auth.username-exists: Username already exists
@@ -343,6 +352,8 @@ flash.auth.user-sshkeys-not-created: Could not create ssh key
 flash.auth.must-be-logged-in: You must be logged in to access gists
 flash.auth.passkey-registred: Passkey %s registered
 flash.auth.passkey-deleted: Passkey deleted
+flash.auth.oauth-session-expired: OAuth2 session expired, please try again
+flash.auth.oauth-already-linked: This %s account is already linked to another user
 
 flash.gist.visibility-changed: Gist visibility has been changed
 flash.gist.deleted: Gist has been deleted

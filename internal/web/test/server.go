@@ -1,8 +1,6 @@
 package test
 
 import (
-	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,80 +8,74 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
-	"runtime"
-	"strconv"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/rs/zerolog/log"
+	"github.com/gorilla/schema"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers/metrics"
 	"github.com/thomiceli/opengist/internal/web/server"
 )
 
 var databaseType string
+var formEncoder *schema.Encoder
 
-type TestServer struct {
+func init() {
+	formEncoder = schema.NewEncoder()
+	formEncoder.SetAliasTag("form")
+}
+
+type Server struct {
 	server        *server.Server
-	sessionCookie string
+	SessionCookie string
+	contextData   echo.Map
 }
 
-func newTestServer() (*TestServer, error) {
-	s := &TestServer{
-		server: server.NewServer(true, filepath.Join(config.GetHomeDir(), "tmp", "sessions"), true),
-	}
-
-	go s.start()
-	return s, nil
+func (s *Server) Request(t *testing.T, method, uri string, data interface{}, expectedCode int) *http.Response {
+	return s.RequestWithHeaders(t, method, uri, data, expectedCode, nil)
 }
 
-func (s *TestServer) start() {
-	s.server.Start()
-}
-
-func (s *TestServer) stop() {
-	s.server.Stop()
-}
-
-func (s *TestServer) Request(method, uri string, data interface{}, expectedCode int, responsePtr ...*http.Response) error {
-	return s.RequestWithHeaders(method, uri, data, expectedCode, nil, responsePtr...)
-}
-
-func (s *TestServer) RequestWithHeaders(method, uri string, data interface{}, expectedCode int, headers map[string]string, responsePtr ...*http.Response) error {
+func (s *Server) RequestWithHeaders(t *testing.T, method, uri string, data interface{}, expectedCode int, headers map[string]string) *http.Response {
 	var bodyReader io.Reader
-	if method == http.MethodPost || method == http.MethodPut {
-		values := structToURLValues(data)
-		bodyReader = strings.NewReader(values.Encode())
+	if method == http.MethodPost || method == http.MethodPut || method == http.MethodDelete {
+		if values, ok := data.(url.Values); ok {
+			bodyReader = strings.NewReader(values.Encode())
+		} else if data != nil {
+			values := url.Values{}
+			_ = formEncoder.Encode(data, values)
+			bodyReader = strings.NewReader(values.Encode())
+		}
 	}
 
-	req := httptest.NewRequest(method, "http://localhost:6157"+uri, bodyReader)
+	req := httptest.NewRequest(method, uri, bodyReader)
 	w := httptest.NewRecorder()
 
 	if method == http.MethodPost || method == http.MethodPut {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 
+	req.Header.Set("Sec-Fetch-Site", "same-origin")
+
 	for key, value := range headers {
 		req.Header.Set(key, value)
 	}
 
-	if s.sessionCookie != "" {
-		req.AddCookie(&http.Cookie{Name: "session", Value: s.sessionCookie})
+	if s.SessionCookie != "" {
+		req.AddCookie(&http.Cookie{Name: "session", Value: s.SessionCookie})
 	}
 
 	s.server.ServeHTTP(w, req)
-
-	if w.Code != expectedCode {
-		return fmt.Errorf("unexpected status code %d, expected %d", w.Code, expectedCode)
+	if expectedCode != 0 {
+		require.Equalf(t, expectedCode, w.Code, "Unexpected status code for %s %s: got %d, expected %d", method, uri, w.Code, expectedCode)
 	}
-
 	if method == http.MethodPost {
-		if strings.Contains(uri, "/login") || strings.Contains(uri, "/register") {
+		if strings.Contains(uri, "/login") {
 			cookie := ""
 			h := w.Header().Get("Set-Cookie")
 			parts := strings.Split(h, "; ")
@@ -93,81 +85,119 @@ func (s *TestServer) RequestWithHeaders(method, uri string, data interface{}, ex
 					break
 				}
 			}
-			if cookie == "" {
-				return errors.New("unable to find access session token in response headers")
-			}
-			s.sessionCookie = strings.TrimPrefix(cookie, "session=")
+			s.SessionCookie = strings.TrimPrefix(cookie, "session=")
 		} else if strings.Contains(uri, "/logout") {
-			s.sessionCookie = ""
+			s.SessionCookie = ""
 		}
 	}
 
-	// If a response pointer was provided, fill it with the response data
-	if len(responsePtr) > 0 && responsePtr[0] != nil {
-		*responsePtr[0] = *w.Result()
+	return w.Result()
+}
+
+func (s *Server) RawRequest(t *testing.T, req *http.Request, expectedCode int) *http.Response {
+	w := httptest.NewRecorder()
+
+	req.Header.Set("Sec-Fetch-Site", "same-origin")
+
+	if s.SessionCookie != "" {
+		req.AddCookie(&http.Cookie{Name: "session", Value: s.SessionCookie})
 	}
 
+	s.server.ServeHTTP(w, req)
+
+	require.Equal(t, expectedCode, w.Code, "unexpected status code for %s %s", req.Method, req.URL.Path)
+
+	return w.Result()
+}
+
+func (s *Server) StartHttpServer(t *testing.T) string {
+	hs := httptest.NewServer(s.server)
+	t.Cleanup(hs.Close)
+	return hs.URL
+}
+
+func (s *Server) User() *db.User {
+	s.Request(nil, "GET", "/", nil, 0)
+	if user, ok := s.contextData["userLogged"].(*db.User); ok {
+		return user
+	}
 	return nil
 }
 
-func structToURLValues(s interface{}) url.Values {
-	v := url.Values{}
-	if s == nil {
-		return v
+func (s *Server) TestCtxData(t *testing.T, expected echo.Map) {
+	for key, expectedValue := range expected {
+		actualValue, exists := s.contextData[key]
+		require.True(t, exists, "Key %q not found in context data", key)
+		require.Equal(t, expectedValue, actualValue, "Context data mismatch for key %q", key)
 	}
-
-	rValue := reflect.ValueOf(s)
-	if rValue.Kind() != reflect.Struct {
-		return v
-	}
-
-	for i := 0; i < rValue.NumField(); i++ {
-		field := rValue.Type().Field(i)
-		tag := field.Tag.Get("form")
-		if tag != "" || field.Anonymous {
-			if field.Type.Kind() == reflect.Int {
-				fieldValue := rValue.Field(i).Int()
-				v.Add(tag, strconv.FormatInt(fieldValue, 10))
-			} else if field.Type.Kind() == reflect.Uint {
-				fieldValue := rValue.Field(i).Uint()
-				v.Add(tag, strconv.FormatUint(fieldValue, 10))
-			} else if field.Type.Kind() == reflect.Slice {
-				fieldValue := rValue.Field(i).Interface().([]string)
-				for _, va := range fieldValue {
-					v.Add(tag, va)
-				}
-			} else if field.Type.Kind() == reflect.Struct {
-				for key, val := range structToURLValues(rValue.Field(i).Interface()) {
-					for _, vv := range val {
-						v.Add(key, vv)
-					}
-				}
-			} else {
-				fieldValue := rValue.Field(i).String()
-				v.Add(tag, fieldValue)
-			}
-		}
-	}
-	return v
 }
 
-func Setup(t *testing.T) *TestServer {
-	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
+func (s *Server) Register(t *testing.T, user string) {
+	s.Request(t, "POST", "/register", db.UserDTO{Username: user, Password: user}, 302)
+}
+
+func (s *Server) Login(t *testing.T, user string) {
+	s.Request(t, "POST", "/login", db.UserDTO{Username: user, Password: user}, 302)
+}
+
+func (s *Server) Logout() {
+	s.SessionCookie = ""
+}
+
+func (s *Server) CreateGist(t *testing.T, visibility string) (gistPath string, gist *db.Gist, username, identifier string) {
+	s.Request(t, "POST", "/register", db.UserDTO{Username: "thomas", Password: "thomas"}, 0)
+	s.Login(t, "thomas")
+
+	resp := s.Request(t, "POST", "/", url.Values{
+		"title":   {"Test"},
+		"name":    {"file.txt", "otherfile.txt"},
+		"content": {"hello world", "other content"},
+		"topics":  {"hello opengist"},
+		"private": {visibility},
+	}, 302)
+
+	// Extract gist identifier from redirect
+	location := resp.Header.Get("Location")
+	parts := strings.Split(strings.TrimPrefix(location, "/"), "/")
+	require.Len(t, parts, 2, "Expected redirect format: /{username}/{identifier}")
+
+	gistUsername := parts[0]
+	gistIdentifier := parts[1]
+
+	gist, err := db.GetGist(gistUsername, gistIdentifier)
+	require.NoError(t, err)
+	require.NotNil(t, gist)
+
+	gistPath = filepath.Join(config.GetHomeDir(), git.ReposDirectory, "thomas", gist.Uuid)
+
+	// Verify gist exists on filesystem
+	_, err = os.Stat(gistPath)
+	require.NoError(t, err, "Gist repository should exist at %s", gistPath)
+
+	username = gist.User.Username
+	identifier = gist.Identifier()
+
+	s.Logout()
+	return gistPath, gist, username, identifier
+}
+
+func Setup(t *testing.T) *Server {
+	tmpDir := t.TempDir()
+	t.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
 
 	err := config.InitConfig("", io.Discard)
 	require.NoError(t, err, "Could not init config")
 
-	err = os.MkdirAll(filepath.Join(config.GetHomeDir()), 0755)
-	require.NoError(t, err, "Could not create Opengist home directory")
+	config.C.LogLevel = "warn"
+	config.C.LogOutput = "stdout"
+	config.C.GitDefaultBranch = "master"
+	config.C.OpengistHome = tmpDir
 
 	config.SetupSecretKey()
-
-	git.ReposDirectory = filepath.Join("tests")
-
-	config.C.Index = ""
-	config.C.LogLevel = "error"
-	config.C.GitDefaultBranch = "master"
 	config.InitLog()
+
+	tmpGitConfig := filepath.Join(tmpDir, "gitconfig")
+	t.Setenv("GIT_CONFIG_GLOBAL", tmpGitConfig)
 
 	err = exec.Command("git", "config", "--global", "--type", "bool", "push.autoSetupRemote", "true").Run()
 	require.NoError(t, err)
@@ -175,9 +205,7 @@ func Setup(t *testing.T) *TestServer {
 	require.NoError(t, err)
 	err = exec.Command("git", "config", "--global", "user.name", "test").Run()
 	require.NoError(t, err)
-
 	homePath := config.GetHomeDir()
-	log.Info().Msg("Data directory: " + homePath)
 
 	var databaseDsn string
 	databaseType = os.Getenv("OPENGIST_TEST_DB")
@@ -187,70 +215,55 @@ func Setup(t *testing.T) *TestServer {
 	case "mysql":
 		databaseDsn = "mysql://root:opengist@localhost:3306/opengist_test"
 	default:
-		databaseDsn = "file:" + filepath.Join(homePath, "tmp", "opengist_test.db")
+		databaseDsn = config.C.DBUri
 	}
 
-	err = os.MkdirAll(filepath.Join(homePath, "tests"), 0755)
-	require.NoError(t, err, "Could not create tests directory")
-
-	err = os.MkdirAll(filepath.Join(homePath, "tmp", "sessions"), 0755)
+	err = os.MkdirAll(filepath.Join(homePath, "sessions"), 0755)
 	require.NoError(t, err, "Could not create sessions directory")
+
+	err = os.MkdirAll(filepath.Join(homePath, "repos"), 0755)
+	require.NoError(t, err, "Could not create repos directory")
 
 	err = os.MkdirAll(filepath.Join(homePath, "tmp", "repos"), 0755)
 	require.NoError(t, err, "Could not create tmp repos directory")
 
+	err = os.MkdirAll(filepath.Join(homePath, "custom"), 0755)
+	require.NoError(t, err, "Could not create custom directory")
+
 	err = db.Setup(databaseDsn)
 	require.NoError(t, err, "Could not initialize database")
 
-	if err != nil {
-		log.Fatal().Err(err).Msg("Could not initialize database")
+	t.Cleanup(func() {
+		db.Close()
+	})
+
+	if index.IndexEnabled() {
+		go index.NewIndexer(index.IndexType())
 	}
 
-	// err = index.Open(filepath.Join(homePath, "testsindex", "opengist.index"))
-	// require.NoError(t, err, "Could not open index")
+	s := &Server{
+		server: server.NewServer(true),
+	}
 
-	s, err := newTestServer()
-	require.NoError(t, err, "Failed to create test server")
+	s.server.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			err := next(c)
+			if data, ok := c.Request().Context().Value(context.DataKeyStr).(echo.Map); ok {
+				s.contextData = data
+			}
+			return err
+		}
+	})
 
 	return s
 }
 
-func Teardown(t *testing.T, s *TestServer) {
-	s.stop()
-
-	//err := db.Close()
-	//require.NoError(t, err, "Could not close database")
-
-	err := db.TruncateDatabase()
-	require.NoError(t, err, "Could not truncate database")
-
-	err = os.RemoveAll(filepath.Join(config.GetHomeDir(), "tests"))
-	require.NoError(t, err, "Could not remove repos directory")
-
-	if runtime.GOOS == "windows" {
-		err = db.Close()
-		require.NoError(t, err, "Could not close database")
-
-		time.Sleep(2 * time.Second)
+func Teardown(t *testing.T) {
+	switch databaseType {
+	case "postgres", "mysql":
+		err := db.TruncateDatabase()
+		require.NoError(t, err, "Could not truncate database")
 	}
-	err = os.RemoveAll(filepath.Join(config.GetHomeDir(), "tmp"))
-	require.NoError(t, err, "Could not remove tmp directory")
-
-	// err = os.RemoveAll(path.Join(config.C.OpengistHome, "testsindex"))
-	// require.NoError(t, err, "Could not remove repos directory")
-
-	// err = index.Close()
-	// require.NoError(t, err, "Could not close index")
-}
-
-type settingSet struct {
-	key   string `form:"key"`
-	value string `form:"value"`
-}
-
-type invitationAdmin struct {
-	nbMax         string `form:"nbMax"`
-	expiredAtUnix string `form:"expiredAtUnix"`
 }
 
 func NewTestMetricsServer() *metrics.Server {

@@ -83,6 +83,18 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        ports:
+          - 47700:7700
+        env:
+          MEILI_NO_ANALYTICS: true
+          MEILI_ENV: development
+        options: >-
+          --health-cmd "curl -sf http://localhost:7700/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -94,13 +106,15 @@ jobs:
 
       - name: Run tests
         run: make test TEST_DB_TYPE=${{ matrix.database }}
+        env:
+          OG_TEST_MEILI_HOST: http://localhost:47700
 
   test:
     name: Test
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
+        os: ["ubuntu-latest", "macOS-latest"]
         go: ["1.25"]
         database: ["sqlite"]
     runs-on: ${{ matrix.os }}

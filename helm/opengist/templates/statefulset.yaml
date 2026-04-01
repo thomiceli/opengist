@@ -84,7 +84,7 @@ spec:
   serviceName: {{ include "opengist.fullname" . }}-http
   podManagementPolicy: {{ .Values.statefulSet.podManagementPolicy }}
   updateStrategy:
-    {{- toYaml .Values.statefulSet.updateStrategy | nindent 2 }}
+    {{- toYaml .Values.statefulSet.updateStrategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "opengist.selectorLabels" . | nindent 6 }}

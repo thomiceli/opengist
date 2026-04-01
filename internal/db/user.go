@@ -2,30 +2,38 @@ package db
 
 import (
 	"encoding/json"
+	"strings"
+
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID               uint   `gorm:"primaryKey"`
-	Username         string `gorm:"uniqueIndex,size:191"`
-	Password         string
-	IsAdmin          bool
-	CreatedAt        int64
-	Email            string
-	MD5Hash          string // for gravatar, if no Email is specified, the value is random
-	AvatarURL        string
-	GithubID         string
-	GitlabID         string
-	GiteaID          string
-	OIDCID           string `gorm:"column:oidc_id"`
-	StylePreferences string
+	ID                 uint   `gorm:"primaryKey"`
+	Username           string `gorm:"uniqueIndex,size:191"`
+	UsernameNormalized string `gorm:"index"`
+	Password           string
+	IsAdmin            bool
+	CreatedAt          int64
+	Email              string
+	MD5Hash            string // for gravatar, if no Email is specified, the value is random
+	AvatarURL          string
+	GithubID           string
+	GitlabID           string
+	GiteaID            string
+	OIDCID             string `gorm:"column:oidc_id"`
+	StylePreferences   string
 
 	Gists               []Gist               `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys             []SSHKey             `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	Liked               []Gist               `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	WebAuthnCredentials []WebAuthnCredential `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	AccessTokens        []AccessToken        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
+}
+
+func (user *User) BeforeSave(_ *gorm.DB) error {
+	user.UsernameNormalized = strings.ToLower(user.Username)
+	return nil
 }
 
 func (user *User) BeforeDelete(tx *gorm.DB) error {
@@ -93,7 +101,7 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 
 func UserExists(username string) (bool, error) {
 	var count int64
-	err := db.Model(&User{}).Where("username like ?", username).Count(&count).Error
+	err := db.Model(&User{}).Where("username_normalized = ?", strings.ToLower(username)).Count(&count).Error
 	return count > 0, err
 }
 
@@ -111,7 +119,7 @@ func GetAllUsers(offset int) ([]*User, error) {
 func GetUserByUsername(username string) (*User, error) {
 	user := new(User)
 	err := db.
-		Where("username like ?", username).
+		Where("username_normalized = ?", strings.ToLower(username)).
 		First(&user).Error
 	return user, err
 }
@@ -256,6 +264,11 @@ func (user *User) GetStyle() *UserStyleDTO {
 type UserDTO struct {
 	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
 	Password string `form:"password" validate:"required"`
+}
+
+type OAuthRegisterDTO struct {
+	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
+	Email    string `form:"email" validate:"omitempty,email"`
 }
 
 func (dto *UserDTO) ToUser() *User {

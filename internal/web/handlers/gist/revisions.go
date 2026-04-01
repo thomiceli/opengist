@@ -1,10 +1,11 @@
 package gist
 
 import (
+	"strings"
+
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
-	"strings"
 )
 
 func Revisions(ctx *context.Context) error {

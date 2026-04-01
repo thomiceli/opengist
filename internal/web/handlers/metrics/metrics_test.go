@@ -1,4 +1,4 @@
-package test
+package metrics_test
 
 import (
 	"io"
@@ -10,19 +10,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
+	webtest "github.com/thomiceli/opengist/internal/web/test"
 )
 
-var (
-	SSHKey = db.SSHKeyDTO{
-		Title:   "Test SSH Key",
-		Content: `ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSUGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3Pbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XAt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/EnmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbxNrRFi9wrf+M7Q== admin@admin.local`,
-	}
-	AdminUser = db.UserDTO{
-		Username: "admin",
-		Password: "admin",
-	}
+func TestMetrics(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
 
-	SimpleGist = db.GistDTO{
+	s.Register(t, "thomas")
+	s.Login(t, "thomas")
+
+	s.Request(t, "POST", "/", db.GistDTO{
 		Title:       "Simple Test Gist",
 		Description: "A simple gist for testing",
 		VisibilityDTO: db.VisibilityDTO{
@@ -31,39 +29,14 @@ var (
 		Name:    []string{"file1.txt"},
 		Content: []string{"This is the content of file1"},
 		Topics:  "",
-	}
-)
+	}, 302)
 
-// TestMetrics tests the metrics endpoint functionality of the application.
-// It verifies that the metrics endpoint correctly reports counts for:
-// - Total number of users
-// - Total number of gists
-// - Total number of SSH keys
-//
-// The test follows these steps:
-// 1. Sets up test environment
-// 2. Registers and logs in an admin user
-// 3. Creates a gist and adds an SSH key
-// 4. Creates a metrics server and queries the /metrics endpoint
-// 5. Verifies the reported metrics match expected values
-func TestMetrics(t *testing.T) {
-	s := Setup(t)
-	defer Teardown(t, s)
+	s.Request(t, "POST", "/settings/ssh-keys", db.SSHKeyDTO{
+		Title:   "Test SSH Key",
+		Content: `ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSUGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3Pbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XAt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/EnmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbxNrRFi9wrf+M7Q== admin@admin.local`,
+	}, 302)
 
-	register(t, s, AdminUser)
-	login(t, s, AdminUser)
-
-	err := s.Request("GET", "/all", nil, 200)
-	require.NoError(t, err)
-
-	err = s.Request("POST", "/", SimpleGist, 302)
-	require.NoError(t, err)
-
-	err = s.Request("POST", "/settings/ssh-keys", SSHKey, 302)
-	require.NoError(t, err)
-
-	// Create a metrics server and query it
-	metricsServer := NewTestMetricsServer()
+	metricsServer := webtest.NewTestMetricsServer()
 
 	req := httptest.NewRequest("GET", "/metrics", nil)
 	w := httptest.NewRecorder()

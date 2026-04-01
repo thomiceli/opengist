@@ -71,6 +71,7 @@ type Gist struct {
 	Uuid            string
 	Title           string
 	URL             string
+	URLNormalized   string
 	Preview         string
 	PreviewFilename string
 	PreviewMimeType string
@@ -98,6 +99,11 @@ type Like struct {
 	CreatedAt int64
 }
 
+func (gist *Gist) BeforeSave(_ *gorm.DB) error {
+	gist.URLNormalized = strings.ToLower(gist.URL)
+	return nil
+}
+
 func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 	// Decrement fork counter if the gist was forked
 	err := tx.Model(&Gist{}).
@@ -110,7 +116,8 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
 	err := db.Preload("User").Preload("Forked.User").Preload("Topics").
-		Where("(gists.uuid like ? OR gists.url = ?) AND users.username like ?", gistUuid+"%", gistUuid, user).
+		Where("(gists.uuid LIKE ? OR gists.url_normalized = ?) AND users.username_normalized = ?",
+			strings.ToLower(gistUuid)+"%", strings.ToLower(gistUuid), strings.ToLower(user)).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
 
@@ -720,13 +727,17 @@ func (gist *Gist) ToDTO() (*GistDTO, error) {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string    `validate:"max=250" form:"title"`
-	Description string    `validate:"max=1000" form:"description"`
-	URL         string    `validate:"max=32,alphanumdashorempty" form:"url"`
-	Files       []FileDTO `validate:"min=1,dive"`
-	Name        []string  `form:"name"`
-	Content     []string  `form:"content"`
-	Topics      string    `validate:"gisttopics" form:"topics"`
+	Title              string    `validate:"max=250" form:"title"`
+	Description        string    `validate:"max=1000" form:"description"`
+	URL                string    `validate:"max=32,alphanumdashorempty" form:"url"`
+	Files              []FileDTO `validate:"min=1,dive"`
+	Name               []string  `form:"name"`
+	Content            []string  `form:"content"`
+	Topics             string    `validate:"gisttopics" form:"topics"`
+	UploadedFilesUUID  []string  `validate:"omitempty,dive,required,uuid" form:"uploadedfile_uuid"`
+	UploadedFilesNames []string  `validate:"omitempty,dive,required" form:"uploadedfile_filename"`
+	BinaryFileOldName  []string  `form:"binary_old_name"`
+	BinaryFileNewName  []string  `form:"binary_new_name"`
 	VisibilityDTO
 }
 
@@ -806,18 +817,19 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 	}
 
 	indexedGist := &index.Gist{
-		GistID:     gist.ID,
-		UserID:     gist.UserID,
-		Visibility: gist.Private.Uint(),
-		Username:   gist.User.Username,
-		Title:      gist.Title,
-		Content:    wholeContent,
-		Filenames:  fileNames,
-		Extensions: exts,
-		Languages:  langs,
-		Topics:     topics,
-		CreatedAt:  gist.CreatedAt,
-		UpdatedAt:  gist.UpdatedAt,
+		GistID:      gist.ID,
+		UserID:      gist.UserID,
+		Visibility:  gist.Private.Uint(),
+		Username:    gist.User.Username,
+		Description: gist.Description,
+		Title:       gist.Title,
+		Content:     wholeContent,
+		Filenames:   fileNames,
+		Extensions:  exts,
+		Languages:   langs,
+		Topics:      topics,
+		CreatedAt:   gist.CreatedAt,
+		UpdatedAt:   gist.UpdatedAt,
 	}
 
 	return indexedGist, nil

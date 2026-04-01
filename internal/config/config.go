@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/thomiceli/opengist/internal/session"
 	"io"
 	"net/url"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/session"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -37,11 +38,12 @@ type config struct {
 	DBUri      string `yaml:"db-uri" env:"OG_DB_URI"`
 	DBFilename string `yaml:"db-filename" env:"OG_DB_FILENAME"` // deprecated
 
-	IndexEnabled bool   `yaml:"index.enabled" env:"OG_INDEX_ENABLED"` // deprecated
-	Index        string `yaml:"index" env:"OG_INDEX"`
-	BleveDirname string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"` // deprecated
-	MeiliHost    string `yaml:"index.meili.host" env:"OG_MEILI_HOST"`
-	MeiliAPIKey  string `yaml:"index.meili.api-key" env:"OG_MEILI_API_KEY"`
+	IndexEnabled  bool   `yaml:"index.enabled" env:"OG_INDEX_ENABLED"` // deprecated
+	Index         string `yaml:"index" env:"OG_INDEX"`
+	BleveDirname  string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"` // deprecated
+	MeiliHost     string `yaml:"index.meili.host" env:"OG_MEILI_HOST"`
+	MeiliAPIKey   string `yaml:"index.meili.api-key" env:"OG_MEILI_API_KEY"`
+	SearchDefault string `yaml:"search.default" env:"OG_SEARCH_DEFAULT"`
 
 	GitDefaultBranch string `yaml:"git.default-branch" env:"OG_GIT_DEFAULT_BRANCH"`
 
@@ -110,6 +112,7 @@ func configWithDefaults() (*config, error) {
 	c.OpengistHome = ""
 	c.DBUri = "opengist.db"
 	c.Index = "bleve"
+	c.SearchDefault = "content"
 
 	c.SqliteJournalMode = "WAL"
 

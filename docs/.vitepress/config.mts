@@ -85,7 +85,7 @@ export default defineConfig({
             {icon: 'github', link: 'https://github.com/thomiceli/opengist'}
         ],
         editLink: {
-            pattern: 'https://github.com/thomiceli/opengist/edit/stable/docs/:path'
+            pattern: 'https://github.com/thomiceli/opengist/edit/v.1.12.2/docs/:path'
         },
         // @ts-ignore
         lastUpdated: true,

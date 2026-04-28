@@ -1,5 +1,10 @@
 # Helm Chart Changelog
 
+# 0.7.0 - 2026-03-14
+
+- Bump Opengist image to 1.12.2
+- Add environment variables and secrets to statefulset
+
 ## 0.6.0 - 2026-02-03
 
 - Bump Opengist image to 1.12.1

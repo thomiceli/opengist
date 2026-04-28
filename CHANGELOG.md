@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.12.2](https://github.com/thomiceli/opengist/compare/v1.12.1...v1.12.2) - 2026-03-14
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- Search all fields (#622)
+- Display a form to create an Opengist account coming from a OAuth provider (#623)
+- Rebuild search index in admin options (#647)
+
+### Fixed
+- Clean file path names on file creation (#624)
+- Support UTF-8 on gist download (#625)
+- CSRF skipper only for GET *.js request (#627)
+- Async-loaded gist embed scripts (#630)
+- Make gists username/urls case insensitive in URLS (#641)
+- Improve code search and index tests (#663)
+- Translation strings (#659)
+- Gitea avatar URL on OAuth (#674)
+
+### [Helm Chart](helm/opengist)
+- Add environment variables and secrets to statefulset (#644)
+
+> Admins of Opengist instances may want to run "Rebuild search index" in the admin panel.
+
 ## [1.12.1](https://github.com/thomiceli/opengist/compare/v1.12.0...v1.12.1) - 2026-02-03
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

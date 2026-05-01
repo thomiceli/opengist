@@ -70,6 +70,17 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 		outputSb.WriteString(fmt.Sprintf("Gist description set to \"%s\"\n\n", opts["description"]))
 	}
 
+	if opts["topics"] != "" && validator.Var(opts["topics"], "gisttopics") == nil {
+		topicNames := strings.Fields(opts["topics"])
+		if len(topicNames) > 0 {
+			gist.Topics = make([]db.GistTopic, 0, len(topicNames))
+			for _, name := range topicNames {
+				gist.Topics = append(gist.Topics, db.GistTopic{Topic: name})
+			}
+			outputSb.WriteString(fmt.Sprintf("Gist topics set to \"%s\"\n\n", opts["topics"]))
+		}
+	}
+
 	if hasNoCommits, err := git.HasNoCommits(gist.User.Username, gist.Uuid); err != nil {
 		_, _ = fmt.Fprintln(er, "Failed to check if gist has no commits")
 		return fmt.Errorf("failed to check if gist has no commits: %w", err)

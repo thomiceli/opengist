@@ -132,19 +132,53 @@ type catFileBatch struct {
 	Truncated           bool
 }
 
-func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*catFileBatch, error) {
+func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*catFileBatch, bool, error) {
 	repositoryPath := RepositoryPath(user, gist)
+	maxFiles := 50
 
 	lsTreeCmd := exec.Command("git", "ls-tree", "-l", revision)
 	lsTreeCmd.Dir = repositoryPath
-	lsTreeOutput, err := lsTreeCmd.Output()
-	if err != nil {
-		return nil, err
+
+	var output []byte
+	var err error
+	if truncate {
+		pr, pw, perr := os.Pipe()
+		if perr != nil {
+			return nil, false, perr
+		}
+		lsTreeCmd.Stdout = pw
+
+		headCmd := exec.Command("head", "-n", strconv.Itoa(maxFiles+1))
+		headCmd.Stdin = pr
+
+		if err = lsTreeCmd.Start(); err != nil {
+			pr.Close()
+			pw.Close()
+			return nil, false, err
+		}
+		pw.Close()
+
+		output, err = headCmd.Output()
+		pr.Close()
+		_ = lsTreeCmd.Wait() // git exits on SIGPIPE when head closes early
+		if err != nil {
+			return nil, false, err
+		}
+	} else {
+		output, err = lsTreeCmd.Output()
+		if err != nil {
+			return nil, false, err
+		}
 	}
 
-	fileMap := make([]*catFileBatch, 0)
+	lines := strings.Split(strings.TrimRight(string(output), "\n"), "\n")
+	gistTruncated := false
+	if truncate && len(lines) > maxFiles {
+		lines = lines[:maxFiles]
+		gistTruncated = true
+	}
 
-	lines := strings.Split(string(lsTreeOutput), "\n")
+	fileMap := make([]*catFileBatch, 0, len(lines))
 	for _, line := range lines {
 		fields := strings.Fields(line)
 		if len(fields) < 4 {
@@ -169,14 +203,14 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 	catFileCmd.Dir = repositoryPath
 	stdin, err := catFileCmd.StdinPipe()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	stdout, err := catFileCmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	if err = catFileCmd.Start(); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	reader := bufio.NewReader(stdout)
@@ -184,12 +218,12 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 	for _, file := range fileMap {
 		_, err = stdin.Write([]byte(file.Hash + "\n"))
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		header, err := reader.ReadString('\n')
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		parts := strings.Fields(header)
@@ -199,7 +233,7 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 
 		size, err := strconv.ParseUint(parts[2], 10, 64)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		// Don't truncate Jupyter notebooks
@@ -215,7 +249,7 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 		// Read exactly size bytes from header, or the max allowed if truncated
 		content := make([]byte, sizeToRead)
 		if _, err = io.ReadFull(reader, content); err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		file.Content = string(content)
@@ -223,26 +257,26 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 		if truncate && size > truncateLimit {
 			// skip other bytes if truncated
 			if _, err = reader.Discard(int(size - truncateLimit)); err != nil {
-				return nil, err
+				return nil, false, err
 			}
 			file.Truncated = true
 		}
 
 		// Read the blank line following the content
 		if _, err := reader.ReadByte(); err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 
 	if err = stdin.Close(); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if err = catFileCmd.Wait(); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return fileMap, nil
+	return fileMap, gistTruncated, nil
 }
 
 func GetFileContent(user string, gist string, revision string, filename string, truncate bool) (string, bool, error) {

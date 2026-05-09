@@ -494,7 +494,7 @@ func TestGistCreation(t *testing.T) {
 
 				// Verify files if specified
 				if len(tt.expectedFileNames) > 0 {
-					files, err := gist.Files("HEAD", false)
+					files, _, err := gist.Files("HEAD", false)
 					require.NoError(t, err, "Failed to get gist files")
 					require.Len(t, files, len(tt.expectedFileNames), "File count mismatch")
 

@@ -414,14 +414,14 @@ func (gist *Gist) DeleteRepository() error {
 	return git.DeleteRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
-	filesCat, err := git.CatFileBatch(gist.User.Username, gist.Uuid, revision, truncate)
+func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, bool, error) {
+	filesCat, gistTruncated, err := git.CatFileBatch(gist.User.Username, gist.Uuid, revision, truncate)
 	if err != nil {
 		// if the revision or the file do not exist
 		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
-			return nil, &git.RevisionNotFoundError{}
+			return nil, false, &git.RevisionNotFoundError{}
 		}
-		return nil, err
+		return nil, false, err
 	}
 
 	var files []*git.File
@@ -442,7 +442,7 @@ func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
 			MimeType:  git.DetectMimeType([]byte(shortContent), filepath.Ext(fileCat.Name)),
 		})
 	}
-	return files, err
+	return files, gistTruncated, err
 }
 
 func (gist *Gist) File(revision string, filename string, truncate bool) (*git.File, error) {
@@ -613,7 +613,7 @@ func (gist *Gist) Identifier() string {
 }
 
 func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
-	files, err := gist.Files("HEAD", true)
+	files, _, err := gist.Files("HEAD", true)
 	if err != nil {
 		return nil, err
 	}
@@ -694,7 +694,7 @@ func (gist *Gist) UpdateLanguages() {
 }
 
 func (gist *Gist) ToDTO() (*GistDTO, error) {
-	files, err := gist.Files("HEAD", false)
+	files, _, err := gist.Files("HEAD", false)
 	if err != nil {
 		return nil, err
 	}
@@ -786,7 +786,7 @@ func (dto *GistDTO) TopicStrToSlice() []GistTopic {
 // -- Index -- //
 
 func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
-	files, err := gist.Files("HEAD", true)
+	files, _, err := gist.Files("HEAD", true)
 	if err != nil {
 		return nil, err
 	}

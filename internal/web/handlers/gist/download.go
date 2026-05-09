@@ -67,7 +67,7 @@ func DownloadZip(ctx *context.Context) error {
 	gist := ctx.GetData("gist").(*db.Gist)
 	revision := ctx.Param("revision")
 
-	files, err := gist.Files(revision, false)
+	files, _, err := gist.Files(revision, false)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error fetching files from repository", err)
 	}

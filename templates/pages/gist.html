@@ -2,6 +2,11 @@
 {{ template "gist_header" .}}
     {{ if .files }}
         <div class="grid gap-y-4">
+        {{ if .hasMoreFiles }}
+        <div class="rounded-md border border-1 border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/30 px-4 py-2 text-sm text-yellow-900 dark:text-yellow-200">
+            {{ .locale.Tr "gist.files-truncated" }}
+        </div>
+        {{ end }}
         {{ range $file := .files }}
         <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto" data-file="{{ $file.Filename }}">
             <div class="border-b-1 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 my-auto block">

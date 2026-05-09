@@ -23,6 +23,7 @@ gist.header.download-zip: Download ZIP
 
 gist.raw: Raw
 gist.file-truncated: This file has been truncated.
+gist.files-truncated: Not all files in this gist are not displayed. Clone or download the gist to see them all.
 gist.file-raw: This file can't be rendered.
 gist.file-binary-edit: This file is binary.
 gist.watch-full-file: View the full file.

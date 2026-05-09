@@ -29,10 +29,10 @@ func TestFork(t *testing.T) {
 		require.Equal(t, gist.Private, forkedGist.Private)
 		require.Equal(t, gist.ID, forkedGist.ForkedID)
 
-		forkedFiles, err := forkedGist.Files("HEAD", false)
+		forkedFiles, _, err := forkedGist.Files("HEAD", false)
 		require.NoError(t, err)
 
-		gistFiles, err := gist.Files("HEAD", false)
+		gistFiles, _, err := gist.Files("HEAD", false)
 		require.NoError(t, err)
 
 		for i, file := range gistFiles {

@@ -28,7 +28,7 @@ func GistIndex(ctx *context.Context) error {
 		revision = "HEAD"
 	}
 
-	files, err := gist.Files(revision, true)
+	files, hasMoreFiles, err := gist.Files(revision, true)
 	if _, ok := err.(*git.RevisionNotFoundError); ok {
 		return ctx.NotFound("Revision not found")
 	} else if err != nil {
@@ -40,6 +40,7 @@ func GistIndex(ctx *context.Context) error {
 	ctx.SetData("page", "code")
 	ctx.SetData("commit", revision)
 	ctx.SetData("files", renderedFiles)
+	ctx.SetData("hasMoreFiles", hasMoreFiles)
 	ctx.SetData("revision", revision)
 	ctx.SetData("htmlTitle", gist.Title)
 	return ctx.Html("gist.html")
@@ -47,13 +48,14 @@ func GistIndex(ctx *context.Context) error {
 
 func GistJson(ctx *context.Context) error {
 	gist := ctx.GetData("gist").(*db.Gist)
-	files, err := gist.Files("HEAD", true)
+	files, hasMoreFiles, err := gist.Files("HEAD", true)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error fetching files", err)
 	}
 
 	renderedFiles := render.RenderFiles(files)
 	ctx.SetData("files", renderedFiles)
+	ctx.SetData("hasMoreFiles", hasMoreFiles)
 
 	topics, err := gist.GetTopics()
 	if err != nil {
@@ -104,13 +106,14 @@ func GistJs(ctx *context.Context) error {
 	}
 
 	gist := ctx.GetData("gist").(*db.Gist)
-	files, err := gist.Files("HEAD", true)
+	files, hasMoreFiles, err := gist.Files("HEAD", true)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error fetching files", err)
 	}
 
 	renderedFiles := render.RenderFiles(files)
 	ctx.SetData("files", renderedFiles)
+	ctx.SetData("hasMoreFiles", hasMoreFiles)
 
 	htmlbuf := bytes.Buffer{}
 	w := bufio.NewWriter(&htmlbuf)

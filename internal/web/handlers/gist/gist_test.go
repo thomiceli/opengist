@@ -81,7 +81,7 @@ func TestGistIndex(t *testing.T) {
 			"content": {"updated content"},
 		}, 302)
 
-		files, err := gist.Files("HEAD", false)
+		files, _, err := gist.Files("HEAD", false)
 		require.NoError(t, err)
 		found := false
 		for _, f := range files {
@@ -96,7 +96,7 @@ func TestGistIndex(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, commits, 2)
 
-		filesOld, err := gist.Files(commits[1].Hash, false)
+		filesOld, _, err := gist.Files(commits[1].Hash, false)
 		require.NoError(t, err)
 		for _, f := range filesOld {
 			if f.Filename == "file.txt" {

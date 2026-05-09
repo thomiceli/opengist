@@ -127,7 +127,7 @@ func ProcessCreate(ctx *context.Context) error {
 		if isCreate {
 			return ctx.HtmlWithCode(400, "create.html")
 		} else {
-			files, err := gist.Files("HEAD", false)
+			files, _, err := gist.Files("HEAD", false)
 			if err != nil {
 				return ctx.ErrorRes(500, "Error fetching files", err)
 			}

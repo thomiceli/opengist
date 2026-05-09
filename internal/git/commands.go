@@ -139,48 +139,29 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 	lsTreeCmd := exec.Command("git", "ls-tree", "-l", revision)
 	lsTreeCmd.Dir = repositoryPath
 
-	var output []byte
-	var err error
-	if truncate {
-		pr, pw, perr := os.Pipe()
-		if perr != nil {
-			return nil, false, perr
-		}
-		lsTreeCmd.Stdout = pw
+	var lsTreeStderr bytes.Buffer
+	lsTreeCmd.Stderr = &lsTreeStderr
 
-		headCmd := exec.Command("head", "-n", strconv.Itoa(maxFiles+1))
-		headCmd.Stdin = pr
-
-		if err = lsTreeCmd.Start(); err != nil {
-			pr.Close()
-			pw.Close()
-			return nil, false, err
-		}
-		pw.Close()
-
-		output, err = headCmd.Output()
-		pr.Close()
-		_ = lsTreeCmd.Wait() // git exits on SIGPIPE when head closes early
-		if err != nil {
-			return nil, false, err
-		}
-	} else {
-		output, err = lsTreeCmd.Output()
-		if err != nil {
-			return nil, false, err
-		}
+	lsTreeStdout, err := lsTreeCmd.StdoutPipe()
+	if err != nil {
+		return nil, false, err
+	}
+	if err = lsTreeCmd.Start(); err != nil {
+		return nil, false, err
 	}
 
-	lines := strings.Split(strings.TrimRight(string(output), "\n"), "\n")
+	fileMap := make([]*catFileBatch, 0)
 	gistTruncated := false
-	if truncate && len(lines) > maxFiles {
-		lines = lines[:maxFiles]
-		gistTruncated = true
-	}
 
-	fileMap := make([]*catFileBatch, 0, len(lines))
-	for _, line := range lines {
-		fields := strings.Fields(line)
+	scanner := bufio.NewScanner(lsTreeStdout)
+	scanner.Buffer(make([]byte, 64*1024), 1024*1024)
+	for scanner.Scan() {
+		if truncate && len(fileMap) >= maxFiles {
+			gistTruncated = true
+			break
+		}
+
+		fields := strings.Fields(scanner.Text())
 		if len(fields) < 4 {
 			continue // Skip lines that don't have enough fields
 		}
@@ -197,6 +178,20 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 			Size: size,
 			Name: convertOctalToUTF8(name),
 		})
+	}
+	scanErr := scanner.Err()
+
+	// Closing the read end before git is done writing causes git's next write
+	// to fail (SIGPIPE on Unix, broken-pipe error on Windows). That shows up as
+	// a non-zero exit from Wait, but it's expected when we stop early — so we
+	// only treat the Wait error as real if git actually printed something to stderr.
+	_ = lsTreeStdout.Close()
+	waitErr := lsTreeCmd.Wait()
+	if scanErr != nil {
+		return nil, false, scanErr
+	}
+	if waitErr != nil && lsTreeStderr.Len() > 0 {
+		return nil, false, waitErr
 	}
 
 	catFileCmd := exec.Command("git", "cat-file", "--batch")

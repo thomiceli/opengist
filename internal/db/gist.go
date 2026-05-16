@@ -124,6 +124,12 @@ func GetGist(user string, gistUuid string) (*Gist, error) {
 	return gist, err
 }
 
+func GetGistByUUID(uuid string) (*Gist, error) {
+	gist := new(Gist)
+	err := db.Preload("User").Where("uuid = ?", uuid).First(gist).Error
+	return gist, err
+}
+
 func GetGistByID(gistId string) (*Gist, error) {
 	gist := new(Gist)
 	err := db.Preload("User").Preload("Forked.User").Preload("Topics").
@@ -156,6 +162,26 @@ func GetAllGists(offset int) ([]*Gist, error) {
 		Find(&gists).Error
 
 	return gists, err
+}
+
+// GetAllPublicGists returns publicly-visible gists only (Visibility = public).
+// Used by the API; admin pages should keep using GetAllGists which is unfiltered.
+func GetAllPublicGists(offset int) ([]*Gist, int64, error) {
+	var gists []*Gist
+	var count int64
+
+	baseQuery := db.Model(&Gist{}).Where("gists.private = 0")
+	if err := baseQuery.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := baseQuery.
+		Preload("User").
+		Limit(11).
+		Offset(offset * 10).
+		Order("id asc").
+		Find(&gists).Error
+	return gists, count, err
 }
 
 func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort string, order string, topic string) ([]*Gist, error) {

@@ -98,6 +98,26 @@ func TestAdminSetConfig(t *testing.T) {
 	})
 }
 
+func TestAdminToggleApiEnabled(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+	s.Register(t, "admin") // first user → admin
+	s.Login(t, "admin")
+
+	// Default off
+	v, _ := db.GetSetting(db.SettingApiEnabled)
+	require.Equal(t, "0", v)
+
+	// Toggle on via admin endpoint
+	s.Request(t, "PUT", "/admin-panel/set-config", url.Values{
+		"key":   {db.SettingApiEnabled},
+		"value": {"1"},
+	}, 200)
+
+	v, _ = db.GetSetting(db.SettingApiEnabled)
+	require.Equal(t, "1", v)
+}
+
 func TestAdminPagination(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)

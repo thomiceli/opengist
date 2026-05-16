@@ -24,6 +24,7 @@ type AccessToken struct {
 	User       User `validate:"-"`
 
 	ScopeGist uint // 0 = none, 1 = read, 2 = read+write
+	ScopeUser uint // 0 = none, 1 = read
 }
 
 // GenerateToken creates a new random token and returns the plain text token.
@@ -100,11 +101,16 @@ func (t *AccessToken) HasGistWritePermission() bool {
 	return t.ScopeGist >= ReadWritePermission
 }
 
+func (t *AccessToken) HasUserReadPermission() bool {
+	return t.ScopeUser >= ReadPermission
+}
+
 // -- DTO -- //
 
 type AccessTokenDTO struct {
 	Name      string `form:"name" validate:"required,max=255"`
 	ScopeGist uint   `form:"scope_gist" validate:"min=0,max=2"`
+	ScopeUser uint   `form:"scope_user" validate:"min=0,max=1"`
 	ExpiresAt string `form:"expires_at"` // empty means no expiration, otherwise date format (YYYY-MM-DD)
 }
 
@@ -120,6 +126,12 @@ func (dto *AccessTokenDTO) ToAccessToken() *AccessToken {
 	return &AccessToken{
 		Name:      dto.Name,
 		ScopeGist: dto.ScopeGist,
+		ScopeUser: dto.ScopeUser,
 		ExpiresAt: expiresAt,
 	}
+}
+
+// SaveAccessTokenForTest is exported for tests only; saves the entire AccessToken row.
+func SaveAccessTokenForTest(t *AccessToken) error {
+	return db.Save(t).Error
 }

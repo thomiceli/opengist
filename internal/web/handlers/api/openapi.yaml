@@ -1,0 +1,275 @@
+openapi: 3.1.0
+info:
+  title: Opengist API
+  version: "1.0.0"
+  description: |
+    REST API for Opengist. Authentication is via Personal Access Tokens
+    (header `Authorization: Bearer og_<token>`).
+
+servers:
+  - url: /
+    description: Current instance
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/user:
+    get:
+      summary: Get the authenticated user
+      tags: [User]
+      responses:
+        "200":
+          description: User info
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/ApiDisabled" }
+
+  /api/v1/gists:
+    get:
+      summary: List gists
+      tags: [Gists]
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 10 } }
+        - { name: visibility, in: query, schema: { type: string, enum: [mine, public], default: mine } }
+      responses:
+        "200":
+          description: Paginated gist list
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaginatedGists" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/ApiDisabled" }
+    post:
+      summary: Create a gist
+      tags: [Gists]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateGistRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GistDetail" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/ApiDisabled" }
+
+  /api/v1/gists/{uuid}:
+    parameters:
+      - { name: uuid, in: path, required: true, schema: { type: string } }
+    get:
+      summary: Get a gist
+      tags: [Gists]
+      responses:
+        "200":
+          description: Gist detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GistDetail" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "503": { $ref: "#/components/responses/ApiDisabled" }
+    patch:
+      summary: Update a gist
+      tags: [Gists]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateGistRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GistDetail" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "503": { $ref: "#/components/responses/ApiDisabled" }
+    delete:
+      summary: Delete a gist
+      tags: [Gists]
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "503": { $ref: "#/components/responses/ApiDisabled" }
+
+  /api/v1/gists/{uuid}/files/{filename}/raw:
+    parameters:
+      - { name: uuid, in: path, required: true, schema: { type: string } }
+      - { name: filename, in: path, required: true, schema: { type: string } }
+    get:
+      summary: Get raw file content
+      tags: [Gists]
+      responses:
+        "200":
+          description: Raw bytes
+          content:
+            text/plain:
+              schema: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "503": { $ref: "#/components/responses/ApiDisabled" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    Error:
+      type: object
+      required: [error, code]
+      properties:
+        error: { type: string }
+        code: { type: string }
+
+    User:
+      type: object
+      required: [id, username, email, is_admin, created_at]
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        email: { type: string }
+        is_admin: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    GistOwner:
+      type: object
+      required: [id, username]
+      properties:
+        id: { type: integer }
+        username: { type: string }
+
+    FileSummary:
+      type: object
+      required: [filename, size]
+      properties:
+        filename: { type: string }
+        size: { type: integer }
+        language: { type: string }
+
+    FileDetail:
+      allOf:
+        - $ref: "#/components/schemas/FileSummary"
+        - type: object
+          properties:
+            content: { type: string }
+            binary: { type: boolean }
+            truncated: { type: boolean }
+
+    GistSummary:
+      type: object
+      required: [uuid, title, visibility, html_url, created_at, updated_at, owner, files]
+      properties:
+        uuid: { type: string }
+        title: { type: string }
+        description: { type: string }
+        visibility: { type: string, enum: [public, unlisted, private] }
+        html_url: { type: string, description: "Relative path to view this gist in a browser" }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        owner: { $ref: "#/components/schemas/GistOwner" }
+        files:
+          type: array
+          items: { $ref: "#/components/schemas/FileSummary" }
+
+    GistDetail:
+      type: object
+      required: [uuid, title, visibility, html_url, created_at, updated_at, owner, files]
+      properties:
+        uuid: { type: string }
+        title: { type: string }
+        description: { type: string }
+        visibility: { type: string, enum: [public, unlisted, private] }
+        html_url: { type: string, description: "Relative path to view this gist in a browser" }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        owner: { $ref: "#/components/schemas/GistOwner" }
+        files:
+          type: array
+          items: { $ref: "#/components/schemas/FileDetail" }
+
+    PaginatedGists:
+      type: object
+      required: [data, page, per_page, total]
+      properties:
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/GistSummary" }
+        page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+
+    FileInput:
+      type: object
+      required: [filename, content]
+      properties:
+        filename: { type: string }
+        content: { type: string }
+
+    CreateGistRequest:
+      type: object
+      required: [files]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        visibility: { type: string, enum: [public, unlisted, private], default: public }
+        files:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/FileInput" }
+
+    UpdateGistRequest:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        visibility: { type: string, enum: [public, unlisted, private] }
+        files:
+          type: array
+          items: { $ref: "#/components/schemas/FileInput" }
+
+  responses:
+    Unauthorized:
+      description: Missing/invalid/expired token
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Insufficient scope
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ValidationFailed:
+      description: Request body invalid
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ApiDisabled:
+      description: API disabled by administrator
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }

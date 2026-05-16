@@ -64,9 +64,12 @@ func (s *Server) registerMiddlewares() {
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteStrictMode,
 		Skipper: func(ctx echo.Context) bool {
+			// skip CSRF for /api/v1 (uses bearer tokens, not session cookies)
+			if strings.HasPrefix(ctx.Request().URL.Path, "/api/v1/") {
+				return true
+			}
 			/* skip CSRF for embeds */
 			gistName := ctx.Param("gistname")
-
 			/* skip CSRF for git clients */
 			matchUploadPack, _ := regexp.MatchString("(.*?)/git-upload-pack$", ctx.Request().URL.Path)
 			matchReceivePack, _ := regexp.MatchString("(.*?)/git-receive-pack$", ctx.Request().URL.Path)
@@ -337,6 +340,45 @@ func loadSettings(ctx *context.Context) error {
 	return nil
 }
 
+func apiScopeGistRead(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		tok, ok := ctx.GetData("accessToken").(*db.AccessToken)
+		if !ok || !tok.HasGistReadPermission() {
+			return ctx.JSON(403, map[string]string{
+				"error": "token lacks gist:read scope",
+				"code":  "forbidden",
+			})
+		}
+		return next(ctx)
+	}
+}
+
+func apiScopeGistWrite(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		tok, ok := ctx.GetData("accessToken").(*db.AccessToken)
+		if !ok || !tok.HasGistWritePermission() {
+			return ctx.JSON(403, map[string]string{
+				"error": "token lacks gist:write scope",
+				"code":  "forbidden",
+			})
+		}
+		return next(ctx)
+	}
+}
+
+func apiScopeUserRead(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		tok, ok := ctx.GetData("accessToken").(*db.AccessToken)
+		if !ok || !tok.HasUserReadPermission() {
+			return ctx.JSON(403, map[string]string{
+				"error": "token lacks user:read scope",
+				"code":  "forbidden",
+			})
+		}
+		return next(ctx)
+	}
+}
+
 // getUserByToken checks the Authorization header for token-based auth.
 // Expects format: Authorization: Token <token>
 // Returns the user if the token is valid and has gist read permission, nil otherwise.
@@ -484,5 +526,65 @@ func setAllGistsMode(mode string) Middleware {
 			ctx.SetData("mode", mode)
 			return next(ctx)
 		}
+	}
+}
+
+// apiAuth validates /api/v1 requests: admin toggle, Authorization header, token validity.
+// Injects ctx.User and ctx.SetData("accessToken", token).
+func apiAuth(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		enabled, err := db.GetSetting(db.SettingApiEnabled)
+		if err != nil {
+			return ctx.JSON(500, map[string]string{
+				"error": "failed to read API setting",
+				"code":  "internal_error",
+			})
+		}
+		if enabled != "1" {
+			return ctx.JSON(503, map[string]string{
+				"error": "API is disabled by administrator",
+				"code":  "api_disabled",
+				"hint":  "Ask an administrator to enable the API at /admin-panel/configuration",
+			})
+		}
+
+		h := ctx.Request().Header.Get("Authorization")
+		var plain string
+		switch {
+		case strings.HasPrefix(h, "Bearer "):
+			plain = strings.TrimPrefix(h, "Bearer ")
+		case strings.HasPrefix(h, "Token "):
+			plain = strings.TrimPrefix(h, "Token ")
+		default:
+			return ctx.JSON(401, map[string]string{
+				"error": "missing or invalid Authorization header",
+				"code":  "unauthorized",
+			})
+		}
+
+		tok, err := db.GetAccessTokenByToken(plain)
+		if err != nil {
+			return ctx.JSON(401, map[string]string{
+				"error": "invalid token",
+				"code":  "unauthorized",
+			})
+		}
+		if tok.IsExpired() {
+			return ctx.JSON(401, map[string]string{
+				"error": "token expired",
+				"code":  "unauthorized",
+			})
+		}
+
+		ctx.User = &tok.User
+		ctx.SetData("accessToken", tok)
+
+		// Synchronous update so that test teardown (TRUNCATE on postgres)
+		// can't race with an in-flight UPDATE on a separate goroutine.
+		// Cost is one indexed UPDATE per request; negligible vs the network
+		// round-trip the caller already paid.
+		_ = tok.UpdateLastUsed()
+
+		return next(ctx)
 	}
 }

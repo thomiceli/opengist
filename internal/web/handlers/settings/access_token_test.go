@@ -273,6 +273,24 @@ func TestAccessTokenLastUsedUpdate(t *testing.T) {
 	require.NotEqual(t, int64(0), tokenFromDB.LastUsedAt)
 }
 
+func TestCreateTokenWithUserScope(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+	s.Register(t, "thomas")
+	s.Login(t, "thomas")
+
+	s.Request(t, "POST", "/settings/access-tokens", db.AccessTokenDTO{
+		Name:      "with-user",
+		ScopeGist: db.ReadPermission,
+		ScopeUser: db.ReadPermission,
+	}, 302)
+
+	tokens, err := db.GetAccessTokensByUserID(1)
+	require.NoError(t, err)
+	require.Len(t, tokens, 1)
+	require.Equal(t, uint(1), tokens[0].ScopeUser)
+}
+
 func TestAccessTokenWithRequireLogin(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)

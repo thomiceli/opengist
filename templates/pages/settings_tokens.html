@@ -1,6 +1,19 @@
 {{ template "header" .}}
 {{ template "settings_header" .}}
 <div class="relative mx-auto max-w-160 space-y-8">
+    {{ if not .apiEnabled }}
+    <div class="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950 dark:border-amber-700 px-4 py-3 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400 mt-0.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+        <div class="flex-1 text-sm text-amber-800 dark:text-amber-200">
+            {{ .locale.Tr "settings.api-disabled-warning" }}
+            {{ if .userIsAdmin }}
+            <a href="{{ .c.ExternalUrl }}/admin-panel/configuration" class="ml-2 underline font-medium hover:text-amber-900 dark:hover:text-amber-100">{{ .locale.Tr "settings.api-disabled-go-admin" }} →</a>
+            {{ end }}
+        </div>
+    </div>
+    {{ end }}
     <div class="sm:grid grid-cols-2 gap-x-4 md:gap-x-8">
         <div class="w-full">
             <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
@@ -26,6 +39,17 @@
                                 <option value="0">{{ .locale.Tr "settings.token-permission-none" }}</option>
                                 <option value="1">{{ .locale.Tr "settings.token-permission-read" }}</option>
                                 <option value="2">{{ .locale.Tr "settings.token-permission-read-write" }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{{ .locale.Tr "settings.token-user-permission" }}</label>
+                        <div class="space-y-2">
+                            <label class="block text-sm text-slate-600 dark:text-slate-400">{{ .locale.Tr "settings.token-user-permission-help" }}</label>
+                            <select name="scope_user" class="dark:bg-gray-800 block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                <option value="0">{{ .locale.Tr "settings.token-permission-none" }}</option>
+                                <option value="1">{{ .locale.Tr "settings.token-permission-read" }}</option>
                             </select>
                         </div>
                     </div>

@@ -13,6 +13,8 @@ import (
 	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers/admin"
+	api "github.com/thomiceli/opengist/internal/web/handlers/api"
+	apiv1 "github.com/thomiceli/opengist/internal/web/handlers/api/v1"
 	"github.com/thomiceli/opengist/internal/web/handlers/auth"
 	"github.com/thomiceli/opengist/internal/web/handlers/gist"
 	"github.com/thomiceli/opengist/internal/web/handlers/git"
@@ -161,6 +163,20 @@ func (s *Server) registerRoutes() {
 	if config.C.HttpGit {
 		r.Any("/:user/:gistname/*", git.GitHttp, gistSoftInit)
 	}
+
+	apiV1 := r.SubGroup("/api/v1")
+	{
+		apiV1.Use(apiAuth)
+		apiV1.GET("/user", apiv1.GetUser, apiScopeUserRead)
+		apiV1.GET("/gists", apiv1.ListGists, apiScopeGistRead)
+		apiV1.GET("/gists/:uuid", apiv1.GetGist, apiScopeGistRead)
+		apiV1.GET("/gists/:uuid/files/:filename/raw", apiv1.RawFile, apiScopeGistRead)
+		apiV1.POST("/gists", apiv1.CreateGist, apiScopeGistWrite)
+		apiV1.PATCH("/gists/:uuid", apiv1.UpdateGist, apiScopeGistWrite)
+		apiV1.DELETE("/gists/:uuid", apiv1.DeleteGist, apiScopeGistWrite)
+	}
+
+	r.GET("/api/v1/openapi.yaml", api.OpenAPISpec)
 
 	r.Any("/*", noRouteFound)
 }

@@ -178,6 +178,8 @@ settings.create-token-help: Access tokens can be used to access the API
 settings.token-name: Name
 settings.token-permissions: Permissions
 settings.token-gist-permission: Gists
+settings.token-user-permission: User
+settings.token-user-permission-help: Read user info (required for /api/v1/user)
 settings.token-permission-none: No access
 settings.token-permission-read: Read
 settings.token-permission-read-write: Read & Write
@@ -193,6 +195,8 @@ settings.token-no-expiration: No expiration
 settings.token-expired: expired
 settings.token-created: Token created, make sure to copy it now, you won't be able to see it again!
 settings.token-deleted: Access token deleted
+settings.api-disabled-warning: The REST API is currently disabled. Tokens you create here cannot be used until an administrator enables it.
+settings.api-disabled-go-admin: Open admin configuration
 
 auth.signup-disabled: Administrator has disabled signing up
 auth.login: Login
@@ -314,6 +318,8 @@ admin.disable-login: Disable login form
 admin.disable-login_help: Forbid logging in via the login form to force using OAuth providers instead.
 admin.disable-gravatar: Disable Gravatar
 admin.disable-gravatar_help: Disable the usage of Gravatar as an avatar provider.
+admin.api-enabled: Enable REST API at /api/v1
+admin.api-enabled_help: Allow programmatic access to gists and user info via Personal Access Tokens.
 
 admin.users.delete_confirm: Do you want to delete this user ?
 

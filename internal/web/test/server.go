@@ -181,6 +181,26 @@ func (s *Server) CreateGist(t *testing.T, visibility string) (gistPath string, g
 	return gistPath, gist, username, identifier
 }
 
+// CreateGistAs creates a gist as the specified user. visibility "0"/"1"/"2".
+// The caller does not need to be logged in beforehand; this method logs in as user.
+func (s *Server) CreateGistAs(t *testing.T, user, visibility string) (string, *db.Gist, string, string) {
+	s.Logout()
+	s.Login(t, user)
+	resp := s.Request(t, "POST", "/", url.Values{
+		"title":   {"Test"},
+		"name":    {"file.txt"},
+		"content": {"hello"},
+		"private": {visibility},
+	}, 302)
+	loc := resp.Header.Get("Location")
+	parts := strings.Split(strings.TrimPrefix(loc, "/"), "/")
+	require.Len(t, parts, 2)
+	gist, err := db.GetGist(parts[0], parts[1])
+	require.NoError(t, err)
+	require.NotNil(t, gist)
+	return "", gist, gist.User.Username, gist.Identifier()
+}
+
 func Setup(t *testing.T) *Server {
 	tmpDir := t.TempDir()
 	t.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")

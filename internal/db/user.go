@@ -267,7 +267,7 @@ type UserDTO struct {
 }
 
 type OAuthRegisterDTO struct {
-	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
+	Username string `form:"username" validate:"required,max=24,alphanumdashunder,notreserved"`
 	Email    string `form:"email" validate:"omitempty,email"`
 }
 

@@ -246,7 +246,7 @@ func ProcessOauthRegister(ctx *context.Context) error {
 
 	keys, err := callbackProvider.GetProviderUserSSHKeys()
 	if err != nil {
-		ctx.AddFlash(ctx.Tr("flash.auth.user-sshkeys-not-retrievable"), "error")
+		ctx.AddFlash(ctx.Tr("flash.auth.user-sshkeys-not-retrievable"), "warning")
 		log.Error().Err(err).Msg("Could not get user keys")
 	} else {
 		for _, key := range keys {

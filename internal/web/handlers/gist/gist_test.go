@@ -92,7 +92,7 @@ func TestGistIndex(t *testing.T) {
 		}
 		require.True(t, found)
 
-		commits, err := gist.Log(0)
+		commits, err := gist.Log("HEAD", 0, 11)
 		require.NoError(t, err)
 		require.Len(t, commits, 2)
 

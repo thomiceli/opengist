@@ -1,275 +1,1073 @@
 openapi: 3.1.0
+
 info:
   title: Opengist API
   version: "1.0.0"
   description: |
-    REST API for Opengist. Authentication is via Personal Access Tokens
-    (header `Authorization: Bearer og_<token>`).
+    REST API for Opengist.
+    
+    The base URL is `/api/v1`.
+
+    Authentication uses a Personal Access Token sent in the `Authorization`
+    header using the `Bearer` scheme:
+
+        Authorization: Bearer og_xxxxxxxx
+
+    Example usage:
+    
+        curl -H "Authorization: Bearer og_xxxxxxxx" https://opengist.local/api/v1/gists
+
+    Tokens are created from the web UI under Settings → Access Tokens and carry
+    per-resource scopes (gist, user) at read or read/write level.
+  license:
+    name: AGPL-3.0
+    url: https://github.com/thomiceli/opengist/blob/master/LICENSE
 
 servers:
-  - url: /
+  - url: /api/v1
     description: Current instance
 
 security:
   - bearerAuth: []
 
-paths:
-  /api/v1/user:
-    get:
-      summary: Get the authenticated user
-      tags: [User]
-      responses:
-        "200":
-          description: User info
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/User" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "503": { $ref: "#/components/responses/ApiDisabled" }
+tags:
+  - name: Gists
+    description: Create, read, update, delete and list gists.
+  - name: Users
+    description: User accounts and their gists.
 
-  /api/v1/gists:
+paths:
+  /gists:
     get:
+      operationId: listGists
       summary: List gists
       tags: [Gists]
+
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Lists gists owned by the authenticated caller. Visibility depends on
+        the token's scope:
+
+        - Token with `gist:read` → all of the caller's own gists (public,
+          unlisted and private).
+        - Token without `gist:read` → only the caller's own public gists.
+        - Anonymous (no token) → all public gists from everyone, matching
+          `GET /gists/public`.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
       parameters:
-        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
-        - { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 10 } }
-        - { name: visibility, in: query, schema: { type: string, enum: [mine, public], default: mine } }
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+        - { $ref: "#/components/parameters/SinceParam" }
       responses:
         "200":
-          description: Paginated gist list
+          description: A list of gists.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/PaginatedGists" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "503": { $ref: "#/components/responses/ApiDisabled" }
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistSimple" }
+        "400": { $ref: "#/components/responses/BadRequest" }
     post:
+      operationId: createGist
       summary: Create a gist
       tags: [Gists]
+      security:
+        - bearerAuth: ["gist:write"]
+      description: |
+        **Required scope:** `gist:write`
+
+        Creates a gist owned by the authenticated caller.
+
+        Files are provided as an object keyed by filename. Entries without a
+        `content` value are dropped; at least one file with content is required.
+        When `title` is omitted it is derived from the first filename.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreateGistRequest" }
+            schema: { $ref: "#/components/schemas/GistCreateRequest" }
       responses:
         "201":
-          description: Created
+          description: The created gist.
+          headers:
+            Location:
+              description: API URL of the created gist.
+              schema: { type: string, format: uri }
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/GistDetail" }
-        "400": { $ref: "#/components/responses/ValidationFailed" }
+              schema: { $ref: "#/components/schemas/Gist" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
-        "503": { $ref: "#/components/responses/ApiDisabled" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
 
-  /api/v1/gists/{uuid}:
-    parameters:
-      - { name: uuid, in: path, required: true, schema: { type: string } }
+  /gists/public:
     get:
-      summary: Get a gist
+      operationId: listPublicGists
+      summary: List public gists
       tags: [Gists]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Lists every public gist on the instance, regardless of the caller's
+        authentication state. Unlisted and private gists are never returned.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+        - { $ref: "#/components/parameters/SinceParam" }
       responses:
         "200":
-          description: Gist detail
+          description: A list of public gists.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/GistDetail" }
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistSimple" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /gists/liked:
+    get:
+      operationId: listLikedGists
+      summary: List liked gists
+      tags: [Gists]
+      security:
+        - bearerAuth: [] # any valid token (no specific scope required)
+      description: |
+        **Required:** any valid token (no specific scope)
+
+        Lists gists the authenticated caller has liked. Visibility of the
+        caller's own private/unlisted likes depends on the token's scope:
+
+        - Token with `gist:read` → every liked gist the caller may see.
+        - Token without `gist:read` → only the public gists the caller liked.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
+        
+        This `liked` endpoint also accept `staredr` in the path as aliases to try to keep
+        a GitHub compatibility - e.g. `/gists/starred`. The behavior is the same.
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+        - { $ref: "#/components/parameters/SinceParam" }
+      responses:
+        "200":
+          description: A list of liked gists.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistSimple" }
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /gists/forked:
+    get:
+      operationId: listForkedGists
+      summary: List forked gists
+      tags: [Gists]
+      security:
+        - bearerAuth: [] # any valid token (no specific scope required)
+      description: |
+        **Required:** any valid token (no specific scope)
+
+        Lists gists the authenticated caller has forked. Visibility of the
+        caller's own private/unlisted forks depends on the token's scope:
+
+        - Token with `gist:read` → every forked gist the caller may see.
+        - Token without `gist:read` → only the public gists the caller forked.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+        - { $ref: "#/components/parameters/SinceParam" }
+      responses:
+        "200":
+          description: A list of forked gists.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistSimple" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /gists/{uuid}:
+    parameters:
+      - { $ref: "#/components/parameters/GistUuidParam" }
+    get:
+      operationId: getGist
+      summary: Get a gist
+      tags: [Gists]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Returns a single gist with its file contents, commits and forks.
+
+        Public and unlisted gists are readable by anyone, including anonymous
+        callers. A private gist resolves only for its owner using a token with
+        the `gist:read` scope; every other caller receives `404` so the gist's
+        existence is not revealed.
+      responses:
+        "200":
+          description: The gist.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Gist" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "503": { $ref: "#/components/responses/ApiDisabled" }
     patch:
+      operationId: updateGist
       summary: Update a gist
       tags: [Gists]
+      security:
+        - bearerAuth: ["gist:write"]
+      description: |
+        **Required scope:** `gist:write`
+
+        Updates a gist owned by the authenticated caller. Only fields present in
+        the body are changed; omitted fields are left untouched, and at least
+        one of `title`,
+        `description`, `visibility` or `files` must be supplied.
+
+        Each entry in `files` is keyed by the current filename and may:
+
+        - set `content` to replace the file body;
+        - set `filename` to rename the file;
+        - set both to do both at once;
+        - be `null` (or carry neither field) to delete the file.
+
+        A key that doesn't match an existing filename adds a new file, in which
+        case `content` is required.
+
+        A private gist resolves only for its owner with a `gist:read`-capable
+        token; other callers get `404`. A visible gist the caller doesn't own
+        returns `403`.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/UpdateGistRequest" }
+            schema: { $ref: "#/components/schemas/GistUpdateRequest" }
       responses:
         "200":
-          description: Updated
+          description: The updated gist.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/GistDetail" }
-        "400": { $ref: "#/components/responses/ValidationFailed" }
+              schema: { $ref: "#/components/schemas/Gist" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "503": { $ref: "#/components/responses/ApiDisabled" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
     delete:
+      operationId: deleteGist
       summary: Delete a gist
       tags: [Gists]
+      security:
+        - bearerAuth: ["gist:write"]
+      description: |
+        **Required scope:** `gist:write`
+
+        Deletes a gist owned by the authenticated caller, removing both its
+        repository and database row.
+
+        A private gist resolves only for its owner with a `gist:read`-capable
+        token; other callers get `404`. A visible gist the caller doesn't own
+        returns `403`.
       responses:
-        "204": { description: Deleted }
+        "204":
+          description: The gist was deleted.
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "503": { $ref: "#/components/responses/ApiDisabled" }
 
-  /api/v1/gists/{uuid}/files/{filename}/raw:
+  /gists/{uuid}/commits:
     parameters:
-      - { name: uuid, in: path, required: true, schema: { type: string } }
-      - { name: filename, in: path, required: true, schema: { type: string } }
+      - { $ref: "#/components/parameters/GistUuidParam" }
     get:
-      summary: Get raw file content
+      operationId: listGistCommits
+      summary: List a gist's commits
       tags: [Gists]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Lists the commits of a gist's repository, most recent first. Each
+        commit's author is resolved to an Opengist account when one matches the
+        commit email.
+
+        Public and unlisted gists are readable by anyone; a private gist
+        resolves only for its owner with a `gist:read`-capable token, otherwise
+        `404`.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers. Unlike the other list endpoints, commits omit
+        `X-Total` / `X-Total-Pages` (computing the total would require an extra
+        git call).
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
       responses:
         "200":
-          description: Raw bytes
+          description: A list of commits.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
           content:
-            text/plain:
-              schema: { type: string }
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistCommit" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /gists/{uuid}/{sha}:
+    parameters:
+      - { $ref: "#/components/parameters/GistUuidParam" }
+      - name: sha
+        in: path
+        required: true
+        description: A full or partial commit SHA (hex, 4–40 characters).
+        schema: { type: string, pattern: "^[0-9a-fA-F]{4,40}$" }
+    get:
+      operationId: getGistRevision
+      summary: Get a gist at a revision
+      tags: [Gists]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Returns a gist as it stood at the given commit SHA, with the same shape
+        as `GET /gists/{uuid}`.
+
+        Visibility rules match the gist endpoint: public and unlisted gists are
+        readable by anyone; a private gist resolves only for its owner with a
+        `gist:read`-capable token, otherwise `404`. An unknown revision also
+        returns `404` so the gist's commit history is not disclosed.
+      responses:
+        "200":
+          description: The gist at the requested revision.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Gist" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /gists/{uuid}/forks:
+    parameters:
+      - { $ref: "#/components/parameters/GistUuidParam" }
+    get:
+      operationId: listGistForks
+      summary: List a gist's forks
+      tags: [Gists]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Lists the gists that fork the targeted gist, filtered to what the
+        caller may see: public forks plus the caller's own private/unlisted
+        forks. Anonymous callers see public forks only.
+
+        The targeted gist follows the usual visibility rules: a private gist
+        resolves only for its owner with a `gist:read`-capable token, otherwise
+        `404`.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+      responses:
+        "200":
+          description: A list of forks.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistSimple" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      operationId: forkGist
+      summary: Fork a gist
+      tags: [Gists]
+      security:
+        - bearerAuth: ["gist:write"]
+      description: |
+        **Required scope:** `gist:write`
+
+        Forks the targeted gist for the authenticated caller, creating a new
+        gist owned by them whose content clones the parent and whose visibility
+        is inherited from it.
+
+        Forking is idempotent: if the caller has already forked this gist, the
+        endpoint returns `200` with the existing fork instead of creating a
+        duplicate. A newly created fork returns `201`. Forking your own gist is
+        rejected with `422`.
+
+        A private parent resolves only for its owner with a `gist:read`-capable
+        token; other callers get `404`.
+      responses:
+        "201":
+          description: The newly created fork.
+          headers:
+            Location:
+              description: API URL of the created fork.
+              schema: { type: string, format: uri }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GistSimple" }
+        "200":
+          description: The caller had already forked this gist; the existing fork is returned.
+          headers:
+            Location:
+              description: API URL of the existing fork.
+              schema: { type: string, format: uri }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GistSimple" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "503": { $ref: "#/components/responses/ApiDisabled" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+
+  /gists/{uuid}/like:
+    parameters:
+      - { $ref: "#/components/parameters/GistUuidParam" }
+    get:
+      operationId: checkGistLike
+      summary: Check whether the caller likes a gist
+      tags: [Gists]
+      security:
+        - bearerAuth: [] # any valid token (no specific scope required)
+      description: |
+        **Required:** any valid token (no specific scope)
+
+        Returns `204 No Content` when the authenticated caller has liked the
+        gist, and `404` when they have not - or when the gist isn't visible to
+        them, so the two cases are indistinguishable by design.
+
+        This `like` endpoint also accepts `star` in the path as an alias to keep
+        GitHub compatibility - e.g. `/gists/{uuid}/star`. The behavior is the same.
+      responses:
+        "204":
+          description: The caller has liked the gist.
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      operationId: toggleGistLike
+      summary: Like or unlike a gist
+      tags: [Gists]
+      security:
+        - bearerAuth: ["user:write"]
+      description: |
+        **Required scope:** `user:write`
+
+        Toggles the authenticated caller's like on the gist: if already liked it
+        is unliked, otherwise it is liked. Always returns `204 No Content` on
+        success. Returns `404` when the gist isn't visible to the caller.
+
+        This `like` endpoint also accepts `star` in the path as an alias to keep
+        GitHub compatibility - e.g. `/gists/{uuid}/star`. The behavior is the same.
+      responses:
+        "204":
+          description: The like was toggled.
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /gists/{uuid}/files/{sha}/{filename}:
+    parameters:
+      - { $ref: "#/components/parameters/GistUuidParam" }
+      - name: sha
+        in: path
+        required: true
+        description: A full or partial commit SHA (hex, 4–40 characters).
+        schema: { type: string, pattern: "^[0-9a-fA-F]{4,40}$" }
+      - name: filename
+        in: path
+        required: true
+        description: Name of the file within the gist.
+        schema: { type: string }
+    get:
+      operationId: getGistRawFile
+      summary: Get a raw file from a gist
+      tags: [Gists]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Returns the raw bytes of `filename` as committed at `sha`. The
+        `Content-Type` is derived from the detected mime type (embeddable types
+        keep their type, other text is served as `text/plain`, everything else
+        as `application/octet-stream`); `X-Content-Type-Options: nosniff` is
+        always set, and SVG/PDF responses carry a restrictive
+        `Content-Security-Policy`.
+
+        Visibility rules match the gist endpoint: public and unlisted gists are
+        readable by anyone, while a private gist resolves only for its owner
+        with a `gist:read`-capable token.
+      responses:
+        "200":
+          description: The raw file content.
+          content:
+            "*/*":
+              schema: { type: string, format: binary }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /user:
+    get:
+      operationId: getAuthenticatedUser
+      summary: Get the authenticated user
+      tags: [Users]
+      security:
+        - bearerAuth: ["user:read"]
+      description: |
+        **Required scope:** `user:read`
+
+        Returns the authenticated caller's own user record. Unlike the gist list
+        endpoints this is a fully-private resource with no public form, so a
+        token lacking the scope gets `403` rather than a reduced response.
+      responses:
+        "200":
+          description: The authenticated user.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PrivateUser" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    patch:
+      operationId: updateAuthenticatedUser
+      summary: Update the authenticated user
+      tags: [Users]
+      security:
+        - bearerAuth: ["user:write"]
+      description: |
+        **Required scope:** `user:write`
+
+        Updates the authenticated caller's username and/or email. Both fields are
+        optional but at least one must be supplied; only fields present in the
+        body are changed.
+
+        The username goes through the same rules as the web settings page
+        (max 24 characters, alphanumeric and dashes, not a reserved word). The
+        email is lowercased server-side and the gravatar hash recomputed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateUserRequest" }
+      responses:
+        "200":
+          description: The updated user.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PrivateUser" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+
+  /user/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The user's numeric ID.
+        schema: { type: integer }
+    get:
+      operationId: getUserById
+      summary: Get a user by ID
+      tags: [Users]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Looks up a user by numeric ID and returns the public user shape (no
+        private fields). Readable by anyone, including anonymous callers.
+      responses:
+        "200":
+          description: The user.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SimpleUser" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /users/{username}:
+    parameters:
+      - { $ref: "#/components/parameters/UsernameParam" }
+    get:
+      operationId: getUserByUsername
+      summary: Get a user by username
+      tags: [Users]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Looks up a user by username and returns the public user shape (no
+        private fields). Readable by anyone, including anonymous callers.
+      responses:
+        "200":
+          description: The user.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SimpleUser" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /users/{username}/gists:
+    parameters:
+      - { $ref: "#/components/parameters/UsernameParam" }
+    get:
+      operationId: listUserGists
+      summary: List a user's gists
+      tags: [Users]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Lists the named user's gists. By default only their public gists are
+        returned. The user's own private and unlisted gists are included only
+        when the caller IS that user AND their token holds the `gist:read`
+        scope; any other caller (including the user with an unscoped token) sees
+        public gists only.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+        - { $ref: "#/components/parameters/SinceParam" }
+      responses:
+        "200":
+          description: A list of the user's gists.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistSimple" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /users/{username}/liked:
+    parameters:
+      - { $ref: "#/components/parameters/UsernameParam" }
+    get:
+      operationId: listUserLikedGists
+      summary: List gists liked by a user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Lists gists the named user has liked, filtered to what the caller may
+        see. The user's own private/unlisted liked gists only surface when the
+        caller IS that user AND their token holds the `gist:read` scope; any
+        other caller sees public liked gists only.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
+        
+        This `liked` endpoint also accept `starred` in the path as aliases to try to keep
+        a GitHub compatibility - e.g. `/user/{username}/starred`. The behavior is the same.
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+        - { $ref: "#/components/parameters/SinceParam" }
+      responses:
+        "200":
+          description: A list of liked gists.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistSimple" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /users/{username}/forked:
+    parameters:
+      - { $ref: "#/components/parameters/UsernameParam" }
+    get:
+      operationId: listUserForkedGists
+      summary: List gists forked by a user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Lists gists the named user has forked, filtered to what the caller may
+        see. The user's own private/unlisted forked gists only surface when the
+        caller IS that user AND their token holds the `gist:read` scope; any
+        other caller sees public forked gists only.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+        - { $ref: "#/components/parameters/SinceParam" }
+      responses:
+        "200":
+          description: A list of forked gists.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistSimple" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
+      description: |
+        Personal Access Token. Send as `Authorization: Bearer og_<token>`.
+
+        Tokens carry per-resource scopes, granted at read or read/write level
+        from the web UI (Settings → Access Tokens). Each operation lists the
+        scope it requires in its `security` entry, e.g. `bearerAuth: [gist:write]`.
+        An empty list (`bearerAuth: []`) means any valid token is accepted, with
+        no specific scope required. The available scopes are:
+
+        - `gist:read` - read gists (including the caller's private/unlisted ones).
+        - `gist:write` - create, update, delete and fork gists.
+        - `user:read` - read the authenticated user's account.
+        - `user:write` - update the authenticated user and toggle likes.
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number, 1-based.
+      schema: { type: integer, minimum: 1, default: 1 }
+    PerPageParam:
+      name: per_page
+      in: query
+      description: Items per page.
+      schema: { type: integer, minimum: 1, maximum: 100, default: 30 }
+    SinceParam:
+      name: since
+      in: query
+      description: Only return gists updated at or after this RFC 3339 timestamp.
+      schema: { type: string, format: date-time }
+    GistUuidParam:
+      name: uuid
+      in: path
+      required: true
+      description: The gist's UUID.
+      schema: { type: string }
+    UsernameParam:
+      name: username
+      in: path
+      required: true
+      description: The user's username.
+      schema: { type: string }
+
+  headers:
+    Link:
+      description: RFC 5988 pagination links (`rel="next"`, `rel="prev"`).
+      schema: { type: string }
+    XPage:
+      description: The current page number (1-based).
+      schema: { type: integer }
+    XPerPage:
+      description: Items per page.
+      schema: { type: integer }
+    XTotal:
+      description: Total number of items matching the query across all pages.
+      schema: { type: integer, format: int64 }
+    XTotalPages:
+      description: Total number of pages, i.e. ceil(total / per_page).
+      schema: { type: integer }
 
   schemas:
     Error:
       type: object
-      required: [error, code]
       properties:
-        error: { type: string }
-        code: { type: string }
+        message:
+          description: Human-readable error message.
+          type: string
+        status:
+          description: HTTP status code, repeated in the body.
+          type: integer
+      required: [message, status]
 
-    User:
+    SimpleUser:
       type: object
-      required: [id, username, email, is_admin, created_at]
+      description: |
+        The public user shape, embedded as the `owner` of a gist and returned
+        by the public user-lookup endpoints. Carries no private fields.
       properties:
         id: { type: integer }
+        login: { type: string }
         username: { type: string }
-        email: { type: string }
-        is_admin: { type: boolean }
+        avatar_url: { type: string, format: uri }
+        type: { type: string }
         created_at: { type: string, format: date-time }
 
-    GistOwner:
-      type: object
-      required: [id, username]
-      properties:
-        id: { type: integer }
-        username: { type: string }
-
-    FileSummary:
-      type: object
-      required: [filename, size]
-      properties:
-        filename: { type: string }
-        size: { type: integer }
-        language: { type: string }
-
-    FileDetail:
+    PrivateUser:
+      description: |
+        The authenticated caller's own user record, returned only by the
+        `/user` endpoints. Extends SimpleUser with the caller's email.
       allOf:
-        - $ref: "#/components/schemas/FileSummary"
+        - { $ref: "#/components/schemas/SimpleUser" }
         - type: object
           properties:
-            content: { type: string }
-            binary: { type: boolean }
-            truncated: { type: boolean }
+            email: { type: string }
 
-    GistSummary:
+    GistSimple:
       type: object
-      required: [uuid, title, visibility, html_url, created_at, updated_at, owner, files]
+      description: |
+        The list-shape gist returned by collection endpoints. Does not include
+        file contents; fetch the gist detail or raw files for those.
       properties:
-        uuid: { type: string }
+        id: { type: string }
+        slug_url: { type: string }
+        owner: { $ref: "#/components/schemas/SimpleUser" }
         title: { type: string }
+        html_url: { type: string, format: uri }
         description: { type: string }
-        visibility: { type: string, enum: [public, unlisted, private] }
-        html_url: { type: string, description: "Relative path to view this gist in a browser" }
+        public:
+          type: boolean
+          description: True only when `visibility` is `public`.
+        visibility:
+          type: string
+          enum: [public, unlisted, private]
+        like_count: { type: integer }
+        fork_count: { type: integer }
+        clone_url: { type: string, format: uri }
+        ssh_url: { type: string }
+        topics:
+          type: array
+          items: { type: string }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
-        owner: { $ref: "#/components/schemas/GistOwner" }
-        files:
-          type: array
-          items: { $ref: "#/components/schemas/FileSummary" }
 
-    GistDetail:
+    GistFile:
       type: object
-      required: [uuid, title, visibility, html_url, created_at, updated_at, owner, files]
-      properties:
-        uuid: { type: string }
-        title: { type: string }
-        description: { type: string }
-        visibility: { type: string, enum: [public, unlisted, private] }
-        html_url: { type: string, description: "Relative path to view this gist in a browser" }
-        created_at: { type: string, format: date-time }
-        updated_at: { type: string, format: date-time }
-        owner: { $ref: "#/components/schemas/GistOwner" }
-        files:
-          type: array
-          items: { $ref: "#/components/schemas/FileDetail" }
-
-    PaginatedGists:
-      type: object
-      required: [data, page, per_page, total]
-      properties:
-        data:
-          type: array
-          items: { $ref: "#/components/schemas/GistSummary" }
-        page: { type: integer }
-        per_page: { type: integer }
-        total: { type: integer }
-
-    FileInput:
-      type: object
-      required: [filename, content]
+      description: One file of a gist, as returned in gist detail responses.
       properties:
         filename: { type: string }
+        type: { type: string }
+        language: { type: string }
+        size: { type: integer }
+        truncated: { type: boolean }
         content: { type: string }
+        encoding: { type: string }
 
-    CreateGistRequest:
+    CommitAuthor:
       type: object
+      description: Raw git author metadata for a commit.
+      properties:
+        name: { type: string }
+        email: { type: string }
+
+    CommitChangeStatus:
+      type: object
+      description: Shortstat breakdown for a commit; total equals additions + deletions.
+      properties:
+        files_changed: { type: integer }
+        additions: { type: integer }
+        deletions: { type: integer }
+        total: { type: integer }
+
+    GistCommit:
+      type: object
+      properties:
+        version:
+          type: string
+          description: Commit SHA.
+        author: { $ref: "#/components/schemas/CommitAuthor" }
+        user:
+          description: Opengist account matching the commit email, or null.
+          oneOf:
+            - { $ref: "#/components/schemas/SimpleUser" }
+            - { type: "null" }
+        change_status: { $ref: "#/components/schemas/CommitChangeStatus" }
+        committed_at: { type: string, format: date-time }
+
+    Gist:
+      description: |
+        Full gist representation including file contents, commits and forks.
+        Returned by the create, get and update endpoints.
+      allOf:
+        - { $ref: "#/components/schemas/GistSimple" }
+        - type: object
+          properties:
+            fork_of:
+              description: The parent gist when this is a fork, otherwise null.
+              oneOf:
+                - { $ref: "#/components/schemas/GistSimple" }
+                - { type: "null" }
+            forks:
+              type: array
+              items: { $ref: "#/components/schemas/GistSimple" }
+            files:
+              type: object
+              additionalProperties: { $ref: "#/components/schemas/GistFile" }
+            commits:
+              type: array
+              items: { $ref: "#/components/schemas/GistCommit" }
+            truncated: { type: boolean }
+
+    GistCreateFileInput:
+      type: object
+      description: Per-file entry of a create request body. The filename is the map key.
+      properties:
+        content:
+          type: string
+          description: File body. Entries without content are dropped.
+
+    GistCreateRequest:
+      type: object
+      description: Request body for creating a gist.
+      properties:
+        title:
+          type: string
+          description: Optional; derived from the first filename when omitted.
+        description: { type: string }
+        visibility:
+          type: string
+          enum: [public, unlisted, private]
+          default: public
+        files:
+          type: object
+          description: Files keyed by filename. At least one entry must have content.
+          additionalProperties: { $ref: "#/components/schemas/GistCreateFileInput" }
       required: [files]
-      properties:
-        title: { type: string }
-        description: { type: string }
-        visibility: { type: string, enum: [public, unlisted, private], default: public }
-        files:
-          type: array
-          minItems: 1
-          items: { $ref: "#/components/schemas/FileInput" }
 
-    UpdateGistRequest:
+    GistUpdateFileInput:
       type: object
+      description: |
+        Per-file entry of an update request, keyed by the current filename.
+        A `null` entry (or one with neither field set) deletes the file.
+      properties:
+        content:
+          type: string
+          description: New file body. Required when the key names a new file.
+        filename:
+          type: string
+          description: New name for the file (rename).
+
+    GistUpdateRequest:
+      type: object
+      description: |
+        Request body for updating a gist. Every field is optional; supply at
+        least one of `title`, `description`, `visibility` or `files`.
       properties:
         title: { type: string }
         description: { type: string }
-        visibility: { type: string, enum: [public, unlisted, private] }
+        visibility:
+          type: string
+          enum: [public, unlisted, private]
         files:
-          type: array
-          items: { $ref: "#/components/schemas/FileInput" }
+          type: object
+          description: Files keyed by their current filename.
+          additionalProperties:
+            oneOf:
+              - { $ref: "#/components/schemas/GistUpdateFileInput" }
+              - { type: "null" }
+
+    UpdateUserRequest:
+      type: object
+      description: |
+        Request body for updating the authenticated user. Both fields are
+        optional; supply at least one.
+      properties:
+        username:
+          type: string
+          description: New username (max 24 chars, alphanumeric and dashes, not reserved).
+        email:
+          type: string
+          description: New email; lowercased server-side.
 
   responses:
+    BadRequest:
+      description: The request was malformed.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
     Unauthorized:
-      description: Missing/invalid/expired token
+      description: Missing or invalid credentials.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
     Forbidden:
-      description: Insufficient scope
+      description: The token lacks the required scope or permission.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
     NotFound:
-      description: Resource not found
+      description: The requested resource does not exist (or is not visible to the caller).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: The request conflicts with the current state (e.g. username already taken).
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
     ValidationFailed:
-      description: Request body invalid
-      content:
-        application/json:
-          schema: { $ref: "#/components/schemas/Error" }
-    ApiDisabled:
-      description: API disabled by administrator
+      description: The request body failed validation.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }

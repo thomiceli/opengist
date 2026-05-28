@@ -12,30 +12,23 @@ import (
 	webtest "github.com/thomiceli/opengist/internal/web/test"
 )
 
+// apiError mirrors the JSON error envelope produced by context.HTTPError:
+// {"message": "...", "status": <code>}.
+type apiError struct {
+	Message string `json:"message"`
+	Status  int    `json:"status"`
+}
+
 func TestApiAuth_MissingToken(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)
 	s.Register(t, "thomas")
 	s.Login(t, "thomas")
-	require.NoError(t, db.UpdateSetting(db.SettingApiEnabled, "1"))
 
-	var body map[string]string
+	var body apiError
 	s.APIRequestUnmarshal(t, "GET", "/api/v1/user", "", nil, &body, 401)
-	require.Equal(t, "unauthorized", body["code"])
-}
-
-func TestApiAuth_ApiDisabled(t *testing.T) {
-	s := webtest.Setup(t)
-	defer webtest.Teardown(t)
-	s.Register(t, "thomas")
-	s.Login(t, "thomas")
-	tok := s.CreateAccessToken(t, "t", db.ReadPermission, db.ReadPermission)
-	require.NoError(t, db.UpdateSetting(db.SettingApiEnabled, "0"))
-
-	var body map[string]string
-	s.APIRequestUnmarshal(t, "GET", "/api/v1/user", tok, nil, &body, 503)
-	require.Equal(t, "api_disabled", body["code"])
-	require.Contains(t, body["hint"], "/admin-panel/configuration")
+	require.Equal(t, 401, body.Status)
+	require.NotEmpty(t, body.Message)
 }
 
 func TestApiAuth_BearerAndTokenPrefix(t *testing.T) {
@@ -44,7 +37,6 @@ func TestApiAuth_BearerAndTokenPrefix(t *testing.T) {
 	s.Register(t, "thomas")
 	s.Login(t, "thomas")
 	tok := s.CreateAccessToken(t, "t", db.ReadPermission, db.ReadPermission)
-	require.NoError(t, db.UpdateSetting(db.SettingApiEnabled, "1"))
 
 	// Bearer
 	s.APIRequest(t, "GET", "/api/v1/user", tok, nil, 200)
@@ -61,7 +53,6 @@ func TestApiAuth_ExpiredToken(t *testing.T) {
 	s.Register(t, "thomas")
 	s.Login(t, "thomas")
 	tok := s.CreateAccessToken(t, "t", db.ReadPermission, db.ReadPermission)
-	require.NoError(t, db.UpdateSetting(db.SettingApiEnabled, "1"))
 
 	// Force the token to be expired.
 	all, _ := db.GetAccessTokensByUserID(s.User().ID)
@@ -69,9 +60,10 @@ func TestApiAuth_ExpiredToken(t *testing.T) {
 	all[0].ExpiresAt = 1
 	require.NoError(t, db.SaveAccessTokenForTest(all[0]))
 
-	var body map[string]string
+	var body apiError
 	s.APIRequestUnmarshal(t, "GET", "/api/v1/user", tok, nil, &body, 401)
-	require.Equal(t, "unauthorized", body["code"])
+	require.Equal(t, 401, body.Status)
+	require.NotEmpty(t, body.Message)
 }
 
 func newJSONReqWithAuth(method, uri, authHeader string) *http.Request {
@@ -81,28 +73,33 @@ func newJSONReqWithAuth(method, uri, authHeader string) *http.Request {
 	return req
 }
 
-func TestApiScope_GistReadInsufficient(t *testing.T) {
+// TestApiScope_GistWriteInsufficient - a token without gist:write is rejected
+// with 403 on a write endpoint. (Read endpoints are soft-scoped and return the
+// public subset instead of 403, so the hard-scope check lives on a write route.)
+func TestApiScope_GistWriteInsufficient(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)
 	s.Register(t, "thomas")
 	s.Login(t, "thomas")
-	tok := s.CreateAccessToken(t, "no-gist", db.NoPermission, db.ReadPermission)
-	require.NoError(t, db.UpdateSetting(db.SettingApiEnabled, "1"))
+	tok := s.CreateAccessToken(t, "no-write", db.ReadPermission, db.ReadPermission)
 
-	var body map[string]string
-	s.APIRequestUnmarshal(t, "GET", "/api/v1/gists", tok, nil, &body, 403)
-	require.Equal(t, "forbidden", body["code"])
+	var body apiError
+	s.APIRequestUnmarshal(t, "POST", "/api/v1/gists", tok, nil, &body, 403)
+	require.Equal(t, 403, body.Status)
+	require.NotEmpty(t, body.Message)
 }
 
+// TestApiScope_UserReadInsufficient - /user is a hard-scoped private resource,
+// so a token lacking user:read gets 403 (not a reduced response).
 func TestApiScope_UserReadInsufficient(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)
 	s.Register(t, "thomas")
 	s.Login(t, "thomas")
 	tok := s.CreateAccessToken(t, "no-user", db.ReadPermission, db.NoPermission)
-	require.NoError(t, db.UpdateSetting(db.SettingApiEnabled, "1"))
 
-	var body map[string]string
+	var body apiError
 	s.APIRequestUnmarshal(t, "GET", "/api/v1/user", tok, nil, &body, 403)
-	require.Equal(t, "forbidden", body["code"])
+	require.Equal(t, 403, body.Status)
+	require.NotEmpty(t, body.Message)
 }

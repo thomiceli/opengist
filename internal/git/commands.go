@@ -327,7 +327,11 @@ func GetFileSize(user string, gist string, revision string, filename string) (ui
 	return strconv.ParseUint(strings.TrimSuffix(string(stdout), "\n"), 10, 64)
 }
 
-func GetLog(user string, gist string, skip int) ([]*Commit, error) {
+// GetLog returns commits walked from `revision` (typically "HEAD" or a
+// specific SHA), skipping `skip` rows from the top of the walk and limited
+// to `limit` rows. Pass "HEAD" for the gist's full history; pass a SHA to
+// see the history ending at (and including) that commit.
+func GetLog(user string, gist string, revision string, skip int, limit int) ([]*Commit, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
@@ -335,14 +339,14 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 		"--no-pager",
 		"log",
 		"-n",
-		"11",
+		strconv.Itoa(limit),
 		"--no-color",
 		"-p",
 		"--skip",
 		strconv.Itoa(skip),
 		"--format=format:c %H%na %aN%nm %ae%nt %at",
 		"--shortstat",
-		"HEAD",
+		revision,
 	)
 	cmd.Dir = repositoryPath
 	stdout, _ := cmd.StdoutPipe()

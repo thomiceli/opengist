@@ -28,7 +28,7 @@ func RawFile(ctx *context.Context) error {
 	}
 
 	if file.MimeType.CanBeEmbedded() {
-		ctx.Response().Header().Set("Content-Type", file.MimeType.ContentType)
+		ctx.Response().Header().Set("Content-Type", file.MimeType.Header())
 	} else if file.MimeType.IsText() {
 		ctx.Response().Header().Set("Content-Type", "text/plain; charset=utf-8")
 	} else {
@@ -51,7 +51,7 @@ func DownloadFile(ctx *context.Context) error {
 		return ctx.NotFound("File not found")
 	}
 
-	ctx.Response().Header().Set("Content-Type", file.MimeType.ContentType)
+	ctx.Response().Header().Set("Content-Type", file.MimeType.Header())
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename=\""+url.PathEscape(file.Filename)+"\"")
 	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(file.Content)))
 	ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")

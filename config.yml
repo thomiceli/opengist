@@ -56,6 +56,9 @@ http.port: 6157
 # Enable or disable git operations (clone, pull, push) via HTTP (either `true` or `false`). Default: true
 http.git-enabled: true
 
+# Enable or disable the REST API (either `true` or `false`). Default: true
+api.enabled: true
+
 # File permissions for Unix socket (octal format). Default: 0666
 unix-socket-permissions: 0666
 

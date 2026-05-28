@@ -118,7 +118,6 @@ settings.token-name: 名称
 settings.token-permissions: 权限
 settings.token-gist-permission: Gists
 settings.token-user-permission: 用户
-settings.token-user-permission-help: 读取用户信息（/api/v1/user 端点需要）
 settings.token-permission-none: 无访问权限
 settings.token-permission-read: 只读
 settings.token-permission-read-write: 读写

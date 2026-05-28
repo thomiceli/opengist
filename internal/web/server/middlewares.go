@@ -23,6 +23,7 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"gorm.io/gorm"
 )
 
 func (s *Server) useCustomContext() {
@@ -45,7 +46,11 @@ func (s *Server) registerMiddlewares() {
 		Getter: middleware.MethodFromForm("_method"),
 	}))
 	s.echo.Pre(middleware.RemoveTrailingSlash())
-	s.echo.Pre(middleware.CORS())
+	// Expose the API's pagination headers so cross-origin browser clients can
+	// read them (the CORS spec hides non-safelisted response headers by default).
+	s.echo.Pre(middleware.CORSWithConfig(middleware.CORSConfig{
+		ExposeHeaders: []string{"Link", "X-Page", "X-Per-Page", "X-Total", "X-Total-Pages"},
+	}))
 	s.echo.Pre(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI: true, LogStatus: true, LogMethod: true,
 		LogValuesFunc: func(ctx echo.Context, v middleware.RequestLoggerValues) error {
@@ -85,12 +90,12 @@ func (s *Server) registerMiddlewares() {
 }
 
 func (s *Server) errorHandler(err error, ctx echo.Context) {
-	var httpErr *echo.HTTPError
+	var httpErr *context.HTTPError
 	data := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
 	if errors.As(err, &httpErr) {
 		acceptJson := strings.Contains(ctx.Request().Header.Get("Accept"), "application/json")
 		data["error"] = err
-		if acceptJson {
+		if acceptJson || data["err_render"] == "json" {
 			if err := ctx.JSON(httpErr.Code, httpErr); err != nil {
 				if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
 					return
@@ -113,7 +118,7 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 		return
 	}
 	log.Error().Err(err).Send()
-	httpErr = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	httpErr = &context.HTTPError{Message: err.Error(), Code: http.StatusInternalServerError}
 	data["error"] = httpErr
 	if err := ctx.Render(500, "error", data); err != nil {
 		if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
@@ -243,6 +248,10 @@ func noRouteFound(ctx *context.Context) error {
 	return ctx.NotFound("Page not found")
 }
 
+func noRouteFoundApi(ctx *context.Context) error {
+	return ctx.ErrorJson(404, "Not found", nil)
+}
+
 func locale(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		// Check URL arguments
@@ -340,42 +349,15 @@ func loadSettings(ctx *context.Context) error {
 	return nil
 }
 
-func apiScopeGistRead(next Handler) Handler {
-	return func(ctx *context.Context) error {
-		tok, ok := ctx.GetData("accessToken").(*db.AccessToken)
-		if !ok || !tok.HasGistReadPermission() {
-			return ctx.JSON(403, map[string]string{
-				"error": "token lacks gist:read scope",
-				"code":  "forbidden",
-			})
+func apiScope(scope, permission uint) Middleware {
+	return func(next Handler) Handler {
+		return func(ctx *context.Context) error {
+			tok, ok := ctx.GetData("accessToken").(*db.AccessToken)
+			if !ok || !tok.CheckForPermission(scope, permission) {
+				return ctx.ErrorJson(403, "token lacks required scope/permission", nil)
+			}
+			return next(ctx)
 		}
-		return next(ctx)
-	}
-}
-
-func apiScopeGistWrite(next Handler) Handler {
-	return func(ctx *context.Context) error {
-		tok, ok := ctx.GetData("accessToken").(*db.AccessToken)
-		if !ok || !tok.HasGistWritePermission() {
-			return ctx.JSON(403, map[string]string{
-				"error": "token lacks gist:write scope",
-				"code":  "forbidden",
-			})
-		}
-		return next(ctx)
-	}
-}
-
-func apiScopeUserRead(next Handler) Handler {
-	return func(ctx *context.Context) error {
-		tok, ok := ctx.GetData("accessToken").(*db.AccessToken)
-		if !ok || !tok.HasUserReadPermission() {
-			return ctx.JSON(403, map[string]string{
-				"error": "token lacks user:read scope",
-				"code":  "forbidden",
-			})
-		}
-		return next(ctx)
 	}
 }
 
@@ -449,26 +431,14 @@ func gistInit(next Handler) Handler {
 
 		ctx.SetData("gist", gist)
 
-		if config.C.SshGit {
-			var sshDomain string
-
-			if config.C.SshExternalDomain != "" {
-				sshDomain = config.C.SshExternalDomain
-			} else {
-				sshDomain = strings.Split(ctx.Request().Host, ":")[0]
-			}
-
-			if config.C.SshPort == "22" {
-				ctx.SetData("sshCloneUrl", sshDomain+":"+userName+"/"+gistName+".git")
-			} else {
-				ctx.SetData("sshCloneUrl", "ssh://"+sshDomain+":"+config.C.SshPort+"/"+userName+"/"+gistName+".git")
-			}
+		if ssh := gist.SSHCloneURL(ctx.Request().Host); ssh != "" {
+			ctx.SetData("sshCloneUrl", ssh)
 		}
 
 		baseHttpUrl := ctx.GetData("baseHttpUrl").(string)
 
-		if config.C.HttpGit {
-			ctx.SetData("httpCloneUrl", baseHttpUrl+"/"+userName+"/"+gistName+".git")
+		if cloneURL := gist.HTTPCloneURL(baseHttpUrl); cloneURL != "" {
+			ctx.SetData("httpCloneUrl", cloneURL)
 		}
 
 		ctx.SetData("httpCopyUrl", baseHttpUrl+"/"+userName+"/"+gistName)
@@ -529,26 +499,21 @@ func setAllGistsMode(mode string) Middleware {
 	}
 }
 
-// apiAuth validates /api/v1 requests: admin toggle, Authorization header, token validity.
-// Injects ctx.User and ctx.SetData("accessToken", token).
-func apiAuth(next Handler) Handler {
+// apiBindAuth gates /api/v1 on the api.enabled config option and optionally
+// resolves a caller identity from the Authorization header. A missing header is
+// allowed (the downstream handler/scope middleware decides whether anonymous
+// access is OK); a malformed/expired/unknown token is always rejected with 401.
+// On success, sets ctx.User and stashes the access token under "accessToken".
+func apiBindAuth(next Handler) Handler {
 	return func(ctx *context.Context) error {
-		enabled, err := db.GetSetting(db.SettingApiEnabled)
-		if err != nil {
-			return ctx.JSON(500, map[string]string{
-				"error": "failed to read API setting",
-				"code":  "internal_error",
-			})
-		}
-		if enabled != "1" {
-			return ctx.JSON(503, map[string]string{
-				"error": "API is disabled by administrator",
-				"code":  "api_disabled",
-				"hint":  "Ask an administrator to enable the API at /admin-panel/configuration",
-			})
+		if !config.C.ApiEnabled {
+			return ctx.ErrorJson(403, "API is disabled", nil)
 		}
 
 		h := ctx.Request().Header.Get("Authorization")
+		if h == "" {
+			return next(ctx)
+		}
 		var plain string
 		switch {
 		case strings.HasPrefix(h, "Bearer "):
@@ -556,24 +521,18 @@ func apiAuth(next Handler) Handler {
 		case strings.HasPrefix(h, "Token "):
 			plain = strings.TrimPrefix(h, "Token ")
 		default:
-			return ctx.JSON(401, map[string]string{
-				"error": "missing or invalid Authorization header",
-				"code":  "unauthorized",
-			})
+			return ctx.ErrorJson(401, "Bad crendentials", nil)
 		}
 
 		tok, err := db.GetAccessTokenByToken(plain)
 		if err != nil {
-			return ctx.JSON(401, map[string]string{
-				"error": "invalid token",
-				"code":  "unauthorized",
-			})
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ctx.ErrorJson(401, "Bad crendentials", nil)
+			}
+			return ctx.ErrorJson(500, "Error fetching access token", err)
 		}
 		if tok.IsExpired() {
-			return ctx.JSON(401, map[string]string{
-				"error": "token expired",
-				"code":  "unauthorized",
-			})
+			return ctx.ErrorJson(401, "Bad crendentials", nil)
 		}
 
 		ctx.User = &tok.User
@@ -585,6 +544,17 @@ func apiAuth(next Handler) Handler {
 		// round-trip the caller already paid.
 		_ = tok.UpdateLastUsed()
 
+		return next(ctx)
+	}
+}
+
+// apiRequireAuth rejects requests that apiAuth didn't attach a user to. Use on
+// routes where anonymous access is not allowed (e.g. /user, write endpoints).
+func apiRequireAuth(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		if ctx.User == nil {
+			return ctx.ErrorJson(401, "Requires authentication", nil)
+		}
 		return next(ctx)
 	}
 }

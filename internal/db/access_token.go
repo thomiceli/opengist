@@ -8,9 +8,14 @@ import (
 )
 
 const (
-	NoPermission        = 0
-	ReadPermission      = 1
-	ReadWritePermission = 2
+	ScopeGist = iota
+	ScopeUser
+)
+
+const (
+	NoPermission = iota
+	ReadPermission
+	ReadWritePermission
 )
 
 type AccessToken struct {
@@ -24,7 +29,7 @@ type AccessToken struct {
 	User       User `validate:"-"`
 
 	ScopeGist uint // 0 = none, 1 = read, 2 = read+write
-	ScopeUser uint // 0 = none, 1 = read
+	ScopeUser uint // 0 = none, 1 = read, 2 = read+write
 }
 
 // GenerateToken creates a new random token and returns the plain text token.
@@ -105,12 +110,26 @@ func (t *AccessToken) HasUserReadPermission() bool {
 	return t.ScopeUser >= ReadPermission
 }
 
+func (t *AccessToken) HasUserWritePermission() bool {
+	return t.ScopeUser >= ReadWritePermission
+}
+
+func (t *AccessToken) CheckForPermission(scope, permission uint) bool {
+	if scope == ScopeGist {
+		return t.ScopeGist >= permission
+	}
+	if scope == ScopeUser {
+		return t.ScopeUser >= permission
+	}
+	return false
+}
+
 // -- DTO -- //
 
 type AccessTokenDTO struct {
 	Name      string `form:"name" validate:"required,max=255"`
 	ScopeGist uint   `form:"scope_gist" validate:"min=0,max=2"`
-	ScopeUser uint   `form:"scope_user" validate:"min=0,max=1"`
+	ScopeUser uint   `form:"scope_user" validate:"min=0,max=2"`
 	ExpiresAt string `form:"expires_at"` // empty means no expiration, otherwise date format (YYYY-MM-DD)
 }
 

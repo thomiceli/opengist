@@ -46,12 +46,12 @@ func TestFork(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 1, original.NbForks)
 
-		forks, err := original.GetForks(2, 0)
+		forks, err := original.GetForks(2, 0, 11, 10)
 		require.NoError(t, err)
 		require.Len(t, forks, 1)
 		require.Equal(t, forkedGist.ID, forks[0].ID)
 
-		forkedGists, err := db.GetAllGistsForkedByUser(2, 2, 0, "created", "asc")
+		forkedGists, err := db.GetAllGistsForkedByUser(2, 2, nil, 0, "created", "asc", 11, 10)
 		require.NoError(t, err)
 		require.Len(t, forkedGists, 1)
 		require.Equal(t, forkedGist.ID, forkedGists[0].ID)

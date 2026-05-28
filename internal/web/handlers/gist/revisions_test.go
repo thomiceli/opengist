@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	webtest "github.com/thomiceli/opengist/internal/web/test"
 )
@@ -32,7 +33,7 @@ func TestRevisions(t *testing.T) {
 			"content": {"updated content", "okay"},
 		}, 302)
 
-		commits, err := gist.Log(0)
+		commits, err := gist.Log("HEAD", 0, 11)
 		require.NoError(t, err)
 
 		require.Len(t, commits, 3)
@@ -41,95 +42,106 @@ func TestRevisions(t *testing.T) {
 		require.Regexp(t, "^[a-f0-9]{40}$", commits[1].Hash)
 		require.Regexp(t, "^[a-f0-9]{40}$", commits[2].Hash)
 
-		require.Equal(t, &git.Commit{
-			Hash:       commits[0].Hash,
-			Timestamp:  commits[0].Timestamp,
-			AuthorName: "thomas",
-			Changed:    "1 file changed, 0 insertions, 0 deletions",
-			Files: []git.File{
-				{
-					Filename:    "renamed.txt",
-					Size:        0,
-					HumanSize:   "",
-					OldFilename: "file.txt",
-					Content:     ``,
-					Truncated:   false,
-					IsCreated:   false,
-					IsDeleted:   false,
-					IsBinary:    false,
-					MimeType:    git.MimeType{},
+		require.Equal(t, &db.GistCommit{
+			Commit: &git.Commit{
+				Hash:         commits[0].Hash,
+				Timestamp:    commits[0].Timestamp,
+				AuthorName:   "thomas",
+				FilesChanged: 1,
+				Additions:    0,
+				Deletions:    0,
+				Files: []git.File{
+					{
+						Filename:    "renamed.txt",
+						Size:        0,
+						HumanSize:   "",
+						OldFilename: "file.txt",
+						Content:     ``,
+						Truncated:   false,
+						IsCreated:   false,
+						IsDeleted:   false,
+						IsBinary:    false,
+						MimeType:    git.MimeType{},
+					},
 				},
 			},
 		}, commits[0])
 
-		require.Equal(t, &git.Commit{
-			Hash:       commits[1].Hash,
-			Timestamp:  commits[1].Timestamp,
-			AuthorName: "thomas",
-			Changed:    "3 files changed, 2 insertions, 2 deletions",
-			Files: []git.File{
-				{
-					Filename:    "file.txt",
-					OldFilename: "file.txt",
-					Content: `@@ -1 +1 @@
+		require.Equal(t, &db.GistCommit{
+			Commit: &git.Commit{
+				Hash:         commits[1].Hash,
+				Timestamp:    commits[1].Timestamp,
+				AuthorName:   "thomas",
+				FilesChanged: 3,
+				Additions:    2,
+				Deletions:    2,
+				Files: []git.File{
+					{
+						Filename:    "file.txt",
+						OldFilename: "file.txt",
+						Content: `@@ -1 +1 @@
 -hello world
 \ No newline at end of file
 +updated content
 \ No newline at end of file
 `,
-					IsCreated: false,
-					IsDeleted: false,
-					IsBinary:  false,
-				}, {
-					Filename:    "ok.txt",
-					OldFilename: "",
-					Content: `@@ -0,0 +1 @@
+						IsCreated: false,
+						IsDeleted: false,
+						IsBinary:  false,
+					}, {
+						Filename:    "ok.txt",
+						OldFilename: "",
+						Content: `@@ -0,0 +1 @@
 +okay
 \ No newline at end of file
 `,
-					IsCreated: true,
-					IsDeleted: false,
-					IsBinary:  false,
-				}, {
-					Filename:    "otherfile.txt",
-					OldFilename: "",
-					Content: `@@ -1 +0,0 @@
+						IsCreated: true,
+						IsDeleted: false,
+						IsBinary:  false,
+					}, {
+						Filename:    "otherfile.txt",
+						OldFilename: "",
+						Content: `@@ -1 +0,0 @@
 -other content
 \ No newline at end of file
 `,
-					IsCreated: false,
-					IsDeleted: true,
-					IsBinary:  false,
+						IsCreated: false,
+						IsDeleted: true,
+						IsBinary:  false,
+					},
 				},
 			},
 		}, commits[1])
 
-		require.Equal(t, &git.Commit{
-			Hash:       commits[2].Hash,
-			Timestamp:  commits[2].Timestamp,
-			AuthorName: "thomas",
-			Changed:    "2 files changed, 2 insertions",
-			Files: []git.File{
-				{
-					Filename:    "file.txt",
-					OldFilename: "",
-					Content: `@@ -0,0 +1 @@
+		require.Equal(t, &db.GistCommit{
+			Commit: &git.Commit{
+				Hash:         commits[2].Hash,
+				Timestamp:    commits[2].Timestamp,
+				AuthorName:   "thomas",
+				FilesChanged: 2,
+				Additions:    2,
+				Files: []git.File{
+					{
+						Filename:    "file.txt",
+						OldFilename: "",
+						Content: `@@ -0,0 +1 @@
 +hello world
 \ No newline at end of file
 `,
-					IsCreated: true,
-					IsDeleted: false,
-					IsBinary:  false,
-				}, {
-					Filename:    "otherfile.txt",
-					OldFilename: "",
-					Content: `@@ -0,0 +1 @@
+						IsCreated: true,
+						IsDeleted: false,
+						IsBinary:  false,
+					}, {
+						Filename:    "otherfile.txt",
+						OldFilename: "",
+						Content: `@@ -0,0 +1 @@
 +other content
 \ No newline at end of file
 `,
-					IsCreated: true,
-					IsDeleted: false,
-					IsBinary:  false,
+						IsCreated: true,
+						IsDeleted: false,
+						IsBinary:  false,
+					},
 				},
 			},
 		}, commits[2])

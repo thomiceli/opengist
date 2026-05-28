@@ -46,10 +46,10 @@
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{{ .locale.Tr "settings.token-user-permission" }}</label>
                         <div class="space-y-2">
-                            <label class="block text-sm text-slate-600 dark:text-slate-400">{{ .locale.Tr "settings.token-user-permission-help" }}</label>
                             <select name="scope_user" class="dark:bg-gray-800 block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 <option value="0">{{ .locale.Tr "settings.token-permission-none" }}</option>
                                 <option value="1">{{ .locale.Tr "settings.token-permission-read" }}</option>
+                                <option value="2">{{ .locale.Tr "settings.token-permission-read-write" }}</option>
                             </select>
                         </div>
                     </div>
@@ -86,6 +86,12 @@
                                     {{ if eq .ScopeGist 0 }}{{ $.locale.Tr "settings.token-permission-none" }}{{ end }}
                                     {{ if eq .ScopeGist 1 }}{{ $.locale.Tr "settings.token-permission-read" }}{{ end }}
                                     {{ if eq .ScopeGist 2 }}{{ $.locale.Tr "settings.token-permission-read-write" }}{{ end }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{ $.locale.Tr "settings.token-user-permission" }}:
+                                    {{ if eq .ScopeUser 0 }}{{ $.locale.Tr "settings.token-permission-none" }}{{ end }}
+                                    {{ if eq .ScopeUser 1 }}{{ $.locale.Tr "settings.token-permission-read" }}{{ end }}
+                                    {{ if eq .ScopeUser 2 }}{{ $.locale.Tr "settings.token-permission-read-write" }}{{ end }}
                                 </p>
                                 <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "settings.token-created-at" }} <span>{{ .CreatedAt | humanDate }}</span></p>
                                 {{ if eq .ExpiresAt 0 }}

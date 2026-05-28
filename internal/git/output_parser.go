@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -23,12 +24,14 @@ type File struct {
 }
 
 type Commit struct {
-	Hash        string
-	AuthorName  string
-	AuthorEmail string
-	Timestamp   string
-	Changed     string
-	Files       []File
+	Hash         string
+	AuthorName   string
+	AuthorEmail  string
+	Timestamp    string
+	FilesChanged int
+	Additions    int
+	Deletions    int
+	Files        []File
 }
 
 func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) {
@@ -59,6 +62,18 @@ func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) 
 }
 
 var reLogBinaryNames = regexp.MustCompile(`Binary files (.+) and (.+) differ`)
+
+// shortstat patterns. Git emits a line like:
+//
+//	" 4 files changed, 2 insertions(+), 2 deletions(-)"
+//
+// with insertions or deletions optionally absent when zero. The capture
+// group in each regex is the count.
+var (
+	reShortstatFiles      = regexp.MustCompile(`(\d+) files? changed`)
+	reShortstatInsertions = regexp.MustCompile(`(\d+) insertions?`)
+	reShortstatDeletions  = regexp.MustCompile(`(\d+) deletions?`)
+)
 
 // inspired from https://github.com/go-gitea/gitea/blob/main/services/gitdiff/gitdiff.go
 func parseLog(out io.Reader, maxFiles int, maxBytes int) ([]*Commit, error) {
@@ -120,10 +135,16 @@ loopLog:
 
 		// Commit shortstat
 		case ' ':
-			changed := []byte(line)[1:]
-			changed = bytes.ReplaceAll(changed, []byte("(+)"), []byte(""))
-			changed = bytes.ReplaceAll(changed, []byte("(-)"), []byte(""))
-			currentCommit.Changed = string(changed)
+			shortstat := line[1:]
+			if m := reShortstatFiles.FindStringSubmatch(shortstat); len(m) == 2 {
+				currentCommit.FilesChanged, _ = strconv.Atoi(m[1])
+			}
+			if m := reShortstatInsertions.FindStringSubmatch(shortstat); len(m) == 2 {
+				currentCommit.Additions, _ = strconv.Atoi(m[1])
+			}
+			if m := reShortstatDeletions.FindStringSubmatch(shortstat); len(m) == 2 {
+				currentCommit.Deletions, _ = strconv.Atoi(m[1])
+			}
 
 			// shortstat is followed by an empty line
 			line, err = input.ReadString('\n')

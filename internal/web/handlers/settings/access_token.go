@@ -3,6 +3,7 @@ package settings
 import (
 	"strconv"
 
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
 	"github.com/thomiceli/opengist/internal/validator"
@@ -17,10 +18,8 @@ func AccessTokens(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Cannot get access tokens", err)
 	}
 
-	apiEnabled, _ := db.GetSetting(db.SettingApiEnabled)
-
 	ctx.SetData("accessTokens", tokens)
-	ctx.SetData("apiEnabled", apiEnabled == "1")
+	ctx.SetData("apiEnabled", config.C.ApiEnabled)
 	ctx.SetData("userIsAdmin", user.IsAdmin)
 	ctx.SetData("settingsHeaderPage", "tokens")
 	ctx.SetData("htmlTitle", ctx.TrH("settings"))

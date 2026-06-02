@@ -70,7 +70,7 @@ func AllGists(ctx *context.Context) error {
 		case "all":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all"))
 			urlPage = "all"
-			gists, err = db.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsForCurrentUser(currentUserId, nil, pageInt-1, sort, order, 11, 10)
 		}
 	} else {
 		var fromUser *db.User
@@ -107,11 +107,11 @@ func AllGists(ctx *context.Context) error {
 		case "liked":
 			urlPage = fromUserStr + "/liked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-liked-by", fromUserStr))
-			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, nil, pageInt-1, sort, order, 11, 10)
 		case "forked":
 			urlPage = fromUserStr + "/forked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-forked-by", fromUserStr))
-			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, nil, pageInt-1, sort, order, 11, 10)
 		case "fromUser":
 			urlPage = fromUserStr
 

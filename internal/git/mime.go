@@ -2,6 +2,7 @@ package git
 
 import (
 	"fmt"
+	"mime"
 	"net/http"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 
 type MimeType struct {
 	ContentType       string
+	Charset           string
 	extension         string
 	golangContentType string // json, m3u, etc. still renderable as text
 }
@@ -88,6 +90,16 @@ func (mt MimeType) RenderType() string {
 	return "Binary"
 }
 
+// Header returns the value for a Content-Type HTTP header, re-attaching the
+// charset parameter that DetectMimeType split out of ContentType.
+func (mt MimeType) Header() string {
+	if mt.Charset == "" {
+		return mt.ContentType
+	}
+	return mime.FormatMediaType(mt.ContentType, map[string]string{"charset": mt.Charset})
+}
+
 func DetectMimeType(data []byte, extension string) MimeType {
-	return MimeType{mimetype.Detect(data).String(), extension, http.DetectContentType(data)}
+	mediaType, params, _ := mime.ParseMediaType(mimetype.Detect(data).String())
+	return MimeType{mediaType, params["charset"], extension, http.DetectContentType(data)}
 }

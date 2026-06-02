@@ -73,7 +73,7 @@ func Forks(ctx *context.Context) error {
 		fromUserID = currentUser.ID
 	}
 
-	forks, err := gist.GetForks(fromUserID, pageInt-1)
+	forks, err := gist.GetForks(fromUserID, pageInt-1, 11, 10)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error getting users who liked this gist", err)
 	}

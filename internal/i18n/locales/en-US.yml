@@ -179,7 +179,6 @@ settings.token-name: Name
 settings.token-permissions: Permissions
 settings.token-gist-permission: Gists
 settings.token-user-permission: User
-settings.token-user-permission-help: Read user info (required for /api/v1/user)
 settings.token-permission-none: No access
 settings.token-permission-read: Read
 settings.token-permission-read-write: Read & Write

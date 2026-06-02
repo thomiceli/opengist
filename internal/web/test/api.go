@@ -11,11 +11,18 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 )
 
-// APIRequest sends a JSON request to /api/v1/* and asserts the status code.
-// body: nil, raw JSON string, or any serializable struct/map.
-// token: empty disables Authorization; otherwise sent as "Bearer <token>".
-// Returns the response body bytes (already drained).
-func (s *Server) APIRequest(t *testing.T, method, uri, token string, body interface{}, expectedCode int) []byte {
+// APIRequestUnmarshal calls APIRequest and unmarshals the body into out (if non-nil).
+func (s *Server) APIRequestUnmarshal(t *testing.T, method, uri, token string, body, out interface{}, expectedCode int) {
+	_, raw := s.APIRequest(t, method, uri, token, body, expectedCode)
+	if out != nil && len(raw) > 0 {
+		require.NoErrorf(t, json.Unmarshal(raw, out),
+			"failed to unmarshal response: %s", string(raw))
+	}
+}
+
+// APIRequest is the response-returning variant of APIRequest: tests
+// that need to inspect headers (e.g. Link for pagination) use this.
+func (s *Server) APIRequest(t *testing.T, method, uri, token string, body interface{}, expectedCode int) (*httptest.ResponseRecorder, []byte) {
 	var bodyReader *bytes.Reader
 	switch v := body.(type) {
 	case nil:
@@ -42,16 +49,7 @@ func (s *Server) APIRequest(t *testing.T, method, uri, token string, body interf
 			"unexpected status for %s %s: got %d, body=%s",
 			method, uri, w.Code, strings.TrimSpace(w.Body.String()))
 	}
-	return w.Body.Bytes()
-}
-
-// APIRequestUnmarshal calls APIRequest and unmarshals the body into out (if non-nil).
-func (s *Server) APIRequestUnmarshal(t *testing.T, method, uri, token string, body, out interface{}, expectedCode int) {
-	raw := s.APIRequest(t, method, uri, token, body, expectedCode)
-	if out != nil && len(raw) > 0 {
-		require.NoErrorf(t, json.Unmarshal(raw, out),
-			"failed to unmarshal response: %s", string(raw))
-	}
+	return w, w.Body.Bytes()
 }
 
 // CreateAccessToken creates an access token for the currently logged-in user

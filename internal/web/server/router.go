@@ -10,10 +10,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers/admin"
-	api "github.com/thomiceli/opengist/internal/web/handlers/api"
+	"github.com/thomiceli/opengist/internal/web/handlers/api"
 	apiv1 "github.com/thomiceli/opengist/internal/web/handlers/api/v1"
 	"github.com/thomiceli/opengist/internal/web/handlers/auth"
 	"github.com/thomiceli/opengist/internal/web/handlers/gist"
@@ -104,6 +105,44 @@ func (s *Server) registerRoutes() {
 			r.Any("/init/*", git.GitHttp, gistNewPushSoftInit)
 		}
 
+		apiV1 := r.SubGroup("/api/v1")
+		{
+			apiV1.Use(apiBindAuth)
+			apiV1.GET("/gists", apiv1.ListGists)
+			apiV1.POST("/gists", apiv1.CreateGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+			apiV1.GET("/gists/public", apiv1.ListPublicGists)
+			apiV1.GET("/gists/liked", apiv1.ListLikedGists, apiRequireAuth)
+			// /starred and /star are GitHub-compat aliases of the canonical
+			// /liked and /like routes (same handlers); openapi.yaml mentions them
+			// in a note but gives them no path entries of their own.
+			apiV1.GET("/gists/starred", apiv1.ListLikedGists, apiRequireAuth)
+			apiV1.GET("/gists/forked", apiv1.ListForkedGists, apiRequireAuth)
+			apiV1.GET("/gists/:uuid", apiv1.GetGist)
+			apiV1.PATCH("/gists/:uuid", apiv1.UpdateGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+			apiV1.DELETE("/gists/:uuid", apiv1.DeleteGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+			apiV1.GET("/gists/:uuid/commits", apiv1.ListCommits)
+			apiV1.GET("/gists/:uuid/:sha", apiv1.GetGistRevision)
+			apiV1.GET("/gists/:uuid/forks", apiv1.ListForks)
+			apiV1.POST("/gists/:uuid/forks", apiv1.ForkGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+			apiV1.GET("/gists/:uuid/like", apiv1.CheckLike, apiRequireAuth)
+			apiV1.GET("/gists/:uuid/star", apiv1.CheckLike, apiRequireAuth)
+			apiV1.PUT("/gists/:uuid/like", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+			apiV1.PUT("/gists/:uuid/star", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+			apiV1.GET("/gists/:uuid/files/:sha/:filename", apiv1.RawFile)
+
+			apiV1.GET("/user", apiv1.GetUser, apiRequireAuth, apiScope(db.ScopeUser, db.ReadPermission))
+			apiV1.PATCH("/user", apiv1.UpdateUser, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+			apiV1.GET("/user/:id", apiv1.GetUserByID)
+			apiV1.GET("/users/:username", apiv1.GetUserByUsername)
+			apiV1.GET("/users/:username/gists", apiv1.ListUserGists)
+			apiV1.GET("/users/:username/liked", apiv1.ListUserLikedGists)
+			apiV1.GET("/users/:username/starred", apiv1.ListUserLikedGists)
+			apiV1.GET("/users/:username/forked", apiv1.ListUserForkedGists)
+			apiV1.Any("", noRouteFoundApi)
+		}
+		r.GET("/api/v1/openapi.yaml", api.OpenAPISpec)
+		r.Any("/api/v1/*", noRouteFoundApi)
+
 		r.GET("/all", gist.AllGists, checkRequireLogin, setAllGistsMode("all"))
 
 		if index.IndexEnabled() {
@@ -163,20 +202,6 @@ func (s *Server) registerRoutes() {
 	if config.C.HttpGit {
 		r.Any("/:user/:gistname/*", git.GitHttp, gistSoftInit)
 	}
-
-	apiV1 := r.SubGroup("/api/v1")
-	{
-		apiV1.Use(apiAuth)
-		apiV1.GET("/user", apiv1.GetUser, apiScopeUserRead)
-		apiV1.GET("/gists", apiv1.ListGists, apiScopeGistRead)
-		apiV1.GET("/gists/:uuid", apiv1.GetGist, apiScopeGistRead)
-		apiV1.GET("/gists/:uuid/files/:filename/raw", apiv1.RawFile, apiScopeGistRead)
-		apiV1.POST("/gists", apiv1.CreateGist, apiScopeGistWrite)
-		apiV1.PATCH("/gists/:uuid", apiv1.UpdateGist, apiScopeGistWrite)
-		apiV1.DELETE("/gists/:uuid", apiv1.DeleteGist, apiScopeGistWrite)
-	}
-
-	r.GET("/api/v1/openapi.yaml", api.OpenAPISpec)
 
 	r.Any("/*", noRouteFound)
 }

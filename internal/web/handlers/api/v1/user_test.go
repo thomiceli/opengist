@@ -19,7 +19,7 @@ type userGistsFixture struct {
 
 func setupListUserGists(t *testing.T) *userGistsFixture {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "target")
@@ -42,7 +42,7 @@ func setupListUserGists(t *testing.T) *userGistsFixture {
 // doesn't need the per-visibility fixture.
 func TestListUserGists_UnknownUser_404(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "thomas")
 
 	s.APIRequest(t, "GET", "/api/v1/users/nobody/gists", "", nil, 404)
@@ -58,7 +58,7 @@ type userLikedFixture struct {
 
 func setupUserLiked(t *testing.T) *userLikedFixture {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "target")
@@ -112,7 +112,7 @@ func TestListUserLikedGists_Visibility(t *testing.T) {
 
 func TestListUserLikedGists_UnknownUser_404(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "thomas")
 
 	s.APIRequest(t, "GET", "/api/v1/users/nobody/liked", "", nil, 404)
@@ -130,7 +130,7 @@ type userForkedFixture struct {
 
 func setupUserForked(t *testing.T) *userForkedFixture {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "parentowner")
@@ -187,7 +187,7 @@ func TestListUserForkedGists_Visibility(t *testing.T) {
 
 func TestListUserForkedGists_UnknownUser_404(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "thomas")
 
 	s.APIRequest(t, "GET", "/api/v1/users/nobody/forked", "", nil, 404)

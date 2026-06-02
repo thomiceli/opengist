@@ -22,7 +22,7 @@ type listGistsVisibilityFixture struct {
 
 func setupListVisibility(t *testing.T) *listGistsVisibilityFixture {
 	s := webtest.Setup(t)
-	defer webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 
 	// First-registered user is auto-admin in some flows - register an admin
 	// stub so the actors below are plain users.
@@ -68,7 +68,7 @@ func idSet(arr []types.GistSimple) map[string]bool {
 // on cleanup.
 func TestListGists_GistObjectShape(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "thomas")

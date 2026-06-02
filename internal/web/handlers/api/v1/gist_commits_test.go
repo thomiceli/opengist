@@ -109,7 +109,7 @@ func TestListCommits_Shape(t *testing.T) {
 // populated with that account (not just the raw author info).
 func TestListCommits_UserResolutionByEmail(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "owner")

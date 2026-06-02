@@ -16,7 +16,7 @@ import (
 // returning so requests go through the token-auth path.
 func setupCreateGist(t *testing.T) (*webtest.Server, string) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 
 	s.Register(t, "admin")
 	s.Logout()
@@ -153,7 +153,7 @@ func TestUpdateGist_DescriptionChange(t *testing.T) {
 // private gists (existence stays hidden).
 func TestUpdateGist_NoAccess(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "thomas")
@@ -209,7 +209,7 @@ func TestUpdateGist_NoAccess(t *testing.T) {
 //   - 404 for private gists (existence stays hidden)
 func TestDeleteGist_NoAccess(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "thomas")

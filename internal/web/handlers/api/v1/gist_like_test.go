@@ -21,7 +21,7 @@ type likedFixture struct {
 
 func setupLiked(t *testing.T) *likedFixture {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 
 	s.Register(t, "admin")
 	s.Logout()
@@ -57,7 +57,7 @@ func setupLiked(t *testing.T) *likedFixture {
 
 func TestListLikedGists_NoAuth(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "thomas")
 
 	s.Logout()
@@ -68,7 +68,7 @@ func TestListLikedGists_NoAuth(t *testing.T) {
 
 func TestListLikedGists_EmptyWhenNoStars(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "thomas")

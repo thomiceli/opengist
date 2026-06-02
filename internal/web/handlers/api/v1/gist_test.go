@@ -28,7 +28,7 @@ type fullGist struct {
 // logs out. Caller is responsible for session/token setup.
 func setupGetGist(t *testing.T) *webtest.Server {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "owner")

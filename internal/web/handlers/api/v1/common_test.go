@@ -18,7 +18,7 @@ import (
 // keeping everything public + anon keeps the focus on pagination plumbing.
 func setupPaginationEnv(t *testing.T, count int) *webtest.Server {
 	s := webtest.Setup(t)
-	defer webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 
 	// First-registered = auto-admin in some flows; register a stub first so
 	// the gist owner is a regular user.

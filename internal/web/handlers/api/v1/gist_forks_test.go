@@ -96,7 +96,7 @@ type forksFixture struct {
 
 func setupForksVisibility(t *testing.T) *forksFixture {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "parentowner")
@@ -213,7 +213,7 @@ type forkedListFixture struct {
 
 func setupForkedList(t *testing.T) *forkedListFixture {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "parentowner")
@@ -242,7 +242,7 @@ func TestListForkedGists_NoAuth(t *testing.T) {
 
 func TestListForkedGists_EmptyWhenNoForks(t *testing.T) {
 	s := webtest.Setup(t)
-	webtest.Teardown(t)
+	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "admin")
 	s.Logout()
 	s.Register(t, "thomas")

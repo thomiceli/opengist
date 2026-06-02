@@ -72,6 +72,10 @@ func (ctx *Context) DataMap() echo.Map {
 }
 
 func (ctx *Context) ErrorRes(code int, message string, err error) error {
+	return ctx.errorRes(code, message, err)
+}
+
+func (ctx *Context) errorRes(code int, message string, err error) error {
 	if code >= 500 && err != nil {
 		var skipLogger = log.With().CallerWithSkipFrameCount(4).Logger()
 		skipLogger.Error().Err(err).Msg(message)
@@ -105,7 +109,7 @@ func (ctx *Context) JsonWithCode(code int, data any) error {
 
 func (ctx *Context) ErrorJson(code int, message string, err error) error {
 	ctx.SetData("err_render", "json")
-	return ctx.ErrorRes(code, message, err)
+	return ctx.errorRes(code, message, err)
 }
 
 func (ctx *Context) PlainText(code int, message string) error {

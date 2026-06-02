@@ -1,0 +1,379 @@
+gist.public: عام
+gist.unlisted: غير مدرج
+gist.private: خاص
+
+gist.header.like: اعجبني
+gist.header.unlike: لم يعجبني
+gist.header.fork: اشتقاق
+gist.header.edit: تعديل
+gist.header.delete: حذف
+gist.header.forked-from: مشتق من
+gist.header.last-active: آخر نشاط
+gist.header.select-tab: اختر علامة التبويب
+gist.header.code: كود
+gist.header.revisions: التعديلات
+gist.header.revision: تعديل
+gist.header.clone-http: نسخ عن طريق %s
+gist.header.clone-http-help: نسخ باستخدام المصادقة HTTP الأساسية.
+gist.header.clone-ssh: نسخ باستخدام مفتاح SSH
+gist.header.clone-ssh-help: نسخ باستخدام مفتاح SSH.
+gist.header.embed: تضمين
+gist.header.embed-help: تضمين هذا المقطع في موقعك على الويب.
+gist.header.download-zip: تنزيل ZIP
+
+gist.raw: خام
+gist.file-truncated: تم تقطيع هذا الملف.
+gist.file-raw: لا يمكن عرض هذا الملف.
+gist.file-binary-edit: هذا الملف ثنائي.
+gist.watch-full-file: عرض الملف الكامل.
+gist.file-not-valid: هذا الملف ليس ملف CSV صالح.
+gist.no-content: لا توجد ملفات.
+gist.preview-non-available: المعاينة غير متاحة
+
+gist.new.new_gist: مقطع جديد
+gist.new.title: العنوان
+gist.new.description: الوصف
+gist.new.url: الرابط
+gist.new.filename-with-extension: اسم الملف مع الامتداد
+gist.new.indent-mode: نمط الإزاحة
+gist.new.indent-mode-space: مسافات
+gist.new.indent-mode-tab: علامة تبويب
+gist.new.indent-size: حجم الإزاحة
+gist.new.wrap-mode: نمط التفاف السطر
+gist.new.wrap-mode-no: بدون التفاف
+gist.new.wrap-mode-soft: التفاف ناعم
+gist.new.add-file: إضافة ملف
+gist.new.create-public-button: إنشاء مقطع عام
+gist.new.create-unlisted-button: إنشاء مقطع غير مدرج
+gist.new.create-private-button: إنشاء مقطع خاص
+gist.new.preview: معاينة
+gist.new.create-a-new-gist: إنشاء مقطع جديد
+gist.new.topics: المواضيع (افصل بينها بمسافات)
+gist.new.drop-files: أفلت الملفات هنا أو انقر للتحميل
+gist.new.any-file-type: ارفع أي نوع ملف
+
+gist.edit.editing: تحرير
+gist.edit.edit-gist: تعديل %s
+gist.edit.change-visibility: جعل
+gist.edit.delete: حذف
+gist.edit.cancel: الغاء
+gist.edit.save: حفظ
+gist.delete.confirm: متأكد أنك تريد حذف هذا المقطع ؟
+
+gist.list.joined: تم الانضمام
+gist.list.all: كل المقاطع
+gist.list.search-results: نتائج البحث
+gist.list.sort: ترتيب
+gist.list.sort-by-created: تم الانشاء
+gist.list.sort-by-updated: تم التحديث
+gist.list.order-by-asc: الأقدم أولاً
+gist.list.order-by-desc: الأحدث أولاً
+gist.list.select-tab: اختر علامة التبويب
+gist.list.liked: معجب بها
+gist.list.likes: إعجابات
+gist.list.forked: مشتقة
+gist.list.forked-from: مشتقة من
+gist.list.forks: اشتقاقات
+gist.list.files: ملفات
+gist.list.last-active: آخر نشاط
+gist.list.no-gists: لا مقاطع
+gist.list.all-liked-by: كل المقاطع التي أعجب بها %s
+gist.list.all-forked-by: كل المقاطع المشتقة بواسطة %s
+gist.list.all-from: كل المقاطع من %s
+gist.list.topic-results-topic: كل المقاطع المطابقة للموضوع %s
+gist.list.topic-results: كل المقاطع المطابقة للموضوع
+
+
+gist.search.found: تم العثور على مقاطع
+gist.search.no-results: لم يتم العثور على مقاطع
+gist.search.help.user: المقاطع التي أنشأها المستخدم
+gist.search.help.title: المقاطع ذات العنوان المحدد
+gist.search.help.description: المقاطع ذات الوصف المحدد
+gist.search.help.filename: المقاطع التي تحتوي ملفات بالاسم المحدد
+gist.search.help.extension: المقاطع التي تحتوي ملفات بالامتداد المحدد
+gist.search.help.language: المقاطع التي تحتوي ملفات باللغة المحددة
+gist.search.help.topic: المقاطع ذات الموضوع المحدد
+gist.search.help.all: البحث في جميع الحقول
+gist.search.placeholder.title: العنوان
+gist.search.placeholder.visibility: مستوى الظهور
+gist.search.placeholder.public: عام
+gist.search.placeholder.unlisted: غير مدرج
+gist.search.placeholder.private: خاص
+gist.search.placeholder.language: اللغة
+gist.search.placeholder.all: الكل
+gist.search.placeholder.topics: المواضيع
+gist.search.placeholder.search: البحث عن
+
+gist.forks: اشتقاقات
+gist.forks.view: عرض الاشتقاق
+gist.forks.no: لا توجد اشتقاقات عامة
+gist.forks.for: اشتقاقات %s
+
+gist.likes: الإعجابات
+gist.likes.no: لا توجد إعجابات بعد
+gist.likes.for: إعجابات %s
+
+gist.revisions: التعديلات
+gist.revision.revised: عدّل هذا المقطع
+gist.revision.go-to-revision: الانتقال إلى التعديل
+gist.revision.file-created: تم إنشاء الملف
+gist.revision.file-deleted: تم حذف الملف
+gist.revision.file-renamed: تم تغيير الاسم إلى
+gist.revision.diff-truncated: الفرق كبير جدًا ولا يمكن عرضه
+gist.revision.file-renamed-no-changes: تم تغيير اسم الملف بدون تغييرات
+gist.revision.empty-file: ملف فارغ
+gist.revision.binary-file-changes: لا يتم عرض تغييرات الملفات الثنائية
+gist.revision.no-changes: لا توجد تغييرات
+gist.revision.no-revisions: لا توجد تعديلات للعرض
+gist.revision-of: تعديل %s
+
+settings: الإعدادات
+settings.email: البريد الإلكتروني
+settings.email-help: يُستخدم في عمليات commit وGravatar
+settings.email-set: تعيين البريد الإلكتروني
+settings.link-accounts: ربط الحسابات
+settings.link-github-account: ربط حساب GitHub
+settings.link-gitlab-account: ربط حساب GitLab
+settings.link-gitea-account: ربط حساب Gitea
+settings.unlink-github-account: إلغاء ربط حساب GitHub
+settings.unlink-gitlab-account: إلغاء ربط حساب GitLab
+settings.unlink-gitea-account: إلغاء ربط حساب Gitea
+settings.delete-account: حذف الحساب
+settings.delete-account-confirm: هل أنت متأكد أنك تريد حذف حسابك؟
+settings.add-ssh-key: إضافة مفتاح SSH
+settings.add-ssh-key-help: يُستخدم فقط لسحب/دفع المقاطع عبر Git باستخدام SSH
+settings.add-ssh-key-title: العنوان
+settings.add-ssh-key-content: المفتاح
+settings.delete-ssh-key: حذف
+settings.delete-ssh-key-confirm: تأكيد حذف مفتاح SSH
+settings.ssh-key-added-at: أُضيف
+settings.ssh-key-never-used: لم يُستخدم أبدًا
+settings.ssh-key-last-used: آخر استخدام
+settings.ssh-key-exists: مفتاح SSH موجود بالفعل
+settings.change-username: تغيير اسم المستخدم
+settings.create-password: إنشاء كلمة مرور
+settings.create-password-help: أنشئ كلمة مرورك لتسجيل الدخول إلى Opengist عبر HTTP
+settings.change-password: تغيير كلمة المرور
+settings.change-password-help: غيّر كلمة مرورك لتسجيل الدخول إلى Opengist عبر HTTP
+settings.password-label-title: كلمة المرور
+settings.header.account: الحساب
+settings.header.mfa: المصادقة متعددة العوامل
+settings.header.ssh: SSH
+settings.header.tokens: رموز الوصول
+settings.header.style: المظهر
+settings.style.gist-code: كود المقطع
+settings.style.no-soft-wrap: بدون التفاف ناعم
+settings.style.soft-wrap: التفاف ناعم
+settings.style.removed-lines-color: لون الأسطر المحذوفة
+settings.style.added-lines-color: لون الأسطر المضافة
+settings.style.git-lines-color: لون أسطر Git
+settings.style.save-style: حفظ المظهر
+settings.style.theme: السمة
+settings.style.theme-light: فاتح
+settings.style.theme-dark: داكن
+settings.style.theme-auto: تلقائي
+settings.create-token: إنشاء رمز وصول
+settings.create-token-help: يمكن استخدام رموز الوصول للوصول إلى API
+settings.token-name: الاسم
+settings.token-permissions: الأذونات
+settings.token-gist-permission: المقاطع
+settings.token-permission-none: بدون وصول
+settings.token-permission-read: قراءة
+settings.token-permission-read-write: قراءة وكتابة
+settings.delete-token: حذف
+settings.delete-token-confirm: تأكيد حذف رمز الوصول
+settings.token-created-at: أُنشئ
+settings.token-never-used: لم يُستخدم أبدًا
+settings.token-last-used: آخر استخدام
+settings.token-expiration: انتهاء الصلاحية
+settings.token-expiration-help: اتركه فارغًا لعدم تحديد انتهاء صلاحية
+settings.token-expires-at: ينتهي في
+settings.token-no-expiration: بدون انتهاء صلاحية
+settings.token-expired: منتهي الصلاحية
+settings.token-created: تم إنشاء الرمز، تأكد من نسخه الآن، لن تتمكن من رؤيته مرة أخرى!
+settings.token-deleted: تم حذف رمز الوصول
+
+auth.signup-disabled: قام المسؤول بتعطيل إنشاء الحسابات
+auth.login: تسجيل الدخول
+auth.signup: انشاء
+auth.new-account: حساب جديد
+auth.username: اسم المستخدم
+auth.password: كلمة المرور
+auth.register-instead: انشاء حساب
+auth.login-instead: سجل الدخول
+auth.oauth: المتابعة باستخدام حساب %s
+auth.oauth.no-provider: لم يتم العثور على موفر OAuth
+auth.oauth.complete-registration: أكمل تسجيلك
+auth.oauth.complete-registration-button: إنشاء حساب
+auth.oauth.signing-in-with: تسجيل الدخول باستخدام %s
+auth.oauth.cancel: الغاء
+auth.oauth.existing-account: لديك حساب موجود؟
+auth.oauth.already-have-account: إذا كان لديك حساب Opengist بالفعل، فسجّل الدخول أولًا ثم اربط حساب %s من الإعدادات.
+auth.mfa: المصادقة متعددة العوامل
+auth.mfa.passkey: مفتاح مرور
+auth.mfa.passkeys: مفاتيح مرور
+auth.mfa.use-passkey: استخدم مفتاح مرور
+auth.mfa.bind-passkey: اربط مفتاح مرور
+auth.mfa.login-with-passkey: سجل الدخول بمفتاح مرور
+auth.mfa.waiting-for-passkey-input: بانتظار الإدخال من تفاعل المتصفح...
+auth.mfa.use-passkey-to-finish: استخدم مفتاح مرور لانهاء المصادقة
+auth.mfa.passkeys-help: أضف مفتاح مرور لتسجيل الدخول إلى حسابك واستخدامه كطريقة مصادقة متعددة العوامل.
+auth.mfa.passkey-name: الاسم
+auth.mfa.delete-passkey: حذف
+auth.mfa.passkey-added-at: أُضيف
+auth.mfa.passkey-never-used: لم يُستخدم أبدًا
+auth.mfa.passkey-last-used: آخر استخدام
+auth.mfa.delete-passkey-confirm: تأكيد حذف مفتاح المرور
+auth.totp: كلمة مرور لمرة واحدة قائمة على الوقت (TOTP)
+auth.totp.help: TOTP هي طريقة مصادقة ثنائية تستخدم سرًا مشتركًا لإنشاء كلمة مرور لمرة واحدة.
+auth.totp.use: استخدام TOTP
+auth.totp.regenerate-recovery-codes: إعادة إنشاء رموز الاسترداد
+auth.totp.already-enabled: TOTP مفعّل بالفعل
+auth.totp.invalid-secret: سر TOTP غير صالح
+auth.totp.invalid-code: رمز TOTP غير صالح
+auth.totp.code-used: تم استخدام رمز الاسترداد %s وهو الآن غير صالح. قد ترغب في تعطيل المصادقة متعددة العوامل حاليًا أو إعادة إنشاء رموزك.
+auth.totp.disabled: تم تعطيل TOTP بنجاح
+auth.totp.disable: تعطيل TOTP
+auth.totp.enter-code: أدخل الرمز من تطبيق المصادقة
+auth.totp.enter-recovery-key: أو مفتاح استرداد إذا فقدت جهازك
+auth.totp.code: كود
+auth.totp.submit: إرسال
+auth.totp.proceed: متابعة
+auth.totp.save-recovery-codes: احفظ رموز الاسترداد في مكان آمن. يمكنك استخدام هذه الرموز لاستعادة الوصول إلى حسابك إذا فقدت الوصول إلى تطبيق المصادقة.
+auth.totp.scan-qr-code: امسح رمز QR أدناه باستخدام تطبيق المصادقة لتفعيل المصادقة الثنائية، أو أدخل السلسلة التالية ثم أكّد بالرمز الذي تم إنشاؤه.
+
+
+error: خطأ
+error.page-not-found: الصفحة غير موجودة
+error.bad-request: طلب غير صالح
+error.signup-disabled: إنشاء الحسابات معطّل
+error.signup-disabled-form: إنشاء الحساب عبر نموذج التسجيل معطّل
+error.login-disabled-form: تسجيل الدخول عبر نموذج تسجيل الدخول معطّل
+error.complete-oauth-login: "تعذر إكمال مصادقة المستخدم: %s"
+error.oauth-unsupported: موفر OAuth2 غير مدعوم
+error.cannot-bind-data: تعذر ربط البيانات
+error.invalid-number: رقم غير صالح
+error.invalid-character-unescaped: محرف غير صالح غير مهلّب
+error.not-in-mfa-session: المستخدم ليس ضمن جلسة مصادقة متعددة العوامل
+error.no-file-uploaded: لم يتم رفع أي ملف
+error.cannot-open-file: تعذر فتح الملف المرفوع
+
+header.menu.all: الكل
+header.menu.new: جديد
+header.menu.search: البحث
+header.menu.my-gists: مقاطعي
+header.menu.liked: المفضلة
+header.menu.admin: الإدارة
+header.menu.settings: الإعدادات
+header.menu.logout: تسجيل الخروج
+header.menu.register: إنشاء حساب
+header.menu.login: تسجيل الدخول
+header.menu.light: فاتح
+header.menu.dark: داكن
+header.menu.system: النظام
+footer.powered-by: مدعوم بواسطة %s
+
+pagination.older: أقدم
+pagination.newer: أحدث
+pagination.previous: سابق
+pagination.next: لاحق
+
+admin.admin_panel: لوحة الإدارة
+admin.general: عام
+admin.users: المستخدمون
+admin.gists: مقاطع
+admin.configuration: الإعدادات
+admin.invitations: الدعوات
+admin.invitations.create: إنشاء دعوة
+admin.versions: الإصدارات
+admin.ssh_keys: مفاتيح SSH
+admin.stats: الإحصائيات
+admin.actions: الإجراءات
+admin.actions.sync-fs: مزامنة المقاطع من نظام الملفات
+admin.actions.sync-db: مزامنة المقاطع من قاعدة البيانات
+admin.actions.git-gc: تنفيذ جمع القمامة لجميع مستودعات Git
+admin.actions.sync-previews: مزامنة معاينات جميع المقاطع
+admin.actions.reset-hooks: إعادة تعيين خطافات خادم Git لجميع المستودعات
+admin.actions.index-gists: إعادة بناء فهرس البحث
+admin.actions.sync-gist-languages: مزامنة لغات جميع المقاطع
+admin.id: ID
+admin.user: المستخدم
+admin.delete: حذف
+admin.created_at: تاريخ الإنشاء
+
+admin.config-link: يمكن %s هذا الإعداد عبر ملف إعدادات YAML و/أو متغيرات البيئة.
+admin.config-link-overriden: تجاوزه
+admin.disable-signup: تعطيل إنشاء الحساب
+admin.disable-signup_help: منع إنشاء حسابات جديدة.
+admin.require-login: طلب تسجيل الدخول
+admin.require-login_help: فرض تسجيل الدخول على المستخدمين لعرض المقاطع.
+admin.allow-gists-without-login: السماح بالمقاطع الفردية دون تسجيل دخول
+admin.allow-gists-without-login_help: السماح بعرض وتنزيل المقاطع الفردية دون تسجيل دخول، مع طلب تسجيل الدخول لاستكشاف المقاطع.
+admin.disable-login: تعطيل نموذج تسجيل الدخول
+admin.disable-login_help: منع تسجيل الدخول عبر النموذج لإجبار استخدام مزوّدي OAuth بدلًا من ذلك.
+admin.disable-gravatar: تعطيل Gravatar
+admin.disable-gravatar_help: تعطيل استخدام Gravatar كمزوّد للصور الرمزية.
+
+admin.users.delete_confirm: هل تريد حذف هذا المستخدم؟
+
+admin.gists.title: العنوان
+admin.gists.private: خاص؟
+admin.gists.nb-files: عدد الملفات
+admin.gists.nb-likes: عدد الإعجابات
+admin.gists.delete_confirm: هل تريد حذف هذا المقطع؟
+
+admin.invitations.help: يمكن استخدام الدعوات لإنشاء حساب حتى لو كان إنشاء الحسابات معطّلًا.
+admin.invitations.max_uses: أقصى عدد استخدامات
+admin.invitations.expires_at: تنتهي في
+admin.invitations.code: كود
+admin.invitations.copy_link: نسخ الرابط
+admin.invitations.uses: الاستخدامات
+admin.invitations.expired: منتهية
+admin.invitations.delete_confirm: هل تريد حذف هذه الدعوة؟
+
+flash.admin.user-deleted: تم حذف المستخدم
+flash.admin.gist-deleted: تم حذف المقطع
+flash.admin.invitation-created: تم إنشاء الدعوة
+flash.admin.invitation-deleted: تم حذف الدعوة
+flash.admin.sync-fs: تتم مزامنة المستودعات من نظام الملفات...
+flash.admin.sync-db: تتم مزامنة المستودعات من قاعدة البيانات...
+flash.admin.git-gc: جارٍ تنفيذ جمع القمامة للمستودعات...
+flash.admin.sync-previews: تتم مزامنة معاينات المقاطع...
+flash.admin.reset-hooks: جارٍ إعادة تعيين خطافات خادم Git لجميع المستودعات...
+flash.admin.index-gists: جارٍ إعادة بناء فهرس البحث...
+flash.admin.sync-gist-languages: تتم مزامنة لغات المقاطع...
+
+flash.auth.username-exists: اسم المستخدم موجود بالفعل
+flash.auth.invalid-credentials: بيانات الاعتماد غير صالحة
+flash.auth.account-linked-oauth: تم ربط الحساب بـ %s
+flash.auth.account-unlinked-oauth: تم إلغاء ربط الحساب من %s
+flash.auth.user-sshkeys-not-retrievable: تعذر جلب مفاتيح المستخدم
+flash.auth.user-sshkeys-not-created: تعذر إنشاء مفتاح SSH
+flash.auth.must-be-logged-in: يجب تسجيل الدخول للوصول إلى المقاطع
+flash.auth.passkey-registred: تم تسجيل مفتاح المرور %s
+flash.auth.passkey-deleted: تم حذف مفتاح المرور
+flash.auth.oauth-session-expired: انتهت جلسة OAuth2، يرجى المحاولة مرة أخرى
+flash.auth.oauth-already-linked: حساب %s هذا مرتبط بالفعل بمستخدم آخر
+
+flash.gist.visibility-changed: تم تغيير مستوى ظهور المقطع
+flash.gist.deleted: تم حذف المقطع
+flash.gist.fork-own-gist: لا يمكن اشتقاق مقاطعك الخاصة
+flash.gist.forked: تم اشتقاق المقطع
+
+flash.user.email-updated: تم تحديث البريد الإلكتروني
+flash.user.invalid-ssh-key: مفتاح SSH غير صالح
+flash.user.ssh-key-added: تمت إضافة مفتاح SSH
+flash.user.ssh-key-deleted: تم حذف مفتاح SSH
+flash.user.password-updated: تم تحديث كلمة المرور
+flash.user.username-updated: تم تحديث اسم المستخدم
+
+validation.is-too-long: الحقل %s طويل جدًا
+validation.should-not-be-empty: يجب ألا يكون الحقل %s فارغًا
+validation.should-not-include-sub-directory: يجب ألا يتضمن الحقل %s مجلدًا فرعيًا
+validation.should-only-contain-alphanumeric-characters: يجب أن يحتوي الحقل %s على أحرف وأرقام فقط
+validation.should-only-contain-alphanumeric-characters-and-dashes: يجب أن يحتوي الحقل %s على أحرف وأرقام وشرطات فقط
+validation.not-enough: '%s غير كافٍ'
+validation.invalid: '%s غير صالح'
+validation.invalid-gist-topics: مواضيع المقطع غير صالحة، يجب أن تبدأ بحرف أو رقم، وألا تتجاوز 50 حرفًا، ويمكن أن تتضمن شرطات
+
+html.title.admin-panel: لوحة الإدارة

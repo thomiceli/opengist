@@ -53,7 +53,7 @@ func GistJson(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error fetching files", err)
 	}
 
-	embedFile, _ := ctx.GetData("embedFile").(string)
+	embedFile := ctx.QueryParam("file")
 	if embedFile != "" {
 		filtered := filterToFile(files, embedFile)
 		if filtered == nil {
@@ -79,15 +79,18 @@ func GistJson(ctx *context.Context) error {
 	}
 	_ = w.Flush()
 
-	var jsUrl string
-	if embedFile != "" {
-		jsUrl, err = url.JoinPath(ctx.GetData("baseHttpUrl").(string), gist.User.Username, gist.Identifier(), embedFile+".js")
-	} else {
-		jsUrl, err = url.JoinPath(ctx.GetData("baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
-	}
+	jsBaseUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
 	if err != nil {
 		return ctx.ErrorRes(500, "Error joining js url", err)
 	}
+
+	// Build per-file and per-theme URL variants.
+	fileQuery, themeSep := "", "?"
+	if embedFile != "" {
+		fileQuery = "?file=" + url.QueryEscape(embedFile)
+		themeSep = "&"
+	}
+	jsUrl := jsBaseUrl + fileQuery
 
 	cssUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["embed.css"].File)
 	if err != nil {
@@ -108,7 +111,7 @@ func GistJson(ctx *context.Context) error {
 			"html":    htmlbuf.String(),
 			"css":     cssUrl,
 			"js":      jsUrl,
-			"js_dark": jsUrl + "?dark",
+			"js_dark": jsUrl + themeSep + "dark",
 		},
 	})
 }
@@ -135,7 +138,7 @@ func GistJs(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error fetching files", err)
 	}
 
-	if embedFile, ok := ctx.GetData("embedFile").(string); ok && embedFile != "" {
+	if embedFile := ctx.QueryParam("file"); embedFile != "" {
 		filtered := filterToFile(files, embedFile)
 		if filtered == nil {
 			return ctx.NotFound("File not found")
@@ -208,7 +211,7 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
                 super();
                 this.attachShadow({ mode: 'open' });
             }
-            
+
             init(css1, css2, content) {
                 this.shadowRoot.innerHTML = %s
                     <style>
@@ -229,7 +232,7 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
 
     const instance = document.createElement('opengist-embed');
     instance.init(%s, %s, %s);
- 	currentScript.parentNode.insertBefore(instance, currentScript.nextSibling);
+    currentScript.parentNode.insertBefore(instance, currentScript.nextSibling);
 })();
 `,
 		"`",

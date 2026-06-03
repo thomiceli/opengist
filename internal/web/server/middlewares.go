@@ -75,12 +75,10 @@ func (s *Server) registerMiddlewares() {
 			}
 			/* skip CSRF for embeds */
 			gistName := ctx.Param("gistname")
-			fileParam := ctx.Param("filename")
 			/* skip CSRF for git clients */
 			matchUploadPack, _ := regexp.MatchString("(.*?)/git-upload-pack$", ctx.Request().URL.Path)
 			matchReceivePack, _ := regexp.MatchString("(.*?)/git-receive-pack$", ctx.Request().URL.Path)
-			isJsEmbed := (filepath.Ext(gistName) == ".js" || filepath.Ext(fileParam) == ".js") && ctx.Request().Method == "GET"
-			return isJsEmbed || matchUploadPack || matchReceivePack
+			return (filepath.Ext(gistName) == ".js" && ctx.Request().Method == "GET") || matchUploadPack || matchReceivePack
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
 			log.Info().Err(err).Msg("CSRF error")
@@ -438,20 +436,6 @@ func gistInit(next Handler) Handler {
 		case ".git":
 			ctx.SetData("gistpage", "git")
 			gistName = strings.TrimSuffix(gistName, ".git")
-		}
-
-		// Single-file embed: /:user/:gistname/:filename.(js|json)
-		if fileParam := ctx.Param("filename"); fileParam != "" {
-			switch filepath.Ext(fileParam) {
-			case ".js":
-				ctx.SetData("gistpage", "js")
-				ctx.SetData("embedFile", strings.TrimSuffix(fileParam, ".js"))
-			case ".json":
-				ctx.SetData("gistpage", "json")
-				ctx.SetData("embedFile", strings.TrimSuffix(fileParam, ".json"))
-			default:
-				return ctx.NotFound("Page not found")
-			}
 		}
 
 		gist, err := db.GetGist(userName, gistName)

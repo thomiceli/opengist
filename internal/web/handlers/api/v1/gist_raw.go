@@ -6,7 +6,7 @@ import (
 	"github.com/thomiceli/opengist/internal/web/context"
 )
 
-// RawFile handles GET /api/v1/gists/:uuid/files/:sha/:filename.
+// RawFile handles GET /api/gists/:uuid/files/:sha/:filename.
 // Returns the raw bytes of `filename` as committed at `sha`. Visibility
 // rules mirror GetGist/GetGistRevision:
 //

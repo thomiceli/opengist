@@ -1,3 +1,7 @@
+---
+description: Opengist is a self-hosted pastebin powered by Git. Snippets are stored in Git repositories and managed via standard Git commands or the web interface.
+---
+
 # Opengist
 
 <img height="108px" src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/img/opengist.svg" alt="Opengist" align="right" />

@@ -14,7 +14,7 @@ type GistFileInput struct {
 	Filename *string `json:"filename,omitempty"`
 }
 
-// GistInput is the unified request body for POST and PATCH /api/v1/gists.
+// GistInput is the unified request body for POST and PATCH /api/gists.
 // Every field is optional / nilable so handlers can tell "client didn't send
 // this" from "client explicitly set this", which is what the PATCH semantics
 // require: files from the previous version of the gist that aren't explicitly

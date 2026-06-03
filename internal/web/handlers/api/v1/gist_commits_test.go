@@ -20,7 +20,7 @@ func makeCommits(t *testing.T, s *webtest.Server, tok string, count int) string 
 	})
 	for i := 1; i < count; i++ {
 		body := fmt.Sprintf(`{"files": {"a.txt": {"content": "v%d"}}}`, i)
-		s.APIRequest(t, "PATCH", "/api/v1/gists/"+id, tok, body, 200)
+		s.APIRequest(t, "PATCH", "/api/gists/"+id, tok, body, 200)
 	}
 	return id
 }
@@ -64,14 +64,14 @@ func TestListCommits_VisibilityAccess(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			s.APIRequest(t, "GET", "/api/v1/gists/"+c.uuid+"/commits", c.tok, nil, c.want)
+			s.APIRequest(t, "GET", "/api/gists/"+c.uuid+"/commits", c.tok, nil, c.want)
 		})
 	}
 }
 
 func TestListCommits_NotFound(t *testing.T) {
 	s := setupGetGist(t)
-	s.APIRequest(t, "GET", "/api/v1/gists/does-not-exist/commits", "", nil, 404)
+	s.APIRequest(t, "GET", "/api/gists/does-not-exist/commits", "", nil, 404)
 }
 
 // --- Response shape ---
@@ -84,7 +84,7 @@ func TestListCommits_Shape(t *testing.T) {
 	s := setupGetGist(t)
 	_, gist, _, _ := s.CreateGistAs(t, "owner", "0")
 
-	commits, _ := apiList[types.GistCommit](t, s, "/api/v1/gists/"+gist.Uuid+"/commits", "", 200)
+	commits, _ := apiList[types.GistCommit](t, s, "/api/gists/"+gist.Uuid+"/commits", "", 200)
 
 	require.Len(t, commits, 1, "fresh gist must have exactly one commit")
 	c := commits[0]
@@ -123,7 +123,7 @@ func TestListCommits_UserResolutionByEmail(t *testing.T) {
 
 	_, gist, _, _ := s.CreateGistAs(t, "owner", "0")
 
-	commits, _ := apiList[types.GistCommit](t, s, "/api/v1/gists/"+gist.Uuid+"/commits", "", 200)
+	commits, _ := apiList[types.GistCommit](t, s, "/api/gists/"+gist.Uuid+"/commits", "", 200)
 	require.Len(t, commits, 1)
 
 	c := commits[0]
@@ -139,7 +139,7 @@ func TestListCommits_PerPage_LimitsResults(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := makeCommits(t, s, tok, 5)
 
-	commits, _ := apiList[types.GistCommit](t, s, "/api/v1/gists/"+id+"/commits?per_page=2", tok, 200)
+	commits, _ := apiList[types.GistCommit](t, s, "/api/gists/"+id+"/commits?per_page=2", tok, 200)
 	require.Len(t, commits, 2)
 }
 
@@ -150,7 +150,7 @@ func TestListCommits_OmitsTotalHeaders(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := makeCommits(t, s, tok, 3)
 
-	w, _ := s.APIRequest(t, "GET", "/api/v1/gists/"+id+"/commits?per_page=2", tok, nil, 200)
+	w, _ := s.APIRequest(t, "GET", "/api/gists/"+id+"/commits?per_page=2", tok, nil, 200)
 	require.Empty(t, w.Header().Get("X-Total"), "commits must not emit X-Total")
 	require.Empty(t, w.Header().Get("X-Total-Pages"), "commits must not emit X-Total-Pages")
 	require.Equal(t, "1", w.Header().Get("X-Page"))
@@ -163,7 +163,7 @@ func TestListCommits_Page_FirstPage_OnlyNext(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := makeCommits(t, s, tok, 5)
 
-	commits, rels := apiList[types.GistCommit](t, s, "/api/v1/gists/"+id+"/commits?per_page=2&page=1", tok, 200)
+	commits, rels := apiList[types.GistCommit](t, s, "/api/gists/"+id+"/commits?per_page=2&page=1", tok, 200)
 	require.Len(t, commits, 2)
 
 	require.Contains(t, rels, "next", "first page must advertise rel=next when more rows exist")
@@ -180,7 +180,7 @@ func TestListCommits_Page_MiddlePage_PrevAndNext(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := makeCommits(t, s, tok, 5)
 
-	commits, rels := apiList[types.GistCommit](t, s, "/api/v1/gists/"+id+"/commits?per_page=2&page=2", tok, 200)
+	commits, rels := apiList[types.GistCommit](t, s, "/api/gists/"+id+"/commits?per_page=2&page=2", tok, 200)
 	require.Len(t, commits, 2)
 
 	require.Contains(t, rels, "next", "middle page must advertise rel=next")
@@ -191,9 +191,9 @@ func TestListCommits_Page_AcrossPagesNoDuplicates(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := makeCommits(t, s, tok, 5)
 
-	page1, _ := apiList[types.GistCommit](t, s, "/api/v1/gists/"+id+"/commits?per_page=2&page=1", tok, 200)
-	page2, _ := apiList[types.GistCommit](t, s, "/api/v1/gists/"+id+"/commits?per_page=2&page=2", tok, 200)
-	page3, _ := apiList[types.GistCommit](t, s, "/api/v1/gists/"+id+"/commits?per_page=2&page=3", tok, 200)
+	page1, _ := apiList[types.GistCommit](t, s, "/api/gists/"+id+"/commits?per_page=2&page=1", tok, 200)
+	page2, _ := apiList[types.GistCommit](t, s, "/api/gists/"+id+"/commits?per_page=2&page=2", tok, 200)
+	page3, _ := apiList[types.GistCommit](t, s, "/api/gists/"+id+"/commits?per_page=2&page=3", tok, 200)
 
 	seen := map[string]bool{}
 	for _, c := range append(append(page1, page2...), page3...) {
@@ -215,10 +215,10 @@ func TestListCommits_MultipleCommits_AfterPatch(t *testing.T) {
 	})
 
 	// PATCH the content → second commit.
-	s.APIRequest(t, "PATCH", "/api/v1/gists/"+id, tok,
+	s.APIRequest(t, "PATCH", "/api/gists/"+id, tok,
 		`{"files": {"a.txt": {"content": "alpha v2"}}}`, 200)
 
-	commits, _ := apiList[types.GistCommit](t, s, "/api/v1/gists/"+id+"/commits", tok, 200)
+	commits, _ := apiList[types.GistCommit](t, s, "/api/gists/"+id+"/commits", tok, 200)
 
 	require.Len(t, commits, 2, "create + PATCH = two commits")
 	// git log is newest-first.

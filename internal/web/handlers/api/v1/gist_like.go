@@ -7,7 +7,7 @@ import (
 	"github.com/thomiceli/opengist/internal/web/context"
 )
 
-// ListLikedGists handles GET /api/v1/gists/liked.
+// ListLikedGists handles GET /api/gists/liked.
 // Lists gists the authenticated user has liked. Auth is mandatory (the route
 // uses apiRequireAuth) but the
 // gist:read scope is soft-checked here so a token without it degrades to the
@@ -44,7 +44,7 @@ func ListLikedGists(ctx *context.Context) error {
 	})
 }
 
-// ToggleLike handles PUT /api/v1/gists/:uuid/like.
+// ToggleLike handles PUT /api/gists/:uuid/like.
 // Idempotent toggle: if the authenticated user has liked the gist, it
 // removes the like; otherwise it adds one. Either way the response is 204
 // No Content. 404 when the gist isn't visible to the caller (same
@@ -71,7 +71,7 @@ func ToggleLike(ctx *context.Context) error {
 	return ctx.NoContent(204)
 }
 
-// CheckLike handles GET /api/v1/gists/:uuid/like.
+// CheckLike handles GET /api/gists/:uuid/like.
 // Returns 204 No Content if the authenticated user has liked the gist, 404
 // otherwise. The gist's visibility is enforced first via lookupGistByUUID -
 // a hidden private gist returns 404 just like the rest of the API, without

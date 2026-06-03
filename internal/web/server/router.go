@@ -105,7 +105,7 @@ func (s *Server) registerRoutes() {
 			r.Any("/init/*", git.GitHttp, gistNewPushSoftInit)
 		}
 
-		apiV1 := r.SubGroup("/api/v1")
+		apiV1 := r.SubGroup("/api")
 		{
 			apiV1.Use(apiBindAuth)
 			apiV1.GET("/gists", apiv1.ListGists)
@@ -140,8 +140,8 @@ func (s *Server) registerRoutes() {
 			apiV1.GET("/users/:username/forked", apiv1.ListUserForkedGists)
 			apiV1.Any("", noRouteFoundApi)
 		}
-		r.GET("/api/v1/openapi.yaml", api.OpenAPISpec)
-		r.Any("/api/v1/*", noRouteFoundApi)
+		r.GET("/api/openapi.yaml", api.OpenAPISpec)
+		r.Any("/api/*", noRouteFoundApi)
 
 		r.GET("/all", gist.AllGists, checkRequireLogin, setAllGistsMode("all"))
 

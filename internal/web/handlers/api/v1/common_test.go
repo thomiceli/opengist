@@ -59,10 +59,10 @@ func parseLinkHeader(t *testing.T, h string) map[string]string {
 	return out
 }
 
-// listAnonymous fires an anonymous GET /api/v1/gists?... and returns both the
+// listAnonymous fires an anonymous GET /api/gists?... and returns both the
 // decoded array and the Link header (parsed by rel).
 func listAnonymous(t *testing.T, s *webtest.Server, query string) ([]types.GistSimple, map[string]string) {
-	return apiList[types.GistSimple](t, s, "/api/v1/gists?"+query, "", 200)
+	return apiList[types.GistSimple](t, s, "/api/gists?"+query, "", 200)
 }
 
 // apiList fires a GET against a list endpoint and returns the decoded array
@@ -159,7 +159,7 @@ func TestPage_BelowOne_FallsBackToOne(t *testing.T) {
 func TestPagination_TotalHeaders(t *testing.T) {
 	s := setupPaginationEnv(t, 5)
 
-	w, body := s.APIRequest(t, "GET", "/api/v1/gists?per_page=2", "", nil, 200)
+	w, body := s.APIRequest(t, "GET", "/api/gists?per_page=2", "", nil, 200)
 	var arr []types.GistSimple
 	require.NoError(t, json.Unmarshal(body, &arr))
 
@@ -173,7 +173,7 @@ func TestPagination_TotalHeaders(t *testing.T) {
 func TestLinkHeader_SinglePage_NoHeader(t *testing.T) {
 	s := setupPaginationEnv(t, 1)
 
-	w, _ := s.APIRequest(t, "GET", "/api/v1/gists?per_page=10", "", nil, 200)
+	w, _ := s.APIRequest(t, "GET", "/api/gists?per_page=10", "", nil, 200)
 	require.Empty(t, w.Header().Get("Link"),
 		"single-page response must omit the Link header (no prev, no next)")
 }
@@ -199,5 +199,5 @@ func TestSince_Past_ReturnsAll(t *testing.T) {
 func TestSince_InvalidFormat_400(t *testing.T) {
 	s := setupPaginationEnv(t, 1)
 
-	s.APIRequest(t, "GET", "/api/v1/gists?since=not-a-date", "", nil, 400)
+	s.APIRequest(t, "GET", "/api/gists?since=not-a-date", "", nil, 400)
 }

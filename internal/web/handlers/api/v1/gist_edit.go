@@ -23,7 +23,7 @@ func strOrEmpty(p *string) string {
 	return *p
 }
 
-// CreateGist handles POST /api/v1/gists.
+// CreateGist handles POST /api/gists.
 // The DTO is built the same way ProcessCreate builds its form DTO - entries
 // without `content` are skipped, empty filenames become "gistfileN.txt" -
 // and is then run through ctx.Validate so the API and the web form share
@@ -115,11 +115,11 @@ func CreateGist(ctx *context.Context) error {
 	if err != nil {
 		return ctx.ErrorJson(500, "failed to serialize gist", err)
 	}
-	ctx.Response().Header().Set("Location", baseURL+"/api/v1/gists/"+saved.Uuid)
+	ctx.Response().Header().Set("Location", baseURL+"/api/gists/"+saved.Uuid)
 	return ctx.JSON(201, resp)
 }
 
-// UpdateGist handles PATCH /api/v1/gists/:uuid.
+// UpdateGist handles PATCH /api/gists/:uuid.
 // Only fields present in the body are touched. Files not mentioned in `files`
 // stay unchanged. A file entry
 // can:
@@ -205,7 +205,7 @@ func UpdateGist(ctx *context.Context) error {
 	return ctx.JSON(200, resp)
 }
 
-// DeleteGist handles DELETE /api/v1/gists/:uuid.
+// DeleteGist handles DELETE /api/gists/:uuid.
 // Owner-only - the route's apiScope(ScopeGist, ReadWritePermission) middleware
 // enforces the token scope before we get here, so we just confirm ownership and
 // drop the repo + row. Returns 204 No Content on success.

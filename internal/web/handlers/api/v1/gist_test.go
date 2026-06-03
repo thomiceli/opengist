@@ -57,11 +57,11 @@ func likeTokenFor(t *testing.T, s *webtest.Server, user string) string {
 	return tok
 }
 
-// createGistViaAPI posts a body to /api/v1/gists and returns the resulting
+// createGistViaAPI posts a body to /api/gists and returns the resulting
 // gist's id. Useful for multi-file / large-content fixtures that can't be
 // built through the web form helper.
 func createGistViaAPI(t *testing.T, s *webtest.Server, tok string, body interface{}) string {
-	_, raw := s.APIRequest(t, "POST", "/api/v1/gists", tok, body, 201)
+	_, raw := s.APIRequest(t, "POST", "/api/gists", tok, body, 201)
 	var resp struct {
 		ID string `json:"id"`
 	}
@@ -110,14 +110,14 @@ func TestGetGist_VisibilityAccess(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			s.APIRequest(t, "GET", "/api/v1/gists/"+c.uuid, c.tok, nil, c.want)
+			s.APIRequest(t, "GET", "/api/gists/"+c.uuid, c.tok, nil, c.want)
 		})
 	}
 }
 
 func TestGetGist_NotFound(t *testing.T) {
 	s := setupGetGist(t)
-	s.APIRequest(t, "GET", "/api/v1/gists/does-not-exist", "", nil, 404)
+	s.APIRequest(t, "GET", "/api/gists/does-not-exist", "", nil, 404)
 }
 
 // --- Response structure ---
@@ -139,7 +139,7 @@ func TestGetGist_ResponseShape(t *testing.T) {
 
 	_, gist, _, _ := s.CreateGistAs(t, "owner", "0")
 
-	_, raw := s.APIRequest(t, "GET", "/api/v1/gists/"+gist.Uuid, "", nil, 200)
+	_, raw := s.APIRequest(t, "GET", "/api/gists/"+gist.Uuid, "", nil, 200)
 	var got fullGist
 	require.NoError(t, json.Unmarshal(raw, &got))
 
@@ -209,7 +209,7 @@ func TestGetGist_ForkOfPopulated(t *testing.T) {
 	require.NoError(t, err)
 
 	// GET the fork - fork_of must point at the parent.
-	_, raw := s.APIRequest(t, "GET", "/api/v1/gists/"+forkGist.Uuid, "", nil, 200)
+	_, raw := s.APIRequest(t, "GET", "/api/gists/"+forkGist.Uuid, "", nil, 200)
 	var got fullGist
 	require.NoError(t, json.Unmarshal(raw, &got))
 
@@ -218,7 +218,7 @@ func TestGetGist_ForkOfPopulated(t *testing.T) {
 	require.Equal(t, "owner", got.ForkOf.Owner.Login, "fork_of.owner must be the parent's owner")
 
 	// Sanity: getting the parent reflects the bumped fork count and nil fork_of.
-	_, parentRaw := s.APIRequest(t, "GET", "/api/v1/gists/"+parent.Uuid, "", nil, 200)
+	_, parentRaw := s.APIRequest(t, "GET", "/api/gists/"+parent.Uuid, "", nil, 200)
 	var parentGot fullGist
 	require.NoError(t, json.Unmarshal(parentRaw, &parentGot))
 	require.Nil(t, parentGot.ForkOf, "parent gist itself is not a fork")
@@ -243,7 +243,7 @@ func TestGetGist_GistTruncatedWhenManyFiles(t *testing.T) {
 		"files":      files,
 	})
 
-	_, raw := s.APIRequest(t, "GET", "/api/v1/gists/"+id, "", nil, 200)
+	_, raw := s.APIRequest(t, "GET", "/api/gists/"+id, "", nil, 200)
 	var got fullGist
 	require.NoError(t, json.Unmarshal(raw, &got))
 
@@ -270,7 +270,7 @@ func TestGetGist_FileContentTruncatedWhenLarge(t *testing.T) {
 		},
 	})
 
-	_, raw := s.APIRequest(t, "GET", "/api/v1/gists/"+id, "", nil, 200)
+	_, raw := s.APIRequest(t, "GET", "/api/gists/"+id, "", nil, 200)
 	var got fullGist
 	require.NoError(t, json.Unmarshal(raw, &got))
 

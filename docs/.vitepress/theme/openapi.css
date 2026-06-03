@@ -1,0 +1,138 @@
+/* Shared styling for the generated API reference components. */
+.oas-op h3,
+.oas-schema h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.oas-method {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 5px;
+  color: #fff;
+}
+.oas-method.m-get { background: #1f7a4d; }
+.oas-method.m-post { background: #1860c2; }
+.oas-method.m-put { background: #b06800; }
+.oas-method.m-patch { background: #8754c9; }
+.oas-method.m-delete { background: #c0392b; }
+/* Endpoint shown as a code block: method badge on the left, then the path. */
+.oas-endpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem 0 1.5rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+/* Plain path text (no inline-code bg/color); only `.oas-param` is highlighted. */
+.vp-doc code.oas-path {
+  font-size: 0.95rem;
+  background: none;
+  color: var(--vp-c-text-1);
+  padding: 0;
+  white-space: nowrap;
+}
+/* Highlight `{param}` segments within the path. */
+.oas-param {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-default-soft);
+  padding: 0 0.25rem;
+  border-radius: 4px;
+}
+.oas-req {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--vp-c-red-1);
+  text-transform: uppercase;
+}
+.oas-opt {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
+  text-transform: uppercase;
+}
+.oas-ct {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--vp-c-text-2);
+}
+/* `.vp-doc table` is display:block / fit-content, so force full-width here. */
+.vp-doc table.oas-table {
+  display: table;
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+}
+.oas-table th { text-align: left; }
+.oas-status { font-weight: 700; }
+.oas-status.s-2 { color: #1f7a4d; }
+.oas-status.s-4,
+.oas-status.s-5 { color: #c0392b; }
+.oas-headers td {
+  padding-top: 0;
+  font-size: 0.85rem;
+  color: var(--vp-c-text-2);
+}
+.oas-hlabel { margin-right: 0.4rem; }
+.oas-header { margin-right: 0.4rem; }
+.oas-includes a { margin-right: 0.5rem; }
+.oas-note { font-size: 0.85rem; color: var(--vp-c-text-2); }
+.oas-bodyhead { display: flex; align-items: center; gap: 0.5rem; }
+.oas-field { display: inline-flex; align-items: center; gap: 0.35rem; }
+.oas-nest { color: var(--vp-c-text-3); }
+.oas-nested { background: var(--vp-c-bg-soft); }
+
+/* ---- three-pane endpoint layout (pages with pageClass: api-page) ---- */
+.api-page .VPDoc .container { max-width: 1180px; }
+.api-page .VPDoc.has-sidebar .content { max-width: none; }
+.api-page .VPDoc .content-container { max-width: none; }
+
+.oas-op-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 26rem;
+  gap: 2.5rem;
+  align-items: start;
+}
+.oas-main { min-width: 0; }
+.oas-main h1 { margin-top: 0; }
+
+.oas-code-sticky {
+  position: sticky;
+  top: calc(var(--vp-nav-height) + 1.5rem);
+}
+.oas-code-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-2);
+}
+.oas-code-label:first-child { margin-top: 0; }
+/* Smaller, denser code in the side panel. VitePress applies
+   `font-size: var(--vp-code-font-size)` to the <code>, so override the var. */
+.oas-code {
+  --vp-code-font-size: 0.75rem;
+  --vp-code-line-height: 1.5;
+}
+.oas-code-block [class*='language-'] { margin: 0; }
+.oas-code-block pre {
+  white-space: pre;
+  padding: 14px 16px;
+}
+
+/* Collapse to a single column when there isn't room for the side panel. */
+@media (max-width: 1280px) {
+  .oas-op-grid { grid-template-columns: 1fr; }
+  .oas-code-sticky { position: static; }
+}

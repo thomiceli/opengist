@@ -48,7 +48,7 @@ func listGistsCommon(ctx *context.Context, fetch gistFetcher) error {
 	return ctx.JSON(200, out)
 }
 
-// ListGists handles GET /api/v1/gists.
+// ListGists handles GET /api/gists.
 // Returns a JSON array; pagination is signaled via the X-* and Link response
 // headers. Scope-gated visibility of the caller's own gists; other users' gists
 // are never returned here (use /gists/public for that).
@@ -92,7 +92,7 @@ func ListGists(ctx *context.Context) error {
 	})
 }
 
-// ListPublicGists handles GET /api/v1/gists/public.
+// ListPublicGists handles GET /api/gists/public.
 // Returns only public gists regardless of the caller's auth state.
 func ListPublicGists(ctx *context.Context) error {
 	return listGistsCommon(ctx, func(since *time.Time, offset, limit, perPage int, sort, order string) ([]*db.Gist, int64, error) {

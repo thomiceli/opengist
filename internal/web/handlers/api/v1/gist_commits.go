@@ -5,7 +5,7 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers/api/v1/types"
 )
 
-// ListCommits handles GET /api/v1/gists/:uuid/commits.
+// ListCommits handles GET /api/gists/:uuid/commits.
 // Each commit's author is
 // resolved to an Opengist user via db.Gist.Log's bulk email lookup (see
 // db.GistCommit) so the API and the web revisions page share the same

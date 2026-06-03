@@ -195,7 +195,7 @@ admin.disable-login: 禁用登录表单
 admin.disable-login_help: 禁止使用登录表单进行登录以强制通过 OAuth 提供方登录。
 admin.disable-gravatar: 禁用 Gravatar
 admin.disable-gravatar_help: 停止使用 Gravatar 作为头像提供方。
-admin.api-enabled: 启用 REST API（/api/v1）
+admin.api-enabled: 启用 REST API（/api）
 admin.api-enabled_help: 允许通过 Personal Access Token 程序化访问 Gist 和用户信息。
 admin.allow-gists-without-login: 允许未登录状态下访问单个 Gists
 admin.allow-gists-without-login_help: 允许在不登录的情况下查看和下载 Gist，同时需要登录才能使用 Gists 的发现功能。

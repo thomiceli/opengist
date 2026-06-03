@@ -72,14 +72,14 @@ func TestListForks_VisibilityAccess(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			s.APIRequest(t, "GET", "/api/v1/gists/"+c.uuid+"/forks", c.tok, nil, c.want)
+			s.APIRequest(t, "GET", "/api/gists/"+c.uuid+"/forks", c.tok, nil, c.want)
 		})
 	}
 }
 
 func TestListForks_NotFound(t *testing.T) {
 	s := setupGetGist(t)
-	s.APIRequest(t, "GET", "/api/v1/gists/does-not-exist/forks", "", nil, 404)
+	s.APIRequest(t, "GET", "/api/gists/does-not-exist/forks", "", nil, 404)
 }
 
 // --- Visibility filter on the forks list itself ---
@@ -142,7 +142,7 @@ func idSetSimple(arr []types.GistSimple) map[string]bool {
 func TestListForks_Anonymous_OnlyPublicForks(t *testing.T) {
 	f := setupForksVisibility(t)
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/"+f.parent.Uuid+"/forks?per_page=20", "", 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/"+f.parent.Uuid+"/forks?per_page=20", "", 200)
 
 	ids := idSetSimple(arr)
 	require.True(t, ids[f.aliceFork.Uuid], "alice's PUBLIC fork must appear")
@@ -160,7 +160,7 @@ func TestListForks_Anonymous_OnlyPublicForks(t *testing.T) {
 func TestListForks_AuthenticatedSeesOwnUnlistedFork(t *testing.T) {
 	f := setupForksVisibility(t)
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/"+f.parent.Uuid+"/forks?per_page=20", f.bobTok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/"+f.parent.Uuid+"/forks?per_page=20", f.bobTok, 200)
 
 	ids := idSetSimple(arr)
 	require.True(t, ids[f.aliceFork.Uuid], "alice's PUBLIC fork must appear")
@@ -173,7 +173,7 @@ func TestListForks_AuthenticatedSeesOwnUnlistedFork(t *testing.T) {
 func TestListForks_AuthenticatedSeesOwnPrivateFork(t *testing.T) {
 	f := setupForksVisibility(t)
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/"+f.parent.Uuid+"/forks?per_page=20", f.charlieTok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/"+f.parent.Uuid+"/forks?per_page=20", f.charlieTok, 200)
 
 	ids := idSetSimple(arr)
 	require.True(t, ids[f.aliceFork.Uuid], "alice's PUBLIC fork must appear")
@@ -187,7 +187,7 @@ func TestListForks_AuthenticatedSeesOwnPrivateFork(t *testing.T) {
 func TestListForks_ScopedThirdParty_OnlyPublic(t *testing.T) {
 	f := setupForksVisibility(t)
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/"+f.parent.Uuid+"/forks?per_page=20", f.aliceTok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/"+f.parent.Uuid+"/forks?per_page=20", f.aliceTok, 200)
 
 	ids := idSetSimple(arr)
 	require.True(t, ids[f.aliceFork.Uuid], "alice's PUBLIC fork must appear")
@@ -196,7 +196,7 @@ func TestListForks_ScopedThirdParty_OnlyPublic(t *testing.T) {
 }
 
 // =========================================================================
-// GET /api/v1/gists/forked - ListForkedGists (the caller's forks)
+// GET /api/gists/forked - ListForkedGists (the caller's forks)
 // =========================================================================
 
 // forkedListFixture: parent_owner owns a public parent gist; the caller
@@ -237,7 +237,7 @@ func setupForkedList(t *testing.T) *forkedListFixture {
 
 func TestListForkedGists_NoAuth(t *testing.T) {
 	s := setupGetGist(t)
-	s.APIRequest(t, "GET", "/api/v1/gists/forked", "", nil, 401)
+	s.APIRequest(t, "GET", "/api/gists/forked", "", nil, 401)
 }
 
 func TestListForkedGists_EmptyWhenNoForks(t *testing.T) {
@@ -249,7 +249,7 @@ func TestListForkedGists_EmptyWhenNoForks(t *testing.T) {
 
 	tok := apiTokenFor(t, s, "thomas", db.ReadPermission)
 
-	arr, _ := apiList[types.GistSimple](t, s, "/api/v1/gists/forked", tok, 200)
+	arr, _ := apiList[types.GistSimple](t, s, "/api/gists/forked", tok, 200)
 	require.Empty(t, arr)
 }
 
@@ -260,7 +260,7 @@ func TestListForkedGists_ReturnsOnlyCallersForks(t *testing.T) {
 	f := setupForkedList(t)
 	callerTok := apiTokenFor(t, f.s, "caller", db.ReadPermission)
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/forked?per_page=20", callerTok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/forked?per_page=20", callerTok, 200)
 
 	ids := idSetSimple(arr)
 	require.True(t, ids[f.callerFork.Uuid], "caller's fork must appear")
@@ -275,7 +275,7 @@ func TestListForkedGists_TokenWithGistRead_IncludesOwnPrivateFork(t *testing.T) 
 	setVisibility(t, f.callerFork, db.PrivateVisibility)
 	callerTok := apiTokenFor(t, f.s, "caller", db.ReadPermission)
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/forked?per_page=20", callerTok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/forked?per_page=20", callerTok, 200)
 
 	ids := idSetSimple(arr)
 	require.True(t, ids[f.callerFork.Uuid],
@@ -290,7 +290,7 @@ func TestListForkedGists_TokenWithoutGistRead_OnlyPublicForks(t *testing.T) {
 	setVisibility(t, f.callerFork, db.UnlistedVisibility)
 	noScopeTok := apiTokenFor(t, f.s, "caller", db.NoPermission)
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/forked?per_page=20", noScopeTok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/forked?per_page=20", noScopeTok, 200)
 
 	ids := idSetSimple(arr)
 	require.False(t, ids[f.callerFork.Uuid],
@@ -308,7 +308,7 @@ func TestListForks_Shape(t *testing.T) {
 	_, parent, parentUser, parentIdent := s.CreateGistAs(t, "owner", "0")
 	fork := forkAs(t, s, "other", parentUser, parentIdent)
 
-	arr, _ := apiList[types.GistSimple](t, s, "/api/v1/gists/"+parent.Uuid+"/forks", "", 200)
+	arr, _ := apiList[types.GistSimple](t, s, "/api/gists/"+parent.Uuid+"/forks", "", 200)
 
 	require.Len(t, arr, 1)
 	got := arr[0]
@@ -320,7 +320,7 @@ func TestListForks_Shape(t *testing.T) {
 }
 
 // =========================================================================
-// POST /api/v1/gists/:uuid/forks
+// POST /api/gists/:uuid/forks
 // =========================================================================
 
 // --- Auth / scope ---
@@ -330,7 +330,7 @@ func TestForkGist_NoAuth(t *testing.T) {
 	_, parent, _, _ := s.CreateGistAs(t, "owner", "0")
 
 	// apiRequireAuth on the route → 401 before the handler runs.
-	s.APIRequest(t, "POST", "/api/v1/gists/"+parent.Uuid+"/forks", "", nil, 401)
+	s.APIRequest(t, "POST", "/api/gists/"+parent.Uuid+"/forks", "", nil, 401)
 }
 
 func TestForkGist_TokenWithoutWriteScope_403(t *testing.T) {
@@ -339,7 +339,7 @@ func TestForkGist_TokenWithoutWriteScope_403(t *testing.T) {
 
 	// Read-only token can read but can't fork (creates a new gist).
 	roTok := apiTokenFor(t, s, "other", db.ReadPermission)
-	s.APIRequest(t, "POST", "/api/v1/gists/"+parent.Uuid+"/forks", roTok, nil, 403)
+	s.APIRequest(t, "POST", "/api/gists/"+parent.Uuid+"/forks", roTok, nil, 403)
 }
 
 // --- Visibility / access matrix on the parent ---
@@ -383,7 +383,7 @@ func TestForkGist_VisibilityAccess(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			s.APIRequest(t, "POST", "/api/v1/gists/"+c.uuid+"/forks", c.tok, nil, c.want)
+			s.APIRequest(t, "POST", "/api/gists/"+c.uuid+"/forks", c.tok, nil, c.want)
 		})
 	}
 }
@@ -395,7 +395,7 @@ func TestForkGist_Success_ResponseAndState(t *testing.T) {
 	_, parent, _, _ := s.CreateGistAs(t, "owner", "0")
 	otherTok := apiTokenFor(t, s, "other", db.ReadWritePermission)
 
-	w, body := s.APIRequest(t, "POST", "/api/v1/gists/"+parent.Uuid+"/forks", otherTok, nil, 201)
+	w, body := s.APIRequest(t, "POST", "/api/gists/"+parent.Uuid+"/forks", otherTok, nil, 201)
 
 	var resp types.GistSimple
 	require.NoError(t, json.Unmarshal(body, &resp), "body: %s", string(body))
@@ -411,7 +411,7 @@ func TestForkGist_Success_ResponseAndState(t *testing.T) {
 	// Location header points to the new fork.
 	loc := w.Header().Get("Location")
 	require.NotEmpty(t, loc)
-	require.Contains(t, loc, "/api/v1/gists/"+resp.ID)
+	require.Contains(t, loc, "/api/gists/"+resp.ID)
 
 	// DB-side: fork row exists with ForkedID, parent's NbForks bumped.
 	fork, err := db.GetGistByUUID(resp.ID)
@@ -430,7 +430,7 @@ func TestForkGist_VisibilityInheritedFromUnlistedParent(t *testing.T) {
 	_, parent, _, _ := s.CreateGistAs(t, "owner", "1") // unlisted
 	otherTok := apiTokenFor(t, s, "other", db.ReadWritePermission)
 
-	_, body := s.APIRequest(t, "POST", "/api/v1/gists/"+parent.Uuid+"/forks", otherTok, nil, 201)
+	_, body := s.APIRequest(t, "POST", "/api/gists/"+parent.Uuid+"/forks", otherTok, nil, 201)
 	var resp types.GistSimple
 	require.NoError(t, json.Unmarshal(body, &resp))
 	require.Equal(t, "unlisted", resp.Visibility)
@@ -448,17 +448,17 @@ func TestForkGist_AlreadyForked_200(t *testing.T) {
 	otherTok := apiTokenFor(t, s, "other", db.ReadWritePermission)
 
 	// First fork → 201.
-	_, firstBody := s.APIRequest(t, "POST", "/api/v1/gists/"+parent.Uuid+"/forks", otherTok, nil, 201)
+	_, firstBody := s.APIRequest(t, "POST", "/api/gists/"+parent.Uuid+"/forks", otherTok, nil, 201)
 	var first types.GistSimple
 	require.NoError(t, json.Unmarshal(firstBody, &first))
 
 	// Second attempt → 200 with the existing fork echoed back, Location →
 	// existing fork.
-	w, secondBody := s.APIRequest(t, "POST", "/api/v1/gists/"+parent.Uuid+"/forks", otherTok, nil, 200)
+	w, secondBody := s.APIRequest(t, "POST", "/api/gists/"+parent.Uuid+"/forks", otherTok, nil, 200)
 	var second types.GistSimple
 	require.NoError(t, json.Unmarshal(secondBody, &second))
 	require.Equal(t, first.ID, second.ID, "the existing fork must be returned, not a new one")
-	require.Contains(t, w.Header().Get("Location"), "/api/v1/gists/"+first.ID,
+	require.Contains(t, w.Header().Get("Location"), "/api/gists/"+first.ID,
 		"Location must point at the existing fork")
 
 	// And the parent's NbForks must not double-count.

@@ -63,7 +63,7 @@ func idSet(arr []types.GistSimple) map[string]bool {
 }
 
 // TestListGists_GistObjectShape verifies every field of a types.GistSimple coming
-// back from /api/v1/gists is populated as expected. HttpGit and SshGit are
+// back from /api/gists is populated as expected. HttpGit and SshGit are
 // toggled on so the URL-bearing fields aren't empty; the test restores config
 // on cleanup.
 func TestListGists_GistObjectShape(t *testing.T) {
@@ -83,7 +83,7 @@ func TestListGists_GistObjectShape(t *testing.T) {
 	tok := s.CreateAccessToken(t, "shape", db.ReadPermission, db.ReadPermission)
 	s.Logout()
 
-	arr, _ := apiList[types.GistSimple](t, s, "/api/v1/gists", tok, 200)
+	arr, _ := apiList[types.GistSimple](t, s, "/api/gists", tok, 200)
 	require.Len(t, arr, 1)
 	got := arr[0]
 
@@ -119,7 +119,7 @@ func TestListGists_Anonymous_OnlyPublicFromEveryone(t *testing.T) {
 	f := setupListVisibility(t)
 	f.s.Logout()
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists?per_page=20", "", 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists?per_page=20", "", 200)
 
 	require.Len(t, arr, 2, "expected 2 gists, got %d", len(arr))
 	ids := idSet(arr)
@@ -146,7 +146,7 @@ func TestListGists_TokenWithoutGistRead_OnlyCallerPublic(t *testing.T) {
 	tok := f.s.CreateAccessToken(t, "no-read", db.NoPermission, db.ReadPermission)
 	f.s.Logout()
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists?per_page=20", tok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists?per_page=20", tok, 200)
 
 	require.Len(t, arr, 1, "expected 1 gist, got %d", len(arr))
 	ids := idSet(arr)
@@ -171,7 +171,7 @@ func TestListGists_TokenWithGistRead_AllOwnRegardlessOfVisibility(t *testing.T) 
 	tok := f.s.CreateAccessToken(t, "read", db.ReadPermission, db.ReadPermission)
 	f.s.Logout()
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists?per_page=20", tok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists?per_page=20", tok, 200)
 
 	require.Len(t, arr, 3, "expected 3 gists, got %d", len(arr))
 	ids := idSet(arr)

@@ -187,6 +187,7 @@ func (s *Server) registerRoutes() {
 			sC.POST("/fork", gist.Fork, logged)
 			sC.GET("/forks", gist.Forks, checkRequireLogin)
 			sC.PUT("/checkbox", gist.Checkbox, logged, writePermission)
+			sC.GET("/:filename", gist.GistIndex)
 		}
 	}
 

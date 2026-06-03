@@ -53,6 +53,16 @@ func GistJson(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error fetching files", err)
 	}
 
+	embedFile, _ := ctx.GetData("embedFile").(string)
+	if embedFile != "" {
+		filtered := filterToFile(files, embedFile)
+		if filtered == nil {
+			return ctx.NotFound("File not found")
+		}
+		files = filtered
+		hasMoreFiles = false
+	}
+
 	renderedFiles := render.RenderFiles(files)
 	ctx.SetData("files", renderedFiles)
 	ctx.SetData("hasMoreFiles", hasMoreFiles)
@@ -69,7 +79,12 @@ func GistJson(ctx *context.Context) error {
 	}
 	_ = w.Flush()
 
-	jsUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
+	var jsUrl string
+	if embedFile != "" {
+		jsUrl, err = url.JoinPath(ctx.GetData("baseHttpUrl").(string), gist.User.Username, gist.Identifier(), embedFile+".js")
+	} else {
+		jsUrl, err = url.JoinPath(ctx.GetData("baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
+	}
 	if err != nil {
 		return ctx.ErrorRes(500, "Error joining js url", err)
 	}
@@ -98,6 +113,15 @@ func GistJson(ctx *context.Context) error {
 	})
 }
 
+func filterToFile(files []*git.File, filename string) []*git.File {
+	for _, f := range files {
+		if f.Filename == filename {
+			return []*git.File{f}
+		}
+	}
+	return nil
+}
+
 func GistJs(ctx *context.Context) error {
 	theme := "light"
 	if _, exists := ctx.QueryParams()["dark"]; exists {
@@ -109,6 +133,15 @@ func GistJs(ctx *context.Context) error {
 	files, hasMoreFiles, err := gist.Files("HEAD", true)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error fetching files", err)
+	}
+
+	if embedFile, ok := ctx.GetData("embedFile").(string); ok && embedFile != "" {
+		filtered := filterToFile(files, embedFile)
+		if filtered == nil {
+			return ctx.NotFound("File not found")
+		}
+		files = filtered
+		hasMoreFiles = false
 	}
 
 	renderedFiles := render.RenderFiles(files)

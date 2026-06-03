@@ -1,6 +1,9 @@
 package ssh
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/pem"
 	"errors"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
@@ -10,7 +13,6 @@ import (
 	"io"
 	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -127,16 +129,12 @@ func setupHostKey() (ssh.Signer, error) {
 	}
 
 	keyPath := filepath.Join(dir, "opengist-ed25519")
-	if _, err := os.Stat(keyPath); err != nil && !os.IsExist(err) {
-		cmd := exec.Command(config.C.SshKeygen,
-			"-t", "ssh-ed25519",
-			"-f", keyPath,
-			"-m", "PEM",
-			"-N", "")
-		err = cmd.Run()
-		if err != nil {
+	if _, err := os.Stat(keyPath); errors.Is(err, os.ErrNotExist) {
+		if err = generateHostKey(keyPath); err != nil {
 			return nil, err
 		}
+	} else if err != nil {
+		return nil, err
 	}
 
 	keyData, err := os.ReadFile(keyPath)
@@ -150,6 +148,20 @@ func setupHostKey() (ssh.Signer, error) {
 	}
 
 	return signer, nil
+}
+
+func generateHostKey(keyPath string) error {
+	_, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		return err
+	}
+
+	block, err := ssh.MarshalPrivateKey(priv, "")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(keyPath, pem.EncodeToMemory(block), 0600)
 }
 
 func errorSsh(message string, err error) {

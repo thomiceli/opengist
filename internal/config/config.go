@@ -61,7 +61,6 @@ type config struct {
 	SshHost           string `yaml:"ssh.host" env:"OG_SSH_HOST"`
 	SshPort           string `yaml:"ssh.port" env:"OG_SSH_PORT"`
 	SshExternalDomain string `yaml:"ssh.external-domain" env:"OG_SSH_EXTERNAL_DOMAIN"`
-	SshKeygen         string `yaml:"ssh.keygen-executable" env:"OG_SSH_KEYGEN_EXECUTABLE"`
 
 	GithubClientKey string `yaml:"github.client-key" env:"OG_GITHUB_CLIENT_KEY"`
 	GithubSecret    string `yaml:"github.secret" env:"OG_GITHUB_SECRET"`
@@ -129,7 +128,6 @@ func configWithDefaults() (*config, error) {
 	c.SshGit = true
 	c.SshHost = "0.0.0.0"
 	c.SshPort = "2222"
-	c.SshKeygen = "ssh-keygen"
 
 	c.GitlabName = "GitLab"
 

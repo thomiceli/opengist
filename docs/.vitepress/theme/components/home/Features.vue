@@ -34,7 +34,7 @@ const features = [
   },
   {
     title: 'Full-text & code search',
-    desc: 'Search across gists via code or metadata.',
+    desc: 'Search across snippets via code or metadata.',
   },
   {
     title: 'OAuth, LDAP & passkeys',
@@ -42,7 +42,7 @@ const features = [
   },
   {
     title: 'Admin & instance controls',
-    desc: 'Require login for a private instance, allow anonymous gists, manage users, and expose Prometheus metrics.',
+    desc: 'Require login for a private instance, allow anonymous snippets, manage users, and expose Prometheus metrics.',
   },
   {
     title: 'Self-hosted your way',

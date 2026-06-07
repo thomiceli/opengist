@@ -26,7 +26,7 @@ func TestApiAuth_MissingToken(t *testing.T) {
 	s.Login(t, "thomas")
 
 	var body apiError
-	s.APIRequestUnmarshal(t, "GET", "/api/v1/user", "", nil, &body, 401)
+	s.APIRequestUnmarshal(t, "GET", "/api/user", "", nil, &body, 401)
 	require.Equal(t, 401, body.Status)
 	require.NotEmpty(t, body.Message)
 }
@@ -39,10 +39,10 @@ func TestApiAuth_BearerAndTokenPrefix(t *testing.T) {
 	tok := s.CreateAccessToken(t, "t", db.ReadPermission, db.ReadPermission)
 
 	// Bearer
-	s.APIRequest(t, "GET", "/api/v1/user", tok, nil, 200)
+	s.APIRequest(t, "GET", "/api/user", tok, nil, 200)
 
 	// Token prefix (legacy)
-	req := newJSONReqWithAuth("GET", "/api/v1/user", "Token "+tok)
+	req := newJSONReqWithAuth("GET", "/api/user", "Token "+tok)
 	resp := s.RawRequest(t, req, 200)
 	_ = json.NewDecoder(resp.Body).Decode(&map[string]interface{}{})
 }
@@ -61,7 +61,7 @@ func TestApiAuth_ExpiredToken(t *testing.T) {
 	require.NoError(t, db.SaveAccessTokenForTest(all[0]))
 
 	var body apiError
-	s.APIRequestUnmarshal(t, "GET", "/api/v1/user", tok, nil, &body, 401)
+	s.APIRequestUnmarshal(t, "GET", "/api/user", tok, nil, &body, 401)
 	require.Equal(t, 401, body.Status)
 	require.NotEmpty(t, body.Message)
 }
@@ -84,7 +84,7 @@ func TestApiScope_GistWriteInsufficient(t *testing.T) {
 	tok := s.CreateAccessToken(t, "no-write", db.ReadPermission, db.ReadPermission)
 
 	var body apiError
-	s.APIRequestUnmarshal(t, "POST", "/api/v1/gists", tok, nil, &body, 403)
+	s.APIRequestUnmarshal(t, "POST", "/api/gists", tok, nil, &body, 403)
 	require.Equal(t, 403, body.Status)
 	require.NotEmpty(t, body.Message)
 }
@@ -99,7 +99,7 @@ func TestApiScope_UserReadInsufficient(t *testing.T) {
 	tok := s.CreateAccessToken(t, "no-user", db.ReadPermission, db.NoPermission)
 
 	var body apiError
-	s.APIRequestUnmarshal(t, "GET", "/api/v1/user", tok, nil, &body, 403)
+	s.APIRequestUnmarshal(t, "GET", "/api/user", tok, nil, &body, 403)
 	require.Equal(t, 403, body.Status)
 	require.NotEmpty(t, body.Message)
 }

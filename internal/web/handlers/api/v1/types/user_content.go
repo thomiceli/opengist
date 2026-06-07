@@ -1,6 +1,6 @@
 package types
 
-// UpdateUserRequest is the PATCH /api/v1/user body. Pointer fields let the
+// UpdateUserRequest is the PATCH /api/user body. Pointer fields let the
 // handler distinguish "absent" from "explicit empty" so partial updates
 // don't accidentally clear other fields.
 //

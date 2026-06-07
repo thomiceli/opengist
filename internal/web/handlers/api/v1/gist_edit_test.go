@@ -62,7 +62,7 @@ func TestUpdateGist_ChangeRenameDelete(t *testing.T) {
 		}
 	}`
 
-	_, raw := s.APIRequest(t, "PATCH", "/api/v1/gists/"+id, tok, patch, 200)
+	_, raw := s.APIRequest(t, "PATCH", "/api/gists/"+id, tok, patch, 200)
 	var resp fullGist
 	require.NoError(t, json.Unmarshal(raw, &resp), "response: %s", string(raw))
 
@@ -100,7 +100,7 @@ func TestUpdateGist_VisibilityChange(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := createSeedGist(t, s, tok)
 
-	_, raw := s.APIRequest(t, "PATCH", "/api/v1/gists/"+id, tok,
+	_, raw := s.APIRequest(t, "PATCH", "/api/gists/"+id, tok,
 		`{"visibility": "private"}`, 200)
 	var resp fullGist
 	require.NoError(t, json.Unmarshal(raw, &resp))
@@ -118,7 +118,7 @@ func TestUpdateGist_TitleChange(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := createSeedGist(t, s, tok)
 
-	_, raw := s.APIRequest(t, "PATCH", "/api/v1/gists/"+id, tok,
+	_, raw := s.APIRequest(t, "PATCH", "/api/gists/"+id, tok,
 		`{"title": "renamed-title"}`, 200)
 	var resp fullGist
 	require.NoError(t, json.Unmarshal(raw, &resp))
@@ -136,7 +136,7 @@ func TestUpdateGist_DescriptionChange(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := createSeedGist(t, s, tok)
 
-	_, raw := s.APIRequest(t, "PATCH", "/api/v1/gists/"+id, tok,
+	_, raw := s.APIRequest(t, "PATCH", "/api/gists/"+id, tok,
 		`{"description": "updated-description"}`, 200)
 	var resp fullGist
 	require.NoError(t, json.Unmarshal(raw, &resp))
@@ -187,7 +187,7 @@ func TestUpdateGist_NoAccess(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			s.APIRequest(t, "PATCH", "/api/v1/gists/"+c.uuid, c.tok, body, c.want)
+			s.APIRequest(t, "PATCH", "/api/gists/"+c.uuid, c.tok, body, c.want)
 		})
 	}
 
@@ -247,7 +247,7 @@ func TestDeleteGist_NoAccess(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			s.APIRequest(t, "DELETE", "/api/v1/gists/"+c.uuid, c.tok, nil, c.want)
+			s.APIRequest(t, "DELETE", "/api/gists/"+c.uuid, c.tok, nil, c.want)
 		})
 	}
 
@@ -265,9 +265,9 @@ func TestUpdateGist_EmptyBody_422(t *testing.T) {
 	s, tok := setupCreateGist(t)
 	id := createSeedGist(t, s, tok)
 
-	s.APIRequest(t, "PATCH", "/api/v1/gists/"+id, tok, `{}`, 422)
+	s.APIRequest(t, "PATCH", "/api/gists/"+id, tok, `{}`, 422)
 	// Same when only an empty files map is supplied - no actual change.
-	s.APIRequest(t, "PATCH", "/api/v1/gists/"+id, tok, `{"files": {}}`, 422)
+	s.APIRequest(t, "PATCH", "/api/gists/"+id, tok, `{"files": {}}`, 422)
 }
 
 func TestCreateGist_NoAuth(t *testing.T) {
@@ -276,7 +276,7 @@ func TestCreateGist_NoAuth(t *testing.T) {
 	body := map[string]interface{}{
 		"files": fileMap{"test.txt": {"content": "hello"}},
 	}
-	s.APIRequest(t, "POST", "/api/v1/gists", "", body, 401)
+	s.APIRequest(t, "POST", "/api/gists", "", body, 401)
 
 	count, err := db.CountAll(db.Gist{})
 	require.NoError(t, err)
@@ -516,7 +516,7 @@ func TestCreateGist(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w, body := s.APIRequest(t, "POST", "/api/v1/gists", tok, tt.body, tt.expectedCode)
+			w, body := s.APIRequest(t, "POST", "/api/gists", tok, tt.body, tt.expectedCode)
 
 			if !tt.expectGistCreated {
 				return
@@ -533,7 +533,7 @@ func TestCreateGist(t *testing.T) {
 
 			// Location header: required on 201.
 			require.NotEmpty(t, w.Header().Get("Location"), "Location header missing")
-			require.Contains(t, w.Header().Get("Location"), "/api/v1/gists/"+resp.ID)
+			require.Contains(t, w.Header().Get("Location"), "/api/gists/"+resp.ID)
 
 			// Files map keyed by filename.
 			require.Len(t, resp.Files, len(tt.expectedFilenames), "file count mismatch")

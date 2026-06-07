@@ -1,0 +1,19 @@
+{
+  "name": "opengist-docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Documentation site for Opengist, built with VitePress.",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.4",
+    "tailwindcss": "^4.2.4",
+    "vitepress": "^2.0.0-alpha.17",
+    "vue": "^3.5.27",
+    "yaml": "^2.9.0"
+  }
+}

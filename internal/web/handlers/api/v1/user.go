@@ -19,13 +19,13 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers/api/v1/types"
 )
 
-// GetUser handles GET /api/v1/user.
+// GetUser handles GET /api/user.
 // Returns the authenticated caller's own user record.
 func GetUser(ctx *context.Context) error {
 	return ctx.JSON(200, ctx.User.ToPrivateAPI())
 }
 
-// UpdateUser handles PATCH /api/v1/user.
+// UpdateUser handles PATCH /api/user.
 // Updates the authenticated caller's username and/or email. Both fields are
 // optional - only fields present in the body are touched. Returns the
 // updated user on success (200), 422 on validation failures, 409 if the
@@ -89,7 +89,7 @@ func UpdateUser(ctx *context.Context) error {
 	return ctx.JSON(200, user.ToPrivateAPI())
 }
 
-// GetUserByID handles GET /api/v1/user/:id.
+// GetUserByID handles GET /api/user/:id.
 // Looks up a user by numeric ID and returns the SimpleUser shape (no
 // private fields like email or admin flag). Anonymous-readable.
 func GetUserByID(ctx *context.Context) error {
@@ -107,7 +107,7 @@ func GetUserByID(ctx *context.Context) error {
 	return ctx.JSON(200, u.ToSimpleAPI())
 }
 
-// GetUserByUsername handles GET /api/v1/users/:username.
+// GetUserByUsername handles GET /api/users/:username.
 // Looks up a user by username and returns the SimpleUser shape.
 // Anonymous-readable.
 func GetUserByUsername(ctx *context.Context) error {
@@ -134,7 +134,7 @@ func userVisibleAs(ctx *context.Context, target *db.User) uint {
 	return 0
 }
 
-// ListUserLikedGists handles GET /api/v1/users/:username/liked.
+// ListUserLikedGists handles GET /api/users/:username/liked.
 // Lists gists liked by :username, filtered to what the caller is allowed
 // to see. The target user's own private/unlisted liked gists only surface
 // when the caller IS that user AND holds gist:read.
@@ -157,7 +157,7 @@ func ListUserLikedGists(ctx *context.Context) error {
 	})
 }
 
-// ListUserForkedGists handles GET /api/v1/users/:username/forked.
+// ListUserForkedGists handles GET /api/users/:username/forked.
 // Lists gists forked by :username. Same caller-visibility rule as
 // ListUserLikedGists.
 func ListUserForkedGists(ctx *context.Context) error {
@@ -179,7 +179,7 @@ func ListUserForkedGists(ctx *context.Context) error {
 	})
 }
 
-// ListUserGists handles GET /api/v1/users/:username/gists.
+// ListUserGists handles GET /api/users/:username/gists.
 // Returns the named user's gists with visibility filtering:
 //
 //   - Anonymous, or any caller other than the named user → only public

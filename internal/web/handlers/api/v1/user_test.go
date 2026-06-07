@@ -45,7 +45,7 @@ func TestListUserGists_UnknownUser_404(t *testing.T) {
 	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "thomas")
 
-	s.APIRequest(t, "GET", "/api/v1/users/nobody/gists", "", nil, 404)
+	s.APIRequest(t, "GET", "/api/users/nobody/gists", "", nil, 404)
 }
 
 // userLikedFixture sets up a "target" user who has liked one public + one
@@ -100,7 +100,7 @@ func TestListUserLikedGists_Visibility(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/users/target/liked?per_page=20", c.tok, 200)
+			arr, _ := apiList[types.GistSimple](t, f.s, "/api/users/target/liked?per_page=20", c.tok, 200)
 
 			ids := idSetSimple(arr)
 			require.Equal(t, c.seePub, ids[f.targetPub.Uuid], "PUBLIC visibility expectation")
@@ -115,7 +115,7 @@ func TestListUserLikedGists_UnknownUser_404(t *testing.T) {
 	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "thomas")
 
-	s.APIRequest(t, "GET", "/api/v1/users/nobody/liked", "", nil, 404)
+	s.APIRequest(t, "GET", "/api/users/nobody/liked", "", nil, 404)
 }
 
 // userForkedFixture sets up parentowner → public parent. target forks the
@@ -175,7 +175,7 @@ func TestListUserForkedGists_Visibility(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/users/target/forked?per_page=20", c.tok, 200)
+			arr, _ := apiList[types.GistSimple](t, f.s, "/api/users/target/forked?per_page=20", c.tok, 200)
 
 			ids := idSetSimple(arr)
 			require.Equal(t, c.seePub, ids[f.targetPub.Uuid], "PUBLIC fork visibility expectation")
@@ -190,7 +190,7 @@ func TestListUserForkedGists_UnknownUser_404(t *testing.T) {
 	t.Cleanup(func() { webtest.Teardown(t) })
 	s.Register(t, "thomas")
 
-	s.APIRequest(t, "GET", "/api/v1/users/nobody/forked", "", nil, 404)
+	s.APIRequest(t, "GET", "/api/users/nobody/forked", "", nil, 404)
 }
 
 // TestListUserGists_Visibility - table-driven matrix of caller types ×
@@ -222,7 +222,7 @@ func TestListUserGists_Visibility(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/users/target/gists?per_page=20", c.tok, 200)
+			arr, _ := apiList[types.GistSimple](t, f.s, "/api/users/target/gists?per_page=20", c.tok, 200)
 
 			ids := idSetSimple(arr)
 			require.Equal(t, c.seePub, ids[f.targetPub.Uuid], "PUBLIC visibility expectation")

@@ -1,3 +1,22 @@
+@import "tailwindcss";
+
+/* Map Tailwind's `dark:` variant onto VitePress's `.dark` class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Opengist brand gray palette (replaces Tailwind's default gray). */
+@theme {
+  --color-gray-50: #EEEFF1;
+  --color-gray-100: #DEDFE3;
+  --color-gray-200: #BABCC5;
+  --color-gray-300: #999CA8;
+  --color-gray-400: #75798A;
+  --color-gray-500: #585B68;
+  --color-gray-600: #464853;
+  --color-gray-700: #363840;
+  --color-gray-800: #232429;
+  --color-gray-900: #131316;
+}
+
 /**
  * Customize default theme styling by overriding CSS variables:
  * https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/styles/vars.css
@@ -49,10 +68,11 @@
   --vp-c-default-3: var(--vp-c-gray-3);
   --vp-c-default-soft: var(--vp-c-gray-soft);
 
-  --vp-c-brand-1: var(--vp-c-indigo-1);
-  --vp-c-brand-2: var(--vp-c-indigo-2);
-  --vp-c-brand-3: var(--vp-c-indigo-3);
-  --vp-c-brand-soft: var(--vp-c-indigo-soft);
+  /* Opengist brand blue (matches --color-primary-* in the app). */
+  --vp-c-brand-1: #3c79e2;
+  --vp-c-brand-2: #356fc0;
+  --vp-c-brand-3: #3c79e2;
+  --vp-c-brand-soft: rgba(60, 121, 226, 0.14);
 
   --vp-c-tip-1: var(--vp-c-brand-1);
   --vp-c-tip-2: var(--vp-c-brand-2);
@@ -68,6 +88,19 @@
   --vp-c-danger-2: var(--vp-c-red-2);
   --vp-c-danger-3: var(--vp-c-red-3);
   --vp-c-danger-soft: var(--vp-c-red-soft);
+}
+
+/* Dark theme background (brand gray-900). */
+.dark {
+  --vp-c-bg: #131316;
+  --vp-c-bg-alt: #0f0f12;
+  --vp-c-bg-elv: #1a1a1e;
+
+  /* Lighter brand blue for contrast on dark backgrounds. */
+  --vp-c-brand-1: #74a4f6;
+  --vp-c-brand-2: #588fee;
+  --vp-c-brand-3: #3c79e2;
+  --vp-c-brand-soft: rgba(116, 164, 246, 0.16);
 }
 
 /**
@@ -142,6 +175,150 @@
     height: 108px;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Home: drop VitePress's bottom margin on the home container so our framed
+   wrapper (and its side borders) reaches the very bottom of the page. */
+.VPHome {
+  margin-bottom: 0 !important;
+}
+
+/**
+ * Navbar: left-align the menu (Docs / Resources) next to the logo,
+ * keeping the appearance toggle and social links on the right.
+ * -------------------------------------------------------------------------- */
+
+@media (min-width: 768px) {
+  /* Drop VitePress's `margin-right: -100vw; padding-right: 100vw` background
+     bleed: it makes the flex free space negative, which neutralises the auto
+     margin below. The bar's own background covers the width anyway. */
+  .VPNavBar .content-body {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+  }
+  /* The (empty) search slot has flex-grow:1 and would eat all the free space,
+     leaving none for the menu's auto margin. Stop it from growing. */
+  .VPNavBar .VPNavBarSearch {
+    flex-grow: 0 !important;
+  }
+  .VPNavBar .VPNavBarMenu {
+    margin-right: auto !important;
+  }
+}
+
+/* Keep the navbar identical on the landing page and the docs pages:
+   VitePress otherwise makes it transparent and borderless on the home page. */
+.VPNavBar {
+  background-color: var(--vp-nav-bg-color) !important;
+}
+/* Bottom border: match the side borders' style (2px, --vp-c-divider) and keep
+   it the same width as the container instead of spanning the whole page. */
+.VPNavBar .divider {
+  max-width: var(--vp-layout-max-width);
+  margin-inline: auto;
+}
+.VPNavBar .divider-line {
+  height: var(--og-frame-border);
+  background-color: var(--vp-c-divider) !important;
+}
+
+/* Drop the bottom border under the logo/title (shown on docs pages). */
+.VPNavBarTitle.has-sidebar .title {
+  border-bottom-color: transparent !important;
+}
+
+/* Remove the small vertical divider lines between the menu, theme toggle
+   (.appearance) and social links in the navbar. */
+.VPNavBar .menu + .translations::before,
+.VPNavBar .menu + .appearance::before,
+.VPNavBar .menu + .social-links::before,
+.VPNavBar .translations + .appearance::before,
+.VPNavBar .appearance + .social-links::before {
+  display: none !important;
+}
+
+/* The dividers also provided the spacing between modules; add it back. */
+.VPNavBar .appearance,
+.VPNavBar .social-links {
+  margin-left: 12px;
+}
+
+/* Match the home content layout: full --vp-layout-max-width container centered
+   (native margin: 0 auto), with no side padding on the wrapper. The container
+   carries the same vertical borders as the home .og-wrapper, with 32px of
+   inner padding so the nav content sits inside the borders. */
+.VPNavBar .wrapper {
+  padding-inline: 0 !important;
+}
+.VPNavBar .container {
+  max-width: var(--vp-layout-max-width) !important;
+  padding-inline: 32px;
+  border-inline: var(--og-frame-border) solid var(--vp-c-divider);
+}
+
+/* On docs pages the navbar gets `.has-sidebar`, which offsets the title to the
+   sidebar width and changes the container. Undo it so the navbar lays out the
+   same as on the landing page (centered, max-width container). */
+@media (min-width: 960px) {
+  .VPNavBar.has-sidebar .wrapper {
+    padding: 0 !important;
+  }
+  .VPNavBar.has-sidebar .container {
+    max-width: var(--vp-layout-max-width) !important;
+  }
+  .VPNavBar.has-sidebar .title {
+    position: static !important;
+    width: auto !important;
+    padding: 0 !important;
+  }
+  .VPNavBar.has-sidebar .content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .VPNavBar.has-sidebar .divider {
+    padding-left: 0 !important;
+  }
+}
+
+/* Horizontal section bar (Guide / API) below the top navbar. Desktop only;
+   on mobile the top-nav menu provides section switching. */
+:root {
+  --og-bar-height: 48px;
+  /* Frame border width, between 1px and 2px without using px (0.1rem ≈ 1.6px). */
+  --og-frame-border: 0.09rem;
+}
+
+@media (min-width: 960px) {
+  /* Push the sidebar, main content and outline down by the bar height. */
+  .VPSidebar {
+    padding-top: calc(var(--vp-nav-height) + var(--og-bar-height)) !important;
+  }
+  .VPContent.has-sidebar {
+    padding-top: calc(var(--vp-nav-height) + var(--og-bar-height)) !important;
+  }
+  .VPDoc {
+    --vp-doc-top-height: var(--og-bar-height);
+  }
+}
+
+/* Continue the navbar/home frame down the docs pages: the sidebar gets the
+   outer-left border and the sidebar/content divider, and the content (.VPDoc)
+   gets the outer-right border. Same style as the rest of the frame. */
+@media (min-width: 960px) {
+  .VPSidebar {
+    border-left: var(--og-frame-border) solid var(--vp-c-divider);
+    border-right: var(--og-frame-border) solid var(--vp-c-divider);
+  }
+  .VPDoc {
+    border-right: var(--og-frame-border) solid var(--vp-c-divider);
+  }
+}
+
+/* At >=1440px the layout is centered, so pull the sidebar box in to start at the
+   frame's left edge (same X as the navbar's left border) instead of the viewport
+   edge. Content/nav positions are unchanged; only the box origin and width move. */
+@media (min-width: 1440px) {
+  .VPSidebar {
+    left: calc((100% - var(--vp-layout-max-width)) / 2) !important;
+    width: var(--vp-sidebar-width) !important;
+    padding-left: 32px !important;
+  }
+}

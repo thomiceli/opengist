@@ -11,6 +11,6 @@ func TestOpenAPISpec(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)
 
-	resp := s.Request(t, "GET", "/api/v1/openapi.yaml", nil, 200)
+	resp := s.Request(t, "GET", "/api/openapi.yaml", nil, 200)
 	require.Contains(t, resp.Header.Get("Content-Type"), "yaml")
 }

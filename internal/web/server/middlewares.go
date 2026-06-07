@@ -69,8 +69,8 @@ func (s *Server) registerMiddlewares() {
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteStrictMode,
 		Skipper: func(ctx echo.Context) bool {
-			// skip CSRF for /api/v1 (uses bearer tokens, not session cookies)
-			if strings.HasPrefix(ctx.Request().URL.Path, "/api/v1/") {
+			// skip CSRF for /api (uses bearer tokens, not session cookies)
+			if strings.HasPrefix(ctx.Request().URL.Path, "/api/") {
 				return true
 			}
 			/* skip CSRF for embeds */
@@ -499,7 +499,7 @@ func setAllGistsMode(mode string) Middleware {
 	}
 }
 
-// apiBindAuth gates /api/v1 on the api.enabled config option and optionally
+// apiBindAuth gates /api on the api.enabled config option and optionally
 // resolves a caller identity from the Authorization header. A missing header is
 // allowed (the downstream handler/scope middleware decides whether anonymous
 // access is OK); a malformed/expired/unknown token is always rejected with 401.

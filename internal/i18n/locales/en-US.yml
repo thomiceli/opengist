@@ -317,7 +317,7 @@ admin.disable-login: Disable login form
 admin.disable-login_help: Forbid logging in via the login form to force using OAuth providers instead.
 admin.disable-gravatar: Disable Gravatar
 admin.disable-gravatar_help: Disable the usage of Gravatar as an avatar provider.
-admin.api-enabled: Enable REST API at /api/v1
+admin.api-enabled: Enable REST API at /api
 admin.api-enabled_help: Allow programmatic access to gists and user info via Personal Access Tokens.
 
 admin.users.delete_confirm: Do you want to delete this user ?

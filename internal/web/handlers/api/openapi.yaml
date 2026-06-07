@@ -6,7 +6,7 @@ info:
   description: |
     REST API for Opengist.
     
-    The base URL is `/api/v1`.
+    The base URL is `/api`.
 
     Authentication uses a Personal Access Token sent in the `Authorization`
     header using the `Bearer` scheme:
@@ -15,7 +15,7 @@ info:
 
     Example usage:
     
-        curl -H "Authorization: Bearer og_xxxxxxxx" https://opengist.local/api/v1/gists
+        curl -H "Authorization: Bearer og_xxxxxxxx" https://opengist.local/api/gists
 
     Tokens are created from the web UI under Settings → Access Tokens and carry
     per-resource scopes (gist, user) at read or read/write level.
@@ -24,7 +24,7 @@ info:
     url: https://github.com/thomiceli/opengist/blob/master/LICENSE
 
 servers:
-  - url: /api/v1
+  - url: /api
     description: Current instance
 
 security:
@@ -473,7 +473,7 @@ paths:
       - { $ref: "#/components/parameters/GistUuidParam" }
     get:
       operationId: checkGistLike
-      summary: Check whether the caller likes a gist
+      summary: Check if a gist is liked
       tags: [Gists]
       security:
         - bearerAuth: [] # any valid token (no specific scope required)

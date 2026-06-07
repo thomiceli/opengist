@@ -38,7 +38,7 @@ func lookupGistByUUID(ctx *context.Context, uuid string) (*db.Gist, error) {
 	return g, nil
 }
 
-// GetGist handles GET /api/v1/gists/:uuid.
+// GetGist handles GET /api/gists/:uuid.
 // Public and unlisted gists are readable by anyone (including anonymous
 // callers), matching the rest of the API's soft-scope rule. Private gists
 // only resolve for their owner with a
@@ -55,7 +55,7 @@ func GetGist(ctx *context.Context) error {
 	return ctx.JSON(200, resp)
 }
 
-// GetGistRevision handles GET /api/v1/gists/:uuid/:sha.
+// GetGistRevision handles GET /api/gists/:uuid/:sha.
 // Same shape as GetGist, but returns the gist as it stood at the given
 // commit SHA instead of HEAD. Visibility rules are identical (lookup-side
 // check). An unknown revision surfaces as 404 - same code as the not-found

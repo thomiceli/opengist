@@ -63,7 +63,7 @@ func TestListLikedGists_NoAuth(t *testing.T) {
 	s.Logout()
 
 	// apiRequireAuth on the route rejects anonymous callers.
-	s.APIRequest(t, "GET", "/api/v1/gists/liked", "", nil, 401)
+	s.APIRequest(t, "GET", "/api/gists/liked", "", nil, 401)
 }
 
 func TestListLikedGists_EmptyWhenNoStars(t *testing.T) {
@@ -77,7 +77,7 @@ func TestListLikedGists_EmptyWhenNoStars(t *testing.T) {
 	tok := s.CreateAccessToken(t, "tok", db.ReadPermission, db.ReadPermission)
 	s.Logout()
 
-	arr, _ := apiList[types.GistSimple](t, s, "/api/v1/gists/liked", tok, 200)
+	arr, _ := apiList[types.GistSimple](t, s, "/api/gists/liked", tok, 200)
 	require.Empty(t, arr)
 }
 
@@ -92,7 +92,7 @@ func TestListLikedGists_TokenWithGistRead_AllAllowed(t *testing.T) {
 	tok := f.s.CreateAccessToken(t, "read", db.ReadPermission, db.ReadPermission)
 	f.s.Logout()
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/liked?per_page=20", tok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/liked?per_page=20", tok, 200)
 
 	ids := idSet(arr)
 	require.True(t, ids[f.callerPub.Uuid], "caller's own PUBLIC liked gist visible")
@@ -104,7 +104,7 @@ func TestListLikedGists_TokenWithGistRead_AllAllowed(t *testing.T) {
 }
 
 // =========================================================================
-// GET /api/v1/gists/:uuid/like - CheckLike
+// GET /api/gists/:uuid/like - CheckLike
 // =========================================================================
 
 // likeGist directly inserts a like row for `username` on `g`, avoiding the
@@ -122,7 +122,7 @@ func TestCheckLike_NoAuth(t *testing.T) {
 	s := setupGetGist(t)
 	_, gist, _, _ := s.CreateGistAs(t, "owner", "0")
 
-	s.APIRequest(t, "GET", "/api/v1/gists/"+gist.Uuid+"/like", "", nil, 401)
+	s.APIRequest(t, "GET", "/api/gists/"+gist.Uuid+"/like", "", nil, 401)
 }
 
 // TestCheckLike_StatusCodes is the headline matrix: combinations of (gist
@@ -175,7 +175,7 @@ func TestCheckLike_StatusCodes(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			s.APIRequest(t, "GET", "/api/v1/gists/"+c.uuid+"/like", c.tok, nil, c.want)
+			s.APIRequest(t, "GET", "/api/gists/"+c.uuid+"/like", c.tok, nil, c.want)
 		})
 	}
 }
@@ -188,19 +188,19 @@ func TestCheckLike_204HasEmptyBody(t *testing.T) {
 	likeGist(t, gist, "other")
 	otherTok := apiTokenFor(t, s, "other", db.ReadPermission)
 
-	_, body := s.APIRequest(t, "GET", "/api/v1/gists/"+gist.Uuid+"/like", otherTok, nil, 204)
+	_, body := s.APIRequest(t, "GET", "/api/gists/"+gist.Uuid+"/like", otherTok, nil, 204)
 	require.Empty(t, body, "204 No Content responses must carry an empty body")
 }
 
 // =========================================================================
-// PUT /api/v1/gists/:uuid/like - ToggleLike
+// PUT /api/gists/:uuid/like - ToggleLike
 // =========================================================================
 
 func TestToggleLike_NoAuth(t *testing.T) {
 	s := setupGetGist(t)
 	_, gist, _, _ := s.CreateGistAs(t, "owner", "0")
 
-	s.APIRequest(t, "PUT", "/api/v1/gists/"+gist.Uuid+"/like", "", nil, 401)
+	s.APIRequest(t, "PUT", "/api/gists/"+gist.Uuid+"/like", "", nil, 401)
 }
 
 // TestToggleLike_LikesIfUnliked - first PUT on a never-liked gist adds the
@@ -210,7 +210,7 @@ func TestToggleLike_LikesIfUnliked(t *testing.T) {
 	_, gist, _, _ := s.CreateGistAs(t, "owner", "0")
 	otherTok := likeTokenFor(t, s, "other")
 
-	_, body := s.APIRequest(t, "PUT", "/api/v1/gists/"+gist.Uuid+"/like", otherTok, nil, 204)
+	_, body := s.APIRequest(t, "PUT", "/api/gists/"+gist.Uuid+"/like", otherTok, nil, 204)
 	require.Empty(t, body, "204 must have empty body")
 
 	reloaded, err := db.GetGistByUUID(gist.Uuid)
@@ -237,7 +237,7 @@ func TestToggleLike_UnlikesIfLiked(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 1, reloaded.NbLikes, "fixture precondition: NbLikes=1 after likeGist")
 
-	s.APIRequest(t, "PUT", "/api/v1/gists/"+gist.Uuid+"/like", otherTok, nil, 204)
+	s.APIRequest(t, "PUT", "/api/gists/"+gist.Uuid+"/like", otherTok, nil, 204)
 
 	reloaded, err = db.GetGistByUUID(gist.Uuid)
 	require.NoError(t, err)
@@ -258,7 +258,7 @@ func TestToggleLike_FullCycle(t *testing.T) {
 	_, gist, _, _ := s.CreateGistAs(t, "owner", "0")
 	otherTok := likeTokenFor(t, s, "other")
 
-	url := "/api/v1/gists/" + gist.Uuid + "/like"
+	url := "/api/gists/" + gist.Uuid + "/like"
 	s.APIRequest(t, "PUT", url, otherTok, nil, 204) // like
 	s.APIRequest(t, "PUT", url, otherTok, nil, 204) // unlike
 
@@ -278,7 +278,7 @@ func TestToggleLike_HiddenPrivateGist_404(t *testing.T) {
 	_, gist, _, _ := s.CreateGistAs(t, "owner", "2") // private
 	otherTok := likeTokenFor(t, s, "other")
 
-	s.APIRequest(t, "PUT", "/api/v1/gists/"+gist.Uuid+"/like", otherTok, nil, 404)
+	s.APIRequest(t, "PUT", "/api/gists/"+gist.Uuid+"/like", otherTok, nil, 404)
 
 	// State unchanged.
 	reloaded, err := db.GetGistByUUID(gist.Uuid)
@@ -290,7 +290,7 @@ func TestToggleLike_NotFound(t *testing.T) {
 	s := setupGetGist(t)
 	otherTok := likeTokenFor(t, s, "other")
 
-	s.APIRequest(t, "PUT", "/api/v1/gists/does-not-exist/like", otherTok, nil, 404)
+	s.APIRequest(t, "PUT", "/api/gists/does-not-exist/like", otherTok, nil, 404)
 }
 
 // TestToggleLike_TokenWithoutUserWrite_403 - the toggle mutates the caller's
@@ -305,7 +305,7 @@ func TestToggleLike_TokenWithoutUserWrite_403(t *testing.T) {
 	tok := s.CreateAccessToken(t, "no-user-write", db.ReadPermission, db.ReadPermission)
 	s.Logout()
 
-	s.APIRequest(t, "PUT", "/api/v1/gists/"+gist.Uuid+"/like", tok, nil, 403)
+	s.APIRequest(t, "PUT", "/api/gists/"+gist.Uuid+"/like", tok, nil, 403)
 
 	reloaded, err := db.GetGistByUUID(gist.Uuid)
 	require.NoError(t, err)
@@ -321,7 +321,7 @@ func TestListLikedGists_TokenWithoutGistRead_OnlyPublic(t *testing.T) {
 	tok := f.s.CreateAccessToken(t, "no-read", db.NoPermission, db.ReadPermission)
 	f.s.Logout()
 
-	arr, _ := apiList[types.GistSimple](t, f.s, "/api/v1/gists/liked?per_page=20", tok, 200)
+	arr, _ := apiList[types.GistSimple](t, f.s, "/api/gists/liked?per_page=20", tok, 200)
 
 	ids := idSet(arr)
 	require.True(t, ids[f.callerPub.Uuid], "caller's own PUBLIC liked gist visible")

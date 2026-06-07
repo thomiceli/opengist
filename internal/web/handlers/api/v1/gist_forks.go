@@ -14,7 +14,7 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers/api/v1/types"
 )
 
-// ListForkedGists handles GET /api/v1/gists/forked.
+// ListForkedGists handles GET /api/gists/forked.
 // Lists gists the authenticated user has forked. Auth is mandatory (the
 // route uses apiRequireAuth) but the gist:read scope is soft-checked here
 // so a token without it degrades to the public subset of forked gists
@@ -52,7 +52,7 @@ func ListForkedGists(ctx *context.Context) error {
 	})
 }
 
-// ListForks handles GET /api/v1/gists/:uuid/forks.
+// ListForks handles GET /api/gists/:uuid/forks.
 // Returns the gists that fork
 // the targeted gist as a list of GistSimple. Same visibility rules as
 // /:uuid (and /:uuid/commits) - public/unlisted readable by anyone,
@@ -101,7 +101,7 @@ func ListForks(ctx *context.Context) error {
 	return ctx.JSON(200, out)
 }
 
-// ForkGist handles POST /api/v1/gists/:uuid/forks.
+// ForkGist handles POST /api/gists/:uuid/forks.
 // The authenticated caller
 // gets a new gist owned by them whose content is a clone of the parent,
 // with `forked_id` pointing back. Visibility (public/unlisted/private) is
@@ -141,7 +141,7 @@ func ForkGist(ctx *context.Context) error {
 			return ctx.ErrorJson(500, "failed to reload existing fork", err)
 		}
 		baseURL := apiBaseURL(ctx)
-		ctx.Response().Header().Set("Location", baseURL+"/api/v1/gists/"+saved.Uuid)
+		ctx.Response().Header().Set("Location", baseURL+"/api/gists/"+saved.Uuid)
 		return ctx.JSON(200, saved.ToAPISimple(baseURL))
 	}
 
@@ -180,6 +180,6 @@ func ForkGist(ctx *context.Context) error {
 
 	baseURL := apiBaseURL(ctx)
 	resp := saved.ToAPISimple(baseURL)
-	ctx.Response().Header().Set("Location", baseURL+"/api/v1/gists/"+saved.Uuid)
+	ctx.Response().Header().Set("Location", baseURL+"/api/gists/"+saved.Uuid)
 	return ctx.JSON(201, resp)
 }

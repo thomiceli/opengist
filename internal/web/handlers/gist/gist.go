@@ -48,19 +48,26 @@ func GistIndex(ctx *context.Context) error {
 
 func GistJson(ctx *context.Context) error {
 	gist := ctx.GetData("gist").(*db.Gist)
-	files, hasMoreFiles, err := gist.Files("HEAD", true)
-	if err != nil {
-		return ctx.ErrorRes(500, "Error fetching files", err)
-	}
 
+	var files []*git.File
+	hasMoreFiles := false
 	embedFile := ctx.QueryParam("file")
+
 	if embedFile != "" {
-		filtered := filterToFile(files, embedFile)
-		if filtered == nil {
+		file, err := gist.File("HEAD", embedFile, true)
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching file", err)
+		}
+		if file == nil {
 			return ctx.NotFound("File not found")
 		}
-		files = filtered
-		hasMoreFiles = false
+		files = []*git.File{file}
+	} else {
+		var err error
+		files, hasMoreFiles, err = gist.Files("HEAD", true)
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching files", err)
+		}
 	}
 
 	renderedFiles := render.RenderFiles(files)
@@ -116,14 +123,6 @@ func GistJson(ctx *context.Context) error {
 	})
 }
 
-func filterToFile(files []*git.File, filename string) []*git.File {
-	for _, f := range files {
-		if f.Filename == filename {
-			return []*git.File{f}
-		}
-	}
-	return nil
-}
 
 func GistJs(ctx *context.Context) error {
 	theme := "light"
@@ -133,18 +132,26 @@ func GistJs(ctx *context.Context) error {
 	}
 
 	gist := ctx.GetData("gist").(*db.Gist)
-	files, hasMoreFiles, err := gist.Files("HEAD", true)
-	if err != nil {
-		return ctx.ErrorRes(500, "Error fetching files", err)
-	}
 
-	if embedFile := ctx.QueryParam("file"); embedFile != "" {
-		filtered := filterToFile(files, embedFile)
-		if filtered == nil {
+	var files []*git.File
+	hasMoreFiles := false
+	embedFile := ctx.QueryParam("file")
+
+	if embedFile != "" {
+		file, err := gist.File("HEAD", embedFile, true)
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching file", err)
+		}
+		if file == nil {
 			return ctx.NotFound("File not found")
 		}
-		files = filtered
-		hasMoreFiles = false
+		files = []*git.File{file}
+	} else {
+		var err error
+		files, hasMoreFiles, err = gist.Files("HEAD", true)
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching files", err)
+		}
 	}
 
 	renderedFiles := render.RenderFiles(files)
@@ -153,7 +160,7 @@ func GistJs(ctx *context.Context) error {
 
 	htmlbuf := bytes.Buffer{}
 	w := bufio.NewWriter(&htmlbuf)
-	if err = ctx.Echo().Renderer.Render(w, "gist_embed.html", ctx.DataMap(), ctx); err != nil {
+	if err := ctx.Echo().Renderer.Render(w, "gist_embed.html", ctx.DataMap(), ctx); err != nil {
 		return err
 	}
 	_ = w.Flush()

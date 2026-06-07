@@ -123,7 +123,6 @@ func GistJson(ctx *context.Context) error {
 	})
 }
 
-
 func GistJs(ctx *context.Context) error {
 	theme := "light"
 	if _, exists := ctx.QueryParams()["dark"]; exists {

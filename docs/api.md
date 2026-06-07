@@ -46,6 +46,10 @@ Authorization: Bearer og_xxxxxxxx
 
 Each endpoint documents the scope it requires in its **Headers** section.
 
+Note that every endpoint requires authentication when an admin enables the "Require login" setting, which both works for the API and the web interface.
+
+The single gist endpoints are available without authentication when an admin enables "Allow individual gists without login" setting.
+
 
 ## Schema
 

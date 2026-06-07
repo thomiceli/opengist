@@ -108,36 +108,48 @@ func (s *Server) registerRoutes() {
 		apiV1 := r.SubGroup("/api")
 		{
 			apiV1.Use(apiBindAuth)
-			apiV1.GET("/gists", apiv1.ListGists)
-			apiV1.POST("/gists", apiv1.CreateGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
-			apiV1.GET("/gists/public", apiv1.ListPublicGists)
-			apiV1.GET("/gists/liked", apiv1.ListLikedGists, apiRequireAuth)
-			// /starred and /star are GitHub-compat aliases of the canonical
-			// /liked and /like routes (same handlers); openapi.yaml mentions them
-			// in a note but gives them no path entries of their own.
-			apiV1.GET("/gists/starred", apiv1.ListLikedGists, apiRequireAuth)
-			apiV1.GET("/gists/forked", apiv1.ListForkedGists, apiRequireAuth)
-			apiV1.GET("/gists/:uuid", apiv1.GetGist)
-			apiV1.PATCH("/gists/:uuid", apiv1.UpdateGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
-			apiV1.DELETE("/gists/:uuid", apiv1.DeleteGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
-			apiV1.GET("/gists/:uuid/commits", apiv1.ListCommits)
-			apiV1.GET("/gists/:uuid/:sha", apiv1.GetGistRevision)
-			apiV1.GET("/gists/:uuid/forks", apiv1.ListForks)
-			apiV1.POST("/gists/:uuid/forks", apiv1.ForkGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
-			apiV1.GET("/gists/:uuid/like", apiv1.CheckLike, apiRequireAuth)
-			apiV1.GET("/gists/:uuid/star", apiv1.CheckLike, apiRequireAuth)
-			apiV1.PUT("/gists/:uuid/like", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
-			apiV1.PUT("/gists/:uuid/star", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
-			apiV1.GET("/gists/:uuid/files/:sha/:filename", apiv1.RawFile)
 
-			apiV1.GET("/user", apiv1.GetUser, apiRequireAuth, apiScope(db.ScopeUser, db.ReadPermission))
-			apiV1.PATCH("/user", apiv1.UpdateUser, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
-			apiV1.GET("/user/:id", apiv1.GetUserByID)
-			apiV1.GET("/users/:username", apiv1.GetUserByUsername)
-			apiV1.GET("/users/:username/gists", apiv1.ListUserGists)
-			apiV1.GET("/users/:username/liked", apiv1.ListUserLikedGists)
-			apiV1.GET("/users/:username/starred", apiv1.ListUserLikedGists)
-			apiV1.GET("/users/:username/forked", apiv1.ListUserForkedGists)
+			// Single-gist reads: blocked when RequireLogin is set, unless
+			// AllowGistsWithoutLogin lets anonymous callers view individual gists.
+			single := apiV1.SubGroup("", makeApiCheckRequireLogin(true))
+			{
+				single.GET("/gists/:uuid", apiv1.GetGist)
+				single.PATCH("/gists/:uuid", apiv1.UpdateGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				single.DELETE("/gists/:uuid", apiv1.DeleteGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				single.GET("/gists/:uuid/commits", apiv1.ListCommits)
+				single.GET("/gists/:uuid/:sha", apiv1.GetGistRevision)
+				single.GET("/gists/:uuid/forks", apiv1.ListForks)
+				single.POST("/gists/:uuid/forks", apiv1.ForkGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				single.GET("/gists/:uuid/like", apiv1.CheckLike, apiRequireAuth)
+				single.GET("/gists/:uuid/star", apiv1.CheckLike, apiRequireAuth)
+				single.PUT("/gists/:uuid/like", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+				single.PUT("/gists/:uuid/star", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+				single.GET("/gists/:uuid/files/:sha/:filename", apiv1.RawFile)
+			}
+
+			// List/aggregate reads: blocked entirely when RequireLogin is set.
+			multi := apiV1.SubGroup("", makeApiCheckRequireLogin(false))
+			{
+				multi.GET("/gists", apiv1.ListGists)
+				multi.POST("/gists", apiv1.CreateGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				multi.GET("/gists/public", apiv1.ListPublicGists)
+				multi.GET("/gists/liked", apiv1.ListLikedGists, apiRequireAuth)
+				// /starred and /star are GitHub-compat aliases of the canonical
+				// /liked and /like routes (same handlers); openapi.yaml mentions them
+				// in a note but gives them no path entries of their own.
+				multi.GET("/gists/starred", apiv1.ListLikedGists, apiRequireAuth)
+				multi.GET("/gists/forked", apiv1.ListForkedGists, apiRequireAuth)
+
+				multi.GET("/user", apiv1.GetUser, apiRequireAuth, apiScope(db.ScopeUser, db.ReadPermission))
+				multi.PATCH("/user", apiv1.UpdateUser, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+				multi.GET("/user/:id", apiv1.GetUserByID)
+				multi.GET("/users/:username", apiv1.GetUserByUsername)
+				multi.GET("/users/:username/gists", apiv1.ListUserGists)
+				multi.GET("/users/:username/liked", apiv1.ListUserLikedGists)
+				multi.GET("/users/:username/starred", apiv1.ListUserLikedGists)
+				multi.GET("/users/:username/forked", apiv1.ListUserForkedGists)
+			}
+
 			apiV1.Any("", noRouteFoundApi)
 		}
 		r.GET("/api/openapi.yaml", api.OpenAPISpec)

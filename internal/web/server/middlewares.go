@@ -244,6 +244,31 @@ func checkRequireLogin(next Handler) Handler {
 	return makeCheckRequireLogin(false)(next)
 }
 
+// makeApiCheckRequireLogin is the /api/v1 counterpart of makeCheckRequireLogin:
+// it enforces the instance's RequireLogin / AllowGistsWithoutLogin settings on
+// anonymous gist reads, but responds with a JSON 401 instead of redirecting to
+// /login. ctx.User is already resolved from the Authorization header by
+// apiBindAuth, so there is no token fallback to do here.
+func makeApiCheckRequireLogin(isSingleGistAccess bool) Middleware {
+	return func(next Handler) Handler {
+		return func(ctx *context.Context) error {
+			if ctx.User != nil {
+				return next(ctx)
+			}
+
+			allow, err := auth.ShouldAllowUnauthenticatedGistAccess(handlers.ContextAuthInfo{Context: ctx}, isSingleGistAccess)
+			if err != nil {
+				return ctx.ErrorJson(500, "Failed to check if unauthenticated access is allowed", err)
+			}
+
+			if !allow {
+				return ctx.ErrorJson(401, "Requires authentication", nil)
+			}
+			return next(ctx)
+		}
+	}
+}
+
 func noRouteFound(ctx *context.Context) error {
 	return ctx.NotFound("Page not found")
 }

@@ -30,3 +30,9 @@ git push -o visibility=public
 git push -o visibility=unlisted
 git push -o visibility=private
 ```
+
+## Change topics
+
+```shell
+git push -o topics="golang devops"
+```

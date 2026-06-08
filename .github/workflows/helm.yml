@@ -2,6 +2,7 @@ name: Build / Deploy Helm Chart
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   build-and-deploy:

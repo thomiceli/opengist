@@ -87,3 +87,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  helm-build-release:
+    needs: docker-build-release
+    uses: ./.github/workflows/helm.yml
+    secrets: inherit

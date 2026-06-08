@@ -48,9 +48,26 @@ func GistIndex(ctx *context.Context) error {
 
 func GistJson(ctx *context.Context) error {
 	gist := ctx.GetData("gist").(*db.Gist)
-	files, hasMoreFiles, err := gist.Files("HEAD", true)
-	if err != nil {
-		return ctx.ErrorRes(500, "Error fetching files", err)
+
+	var files []*git.File
+	hasMoreFiles := false
+	embedFile := ctx.QueryParam("file")
+
+	if embedFile != "" {
+		file, err := gist.File("HEAD", embedFile, true)
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching file", err)
+		}
+		if file == nil {
+			return ctx.NotFound("File not found")
+		}
+		files = []*git.File{file}
+	} else {
+		var err error
+		files, hasMoreFiles, err = gist.Files("HEAD", true)
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching files", err)
+		}
 	}
 
 	renderedFiles := render.RenderFiles(files)
@@ -69,10 +86,18 @@ func GistJson(ctx *context.Context) error {
 	}
 	_ = w.Flush()
 
-	jsUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
+	jsBaseUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), gist.User.Username, gist.Identifier()+".js")
 	if err != nil {
 		return ctx.ErrorRes(500, "Error joining js url", err)
 	}
+
+	// Build per-file and per-theme URL variants.
+	fileQuery, themeSep := "", "?"
+	if embedFile != "" {
+		fileQuery = "?file=" + url.QueryEscape(embedFile)
+		themeSep = "&"
+	}
+	jsUrl := jsBaseUrl + fileQuery
 
 	cssUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["embed.css"].File)
 	if err != nil {
@@ -93,7 +118,7 @@ func GistJson(ctx *context.Context) error {
 			"html":    htmlbuf.String(),
 			"css":     cssUrl,
 			"js":      jsUrl,
-			"js_dark": jsUrl + "?dark",
+			"js_dark": jsUrl + themeSep + "dark",
 		},
 	})
 }
@@ -106,9 +131,26 @@ func GistJs(ctx *context.Context) error {
 	}
 
 	gist := ctx.GetData("gist").(*db.Gist)
-	files, hasMoreFiles, err := gist.Files("HEAD", true)
-	if err != nil {
-		return ctx.ErrorRes(500, "Error fetching files", err)
+
+	var files []*git.File
+	hasMoreFiles := false
+	embedFile := ctx.QueryParam("file")
+
+	if embedFile != "" {
+		file, err := gist.File("HEAD", embedFile, true)
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching file", err)
+		}
+		if file == nil {
+			return ctx.NotFound("File not found")
+		}
+		files = []*git.File{file}
+	} else {
+		var err error
+		files, hasMoreFiles, err = gist.Files("HEAD", true)
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching files", err)
+		}
 	}
 
 	renderedFiles := render.RenderFiles(files)
@@ -117,7 +159,7 @@ func GistJs(ctx *context.Context) error {
 
 	htmlbuf := bytes.Buffer{}
 	w := bufio.NewWriter(&htmlbuf)
-	if err = ctx.Echo().Renderer.Render(w, "gist_embed.html", ctx.DataMap(), ctx); err != nil {
+	if err := ctx.Echo().Renderer.Render(w, "gist_embed.html", ctx.DataMap(), ctx); err != nil {
 		return err
 	}
 	_ = w.Flush()
@@ -175,7 +217,7 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
                 super();
                 this.attachShadow({ mode: 'open' });
             }
-            
+
             init(css1, css2, content) {
                 this.shadowRoot.innerHTML = %s
                     <style>
@@ -196,7 +238,7 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
 
     const instance = document.createElement('opengist-embed');
     instance.init(%s, %s, %s);
- 	currentScript.parentNode.insertBefore(instance, currentScript.nextSibling);
+    currentScript.parentNode.insertBefore(instance, currentScript.nextSibling);
 })();
 `,
 		"`",

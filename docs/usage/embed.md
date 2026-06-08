@@ -9,3 +9,11 @@ To embed a Gist to your webpage, you can add a script tag with the URL of your g
 <script src="http://opengist.url/user/gist-url.js?dark"></script>
 ```
 
+If you have a Gist that holds several different files, you can also explicitely call a specific file by its filename:
+
+```html
+<script src="http://opengist.url/user/gist-url.js?file=filename"></script>
+
+<!-- Dark mode: -->
+<script src="http://opengist.url/user/gist-url.js?file=filename&dark"></script>
+```

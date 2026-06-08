@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
@@ -323,5 +324,133 @@ func TestGetGistCaseInsensitive(t *testing.T) {
 	t.Run("UUID", func(t *testing.T) {
 		s.Request(t, "GET", "/thomas/"+strings.ToLower(gist.Uuid), nil, 200)
 		s.Request(t, "GET", "/THOMAS/"+strings.ToUpper(gist.Uuid), nil, 200)
+	})
+}
+
+func TestGistJsSingleFile(t *testing.T) {
+	setupManifestEntries()
+
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+	s.Register(t, "alice")
+
+	t.Run("RendersOnlyRequestedFile", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		js := string(body)
+
+		assert.Contains(t, js, "opengist-embed")
+		assert.Contains(t, js, "hello world")
+		assert.NotContains(t, js, "other content")
+	})
+
+	t.Run("NonExistentFile", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+		s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=nonexistent.txt", nil, 404)
+	})
+
+	t.Run("DarkTheme", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js?dark", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Contains(t, string(body), "dark.css")
+	})
+
+	t.Run("PrivateGist", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "2")
+
+		// Anonymous — no token
+		s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 404)
+
+		// Invalid token
+		s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 404,
+			map[string]string{"Authorization": "Token invalidtoken"})
+
+		// Other user's valid token
+		s.Login(t, "alice")
+		aliceTok := s.CreateAccessToken(t, "alice-tok", db.ReadPermission, db.ReadPermission)
+		s.Logout()
+		s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 404,
+			map[string]string{"Authorization": "Token " + aliceTok})
+
+		// Owner's valid token
+		s.Login(t, "thomas")
+		ownerTok := s.CreateAccessToken(t, "owner-tok", db.ReadPermission, db.ReadPermission)
+		s.Logout()
+		resp := s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 200,
+			map[string]string{"Authorization": "Token " + ownerTok})
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Contains(t, string(body), "hello world")
+	})
+}
+
+func TestGistJsonSingleFile(t *testing.T) {
+	setupManifestEntries()
+
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+
+	t.Run("RendersOnlyRequestedFile", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".json?file=file.txt", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		var result map[string]interface{}
+		require.NoError(t, json.Unmarshal(body, &result))
+
+		files, ok := result["files"].([]interface{})
+		require.True(t, ok)
+		require.Len(t, files, 1)
+		assert.Equal(t, "file.txt", files[0].(map[string]interface{})["filename"])
+
+		embed, ok := result["embed"].(map[string]interface{})
+		require.True(t, ok)
+		assert.Contains(t, embed["js"], identifier+".js?file=file.txt")
+		assert.Contains(t, embed["js_dark"], identifier+".js?file=file.txt&dark")
+		assert.NotEmpty(t, embed["html"])
+	})
+
+	t.Run("NonExistentFile", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+		s.Request(t, "GET", "/"+username+"/"+identifier+".json?file=nonexistent.txt", nil, 404)
+	})
+
+	t.Run("PrivateGist", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "2")
+
+		// Anonymous — no token
+		s.Request(t, "GET", "/"+username+"/"+identifier+".json?file=file.txt", nil, 404)
+
+		// Invalid token
+		s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".json?file=file.txt", nil, 404,
+			map[string]string{"Authorization": "Token invalidtoken"})
+
+		// Owner's valid token
+		s.Login(t, "thomas")
+		ownerTok := s.CreateAccessToken(t, "owner-tok", db.ReadPermission, db.ReadPermission)
+		s.Logout()
+
+		resp := s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".json?file=file.txt", nil, 200,
+			map[string]string{"Authorization": "Token " + ownerTok})
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		var result map[string]interface{}
+		require.NoError(t, json.Unmarshal(body, &result))
+		files, ok := result["files"].([]interface{})
+		require.True(t, ok)
+		require.Len(t, files, 1)
 	})
 }

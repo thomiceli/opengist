@@ -47,7 +47,7 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 
 	if slices.Contains([]string{"public", "unlisted", "private"}, opts["visibility"]) {
 		gist.Private = db.ParseVisibility(opts["visibility"])
-		outputSb.WriteString(fmt.Sprintf("Gist visibility set to %s\n\n", opts["visibility"]))
+		fmt.Fprintf(&outputSb, "Gist visibility set to %s\n\n", opts["visibility"])
 	}
 
 	if opts["url"] != "" && validator.Var(opts["url"], "max=32,alphanumdashorempty") == nil {
@@ -55,19 +55,19 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 		lastIndex := strings.LastIndex(gistUrl, "/")
 		gistUrl = gistUrl[:lastIndex+1] + gist.URL
 		if !newGist {
-			outputSb.WriteString(fmt.Sprintf("Gist URL set to %s. Set the Git remote URL via:\n", gistUrl))
-			outputSb.WriteString(fmt.Sprintf("git remote set-url origin %s\n\n", gistUrl))
+			fmt.Fprintf(&outputSb, "Gist URL set to %s. Set the Git remote URL via:\n", gistUrl)
+			fmt.Fprintf(&outputSb, "git remote set-url origin %s\n\n", gistUrl)
 		}
 	}
 
 	if opts["title"] != "" && validator.Var(opts["title"], "max=250") == nil {
 		gist.Title = opts["title"]
-		outputSb.WriteString(fmt.Sprintf("Gist title set to \"%s\"\n\n", opts["title"]))
+		fmt.Fprintf(&outputSb, "Gist title set to \"%s\"\n\n", opts["title"])
 	}
 
 	if opts["description"] != "" && validator.Var(opts["description"], "max=1000") == nil {
 		gist.Description = opts["description"]
-		outputSb.WriteString(fmt.Sprintf("Gist description set to \"%s\"\n\n", opts["description"]))
+		fmt.Fprintf(&outputSb, "Gist description set to \"%s\"\n\n", opts["description"])
 	}
 
 	if opts["topics"] != "" && validator.Var(opts["topics"], "gisttopics") == nil {
@@ -77,7 +77,7 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 			for _, name := range topicNames {
 				gist.Topics = append(gist.Topics, db.GistTopic{Topic: name})
 			}
-			outputSb.WriteString(fmt.Sprintf("Gist topics set to \"%s\"\n\n", opts["topics"]))
+			fmt.Fprintf(&outputSb, "Gist topics set to \"%s\"\n\n", opts["topics"])
 		}
 	}
 
@@ -101,9 +101,9 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 	gist.AddInIndex()
 
 	if newGist {
-		outputSb.WriteString(fmt.Sprintf("Your new gist has been created here: %s\n", gistUrl))
+		fmt.Fprintf(&outputSb, "Your new gist has been created here: %s\n", gistUrl)
 		outputSb.WriteString("If you want to keep working with your gist, you could set the Git remote URL via:\n")
-		outputSb.WriteString(fmt.Sprintf("git remote set-url origin %s\n\n", gistUrl))
+		fmt.Fprintf(&outputSb, "git remote set-url origin %s\n\n", gistUrl)
 	}
 
 	outputStr := outputSb.String()

@@ -1,4 +1,4 @@
-FROM alpine:3.22 AS base
+FROM alpine:3.23 AS base
 
 RUN apk update && \
         apk add --no-cache \
@@ -8,11 +8,11 @@ RUN apk update && \
         musl-dev \
         libstdc++
 
-COPY --from=golang:1.25.6-alpine3.22 /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.26.4-alpine3.23 /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 ENV CGO_ENABLED=0
 
-COPY --from=node:24.13.0-alpine3.22 /usr/local/ /usr/local/
+COPY --from=node:26.3.0-alpine3.23 /usr/local/ /usr/local/
 ENV NODE_PATH="/usr/local/lib/node_modules"
 ENV PATH="/usr/local/bin:${PATH}"
 
@@ -46,7 +46,7 @@ FROM base AS build
 RUN make
 
 
-FROM alpine:3.22 AS prod
+FROM alpine:3.23 AS prod
 
 RUN apk update && \
     apk add --no-cache \

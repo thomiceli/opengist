@@ -1,4 +1,4 @@
-.PHONY: all all_crosscompile install build_frontend build_backend build build_crosscompile build_docker build_dev_docker run_dev_docker watch_frontend watch_backend watch clean clean_docker check_changes go_mod fmt test check-tr
+.PHONY: all all_crosscompile install build_frontend build_backend build build_crosscompile build_docker build_dev_docker run_dev_docker watch_frontend watch_backend watch clean clean_docker check_changes go_mod fmt test check-tr update_js_deps update_go_deps
 
 # Specify the name of your Go binary output
 BINARY_NAME := opengist
@@ -76,3 +76,11 @@ test:
 
 check-tr:
 	@bash ./scripts/check-translations.sh
+
+update_js_deps:
+	@echo "Updating NPM dependencies..."
+	@npx npm-check-updates -u && npm install
+
+update_go_deps:
+	@echo "Updating Go dependencies..."
+	@go get -u ./... && go mod tidy

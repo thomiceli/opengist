@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.13.0](https://github.com/thomiceli/opengist/compare/v1.12.2...v1.13.0) - 2026-06-09
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- REST API (#707) (#711) (#702)
+- Limit display if there is too much files in one gist (#701)
+- Topics git push option in post-receive hook (#698)
+- Allow embedding Gists for a certain file only (#709)
+- Arabic Translation (#706)
+
+### Fixed
+- Server SSH key generation (#708)
+
+### Other
+- Update deps Golang, JS, Docker deps (#713)
+- New docs website (#710)
+
 ## [1.12.2](https://github.com/thomiceli/opengist/compare/v1.12.1...v1.12.2) - 2026-03-14
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

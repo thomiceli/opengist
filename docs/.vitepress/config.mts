@@ -210,7 +210,7 @@ export default defineConfig({
             {icon: 'discord', link: 'https://discord.gg/9Pm3X5scZT'}
         ],
         editLink: {
-            pattern: 'https://github.com/thomiceli/opengist/edit/v.1.12.2/docs/:path'
+            pattern: 'https://github.com/thomiceli/opengist/edit/master/docs/:path'
         },
         // @ts-ignore
         lastUpdated: true,

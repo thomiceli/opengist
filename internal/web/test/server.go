@@ -221,6 +221,7 @@ func Setup(t *testing.T) *Server {
 		"ts/embed.ts": {Css: []string{"assets/embed.css"}},
 		"ts/light.ts": {Css: []string{"assets/light.css"}},
 		"ts/dark.ts":  {Css: []string{"assets/dark.css"}},
+		"ts/auto.ts":  {Css: []string{"assets/auto.css"}},
 	}
 
 	tmpGitConfig := filepath.Join(tmpDir, "gitconfig")

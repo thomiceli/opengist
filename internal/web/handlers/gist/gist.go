@@ -6,6 +6,7 @@ import (
 	gojson "encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/thomiceli/opengist/internal/db"
@@ -98,9 +99,10 @@ func GistJson(ctx *context.Context) error {
 		themeSep = "&"
 	}
 	jsUrl := jsBaseUrl + fileQuery
-	cssUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["ts/embed.ts"].Css[0])
+	baseHttpUrl := ctx.GetData("baseHttpUrl").(string)
+	cssUrl, err := manifestCssUrl(baseHttpUrl, "ts/embed.ts")
 	if err != nil {
-		return ctx.ErrorRes(500, "Error joining css url", err)
+		return ctx.ErrorRes(500, "Missing embed CSS in manifest", err)
 	}
 
 	return ctx.JSON(200, map[string]interface{}{
@@ -174,14 +176,15 @@ func GistJs(ctx *context.Context) error {
 	}
 	_ = w.Flush()
 
-	cssUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["ts/embed.ts"].Css[0])
+	baseHttpUrl := ctx.GetData("baseHttpUrl").(string)
+	cssUrl, err := manifestCssUrl(baseHttpUrl, "ts/embed.ts")
 	if err != nil {
-		return ctx.ErrorRes(500, "Error joining css url", err)
+		return ctx.ErrorRes(500, "Missing embed CSS in manifest", err)
 	}
 
-	themeUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["ts/"+theme+".ts"].Css[0])
+	themeUrl, err := manifestCssUrl(baseHttpUrl, "ts/"+theme+".ts")
 	if err != nil {
-		return ctx.ErrorRes(500, "Error joining theme url", err)
+		return ctx.ErrorRes(500, "Missing theme CSS in manifest", err)
 	}
 
 	js, err := escapeJavaScriptContent(htmlbuf.String(), cssUrl, themeUrl, autoMode)
@@ -201,6 +204,21 @@ func Preview(ctx *context.Context) error {
 	}
 
 	return ctx.PlainText(200, previewStr)
+}
+
+// manifestCssUrl returns the full CSS URL for a vite manifest key (e.g. "ts/embed.ts").
+// In dev mode (ManifestEntries is nil) it falls back to the vite dev server, deriving the
+// CSS path from the TS key: "ts/embed.ts" → "http://localhost:16157/css/embed.css".
+func manifestCssUrl(baseHttpUrl, key string) (string, error) {
+	if context.ManifestEntries == nil {
+		name := strings.TrimSuffix(strings.TrimPrefix(key, "ts/"), ".ts")
+		return "http://localhost:16157/css/" + name + ".css", nil
+	}
+	entry, ok := context.ManifestEntries[key]
+	if !ok || len(entry.Css) == 0 {
+		return "", fmt.Errorf("no CSS entry for manifest key %q", key)
+	}
+	return url.JoinPath(baseHttpUrl, entry.Css[0])
 }
 
 func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string, autoMode bool) (string, error) {

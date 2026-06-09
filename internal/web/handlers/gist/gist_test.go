@@ -10,19 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/web/context"
 	webtest "github.com/thomiceli/opengist/internal/web/test"
 )
-
-func setupManifestEntries() {
-	context.ManifestEntries = map[string]context.Asset{
-		"embed.css":   {File: "assets/embed.css"},
-		"ts/embed.ts": {Css: []string{"assets/embed.css"}},
-		"ts/light.ts": {Css: []string{"assets/light.css"}},
-		"ts/dark.ts":  {Css: []string{"assets/dark.css"}},
-		"ts/auto.ts":  {Css: []string{"assets/auto.css"}},
-	}
-}
 
 func TestGistIndex(t *testing.T) {
 	s := webtest.Setup(t)

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/thomiceli/opengist/compare/v1.13.0...v1.13.1) - 2026-06-10
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Fixed
+- Embedding fix vertical scrolling and improve padding (#714)
+- Fix CSS url for json embed url (#715)
+
 ## [1.13.0](https://github.com/thomiceli/opengist/compare/v1.12.2...v1.13.0) - 2026-06-09
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

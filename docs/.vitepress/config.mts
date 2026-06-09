@@ -187,7 +187,7 @@ export default defineConfig({
                 ]
             },
             {
-                text: 'v1.13.0',
+                text: 'v1.13.1',
                 items: [
                     { text: 'Changelog', link: '/changelog' },
                     { text: 'Releases', link: 'https://github.com/thomiceli/opengist/releases' },

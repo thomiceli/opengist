@@ -114,19 +114,30 @@ func GistJson(ctx *context.Context) error {
 		"files":       renderedFiles,
 		"topics":      topics,
 		"embed": map[string]string{
-			"html":    htmlbuf.String(),
-			"css":     cssUrl,
-			"js":      jsUrl,
-			"js_dark": jsUrl + themeSep + "dark",
+			"html":     htmlbuf.String(),
+			"css":      cssUrl,
+			"js":       jsUrl,
+			"js_dark":  jsUrl + themeSep + "dark",
+			"js_light": jsUrl + themeSep + "light",
+			"js_auto":  jsUrl + themeSep + "auto",
 		},
 	})
 }
 
 func GistJs(ctx *context.Context) error {
-	theme := "light"
-	if _, exists := ctx.QueryParams()["dark"]; exists {
+	params := ctx.QueryParams()
+	_, hasDark := params["dark"]
+	_, hasLight := params["light"]
+
+	theme := "auto"
+	autoMode := true
+	if hasDark {
 		ctx.SetData("dark", "dark")
 		theme = "dark"
+		autoMode = false
+	} else if hasLight {
+		theme = "light"
+		autoMode = false
 	}
 
 	gist := ctx.GetData("gist").(*db.Gist)
@@ -173,7 +184,7 @@ func GistJs(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error joining theme url", err)
 	}
 
-	js, err := escapeJavaScriptContent(htmlbuf.String(), cssUrl, themeUrl)
+	js, err := escapeJavaScriptContent(htmlbuf.String(), cssUrl, themeUrl, autoMode)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error escaping JavaScript content", err)
 	}
@@ -192,7 +203,7 @@ func Preview(ctx *context.Context) error {
 	return ctx.PlainText(200, previewStr)
 }
 
-func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, error) {
+func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string, autoMode bool) (string, error) {
 	jsonContent, err := gojson.Marshal(htmlContent)
 	if err != nil {
 		return "", fmt.Errorf("failed to encode content: %w", err)
@@ -208,6 +219,11 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
 		return "", fmt.Errorf("failed to encode Theme URL: %w", err)
 	}
 
+	jsonAutoMode, err := gojson.Marshal(autoMode)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode auto mode: %w", err)
+	}
+
 	js := fmt.Sprintf(`
 (function() {
     if (!customElements.get('opengist-embed')) {
@@ -217,7 +233,7 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
                 this.attachShadow({ mode: 'open' });
             }
 
-            init(css1, css2, content) {
+            init(css1, css2, content, autoMode) {
                 this.shadowRoot.innerHTML = %s
                     <style>
                         @import url(${css1});
@@ -226,6 +242,13 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
                     </style>
                     <div class="container">${content}</div>
                 %s;
+                if (autoMode) {
+                    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+                    const htmlDiv = this.shadowRoot.querySelector('.html');
+                    const applyTheme = () => htmlDiv && htmlDiv.classList.toggle('dark', mq.matches);
+                    mq.addEventListener('change', applyTheme);
+                    applyTheme();
+                }
             }
         });
     }
@@ -236,7 +259,7 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
     })();
 
     const instance = document.createElement('opengist-embed');
-    instance.init(%s, %s, %s);
+    instance.init(%s, %s, %s, %s);
     currentScript.parentNode.insertBefore(instance, currentScript.nextSibling);
 })();
 `,
@@ -245,6 +268,7 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string) (string, erro
 		string(jsonCssUrl),
 		string(jsonThemeUrl),
 		string(jsonContent),
+		string(jsonAutoMode),
 	)
 
 	return js, nil

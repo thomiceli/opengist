@@ -98,8 +98,7 @@ func GistJson(ctx *context.Context) error {
 		themeSep = "&"
 	}
 	jsUrl := jsBaseUrl + fileQuery
-
-	cssUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["embed.css"].File)
+	cssUrl, err := url.JoinPath(ctx.GetData("baseHttpUrl").(string), context.ManifestEntries["ts/embed.ts"].Css[0])
 	if err != nil {
 		return ctx.ErrorRes(500, "Error joining css url", err)
 	}

@@ -27,6 +27,7 @@ pre {
 .code {
     font-family: Menlo,Consolas,Liberation Mono,monospace;
     overflow-x: auto;
+    padding: 5px 10px 5px;
 }
 
 .code .line-num {

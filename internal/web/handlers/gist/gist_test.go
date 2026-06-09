@@ -10,18 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/web/context"
 	webtest "github.com/thomiceli/opengist/internal/web/test"
 )
-
-func setupManifestEntries() {
-	context.ManifestEntries = map[string]context.Asset{
-		"embed.css":   {File: "assets/embed.css"},
-		"ts/embed.ts": {Css: []string{"assets/embed.css"}},
-		"ts/light.ts": {Css: []string{"assets/light.css"}},
-		"ts/dark.ts":  {Css: []string{"assets/dark.css"}},
-	}
-}
 
 func TestGistIndex(t *testing.T) {
 	s := webtest.Setup(t)
@@ -141,8 +131,6 @@ func TestPreview(t *testing.T) {
 }
 
 func TestGistJson(t *testing.T) {
-	setupManifestEntries()
-
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)
 
@@ -328,8 +316,6 @@ func TestGetGistCaseInsensitive(t *testing.T) {
 }
 
 func TestGistJsSingleFile(t *testing.T) {
-	setupManifestEntries()
-
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)
 
@@ -393,8 +379,6 @@ func TestGistJsSingleFile(t *testing.T) {
 }
 
 func TestGistJsonSingleFile(t *testing.T) {
-	setupManifestEntries()
-
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)
 

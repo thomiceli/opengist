@@ -216,6 +216,13 @@ func Setup(t *testing.T) *Server {
 	config.SetupSecretKey()
 	config.InitLog()
 
+	context.ManifestEntries = map[string]context.Asset{
+		"embed.css":   {File: "assets/embed.css"},
+		"ts/embed.ts": {Css: []string{"assets/embed.css"}},
+		"ts/light.ts": {Css: []string{"assets/light.css"}},
+		"ts/dark.ts":  {Css: []string{"assets/dark.css"}},
+	}
+
 	tmpGitConfig := filepath.Join(tmpDir, "gitconfig")
 	t.Setenv("GIT_CONFIG_GLOBAL", tmpGitConfig)
 

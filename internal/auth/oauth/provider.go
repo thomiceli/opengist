@@ -52,6 +52,8 @@ func DefineProvider(provider string, url string) (Provider, error) {
 }
 
 func CompleteUserAuth(ctx *context.Context) (CallbackProvider, error) {
+	injectCodeVerifier(ctx)
+
 	user, err := gothic.CompleteUserAuth(ctx.Response(), ctx.Request())
 	if err != nil {
 		return nil, err

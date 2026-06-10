@@ -62,7 +62,7 @@ func Oauth(ctx *context.Context) error {
 func OauthCallback(ctx *context.Context) error {
 	provider, err := oauth.CompleteUserAuth(ctx)
 	if err != nil {
-		ctx.AddFlash(ctx.Tr("auth.oauth.no-provider"), "error")
+		ctx.AddFlash(fmt.Sprintf("%s: %s", ctx.Tr("auth.oauth.no-provider"), err.Error()), "error")
 		return ctx.Redirect(302, "/login")
 	}
 

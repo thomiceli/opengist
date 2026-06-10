@@ -8,6 +8,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/openidConnect"
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
@@ -39,6 +40,10 @@ func (p *OIDCProvider) RegisterProvider() error {
 }
 
 func (p *OIDCProvider) BeginAuthHandler(ctx *context.Context) {
+	if err := enablePKCE(ctx, OpenIDConnectString); err != nil {
+		log.Error().Err(err).Msg("Cannot enable PKCE for OIDC provider")
+	}
+
 	ctxValue := gocontext.WithValue(ctx.Request().Context(), gothic.ProviderParamKey, OpenIDConnectString)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 

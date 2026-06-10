@@ -19,7 +19,7 @@ type oidcUser struct {
 }
 
 func (u *oidcUser) Userinfo(scope []string) ([]byte, error) {
-	data, err := u.Userinfo(scope)
+	data, err := u.MockUser.Userinfo(scope)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (u *oidcUser) Userinfo(scope []string) ([]byte, error) {
 	if err := json.Unmarshal(data, &claims); err != nil {
 		return nil, err
 	}
-	claims["sub"] = u.MockUser.Subject
+	claims["sub"] = u.Subject
 	return json.Marshal(claims)
 }
 

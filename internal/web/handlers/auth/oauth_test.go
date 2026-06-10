@@ -19,7 +19,7 @@ type oidcUser struct {
 }
 
 func (u *oidcUser) Userinfo(scope []string) ([]byte, error) {
-	data, err := u.MockUser.Userinfo(scope)
+	data, err := u.Userinfo(scope)
 	if err != nil {
 		return nil, err
 	}

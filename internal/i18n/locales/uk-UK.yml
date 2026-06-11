@@ -187,8 +187,6 @@ admin.versions: Версії
 admin.ssh_keys: Ключі SSH
 admin.stats: Статистика
 admin.actions: Дії
-admin.actions.sync-fs: Синхронізувати gists з файлової системи
-admin.actions.sync-db: Синхронізувати gists з базою даних
 admin.actions.git-gc: Збір сміття з репозиторіїв Git
 admin.actions.sync-previews: Синхронізувати всі gists перегляди
 admin.actions.reset-hooks: Скинути серверні Git hooks для всіх репозиторіїв

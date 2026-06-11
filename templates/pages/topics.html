@@ -1,0 +1,39 @@
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="flex min-h-9 flex-wrap items-center justify-between gap-3">
+        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "gist.list.topics" }}</h1>
+    </header>
+
+    {{ if ne (len .topics) 0 }}
+        <div class="overflow-hidden rounded-md border">
+            <table class="w-full text-sm">
+                <thead class="bg-muted/50 text-muted-foreground">
+                    <tr class="border-b">
+                        <th class="px-4 py-2 text-left font-medium">{{ .locale.Tr "gist.list.topic" }}</th>
+                        <th class="px-4 py-2 text-right font-medium">{{ .locale.Tr "gist.list.gists" }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    {{ range .topics }}
+                    <tr class="hover:bg-muted/50">
+                        <td class="px-4 py-2">
+                            <a href="{{ $.c.ExternalUrl }}/-/topics/{{ .Topic }}" class="flex items-center gap-2.5 hover:underline">
+                                <span class="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-md border text-sm font-medium uppercase">{{ slice .Topic 0 1 }}</span>
+                                <span class="text-primary dark:text-violet-300 text-base font-medium">{{ .Topic }}</span>
+                            </a>
+                        </td>
+                        <td class="text-muted-foreground px-4 py-2 text-right tabular-nums">{{ .Count }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        {{ template "pagination" . }}
+    {{ else }}
+        <div class="text-muted-foreground flex flex-col items-center justify-center py-16 text-center">
+            <svg class="size-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" /></svg>
+            <h3 class="text-foreground mt-3 text-sm font-medium">{{ .locale.Tr "gist.list.no-topics" }}</h3>
+        </div>
+    {{ end }}
+</div>
+{{ end }}

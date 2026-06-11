@@ -159,5 +159,5 @@ func ProcessLogin(ctx *context.Context) error {
 func Logout(ctx *context.Context) error {
 	ctx.DeleteSession()
 	ctx.DeleteCsrfCookie()
-	return ctx.RedirectTo("/all")
+	return ctx.RedirectTo("/-/all")
 }

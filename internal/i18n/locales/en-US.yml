@@ -6,6 +6,7 @@ gist.header.like: Like
 gist.header.unlike: Unlike
 gist.header.fork: Fork
 gist.header.edit: Edit
+gist.header.edit-files: Edit files
 gist.header.delete: Delete
 gist.header.archive: Archive
 gist.header.unarchive: Unarchive
@@ -35,6 +36,7 @@ gist.watch-full-file: View the full file.
 gist.file-not-valid: This file is not a valid CSV file.
 gist.no-content: No files found
 gist.preview-non-available: Preview not available
+gist.embed.view-all-files: View all files
 
 gist.new.new_gist: New gist
 gist.new.title: Title
@@ -74,9 +76,18 @@ gist.edit.cancel: Cancel
 gist.edit.save: Save
 gist.delete.confirm: Are you sure you want to delete this gist ?
 
+gist.settings.visibility-help: Control who can see and find this gist.
+gist.settings.archive-help: Archived gists become read-only. You can unarchive at any time.
+gist.settings.danger-zone: Danger zone
+gist.settings.delete-gist: Delete this gist
+gist.settings.delete-help: Once deleted, this gist and all its revisions are gone for good.
+
 gist.list.joined: Joined
 gist.list.all: All gists
+gist.list.recently-liked: Recently liked
+gist.list.recently-forked: Recently forked
 gist.list.search-results: Search results
+gist.list.search-for: Results for
 gist.list.sort: Sort
 gist.list.sort-by-created: created
 gist.list.sort-by-updated: updated
@@ -84,18 +95,30 @@ gist.list.order-by-asc: Least recently
 gist.list.order-by-desc: Recently
 gist.list.select-tab: Select a tab
 gist.list.liked: Liked
-gist.list.likes: likes
+gist.list.likes: Likes
 gist.list.forked: Forked
 gist.list.forked-from: Forked from
-gist.list.forks: forks
+gist.list.forks: Forks
 gist.list.files: files
 gist.list.last-active: Last active
 gist.list.no-gists: No gists
+gist.list.topics: Topics
+gist.list.users: Users
+gist.list.no-topics: No topics
+gist.list.topic: Topic
+gist.list.gists: Gists
 gist.list.all-liked-by: All gists liked by %s
 gist.list.all-forked-by: All gists forked by %s
 gist.list.all-from: All gists from %s
 gist.list.topic-results-topic: All gists matching topic %s
 gist.list.topic-results: All gists matching topic
+
+explore.users.no-users: No users
+explore.users.search-placeholder: Search users
+explore.users.sort-username-asc: Username (A → Z)
+explore.users.sort-username-desc: Username (Z → A)
+explore.users.sort-joined-desc: Newest
+explore.users.sort-joined-asc: Oldest
 
 
 gist.search.found: gists found
@@ -175,6 +198,7 @@ settings.change-password-help: Change your password to login to Opengist via HTT
 settings.password-label-title: Password
 settings.header.account: Account
 settings.header.mfa: MFA
+settings.header.authentication: Authentication
 settings.header.ssh: SSH
 settings.header.tokens: Access tokens
 settings.header.style: Style
@@ -270,6 +294,7 @@ auth.totp.scan-qr-code: Scan the QR code below with your authenticator app to en
 
 
 error: Error
+error.go-home: Back to home
 error.page-not-found: Page not found
 error.bad-request: Bad request
 error.signup-disabled: Signing up is disabled
@@ -287,7 +312,11 @@ error.cannot-open-file: Cannot open uploaded file
 
 header.menu.all: All
 header.menu.new: New
+header.menu.topics: Topics
+header.menu.users: Users
 header.menu.search: Search
+header.menu.recently-liked: Recently liked
+header.menu.recently-forked: Recently forked
 header.menu.my-gists: My gists
 header.menu.liked: Liked
 header.menu.admin: Admin
@@ -316,8 +345,11 @@ admin.versions: Versions
 admin.ssh_keys: SSH keys
 admin.stats: Stats
 admin.actions: Actions
-admin.actions.sync-fs: Synchronize gists from filesystem
-admin.actions.sync-db: Synchronize gists from database
+admin.actions.subtitle: Run maintenance tasks manually. Some tasks also run automatically on a schedule.
+admin.actions.run: Run
+admin.actions.running: Running
+admin.actions.sync-fs: Delete gists without a repository on disk
+admin.actions.sync-db: Delete repositories without a gist in the database
 admin.actions.git-gc: Garbage collect all git repositories
 admin.actions.sync-previews: Synchronize all gists previews
 admin.actions.reset-hooks: Reset Git server hooks for all repositories
@@ -366,15 +398,6 @@ flash.admin.user-deleted: User has been deleted
 flash.admin.gist-deleted: Gist has been deleted
 flash.admin.invitation-created: Invitation has been created
 flash.admin.invitation-deleted: Invitation has been deleted
-flash.admin.sync-fs: Syncing repositories from filesystem...
-flash.admin.sync-db: Syncing repositories from database...
-flash.admin.git-gc: Garbage collecting repositories...
-flash.admin.sync-previews: Syncing Gist previews...
-flash.admin.reset-hooks: Resetting Git server hooks for all repositories...
-flash.admin.index-gists: Rebuilding search index...
-flash.admin.sync-gist-languages: Syncing Gist languages...
-flash.admin.delete-expired-gists: Deleting expired gists...
-flash.admin.sync-ssh-keys: Regenerating the authorized_keys file...
 
 flash.auth.username-exists: Username already exists
 flash.auth.invalid-credentials: Invalid credentials
@@ -392,6 +415,7 @@ flash.gist.visibility-changed: Gist visibility has been changed
 flash.gist.archived: Gist has been archived
 flash.gist.unarchived: Gist has been unarchived
 flash.gist.deleted: Gist has been deleted
+flash.gist.updated: Gist has been updated
 flash.gist.fork-own-gist: Unable to fork own gists
 flash.gist.forked: Gist has been forked
 

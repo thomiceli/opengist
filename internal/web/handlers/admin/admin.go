@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/thomiceli/opengist/internal/actions"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -44,16 +43,6 @@ func AdminIndex(ctx *context.Context) error {
 	}
 	ctx.SetData("countKeys", countKeys)
 
-	ctx.SetData("syncReposFromFS", actions.IsRunning(actions.SyncReposFromFS))
-	ctx.SetData("syncReposFromDB", actions.IsRunning(actions.SyncReposFromDB))
-	ctx.SetData("gitGcRepos", actions.IsRunning(actions.GitGcRepos))
-	ctx.SetData("syncGistPreviews", actions.IsRunning(actions.SyncGistPreviews))
-	ctx.SetData("resetHooks", actions.IsRunning(actions.ResetHooks))
-	ctx.SetData("indexGists", actions.IsRunning(actions.IndexGists))
-	ctx.SetData("syncGistLanguages", actions.IsRunning(actions.SyncGistLanguages))
-	ctx.SetData("deleteExpiredGists", actions.IsRunning(actions.DeleteExpiredGists))
-	ctx.SetData("syncSSHKeys", actions.IsRunning(actions.SyncSSHKeys))
-	ctx.SetData("sshManagesAuthorizedKeys", config.C.SshManagesAuthorizedKeys())
 	return ctx.Html("admin_index.html")
 }
 

@@ -1,0 +1,147 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en" class="h-full {{ if eq (mainTheme .currentStyle) "dark" }}dark{{ end }}" data-theme="{{ mainTheme .currentStyle }}">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {{ if .NoIndex }}<meta name="robots" content="noindex, follow" />{{ end }}
+
+    <base href="{{ .c.ExternalUrl }}" />
+
+    <script nonce="{{ .cspNonce }}">
+        window.opengist_base_url = "{{ .c.ExternalUrl }}";
+        const checkTheme = () => {
+            if (document.documentElement.dataset.theme === "auto") {
+                window.matchMedia('(prefers-color-scheme: dark)').matches
+                    ? document.documentElement.classList.add('dark')
+                    : document.documentElement.classList.remove('dark');
+            }
+        };
+        checkTheme();
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkTheme);
+    </script>
+
+    {{ if .c.CustomFavicon }}
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ custom .c.CustomFavicon }}" />
+    {{ else }}
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset "img/favicon-32.png" }}" />
+    {{ end }}
+
+    {{ if dev }}
+        <script type="module" src="{{ asset "@vite/client" }}"></script>
+        <link rel="stylesheet" href="{{ asset "css/main.css" }}" />
+        <link rel="stylesheet" href="{{ assetCss (print "css/" (mainTheme .currentStyle ) ".css") }}" />
+    {{ else }}
+        <link rel="stylesheet" href="{{ assetCss "ts/main.ts" }}" />
+        <link rel="stylesheet" href="{{ assetCss (print "ts/" (mainTheme .currentStyle ) ".ts") }}" />
+    {{ end }}
+    <script type="module" src="{{ asset "ts/main.ts" }}"></script>
+
+    {{ if .currentStyle }}
+        <style>
+            :root {
+                {{ if .currentStyle.ThemeColor }}
+                {{/* Loaded after globals.css, so this overrides the default
+                     --theme-color in both :root and .dark. --primary and the
+                     sidebar/content tints all derive from it, recoloring the UI.
+                     ThemeColor is validated against validator.ThemeColors, so it
+                     only ever names a Tailwind color with a safelisted -500 var. */}}
+                --theme-color: var(--color-{{ .currentStyle.ThemeColor }}-500);
+                {{ end }}
+                --red-diff: rgba({{ hexToRgb .currentStyle.RemovedLineColor }} 0.1);
+                --green-diff: rgba({{ hexToRgb .currentStyle.AddedLineColor }} 0.1);
+                --git-diff: rgba({{ hexToRgb .currentStyle.GitLineColor }} 0.38);
+            }
+        </style>
+    {{ end }}
+
+    <title>{{ if .htmlTitle }}{{ .htmlTitle }} - {{ end }}{{ if .c.CustomName }}{{ .c.CustomName }}{{ else }}Opengist{{ end }}</title>
+</head>
+<body class="h-full bg-background text-foreground antialiased" hx-boost="true">
+
+<!-- CSS-only mobile sidebar toggle (no JS) -->
+<input type="checkbox" id="nav-toggle" class="peer sr-only" />
+
+{{ template "sidebar" . }}
+
+<!-- Backdrop closes the mobile sidebar (no JS) -->
+<label for="nav-toggle" class="fixed inset-0 z-40 hidden bg-black/50 peer-checked:block md:hidden" aria-hidden="true"></label>
+
+<div class="flex min-h-full flex-col md:ml-60">
+    <header class="bg-background/80 sticky top-0 z-30 flex h-14 items-center gap-3 border-b px-4 backdrop-blur">
+        <label for="nav-toggle" class="btn-icon-ghost cursor-pointer md:hidden" aria-label="Toggle sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </label>
+
+        <form action="{{ .c.ExternalUrl }}/search" method="GET" class="group relative w-full max-w-md">
+            <svg class="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" name="q" value="{{ .searchQuery }}" autocomplete="off"
+                   placeholder="{{ if indexEnabled }}Code search{{ else }}Search{{ end }}"
+                   class="input pl-9" />
+            {{ if indexEnabled }}
+            <div class="bg-popover text-popover-foreground absolute left-0 top-full z-40 mt-2 hidden w-max max-w-[calc(100vw-2rem)] rounded-md border p-3 text-xs shadow-md group-focus-within:block">
+                <div class="grid gap-1">
+                    <p class="text-muted-foreground"><code class="text-foreground pr-1 font-mono">user:thomas</code> {{ .locale.Tr "gist.search.help.user" }}</p>
+                    <p class="text-muted-foreground"><code class="text-foreground pr-1 font-mono">title:mygist</code> {{ .locale.Tr "gist.search.help.title" }}</p>
+                    <p class="text-muted-foreground"><code class="text-foreground pr-1 font-mono">description:sync</code> {{ .locale.Tr "gist.search.help.description" }}</p>
+                    <p class="text-muted-foreground"><code class="text-foreground pr-1 font-mono">filename:myfile.txt</code> {{ .locale.Tr "gist.search.help.filename" }}</p>
+                    <p class="text-muted-foreground"><code class="text-foreground pr-1 font-mono">extension:yml</code> {{ .locale.Tr "gist.search.help.extension" }}</p>
+                    <p class="text-muted-foreground"><code class="text-foreground pr-1 font-mono">language:go</code> {{ .locale.Tr "gist.search.help.language" }}</p>
+                    <p class="text-muted-foreground"><code class="text-foreground pr-1 font-mono">topic:homelab</code> {{ .locale.Tr "gist.search.help.topic" }}</p>
+                    <p class="text-muted-foreground"><code class="text-foreground pr-1 font-mono">all:systemctl</code> {{ .locale.Tr "gist.search.help.all" }}</p>
+                </div>
+            </div>
+            {{ end }}
+        </form>
+
+        <div class="ml-auto flex items-center gap-2">
+            {{ if .userLogged }}
+            <a hx-boost="false" href="{{ .c.ExternalUrl }}/" class="btn-sm">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                {{ .locale.Tr "header.menu.new" }}
+            </a>
+            <!-- Basecoat dropdown-menu (JS) -->
+            <div class="dropdown-menu">
+                <button type="button" id="user-menu-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="user-menu"
+                        class="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 rounded-md p-1.5 text-sm">
+                    {{ if not (shouldGenerateAvatar .userLogged .DisableGravatar) }}
+                        <img class="size-7 shrink-0 rounded-md object-cover" src="{{ avatarUrl .userLogged .DisableGravatar }}" alt="{{ .userLogged.Username }}" />
+                    {{ else }}
+                        <svg class="size-7 shrink-0 rounded-md" data-jdenticon-value="{{ .userLogged.Username }}" width="28" height="28"></svg>
+                    {{ end }}
+                    <span class="hidden max-w-[8rem] truncate text-left sm:block">{{ .userLogged.Username }}</span>
+                    <svg class="size-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="user-menu" data-popover aria-hidden="true" data-side="bottom" data-align="end">
+                    <div role="menu" aria-labelledby="user-menu-trigger">
+                        <a href="{{ .c.ExternalUrl }}/settings" role="menuitem">{{ .locale.Tr "header.menu.settings" }}</a>
+                        <hr role="separator" />
+                        <a href="{{ .c.ExternalUrl }}/logout" role="menuitem" class="text-destructive">{{ .locale.Tr "header.menu.logout" }}</a>
+                    </div>
+                </div>
+            </div>
+            {{ else }}
+            <a href="{{ .c.ExternalUrl }}/login" class="btn-sm">{{ .locale.Tr "header.menu.login" }}</a>
+            {{ if not .DisableSignup }}
+            <a href="{{ .c.ExternalUrl }}/register" class="btn-sm-outline">{{ .locale.Tr "header.menu.register" }}</a>
+            {{ end }}
+            {{ end }}
+        </div>
+    </header>
+
+    <main id="content" class="bg-content flex-1">
+        <div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+            {{ block "flashes" . }}
+                {{ range .flashErrors }}<div class="alert og-red mb-4" role="alert"><section>{{ . }}</section></div>{{ end }}
+                {{ range .flashSuccess }}<div class="alert og-blue mb-4" role="status"><section>{{ . }}</section></div>{{ end }}
+                {{ range .flashWarnings }}<div class="alert og-orange mb-4" role="alert"><section>{{ . }}</section></div>{{ end }}
+            {{ end }}
+
+            {{ block "content" . }}{{ end }}
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
+{{ end }}

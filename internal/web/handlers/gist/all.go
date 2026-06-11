@@ -21,31 +21,41 @@ func AllGists(ctx *context.Context) error {
 	fromUserStr := ctx.Param("user")
 	userLogged := ctx.User
 	pageInt := handlers.GetPage(ctx)
+	mode := ctx.GetData("mode")
 
 	sort := "created"
 	order := "desc"
 
-	if userLogged != nil {
-		if style := userLogged.GetStyle(); style != nil {
-			if style.DefaultSort == "updated" {
-				sort = "updated"
-			}
-			if style.DefaultOrder == "asc" {
-				order = "asc"
+	// Some feeds (e.g. "recently liked" / "recently forked") have a fixed order:
+	// creation time descending, ignoring the user's default-sort style and the
+	// sort/order query params. The template hides the sort dropdown when sortable
+	// is false.
+	sortable := mode != "all-liked" && mode != "all-forked"
+	ctx.SetData("sortable", sortable)
+
+	if sortable {
+		if userLogged != nil {
+			if style := userLogged.GetStyle(); style != nil {
+				if style.DefaultSort == "updated" {
+					sort = "updated"
+				}
+				if style.DefaultOrder == "asc" {
+					order = "asc"
+				}
 			}
 		}
-	}
 
-	if ctx.QueryParam("sort") == "updated" {
-		sort = "updated"
-	} else if ctx.QueryParam("sort") == "created" {
-		sort = "created"
-	}
+		if ctx.QueryParam("sort") == "updated" {
+			sort = "updated"
+		} else if ctx.QueryParam("sort") == "created" {
+			sort = "created"
+		}
 
-	if ctx.QueryParam("order") == "asc" {
-		order = "asc"
-	} else if ctx.QueryParam("order") == "desc" {
-		order = "desc"
+		if ctx.QueryParam("order") == "asc" {
+			order = "asc"
+		} else if ctx.QueryParam("order") == "desc" {
+			order = "desc"
+		}
 	}
 
 	sortText := ctx.TrH("gist.list.sort-by-" + sort)
@@ -67,24 +77,50 @@ func AllGists(ctx *context.Context) error {
 		currentUserId = 0
 	}
 
-	mode := ctx.GetData("mode")
 	if fromUserStr == "" {
 		switch mode {
 		case "search":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.search-results"))
 			ctx.SetData("searchQuery", ctx.QueryParam("q"))
 			pagination.Query = ctx.QueryParam("q")
-			urlPage = "search"
+			urlPage = "-/search"
 			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order, "")
 		case "topics":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.topic-results-topic", ctx.Param("topic")))
 			ctx.SetData("topic", ctx.Param("topic"))
-			urlPage = "topics/" + ctx.Param("topic")
-			gists, err = db.GetAllGistsFromSearch(currentUserId, "", pageInt-1, sort, order, ctx.Param("topic"))
+			urlPage = "-/topics/" + ctx.Param("topic")
+
+			if languages, err := db.GetGistLanguagesByTopic(currentUserId, ctx.Param("topic")); err != nil {
+				return ctx.ErrorRes(500, "Error fetching languages", err)
+			} else {
+				ctx.SetData("languages", languages)
+			}
+
+			title, language, visibility, topics := readGistFilters(ctx, pagination)
+			gists, _, err = db.GetAllGistsByTopicFiltered(currentUserId, ctx.Param("topic"), title, language, visibility, topics, pageInt-1, sort, order)
 		case "all":
+			ctx.SetData("currentPage", "all")
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all"))
-			urlPage = "all"
-			gists, err = db.GetAllGistsForCurrentUser(currentUserId, nil, pageInt-1, sort, order, 11, 10)
+			urlPage = "-/all"
+
+			if languages, err := db.GetGistLanguages(currentUserId); err != nil {
+				return ctx.ErrorRes(500, "Error fetching languages", err)
+			} else {
+				ctx.SetData("languages", languages)
+			}
+
+			title, language, visibility, topics := readGistFilters(ctx, pagination)
+			gists, _, err = db.GetAllGistsForCurrentUserFiltered(currentUserId, title, language, visibility, topics, pageInt-1, sort, order)
+		case "all-liked":
+			ctx.SetData("currentPage", "recently-liked")
+			ctx.SetData("htmlTitle", ctx.TrH("gist.list.recently-liked"))
+			urlPage = "-/liked"
+			gists, err = db.GetAllGistsLiked(currentUserId, nil, pageInt-1, sort, order, 11, 10)
+		case "all-forked":
+			ctx.SetData("currentPage", "recently-forked")
+			ctx.SetData("htmlTitle", ctx.TrH("gist.list.recently-forked"))
+			urlPage = "-/forked"
+			gists, err = db.GetAllGistsForked(currentUserId, nil, pageInt-1, sort, order, 11, 10)
 		}
 	} else {
 		var fromUser *db.User
@@ -98,6 +134,12 @@ func AllGists(ctx *context.Context) error {
 			return ctx.ErrorRes(500, "Error fetching user", err)
 		}
 		ctx.SetData("fromUser", fromUser)
+
+		// Highlight "My gists" on any of the logged-in user's own tabs
+		// (gists, liked, forked).
+		if userLogged != nil && fromUserStr == userLogged.Username {
+			ctx.SetData("currentPage", "mine")
+		}
 
 		if countFromUser, err := db.CountAllGistsFromUser(fromUser.ID, currentUserId); err != nil {
 			return ctx.ErrorRes(500, "Error counting gists", err)
@@ -134,25 +176,7 @@ func AllGists(ctx *context.Context) error {
 			} else {
 				ctx.SetData("languages", languages)
 			}
-			title := ctx.QueryParam("title")
-			language := ctx.QueryParam("language")
-			visibility := ctx.QueryParam("visibility")
-			topicsStr := ctx.QueryParam("topics")
-			topics := strings.Fields(topicsStr)
-			if len(topics) > 10 {
-				topics = topics[:10]
-			}
-			slices.Sort(topics)
-			topics = slices.Compact(topics)
-			pagination.Title = title
-			pagination.Language = language
-			pagination.Visibility = visibility
-			pagination.Topics = topicsStr
-
-			ctx.SetData("title", title)
-			ctx.SetData("language", language)
-			ctx.SetData("visibility", visibility)
-			ctx.SetData("topics", topicsStr)
+			title, language, visibility, topics := readGistFilters(ctx, pagination)
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-from", fromUserStr))
 			gists, count, err = db.GetAllGistsFromUser(fromUser.ID, currentUserId, title, language, visibility, topics, pageInt-1, sort, order)
 			ctx.SetData("countFromUser", count)
@@ -176,6 +200,34 @@ func AllGists(ctx *context.Context) error {
 	}
 
 	return ctx.Html("all.html")
+}
+
+// readGistFilters pulls the faceted filter query params (title, language,
+// visibility, topics) shared by the explore "all"/"topics" feeds and the
+// per-user gist list, mirrors them into pagination and template data, and
+// returns the parsed values.
+func readGistFilters(ctx *context.Context, pagination *handlers.PaginationParams) (title, language, visibility string, topics []string) {
+	title = ctx.QueryParam("title")
+	language = ctx.QueryParam("language")
+	visibility = ctx.QueryParam("visibility")
+	topicsStr := ctx.QueryParam("topics")
+	topics = strings.Fields(topicsStr)
+	if len(topics) > 10 {
+		topics = topics[:10]
+	}
+	slices.Sort(topics)
+	topics = slices.Compact(topics)
+
+	pagination.Title = title
+	pagination.Language = language
+	pagination.Visibility = visibility
+	pagination.Topics = topicsStr
+
+	ctx.SetData("title", title)
+	ctx.SetData("language", language)
+	ctx.SetData("visibility", visibility)
+	ctx.SetData("topics", topicsStr)
+	return
 }
 
 // Search handles the search page for gists.

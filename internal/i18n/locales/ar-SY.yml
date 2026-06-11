@@ -289,8 +289,6 @@ admin.versions: الإصدارات
 admin.ssh_keys: مفاتيح SSH
 admin.stats: الإحصائيات
 admin.actions: الإجراءات
-admin.actions.sync-fs: مزامنة المقاطع من نظام الملفات
-admin.actions.sync-db: مزامنة المقاطع من قاعدة البيانات
 admin.actions.git-gc: تنفيذ جمع القمامة لجميع مستودعات Git
 admin.actions.sync-previews: مزامنة معاينات جميع المقاطع
 admin.actions.reset-hooks: إعادة تعيين خطافات خادم Git لجميع المستودعات

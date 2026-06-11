@@ -177,8 +177,6 @@ admin.versions: 版本
 admin.ssh_keys: SSH 密钥
 admin.stats: 状态
 admin.actions: 动作
-admin.actions.sync-fs: 从文件系统同步 Gist
-admin.actions.sync-db: 从数据库同步 Gist
 admin.actions.git-gc: 对 Git 仓库执行垃圾回收
 admin.id: ID
 admin.user: 用户

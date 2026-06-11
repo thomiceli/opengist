@@ -1,0 +1,143 @@
+{{ define "gist_header" }}
+<header class="space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex min-w-0 items-center gap-3">
+            <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}" class="shrink-0">
+                {{ if not (shouldGenerateAvatar .gist.User .DisableGravatar) }}
+                    <img class="size-12 rounded-md border object-cover" src="{{ avatarUrl .gist.User .DisableGravatar }}" alt="{{ .gist.User.Username }}" />
+                {{ else }}
+                    <svg class="size-12 rounded-md border" data-jdenticon-value="{{ .gist.User.Username }}" width="48" height="48"></svg>
+                {{ end }}
+            </a>
+            <div class="min-w-0">
+                <h1 class="break-all text-2xl font-bold leading-tight">
+                    <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}" class="hover:underline">{{ .gist.User.Username }}</a>
+                    <span class="text-muted-foreground">/</span>
+                    <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" class="font-semibold hover:underline">{{ .gist.Title }}</a>
+                </h1>
+                <p class="text-muted-foreground text-sm">{{ .locale.Tr "gist.header.last-active" }} {{ .gist.UpdatedAt | humanTimeDiff }}</p>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap items-center gap-2">
+            {{ if .userLogged }}
+            <form method="post" action="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/like?redirecturl={{ .currentUrl }}" class="inline-flex">
+                {{ .csrfHtml }}
+                <button type="submit" class="btn-sm-outline rounded-r-none">
+                    {{ if not .hasLiked }}
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+                    {{ .locale.Tr "gist.header.like" }}
+                    {{ else }}
+                    <svg class="size-4 text-rose-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+                    {{ .locale.Tr "gist.header.unlike" }}
+                    {{ end }}
+                </button>
+                <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/likes" class="btn-sm-outline -ml-px rounded-l-none">{{ .gist.NbLikes }}</a>
+            </form>
+
+            {{ if ne .userLogged.ID .gist.User.ID }}
+            <form method="post" action="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/fork" class="inline-flex">
+                {{ .csrfHtml }}
+                <button type="submit" class="btn-sm-outline rounded-r-none">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="6" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M6 9v3a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9M12 15v3"/></svg>
+                    {{ .locale.Tr "gist.header.fork" }}
+                </button>
+                <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/forks" class="btn-sm-outline -ml-px rounded-l-none">{{ .gist.NbForks }}</a>
+            </form>
+            {{ end }}
+
+            {{ else }}
+            <a href="{{ .c.ExternalUrl }}/login" class="btn-sm-outline">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+                {{ .locale.Tr "gist.header.like" }} <span class="text-muted-foreground">{{ .gist.NbLikes }}</span>
+            </a>
+            {{ end }}
+
+            <!-- Code: embed / clone / download -->
+            <div class="dropdown-menu">
+                <button type="button" id="code-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="code-menu" class="btn-sm-outline">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+                    {{ .locale.Tr "gist.header.code" }}
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="code-menu" data-popover aria-hidden="true" data-side="bottom" data-align="end" class="w-96">
+                    <div role="menu" aria-labelledby="code-trigger" class="space-y-3 p-3">
+                        <div class="space-y-1">
+                            <span class="text-sm font-medium">{{ .locale.Tr "gist.header.embed" }}</span>
+                            <div class="flex gap-1">
+                                <input readonly value="{{ .embedScript }}" class="border-input bg-background h-8 w-full rounded-md border px-2 font-mono text-xs" />
+                                <button type="button" class="btn-sm-outline copy-btn shrink-0" aria-label="Copy"
+                                        _="on click
+                                             call navigator.clipboard.writeText(the previous <input/>'s value)
+                                             set @data-copied to 'true'
+                                             wait 1.2s
+                                             remove @data-copied from me">
+                                    <svg class="icon-copy size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                    <svg class="icon-check size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        {{ if .httpCloneUrl }}
+                        <div class="space-y-1">
+                            <span class="text-sm font-medium">{{ .locale.Tr "gist.header.clone-http" .httpProtocol }}</span>
+                            <div class="flex gap-1">
+                                <input readonly value="{{ .httpCloneUrl }}" class="border-input bg-background h-8 w-full rounded-md border px-2 font-mono text-xs" />
+                                <button type="button" class="btn-sm-outline copy-btn shrink-0" aria-label="Copy"
+                                        _="on click
+                                             call navigator.clipboard.writeText(the previous <input/>'s value)
+                                             set @data-copied to 'true'
+                                             wait 1.2s
+                                             remove @data-copied from me">
+                                    <svg class="icon-copy size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                    <svg class="icon-check size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        {{ end }}
+                        {{ if .sshCloneUrl }}
+                        <div class="space-y-1">
+                            <span class="text-sm font-medium">{{ .locale.Tr "gist.header.clone-ssh" }}</span>
+                            <div class="flex gap-1">
+                                <input readonly value="{{ .sshCloneUrl }}" class="border-input bg-background h-8 w-full rounded-md border px-2 font-mono text-xs" />
+                                <button type="button" class="btn-sm-outline copy-btn shrink-0" aria-label="Copy"
+                                        _="on click
+                                             call navigator.clipboard.writeText(the previous <input/>'s value)
+                                             set @data-copied to 'true'
+                                             wait 1.2s
+                                             remove @data-copied from me">
+                                    <svg class="icon-copy size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                    <svg class="icon-check size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        {{ end }}
+                        <a hx-boost="false" href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/archive/{{ .revision }}" class="btn-sm-outline w-full justify-center">
+                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            {{ .locale.Tr "gist.header.download-zip" }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meta -->
+    <div class="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
+        {{ if .gist.Forked }}<span>{{ .locale.Tr "gist.header.forked-from" }} <a href="{{ .c.ExternalUrl }}/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Identifier }}" class="hover:underline">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a></span>{{ end }}
+        {{ if .gist.Private }}<span class="badge text-primary border-transparent bg-primary/10 dark:bg-violet-400/15 dark:text-violet-300">{{ visibilityStr .gist.Private false }}</span>{{ end }}
+        {{ if .gist.Archived }}<span class="badge border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">{{ .locale.Tr "gist.header.archived" }}</span>{{ end }}
+        {{ if .gist.ExpiresAt }}<span class="badge border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300" title="{{ humanDate .gist.ExpiresAt }}">{{ .locale.Tr "gist.header.expires" }} {{ .gist.ExpiresAt | humanTimeDiff }}</span>{{ end }}
+    </div>
+
+    {{ if .gist.Description }}<p class="text-sm break-words">{{ .gist.Description }}</p>{{ end }}
+
+    {{ if .gist.Topics }}
+    <div class="flex flex-wrap gap-1">
+        {{ range .gist.Topics }}
+        <a href="{{ $.c.ExternalUrl }}/-/topics/{{ .Topic }}" class="badge-secondary hover:bg-secondary/80">{{ .Topic }}</a>
+        {{ end }}
+    </div>
+    {{ end }}
+</header>
+{{ end }}

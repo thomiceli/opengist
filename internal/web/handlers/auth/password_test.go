@@ -214,7 +214,7 @@ func TestLogout(t *testing.T) {
 		require.Equal(t, "thomas", s.User().Username)
 
 		resp := s.Request(t, "GET", "/logout", nil, 302)
-		require.Equal(t, "/all", resp.Header.Get("Location"))
+		require.Equal(t, "/-/all", resp.Header.Get("Location"))
 		require.Nil(t, s.User())
 		s.Request(t, "GET", "/", nil, 302)
 	})

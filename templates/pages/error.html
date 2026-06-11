@@ -1,16 +1,17 @@
-{{ define "error" }}
-{{ template "header" .}}
+{{ define "content" }}
+<div class="flex flex-col items-center justify-center py-16 text-center">
+    <div class="bg-muted text-muted-foreground flex size-16 items-center justify-center rounded-full">
+        <svg class="size-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+        </svg>
+    </div>
 
-<div class="mt-4">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-12 w-12 text-slate-600 dark:text-slate-400">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-    </svg>
-
-    <h1 class="mt-2 text-3xl font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "error" }} {{ .error.Code }}</h1>
-    <h3 class="mt-2 text-md font-medium text-slate-700 dark:text-slate-300">{{ httpStatusText .error.Code }}</h3>
-    {{ if lt .error.Code 500 }}
-        <p class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .error.Message }}</p>
+    <p class="text-muted-foreground mt-6 text-sm font-medium">{{ .locale.Tr "error" }} {{ .error.Code }}</p>
+    <h1 class="mt-1 text-2xl font-bold leading-tight">{{ httpStatusText .error.Code }}</h1>
+    {{ if and (lt .error.Code 500) .error.Message }}
+        <p class="text-muted-foreground mt-2 max-w-md text-sm">{{ .error.Message }}</p>
     {{ end }}
+
+    <a href="{{ .c.ExternalUrl }}/" class="btn mt-6">{{ .locale.Tr "error.go-home" }}</a>
 </div>
-{{ template "footer" .}}
-{{end}}
+{{ end }}

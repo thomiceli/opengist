@@ -1,0 +1,85 @@
+{{ template "header" .}}
+<div class="py-10">
+    <header>
+        <h1 class="text-2xl font-bold leading-tight text-slate-700 dark:text-slate-300">
+            {{ .title }}
+        </h1>
+    </header>
+    <main class="mt-4">
+        <div class="grid sm:grid-cols-2">
+            <div class="">
+                <div class="mt-8 sm:w-full sm:max-w-md">
+                    <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+
+                        <div class="mb-6 text-center">
+                            {{ if .oauthAvatarURL }}
+                            <img src="{{ .oauthAvatarURL }}" alt="Avatar" class="w-16 h-16 rounded-full mx-auto mb-2">
+                            {{ end }}
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ .locale.Tr "auth.oauth.signing-in-with" $.c.OIDCProviderName }}
+                            </p>
+                        </div>
+
+                        <form class="space-y-6" method="post">
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    {{ .locale.Tr "auth.username" }}
+                                </label>
+                                <div class="mt-1">
+                                    <input id="username" name="username" type="text" value="{{ .oauthNickname }}" required
+                                           class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div class="mt-8">
+                                <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    {{ .locale.Tr "settings.email" }}
+                                </label>
+                                <div class="mt-1">
+                                    <input id="email" name="email" type="email" value="{{ .oauthEmail }}"
+                                           class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ .locale.Tr "settings.email-help" }}
+                                </p>
+                            </div>
+
+                            <div class="flex">
+                                <div class="flex-auto">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                        {{ .locale.Tr "auth.oauth.complete-registration-button" }}
+                                    </button>
+                                </div>
+                                <span class="float-right text-sm py-2 underline">
+                                    <a href="{{ $.c.ExternalUrl }}/login">{{ .locale.Tr "auth.oauth.cancel" }}</a>
+                                </span>
+                            </div>
+                            {{ .csrfHtml }}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                <div class="mt-8 sm:w-full sm:max-w-md">
+                    <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        <p class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "auth.oauth.existing-account" }}</p>
+                        <div class="flex items-center justify-center mt-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-14 text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                            </svg>
+                        </div>
+                        <p class="mt-4 text-sm text-center">
+                            {{ .locale.Tr "auth.oauth.already-have-account" $.c.OIDCProviderName }}
+                        </p>
+                        <div class="flex items-center justify-center mt-4">
+                            <a href="{{ $.c.ExternalUrl }}/login" class="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-slate-700 dark:text-slate-300 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                {{ .locale.Tr "auth.login" }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{{ template "footer" .}}

@@ -1,0 +1,4 @@
+@import "highlight.js/styles/github-dark.css";
+@import "@catppuccin/highlightjs/css/catppuccin-macchiato.css";
+@import "github-markdown-css/github-markdown-dark.css";
+@import './catppuccin-macchiato.css';

@@ -48,7 +48,7 @@ func AccountDeleteProcess(ctx *context.Context) error {
 	}
 	opengistssh.SyncAuthorizedKeysLogged()
 
-	return ctx.RedirectTo("/all")
+	return ctx.RedirectTo("/-/all")
 }
 
 func UsernameProcess(ctx *context.Context) error {

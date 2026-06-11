@@ -165,8 +165,6 @@ admin.versions: Verziók
 admin.ssh_keys: SSH kulcsok
 admin.stats: Statisztikák
 admin.actions: Műveletek
-admin.actions.sync-fs: Gistek szinkronizálása a fájlrendszerrel
-admin.actions.sync-db: Gistek szinkronizálása az adatbázissal
 admin.actions.git-gc: Használatlan git repository-k eltávolítása
 admin.actions.sync-previews: Gist előnézetek szinkronizálása
 admin.actions.reset-hooks: Git server hook-ok alaphelyzetbe állítása minden repository-nál

@@ -40,7 +40,7 @@ func PasswordProcess(ctx *context.Context) error {
 
 	if err := ctx.Validate(dto); err != nil {
 		ctx.AddFlash(validator.ValidationMessages(&err, ctx.GetData("locale").(*i18n.Locale)), "error")
-		return ctx.Html("settings.html")
+		return ctx.RedirectTo("/settings/authentication")
 	}
 
 	password, err := passwordpkg.HashPassword(dto.Password)

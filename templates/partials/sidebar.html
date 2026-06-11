@@ -1,0 +1,247 @@
+{{ define "sidebar" }}
+<aside class="bg-sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 flex w-60 -translate-x-full flex-col border-r transition-transform duration-300 ease-in-out peer-checked:translate-x-0 md:translate-x-0">
+    <nav class="flex h-full flex-col" aria-label="Main navigation">
+        <header class="flex flex-col gap-2 p-2">
+            <a href="{{ .c.ExternalUrl }}/" class="flex items-center gap-2 px-2 py-1.5 font-semibold">
+                {{ if .c.CustomLogo }}
+                    <img src="{{ custom .c.CustomLogo }}" class="size-6 object-cover" alt="Opengist Logo" />
+                {{ else }}
+                    <img src="{{ asset "img/opengist.svg" }}" class="size-6" alt="" />
+                {{ end }}
+                <span>{{ if .c.CustomName }}{{ .c.CustomName }}{{ else }}Opengist{{ end }}</span>
+            </a>
+        </header>
+
+        <section class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2">
+        {{ if .settingsHeaderPage }}
+            <!-- User settings context -->
+            <a href="{{ .c.ExternalUrl }}/{{ if .userLogged }}{{ .userLogged.Username }}{{ else }}-/all{{ end }}"
+               class="text-muted-foreground hover:text-sidebar-foreground flex items-center gap-2 rounded-md px-2 py-1 text-sm [&>svg]:size-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+                <span>{{ .locale.Tr "header.menu.my-gists" }}</span>
+            </a>
+
+            <p class="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-bold">{{ .locale.Tr "settings" }}</p>
+
+            <div role="group">
+                <ul class="flex flex-col gap-1">
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/settings" {{ if eq .settingsHeaderPage "account" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span>{{ .locale.Tr "settings.header.account" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/settings/authentication" {{ if eq .settingsHeaderPage "authentication" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+                            <span>{{ .locale.Tr "settings.header.authentication" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/settings/ssh" {{ if eq .settingsHeaderPage "ssh" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg>
+                            <span>{{ .locale.Tr "settings.header.ssh" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/settings/access-tokens" {{ if eq .settingsHeaderPage "tokens" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L21 5"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>
+                            <span>{{ .locale.Tr "settings.header.tokens" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/settings/style" {{ if eq .settingsHeaderPage "style" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2Z"/></svg>
+                            <span>{{ .locale.Tr "settings.header.style" }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        {{ else if .gist }}
+            <!-- Gist context (single gist viewer) -->
+            <p class="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-bold">Gist</p>
+
+            <div role="group">
+                <ul class="flex flex-col gap-1">
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" {{ if eq .page "code" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+                            <span class="truncate">{{ .gist.Title }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/revisions" {{ if eq .page "revisions" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+                            <span>{{ .locale.Tr "gist.header.revisions" }}</span>
+                            <span class="badge-secondary ml-auto">{{ if .nbCommits }}{{ .nbCommits }}{{ else }}0{{ end }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/likes" {{ if eq .page "likes" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+                            <span>{{ .locale.Tr "gist.list.likes" }}</span>
+                            <span class="badge-secondary ml-auto">{{ .gist.NbLikes }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/forks" {{ if eq .page "forks" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="6" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M6 9v3a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9M12 15v3"/></svg>
+                            <span>{{ .locale.Tr "gist.list.forks" }}</span>
+                            <span class="badge-secondary ml-auto">{{ .gist.NbForks }}</span>
+                        </a>
+                    </li>
+
+                    {{ if and .userLogged (eq .gist.User.Username .userLogged.Username) }}
+                    {{ if not .gist.Archived }}
+                    <li>
+                        <a hx-boost="false" href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/edit"
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+                            <span>{{ .locale.Tr "gist.header.edit-files" }}</span>
+                        </a>
+                    </li>
+                    {{ end }}
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/settings" {{ if eq .page "settings" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>{{ .locale.Tr "settings" }}</span>
+                        </a>
+                    </li>
+                    {{ end }}
+                </ul>
+            </div>
+        {{ else if .adminHeaderPage }}
+            <!-- Admin panel context -->
+            <p class="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-bold">{{ .locale.Tr "admin.admin_panel" }}</p>
+
+            <div role="group">
+                <ul class="flex flex-col gap-1">
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/admin-panel" {{ if eq .adminHeaderPage "index" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                            <span>{{ .locale.Tr "admin.general" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/admin-panel/actions" {{ if eq .adminHeaderPage "actions" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            <span>{{ .locale.Tr "admin.actions" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/admin-panel/users" {{ if eq .adminHeaderPage "users" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <span>{{ .locale.Tr "admin.users" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/admin-panel/gists" {{ if eq .adminHeaderPage "gists" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+                            <span>{{ .locale.Tr "admin.gists" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/admin-panel/invitations" {{ if eq .adminHeaderPage "invitations" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 7-10 5L2 7"/></svg>
+                            <span>{{ .locale.Tr "admin.invitations" }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/admin-panel/configuration" {{ if eq .adminHeaderPage "config" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>{{ .locale.Tr "admin.configuration" }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        {{ else }}
+            <p class="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-bold">Explore</p>
+
+            <div role="group">
+                <ul class="flex flex-col gap-1">
+                    {{ if .userLogged }}
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/{{ .userLogged.Username }}" {{ if eq .currentPage "mine" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span>{{ .locale.Tr "header.menu.my-gists" }}</span>
+                        </a>
+                    </li>
+                    {{ end }}
+
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/-/all" {{ if or (eq .currentPage "all") (eq .currentPage "recently-liked") (eq .currentPage "recently-forked") }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                            <span>{{ .locale.Tr "gist.list.all" }}</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/-/topics" {{ if eq .currentPage "topics" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+                            </svg>
+                            <span>{{ .locale.Tr "header.menu.topics" }}</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/-/users" {{ if eq .currentPage "users" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <span>{{ .locale.Tr "header.menu.users" }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        {{ end }}
+        </section>
+
+        {{ if or (and .userLogged .userLogged.IsAdmin) (ne (len .c.StaticLinks) 0) }}
+        <div class="flex flex-col gap-1 p-2">
+            {{ if and .userLogged .userLogged.IsAdmin }}
+            <a href="{{ .c.ExternalUrl }}/admin-panel" {{ if eq .currentPage "admin" }}aria-current="page"{{ end }}
+               class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+                <span>{{ .locale.Tr "header.menu.admin" }}</span>
+            </a>
+            {{ end }}
+            {{ range $index, $value := .c.StaticLinks }}
+            <a hx-boost="false" target="_blank" href="{{ if isUrl .Path }}{{ .Path }}{{ else }}{{ $.c.ExternalUrl }}/assets/{{ .Path }}{{ end }}"
+               class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground [&>svg]:size-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>{{ .Name }}</span>
+            </a>
+            {{ end }}
+        </div>
+        {{ end }}
+
+        <footer class="border-sidebar-border flex flex-col gap-2 border-t p-2">
+            <a href="https://github.com/thomiceli/opengist" target="_blank" rel="noopener"
+               class="text-sidebar-foreground/70 hover:text-sidebar-foreground flex items-center gap-1.5 px-2 py-1.5 text-xs">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.21 11.19.6.11.82-.26.82-.57v-2.01c-3.34.71-4.04-1.58-4.04-1.58-.55-1.36-1.34-1.73-1.34-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.21 1.84 1.21 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.58-2.67-.3-5.47-1.31-5.47-5.83 0-1.29.47-2.34 1.24-3.17-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.13 3 .4 2.29-1.53 3.3-1.21 3.3-1.21.65 1.66.24 2.88.12 3.18.77.83 1.23 1.88 1.23 3.17 0 4.53-2.81 5.53-5.49 5.82.43.36.82 1.09.82 2.2v3.26c0 .31.21.69.82.57A12.01 12.01 0 0 0 24 12.29C24 5.78 18.63.5 12 .5Z"/></svg>
+                <span>{{ .locale.Tr "footer.powered-by" "Opengist" }} ⋅ {{ loadedTime .loadStartTime }}</span>
+            </a>
+        </footer>
+    </nav>
+</aside>
+{{ end }}

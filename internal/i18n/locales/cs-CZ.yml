@@ -155,8 +155,6 @@ admin.versions: Verze
 admin.ssh_keys: SSH klíče
 admin.stats: Statistiky
 admin.actions: Akce
-admin.actions.sync-fs: Synchronizovat gisty ze souborového systému
-admin.actions.sync-db: Synchronizovat gisty z databáze
 admin.actions.git-gc: Garbage collect git repozitářů
 admin.id: ID
 admin.user: Uživatel

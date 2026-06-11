@@ -59,6 +59,15 @@ func IsRunning(actionType int) bool {
 	return actionType >= 0 && actionType < numActions && running[actionType].Load()
 }
 
+func IsPeriodic(actionType int) bool {
+	a, ok := registry[actionType]
+	return ok && a.spec != ""
+}
+
+func Spec(actionType int) string {
+	return registry[actionType].spec
+}
+
 func RunOnce(actionType int) {
 	a, ok := registry[actionType]
 	if !ok {
@@ -89,6 +98,7 @@ func RunOnce(actionType int) {
 	}()
 
 	log.Info().Msgf("Starting running action %d", actionType)
+	time.Sleep(100 * time.Millisecond)
 	a.run()
 	log.Info().Msgf("Finished running action %d", actionType)
 }

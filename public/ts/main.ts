@@ -1,204 +1,141 @@
-import '../css/tailwind.css';
+import '../css/main.css';
 import '../img/favicon-32.png';
 import '../img/opengist.svg';
-import jdenticon from 'jdenticon/standalone';
-import PDFObject from 'pdfobject';
 
-jdenticon.update("[data-jdenticon-value]")
+import 'htmx.org';
+import 'hyperscript.org';
+import 'basecoat-css/basecoat';
+import 'basecoat-css/dropdown-menu';
+import { initGistFilters } from './gist-filter';
+import { initGistLines } from './gist-lines';
+import { initJdenticon } from './jdenticon';
+import { initIpynb } from './ipynb';
+import { initPdf } from './pdf';
 
-document.querySelectorAll(".pdf").forEach((el) => {
-    PDFObject.embed(el.dataset.src || "", el);
-})
+const init = () => {
+    initGistFilters();
+    initGistLines();
+    initIpynb();
+    initPdf();
+    initJdenticon();
+};
 
-if (document.querySelector('.mermaid') && document.documentElement.classList.contains('dark')) {
-    (window as any).mermaid?.initialize({ theme: 'dark', startOnLoad: true });
-}
+document.addEventListener('DOMContentLoaded', init);
+// Re-init after hx-boost / htmx content swaps.
+document.body.addEventListener('htmx:afterSwap', init);
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('user-btn')?.addEventListener("click" , () => {
-        document.getElementById('user-menu')!.classList.toggle('hidden');
-    })
+// Top loading bar for boosted navigations. Large files can take a moment to
+// render server-side, and htmx gives no visual feedback in the meantime, so the
+// page looks frozen after a click. This animates a slim bar at the top of the
+// viewport while the request is in flight.
+//
+// hx-boost swaps the whole <body> innerHTML on navigation, which would wipe any
+// element we place in the template. We own the bar in JS instead and re-attach
+// it after every swap so the reference never goes stale.
+(() => {
+    const bar = document.createElement('div');
+    bar.id = 'page-progress';
+    bar.setAttribute('aria-hidden', 'true');
 
-    document.querySelectorAll('form').forEach((form: HTMLFormElement) => {
-        form.onsubmit = () => {
-            form.querySelectorAll('input[type=datetime-local]').forEach((input: HTMLInputElement) => {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'expiredAtUnix'
-                hiddenInput.value = Math.floor(new Date(input.value).getTime() / 1000).toString();
-                form.appendChild(hiddenInput);
-            });
-            return true;
-        };
-    })
+    let trickle: number | undefined;
+    let showTimer: number | undefined;
+    let progress = 0;
 
-
-
-    const rev = document.querySelector<HTMLElement>('.revision-text');
-    if (rev) {
-        const fullRev = rev.innerHTML;
-        const smallRev = fullRev.substring(0, 7);
-        rev.innerHTML = smallRev;
-
-        rev.onmouseover = () => {
-            rev.innerHTML = fullRev;
-        };
-        rev.onmouseout = () => {
-            rev.innerHTML = smallRev;
-        };
-    }
-
-
-    const colorhash = () => {
-        Array.from(document.querySelectorAll('.table-code .selected')).forEach((el) => el.classList.remove('selected'));
-        const lineEl = document.querySelector<HTMLElement>(location.hash);
-        if (lineEl) {
-            const nextSibling = lineEl.nextSibling;
-            if (nextSibling instanceof HTMLElement) {
-                nextSibling.classList.add('selected');
-            }
-        }
+    const set = (value: number) => {
+        progress = value;
+        bar.style.setProperty('--progress', String(value));
     };
 
-    if (location.hash) {
-        colorhash();
-    }
-    window.onhashchange = colorhash;
-
-    document.getElementById('main-menu-button')!.onclick = () => {
-        document.getElementById('mobile-menu')!.classList.toggle('hidden');
-    };
-
-    const tabs = document.getElementById('gist-tabs');
-    if (tabs) {
-        tabs.onchange = (e: Event) => {
-            const target = e.target as HTMLSelectElement;
-            window.location.href = target.selectedOptions[0].dataset.url || '';
-        };
-    }
-
-    const gistmenutoggle = document.getElementById('gist-menu-toggle');
-    if (gistmenutoggle) {
-        const gistmenucopy = document.getElementById('gist-menu-copy')!;
-        const gistmenubuttoncopy = document.getElementById('gist-menu-button-copy')!;
-        const gistmenuinput = document.getElementById('gist-menu-input') as HTMLInputElement;
-        const gistmenutitle = document.getElementById('gist-menu-title')!;
-
-        gistmenutitle.textContent = gistmenucopy.children[0].firstChild!.textContent;
-        gistmenuinput.value = (gistmenucopy.children[0] as HTMLElement).dataset.link || '';
-
-        gistmenutoggle.onclick = () => {
-            gistmenucopy.classList.toggle('hidden');
-        };
-
-        for (const item of Array.from(gistmenucopy.children)) {
-            (item as HTMLElement).onclick = () => {
-                gistmenutitle.textContent = item.firstChild!.textContent;
-                gistmenuinput.value = (item as HTMLElement).dataset.link || '';
-                gistmenucopy.classList.toggle('hidden');
-            };
-        }
-
-        gistmenubuttoncopy.onclick = () => {
-            const text = gistmenuinput.value;
-            navigator.clipboard.writeText(text).catch((err) => {
-                console.error('Could not copy text: ', err);
-            });
-        };
-    }
-
-
-    const sortgist = document.getElementById('sort-gists-button');
-    if (sortgist) {
-        sortgist.onclick = () => {
-            document.getElementById('sort-gists-dropdown')!.classList.toggle('hidden');
-        };
-    }
-
-    const searchUserGistsVisibility = document.getElementById('search-user-gists-visibility');
-    if (searchUserGistsVisibility) {
-        let dropdown = document.getElementById('search-user-gists-visibility-dropdown');
-        searchUserGistsVisibility.onclick = () => {
-            dropdown!.classList.toggle('hidden');
-        };
-
-        let buttons = dropdown.querySelectorAll('button');
-        buttons.forEach((button) => {
-            button.onclick = () => {
-                let value = document.getElementById('visibility-value') as HTMLInputElement;
-                value.textContent = button.dataset.visibilityStr;
-                dropdown!.classList.add('hidden');
-                dropdown.querySelector('input')!.value = button.dataset.visibility || '';
-            };
+    const attach = () => {
+        // A history snapshot may have restored a stale copy of the bar (see the
+        // beforeHistorySave handler below). Drop any that isn't ours.
+        document.querySelectorAll('#page-progress').forEach((el) => {
+            if (el !== bar) el.remove();
         });
-    }
-
-    const searchUserGistsLanguage = document.getElementById('search-user-gists-language');
-    if (searchUserGistsLanguage) {
-        let dropdown = document.getElementById('search-user-gists-language-dropdown');
-        searchUserGistsLanguage.onclick = () => {
-            dropdown!.classList.toggle('hidden');
-        };
-        let buttons = dropdown.querySelectorAll('button');
-        buttons.forEach((button) => {
-            button.onclick = () => {
-                let value = document.getElementById('language-value') as HTMLInputElement;
-                value.textContent = button.dataset.languageStr;
-                dropdown!.classList.add('hidden');
-                dropdown.querySelector('input')!.value = button.dataset.language || '';
-            };
-        });
-    }
-    document.getElementById('language-btn')!.onclick = () => {
-        document.getElementById('language-list')!.classList.toggle('hidden');
+        if (bar.parentElement !== document.body) document.body.appendChild(bar);
     };
+    attach();
+    document.body.addEventListener('htmx:afterSwap', attach);
 
-
-    document.querySelectorAll('.copy-gist-btn').forEach((e: HTMLElement) => {
-        e.onclick = () => {
-            navigator.clipboard.writeText(e.parentNode!.parentNode!.querySelector<HTMLElement>('.gist-content')!.textContent || '').catch((err) => {
-                console.error('Could not copy text: ', err);
-            });
-        };
+    // The bar is chrome, not page content, so keep it out of the DOM snapshot
+    // htmx saves for back/forward navigation — otherwise a bar frozen mid-load
+    // gets restored and sticks at the top. Detaching + clearing state leaves the
+    // snapshot clean; attach() re-adds a fresh bar on the way back.
+    document.body.addEventListener('htmx:beforeHistorySave', () => {
+        window.clearTimeout(showTimer);
+        window.clearInterval(trickle);
+        bar.classList.remove('is-loading');
+        set(0);
+        bar.remove();
     });
 
-    const gistmenuvisibility = document.getElementById('gist-menu-visibility');
-    if (gistmenuvisibility) {
-        let submitgistbutton = (document.getElementById('submit-gist') as HTMLInputElement);
-        document.getElementById('gist-visibility-menu-button')!.onclick = () => {
-            gistmenuvisibility!.classList.toggle('hidden');
-        }
-        const lastVisibility = localStorage.getItem('visibility');
-        Array.from(document.querySelectorAll('.gist-visibility-option')).forEach((el) => {
-            const visibility = (el as HTMLElement).dataset.visibility || '0';
-            (el as HTMLElement).onclick = () => {
-                submitgistbutton.textContent = (el as HTMLElement).dataset.btntext;
-                submitgistbutton!.value = visibility;
-                localStorage.setItem('visibility', visibility);
-                gistmenuvisibility!.classList.add('hidden');
-            }
-            if (lastVisibility === visibility) {
-                (el as HTMLElement).click();
-            }
-        });
+    const start = () => {
+        window.clearTimeout(showTimer);
+        window.clearInterval(trickle);
+        // Delay showing so quick navigations don't flash the bar.
+        showTimer = window.setTimeout(() => {
+            attach();
+            bar.classList.add('is-loading');
+            set(0.08);
+            // Creep toward (but never reach) the end while we wait.
+            trickle = window.setInterval(() => {
+                if (progress < 0.9) set(progress + (0.9 - progress) * 0.1);
+            }, 300);
+        }, 150);
+    };
+
+    const done = () => {
+        window.clearTimeout(showTimer);
+        window.clearInterval(trickle);
+        if (!bar.classList.contains('is-loading')) return;
+        // Fill to the end, then fade out. Reset the width only once it's fully
+        // invisible so the bar never appears to slide backwards.
+        attach();
+        set(1);
+        window.setTimeout(() => bar.classList.remove('is-loading'), 200);
+        window.setTimeout(() => {
+            bar.style.transition = 'none';
+            set(0);
+            void bar.offsetWidth; // flush before restoring transitions
+            bar.style.transition = '';
+        }, 500);
+    };
+
+    document.body.addEventListener('htmx:beforeRequest', start);
+    document.body.addEventListener('htmx:afterRequest', done);
+    document.body.addEventListener('htmx:historyRestore', () => {
+        attach();
+        done();
+    });
+})();
+
+// htmx ignores error responses (4xx/5xx) by default, so a boosted navigation to
+// a page that errors (e.g. a 404) would leave the user on the old page. Tell htmx
+// to swap the error page in anyway so it renders like a normal navigation.
+document.body.addEventListener('htmx:beforeSwap', (e) => {
+    const detail = (e as CustomEvent).detail as { xhr: XMLHttpRequest; shouldSwap: boolean; isError: boolean };
+    if (detail.xhr && detail.xhr.status >= 400) {
+        detail.shouldSwap = true;
+        detail.isError = false;
     }
+});
 
-    const expireselect = document.getElementById('expire') as HTMLSelectElement | null;
-    const expireat = document.getElementById('expire_at') as HTMLInputElement | null;
-    if (expireselect && expireat) {
-        const toggleExpireAt = () => {
-            expireat.classList.toggle('hidden', expireselect.value !== 'custom');
-        };
-        expireselect.addEventListener('change', toggleExpireAt);
-        toggleExpireAt();
-    }
+// hx-boost stores a DOM snapshot for the back/forward cache. Components mark
+// themselves initialized (basecoat: data-*-initialized, our filter:
+// data-filter-ready), but the restored snapshot keeps those markers while the
+// JS listeners are gone — so dropdowns etc. look dead. Strip the markers before
+// the snapshot is saved, and re-initialize on restore.
+const INIT_MARKERS = '[data-dropdown-menu-initialized], [data-filter-ready]';
+const stripInitMarkers = () => {
+    document.querySelectorAll(INIT_MARKERS).forEach((el) => {
+        el.removeAttribute('data-dropdown-menu-initialized');
+        el.removeAttribute('data-filter-ready');
+    });
+};
 
-    const searchinput = document.getElementById('search') as HTMLInputElement;
-    searchinput.addEventListener('focusin', () => {
-        document.getElementById('search-help').classList.remove('hidden');
-    })
-
-    searchinput.addEventListener('focusout', (e) => {
-        document.getElementById('search-help').classList.add('hidden');
-    })
+document.body.addEventListener('htmx:beforeHistorySave', stripInitMarkers);
+document.body.addEventListener('htmx:historyRestore', () => {
+    stripInitMarkers();
+    (window as unknown as { basecoat?: { initAll?: () => void } }).basecoat?.initAll?.();
+    init();
 });

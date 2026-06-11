@@ -124,6 +124,70 @@ func GetAllUsers(offset int) ([]*User, error) {
 	return users, err
 }
 
+// UserWithNbGists is a user together with the number of gists they own that are
+// visible to the viewer (public gists, plus the viewer's own private ones).
+type UserWithNbGists struct {
+	*User
+	NbGists int64
+}
+
+// GetUsersWithGistCounts returns a paginated, sorted page of users for the
+// explore "Users" list, each annotated with how many gists they own that are
+// visible to currentUserId. When query is non-empty, users are filtered to those
+// whose username contains it (case-insensitive). sortColumn must be a
+// whitelisted column name ("username_normalized" or "created_at") and order
+// "asc" or "desc"; both are validated by the caller. limit is typically
+// perPage+1 so callers can detect a following page.
+func GetUsersWithGistCounts(currentUserId uint, query string, offset int, limit int, perPage int, sortColumn string, order string) ([]*UserWithNbGists, error) {
+	var users []*User
+	stmt := db.Model(&User{})
+	if query != "" {
+		stmt = stmt.Where("username_normalized LIKE ?", "%"+strings.ToLower(query)+"%")
+	}
+	if err := stmt.
+		Order(sortColumn + " " + order).
+		Limit(limit).
+		Offset(offset * perPage).
+		Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*UserWithNbGists, 0, len(users))
+	if len(users) == 0 {
+		return result, nil
+	}
+
+	ids := make([]uint, len(users))
+	for i, u := range users {
+		ids[i] = u.ID
+	}
+
+	type countRow struct {
+		UserID uint
+		Count  int64
+	}
+	var rows []countRow
+	if err := db.Model(&Gist{}).
+		Select("user_id, count(*) as count").
+		Where("user_id IN ?", ids).
+		Where("private = 0 or user_id = ?", currentUserId).
+		Group("user_id").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	counts := make(map[uint]int64, len(rows))
+	for _, r := range rows {
+		counts[r.UserID] = r.Count
+	}
+
+	for _, u := range users {
+		result = append(result, &UserWithNbGists{User: u, NbGists: counts[u.ID]})
+	}
+
+	return result, nil
+}
+
 func GetUserByUsername(username string) (*User, error) {
 	user := new(User)
 	err := db.
@@ -301,6 +365,7 @@ type UserUsernameDTO struct {
 
 type UserStyleDTO struct {
 	SoftWrap         bool   `form:"softwrap" json:"soft_wrap"`
+	ThemeColor       string `form:"themecolor" json:"theme_color" validate:"omitempty,themecolor"`
 	RemovedLineColor string `form:"removedlinecolor" json:"removed_line_color" validate:"min=0,max=7"`
 	AddedLineColor   string `form:"addedlinecolor" json:"added_line_color" validate:"min=0,max=7"`
 	GitLineColor     string `form:"gitlinecolor" json:"git_line_color" validate:"min=0,max=7"`

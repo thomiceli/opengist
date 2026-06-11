@@ -1,121 +1,52 @@
-{{ template "header" .}}
-{{ template "admin_header" .}}
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="space-y-1">
+        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "admin.admin_panel" }}</h1>
+        <p class="text-muted-foreground text-sm">{{ .locale.Tr "admin.general" }}</p>
+    </header>
 
-<div class="sm:flex sm:space-x-4 space-y-4 sm:space-y-0">
-    <div class="sm:overflow-hidden ">
-        <div class="space-y-2 bg-gray-50 dark:bg-gray-800 py-6 px-6 rounded-md border border-gray-200 dark:border-gray-700">
-            <div>
-                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.versions" }}</span>
+    <div class="grid gap-4 sm:grid-cols-2">
+        <!-- Versions -->
+        <section class="bg-card rounded-lg border">
+            <div class="border-b px-4 py-3">
+                <h2 class="font-semibold">{{ .locale.Tr "admin.versions" }}</h2>
             </div>
-            <table class="table-fixed">
-                <tbody>
-                    <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">Opengist</td>
-                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .opengistVersion }}</td>
-                    </tr>
-                    <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">Go</td>
-                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .goVersion }}</td>
-                    </tr>
-                    <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">Git</td>
-                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .gitVersion }} </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+            <dl class="divide-y text-sm">
+                <div class="flex items-center justify-between px-4 py-2">
+                    <dt class="text-muted-foreground">Opengist</dt>
+                    <dd class="font-medium">{{ .opengistVersion }}</dd>
+                </div>
+                <div class="flex items-center justify-between px-4 py-2">
+                    <dt class="text-muted-foreground">Go</dt>
+                    <dd class="font-medium">{{ .goVersion }}</dd>
+                </div>
+                <div class="flex items-center justify-between px-4 py-2">
+                    <dt class="text-muted-foreground">Git</dt>
+                    <dd class="font-medium">{{ .gitVersion }}</dd>
+                </div>
+            </dl>
+        </section>
 
-    <div class="sm:overflow-hidden ">
-        <div class="space-y-2 bg-gray-50 dark:bg-gray-800 py-6 px-6 rounded-md border border-gray-200 dark:border-gray-700">
-            <div>
-                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.stats" }}</span>
+        <!-- Stats -->
+        <section class="bg-card rounded-lg border">
+            <div class="border-b px-4 py-3">
+                <h2 class="font-semibold">{{ .locale.Tr "admin.stats" }}</h2>
             </div>
-            <table class="table-fixed">
-                <tbody>
-                    <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">{{ .locale.Tr "admin.users" }}</td>
-                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .countUsers }}</td>
-                    </tr>
-                    <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">{{ .locale.Tr "admin.gists" }}</td>
-                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .countGists }}</td>
-                    </tr>
-                    <tr>
-                        <td class="whitespace-nowrap py-2 pr-3 text-sm text-slate-700 dark:text-slate-300 ">{{ .locale.Tr "admin.ssh_keys" }}</td>
-                        <td class="whitespace-nowrap px-2 py-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .countKeys }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="sm:overflow-hidden ">
-        <div class="space-y-2 bg-gray-50 dark:bg-gray-800 py-6 px-6 rounded-md border border-gray-200 dark:border-gray-700">
-            <div>
-                <span class="text-base font-bold leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.actions" }}</span>
-            </div>
-            <div class="space-y-2">
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/sync-fs" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .syncReposFromFS }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.sync-fs" }}
-                    </button>
-                </form>
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/sync-db" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .syncReposFromDB }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromDB }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.sync-db" }}
-                    </button>
-                </form>
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/gc-repos" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .gitGcRepos }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .gitGcRepos }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.git-gc" }}
-                    </button>
-                </form>
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/sync-previews" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .syncGistPreviews }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncGistPreviews }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.sync-previews" }}
-                    </button>
-                </form>
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/reset-hooks" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .resetHooks }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .resetHooks }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.reset-hooks" }}
-                    </button>
-                </form>
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/index-gists" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .indexGists }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .indexGists }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.index-gists" }}
-                    </button>
-                </form>
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/sync-languages" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .syncGistLanguages }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncGistLanguages }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.sync-gist-languages" }}
-                    </button>
-                </form>
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/delete-expired-gists" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .deleteExpiredGists }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .deleteExpiredGists }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.delete-expired-gists" }}
-                    </button>
-                </form>
-                {{ if .sshManagesAuthorizedKeys }}
-                <form action="{{ $.c.ExternalUrl }}/admin-panel/sync-ssh-keys" method="POST">
-                    {{ .csrfHtml }}
-                    <button type="submit" {{ if .syncSSHKeys }}disabled="disabled"{{ end }} class="whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncSSHKeys }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                        {{ .locale.Tr "admin.actions.sync-ssh-keys" }}
-                    </button>
-                </form>
-                {{ end }}
-            </div>
-        </div>
+            <dl class="divide-y text-sm">
+                <div class="flex items-center justify-between px-4 py-2">
+                    <dt class="text-muted-foreground">{{ .locale.Tr "admin.users" }}</dt>
+                    <dd class="font-medium">{{ .countUsers }}</dd>
+                </div>
+                <div class="flex items-center justify-between px-4 py-2">
+                    <dt class="text-muted-foreground">{{ .locale.Tr "admin.gists" }}</dt>
+                    <dd class="font-medium">{{ .countGists }}</dd>
+                </div>
+                <div class="flex items-center justify-between px-4 py-2">
+                    <dt class="text-muted-foreground">{{ .locale.Tr "admin.ssh_keys" }}</dt>
+                    <dd class="font-medium">{{ .countKeys }}</dd>
+                </div>
+            </dl>
+        </section>
     </div>
 </div>
-
-{{ template "admin_footer" .}}
-{{ template "footer" .}}
+{{ end }}

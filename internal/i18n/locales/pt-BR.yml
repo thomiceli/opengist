@@ -146,8 +146,6 @@ admin.versions: Versões
 admin.ssh_keys: Chaves SSH
 admin.stats: Estatísticas
 admin.actions: Ações
-admin.actions.sync-fs: Sincronizar gists do sistema de arquivos
-admin.actions.sync-db: Sincronizar gists do banco de dados
 admin.actions.git-gc: Coletar lixo nos repositórios Git
 admin.id: ID
 admin.user: Usuário

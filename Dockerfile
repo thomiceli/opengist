@@ -1,4 +1,4 @@
-FROM alpine:3.23 AS base
+FROM alpine:3.24 AS base
 
 RUN apk update && \
         apk add --no-cache \
@@ -46,7 +46,7 @@ FROM base AS build
 RUN make
 
 
-FROM alpine:3.23 AS prod
+FROM alpine:3.24 AS prod
 
 RUN apk update && \
     apk add --no-cache \

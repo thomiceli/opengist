@@ -3,8 +3,10 @@ package render
 import (
 	"bufio"
 	"bytes"
+	"embed"
 	"encoding/base64"
 	"fmt"
+	"io/fs"
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
@@ -13,6 +15,19 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 )
+
+//go:embed lexers/*.xml
+var customLexers embed.FS
+
+func init() {
+	paths, err := fs.Glob(customLexers, "lexers/*.xml")
+	if err != nil {
+		panic(err)
+	}
+	for _, path := range paths {
+		lexers.Register(chroma.MustNewXMLLexer(customLexers, path))
+	}
+}
 
 type HighlightedFile struct {
 	*git.File

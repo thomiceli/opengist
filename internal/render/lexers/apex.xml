@@ -1,0 +1,137 @@
+<lexer>
+  <config>
+    <name>Apex</name>
+    <alias>apex</alias>
+    <filename>*.trigger</filename>
+    <filename>*.apex</filename>
+    <mime_type>text/x-apex</mime_type>
+    <dot_all>true</dot_all>
+  </config>
+  <rules>
+    <state name="root">
+      <!-- Whitespace -->
+      <rule pattern="[^\S\n]+">
+        <token type="TextWhitespace" />
+      </rule>
+      <!-- Single-line comment -->
+      <rule pattern="(//.*?)(\n)">
+        <bygroups>
+          <token type="CommentSingle" />
+          <token type="TextWhitespace" />
+        </bygroups>
+      </rule>
+      <!-- Multi-line comment -->
+      <rule pattern="/\*.*?\*/">
+        <token type="CommentMultiline" />
+      </rule>
+      <!-- Annotations -->
+      <rule pattern="@[A-Za-z_][A-Za-z0-9_]*">
+        <token type="NameDecorator" />
+      </rule>
+      <!-- SOQL / SOSL inline queries -->
+      <rule pattern="\[(\s*)(SELECT|FIND)\b">
+        <bygroups>
+          <token type="TextWhitespace" />
+          <token type="KeywordPseudo" />
+        </bygroups>
+        <push state="soql" />
+      </rule>
+      <!-- Keywords -->
+      <rule pattern="(break|catch|continue|do|else|finally|for|if|instanceof|new|return|switch|this|super|throw|try|when|while)\b">
+        <token type="Keyword" />
+      </rule>
+      <!-- Declaration keywords -->
+      <rule pattern="(abstract|class|enum|extends|final|global|implements|inherited\s+sharing|interface|override|private|protected|public|static|virtual|webservice|with\s+sharing|without\s+sharing)\b">
+        <token type="KeywordDeclaration" />
+      </rule>
+      <!-- Trigger keyword -->
+      <rule pattern="\btrigger\b">
+        <token type="KeywordDeclaration" />
+      </rule>
+      <!-- DML keywords -->
+      <rule pattern="\b(delete|insert|merge|undelete|update|upsert)\b">
+        <token type="KeywordPseudo" />
+      </rule>
+      <!-- Literals: null, true, false -->
+      <rule pattern="\b(null|true|false)\b">
+        <token type="KeywordConstant" />
+      </rule>
+      <!-- Void -->
+      <rule pattern="\bvoid\b">
+        <token type="KeywordType" />
+      </rule>
+      <!-- Primitive/built-in types -->
+      <rule pattern="\b(Blob|Boolean|Date|Datetime|Decimal|Double|Id|Integer|Long|Object|SObject|String|Time)\b">
+        <token type="KeywordType" />
+      </rule>
+      <!-- Collection types -->
+      <rule pattern="\b(List|Map|Set)\b">
+        <token type="KeywordType" />
+      </rule>
+      <!-- Method calls and function names -->
+      <rule pattern="((?:(?:[A-Z][A-Za-z0-9_]*|[a-z][A-Za-z0-9_]*)(?:\.[A-Za-z0-9_]+)*\s+)+?)([a-z_][A-Za-z0-9_]*)(\s*)(\()">
+        <bygroups>
+          <usingself state="root" />
+          <token type="NameFunction" />
+          <token type="TextWhitespace" />
+          <token type="Punctuation" />
+        </bygroups>
+      </rule>
+      <!-- Strings -->
+      <rule pattern="'(?:[^'\\]|\\.)*'">
+        <token type="LiteralStringSingle" />
+      </rule>
+      <!-- Numbers -->
+      <rule pattern="\b(0[xX][0-9a-fA-F]+|[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?[lLdDfF]?)\b">
+        <token type="LiteralNumber" />
+      </rule>
+      <!-- Operators -->
+      <rule pattern="(==|!=|&lt;=|&gt;=|&lt;&lt;|&gt;&gt;&gt;|&gt;&gt;|\+\+|--|&amp;&amp;|\|\||[+\-*/%&amp;|^~!&lt;&gt;?:=])">
+        <token type="Operator" />
+      </rule>
+      <!-- Punctuation -->
+      <rule pattern="[(){}\[\];,.]">
+        <token type="Punctuation" />
+      </rule>
+      <!-- Identifiers -->
+      <rule pattern="[A-Za-z_$][A-Za-z0-9_$]*">
+        <token type="Name" />
+      </rule>
+      <!-- Newlines -->
+      <rule pattern="\n">
+        <token type="TextWhitespace" />
+      </rule>
+    </state>
+    <!-- SOQL/SOSL inline query state -->
+    <state name="soql">
+      <rule pattern="\]">
+        <token type="Punctuation" />
+        <pop depth="1" />
+      </rule>
+      <rule pattern="\b(SELECT|FROM|WHERE|AND|OR|NOT|ORDER\s+BY|GROUP\s+BY|HAVING|LIMIT|OFFSET|FIND|IN|ALL\s+FIELDS|RETURNING|WITH\s+DATA\s+CATEGORY|UPDATE\s+TRACKING|UPDATE\s+VIEWSTAT|TYPEOF|END|USING\s+SCOPE|NULLS\s+FIRST|NULLS\s+LAST|ASC|DESC|COUNT|AVG|MIN|MAX|SUM|COUNT_DISTINCT|CALENDAR_MONTH|CALENDAR_QUARTER|CALENDAR_YEAR|DAY_IN_MONTH|DAY_IN_WEEK|DAY_IN_YEAR|DAY_ONLY|FISCAL_MONTH|FISCAL_QUARTER|FISCAL_YEAR|HOUR_IN_DAY|WEEK_IN_MONTH|WEEK_IN_YEAR|LAST_N_DAYS|NEXT_N_DAYS|THIS_MONTH|LAST_MONTH|NEXT_MONTH|THIS_WEEK|LAST_WEEK|NEXT_WEEK|THIS_QUARTER|LAST_QUARTER|NEXT_QUARTER|THIS_YEAR|LAST_YEAR|NEXT_YEAR|TODAY|YESTERDAY|TOMORROW|LAST_90_DAYS|NEXT_90_DAYS|INCLUDES|EXCLUDES)\b">
+        <token type="KeywordPseudo" />
+      </rule>
+      <rule pattern="'(?:[^'\\]|\\.)*'">
+        <token type="LiteralStringSingle" />
+      </rule>
+      <rule pattern=":[A-Za-z_][A-Za-z0-9_.]*">
+        <token type="NameVariable" />
+      </rule>
+      <rule pattern="\b[0-9]+\b">
+        <token type="LiteralNumber" />
+      </rule>
+      <rule pattern="[A-Za-z_][A-Za-z0-9_.]*">
+        <token type="NameAttribute" />
+      </rule>
+      <rule pattern="[^\S\n]+">
+        <token type="TextWhitespace" />
+      </rule>
+      <rule pattern="\n">
+        <token type="TextWhitespace" />
+      </rule>
+      <rule pattern="[(),=!&lt;&gt;]">
+        <token type="Punctuation" />
+      </rule>
+    </state>
+  </rules>
+</lexer>

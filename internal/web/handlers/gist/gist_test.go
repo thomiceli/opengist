@@ -349,6 +349,13 @@ func TestGistJsSingleFile(t *testing.T) {
 		assert.Contains(t, string(body), "dark.css")
 	})
 
+	t.Run("NoCacheHeader", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js", nil, 200)
+		assert.Equal(t, "no-store", resp.Header.Get("Cache-Control"))
+	})
+
 	t.Run("PrivateGist", func(t *testing.T) {
 		_, _, username, identifier := s.CreateGist(t, "2")
 

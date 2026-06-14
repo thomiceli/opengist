@@ -1,8 +1,8 @@
 package render
 
 import (
-	"testing"
 	"github.com/alecthomas/chroma/v2/lexers"
+	"testing"
 )
 
 func TestApexLexer(t *testing.T) {

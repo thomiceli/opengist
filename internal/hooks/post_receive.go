@@ -3,14 +3,16 @@ package hooks
 import (
 	"bufio"
 	"fmt"
-	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/git"
-	validatorpkg "github.com/thomiceli/opengist/internal/validator"
 	"io"
 	"os"
 	"os/exec"
 	"slices"
 	"strings"
+	"time"
+
+	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/git"
+	validatorpkg "github.com/thomiceli/opengist/internal/validator"
 )
 
 func PostReceive(in io.Reader, out, er io.Writer) error {
@@ -78,6 +80,25 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 				gist.Topics = append(gist.Topics, db.GistTopic{Topic: name})
 			}
 			fmt.Fprintf(&outputSb, "Gist topics set to \"%s\"\n\n", opts["topics"])
+		}
+	}
+
+	if newGist && opts["expire"] != "" {
+		value := opts["expire"]
+		expire := db.ExpirationType(value)
+		switch {
+		case expire == db.ExpiryNever:
+			// no expiration
+		case expire.Duration() > 0:
+			gist.ExpiresAt = expire.ExpiresAtTimestamp()
+			fmt.Fprintf(&outputSb, "Gist expiration set to \"%s\"\n\n", value)
+		default:
+			if t, err := validatorpkg.ParseDateTime(value); err == nil && t.After(time.Now()) {
+				gist.ExpiresAt = t.Unix()
+				fmt.Fprintf(&outputSb, "Gist expiration set to \"%s\"\n\n", value)
+			} else {
+				fmt.Fprintf(&outputSb, "Invalid gist expiration \"%s\", ignored\n\n", value)
+			}
 		}
 	}
 

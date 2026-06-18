@@ -18,6 +18,11 @@ func (gist *Gist) ToAPISimple(baseURL string) types.GistSimple {
 	if u, err := url.Parse(baseURL); err == nil {
 		sshHost = u.Host
 	}
+	var expiresAt *time.Time
+	if gist.ExpiresAt > 0 {
+		t := time.Unix(gist.ExpiresAt, 0).UTC()
+		expiresAt = &t
+	}
 	return types.GistSimple{
 		ID:          gist.Uuid,
 		Owner:       gist.User.ToSimpleAPI(),
@@ -34,6 +39,7 @@ func (gist *Gist) ToAPISimple(baseURL string) types.GistSimple {
 		Topics:      gist.TopicsSlice(),
 		CreatedAt:   time.Unix(gist.CreatedAt, 0).UTC(),
 		UpdatedAt:   time.Unix(gist.UpdatedAt, 0).UTC(),
+		ExpiresAt:   expiresAt,
 	}
 }
 

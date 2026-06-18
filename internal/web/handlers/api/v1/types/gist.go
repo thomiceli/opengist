@@ -34,6 +34,7 @@ type GistSimple struct {
 	Topics      []string   `json:"topics"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
+	ExpiresAt   *time.Time `json:"expires_at"` // null when the gist never expires
 }
 
 type Gist struct {

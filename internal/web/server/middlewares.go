@@ -443,6 +443,12 @@ func gistInit(next Handler) Handler {
 			return ctx.NotFound("Gist not found")
 		}
 
+		// Expired gists are removed by a background job, but it may not have run
+		// yet so hide them in the meantime so they're never served past expiry.
+		if gist.IsExpired() {
+			return ctx.NotFound("Gist not found")
+		}
+
 		if gist.Private == db.PrivateVisibility {
 			if currUser == nil || currUser.ID != gist.UserID {
 				// Check for token-based auth via Authorization header

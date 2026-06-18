@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/actions"
 	"github.com/thomiceli/opengist/internal/auth/webauthn"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
@@ -41,6 +42,7 @@ var CmdStart = cli.Command{
 		httpServer := server.NewServer(os.Getenv("OG_DEV") == "1")
 		go httpServer.Start()
 		go ssh.Start()
+		stopCron := actions.StartCron()
 
 		var metricsServer *metrics.Server
 		if config.C.MetricsEnabled {
@@ -49,6 +51,7 @@ var CmdStart = cli.Command{
 		}
 
 		<-stopCtx.Done()
+		stopCron()
 		shutdown(httpServer, metricsServer)
 		return nil
 	},

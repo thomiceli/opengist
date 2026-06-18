@@ -59,8 +59,22 @@
                 <div id="uploaded-files" class="space-y-2"></div>
             </div>
 
-            <div class="flex">
+            <div class="flex items-center">
                 <button type="button" id="add-file" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">{{ .locale.Tr "gist.new.add-file" }}</button>
+
+                <div class="ml-4 inline-flex items-center">
+                    <label for="expire" class="text-sm text-gray-500 dark:text-gray-400 mr-2 whitespace-nowrap">{{ .locale.Tr "gist.new.expire" }}</label>
+                    <select name="expire" id="expire" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
+                        <option value="never" {{ if or (not .dto.Expire) (eq (toStr .dto.Expire) "never") }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-never" }}</option>
+                        <option value="1hour" {{ if eq (toStr .dto.Expire) "1hour" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-1hour" }}</option>
+                        <option value="12hours" {{ if eq (toStr .dto.Expire) "12hours" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-12hours" }}</option>
+                        <option value="1day" {{ if eq (toStr .dto.Expire) "1day" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-1day" }}</option>
+                        <option value="7days" {{ if eq (toStr .dto.Expire) "7days" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-7days" }}</option>
+                        <option value="15days" {{ if eq (toStr .dto.Expire) "15days" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-15days" }}</option>
+                        <option value="custom" {{ if eq (toStr .dto.Expire) "custom" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-custom" }}</option>
+                    </select>
+                    <input type="datetime-local" name="expire_at" id="expire_at" value="{{ .dto.ExpireAt }}" class="ml-2 bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm border-gray-200 dark:border-gray-700 rounded-md {{ if ne (toStr .dto.Expire) "custom" }}hidden{{ end }}">
+                </div>
 
                 <div class="ml-auto inline-flex ">
                     <button id="submit-gist" type="submit" name="private" value="0" class="ml-2 items-center px-4 py-2 border border-transparent border-primary-200 dark:border-primary-700 text-sm font-medium rounded-l-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 z-20">{{ .locale.Tr "gist.new.create-public-button" }}</button>

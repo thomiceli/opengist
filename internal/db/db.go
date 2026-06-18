@@ -155,7 +155,7 @@ func Setup(dbUri string) error {
 		return err
 	}
 
-	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{}); err != nil {
+	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{}, &ActionLock{}); err != nil {
 		return err
 	}
 

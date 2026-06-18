@@ -85,6 +85,7 @@ type Gist struct {
 	NbForks         int
 	CreatedAt       int64
 	UpdatedAt       int64
+	ExpiresAt       int64 // 0: never expires
 
 	Likes    []User `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Forked   *Gist  `gorm:"foreignKey:ForkedID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
@@ -106,6 +107,8 @@ func (gist *Gist) BeforeSave(_ *gorm.DB) error {
 }
 
 func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
+	gist.DeleteRepository()
+	gist.RemoveFromIndex()
 	// Decrement fork counter if the gist was forked
 	err := tx.Model(&Gist{}).
 		Omit("updated_at").
@@ -487,11 +490,6 @@ func (gist *Gist) UpdateNoTimestamps() error {
 }
 
 func (gist *Gist) Delete() error {
-	err := gist.DeleteRepository()
-	if err != nil {
-		return err
-	}
-
 	return db.Delete(&gist).Error
 }
 
@@ -578,8 +576,11 @@ func (gist *Gist) InitRepository() error {
 	return git.InitRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) DeleteRepository() error {
-	return git.DeleteRepository(gist.User.Username, gist.Uuid)
+func (gist *Gist) DeleteRepository() {
+	err := git.DeleteRepository(gist.User.Username, gist.Uuid)
+	if err != nil {
+		log.Warn().Err(err).Msgf("Could not delete repository %s/%s", gist.User.Username, gist.Uuid)
+	}
 }
 
 func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, bool, error) {
@@ -970,17 +971,19 @@ func (gist *Gist) ToDTO() (*GistDTO, error) {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title              string    `validate:"max=250" form:"title"`
-	Description        string    `validate:"max=1000" form:"description"`
-	URL                string    `validate:"max=32,alphanumdashorempty" form:"url"`
-	Files              []FileDTO `validate:"min=1,dive"`
-	Name               []string  `form:"name"`
-	Content            []string  `form:"content"`
-	Topics             string    `validate:"gisttopics" form:"topics"`
-	UploadedFilesUUID  []string  `validate:"omitempty,dive,required,uuid" form:"uploadedfile_uuid"`
-	UploadedFilesNames []string  `validate:"omitempty,dive,required" form:"uploadedfile_filename"`
-	BinaryFileOldName  []string  `form:"binary_old_name"`
-	BinaryFileNewName  []string  `form:"binary_new_name"`
+	Title              string         `validate:"max=250" form:"title"`
+	Description        string         `validate:"max=1000" form:"description"`
+	URL                string         `validate:"max=32,alphanumdashorempty" form:"url"`
+	Files              []FileDTO      `validate:"min=1,dive"`
+	Name               []string       `form:"name"`
+	Content            []string       `form:"content"`
+	Topics             string         `validate:"gisttopics" form:"topics"`
+	UploadedFilesUUID  []string       `validate:"omitempty,dive,required,uuid" form:"uploadedfile_uuid"`
+	UploadedFilesNames []string       `validate:"omitempty,dive,required" form:"uploadedfile_filename"`
+	BinaryFileOldName  []string       `form:"binary_old_name"`
+	BinaryFileNewName  []string       `form:"binary_new_name"`
+	Expire             ExpirationType `validate:"omitempty,oneof=never 1hour 12hours 1day 7days 15days custom" form:"expire"`
+	ExpireAt           string         `validate:"expirationdate" form:"expire_at"`
 	VisibilityDTO
 }
 

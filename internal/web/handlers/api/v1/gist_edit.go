@@ -47,7 +47,13 @@ func CreateGist(ctx *context.Context) error {
 	dto := &db.GistDTO{
 		Title:         strOrEmpty(req.Title),
 		Description:   strOrEmpty(req.Description),
+		Expire:        db.ExpirationType(strOrEmpty(req.Expire)),
 		VisibilityDTO: db.VisibilityDTO{Private: db.ParseVisibility(strOrEmpty(req.Visibility))},
+	}
+	// An explicit custom date takes precedence over the preset.
+	if req.ExpiresAt != nil {
+		dto.Expire = db.ExpiryCustom
+		dto.ExpireAt = *req.ExpiresAt
 	}
 	for _, rawName := range filenames {
 		f := req.Files[rawName]
@@ -78,6 +84,8 @@ func CreateGist(ctx *context.Context) error {
 	gist.User = *user
 	gist.NbFiles = len(dto.Files)
 
+	gist.ExpiresAt = dto.ExpiresAtTimestamp()
+
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return ctx.ErrorJson(500, "uuid generation failed", err)
@@ -95,11 +103,11 @@ func CreateGist(ctx *context.Context) error {
 		return ctx.ErrorJson(500, "failed to init repo", err)
 	}
 	if err := gist.AddAndCommitFiles(&dto.Files); err != nil {
-		_ = gist.DeleteRepository()
+		gist.DeleteRepository()
 		return ctx.ErrorJson(500, "failed to commit files", err)
 	}
 	if err := gist.Create(); err != nil {
-		_ = gist.DeleteRepository()
+		gist.DeleteRepository()
 		return ctx.ErrorJson(500, "failed to create gist", err)
 	}
 	gist.AddInIndex()

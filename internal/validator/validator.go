@@ -1,10 +1,13 @@
 package validator
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/thomiceli/opengist/internal/i18n"
+	"fmt"
 	"regexp"
 	"strings"
+	"time"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/thomiceli/opengist/internal/i18n"
 )
 
 type OpengistValidator struct {
@@ -17,6 +20,7 @@ func NewValidator() *OpengistValidator {
 	_ = v.RegisterValidation("alphanumdash", validateAlphaNumDash)
 	_ = v.RegisterValidation("alphanumdashorempty", validateAlphaNumDashOrEmpty)
 	_ = v.RegisterValidation("gisttopics", validateGistTopics)
+	_ = v.RegisterValidation("expirationdate", validateExpirationDate)
 	return &OpengistValidator{v}
 }
 
@@ -49,6 +53,8 @@ func ValidationMessages(err *error, locale *i18n.Locale) string {
 			messages[i] = locale.String("validation.invalid", e.Field())
 		case "gisttopics":
 			messages[i] = locale.String("validation.invalid-gist-topics")
+		case "expirationdate":
+			messages[i] = locale.String("validation.invalid-expiration-date")
 		}
 	}
 
@@ -98,4 +104,37 @@ func validateGistTopics(fl validator.FieldLevel) bool {
 	}
 
 	return true
+}
+
+var dateTimeLayouts = []string{
+	"2006-01-02T15:04",
+	"2006-01-02T15:04:05",
+	time.RFC3339,
+}
+
+func validateExpirationDate(fl validator.FieldLevel) bool {
+	expire := fl.Parent().FieldByName("Expire")
+	if !expire.IsValid() || expire.String() != "custom" {
+		return true
+	}
+
+	value := strings.TrimSpace(fl.Field().String())
+	if value == "" {
+		return false
+	}
+
+	t, err := ParseDateTime(value)
+	if err != nil {
+		return false
+	}
+	return t.After(time.Now())
+}
+
+func ParseDateTime(value string) (time.Time, error) {
+	for _, layout := range dateTimeLayouts {
+		if t, err := time.ParseInLocation(layout, value, time.Local); err == nil {
+			return t, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("invalid datetime: %q", value)
 }

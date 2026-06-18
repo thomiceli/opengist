@@ -9,6 +9,7 @@ gist.header.edit: Edit
 gist.header.delete: Delete
 gist.header.forked-from: Forked from
 gist.header.last-active: Last active
+gist.header.expires: Expires
 gist.header.select-tab: Select a tab
 gist.header.code: Code
 gist.header.revisions: Revisions
@@ -52,6 +53,14 @@ gist.new.create-a-new-gist: Create a new gist
 gist.new.topics: Topics (separate with spaces)
 gist.new.drop-files: Drop files here or click to upload
 gist.new.any-file-type: Upload any file type
+gist.new.expire: Expires
+gist.new.expire-never: Never
+gist.new.expire-1hour: After 1 hour
+gist.new.expire-12hours: After 12 hours
+gist.new.expire-1day: After 1 day
+gist.new.expire-7days: After 7 days
+gist.new.expire-15days: After 15 days
+gist.new.expire-custom: Custom date
 
 gist.edit.editing: Editing
 gist.edit.edit-gist: Edit %s
@@ -300,6 +309,7 @@ admin.actions.sync-previews: Synchronize all gists previews
 admin.actions.reset-hooks: Reset Git server hooks for all repositories
 admin.actions.index-gists: Rebuild search index
 admin.actions.sync-gist-languages: Synchronize all gists languages
+admin.actions.delete-expired-gists: Delete expired gists
 admin.id: ID
 admin.user: User
 admin.delete: Delete
@@ -348,6 +358,7 @@ flash.admin.sync-previews: Syncing Gist previews...
 flash.admin.reset-hooks: Resetting Git server hooks for all repositories...
 flash.admin.index-gists: Rebuilding search index...
 flash.admin.sync-gist-languages: Syncing Gist languages...
+flash.admin.delete-expired-gists: Deleting expired gists...
 
 flash.auth.username-exists: Username already exists
 flash.auth.invalid-credentials: Invalid credentials
@@ -381,5 +392,6 @@ validation.should-only-contain-alphanumeric-characters-and-dashes: Field %s shou
 validation.not-enough: Not enough %s
 validation.invalid: Invalid %s
 validation.invalid-gist-topics: Invalid gist topics, they must start with a letter or number, consist of 50 characters or less, and can include hyphens
+validation.invalid-expiration-date: Invalid expiration date, it must be a valid date in the future
 
 html.title.admin-panel: Admin panel

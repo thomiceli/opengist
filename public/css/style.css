@@ -171,6 +171,10 @@ dl.dl-config dd {
     @apply bg-transparent dark:bg-transparent;
 }
 
+.markdown-body .markdown-alert-title svg.octicon {
+    margin-right: 0.5rem;
+}
+
 .chroma.preview.markdown pre code {
     @apply p-4;
 }

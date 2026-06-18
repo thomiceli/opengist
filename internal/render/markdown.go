@@ -54,6 +54,7 @@ func newMarkdown(extraExtensions ...goldmark.Extender) goldmark.Markdown {
 		),
 		emoji.Emoji,
 		&mermaid.Extender{},
+		&alertExtension{},
 	}
 
 	extensions = append(extensions, extraExtensions...)

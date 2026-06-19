@@ -179,6 +179,8 @@ func TestGistJson(t *testing.T) {
 		require.True(t, ok)
 		require.Contains(t, embed["js"], identifier+".js")
 		require.Contains(t, embed["js_dark"], identifier+".js?dark")
+		require.Contains(t, embed["js_light"], identifier+".js?light")
+		require.Contains(t, embed["js_auto"], identifier+".js?auto")
 		require.NotEmpty(t, embed["css"])
 		require.NotEmpty(t, embed["html"])
 	})
@@ -347,6 +349,39 @@ func TestGistJsSingleFile(t *testing.T) {
 		body, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		assert.Contains(t, string(body), "dark.css")
+		assert.Contains(t, string(body), ", false)")
+	})
+
+	t.Run("LightTheme", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js?light", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Contains(t, string(body), "light.css")
+		assert.Contains(t, string(body), ", false)")
+	})
+
+	t.Run("AutoTheme", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		// explicit ?auto
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js?auto", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Contains(t, string(body), "auto.css")
+		assert.Contains(t, string(body), "prefers-color-scheme")
+	})
+
+	t.Run("DefaultThemeIsAuto", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		// no param → auto
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Contains(t, string(body), "auto.css")
+		assert.Contains(t, string(body), "prefers-color-scheme")
 	})
 
 	t.Run("PrivateGist", func(t *testing.T) {
@@ -403,6 +438,8 @@ func TestGistJsonSingleFile(t *testing.T) {
 		require.True(t, ok)
 		assert.Contains(t, embed["js"], identifier+".js?file=file.txt")
 		assert.Contains(t, embed["js_dark"], identifier+".js?file=file.txt&dark")
+		assert.Contains(t, embed["js_light"], identifier+".js?file=file.txt&light")
+		assert.Contains(t, embed["js_auto"], identifier+".js?file=file.txt&auto")
 		assert.NotEmpty(t, embed["html"])
 	})
 

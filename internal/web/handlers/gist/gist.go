@@ -268,6 +268,15 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string, autoMode bool
                     mq.addEventListener('change', applyTheme);
                     applyTheme();
                 }
+                this.shadowRoot.querySelectorAll('.copy-embed-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var block = btn.closest('.rounded-md');
+                        var el = block && block.querySelector('.gist-content');
+                        navigator.clipboard.writeText(el ? el.textContent : '').catch(function(err) {
+                            console.error('Could not copy text: ', err);
+                        });
+                    });
+                });
             }
         });
     }

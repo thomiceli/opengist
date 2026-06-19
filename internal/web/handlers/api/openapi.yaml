@@ -901,6 +901,11 @@ components:
           items: { type: string }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the gist will be automatically deleted, or null when the gist never expires.
 
     GistFile:
       type: object
@@ -989,6 +994,17 @@ components:
           type: string
           enum: [public, unlisted, private]
           default: public
+        expire:
+          type: string
+          enum: [never, 1hour, 12hours, 1day, 7days, 15days]
+          default: never
+          description: When set, the gist is automatically deleted after the given delay.
+        expires_at:
+          type: string
+          format: date-time
+          description: >-
+            A custom expiration date (RFC3339). When set it takes precedence
+            over `expire`.
         files:
           type: object
           description: Files keyed by filename. At least one entry must have content.

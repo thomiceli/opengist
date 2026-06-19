@@ -179,6 +179,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const expireselect = document.getElementById('expire') as HTMLSelectElement | null;
+    const expireat = document.getElementById('expire_at') as HTMLInputElement | null;
+    if (expireselect && expireat) {
+        const toggleExpireAt = () => {
+            expireat.classList.toggle('hidden', expireselect.value !== 'custom');
+        };
+        expireselect.addEventListener('change', toggleExpireAt);
+        toggleExpireAt();
+    }
+
     const searchinput = document.getElementById('search') as HTMLInputElement;
     searchinput.addEventListener('focusin', () => {
         document.getElementById('search-help').classList.remove('hidden');

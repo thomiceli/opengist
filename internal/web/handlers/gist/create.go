@@ -138,6 +138,7 @@ func ProcessCreate(ctx *context.Context) error {
 
 	if isCreate {
 		gist = dto.ToGist()
+		gist.ExpiresAt = dto.ExpiresAtTimestamp()
 	} else {
 		gist = dto.ToExistingGist(gist)
 	}

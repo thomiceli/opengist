@@ -31,9 +31,16 @@ type GistFileInput struct {
 //     content are skipped. PATCH: keys must match existing filenames;
 //     null entry (or empty content+filename) deletes; unknown key with
 //     content adds a new file.
+//   - Expire      - CREATE: one of never, 1hour, 12hours, 1day, 7days, 15days.
+//     nil/empty means the gist never expires. It is ignored on PATCH.
+//   - ExpiresAt sets a custom expiration date on CREATE (RFC3339, e.g.
+//     2026-01-02T15:04:05Z). When set it takes precedence over Expire. Ignored
+//     on PATCH.
 type GistInput struct {
 	Description *string                   `json:"description,omitempty"`
 	Files       map[string]*GistFileInput `json:"files,omitempty"`
 	Title       *string                   `json:"title,omitempty"`
 	Visibility  *string                   `json:"visibility,omitempty"`
+	Expire      *string                   `json:"expire,omitempty"`
+	ExpiresAt   *string                   `json:"expires_at,omitempty"`
 }

@@ -93,6 +93,7 @@
         {{ end }}
         <p class="mt-1 max-w-2xl text-sm text-slate-500">{{ .locale.Tr "gist.header.last-active" }} <span> {{ .gist.UpdatedAt | humanTimeDiff }} </span>
             {{ if .gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> {{ visibilityStr .gist.Private false }} </span>{{ end }}
+            {{ if .gist.ExpiresAt }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200" title="{{ humanDate .gist.ExpiresAt }}"> {{ .locale.Tr "gist.header.expires" }} {{ .gist.ExpiresAt | humanTimeDiff }} </span>{{ end }}
         </p>
         <p class="mt-1 text-sm max-w-2xl text-slate-600 dark:text-slate-400">{{ .gist.Description }}</p>
         {{ if .gist.Topics }}

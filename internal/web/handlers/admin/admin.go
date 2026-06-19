@@ -1,15 +1,16 @@
 package admin
 
 import (
+	"runtime"
+	"strconv"
+	"time"
+
 	"github.com/thomiceli/opengist/internal/actions"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
-	"runtime"
-	"strconv"
-	"time"
 )
 
 func AdminIndex(ctx *context.Context) error {
@@ -49,6 +50,7 @@ func AdminIndex(ctx *context.Context) error {
 	ctx.SetData("resetHooks", actions.IsRunning(actions.ResetHooks))
 	ctx.SetData("indexGists", actions.IsRunning(actions.IndexGists))
 	ctx.SetData("syncGistLanguages", actions.IsRunning(actions.SyncGistLanguages))
+	ctx.SetData("deleteExpiredGists", actions.IsRunning(actions.DeleteExpiredGists))
 	return ctx.Html("admin_index.html")
 }
 
@@ -109,10 +111,6 @@ func AdminGistDelete(ctx *context.Context) error {
 	gist, err := db.GetGistByID(ctx.Param("gist"))
 	if err != nil {
 		return ctx.ErrorRes(500, "Cannot retrieve gist", err)
-	}
-
-	if err = gist.DeleteRepository(); err != nil {
-		return ctx.ErrorRes(500, "Cannot delete the repository", err)
 	}
 
 	if err = gist.Delete(); err != nil {

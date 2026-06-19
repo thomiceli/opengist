@@ -191,6 +191,7 @@ func GistJs(ctx *context.Context) error {
 	if err != nil {
 		return ctx.ErrorRes(500, "Error escaping JavaScript content", err)
 	}
+	ctx.Response().Header().Set("Cache-Control", "no-store")
 	ctx.Response().Header().Set("Content-Type", "text/javascript")
 	return ctx.PlainText(200, js)
 }

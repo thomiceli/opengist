@@ -3,6 +3,7 @@ package gist_test
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 	"testing"
@@ -382,7 +383,8 @@ func TestGistJsSingleFile(t *testing.T) {
 
 	t.Run("NonExistentFile", func(t *testing.T) {
 		_, _, username, identifier := s.CreateGist(t, "0")
-		s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=nonexistent.txt", nil, 404)
+		// 200 so the browser executes the error-placeholder script
+		s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=nonexistent.txt", nil, 200)
 	})
 
 	t.Run("DarkTheme", func(t *testing.T) {
@@ -437,18 +439,18 @@ func TestGistJsSingleFile(t *testing.T) {
 	t.Run("PrivateGist", func(t *testing.T) {
 		_, _, username, identifier := s.CreateGist(t, "2")
 
-		// Anonymous — no token
-		s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 404)
+		// Anonymous — no token; 200 so browser executes the error-placeholder script
+		s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 200)
 
 		// Invalid token
-		s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 404,
+		s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 200,
 			map[string]string{"Authorization": "Token invalidtoken"})
 
 		// Other user's valid token
 		s.Login(t, "alice")
 		aliceTok := s.CreateAccessToken(t, "alice-tok", db.ReadPermission, db.ReadPermission)
 		s.Logout()
-		s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 404,
+		s.RequestWithHeaders(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 200,
 			map[string]string{"Authorization": "Token " + aliceTok})
 
 		// Owner's valid token
@@ -460,6 +462,105 @@ func TestGistJsSingleFile(t *testing.T) {
 		body, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		assert.Contains(t, string(body), "hello world")
+	})
+}
+
+func TestGistJsEmbedError(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+	s.Register(t, "alice")
+
+	assertJsErrorPlaceholder := func(t *testing.T, resp *http.Response, wantMessage string) {
+		t.Helper()
+		assert.Equal(t, "text/javascript", resp.Header.Get("Content-Type"))
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		js := string(body)
+		assert.NotContains(t, js, "<html", "response must not be an HTML error page")
+		assert.Contains(t, js, "currentScript")
+		assert.Contains(t, js, "createElement")
+		assert.Contains(t, js, "insertBefore")
+		assert.Contains(t, js, "og-embed-err", "must inject CSS class for theming")
+		if wantMessage != "" {
+			assert.Contains(t, js, wantMessage)
+		}
+	}
+
+	t.Run("NonExistentGist", func(t *testing.T) {
+		resp := s.Request(t, "GET", "/thomas/nonexistent.js", nil, 200)
+		assertJsErrorPlaceholder(t, resp, "Gist not found")
+	})
+
+	t.Run("ThemeDark", func(t *testing.T) {
+		resp := s.Request(t, "GET", "/thomas/nonexistent.js?dark", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		js := string(body)
+		assert.Contains(t, js, "og-dark", "dark theme must force dark class")
+		assert.NotContains(t, js, "matchMedia", "dark theme must not use matchMedia")
+	})
+
+	t.Run("ThemeLight", func(t *testing.T) {
+		resp := s.Request(t, "GET", "/thomas/nonexistent.js?light", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		js := string(body)
+		assert.NotContains(t, js, "classList.add('og-dark')", "light theme must not force dark class")
+		assert.NotContains(t, js, "matchMedia", "light theme must not use matchMedia")
+	})
+
+	t.Run("ThemeAuto", func(t *testing.T) {
+		resp := s.Request(t, "GET", "/thomas/nonexistent.js", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		js := string(body)
+		assert.Contains(t, js, "matchMedia", "auto theme must use matchMedia for OS preference")
+	})
+
+	t.Run("PrivateGist", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "2")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js", nil, 200)
+		assertJsErrorPlaceholder(t, resp, "Gist not found")
+	})
+
+	t.Run("PrivateGistOtherUser", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "2")
+
+		s.Login(t, "alice")
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js", nil, 200)
+		assertJsErrorPlaceholder(t, resp, "Gist not found")
+	})
+
+	t.Run("NonExistentFile", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=nonexistent.txt", nil, 200)
+		assertJsErrorPlaceholder(t, resp, "File not found")
+	})
+
+	t.Run("DeletedFile", func(t *testing.T) {
+		// CreateGist makes a gist with file.txt + otherfile.txt; edit to remove file.txt.
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		s.Login(t, "thomas")
+		s.Request(t, "POST", "/"+username+"/"+identifier+"/edit", url.Values{
+			"title":   {"Test"},
+			"name":    {"otherfile.txt"},
+			"content": {"other content"},
+		}, 302)
+		s.Logout()
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+".js?file=file.txt", nil, 200)
+		assertJsErrorPlaceholder(t, resp, "File not found")
+		// Confirm no gist content leaks through — the body must not contain any file data.
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.NotContains(t, string(body), "hello world", "deleted file content must not appear in error response")
+		assert.NotContains(t, string(body), "other content", "other file content must not appear in error response")
+		assert.Equal(t, "no-store", resp.Header.Get("Cache-Control"))
 	})
 }
 

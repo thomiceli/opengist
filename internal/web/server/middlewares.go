@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -94,6 +95,49 @@ func (s *Server) registerMiddlewares() {
 
 }
 
+func embedErrorJs(message, theme string) string {
+	jsonLabel, _ := json.Marshal(message)
+
+	// Shadow DOM isolates styles from the host page, preventing the host's CSS
+	// from overriding the error element's colors.
+	const css = `:host{display:block;margin:8px 0}` +
+		`.og-embed-err{border:1px solid #fca5a5;border-radius:6px;padding:12px 16px;` +
+		`font-family:sans-serif;font-size:14px;color:#b91c1c;background:#fef2f2}` +
+		`.og-embed-err.og-dark{border-color:#f87171;color:#fca5a5;background:#232429}`
+	jsonCSS, _ := json.Marshal(css)
+
+	var themeScript string
+	switch theme {
+	case "dark":
+		themeScript = "\n    el.classList.add('og-dark');"
+	case "light":
+		// light is the default, no extra script needed
+	default: // "auto"
+		themeScript = `
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var applyTheme = function() { el.classList.toggle('og-dark', mq.matches); };
+    mq.addEventListener('change', applyTheme);
+    applyTheme();`
+	}
+
+	return fmt.Sprintf(`(function() {
+    var currentScript = document.currentScript || (function() {
+        var scripts = document.getElementsByTagName('script');
+        return scripts[scripts.length - 1];
+    })();
+    var host = document.createElement('div');
+    var shadow = host.attachShadow({ mode: 'open' });
+    var style = document.createElement('style');
+    style.textContent = %s;
+    var el = document.createElement('div');
+    el.className = 'og-embed-err';
+    el.textContent = %s;%s
+    shadow.appendChild(style);
+    shadow.appendChild(el);
+    currentScript.parentNode.insertBefore(host, currentScript.nextSibling);
+})();`, string(jsonCSS), string(jsonLabel), themeScript)
+}
+
 func (s *Server) errorHandler(err error, ctx echo.Context) {
 	data, _ := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
 	if data == nil {
@@ -113,6 +157,32 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 	}
 
 	if ctx.Response().Committed {
+		return
+	}
+
+	if data["gistpage"] == "js" {
+		params := ctx.QueryParams()
+		theme := "auto"
+		if _, ok := params["dark"]; ok {
+			theme = "dark"
+		} else if _, ok := params["light"]; ok {
+			theme = "light"
+		}
+		locale := data["locale"].(*i18n.Locale)
+		message := locale.String("error.internal_server_error")
+		if httpErr.Code < 500 {
+			message = fmt.Sprintf("%v", httpErr.Message)
+		}
+		ctx.Response().Header().Set("Cache-Control", "no-store")
+		ctx.Response().Header().Set("Content-Type", "text/javascript")
+		// Always return 200 so browsers execute the script — non-2xx responses
+		// are silently dropped by <script src> and the placeholder never renders.
+		if err := ctx.String(http.StatusOK, embedErrorJs(message, theme)); err != nil {
+			if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
+				return
+			}
+			log.Fatal().Err(err).Send()
+		}
 		return
 	}
 
@@ -482,13 +552,13 @@ func gistInit(next Handler) Handler {
 
 		gist, err := db.GetGist(userName, gistName)
 		if err != nil {
-			return ctx.NotFound("Gist not found")
+			return ctx.NotFound(ctx.Tr("error.gist_not_found"))
 		}
 
 		// Expired gists are removed by a background job, but it may not have run
 		// yet so hide them in the meantime so they're never served past expiry.
 		if gist.IsExpired() {
-			return ctx.NotFound("Gist not found")
+			return ctx.NotFound(ctx.Tr("error.gist_not_found"))
 		}
 
 		if gist.Private == db.PrivateVisibility {
@@ -497,7 +567,7 @@ func gistInit(next Handler) Handler {
 				if tokenUser := getUserByToken(ctx); tokenUser != nil && tokenUser.ID == gist.UserID {
 					// Token is valid and belongs to gist owner, allow access
 				} else {
-					return ctx.NotFound("Gist not found")
+					return ctx.NotFound(ctx.Tr("error.gist_not_found"))
 				}
 			}
 		}

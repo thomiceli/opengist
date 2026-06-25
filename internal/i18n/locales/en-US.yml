@@ -367,7 +367,7 @@ flash.auth.username-exists: Username already exists
 flash.auth.invalid-credentials: Invalid credentials
 flash.auth.account-linked-oauth: Account linked to %s
 flash.auth.account-unlinked-oauth: Account unlinked from %s
-flash.auth.user-sshkeys-not-retrievable: Could not get user keys
+flash.auth.user-sshkeys-not-retrievable: Could not import SSH keys from your provider. Your account was created, but you may need to add your SSH keys manually.
 flash.auth.user-sshkeys-not-created: Could not create ssh key
 flash.auth.must-be-logged-in: You must be logged in to access gists
 flash.auth.passkey-registred: Passkey %s registered

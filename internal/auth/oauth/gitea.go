@@ -2,7 +2,7 @@ package oauth
 
 import (
 	gocontext "context"
-
+	"fmt"
 	"net/http"
 
 	"github.com/markbates/goth"
@@ -73,6 +73,10 @@ func (p *GiteaCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("gitea API returned status code %d", resp.StatusCode)
+	}
 
 	return readKeys(resp)
 }

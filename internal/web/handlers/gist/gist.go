@@ -60,7 +60,7 @@ func GistJson(ctx *context.Context) error {
 			return ctx.ErrorRes(500, "Error fetching file", err)
 		}
 		if file == nil {
-			return ctx.NotFound("File not found")
+			return ctx.NotFound(ctx.Tr("error.file_not_found"))
 		}
 		files = []*git.File{file}
 	} else {
@@ -154,7 +154,7 @@ func GistJs(ctx *context.Context) error {
 			return ctx.ErrorRes(500, "Error fetching file", err)
 		}
 		if file == nil {
-			return ctx.NotFound("File not found")
+			return ctx.NotFound(ctx.Tr("error.file_not_found"))
 		}
 		files = []*git.File{file}
 	} else {

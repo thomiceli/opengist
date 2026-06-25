@@ -1,8 +1,10 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/web/handlers/api/v1/types"
 )
 
@@ -12,11 +14,16 @@ import (
 // (followers, repos, ...) are still populated with the spec-shaped URLs so
 // clients can parse cleanly.
 func (u *User) ToSimpleAPI() types.SimpleUser {
+	avatarURL := u.AvatarURL
+	if u.HasUploadedAvatar() {
+		avatarURL = fmt.Sprintf("%s/avatar/%s", config.C.ExternalUrl, u.AvatarURL)
+	}
+
 	return types.SimpleUser{
 		ID:        u.ID,
 		Login:     u.Username,
 		Username:  u.Username,
-		AvatarURL: u.AvatarURL,
+		AvatarURL: avatarURL,
 		Type:      "User",
 		CreatedAt: time.Unix(u.CreatedAt, 0).UTC(),
 	}

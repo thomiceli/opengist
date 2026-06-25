@@ -138,6 +138,9 @@ gist.revision.no-revisions: No revisions to show
 gist.revision-of: Revision of %s
 
 settings: Settings
+settings.avatar: Avatar
+settings.avatar-help: Upload a custom avatar to override Gravatar
+settings.avatar-remove: Remove avatar
 settings.email: Email
 settings.email-help: Used for commits and Gravatar
 settings.email-set: Set email
@@ -378,6 +381,10 @@ flash.gist.fork-own-gist: Unable to fork own gists
 flash.gist.forked: Gist has been forked
 
 flash.user.email-updated: Email updated
+flash.user.avatar-updated: Avatar updated
+flash.user.avatar-deleted: Avatar removed
+flash.user.avatar-invalid: Invalid image file, allowed formats are PNG, JPEG, GIF and WebP
+flash.user.avatar-too-large: Image file is too large, the maximum size is 5 MB
 flash.user.invalid-ssh-key: Invalid SSH key
 flash.user.ssh-key-added: SSH key added
 flash.user.ssh-key-deleted: SSH key deleted

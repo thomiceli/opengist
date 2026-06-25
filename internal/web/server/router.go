@@ -36,6 +36,8 @@ func (s *Server) registerRoutes() {
 
 		r.GET("/healthcheck", health.Healthcheck)
 
+		r.Static("/avatar", settings.AvatarsDir())
+
 		r.GET("/register", auth.Register)
 		r.POST("/register", auth.ProcessRegister)
 		r.GET("/login", auth.Login)
@@ -64,6 +66,8 @@ func (s *Server) registerRoutes() {
 			sA.GET("/style", settings.UserStyle)
 			sA.POST("/style", settings.ProcessUserStyle)
 			sA.POST("/email", settings.EmailProcess)
+			sA.POST("/avatar", settings.AvatarProcess)
+			sA.DELETE("/avatar", settings.AvatarDelete)
 			sA.DELETE("/account", settings.AccountDeleteProcess)
 			sA.POST("/ssh-keys", settings.SshKeysProcess)
 			sA.DELETE("/ssh-keys/:id", settings.SshKeysDelete)

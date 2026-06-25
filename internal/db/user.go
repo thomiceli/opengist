@@ -2,8 +2,11 @@ package db
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 )
@@ -17,7 +20,7 @@ type User struct {
 	CreatedAt          int64
 	Email              string
 	MD5Hash            string // for gravatar, if no Email is specified, the value is random
-	AvatarURL          string
+	AvatarURL          string // an absolute URL (from an OAuth provider) or a bare filename for a manually uploaded avatar stored under {home}/avatars
 	GithubID           string
 	GitlabID           string
 	GiteaID            string
@@ -94,6 +97,11 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 	// Delete user directory
 	if err = git.DeleteUserDirectory(user.Username); err != nil {
 		return err
+	}
+
+	// Delete uploaded avatar, if any
+	if user.HasUploadedAvatar() {
+		_ = os.Remove(filepath.Join(config.GetHomeDir(), "avatars", filepath.Base(user.AvatarURL)))
 	}
 
 	return nil
@@ -228,10 +236,13 @@ func (user *User) DeleteProviderID(provider string) error {
 	}
 
 	if providerIDField, ok := providerIDFields[provider]; ok {
-		return db.Model(&user).
-			Update(providerIDField, nil).
-			Update("avatar_url", nil).
-			Error
+		query := db.Model(&user).Update(providerIDField, nil)
+		// Only clear the avatar when it came from the provider, not when the
+		// user has uploaded their own.
+		if !user.HasUploadedAvatar() {
+			query = query.Update("avatar_url", nil)
+		}
+		return query.Error
 	}
 
 	return nil
@@ -257,6 +268,12 @@ func (user *User) GetStyle() *UserStyleDTO {
 		return nil
 	}
 	return style
+}
+
+// HasUploadedAvatar reports whether the user's AvatarURL refers to a manually
+// uploaded avatar (a bare filename) rather than an absolute OAuth provider URL.
+func (user *User) HasUploadedAvatar() bool {
+	return user.AvatarURL != "" && !strings.Contains(user.AvatarURL, "://")
 }
 
 // -- DTO -- //

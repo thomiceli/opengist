@@ -75,7 +75,7 @@ func (p *GiteaCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Gitea API returned status code %d", resp.StatusCode)
+		return nil, fmt.Errorf("gitea API returned status code %d", resp.StatusCode)
 	}
 
 	return readKeys(resp)

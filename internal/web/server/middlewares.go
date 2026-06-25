@@ -158,6 +158,7 @@ func dataInit(next Handler) Handler {
 		}
 
 		ctx.SetData("baseHttpUrl", baseHttpUrl)
+		ctx.SetData("canonicalUrl", baseHttpUrl+ctx.Request().URL.Path)
 
 		return next(ctx)
 	}

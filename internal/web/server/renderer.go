@@ -70,6 +70,10 @@ func (s *Server) setFuncMap() {
 			return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
 		},
 		"avatarUrl": func(user *db.User, noGravatar bool) string {
+			if user.HasUploadedAvatar() {
+				return fmt.Sprintf("%s/avatar/%s", config.C.ExternalUrl, user.AvatarURL)
+			}
+
 			if user.AvatarURL != "" {
 				return user.AvatarURL
 			}

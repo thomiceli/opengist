@@ -1,6 +1,44 @@
 {{ template "header" .}}
 {{ template "settings_header" .}}
 <div class="relative mx-auto max-w-160 space-y-8">
+    <div class="w-full">
+        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
+                {{ .locale.Tr "settings.avatar" }}
+            </h2>
+            <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
+                {{ .locale.Tr "settings.avatar-help" }}
+            </h3>
+            <div class="flex items-center gap-x-4">
+                <div class="shrink-0">
+                    {{ if not (shouldGenerateAvatar .userLogged .DisableGravatar) }}
+                        <img class="h-16 w-16 rounded-md border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .userLogged .DisableGravatar }}" alt="{{ .userLogged.Username }}'s Avatar">
+                    {{ else }}
+                        <svg class="h-16 w-16 rounded-md border border-gray-200 dark:border-gray-700"
+                             data-jdenticon-value="{{ .userLogged.Username }}"
+                             width="64"
+                             height="64">
+                        </svg>
+                    {{ end }}
+                </div>
+                <div class="flex-auto">
+                    <form class="flex flex-wrap items-center gap-3" action="{{ $.c.ExternalUrl }}/settings/avatar" method="post" enctype="multipart/form-data">
+                        <input id="avatar" name="avatar" type="file" accept="image/png,image/jpeg,image/gif,image/webp" required onchange="this.form.submit()" class="block text-sm text-slate-700 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600 file:cursor-pointer">
+                        {{ .csrfHtml }}
+                    </form>
+                    {{ if .userLogged.HasUploadedAvatar }}
+                    <form class="mt-3" action="{{ $.c.ExternalUrl }}/settings/avatar" method="post">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-slate-700 dark:text-slate-300 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            {{ .locale.Tr "settings.avatar-remove" }}
+                        </button>
+                        {{ .csrfHtml }}
+                    </form>
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="sm:grid {{ if not .disableForm }}grid-cols-2{{ else }}grid-cols-1{{ end }} gap-x-4 md:gap-x-8 space-y-8 md:space-y-0">
         <div class="w-full">
             <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10 h-full">

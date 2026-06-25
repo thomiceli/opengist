@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -244,16 +245,22 @@ func InitLog() {
 	}
 }
 
+// gitVersionRegex extracts the major and minor numbers from a git version string.
+// It tolerates a leading "git version " prefix as well as suffixes such as the
+// ".windows.1" appended by Git for Windows (e.g. "git version 2.50.1.windows.1").
+var gitVersionRegex = regexp.MustCompile(`(\d+)\.(\d+)`)
+
 func CheckGitVersion(version string) (bool, error) {
-	versionParts := strings.Split(version, ".")
-	if len(versionParts) < 2 {
-		return false, fmt.Errorf("invalid version string")
+	matches := gitVersionRegex.FindStringSubmatch(version)
+	if matches == nil {
+		return false, fmt.Errorf("invalid version string: %q", version)
 	}
-	major, err := strconv.Atoi(versionParts[0])
+
+	major, err := strconv.Atoi(matches[1])
 	if err != nil {
 		return false, fmt.Errorf("invalid major version number")
 	}
-	minor, err := strconv.Atoi(versionParts[1])
+	minor, err := strconv.Atoi(matches[2])
 	if err != nil {
 		return false, fmt.Errorf("invalid minor version number")
 	}

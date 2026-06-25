@@ -20,6 +20,7 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers/gist"
 	"github.com/thomiceli/opengist/internal/web/handlers/git"
 	"github.com/thomiceli/opengist/internal/web/handlers/health"
+	"github.com/thomiceli/opengist/internal/web/handlers/ipc"
 	"github.com/thomiceli/opengist/internal/web/handlers/settings"
 	"github.com/thomiceli/opengist/public"
 )
@@ -158,6 +159,11 @@ func (s *Server) registerRoutes() {
 			apiV1.Any("", noRouteFoundApi)
 		}
 		r.GET("/api/openapi.yaml", api.OpenAPISpec)
+
+		ipcGroup := r.SubGroup("/api/ipc", ipcAuth)
+		ipcGroup.POST("/hook/pre-receive", ipc.PreReceive)
+		ipcGroup.POST("/hook/post-receive", ipc.PostReceive)
+
 		r.Any("/api/*", noRouteFoundApi)
 
 		r.GET("/all", gist.AllGists, checkRequireLogin, setAllGistsMode("all"))

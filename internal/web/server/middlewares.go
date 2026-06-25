@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/subtle"
 	"errors"
 	"fmt"
 	"html/template"
@@ -19,6 +20,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
+	"github.com/thomiceli/opengist/internal/ipc"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"golang.org/x/text/cases"
@@ -69,7 +71,8 @@ func (s *Server) registerMiddlewares() {
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteStrictMode,
 		Skipper: func(ctx echo.Context) bool {
-			// skip CSRF for /api (uses bearer tokens, not session cookies)
+			// skip CSRF for /api (uses bearer tokens, not session cookies); this
+			// also covers the token-authenticated IPC API under /api/ipc
 			if strings.HasPrefix(ctx.Request().URL.Path, "/api/") {
 				return true
 			}
@@ -586,6 +589,19 @@ func apiRequireAuth(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		if ctx.User == nil {
 			return ctx.ErrorJson(401, "Requires authentication", nil)
+		}
+		return next(ctx)
+	}
+}
+
+// ipcAuth guards the IPC API: only callers presenting the token derived from the
+// secret key (i.e. Opengist's own subprocesses) may proceed.
+func ipcAuth(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		got := []byte(ctx.Request().Header.Get(ipc.AuthHeader))
+		want := []byte(ipc.Token())
+		if subtle.ConstantTimeCompare(got, want) != 1 {
+			return ctx.NoContent(http.StatusUnauthorized)
 		}
 		return next(ctx)
 	}

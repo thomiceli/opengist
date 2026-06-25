@@ -2,10 +2,26 @@ package cli
 
 import (
 	"fmt"
+	"io"
+
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/auth/password"
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/urfave/cli/v2"
 )
+
+func initialize(ctx *cli.Context) {
+	if err := config.InitConfig(ctx.String("config"), io.Discard); err != nil {
+		panic(err)
+	}
+	config.InitLog()
+
+	db.DeprecationDBFilename()
+	if err := db.Setup(config.C.DBUri); err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize database")
+	}
+}
 
 var CmdAdmin = cli.Command{
 	Name:  "admin",

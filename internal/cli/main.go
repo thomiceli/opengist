@@ -97,7 +97,7 @@ func Initialize(ctx *cli.Context) {
 	}
 
 	if ok, err := config.CheckGitVersion(gitVersion); err != nil {
-		log.Fatal().Err(err).Send()
+		log.Warn().Err(err).Msg("Could not determine the git version; some features may not work as expected")
 	} else if !ok {
 		log.Warn().Msg("Git version may be too old, as Opengist has not been tested prior git version 2.28 and some features would not work. " +
 			"Current git version: " + gitVersion)

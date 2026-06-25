@@ -3,6 +3,7 @@ package oauth
 import (
 	gocontext "context"
 	gojson "encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -75,6 +76,10 @@ func (p *GitLabCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("GitLab API returned status code %d", resp.StatusCode)
+	}
 
 	return readKeys(resp)
 }

@@ -396,6 +396,7 @@ validation.should-not-be-empty: Field %s should not be empty
 validation.should-not-include-sub-directory: Field %s should not include a sub directory
 validation.should-only-contain-alphanumeric-characters: Field %s should only contain alphanumeric characters
 validation.should-only-contain-alphanumeric-characters-and-dashes: Field %s should only contain alphanumeric characters and dashes
+validation.should-only-contain-alphanumeric-characters-and-dashes-and-underscores: Field %s should only contain alphanumeric characters, dashes and underscores
 validation.not-enough: Not enough %s
 validation.invalid: Invalid %s
 validation.invalid-gist-topics: Invalid gist topics, they must start with a letter or number, consist of 50 characters or less, and can include hyphens

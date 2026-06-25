@@ -19,6 +19,8 @@ func NewValidator() *OpengistValidator {
 	_ = v.RegisterValidation("notreserved", validateReservedKeywords)
 	_ = v.RegisterValidation("alphanumdash", validateAlphaNumDash)
 	_ = v.RegisterValidation("alphanumdashorempty", validateAlphaNumDashOrEmpty)
+	_ = v.RegisterValidation("alphanumdashunder", validateAlphaNumDashUnder)
+	_ = v.RegisterValidation("alphanumdashunderorempty", validateAlphaNumDashUnderOrEmpty)
 	_ = v.RegisterValidation("gisttopics", validateGistTopics)
 	_ = v.RegisterValidation("expirationdate", validateExpirationDate)
 	return &OpengistValidator{v}
@@ -47,6 +49,8 @@ func ValidationMessages(err *error, locale *i18n.Locale) string {
 			messages[i] = locale.String("validation.should-only-contain-alphanumeric-characters", e.Field())
 		case "alphanumdash", "alphanumdashorempty":
 			messages[i] = locale.String("validation.should-only-contain-alphanumeric-characters-and-dashes", e.Field())
+		case "alphanumdashunder", "alphanumdashunderorempty":
+			messages[i] = locale.String("validation.should-only-contain-alphanumeric-characters-and-dashes-and-underscores", e.Field())
 		case "min":
 			messages[i] = locale.String("validation.not-enough", e.Field())
 		case "notreserved":
@@ -80,6 +84,14 @@ func validateAlphaNumDash(fl validator.FieldLevel) bool {
 
 func validateAlphaNumDashOrEmpty(fl validator.FieldLevel) bool {
 	return regexp.MustCompile(`^$|^[a-zA-Z0-9-]+$`).MatchString(fl.Field().String())
+}
+
+func validateAlphaNumDashUnder(fl validator.FieldLevel) bool {
+	return regexp.MustCompile(`^[a-zA-Z0-9-_]+$`).MatchString(fl.Field().String())
+}
+
+func validateAlphaNumDashUnderOrEmpty(fl validator.FieldLevel) bool {
+	return regexp.MustCompile(`^$|^[a-zA-Z0-9-_]+$`).MatchString(fl.Field().String())
 }
 
 func validateGistTopics(fl validator.FieldLevel) bool {

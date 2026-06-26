@@ -324,9 +324,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // File upload functionality
     let uploadedFileUUIDs: {uuid: string, filename: string}[] = [];
-    const fileUploadInput = document.getElementById("file-upload") as HTMLInputElement;
-    const uploadedFilesContainer = document.getElementById("uploaded-files")!;
-    const fileUploadZone = document.getElementById("file-upload-zone")!.querySelector('.border-dashed') as HTMLElement;
+    const fileUploadInput = document.getElementById("file-upload") as HTMLInputElement | null;
+    const uploadedFilesContainer = document.getElementById("uploaded-files");
+    const fileUploadZoneEl = document.getElementById("file-upload-zone");
+
+    // File upload may be disabled instance-wide, in which case the upload zone is absent
+    if (!fileUploadInput || !uploadedFilesContainer || !fileUploadZoneEl) {
+        return;
+    }
+    const fileUploadZone = fileUploadZoneEl.querySelector('.border-dashed') as HTMLElement;
 
     // Handle file selection
     const handleFiles = (files: FileList) => {

@@ -251,6 +251,15 @@ func checkRequireLogin(next Handler) Handler {
 	return makeCheckRequireLogin(false)(next)
 }
 
+func checkFileUploadEnabled(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		if config.C.DisableFileUpload {
+			return ctx.ErrorRes(403, ctx.Tr("error.file-upload-disabled"), nil)
+		}
+		return next(ctx)
+	}
+}
+
 // makeApiCheckRequireLogin is the /api/v1 counterpart of makeCheckRequireLogin:
 // it enforces the instance's RequireLogin / AllowGistsWithoutLogin settings on
 // anonymous gist reads, but responds with a JSON 401 instead of redirecting to

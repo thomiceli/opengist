@@ -101,9 +101,7 @@ func DownloadZip(ctx *context.Context) error {
 	ctx.Response().Header().Set("Content-Type", "application/zip")
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename="+gist.Identifier()+".zip")
 	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(zipFile.Bytes())))
-	_, err = ctx.Response().Write(zipFile.Bytes())
-	if err != nil {
-		return ctx.ErrorRes(500, "Error writing the zip archive", err)
-	}
+
+	_, _ = ctx.Response().Write(zipFile.Bytes())
 	return nil
 }

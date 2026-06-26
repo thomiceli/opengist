@@ -16,6 +16,17 @@ db-uri: postgres://postgres:passwd@localhost:5432/opengist_db
 OG_DB_URI=postgres://postgres:passwd@localhost:5432/opengist_db
 ```
 
+### Unix socket
+
+To connect through a Unix socket instead of TCP, omit the host/port and set the `socket` query parameter to the directory containing the socket:
+
+`postgres://<user>:<password>@/<database>?socket=<socket-directory>`
+
+```yaml
+# Example
+db-uri: postgres://postgres:passwd@/opengist_db?socket=/var/run/postgresql
+```
+
 ### Docker Compose
 ```yml
 services:

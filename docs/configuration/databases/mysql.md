@@ -16,6 +16,17 @@ db-uri: mysql://root:passwd@localhost:3306/opengist_db
 OG_DB_URI=mysql://root:passwd@localhost:3306/opengist_db
 ```
 
+### Unix socket
+
+To connect through a Unix socket instead of TCP, omit the host/port and set the `socket` query parameter to the socket path:
+
+`mysql://<user>:<password>@/<database>?socket=<socket-path>`
+
+```yaml
+# Example
+db-uri: mysql://root:passwd@/opengist_db?socket=/var/run/mysqld/mysqld.sock
+```
+
 ### Docker Compose
 ```yml
 services:

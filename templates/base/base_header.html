@@ -9,7 +9,7 @@
 
     <base href="{{ $.c.ExternalUrl }}" />
 
-    <script>
+    <script nonce="{{ .cspNonce }}">
         window.opengist_base_url = "{{ $.c.ExternalUrl }}";
         window.opengist_locale = "{{ .locale.Code }}".substring(0, 2);
         const checkTheme = () => {

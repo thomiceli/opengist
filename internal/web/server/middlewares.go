@@ -1,6 +1,8 @@
 package server
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"html/template"
@@ -131,6 +133,7 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 func dataInit(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		ctx.SetData("loadStartTime", time.Now())
+		ctx.SetData("cspNonce", newCSPNonce())
 
 		if err := loadSettings(ctx); err != nil {
 			return ctx.ErrorRes(500, "Cannot load settings", err)
@@ -346,6 +349,20 @@ func sessionInit(next Handler) Handler {
 		ctx.SetData("userLogged", nil)
 		return next(ctx)
 	}
+}
+
+// newCSPNonce returns a fresh random nonce for the Content-Security-Policy of
+// the current request. The same value is exposed to templates (so inline
+// scripts can carry a matching nonce attribute) and used in the CSP header set
+// by handlers that opt into a strict policy (e.g. the gist view page).
+func newCSPNonce() string {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		// rand.Read never returns an error on supported platforms; fall back to
+		// an empty nonce rather than serving a non-functional inline script.
+		return ""
+	}
+	return base64.RawStdEncoding.EncodeToString(b)
 }
 
 func csrfInit(next Handler) Handler {

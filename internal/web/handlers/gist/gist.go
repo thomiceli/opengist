@@ -6,6 +6,7 @@ import (
 	gojson "encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -44,6 +45,7 @@ func GistIndex(ctx *context.Context) error {
 	ctx.SetData("hasMoreFiles", hasMoreFiles)
 	ctx.SetData("revision", revision)
 	ctx.SetData("htmlTitle", gist.Title)
+	setGistCSP(ctx)
 	return ctx.Html("gist.html")
 }
 
@@ -300,4 +302,23 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string, autoMode bool
 	)
 
 	return js, nil
+}
+
+func setGistCSP(ctx *context.Context) {
+	if os.Getenv("OG_DEV") == "1" {
+		return
+	}
+	nonce, _ := ctx.GetData("cspNonce").(string)
+	ctx.Response().Header().Set("Content-Security-Policy",
+		"default-src 'self'; "+
+			"script-src 'self' 'nonce-"+nonce+"'; "+
+			"style-src 'self' 'unsafe-inline'; "+
+			"img-src 'self' data:; "+
+			"font-src 'self' data:; "+
+			"connect-src 'self'; "+
+			// 'self' (not 'none') so same-origin PDF previews keep working via
+			// the <embed> element PDFObject inserts.
+			"object-src 'self'; "+
+			"base-uri 'self'; "+
+			"frame-ancestors 'self'")
 }

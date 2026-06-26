@@ -107,9 +107,6 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 		data["error"] = httpErr
 	}
 
-	// If the response is already committed, writing another body would corrupt it
-	// (e.g. "http: wrote more than the declared Content-Length", which previously
-	// crashed the server via log.Fatal). Nothing left we can safely do.
 	if ctx.Response().Committed {
 		return
 	}
@@ -122,7 +119,6 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 		renderErr = ctx.Render(httpErr.Code, "error", data)
 	}
 
-	// Failing to render the error page must never crash the server.
 	if renderErr != nil && !isClientGone(renderErr) {
 		log.Error().Err(renderErr).Send()
 	}

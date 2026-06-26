@@ -90,42 +90,46 @@ func (s *Server) registerMiddlewares() {
 }
 
 func (s *Server) errorHandler(err error, ctx echo.Context) {
+	data, _ := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
+	if data == nil {
+		data = echo.Map{}
+	}
+
 	var httpErr *context.HTTPError
-	data := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
 	if errors.As(err, &httpErr) {
-		acceptJson := strings.Contains(ctx.Request().Header.Get("Accept"), "application/json")
 		data["error"] = err
-		if acceptJson || data["err_render"] == "json" {
-			if err := ctx.JSON(httpErr.Code, httpErr); err != nil {
-				if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-					return
-				}
-				log.Fatal().Err(err).Send()
-			}
+	} else {
+		if isClientGone(err) {
 			return
 		}
+		log.Error().Err(err).Send()
+		httpErr = &context.HTTPError{Message: err.Error(), Code: http.StatusInternalServerError}
+		data["error"] = httpErr
+	}
 
-		if err := ctx.Render(httpErr.Code, "error", data); err != nil {
-			if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-				return
-			}
-			log.Fatal().Err(err).Send()
-		}
+	// If the response is already committed, writing another body would corrupt it
+	// (e.g. "http: wrote more than the declared Content-Length", which previously
+	// crashed the server via log.Fatal). Nothing left we can safely do.
+	if ctx.Response().Committed {
 		return
 	}
 
-	if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-		return
+	acceptJson := strings.Contains(ctx.Request().Header.Get("Accept"), "application/json")
+	var renderErr error
+	if acceptJson || data["err_render"] == "json" {
+		renderErr = ctx.JSON(httpErr.Code, httpErr)
+	} else {
+		renderErr = ctx.Render(httpErr.Code, "error", data)
 	}
-	log.Error().Err(err).Send()
-	httpErr = &context.HTTPError{Message: err.Error(), Code: http.StatusInternalServerError}
-	data["error"] = httpErr
-	if err := ctx.Render(500, "error", data); err != nil {
-		if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-			return
-		}
-		log.Fatal().Err(err).Send()
+
+	// Failing to render the error page must never crash the server.
+	if renderErr != nil && !isClientGone(renderErr) {
+		log.Error().Err(renderErr).Send()
 	}
+}
+
+func isClientGone(err error) bool {
+	return errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET)
 }
 
 func dataInit(next Handler) Handler {

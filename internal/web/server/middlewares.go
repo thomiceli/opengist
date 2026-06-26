@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/rand"
+  "crypto/subtle"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -21,6 +22,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
+	"github.com/thomiceli/opengist/internal/ipc"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"golang.org/x/text/cases"
@@ -71,7 +73,8 @@ func (s *Server) registerMiddlewares() {
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteStrictMode,
 		Skipper: func(ctx echo.Context) bool {
-			// skip CSRF for /api (uses bearer tokens, not session cookies)
+			// skip CSRF for /api (uses bearer tokens, not session cookies); this
+			// also covers the token-authenticated IPC API under /api/ipc
 			if strings.HasPrefix(ctx.Request().URL.Path, "/api/") {
 				return true
 			}
@@ -92,42 +95,42 @@ func (s *Server) registerMiddlewares() {
 }
 
 func (s *Server) errorHandler(err error, ctx echo.Context) {
+	data, _ := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
+	if data == nil {
+		data = echo.Map{}
+	}
+
 	var httpErr *context.HTTPError
-	data := ctx.Request().Context().Value(context.DataKeyStr).(echo.Map)
 	if errors.As(err, &httpErr) {
-		acceptJson := strings.Contains(ctx.Request().Header.Get("Accept"), "application/json")
 		data["error"] = err
-		if acceptJson || data["err_render"] == "json" {
-			if err := ctx.JSON(httpErr.Code, httpErr); err != nil {
-				if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-					return
-				}
-				log.Fatal().Err(err).Send()
-			}
+	} else {
+		if isClientGone(err) {
 			return
 		}
+		log.Error().Err(err).Send()
+		httpErr = &context.HTTPError{Message: err.Error(), Code: http.StatusInternalServerError}
+		data["error"] = httpErr
+	}
 
-		if err := ctx.Render(httpErr.Code, "error", data); err != nil {
-			if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-				return
-			}
-			log.Fatal().Err(err).Send()
-		}
+	if ctx.Response().Committed {
 		return
 	}
 
-	if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-		return
+	acceptJson := strings.Contains(ctx.Request().Header.Get("Accept"), "application/json")
+	var renderErr error
+	if acceptJson || data["err_render"] == "json" {
+		renderErr = ctx.JSON(httpErr.Code, httpErr)
+	} else {
+		renderErr = ctx.Render(httpErr.Code, "error", data)
 	}
-	log.Error().Err(err).Send()
-	httpErr = &context.HTTPError{Message: err.Error(), Code: http.StatusInternalServerError}
-	data["error"] = httpErr
-	if err := ctx.Render(500, "error", data); err != nil {
-		if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) {
-			return
-		}
-		log.Fatal().Err(err).Send()
+
+	if renderErr != nil && !isClientGone(renderErr) {
+		log.Error().Err(renderErr).Send()
 	}
+}
+
+func isClientGone(err error) bool {
+	return errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET)
 }
 
 func dataInit(next Handler) Handler {
@@ -161,6 +164,7 @@ func dataInit(next Handler) Handler {
 		}
 
 		ctx.SetData("baseHttpUrl", baseHttpUrl)
+		ctx.SetData("canonicalUrl", baseHttpUrl+ctx.Request().URL.Path)
 
 		return next(ctx)
 	}
@@ -602,6 +606,19 @@ func apiRequireAuth(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		if ctx.User == nil {
 			return ctx.ErrorJson(401, "Requires authentication", nil)
+		}
+		return next(ctx)
+	}
+}
+
+// ipcAuth guards the IPC API: only callers presenting the token derived from the
+// secret key (i.e. Opengist's own subprocesses) may proceed.
+func ipcAuth(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		got := []byte(ctx.Request().Header.Get(ipc.AuthHeader))
+		want := []byte(ipc.Token())
+		if subtle.ConstantTimeCompare(got, want) != 1 {
+			return ctx.NoContent(http.StatusUnauthorized)
 		}
 		return next(ctx)
 	}

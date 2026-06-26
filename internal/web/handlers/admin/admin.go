@@ -9,6 +9,7 @@ import (
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	opengistssh "github.com/thomiceli/opengist/internal/ssh"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
 )
@@ -51,6 +52,8 @@ func AdminIndex(ctx *context.Context) error {
 	ctx.SetData("indexGists", actions.IsRunning(actions.IndexGists))
 	ctx.SetData("syncGistLanguages", actions.IsRunning(actions.SyncGistLanguages))
 	ctx.SetData("deleteExpiredGists", actions.IsRunning(actions.DeleteExpiredGists))
+	ctx.SetData("syncSSHKeys", actions.IsRunning(actions.SyncSSHKeys))
+	ctx.SetData("sshManagesAuthorizedKeys", config.C.SshManagesAuthorizedKeys())
 	return ctx.Html("admin_index.html")
 }
 
@@ -102,6 +105,7 @@ func AdminUserDelete(ctx *context.Context) error {
 	if err := user.Delete(); err != nil {
 		return ctx.ErrorRes(500, "Cannot delete this user", err)
 	}
+	opengistssh.SyncAuthorizedKeysLogged()
 
 	ctx.AddFlash(ctx.Tr("flash.admin.user-deleted"), "success")
 	return ctx.RedirectTo("/admin-panel/users")

@@ -840,20 +840,24 @@ func (gist *Gist) HTTPCloneURL(baseURL string) string {
 // SSHCloneURL returns the SSH clone URL. `fallbackHost` is the request's Host
 // header (or any host:port-shaped string) used when SshExternalDomain isn't
 // configured — only its hostname part is kept. Returns "" when SSH git access
-// is disabled (config.SshGit == false).
+// is disabled (ssh.git-enabled = disabled).
 func (gist *Gist) SSHCloneURL(fallbackHost string) string {
-	if !config.C.SshGit {
+	if !config.C.SshEnabled() {
 		return ""
 	}
 	sshDomain := config.C.SshExternalDomain
 	if sshDomain == "" {
 		sshDomain = strings.Split(fallbackHost, ":")[0]
 	}
+	var user string
+	if config.C.SshUsername != "" {
+		user = config.C.SshUsername + "@"
+	}
 	path := gist.User.Username + "/" + gist.Identifier() + ".git"
 	if config.C.SshPort == "22" {
-		return sshDomain + ":" + path
+		return user + sshDomain + ":" + path
 	}
-	return "ssh://" + sshDomain + ":" + config.C.SshPort + "/" + path
+	return "ssh://" + user + sshDomain + ":" + config.C.SshPort + "/" + path
 }
 
 func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {

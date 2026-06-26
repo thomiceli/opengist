@@ -8,7 +8,11 @@
     {{ end }}
 
     <base href="{{ $.c.ExternalUrl }}" />
-
+    
+    {{ if .canonicalUrl }}
+        <link rel="canonical" href="{{ .canonicalUrl }}" />
+    {{ end }}
+  
     <script nonce="{{ .cspNonce }}">
         window.opengist_base_url = "{{ $.c.ExternalUrl }}";
         window.opengist_locale = "{{ .locale.Code }}".substring(0, 2);

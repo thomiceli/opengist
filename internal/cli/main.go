@@ -69,7 +69,7 @@ func App() error {
 	app.Usage = "A self-hosted pastebin powered by Git."
 	app.HelpName = "opengist"
 
-	app.Commands = []*cli.Command{&CmdVersion, &CmdStart, &CmdHook, &CmdAdmin}
+	app.Commands = []*cli.Command{&CmdVersion, &CmdStart, &CmdHook, &CmdAdmin, &CmdKeys, &CmdShell}
 	app.DefaultCommand = CmdStart.Name
 	app.Flags = []cli.Flag{
 		&ConfigFlag,

@@ -10,11 +10,15 @@ import (
 	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
-	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
 )
 
-func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
+// AuthorizeGitCommand validates a single git pack command (upload-pack /
+// receive-pack) and checks that the given SSH key may run it against the
+// referenced gist, returning the gist and the bare verb. It is shared by the
+// embedded SSH server (which has the key string) and the IPC handler backing the
+// OpenSSH shim (which resolves the key id to its string).
+func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string, error) {
 	verb, args := parseCommand(gitCmd)
 	if !strings.HasPrefix(verb, "git-") {
 		verb = ""
@@ -22,13 +26,13 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 	verb = strings.TrimPrefix(verb, "git-")
 
 	if verb != "upload-pack" && verb != "receive-pack" {
-		return errors.New("invalid command")
+		return nil, "", errors.New("invalid command")
 	}
 
 	repoFullName := strings.ToLower(strings.Trim(args, "'"))
 	repoFields := strings.SplitN(repoFullName, "/", 2)
 	if len(repoFields) != 2 {
-		return errors.New("invalid gist path")
+		return nil, "", errors.New("invalid gist path")
 	}
 
 	userName := strings.ToLower(repoFields[0])
@@ -36,13 +40,13 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 
 	gist, err := db.GetGist(userName, gistName)
 	if err != nil {
-		return errors.New("gist not found")
+		return nil, "", errors.New("gist not found")
 	}
 
 	allowUnauthenticated, err := auth.ShouldAllowUnauthenticatedGistAccess(db.AuthInfo{}, true)
 	if err != nil {
 		errorSsh("Failed to get auth info", err)
-		return errors.New("internal server error")
+		return nil, "", errors.New("internal server error")
 	}
 
 	// Check for the key if :
@@ -66,12 +70,26 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
-				return errors.New("gist not found")
+				return nil, "", errors.New("gist not found")
 			}
 			errorSsh("Failed to get user by SSH key id", err)
-			return errors.New("internal server error")
+			return nil, "", errors.New("internal server error")
 		}
 		_ = db.SSHKeyLastUsedNow(pubKey.Content)
+	}
+
+	return gist, verb, nil
+}
+
+// RunGitCommand authorizes and runs a single git pack command (upload-pack /
+// receive-pack) for the gist referenced by gitCmd, on behalf of the given SSH
+// key. It is transport-agnostic: the embedded SSH server passes its channel as
+// in/out/errOut. (The OpenSSH shim authorizes over the IPC API and runs git
+// itself, so it does not use this.)
+func RunGitCommand(in io.Reader, out, errOut io.Writer, gitCmd string, key string, ip string) error {
+	gist, verb, err := AuthorizeGitCommand(gitCmd, key, ip)
+	if err != nil {
+		return err
 	}
 
 	repositoryPath := git.RepositoryPath(gist.User.Username, gist.Uuid)
@@ -90,10 +108,10 @@ func runGitCommand(ch ssh.Channel, gitCmd string, key string, ip string) error {
 
 	// avoid blocking
 	go func() {
-		_, _ = io.Copy(stdin, ch)
+		_, _ = io.Copy(stdin, in)
 	}()
-	_, _ = io.Copy(ch, stdout)
-	_, _ = io.Copy(ch, stderr)
+	_, _ = io.Copy(out, stdout)
+	_, _ = io.Copy(errOut, stderr)
 
 	err = cmd.Wait()
 	if err != nil {

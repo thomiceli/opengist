@@ -19,7 +19,7 @@ import (
 )
 
 func Start() {
-	if !config.C.SshGit {
+	if !config.C.SshBuiltin() {
 		return
 	}
 
@@ -110,7 +110,7 @@ func handleConnexion(channels <-chan ssh.NewChannel, key string, ip string) {
 						payloadCmd = payloadCmd[i:]
 					}
 
-					if err = runGitCommand(ch, payloadCmd, key, ip); err != nil {
+					if err = RunGitCommand(ch, ch, ch, payloadCmd, key, ip); err != nil {
 						_, _ = ch.Stderr().Write([]byte("Opengist: " + err.Error() + "\r\n"))
 					}
 					_, _ = ch.SendRequest("exit-status", false, []byte{0, 0, 0, 0})

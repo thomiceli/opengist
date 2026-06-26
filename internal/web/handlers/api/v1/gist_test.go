@@ -133,7 +133,7 @@ func TestGetGist_ResponseShape(t *testing.T) {
 		config.C.SshExternalDomain, config.C.SshPort = prevDomain, prevPort
 	})
 	config.C.HttpGit = true
-	config.C.SshGit = true
+	config.C.SshGit = config.SshServerBuiltin
 	config.C.SshExternalDomain = "gist.example.com"
 	config.C.SshPort = "22"
 

@@ -103,6 +103,7 @@ func (s *Server) registerRoutes() {
 			sB.POST("/index-gists", admin.AdminIndexGists)
 			sB.POST("/sync-languages", admin.AdminSyncGistLanguages)
 			sB.POST("/delete-expired-gists", admin.AdminDeleteExpiredGists)
+			sB.POST("/sync-ssh-keys", admin.AdminSyncSSHKeys)
 			sB.GET("/configuration", admin.AdminConfig)
 			sB.PUT("/set-config", admin.AdminSetConfig)
 		}
@@ -163,6 +164,8 @@ func (s *Server) registerRoutes() {
 		ipcGroup := r.SubGroup("/api/ipc", ipcAuth)
 		ipcGroup.POST("/hook/pre-receive", ipc.PreReceive)
 		ipcGroup.POST("/hook/post-receive", ipc.PostReceive)
+		ipcGroup.POST("/ssh/keys", ipc.SSHKeys)
+		ipcGroup.POST("/ssh/command", ipc.SSHCommand)
 
 		r.Any("/api/*", noRouteFoundApi)
 

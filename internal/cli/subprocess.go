@@ -8,21 +8,19 @@ import (
 )
 
 // subprocessInit initializes Opengist for short-lived processes that Opengist
-// spawns of itself (Git hooks, and later the SSH shim). It is the shared
-// contract for every self-invoked subcommand:
+// spawns of itself (Git hooks, the SSH `keys`/`shell` commands). It is the
+// shared contract for every self-invoked subcommand:
 //
-//   - stdout is left untouched — config output is discarded — so callers such
-//     as the SSH AuthorizedKeysCommand can write only their own payload to it;
-//   - logs go through the configured logger (file/stderr), never stdout.
-//
-// It deliberately does not touch the database: subprocesses talk to the running
-// daemon's internal API instead of opening their own connection. Use
-// subprocessInitClient when the subprocess needs to call that API.
+//   - stdout is reserved for the subcommand's own protocol output (git pack
+//     stream, authorized_keys lines, hook messages). Config output is discarded,
+//     and logging is left at zerolog's default (stderr) — InitLog's console
+//     writer goes to stdout, so it is deliberately not called here.
+//   - it opens no database: subprocesses talk to the running daemon's internal
+//     API instead. Use subprocessInitClient when that API is needed.
 func subprocessInit(ctx *cli.Context) {
 	if err := config.InitConfig(ctx.String("config"), io.Discard); err != nil {
 		panic(err)
 	}
-	config.InitLog()
 }
 
 // subprocessInitClient is subprocessInit plus the secret key, which is needed to

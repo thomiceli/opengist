@@ -26,6 +26,14 @@ var C *config
 
 var SecretKey []byte
 
+// SSH server modes: the canonical values of ssh.git-enabled. The legacy
+// booleans are still accepted (true → builtin, false → disabled).
+const (
+	SshServerBuiltin  = "builtin"  // Opengist's embedded SSH server
+	SshServerHost     = "host"     // delegate to the host's OpenSSH
+	SshServerDisabled = "disabled" // no SSH git access
+)
+
 // Not using nested structs because the library
 // doesn't support dot notation in this case sadly
 type config struct {
@@ -58,10 +66,12 @@ type config struct {
 
 	UnixSocketPermissions string `yaml:"unix-socket-permissions" env:"OG_UNIX_SOCKET_PERMISSIONS"`
 
-	SshGit            bool   `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"`
-	SshHost           string `yaml:"ssh.host" env:"OG_SSH_HOST"`
-	SshPort           string `yaml:"ssh.port" env:"OG_SSH_PORT"`
-	SshExternalDomain string `yaml:"ssh.external-domain" env:"OG_SSH_EXTERNAL_DOMAIN"`
+	SshGit                string `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"` // builtin | host | disabled (true → builtin, false → disabled)
+	SshAuthorizedKeysFile string `yaml:"ssh.authorized-keys-file" env:"OG_SSH_AUTHORIZED_KEYS_FILE"`
+	SshHost               string `yaml:"ssh.host" env:"OG_SSH_HOST"`
+	SshPort               string `yaml:"ssh.port" env:"OG_SSH_PORT"`
+	SshExternalDomain     string `yaml:"ssh.external-domain" env:"OG_SSH_EXTERNAL_DOMAIN"`
+	SshUsername           string `yaml:"ssh.username" env:"OG_SSH_USERNAME"`
 
 	GithubClientKey string `yaml:"github.client-key" env:"OG_GITHUB_CLIENT_KEY"`
 	GithubSecret    string `yaml:"github.secret" env:"OG_GITHUB_SECRET"`
@@ -104,6 +114,22 @@ type StaticLink struct {
 	Path string `yaml:"path" env:"OG_CUSTOM_STATIC_LINK_#_PATH"`
 }
 
+// SshEnabled reports whether SSH git access is offered in any form.
+func (c *config) SshEnabled() bool {
+	return c.SshGit == SshServerBuiltin || c.SshGit == SshServerHost
+}
+
+// SshBuiltin reports whether Opengist runs its own embedded SSH server.
+func (c *config) SshBuiltin() bool {
+	return c.SshGit == SshServerBuiltin
+}
+
+// SshManagesAuthorizedKeys reports whether Opengist maintains an authorized_keys
+// file: host mode with a configured file path.
+func (c *config) SshManagesAuthorizedKeys() bool {
+	return c.SshGit == SshServerHost && c.SshAuthorizedKeysFile != ""
+}
+
 func configWithDefaults() (*config, error) {
 	c := &config{}
 
@@ -126,7 +152,7 @@ func configWithDefaults() (*config, error) {
 
 	c.UnixSocketPermissions = "0666"
 
-	c.SshGit = true
+	c.SshGit = SshServerBuiltin
 	c.SshHost = "0.0.0.0"
 	c.SshPort = "2222"
 
@@ -156,6 +182,11 @@ func InitConfig(configPath string, out io.Writer) error {
 	if err = loadConfigFromEnv(c, out); err != nil {
 		return err
 	}
+
+	// ssh.git-enabled accepts the explicit modes (builtin, host, disabled) as well
+	// as the legacy booleans (true → builtin, false → disabled). Collapse whatever
+	// was provided into a canonical mode.
+	c.SshGit = normalizeSshGitMode(c.SshGit)
 
 	if c.OpengistHome == "" {
 		homeDir, err := os.UserHomeDir()
@@ -393,7 +424,30 @@ func loadConfigFromEnv(c *config, out io.Writer) error {
 	return nil
 }
 
+// normalizeSshGitMode maps every accepted ssh.git-enabled value to a canonical
+// mode. The legacy booleans are preserved for backward compatibility (true →
+// builtin, false → disabled); unknown values are returned untouched so checks()
+// can reject them.
+func normalizeSshGitMode(s string) string {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "host":
+		return SshServerHost
+	case "false", "f", "0", "no", "off", "disabled":
+		return SshServerDisabled
+	case "true", "t", "1", "yes", "on", "builtin", "":
+		return SshServerBuiltin
+	default:
+		return strings.TrimSpace(s)
+	}
+}
+
 func checks(c *config) error {
+	switch c.SshGit {
+	case SshServerBuiltin, SshServerHost, SshServerDisabled:
+	default:
+		return fmt.Errorf("invalid ssh.git-enabled %q (must be %q, %q or %q, or a boolean)", c.SshGit, SshServerBuiltin, SshServerHost, SshServerDisabled)
+	}
+
 	if _, err := url.Parse(c.ExternalUrl); err != nil {
 		return err
 	}

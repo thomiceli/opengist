@@ -13,6 +13,7 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/index"
+	"github.com/thomiceli/opengist/internal/ssh"
 )
 
 const (
@@ -24,6 +25,7 @@ const (
 	IndexGists
 	SyncGistLanguages
 	DeleteExpiredGists
+	SyncSSHKeys
 
 	numActions // keep last — sizes the `running` array
 )
@@ -50,6 +52,7 @@ var registry = map[int]action{
 	IndexGists:         {run: indexGists},
 	SyncGistLanguages:  {run: syncGistLanguages},
 	DeleteExpiredGists: {run: deleteExpiredGists, spec: "@every 1m"},
+	SyncSSHKeys:        {run: syncSSHKeys, spec: "@every 72h"},
 }
 
 func IsRunning(actionType int) bool {
@@ -194,6 +197,16 @@ func syncGistLanguages() {
 	for _, gist := range gists {
 		log.Info().Msgf("Syncing languages for gist %d", gist.ID)
 		gist.UpdateLanguages()
+	}
+}
+
+func syncSSHKeys() {
+	if !config.C.SshManagesAuthorizedKeys() {
+		return
+	}
+	log.Info().Msg("Regenerating the managed authorized_keys file...")
+	if err := ssh.SyncAuthorizedKeys(); err != nil {
+		log.Error().Err(err).Msg("Error regenerating the authorized_keys file")
 	}
 }
 

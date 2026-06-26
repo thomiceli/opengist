@@ -2,7 +2,7 @@ package server
 
 import (
 	"crypto/rand"
-  "crypto/subtle"
+	"crypto/subtle"
 	"encoding/base64"
 	"errors"
 	"fmt"

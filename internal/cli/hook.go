@@ -8,8 +8,9 @@ import (
 )
 
 var CmdHook = cli.Command{
-	Name:  "hook",
-	Usage: "Run Git server hooks, used and should only be called by Opengist itself",
+	Name:   "hook",
+	Usage:  "Run Git server hooks, used and should only be called by Opengist itself",
+	Hidden: true,
 	Subcommands: []*cli.Command{
 		&CmdHookPreReceive,
 		&CmdHookPostReceive,

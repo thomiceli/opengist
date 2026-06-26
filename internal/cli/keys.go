@@ -25,8 +25,9 @@ import (
 //	AuthorizedKeysCommand /usr/local/bin/opengist --config /etc/opengist/config.yml keys -t %t -k %k
 //	AuthorizedKeysCommandUser opengist
 var CmdKeys = cli.Command{
-	Name:  "keys",
-	Usage: "Print the authorized_keys line for an SSH key (sshd AuthorizedKeysCommand)",
+	Name:   "keys",
+	Usage:  "Print the authorized_keys line for an SSH key (sshd AuthorizedKeysCommand)",
+	Hidden: true,
 	Flags: []cli.Flag{
 		&cli.StringFlag{Name: "type", Aliases: []string{"t"}, Usage: "SSH key type, sshd's %t token"},
 		&cli.StringFlag{Name: "key", Aliases: []string{"k"}, Usage: "Base64 SSH key, sshd's %k token"},

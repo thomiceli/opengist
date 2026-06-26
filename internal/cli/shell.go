@@ -21,6 +21,7 @@ var CmdShell = cli.Command{
 	Name:      "shell",
 	Usage:     "Serve a single git command over SSH (forced command; called by sshd)",
 	ArgsUsage: "[ssh key id]",
+	Hidden:    true,
 	Action: func(ctx *cli.Context) error {
 		subprocessInitClient(ctx)
 

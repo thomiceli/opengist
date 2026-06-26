@@ -59,6 +59,9 @@ http.git-enabled: true
 # Enable or disable the REST API (either `true` or `false`). Default: true
 api.enabled: true
 
+# Disable file uploads when creating or editing gists (either `true` or `false`). Default: false
+disable-file-upload: false
+
 # File permissions for Unix socket (octal format). Default: 0666
 unix-socket-permissions: 0666
 

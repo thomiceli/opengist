@@ -65,10 +65,10 @@ func ProcessCreate(ctx *context.Context) error {
 		})
 	}
 
-	// Process uploaded files from UUID arrays
+	// Process uploaded files from UUID arrays, unless file upload is disabled instance-wide
 	fileUUIDs := dto.UploadedFilesUUID
 	fileFilenames := dto.UploadedFilesNames
-	if len(fileUUIDs) == len(fileFilenames) {
+	if !config.C.DisableFileUpload && len(fileUUIDs) == len(fileFilenames) {
 		for i, fileUUID := range fileUUIDs {
 			if !uuidRegex.MatchString(filepath.Base(fileUUID)) {
 				continue

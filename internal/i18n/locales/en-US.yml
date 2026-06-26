@@ -272,6 +272,7 @@ error.invalid-number: Invalid number
 error.invalid-character-unescaped: Invalid character unescaped
 error.not-in-mfa-session: User is not in a MFA session
 error.no-file-uploaded: No file uploaded
+error.file-upload-disabled: File upload is disabled
 error.cannot-open-file: Cannot open uploaded file
 
 header.menu.all: All

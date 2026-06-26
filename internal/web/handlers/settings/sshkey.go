@@ -3,6 +3,7 @@ package settings
 import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/i18n"
+	opengistssh "github.com/thomiceli/opengist/internal/ssh"
 	"github.com/thomiceli/opengist/internal/validator"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"golang.org/x/crypto/ssh"
@@ -44,6 +45,7 @@ func SshKeysProcess(ctx *context.Context) error {
 	if err := key.Create(); err != nil {
 		return ctx.ErrorRes(500, "Cannot add SSH key", err)
 	}
+	opengistssh.SyncAuthorizedKeysLogged()
 
 	ctx.AddFlash(ctx.Tr("flash.user.ssh-key-added"), "success")
 	return ctx.RedirectTo("/settings/ssh")
@@ -65,6 +67,7 @@ func SshKeysDelete(ctx *context.Context) error {
 	if err := key.Delete(); err != nil {
 		return ctx.ErrorRes(500, "Cannot delete SSH key", err)
 	}
+	opengistssh.SyncAuthorizedKeysLogged()
 
 	ctx.AddFlash(ctx.Tr("flash.user.ssh-key-deleted"), "success")
 	return ctx.RedirectTo("/settings/ssh")

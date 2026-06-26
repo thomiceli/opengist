@@ -12,6 +12,7 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/i18n"
+	opengistssh "github.com/thomiceli/opengist/internal/ssh"
 	"github.com/thomiceli/opengist/internal/validator"
 	"github.com/thomiceli/opengist/internal/web/context"
 )
@@ -45,6 +46,7 @@ func AccountDeleteProcess(ctx *context.Context) error {
 	if err := user.Delete(); err != nil {
 		return ctx.ErrorRes(500, "Cannot delete this user", err)
 	}
+	opengistssh.SyncAuthorizedKeysLogged()
 
 	return ctx.RedirectTo("/all")
 }

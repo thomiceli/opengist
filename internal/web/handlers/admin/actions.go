@@ -52,3 +52,9 @@ func AdminDeleteExpiredGists(ctx *context.Context) error {
 	go actions.RunOnce(actions.DeleteExpiredGists)
 	return ctx.RedirectTo("/admin-panel")
 }
+
+func AdminSyncSSHKeys(ctx *context.Context) error {
+	ctx.AddFlash(ctx.Tr("flash.admin.sync-ssh-keys"), "success")
+	go actions.RunOnce(actions.SyncSSHKeys)
+	return ctx.RedirectTo("/admin-panel")
+}

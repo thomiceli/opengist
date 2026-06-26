@@ -90,6 +90,7 @@ const docsSidebar = [
     {
         text: 'Administration', base: '/docs/administration', items: [
             {text: 'Run with systemd', link: '/run-with-systemd'},
+            {text: 'Git over SSH with OpenSSH', link: '/openssh'},
             {text: 'Reverse proxy', items: [
                 {text: 'Nginx', link: '/nginx-reverse-proxy'},
                 {text: 'Traefik', link: '/traefik-reverse-proxy'},

@@ -63,9 +63,8 @@ func idSet(arr []types.GistSimple) map[string]bool {
 }
 
 // TestListGists_GistObjectShape verifies every field of a types.GistSimple coming
-// back from /api/gists is populated as expected. HttpGit and SshGit are
-// toggled on so the URL-bearing fields aren't empty; the test restores config
-// on cleanup.
+// back from /api/gists is populated as expected. HTTP git and the SSH server are
+// enabled so the URL-bearing fields aren't empty.
 func TestListGists_GistObjectShape(t *testing.T) {
 	s := webtest.Setup(t)
 	t.Cleanup(func() { webtest.Teardown(t) })
@@ -74,7 +73,7 @@ func TestListGists_GistObjectShape(t *testing.T) {
 	s.Register(t, "thomas")
 
 	config.C.HttpGit = true
-	config.C.SshGit = true
+	config.C.SshGit = config.SshServerBuiltin
 	config.C.SshExternalDomain = "gist.example.com"
 	config.C.SshPort = "22"
 

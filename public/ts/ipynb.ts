@@ -1,6 +1,13 @@
 import hljs from 'highlight.js';
 import latex from './latex';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+
+// Notebook content is attacker-controlled: any user can store a `.ipynb` gist
+// whose JSON ends up injected into the page. Every fragment that reaches an
+// `innerHTML` sink must therefore be sanitized to prevent stored XSS (see the
+// security advisory describing the original markdown-cell / output sinks).
+const sanitize = (html: string): string => DOMPurify.sanitize(html);
 
 class IPynb {
   private element: HTMLElement;
@@ -10,7 +17,9 @@ class IPynb {
 
   constructor(element: HTMLElement) {
     this.element = element;
-    let notebookContent = element.innerText;
+    // textContent yields the raw notebook JSON the server escaped into the
+    // <pre>; it is parsed as data, never injected as markup.
+    let notebookContent = element.textContent || '';
 
     try {
       this.notebook = JSON.parse(notebookContent);
@@ -49,10 +58,10 @@ class IPynb {
         outputElement.appendChild(textElement);
       } else if (output.output_type === 'display_data' || output.output_type === 'execute_result') {
         if (output.data['text/plain']) {
-          outputElement.innerHTML += `\n<pre>${output.data['text/plain']}</pre>`;
+          outputElement.innerHTML += sanitize(`\n<pre>${output.data['text/plain']}</pre>`);
         }
         if (output.data['text/html']) {
-          outputElement.innerHTML += '\n' + output.data['text/html'];
+          outputElement.innerHTML += '\n' + sanitize(output.data['text/html']);
         }
 
         const images = Object.keys(output.data).filter(key => key.startsWith('image/'));
@@ -60,19 +69,7 @@ class IPynb {
           const imgEl = document.createElement('img');
           const imgType = images[0]; // Use the first image type found
           imgEl.src = `data:${imgType};base64,${output.data[imgType]}`;
-          outputElement.innerHTML += imgEl.outerHTML;
-        }
-      } else if (output.output_type === 'execute_result') {
-        if (output.data['text/plain']) {
-          outputElement.innerHTML += `<pre>${output.data['text/plain']}</pre>`;
-        }
-        if (output.data['text/html']) {
-          outputElement.innerHTML += output.data['text/html'];
-        }
-        if (output.data['image/png']) {
-          const imgEl = document.createElement('img');
-          imgEl.src = `data:image/png;base64,${output.data['image/png']}`;
-          outputElement.appendChild(imgEl);
+          outputElement.innerHTML += sanitize(imgEl.outerHTML);
         }
       } else if (output.output_type === 'error') {
         outputElement.classList.add('error');
@@ -91,13 +88,24 @@ class IPynb {
     switch (cell.cell_type) {
       case 'markdown':
         cellElement.classList.add('markdown-cell');
-        cellElement.innerHTML = `<div class="markdown-body">${marked.parse(latex.render(source))}</div>`;
+        cellElement.innerHTML = sanitize(
+          `<div class="markdown-body">${marked.parse(latex.render(source)) as string}</div>`
+        );
         break;
-      case 'code':
+      case 'code': {
         cellElement.classList.add('code-cell');
-        cellElement.innerHTML = `<pre class="hljs"><code class="language-${this.language}">${source}</code></pre>`;
-        hljs.highlightElement(cellElement.querySelector('code') as HTMLElement);
+        // Build the code block via DOM APIs so the source is treated as text,
+        // not markup, before highlight.js processes it.
+        const pre = document.createElement('pre');
+        pre.classList.add('hljs');
+        const code = document.createElement('code');
+        code.classList.add(`language-${this.language}`);
+        code.textContent = source;
+        pre.appendChild(code);
+        cellElement.appendChild(pre);
+        hljs.highlightElement(code);
         break;
+      }
       default:
         break;
     }

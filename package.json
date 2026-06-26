@@ -19,6 +19,7 @@
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.0",
     "codemirror": "^6.0.2",
+    "dompurify": "^3.4.11",
     "github-markdown-css": "^5.9.0",
     "highlight.js": "^11.11.1",
     "jdenticon": "^3.3.0",

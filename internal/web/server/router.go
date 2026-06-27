@@ -191,16 +191,17 @@ func (s *Server) registerRoutes() {
 			sC.GET("/revisions", gist.Revisions)
 			sC.GET("/archive/:revision", gist.DownloadZip)
 			sC.POST("/visibility", gist.EditVisibility, logged, writePermission)
+			sC.POST("/archive", gist.ToggleArchive, logged, writePermission)
 			sC.POST("/delete", gist.DeleteGist, logged, writePermission)
 			sC.GET("/raw/:revision/:file", gist.RawFile)
 			sC.GET("/download/:revision/:file", gist.DownloadFile)
-			sC.GET("/edit", gist.Edit, logged, writePermission)
-			sC.POST("/edit", gist.ProcessCreate, logged, writePermission)
+			sC.GET("/edit", gist.Edit, logged, writePermission, notArchived)
+			sC.POST("/edit", gist.ProcessCreate, logged, writePermission, notArchived)
 			sC.POST("/like", gist.Like, logged)
 			sC.GET("/likes", gist.Likes, checkRequireLogin)
 			sC.POST("/fork", gist.Fork, logged)
 			sC.GET("/forks", gist.Forks, checkRequireLogin)
-			sC.PUT("/checkbox", gist.Checkbox, logged, writePermission)
+			sC.PUT("/checkbox", gist.Checkbox, logged, writePermission, notArchived)
 		}
 	}
 

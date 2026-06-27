@@ -899,6 +899,9 @@ components:
         topics:
           type: array
           items: { type: string }
+        archived:
+          type: boolean
+          description: True when the gist is archived (read-only).
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
         expires_at:

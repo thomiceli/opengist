@@ -37,6 +37,7 @@ func (gist *Gist) ToAPISimple(baseURL string) types.GistSimple {
 		CloneUrl:    gist.HTTPCloneURL(baseURL),
 		SSHUrl:      gist.SSHCloneURL(sshHost),
 		Topics:      gist.TopicsSlice(),
+		Archived:    gist.Archived,
 		CreatedAt:   time.Unix(gist.CreatedAt, 0).UTC(),
 		UpdatedAt:   time.Unix(gist.UpdatedAt, 0).UTC(),
 		ExpiresAt:   expiresAt,

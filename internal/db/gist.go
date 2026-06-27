@@ -86,6 +86,7 @@ type Gist struct {
 	CreatedAt       int64
 	UpdatedAt       int64
 	ExpiresAt       int64 // 0: never expires
+	Archived        bool
 
 	Likes    []User `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Forked   *Gist  `gorm:"foreignKey:ForkedID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
@@ -491,6 +492,11 @@ func (gist *Gist) UpdateNoTimestamps() error {
 
 func (gist *Gist) Delete() error {
 	return db.Delete(&gist).Error
+}
+
+func (gist *Gist) SetArchived(archived bool) error {
+	gist.Archived = archived
+	return db.Model(&gist).Omit("updated_at").Update("archived", archived).Error
 }
 
 func (gist *Gist) SetLastActiveNow() error {

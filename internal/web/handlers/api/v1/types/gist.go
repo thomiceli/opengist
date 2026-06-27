@@ -32,6 +32,7 @@ type GistSimple struct {
 	CloneUrl    string     `json:"clone_url"`
 	SSHUrl      string     `json:"ssh_url"`
 	Topics      []string   `json:"topics"`
+	Archived    bool       `json:"archived"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 	ExpiresAt   *time.Time `json:"expires_at"` // null when the gist never expires

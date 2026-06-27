@@ -168,6 +168,11 @@ func GitHttp(ctx *context.Context) error {
 				}
 				return ctx.ErrorRes(500, "Authentication system error", nil)
 			}
+
+			if gist.Archived {
+				log.Debug().Str("authUsername", authUsername).Msg("Pushing to archived gist")
+				return ctx.PlainText(403, "This gist is archived and is read-only")
+			}
 			log.Debug().Str("authUsername", authUsername).Msg("Pushing gist")
 
 			return route.handler(ctx)

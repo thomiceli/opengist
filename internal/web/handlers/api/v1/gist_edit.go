@@ -154,6 +154,9 @@ func UpdateGist(ctx *context.Context) error {
 		// 404'd above) - existence is already disclosed, so a 403 is honest.
 		return ctx.ErrorJson(403, "You are not the owner of this gist", nil)
 	}
+	if g.Archived {
+		return ctx.ErrorJson(403, "This gist is archived and is read-only", nil)
+	}
 
 	var req types.GistInput
 	if err := ctx.Bind(&req); err != nil {

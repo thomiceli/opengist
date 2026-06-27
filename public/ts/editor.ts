@@ -1,11 +1,15 @@
 import {EditorView, gutter, keymap, lineNumbers} from "@codemirror/view";
-import {Compartment, EditorState, Facet, Line, SelectionRange} from "@codemirror/state";
-import {defaultKeymap, indentLess} from "@codemirror/commands";
+import {Compartment, EditorState, Facet, Line, Prec, SelectionRange} from "@codemirror/state";
+import {defaultKeymap, indentLess, toggleLineComment} from "@codemirror/commands";
+import {HighlightStyle, LanguageDescription, syntaxHighlighting} from "@codemirror/language";
+import {languages} from "@codemirror/language-data";
+import {tags} from "@lezer/highlight";
 
 document.addEventListener("DOMContentLoaded", () => {
     EditorView.theme({}, {dark: true});
 
     let editorsjs: EditorView[] = [];
+    let editorHighlightCompartments: {editor: EditorView, conf: Compartment}[] = [];
     let editorsParentdom = document.getElementById("editors")!;
     let allEditorsdom = document.querySelectorAll("#editors > .editor");
     let firstEditordom = allEditorsdom[0];
@@ -20,7 +24,61 @@ document.addEventListener("DOMContentLoaded", () => {
         wrapMode = new Compartment(),
         indentType = new Compartment();
 
+    // Catppuccin Macchiato (dark)
+    const macchiatoHighlight = HighlightStyle.define([
+        {tag: tags.keyword, color: "#c6a0f6"},
+        {tag: [tags.definitionKeyword, tags.moduleKeyword], color: "#c6a0f6"},
+        {tag: tags.string, color: "#a6da95"},
+        {tag: [tags.number, tags.integer, tags.float], color: "#f5a97f"},
+        {tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "#6e738d", fontStyle: "italic"},
+        {tag: [tags.function(tags.variableName), tags.function(tags.propertyName)], color: "#8aadf4"},
+        {tag: [tags.typeName, tags.className], color: "#eed49f"},
+        {tag: tags.variableName, color: "#cad3f5"},
+        {tag: tags.definition(tags.variableName), color: "#8aadf4"},
+        {tag: tags.operator, color: "#91d7e3"},
+        {tag: tags.punctuation, color: "#cad3f5"},
+        {tag: tags.propertyName, color: "#8aadf4"},
+        {tag: [tags.bool, tags.null], color: "#f5a97f"},
+        {tag: tags.self, color: "#ed8796"},
+        {tag: tags.attributeName, color: "#8aadf4"},
+        {tag: tags.attributeValue, color: "#a6da95"},
+        {tag: tags.tagName, color: "#c6a0f6"},
+        {tag: tags.namespace, color: "#f5a97f"},
+        {tag: tags.regexp, color: "#8bd5ca"},
+        {tag: tags.escape, color: "#8aadf4"},
+    ]);
+
+    // Catppuccin Latte (light)
+    const latteHighlight = HighlightStyle.define([
+        {tag: tags.keyword, color: "#8839ef"},
+        {tag: [tags.definitionKeyword, tags.moduleKeyword], color: "#8839ef"},
+        {tag: tags.string, color: "#40a02b"},
+        {tag: [tags.number, tags.integer, tags.float], color: "#fe640b"},
+        {tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "#9ca0b0", fontStyle: "italic"},
+        {tag: [tags.function(tags.variableName), tags.function(tags.propertyName)], color: "#1e66f5"},
+        {tag: [tags.typeName, tags.className], color: "#df8e1d"},
+        {tag: tags.variableName, color: "#4c4f69"},
+        {tag: tags.definition(tags.variableName), color: "#1e66f5"},
+        {tag: tags.operator, color: "#179299"},
+        {tag: tags.punctuation, color: "#4c4f69"},
+        {tag: tags.propertyName, color: "#1e66f5"},
+        {tag: [tags.bool, tags.null], color: "#fe640b"},
+        {tag: tags.self, color: "#d20f39"},
+        {tag: tags.attributeName, color: "#1e66f5"},
+        {tag: tags.attributeValue, color: "#40a02b"},
+        {tag: tags.tagName, color: "#8839ef"},
+        {tag: tags.namespace, color: "#fe640b"},
+        {tag: tags.regexp, color: "#179299"},
+        {tag: tags.escape, color: "#1e66f5"},
+    ]);
+
+    const isDark = () => document.documentElement.classList.contains("dark");
+    const currentHighlight = () => syntaxHighlighting(isDark() ? macchiatoHighlight : latteHighlight);
+
     const newEditor = (dom: HTMLElement, value: string = ""): EditorView => {
+        const languageConf = new Compartment();
+        const highlightConf = new Compartment();
+
         let editor = new EditorView({
             doc: value,
             parent: dom,
@@ -29,11 +87,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 gutter({class: "cm-mygutter"}),
                 keymap.of([
                     {key: "Tab", run: customIndentMore, shift: indentLess},
+                    {key: "Mod-/", run: toggleLineComment},
                     ...defaultKeymap,
                 ]),
                 indentSize.of(EditorState.tabSize.of(2)),
                 wrapMode.of([]),
                 indentType.of(txtFacet.of("space")),
+                languageConf.of([]),
+                highlightConf.of(currentHighlight()),
+                // Fallback comment token (#) so Mod-/ works on plain text /
+                // config files; an actual language takes precedence over this.
+                Prec.lowest(EditorState.languageData.of(() => [{commentTokens: {line: "#"}}])),
             ],
         });
 
@@ -41,12 +105,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let formfilename = dom.querySelector<HTMLInputElement>(".form-filename");
 
+        const applyLanguage = (filename: string) => {
+            const desc = LanguageDescription.matchFilename(languages, filename);
+            if (desc) {
+                desc.load().then(lang => {
+                    editor.dispatch({effects: languageConf.reconfigure(lang)});
+                });
+            } else {
+                editor.dispatch({effects: languageConf.reconfigure([])});
+            }
+        };
+
         // check if file ends with .md on pageload
         if (formfilename!.value.endsWith(".md")) {
             mdpreview!.classList.remove("hidden");
         } else {
             mdpreview!.classList.add("hidden");
         }
+
+        // apply language highlight on pageload
+        applyLanguage(formfilename!.value);
 
         // event if the filename ends with .md; trigger event
         formfilename!.onkeyup = (e) => {
@@ -56,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 mdpreview!.classList.add("hidden");
             }
+            applyLanguage(filename);
         };
 
         // @ts-ignore
@@ -121,6 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!dom.hasAttribute('data-binary-original-name')) {
                     // Only remove from editors array for text files
                     editorsjs.splice(editorsjs.indexOf(editor), 1);
+                    const hIdx = editorHighlightCompartments.findIndex(e => e.editor === editor);
+                    if (hIdx !== -1) editorHighlightCompartments.splice(hIdx, 1);
                 }
                 dom.remove();
                 checkForFirstDeleteButton();
@@ -135,6 +216,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return "Are you sure you want to quit?";
             };
         });
+
+        editorHighlightCompartments.push({editor, conf: highlightConf});
 
         return editor;
     };
@@ -217,6 +300,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     checkForFirstDeleteButton();
+
+    // Update syntax highlight theme when dark/light mode changes
+    new MutationObserver(() => {
+        const hl = currentHighlight();
+        editorHighlightCompartments.forEach(({editor, conf}) => {
+            editor.dispatch({effects: conf.reconfigure(hl)});
+        });
+    }).observe(document.documentElement, {attributes: true, attributeFilter: ["class"]});
 
     document.getElementById("add-file")!.onclick = () => {
         const template = document.getElementById("editor-template")!;

@@ -1,25 +1,18 @@
-FROM alpine:3.19 AS base
+FROM alpine:3.23 AS base
 
 RUN apk update && \
         apk add --no-cache \
         make \
-        shadow \
-        openssl \
-        openssh \
-        curl \
-        wget \
-        git \
-        gnupg \
-        xz \
         gcc \
+        git \
         musl-dev \
         libstdc++
 
-COPY --from=golang:1.23-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.26.4-alpine3.23 /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 ENV CGO_ENABLED=0
 
-COPY --from=node:20-alpine /usr/local/ /usr/local/
+COPY --from=node:26.3.0-alpine3.23 /usr/local/ /usr/local/
 ENV NODE_PATH="/usr/local/lib/node_modules"
 ENV PATH="/usr/local/bin:${PATH}"
 
@@ -29,8 +22,20 @@ COPY . .
 
 
 FROM base AS dev
+RUN apk add --no-cache \
+    openssl \
+    openssh-server \
+    curl \
+    wget \
+    git \
+    gnupg \
+    xz
 
-EXPOSE 6157 2222 16157
+EXPOSE 6157 6158 2222 16157
+
+RUN git config --global --add safe.directory /opengist
+RUN make install
+
 VOLUME /opengist
 
 CMD ["make", "watch"]
@@ -41,33 +46,24 @@ FROM base AS build
 RUN make
 
 
-FROM alpine:3.19 as prod
+FROM alpine:3.23 AS prod
 
 RUN apk update && \
     apk add --no-cache \
     shadow \
-    openssl \
-    openssh \
     curl \
-    wget \
-    git \
-    gnupg \
-    xz \
-    gcc \
-    musl-dev \
-    libstdc++
+    git
 
 RUN addgroup -S opengist && \
     adduser -S -G opengist -s /bin/ash -g 'Opengist User' opengist
 
-COPY --from=build --chown=opengist:opengist /opengist/config.yml config.yml
-
 WORKDIR /app/opengist
 
+COPY --from=build --chown=opengist:opengist /opengist/config.yml /config.yml
 COPY --from=build --chown=opengist:opengist /opengist/opengist .
 COPY --from=build --chown=opengist:opengist /opengist/docker ./docker
 
-EXPOSE 6157 2222
+EXPOSE 6157 6158 2222
 VOLUME /opengist
 HEALTHCHECK --interval=60s --timeout=30s --start-period=15s --retries=3 CMD curl -f http://localhost:6157/healthcheck || exit 1
 ENTRYPOINT ["./docker/entrypoint.sh"]

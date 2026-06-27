@@ -2,16 +2,18 @@ package config
 
 import (
 	"fmt"
-	"github.com/thomiceli/opengist/internal/session"
 	"io"
 	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/session"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -23,6 +25,14 @@ var OpengistVersion = ""
 var C *config
 
 var SecretKey []byte
+
+// SSH server modes: the canonical values of ssh.git-enabled. The legacy
+// booleans are still accepted (true → builtin, false → disabled).
+const (
+	SshServerBuiltin  = "builtin"  // Opengist's embedded SSH server
+	SshServerHost     = "host"     // delegate to the host's OpenSSH
+	SshServerDisabled = "disabled" // no SSH git access
+)
 
 // Not using nested structs because the library
 // doesn't support dot notation in this case sadly
@@ -38,11 +48,12 @@ type config struct {
 	DBUri      string `yaml:"db-uri" env:"OG_DB_URI"`
 	DBFilename string `yaml:"db-filename" env:"OG_DB_FILENAME"` // deprecated
 
-	IndexEnabled bool   `yaml:"index.enabled" env:"OG_INDEX_ENABLED"` // deprecated
-	Index        string `yaml:"index" env:"OG_INDEX"`
-	BleveDirname string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"` // deprecated
-	MeiliHost    string `yaml:"index.meili.host" env:"OG_MEILI_HOST"`
-	MeiliAPIKey  string `yaml:"index.meili.api-key" env:"OG_MEILI_API_KEY"`
+	IndexEnabled  bool   `yaml:"index.enabled" env:"OG_INDEX_ENABLED"` // deprecated
+	Index         string `yaml:"index" env:"OG_INDEX"`
+	BleveDirname  string `yaml:"index.dirname" env:"OG_INDEX_DIRNAME"` // deprecated
+	MeiliHost     string `yaml:"index.meili.host" env:"OG_MEILI_HOST"`
+	MeiliAPIKey   string `yaml:"index.meili.api-key" env:"OG_MEILI_API_KEY"`
+	SearchDefault string `yaml:"search.default" env:"OG_SEARCH_DEFAULT"`
 
 	GitDefaultBranch string `yaml:"git.default-branch" env:"OG_GIT_DEFAULT_BRANCH"`
 
@@ -52,11 +63,18 @@ type config struct {
 	HttpPort string `yaml:"http.port" env:"OG_HTTP_PORT"`
 	HttpGit  bool   `yaml:"http.git-enabled" env:"OG_HTTP_GIT_ENABLED"`
 
-	SshGit            bool   `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"`
-	SshHost           string `yaml:"ssh.host" env:"OG_SSH_HOST"`
-	SshPort           string `yaml:"ssh.port" env:"OG_SSH_PORT"`
-	SshExternalDomain string `yaml:"ssh.external-domain" env:"OG_SSH_EXTERNAL_DOMAIN"`
-	SshKeygen         string `yaml:"ssh.keygen-executable" env:"OG_SSH_KEYGEN_EXECUTABLE"`
+	ApiEnabled bool `yaml:"api.enabled" env:"OG_API_ENABLED"`
+
+	DisableFileUpload bool `yaml:"disable-file-upload" env:"OG_DISABLE_FILE_UPLOAD"`
+
+	UnixSocketPermissions string `yaml:"unix-socket-permissions" env:"OG_UNIX_SOCKET_PERMISSIONS"`
+
+	SshGit                string `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"` // builtin | host | disabled (true → builtin, false → disabled)
+	SshAuthorizedKeysFile string `yaml:"ssh.authorized-keys-file" env:"OG_SSH_AUTHORIZED_KEYS_FILE"`
+	SshHost               string `yaml:"ssh.host" env:"OG_SSH_HOST"`
+	SshPort               string `yaml:"ssh.port" env:"OG_SSH_PORT"`
+	SshExternalDomain     string `yaml:"ssh.external-domain" env:"OG_SSH_EXTERNAL_DOMAIN"`
+	SshUsername           string `yaml:"ssh.username" env:"OG_SSH_USERNAME"`
 
 	GithubClientKey string `yaml:"github.client-key" env:"OG_GITHUB_CLIENT_KEY"`
 	GithubSecret    string `yaml:"github.secret" env:"OG_GITHUB_SECRET"`
@@ -78,7 +96,9 @@ type config struct {
 	OIDCGroupClaimName string `yaml:"oidc.group-claim-name" env:"OG_OIDC_GROUP_CLAIM_NAME"`
 	OIDCAdminGroup     string `yaml:"oidc.admin-group" env:"OG_OIDC_ADMIN_GROUP"`
 
-	MetricsEnabled bool `yaml:"metrics.enabled" env:"OG_METRICS_ENABLED"`
+	MetricsEnabled bool   `yaml:"metrics.enabled" env:"OG_METRICS_ENABLED"`
+	MetricsHost    string `yaml:"metrics.host" env:"OG_METRICS_HOST"`
+	MetricsPort    string `yaml:"metrics.port" env:"OG_METRICS_PORT"`
 
 	LDAPUrl             string `yaml:"ldap.url" env:"OG_LDAP_URL"`
 	LDAPBindDn          string `yaml:"ldap.bind-dn" env:"OG_LDAP_BIND_DN"`
@@ -97,6 +117,22 @@ type StaticLink struct {
 	Path string `yaml:"path" env:"OG_CUSTOM_STATIC_LINK_#_PATH"`
 }
 
+// SshEnabled reports whether SSH git access is offered in any form.
+func (c *config) SshEnabled() bool {
+	return c.SshGit == SshServerBuiltin || c.SshGit == SshServerHost
+}
+
+// SshBuiltin reports whether Opengist runs its own embedded SSH server.
+func (c *config) SshBuiltin() bool {
+	return c.SshGit == SshServerBuiltin
+}
+
+// SshManagesAuthorizedKeys reports whether Opengist maintains an authorized_keys
+// file: host mode with a configured file path.
+func (c *config) SshManagesAuthorizedKeys() bool {
+	return c.SshGit == SshServerHost && c.SshAuthorizedKeysFile != ""
+}
+
 func configWithDefaults() (*config, error) {
 	c := &config{}
 
@@ -107,6 +143,7 @@ func configWithDefaults() (*config, error) {
 	c.OpengistHome = ""
 	c.DBUri = "opengist.db"
 	c.Index = "bleve"
+	c.SearchDefault = "content"
 
 	c.SqliteJournalMode = "WAL"
 
@@ -114,10 +151,13 @@ func configWithDefaults() (*config, error) {
 	c.HttpPort = "6157"
 	c.HttpGit = true
 
-	c.SshGit = true
+	c.ApiEnabled = true
+
+	c.UnixSocketPermissions = "0666"
+
+	c.SshGit = SshServerBuiltin
 	c.SshHost = "0.0.0.0"
 	c.SshPort = "2222"
-	c.SshKeygen = "ssh-keygen"
 
 	c.GitlabName = "GitLab"
 
@@ -125,6 +165,8 @@ func configWithDefaults() (*config, error) {
 	c.GiteaName = "Gitea"
 
 	c.MetricsEnabled = false
+	c.MetricsHost = "0.0.0.0"
+	c.MetricsPort = "6158"
 
 	return c, nil
 }
@@ -143,6 +185,11 @@ func InitConfig(configPath string, out io.Writer) error {
 	if err = loadConfigFromEnv(c, out); err != nil {
 		return err
 	}
+
+	// ssh.git-enabled accepts the explicit modes (builtin, host, disabled) as well
+	// as the legacy booleans (true → builtin, false → disabled). Collapse whatever
+	// was provided into a canonical mode.
+	c.SshGit = normalizeSshGitMode(c.SshGit)
 
 	if c.OpengistHome == "" {
 		homeDir, err := os.UserHomeDir()
@@ -236,16 +283,22 @@ func InitLog() {
 	}
 }
 
+// gitVersionRegex extracts the major and minor numbers from a git version string.
+// It tolerates a leading "git version " prefix as well as suffixes such as the
+// ".windows.1" appended by Git for Windows (e.g. "git version 2.50.1.windows.1").
+var gitVersionRegex = regexp.MustCompile(`(\d+)\.(\d+)`)
+
 func CheckGitVersion(version string) (bool, error) {
-	versionParts := strings.Split(version, ".")
-	if len(versionParts) < 2 {
-		return false, fmt.Errorf("invalid version string")
+	matches := gitVersionRegex.FindStringSubmatch(version)
+	if matches == nil {
+		return false, fmt.Errorf("invalid version string: %q", version)
 	}
-	major, err := strconv.Atoi(versionParts[0])
+
+	major, err := strconv.Atoi(matches[1])
 	if err != nil {
 		return false, fmt.Errorf("invalid major version number")
 	}
-	minor, err := strconv.Atoi(versionParts[1])
+	minor, err := strconv.Atoi(matches[2])
 	if err != nil {
 		return false, fmt.Errorf("invalid minor version number")
 	}
@@ -378,7 +431,30 @@ func loadConfigFromEnv(c *config, out io.Writer) error {
 	return nil
 }
 
+// normalizeSshGitMode maps every accepted ssh.git-enabled value to a canonical
+// mode. The legacy booleans are preserved for backward compatibility (true →
+// builtin, false → disabled); unknown values are returned untouched so checks()
+// can reject them.
+func normalizeSshGitMode(s string) string {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "host":
+		return SshServerHost
+	case "false", "f", "0", "no", "off", "disabled":
+		return SshServerDisabled
+	case "true", "t", "1", "yes", "on", "builtin", "":
+		return SshServerBuiltin
+	default:
+		return strings.TrimSpace(s)
+	}
+}
+
 func checks(c *config) error {
+	switch c.SshGit {
+	case SshServerBuiltin, SshServerHost, SshServerDisabled:
+	default:
+		return fmt.Errorf("invalid ssh.git-enabled %q (must be %q, %q or %q, or a boolean)", c.SshGit, SshServerBuiltin, SshServerHost, SshServerDisabled)
+	}
+
 	if _, err := url.Parse(c.ExternalUrl); err != nil {
 		return err
 	}

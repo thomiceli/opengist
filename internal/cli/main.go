@@ -2,20 +2,23 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"path"
+	"path/filepath"
+	"syscall"
+
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/actions"
 	"github.com/thomiceli/opengist/internal/auth/webauthn"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/ssh"
+	"github.com/thomiceli/opengist/internal/web/handlers/metrics"
 	"github.com/thomiceli/opengist/internal/web/server"
 	"github.com/urfave/cli/v2"
-	"os"
-	"os/signal"
-	"path"
-	"path/filepath"
-	"syscall"
 )
 
 var CmdVersion = cli.Command{
@@ -36,11 +39,20 @@ var CmdStart = cli.Command{
 
 		Initialize(ctx)
 
-		go server.NewServer(os.Getenv("OG_DEV") == "1", path.Join(config.GetHomeDir(), "sessions"), false).Start()
+		httpServer := server.NewServer(os.Getenv("OG_DEV") == "1")
+		go httpServer.Start()
 		go ssh.Start()
+		stopCron := actions.StartCron()
+
+		var metricsServer *metrics.Server
+		if config.C.MetricsEnabled {
+			metricsServer = metrics.NewServer()
+			go metricsServer.Start()
+		}
 
 		<-stopCtx.Done()
-		shutdown()
+		stopCron()
+		shutdown(httpServer, metricsServer)
 		return nil
 	},
 }
@@ -57,7 +69,7 @@ func App() error {
 	app.Usage = "A self-hosted pastebin powered by Git."
 	app.HelpName = "opengist"
 
-	app.Commands = []*cli.Command{&CmdVersion, &CmdStart, &CmdHook, &CmdAdmin}
+	app.Commands = []*cli.Command{&CmdVersion, &CmdStart, &CmdHook, &CmdAdmin, &CmdKeys, &CmdShell}
 	app.DefaultCommand = CmdStart.Name
 	app.Flags = []cli.Flag{
 		&ConfigFlag,
@@ -85,7 +97,7 @@ func Initialize(ctx *cli.Context) {
 	}
 
 	if ok, err := config.CheckGitVersion(gitVersion); err != nil {
-		log.Fatal().Err(err).Send()
+		log.Warn().Err(err).Msg("Could not determine the git version; some features may not work as expected")
 	} else if !ok {
 		log.Warn().Msg("Git version may be too old, as Opengist has not been tested prior git version 2.28 and some features would not work. " +
 			"Current git version: " + gitVersion)
@@ -130,7 +142,7 @@ func Initialize(ctx *cli.Context) {
 	}
 }
 
-func shutdown() {
+func shutdown(httpServer *server.Server, metricsServer *metrics.Server) {
 	log.Info().Msg("Shutting down database...")
 	if err := db.Close(); err != nil {
 		log.Error().Err(err).Msg("Failed to close database")
@@ -139,6 +151,12 @@ func shutdown() {
 	if index.IndexEnabled() {
 		log.Info().Msg("Shutting down index...")
 		index.Close()
+	}
+
+	httpServer.Stop()
+
+	if metricsServer != nil {
+		metricsServer.Stop()
 	}
 
 	log.Info().Msg("Shutdown complete")

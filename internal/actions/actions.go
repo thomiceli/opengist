@@ -1,20 +1,20 @@
 package actions
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync/atomic"
+	"time"
+
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/index"
-	"os"
-	"path/filepath"
-	"strings"
-	"sync"
+	"github.com/thomiceli/opengist/internal/ssh"
 )
-
-type ActionStatus struct {
-	Running bool
-}
 
 const (
 	SyncReposFromFS = iota
@@ -24,63 +24,73 @@ const (
 	ResetHooks
 	IndexGists
 	SyncGistLanguages
+	DeleteExpiredGists
+	SyncSSHKeys
+
+	numActions // keep last — sizes the `running` array
 )
 
-var (
-	mutex   sync.Mutex
-	actions = make(map[int]ActionStatus)
-)
+// running tracks which actions are in progress in this instance, one slot per
+// action type. It dedupes concurrent runs (e.g. a double-clicked admin button)
+// and backs IsRunning for the admin panel; cross-instance single-flighting is
+// handled separately by the DB action lock.
+var running [numActions]atomic.Bool
 
-func updateActionStatus(actionType int, running bool) {
-	actions[actionType] = ActionStatus{
-		Running: running,
-	}
+const lockLease = time.Hour
+
+type action struct {
+	run  func()
+	spec string
+}
+
+var registry = map[int]action{
+	SyncReposFromFS:    {run: syncReposFromFS},
+	SyncReposFromDB:    {run: syncReposFromDB},
+	GitGcRepos:         {run: gitGcRepos},
+	SyncGistPreviews:   {run: syncGistPreviews},
+	ResetHooks:         {run: resetHooks},
+	IndexGists:         {run: indexGists},
+	SyncGistLanguages:  {run: syncGistLanguages},
+	DeleteExpiredGists: {run: deleteExpiredGists, spec: "@every 1m"},
+	SyncSSHKeys:        {run: syncSSHKeys, spec: "@every 72h"},
 }
 
 func IsRunning(actionType int) bool {
-	mutex.Lock()
-	defer mutex.Unlock()
-	return actions[actionType].Running
+	return actionType >= 0 && actionType < numActions && running[actionType].Load()
 }
 
-func Run(actionType int) {
-	mutex.Lock()
-
-	if actions[actionType].Running {
-		mutex.Unlock()
+func RunOnce(actionType int) {
+	a, ok := registry[actionType]
+	if !ok {
+		log.Error().Msgf("Unknown action type %d", actionType)
 		return
 	}
 
-	updateActionStatus(actionType, true)
-	mutex.Unlock()
+	if !running[actionType].CompareAndSwap(false, true) {
+		return // already running in this instance
+	}
+	defer running[actionType].Store(false)
 
+	// Single-flight the action across instances sharing the database so only
+	// one replica runs it at a time, whether triggered by the scheduler or
+	// manually.
+	acquired, err := db.AcquireLock(actionType, lockLease)
+	if err != nil {
+		log.Error().Err(err).Msgf("Could not acquire lock for action %d", actionType)
+		return
+	}
+	if !acquired {
+		return
+	}
 	defer func() {
-		mutex.Lock()
-		updateActionStatus(actionType, false)
-		mutex.Unlock()
+		if err := db.ReleaseLock(actionType); err != nil {
+			log.Error().Err(err).Msgf("Could not release lock for action %d", actionType)
+		}
 	}()
 
-	var functionToRun func()
-	switch actionType {
-	case SyncReposFromFS:
-		functionToRun = syncReposFromFS
-	case SyncReposFromDB:
-		functionToRun = syncReposFromDB
-	case GitGcRepos:
-		functionToRun = gitGcRepos
-	case SyncGistPreviews:
-		functionToRun = syncGistPreviews
-	case ResetHooks:
-		functionToRun = resetHooks
-	case IndexGists:
-		functionToRun = indexGists
-	case SyncGistLanguages:
-		functionToRun = syncGistLanguages
-	default:
-		log.Error().Msg("Unknown action type")
-	}
-
-	functionToRun()
+	log.Info().Msgf("Starting running action %d", actionType)
+	a.run()
+	log.Info().Msgf("Finished running action %d", actionType)
 }
 
 func syncReposFromFS() {
@@ -136,6 +146,7 @@ func syncGistPreviews() {
 		return
 	}
 	for _, gist := range gists {
+		fmt.Println("Syncing preview for gist", gist.ID)
 		if err = gist.UpdatePreviewAndCount(false); err != nil {
 			log.Error().Err(err).Msgf("Cannot update preview and count for gist %d", gist.ID)
 		}
@@ -150,7 +161,12 @@ func resetHooks() {
 }
 
 func indexGists() {
-	log.Info().Msg("Indexing all Gists...")
+	log.Info().Msg("Rebuilding index from scratch...")
+	if err := index.ResetIndex(); err != nil {
+		log.Error().Err(err).Msg("Cannot reset index")
+		return
+	}
+
 	gists, err := db.GetAllGistsRows()
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get gists")
@@ -181,5 +197,27 @@ func syncGistLanguages() {
 	for _, gist := range gists {
 		log.Info().Msgf("Syncing languages for gist %d", gist.ID)
 		gist.UpdateLanguages()
+	}
+}
+
+func syncSSHKeys() {
+	if !config.C.SshManagesAuthorizedKeys() {
+		return
+	}
+	log.Info().Msg("Regenerating the managed authorized_keys file...")
+	if err := ssh.SyncAuthorizedKeys(); err != nil {
+		log.Error().Err(err).Msg("Error regenerating the authorized_keys file")
+	}
+}
+
+func deleteExpiredGists() {
+	gists, err := db.DeleteExpiredGists()
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot delete expired gists")
+		return
+	}
+
+	if len(gists) > 0 {
+		log.Info().Msgf("Deleted %d expired gist(s)", len(gists))
 	}
 }

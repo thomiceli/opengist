@@ -2,6 +2,8 @@ package render
 
 import (
 	"bytes"
+	"regexp"
+
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -12,7 +14,6 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/util"
 	"go.abhg.dev/goldmark/mermaid"
-	"regexp"
 )
 
 func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
@@ -27,14 +28,37 @@ func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
 	}, err
 }
 
-func MarkdownFile(file *git.File) (RenderedFile, error) {
+func renderMarkdownFile(file *git.File) (HighlightedFile, error) {
 	var buf bytes.Buffer
 	err := newMarkdownWithSvgExtension().Convert([]byte(file.Content), &buf)
 
-	return RenderedFile{
+	return HighlightedFile{
 		File: file,
 		HTML: buf.String(),
 		Type: "Markdown",
+	}, err
+}
+
+func MermaidGistPreview(gist *db.Gist) (RenderedGist, error) {
+	var buf bytes.Buffer
+	wrapped := "```mermaid\n" + gist.Preview + "\n```"
+	err := newMarkdown().Convert([]byte(wrapped), &buf)
+
+	return RenderedGist{
+		Gist: gist,
+		HTML: buf.String(),
+	}, err
+}
+
+func renderMermaidFile(file *git.File) (HighlightedFile, error) {
+	var buf bytes.Buffer
+	wrapped := "```mermaid\n" + file.Content + "\n```"
+	err := newMarkdown().Convert([]byte(wrapped), &buf)
+
+	return HighlightedFile{
+		File: file,
+		HTML: buf.String(),
+		Type: "Mermaid",
 	}, err
 }
 func MarkdownString(content string) (string, error) {
@@ -53,6 +77,7 @@ func newMarkdown(extraExtensions ...goldmark.Extender) goldmark.Markdown {
 		),
 		emoji.Emoji,
 		&mermaid.Extender{},
+		&alertExtension{},
 	}
 
 	extensions = append(extensions, extraExtensions...)

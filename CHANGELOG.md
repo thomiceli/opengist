@@ -1,5 +1,133 @@
 # Changelog
 
+## [1.13.1](https://github.com/thomiceli/opengist/compare/v1.13.0...v1.13.1) - 2026-06-10
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Fixed
+- Embedding fix vertical scrolling and improve padding (#714)
+- Fix CSS url for json embed url (#715)
+
+## [1.13.0](https://github.com/thomiceli/opengist/compare/v1.12.2...v1.13.0) - 2026-06-09
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- REST API (#707) (#711) (#702)
+- Limit display if there is too much files in one gist (#701)
+- Topics git push option in post-receive hook (#698)
+- Allow embedding Gists for a certain file only (#709)
+- Arabic Translation (#706)
+
+### Fixed
+- Server SSH key generation (#708)
+
+### Other
+- Update deps Golang, JS, Docker deps (#713)
+- New docs website (#710)
+
+## [1.12.2](https://github.com/thomiceli/opengist/compare/v1.12.1...v1.12.2) - 2026-03-14
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- Search all fields (#622)
+- Display a form to create an Opengist account coming from a OAuth provider (#623)
+- Rebuild search index in admin options (#647)
+
+### Fixed
+- Clean file path names on file creation (#624)
+- Support UTF-8 on gist download (#625)
+- CSRF skipper only for GET *.js request (#627)
+- Async-loaded gist embed scripts (#630)
+- Make gists username/urls case insensitive in URLS (#641)
+- Improve code search and index tests (#663)
+- Translation strings (#659)
+- Gitea avatar URL on OAuth (#674)
+
+### [Helm Chart](helm/opengist)
+- Add environment variables and secrets to statefulset (#644)
+
+> Admins of Opengist instances may want to run "Rebuild search index" in the admin panel.
+
+## [1.12.1](https://github.com/thomiceli/opengist/compare/v1.12.0...v1.12.1) - 2026-02-03
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- More translation strings (#605)
+
+### Fixed
+- Allow Access Tokens with Required Login (#611)
+- Make text files renderable with mimetypes different than text/plain (#612)
+- Improve security on raw files endpoint (#613)
+
+> Admins of Opengist instances may want to run "Synchronize all gists previews" in the admin panel.
+
+## [1.12.0](https://github.com/thomiceli/opengist/compare/v1.11.1...v1.12.0) - 2026-01-27
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- Access tokens (#602)
+- Fuzzy search for gist search (#555)
+- Allow Unicode letters/numbers in topics (#597)
+- Resize editor height (#600)
+- More translation strings (#516) (#604)
+
+### Fixed
+- Don't panic on Go TCP errors (#601)
+
+### Other
+- Reduce footprint of Docker image (#515)
+- Update Go + JS deps (#603)
+- Configure Dependabot for updates on Go and NPM (#449)
+
+### [Helm Chart](helm/opengist)
+- Use existing pvc claim of provided (#547)
+- Adds StatefulSet support (#549)
+- Move Prom metrics to a dedicated port + support ServiceMonitor (#599)
+
+## [1.11.1](https://github.com/thomiceli/opengist/compare/v1.11.0...v1.11.1) - 2025-09-30
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- More translation strings (#511)
+
+### Fixed
+- CSV errors for rendering (#514)
+
+### Other
+- Reset default log level to warn
+
+## [1.11.0](https://github.com/thomiceli/opengist/compare/v1.10.0...v1.11.0) - 2025-09-21
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- LDAP authentication (#470)
+- Listen to Unix websocket (#484)
+- Binary files support (#503)
+- Support for rendering .ipynb Jupyter/IPython notebooks (#491)
+- File upload on gist creation/edition (#507)
+- Read psql sslmode from db uri (#462)
+- OIDC group claim name to OpenID request (#490)
+- Reworked user settings page (#467)
+- Style preference tab for user (#467)
+- Init gist with regular urls via git CLI (http) (#501)
+
+### Fixed
+- Gitlab avatar (#461)
+- Correct German spelling, use consistent wording (#468)
+- Filename unescape (#474)
+- Fix Markdown preview links (#475)
+- Replace Unicode characters with HTML entity codes in embed template (#480)
+- Redirect to $baseUrl after auth with passkey instead of / (#482)
+- Human date on iOS devices (#510)
+
+### Docs
+- Add Proxmox VE Helper-Script (#473)
+
+### Other
+- Use Helm deployment.env[] values (#471)
+- Update Helm Postgres version
+- Use database for Gist init queue (#498)
+- Update go dep chroma (#493)
+
 ## [1.10.0](https://github.com/thomiceli/opengist/compare/v1.9.1...v1.10.0) - 2025-04-07
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

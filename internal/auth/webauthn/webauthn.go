@@ -2,13 +2,14 @@ package webauthn
 
 import (
 	"encoding/json"
+	"net/http"
+	"net/url"
+
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
-	"net/http"
-	"net/url"
 )
 
 var webAuthn *webauthn.WebAuthn
@@ -101,7 +102,7 @@ func FinishDiscoverableLogin(jsonSession []byte, response *http.Request) (uint, 
 		return 0, err
 	}
 
-	return waUser.(*user).User.ID, nil
+	return waUser.(*user).ID, nil
 }
 
 func BeginLogin(dbUser *db.User) (credCreation *protocol.CredentialAssertion, jsonSession []byte, err error) {

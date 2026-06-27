@@ -6,11 +6,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/thomiceli/opengist/internal/auth"
+	"slices"
+
 	"github.com/thomiceli/opengist/internal/auth/password"
 	ogtotp "github.com/thomiceli/opengist/internal/auth/totp"
 	"github.com/thomiceli/opengist/internal/config"
-	"slices"
 )
 
 type TOTP struct {
@@ -31,7 +31,7 @@ func GetTOTPByUserID(userID uint) (*TOTP, error) {
 
 func (totp *TOTP) StoreSecret(secret string) error {
 	secretBytes := []byte(secret)
-	encrypted, err := auth.AESEncrypt(config.SecretKey, secretBytes)
+	encrypted, err := ogtotp.AESEncrypt(config.SecretKey, secretBytes)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (totp *TOTP) ValidateCode(code string) (bool, error) {
 		return false, err
 	}
 
-	secretBytes, err := auth.AESDecrypt(config.SecretKey, ciphertext)
+	secretBytes, err := ogtotp.AESDecrypt(config.SecretKey, ciphertext)
 	if err != nil {
 		return false, err
 	}

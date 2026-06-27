@@ -3,36 +3,35 @@ package git
 import (
 	"bufio"
 	"bytes"
-	"encoding/csv"
 	"fmt"
 	"io"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
 type File struct {
-	Filename    string `json:"filename"`
-	Size        uint64 `json:"size"`
-	HumanSize   string `json:"human_size"`
-	OldFilename string `json:"-"`
-	Content     string `json:"content"`
-	Truncated   bool   `json:"truncated"`
-	IsCreated   bool   `json:"-"`
-	IsDeleted   bool   `json:"-"`
-}
-
-type CsvFile struct {
-	File
-	Header []string
-	Rows   [][]string
+	Filename    string   `json:"filename"`
+	Size        uint64   `json:"size"`
+	HumanSize   string   `json:"human_size"`
+	OldFilename string   `json:"-"`
+	Content     string   `json:"content"`
+	Truncated   bool     `json:"truncated"`
+	IsCreated   bool     `json:"-"`
+	IsDeleted   bool     `json:"-"`
+	IsBinary    bool     `json:"-"`
+	MimeType    MimeType `json:"-"`
 }
 
 type Commit struct {
-	Hash        string
-	AuthorName  string
-	AuthorEmail string
-	Timestamp   string
-	Changed     string
-	Files       []File
+	Hash         string
+	AuthorName   string
+	AuthorEmail  string
+	Timestamp    string
+	FilesChanged int
+	Additions    int
+	Deletions    int
+	Files        []File
 }
 
 func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) {
@@ -61,6 +60,20 @@ func truncateCommandOutput(out io.Reader, maxBytes int64) (string, bool, error) 
 
 	return string(buf), truncated, nil
 }
+
+var reLogBinaryNames = regexp.MustCompile(`Binary files (.+) and (.+) differ`)
+
+// shortstat patterns. Git emits a line like:
+//
+//	" 4 files changed, 2 insertions(+), 2 deletions(-)"
+//
+// with insertions or deletions optionally absent when zero. The capture
+// group in each regex is the count.
+var (
+	reShortstatFiles      = regexp.MustCompile(`(\d+) files? changed`)
+	reShortstatInsertions = regexp.MustCompile(`(\d+) insertions?`)
+	reShortstatDeletions  = regexp.MustCompile(`(\d+) deletions?`)
+)
 
 // inspired from https://github.com/go-gitea/gitea/blob/main/services/gitdiff/gitdiff.go
 func parseLog(out io.Reader, maxFiles int, maxBytes int) ([]*Commit, error) {
@@ -122,10 +135,16 @@ loopLog:
 
 		// Commit shortstat
 		case ' ':
-			changed := []byte(line)[1:]
-			changed = bytes.ReplaceAll(changed, []byte("(+)"), []byte(""))
-			changed = bytes.ReplaceAll(changed, []byte("(-)"), []byte(""))
-			currentCommit.Changed = string(changed)
+			shortstat := line[1:]
+			if m := reShortstatFiles.FindStringSubmatch(shortstat); len(m) == 2 {
+				currentCommit.FilesChanged, _ = strconv.Atoi(m[1])
+			}
+			if m := reShortstatInsertions.FindStringSubmatch(shortstat); len(m) == 2 {
+				currentCommit.Additions, _ = strconv.Atoi(m[1])
+			}
+			if m := reShortstatDeletions.FindStringSubmatch(shortstat); len(m) == 2 {
+				currentCommit.Deletions, _ = strconv.Atoi(m[1])
+			}
 
 			// shortstat is followed by an empty line
 			line, err = input.ReadString('\n')
@@ -206,6 +225,20 @@ loopLog:
 						currentFile.IsCreated = true
 					case strings.HasPrefix(line, "deleted file"):
 						currentFile.IsDeleted = true
+					case strings.HasPrefix(line, "Binary files"):
+						currentFile.IsBinary = true
+						names := reLogBinaryNames.FindStringSubmatch(line)
+						if names[1][2:] != names[2][2:] {
+							if currentFile.IsCreated {
+								currentFile.Filename = convertOctalToUTF8(names[2])[2:]
+							}
+							if currentFile.IsDeleted {
+								currentFile.Filename = convertOctalToUTF8(names[1])[2:]
+							}
+						} else {
+							currentFile.OldFilename = convertOctalToUTF8(names[1])[2:]
+							currentFile.Filename = convertOctalToUTF8(names[2])[2:]
+						}
 					case strings.HasPrefix(line, "--- "):
 						name := convertOctalToUTF8(line[4 : len(line)-1])
 						if parseRename && currentFile.IsDeleted {
@@ -343,28 +376,4 @@ func skipToNextCommit(input *bufio.Reader) (line string, err error) {
 		line += tail
 	}
 	return line, err
-}
-
-func ParseCsv(file *File) (*CsvFile, error) {
-
-	reader := csv.NewReader(strings.NewReader(file.Content))
-	records, err := reader.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-
-	header := records[0]
-	numColumns := len(header)
-
-	for i := 1; i < len(records); i++ {
-		if len(records[i]) != numColumns {
-			return nil, fmt.Errorf("CSV file has invalid row at index %d", i)
-		}
-	}
-
-	return &CsvFile{
-		File:   *file,
-		Header: header,
-		Rows:   records[1:],
-	}, nil
 }

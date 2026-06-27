@@ -2,29 +2,41 @@ package db
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID               uint   `gorm:"primaryKey"`
-	Username         string `gorm:"uniqueIndex,size:191"`
-	Password         string
-	IsAdmin          bool
-	CreatedAt        int64
-	Email            string
-	MD5Hash          string // for gravatar, if no Email is specified, the value is random
-	AvatarURL        string
-	GithubID         string
-	GitlabID         string
-	GiteaID          string
-	OIDCID           string `gorm:"column:oidc_id"`
-	StylePreferences string
+	ID                 uint   `gorm:"primaryKey"`
+	Username           string `gorm:"uniqueIndex,size:191"`
+	UsernameNormalized string `gorm:"index"`
+	Password           string
+	IsAdmin            bool
+	CreatedAt          int64
+	Email              string
+	MD5Hash            string // for gravatar, if no Email is specified, the value is random
+	AvatarURL          string // an absolute URL (from an OAuth provider) or a bare filename for a manually uploaded avatar stored under {home}/avatars
+	GithubID           string
+	GitlabID           string
+	GiteaID            string
+	OIDCID             string `gorm:"column:oidc_id"`
+	StylePreferences   string
 
 	Gists               []Gist               `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys             []SSHKey             `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	Liked               []Gist               `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	WebAuthnCredentials []WebAuthnCredential `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
+	AccessTokens        []AccessToken        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
+}
+
+func (user *User) BeforeSave(_ *gorm.DB) error {
+	user.UsernameNormalized = strings.ToLower(user.Username)
+	return nil
 }
 
 func (user *User) BeforeDelete(tx *gorm.DB) error {
@@ -72,6 +84,11 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
+	err = tx.Where("user_id = ?", user.ID).Delete(&AccessToken{}).Error
+	if err != nil {
+		return err
+	}
+
 	err = tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 	if err != nil {
 		return err
@@ -82,12 +99,17 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
+	// Delete uploaded avatar, if any
+	if user.HasUploadedAvatar() {
+		_ = os.Remove(filepath.Join(config.GetHomeDir(), "avatars", filepath.Base(user.AvatarURL)))
+	}
+
 	return nil
 }
 
 func UserExists(username string) (bool, error) {
 	var count int64
-	err := db.Model(&User{}).Where("username like ?", username).Count(&count).Error
+	err := db.Model(&User{}).Where("username_normalized = ?", strings.ToLower(username)).Count(&count).Error
 	return count > 0, err
 }
 
@@ -105,7 +127,7 @@ func GetAllUsers(offset int) ([]*User, error) {
 func GetUserByUsername(username string) (*User, error) {
 	user := new(User)
 	err := db.
-		Where("username like ?", username).
+		Where("username_normalized = ?", strings.ToLower(username)).
 		First(&user).Error
 	return user, err
 }
@@ -214,10 +236,13 @@ func (user *User) DeleteProviderID(provider string) error {
 	}
 
 	if providerIDField, ok := providerIDFields[provider]; ok {
-		return db.Model(&user).
-			Update(providerIDField, nil).
-			Update("avatar_url", nil).
-			Error
+		query := db.Model(&user).Update(providerIDField, nil)
+		// Only clear the avatar when it came from the provider, not when the
+		// user has uploaded their own.
+		if !user.HasUploadedAvatar() {
+			query = query.Update("avatar_url", nil)
+		}
+		return query.Error
 	}
 
 	return nil
@@ -245,11 +270,22 @@ func (user *User) GetStyle() *UserStyleDTO {
 	return style
 }
 
+// HasUploadedAvatar reports whether the user's AvatarURL refers to a manually
+// uploaded avatar (a bare filename) rather than an absolute OAuth provider URL.
+func (user *User) HasUploadedAvatar() bool {
+	return user.AvatarURL != "" && !strings.Contains(user.AvatarURL, "://")
+}
+
 // -- DTO -- //
 
 type UserDTO struct {
 	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
 	Password string `form:"password" validate:"required"`
+}
+
+type OAuthRegisterDTO struct {
+	Username string `form:"username" validate:"required,max=24,alphanumdashunder,notreserved"`
+	Email    string `form:"email" validate:"omitempty,email"`
 }
 
 func (dto *UserDTO) ToUser() *User {
@@ -268,6 +304,9 @@ type UserStyleDTO struct {
 	RemovedLineColor string `form:"removedlinecolor" json:"removed_line_color" validate:"min=0,max=7"`
 	AddedLineColor   string `form:"addedlinecolor" json:"added_line_color" validate:"min=0,max=7"`
 	GitLineColor     string `form:"gitlinecolor" json:"git_line_color" validate:"min=0,max=7"`
+	Theme            string `form:"theme" json:"theme" validate:"oneof=light dark auto"`
+	DefaultSort      string `form:"defaultsort" json:"default_sort" validate:"omitempty,oneof=created updated"`
+	DefaultOrder     string `form:"defaultorder" json:"default_order" validate:"omitempty,oneof=asc desc"`
 }
 
 func (dto *UserStyleDTO) ToJson() string {

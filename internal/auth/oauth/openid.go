@@ -3,9 +3,12 @@ package oauth
 import (
 	gocontext "context"
 	"errors"
+	"slices"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/openidConnect"
+	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
@@ -25,6 +28,7 @@ func (p *OIDCProvider) RegisterProvider() error {
 		"openid",
 		"email",
 		"profile",
+		config.C.OIDCGroupClaimName,
 	)
 
 	if err != nil {
@@ -36,6 +40,10 @@ func (p *OIDCProvider) RegisterProvider() error {
 }
 
 func (p *OIDCProvider) BeginAuthHandler(ctx *context.Context) {
+	if err := enablePKCE(ctx, OpenIDConnectString); err != nil {
+		log.Error().Err(err).Msg("Cannot enable PKCE for OIDC provider")
+	}
+
 	ctxValue := gocontext.WithValue(ctx.Request().Context(), gothic.ProviderParamKey, OpenIDConnectString)
 	ctx.SetRequest(ctx.Request().WithContext(ctxValue))
 
@@ -76,6 +84,31 @@ func (p *OIDCCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 func (p *OIDCCallbackProvider) UpdateUserDB(user *db.User) {
 	user.OIDCID = p.User.UserID
 	user.AvatarURL = p.User.AvatarURL
+}
+
+func (p *OIDCCallbackProvider) IsAdmin() bool {
+	if config.C.OIDCAdminGroup == "" {
+		return false
+	}
+
+	groupClaimName := config.C.OIDCGroupClaimName
+	if groupClaimName == "" {
+		return false
+	}
+
+	groups, ok := p.User.RawData[groupClaimName].([]interface{})
+	if !ok {
+		return false
+	}
+
+	var groupNames []string
+	for _, group := range groups {
+		if groupName, ok := group.(string); ok {
+			groupNames = append(groupNames, groupName)
+		}
+	}
+
+	return slices.Contains(groupNames, config.C.OIDCAdminGroup)
 }
 
 func NewOIDCCallbackProvider(user *goth.User) CallbackProvider {

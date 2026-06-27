@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
@@ -29,7 +30,7 @@ func (*binaryData) GormDataType() string {
 }
 
 func (*binaryData) GormDBDataType(db *gorm.DB, _ *schema.Field) string {
-	switch db.Dialector.Name() {
+	switch db.Name() {
 	case "sqlite":
 		return "BLOB"
 	case "mysql":
@@ -67,7 +68,7 @@ func (*jsonData) GormDataType() string {
 }
 
 func (*jsonData) GormDBDataType(db *gorm.DB, _ *schema.Field) string {
-	switch db.Dialector.Name() {
+	switch db.Name() {
 	case "mysql", "sqlite":
 		return "JSON"
 	case "postgres":

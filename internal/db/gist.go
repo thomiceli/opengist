@@ -1,8 +1,6 @@
 package db
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +12,7 @@ import (
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/dustin/go-humanize"
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/index"
 	"gorm.io/gorm"
@@ -73,8 +72,10 @@ type Gist struct {
 	Uuid            string
 	Title           string
 	URL             string
+	URLNormalized   string
 	Preview         string
 	PreviewFilename string
+	PreviewMimeType string
 	Description     string
 	Private         Visibility // 0: public, 1: unlisted, 2: private
 	UserID          uint
@@ -84,6 +85,8 @@ type Gist struct {
 	NbForks         int
 	CreatedAt       int64
 	UpdatedAt       int64
+	ExpiresAt       int64 // 0: never expires
+	Archived        bool
 
 	Likes    []User `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Forked   *Gist  `gorm:"foreignKey:ForkedID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
@@ -99,7 +102,14 @@ type Like struct {
 	CreatedAt int64
 }
 
+func (gist *Gist) BeforeSave(_ *gorm.DB) error {
+	gist.URLNormalized = strings.ToLower(gist.URL)
+	return nil
+}
+
 func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
+	gist.DeleteRepository()
+	gist.RemoveFromIndex()
 	// Decrement fork counter if the gist was forked
 	err := tx.Model(&Gist{}).
 		Omit("updated_at").
@@ -111,10 +121,17 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
 	err := db.Preload("User").Preload("Forked.User").Preload("Topics").
-		Where("(gists.uuid like ? OR gists.url = ?) AND users.username like ?", gistUuid+"%", gistUuid, user).
+		Where("(gists.uuid LIKE ? OR gists.url_normalized = ?) AND users.username_normalized = ?",
+			strings.ToLower(gistUuid)+"%", strings.ToLower(gistUuid), strings.ToLower(user)).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
 
+	return gist, err
+}
+
+func GetGistByUUID(uuid string) (*Gist, error) {
+	gist := new(Gist)
+	err := db.Preload("User").Preload("Forked.User").Where("uuid = ?", uuid).First(gist).Error
 	return gist, err
 }
 
@@ -127,14 +144,88 @@ func GetGistByID(gistId string) (*Gist, error) {
 	return gist, err
 }
 
-func GetAllGistsForCurrentUser(currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
+// GetAllGistsForCurrentUser returns gists visible to currentUserId - all public
+// gists plus the user's own private/unlisted ones - ordered by sort/order and
+// paginated to one extra row (the 11th is the peek-next sentinel).
+// `since`, when non-nil, restricts results to gists updated at or after that
+// instant (used by the API; the web handler passes nil).
+func GetAllGistsForCurrentUser(currentUserId uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
 	var gists []*Gist
-	err := db.Preload("User").
+	query := db.Preload("User").
 		Preload("Forked.User").
 		Preload("Topics").
-		Where("gists.private = 0 or gists.user_id = ?", currentUserId).
-		Limit(11).
-		Offset(offset * 10).
+		Where("gists.private = 0 or gists.user_id = ?", currentUserId)
+	if since != nil {
+		query = query.Where("gists.updated_at >= ?", since.Unix())
+	}
+	err := query.
+		Limit(limit).
+		Offset(offset * perPage).
+		Order(sort + "_at " + order).
+		Find(&gists).Error
+
+	return gists, err
+}
+
+// GetAllGistsFromUserVisibleTo returns gists owned by fromUserId, filtered
+// to what currentUserId is allowed to see (public always; private/unlisted
+// only when currentUserId == fromUserId). Same pagination/since shape as
+// the other API list helpers. Pass currentUserId=0 to force the
+// public-only subset.
+func GetAllGistsFromUserVisibleTo(fromUserId uint, currentUserId uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
+	var gists []*Gist
+	query := gistsFromUserStatement(fromUserId, currentUserId)
+	if since != nil {
+		query = query.Where("gists.updated_at >= ?", since.Unix())
+	}
+	err := query.
+		Limit(limit).
+		Offset(offset * perPage).
+		Order("gists." + sort + "_at " + order).
+		Find(&gists).Error
+
+	return gists, err
+}
+
+// GetAllGistsOfUser returns every gist owned by userID - public, unlisted,
+// and private - with the same pagination/since semantics as GetAllGistsForCurrentUser.
+// Used by the API list endpoint for callers whose
+// token holds gist:read: they see all of their own content but nothing from
+// other users (others' public gists live under /gists/public).
+func GetAllGistsOfUser(userID uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
+	var gists []*Gist
+	query := db.Preload("User").
+		Preload("Forked.User").
+		Preload("Topics").
+		Where("gists.user_id = ?", userID)
+	if since != nil {
+		query = query.Where("gists.updated_at >= ?", since.Unix())
+	}
+	err := query.
+		Limit(limit).
+		Offset(offset * perPage).
+		Order(sort + "_at " + order).
+		Find(&gists).Error
+
+	return gists, err
+}
+
+// GetAllPublicGistsOfUser returns only the public gists owned by userID, with
+// the same pagination/since semantics as GetAllGistsForCurrentUser. Used by
+// the API list endpoint for callers that authenticate but whose token lacks
+// gist:read - they get only their own public gists.
+func GetAllPublicGistsOfUser(userID uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
+	var gists []*Gist
+	query := db.Preload("User").
+		Preload("Forked.User").
+		Preload("Topics").
+		Where("gists.private = 0 AND gists.user_id = ?", userID)
+	if since != nil {
+		query = query.Where("gists.updated_at >= ?", since.Unix())
+	}
+	err := query.
+		Limit(limit).
+		Offset(offset * perPage).
 		Order(sort + "_at " + order).
 		Find(&gists).Error
 
@@ -229,10 +320,19 @@ func likedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
 		Joins("join users on likes.user_id = users.id")
 }
 
-func GetAllGistsLikedByUser(fromUserId uint, currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
+// GetAllGistsLikedByUser returns gists that fromUserId has starred, filtered
+// to what currentUserId is allowed to see. `since`, when non-nil, restricts
+// results to gists updated at or after that instant (used by the API; the web
+// handler passes nil for both since and the explicit pagination args).
+func GetAllGistsLikedByUser(fromUserId uint, currentUserId uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
 	var gists []*Gist
-	err := likedStatement(fromUserId, currentUserId).Limit(11).
-		Offset(offset * 10).
+	query := likedStatement(fromUserId, currentUserId)
+	if since != nil {
+		query = query.Where("gists.updated_at >= ?", since.Unix())
+	}
+	err := query.
+		Limit(limit).
+		Offset(offset * perPage).
 		Order("gists." + sort + "_at " + order).
 		Find(&gists).Error
 	return gists, err
@@ -251,10 +351,19 @@ func forkedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
 		Joins("join users on gists.user_id = users.id")
 }
 
-func GetAllGistsForkedByUser(fromUserId uint, currentUserId uint, offset int, sort string, order string) ([]*Gist, error) {
+// GetAllGistsForkedByUser returns gists forked by fromUserId, filtered to
+// what currentUserId is allowed to see. `since`, when non-nil, restricts
+// results to gists updated at or after that instant (used by the API; the
+// web handler passes nil for both since and the explicit pagination args).
+func GetAllGistsForkedByUser(fromUserId uint, currentUserId uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
 	var gists []*Gist
-	err := forkedStatement(fromUserId, currentUserId).Limit(11).
-		Offset(offset * 10).
+	query := forkedStatement(fromUserId, currentUserId)
+	if since != nil {
+		query = query.Where("gists.updated_at >= ?", since.Unix())
+	}
+	err := query.
+		Limit(limit).
+		Offset(offset * perPage).
 		Order("gists." + sort + "_at " + order).
 		Find(&gists).Error
 	return gists, err
@@ -263,6 +372,59 @@ func GetAllGistsForkedByUser(fromUserId uint, currentUserId uint, offset int, so
 func CountAllGistsForkedByUser(fromUserId uint, currentUserId uint) (int64, error) {
 	var count int64
 	err := forkedStatement(fromUserId, currentUserId).Model(&Gist{}).Count(&count).Error
+	return count, err
+}
+
+// applySince narrows a gist query to rows updated at or after `since` when it
+// is non-nil, matching the filter the API list queries apply. Kept separate so
+// the count helpers stay in sync with their Find counterparts.
+func applySince(q *gorm.DB, since *time.Time) *gorm.DB {
+	if since != nil {
+		return q.Where("gists.updated_at >= ?", since.Unix())
+	}
+	return q
+}
+
+// The Count* helpers below mirror the API list queries (including the optional
+// `since` filter) so list responses can report a total. They're separate from
+// the web UI's CountAll* helpers above, which don't take `since`.
+
+func CountAllGistsForCurrentUser(currentUserId uint, since *time.Time) (int64, error) {
+	var count int64
+	q := applySince(db.Model(&Gist{}).Where("gists.private = 0 or gists.user_id = ?", currentUserId), since)
+	err := q.Count(&count).Error
+	return count, err
+}
+
+func CountAllGistsFromUserVisibleTo(fromUserId uint, currentUserId uint, since *time.Time) (int64, error) {
+	var count int64
+	err := applySince(gistsFromUserStatement(fromUserId, currentUserId).Model(&Gist{}), since).Count(&count).Error
+	return count, err
+}
+
+func CountAllGistsOfUser(userID uint, since *time.Time) (int64, error) {
+	var count int64
+	q := applySince(db.Model(&Gist{}).Where("gists.user_id = ?", userID), since)
+	err := q.Count(&count).Error
+	return count, err
+}
+
+func CountAllPublicGistsOfUser(userID uint, since *time.Time) (int64, error) {
+	var count int64
+	q := applySince(db.Model(&Gist{}).Where("gists.private = 0 AND gists.user_id = ?", userID), since)
+	err := q.Count(&count).Error
+	return count, err
+}
+
+func CountAllGistsLikedByUserSince(fromUserId uint, currentUserId uint, since *time.Time) (int64, error) {
+	var count int64
+	err := applySince(likedStatement(fromUserId, currentUserId).Model(&Gist{}), since).Count(&count).Error
+	return count, err
+}
+
+func CountAllGistsForkedByUserSince(fromUserId uint, currentUserId uint, since *time.Time) (int64, error) {
+	var count int64
+	err := applySince(forkedStatement(fromUserId, currentUserId).Model(&Gist{}), since).Count(&count).Error
 	return count, err
 }
 
@@ -329,12 +491,12 @@ func (gist *Gist) UpdateNoTimestamps() error {
 }
 
 func (gist *Gist) Delete() error {
-	err := gist.DeleteRepository()
-	if err != nil {
-		return err
-	}
-
 	return db.Delete(&gist).Error
+}
+
+func (gist *Gist) SetArchived(archived bool) error {
+	gist.Archived = archived
+	return db.Model(&gist).Omit("updated_at").Update("archived", archived).Error
 }
 
 func (gist *Gist) SetLastActiveNow() error {
@@ -383,52 +545,79 @@ func (gist *Gist) GetUsersLikes(offset int) ([]*User, error) {
 	return users, err
 }
 
-func (gist *Gist) GetForks(currentUserId uint, offset int) ([]*Gist, error) {
+// GetForks returns gists that fork this gist, filtered to what
+// currentUserId is allowed to see. `offset` is the page index (0-based);
+// `limit` caps the returned slice (pass perPage+1 for the peek-next
+// sentinel). `perPage` is the slice size used for the offset arithmetic
+// (offset * perPage rows are skipped).
+func (gist *Gist) GetForks(currentUserId uint, offset int, limit int, perPage int) ([]*Gist, error) {
 	var gists []*Gist
 	err := db.Model(&gist).Preload("User").
 		Where("forked_id = ?", gist.ID).
 		Where("(gists.private = 0) or (gists.private > 0 and gists.user_id = ?)", currentUserId).
-		Limit(11).
-		Offset(offset * 10).
+		Limit(limit).
+		Offset(offset * perPage).
 		Order("updated_at desc").
 		Find(&gists).Error
 
 	return gists, err
 }
 
+// CountForks returns the number of forks of this gist visible to currentUserId,
+// using the same visibility filter as GetForks (pass 0 for the public subset).
+func (gist *Gist) CountForks(currentUserId uint) (int64, error) {
+	var count int64
+	err := db.Model(&Gist{}).
+		Where("forked_id = ?", gist.ID).
+		Where("(gists.private = 0) or (gists.private > 0 and gists.user_id = ?)", currentUserId).
+		Count(&count).Error
+	return count, err
+}
+
 func (gist *Gist) CanWrite(user *User) bool {
-	return !(user == nil) && (gist.UserID == user.ID)
+	return user != nil && gist.UserID == user.ID
 }
 
 func (gist *Gist) InitRepository() error {
 	return git.InitRepository(gist.User.Username, gist.Uuid)
 }
 
-func (gist *Gist) DeleteRepository() error {
-	return git.DeleteRepository(gist.User.Username, gist.Uuid)
+func (gist *Gist) DeleteRepository() {
+	err := git.DeleteRepository(gist.User.Username, gist.Uuid)
+	if err != nil {
+		log.Warn().Err(err).Msgf("Could not delete repository %s/%s", gist.User.Username, gist.Uuid)
+	}
 }
 
-func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, error) {
-	filesCat, err := git.CatFileBatch(gist.User.Username, gist.Uuid, revision, truncate)
+func (gist *Gist) Files(revision string, truncate bool) ([]*git.File, bool, error) {
+	filesCat, gistTruncated, err := git.CatFileBatch(gist.User.Username, gist.Uuid, revision, truncate)
 	if err != nil {
 		// if the revision or the file do not exist
 		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
-			return nil, &git.RevisionNotFoundError{}
+			return nil, false, &git.RevisionNotFoundError{}
 		}
-		return nil, err
+		return nil, false, err
 	}
 
 	var files []*git.File
 	for _, fileCat := range filesCat {
+		var shortContent string
+		if len(fileCat.Content) > 512 {
+			shortContent = fileCat.Content[:512]
+		} else {
+			shortContent = fileCat.Content
+		}
+
 		files = append(files, &git.File{
 			Filename:  fileCat.Name,
 			Size:      fileCat.Size,
 			HumanSize: humanize.IBytes(fileCat.Size),
 			Content:   fileCat.Content,
 			Truncated: fileCat.Truncated,
+			MimeType:  git.DetectMimeType([]byte(shortContent), filepath.Ext(fileCat.Name)),
 		})
 	}
-	return files, err
+	return files, gistTruncated, err
 }
 
 func (gist *Gist) File(revision string, filename string, truncate bool) (*git.File, error) {
@@ -446,12 +635,20 @@ func (gist *Gist) File(revision string, filename string, truncate bool) (*git.Fi
 		return nil, err
 	}
 
+	var shortContent string
+	if len(content) > 512 {
+		shortContent = content[:512]
+	} else {
+		shortContent = content
+	}
+
 	return &git.File{
 		Filename:  filename,
 		Size:      size,
 		HumanSize: humanize.IBytes(size),
 		Content:   content,
 		Truncated: truncated,
+		MimeType:  git.DetectMimeType([]byte(shortContent), filepath.Ext(filename)),
 	}, err
 }
 
@@ -459,8 +656,55 @@ func (gist *Gist) FileNames(revision string) ([]string, error) {
 	return git.GetFilesOfRepository(gist.User.Username, gist.Uuid, revision)
 }
 
-func (gist *Gist) Log(skip int) ([]*git.Commit, error) {
-	return git.GetLog(gist.User.Username, gist.Uuid, skip)
+// GistCommit pairs a raw git commit with the Opengist account whose email
+// matches the commit's AuthorEmail (when one exists). The git.Commit pointer
+// is embedded so callers/templates can read AuthorName, Hash, Timestamp,
+// Files, etc. directly. User is nil when no account matches - callers can
+// fall back to the embedded AuthorName/AuthorEmail.
+type GistCommit struct {
+	*git.Commit
+	User *User
+}
+
+// Log returns the gist's commit history starting from `revision` (pass
+// "HEAD" for the full history or a SHA to walk from a specific commit
+// downward), with each commit's author resolved to an Opengist user via a
+// single bulk email lookup. Lookup is case-insensitive on both sides -
+// matches the historical web behavior even when the DB stores mixed-case
+// emails. `skip` is the number of commits to skip from the top of the walk
+// (use offset*per_page for paging); `limit` caps the returned slice (pass
+// per_page+1 to enable the peek-next sentinel trick).
+func (gist *Gist) Log(revision string, skip int, limit int) ([]*GistCommit, error) {
+	raw, err := git.GetLog(gist.User.Username, gist.Uuid, revision, skip, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	// Collect distinct lowercased author emails.
+	loweredSet := make(map[string]struct{}, len(raw))
+	for _, c := range raw {
+		if c.AuthorEmail == "" {
+			continue
+		}
+		loweredSet[strings.ToLower(c.AuthorEmail)] = struct{}{}
+	}
+
+	// One IN query, then re-key by lowercased email so we can look up
+	// case-insensitively even if the DB column holds a mixed-case value.
+	byDBEmail, _ := GetUsersFromEmails(loweredSet)
+	byLowered := make(map[string]*User, len(byDBEmail))
+	for e, u := range byDBEmail {
+		byLowered[strings.ToLower(e)] = u
+	}
+
+	out := make([]*GistCommit, len(raw))
+	for i, c := range raw {
+		out[i] = &GistCommit{
+			Commit: c,
+			User:   byLowered[strings.ToLower(c.AuthorEmail)],
+		}
+	}
+	return out, nil
 }
 
 func (gist *Gist) NbCommits() (string, error) {
@@ -473,8 +717,14 @@ func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
 	}
 
 	for _, file := range *files {
-		if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
-			return err
+		if file.SourcePath != "" { // if it's an uploaded file
+			if err := git.MoveFileToRepository(gist.Uuid, file.Filename, file.SourcePath); err != nil {
+				return err
+			}
+		} else { // else it's a text editor file
+			if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -531,20 +781,31 @@ func (gist *Gist) UpdatePreviewAndCount(withTimestampUpdate bool) error {
 	if len(filesStr) == 0 {
 		gist.Preview = ""
 		gist.PreviewFilename = ""
+		gist.PreviewMimeType = ""
 	} else {
-		file, err := gist.File("HEAD", filesStr[0], true)
-		if err != nil {
-			return err
-		}
+		for _, fileStr := range filesStr {
+			file, err := gist.File("HEAD", fileStr, true)
+			if err != nil {
+				return err
+			}
+			if file == nil {
+				continue
+			}
+			gist.Preview = ""
+			gist.PreviewFilename = file.Filename
+			gist.PreviewMimeType = file.MimeType.ContentType
 
-		split := strings.Split(file.Content, "\n")
-		if len(split) > 10 {
-			gist.Preview = strings.Join(split[:10], "\n")
-		} else {
-			gist.Preview = file.Content
-		}
+			if !file.MimeType.CanBeEdited() {
+				continue
+			}
 
-		gist.PreviewFilename = file.Filename
+			split := strings.Split(file.Content, "\n")
+			if len(split) > 10 {
+				gist.Preview = strings.Join(split[:10], "\n")
+			} else {
+				gist.Preview = file.Content
+			}
+		}
 	}
 
 	if withTimestampUpdate {
@@ -573,8 +834,40 @@ func (gist *Gist) Identifier() string {
 	return gist.Uuid
 }
 
+// HTTPCloneURL returns the HTTPS clone URL (`{baseURL}/{user}/{identifier}.git`).
+// Returns "" when HTTP git access is disabled (config.HttpGit == false).
+func (gist *Gist) HTTPCloneURL(baseURL string) string {
+	if !config.C.HttpGit {
+		return ""
+	}
+	return baseURL + "/" + gist.User.Username + "/" + gist.Identifier() + ".git"
+}
+
+// SSHCloneURL returns the SSH clone URL. `fallbackHost` is the request's Host
+// header (or any host:port-shaped string) used when SshExternalDomain isn't
+// configured — only its hostname part is kept. Returns "" when SSH git access
+// is disabled (ssh.git-enabled = disabled).
+func (gist *Gist) SSHCloneURL(fallbackHost string) string {
+	if !config.C.SshEnabled() {
+		return ""
+	}
+	sshDomain := config.C.SshExternalDomain
+	if sshDomain == "" {
+		sshDomain = strings.Split(fallbackHost, ":")[0]
+	}
+	var user string
+	if config.C.SshUsername != "" {
+		user = config.C.SshUsername + "@"
+	}
+	path := gist.User.Username + "/" + gist.Identifier() + ".git"
+	if config.C.SshPort == "22" {
+		return user + sshDomain + ":" + path
+	}
+	return "ssh://" + user + sshDomain + ":" + config.C.SshPort + "/" + path
+}
+
 func (gist *Gist) GetLanguagesFromFiles() ([]string, error) {
-	files, err := gist.Files("HEAD", true)
+	files, _, err := gist.Files("HEAD", true)
 	if err != nil {
 		return nil, err
 	}
@@ -611,30 +904,6 @@ func (gist *Gist) TopicsSlice() []string {
 		topics = append(topics, topic.Topic)
 	}
 	return topics
-}
-
-func (gist *Gist) SerialiseInitRepository() error {
-	var gobBuffer bytes.Buffer
-	encoder := gob.NewEncoder(&gobBuffer)
-	if err := encoder.Encode(gist); err != nil {
-		return fmt.Errorf("gob encoding error: %v", err)
-	}
-
-	return git.SerialiseInitRepository(gist.User.Username, gobBuffer.Bytes())
-}
-
-func DeserialiseInitRepository(user string) (*Gist, error) {
-	data, err := git.DeserialiseInitRepository(user)
-	if err != nil {
-		return nil, err
-	}
-
-	var gist Gist
-	decoder := gob.NewDecoder(bytes.NewReader(data))
-	if err := decoder.Decode(&gist); err != nil {
-		return nil, fmt.Errorf("gob decoding error: %v", err)
-	}
-	return &gist, nil
 }
 
 func (gist *Gist) UpdateLanguages() {
@@ -679,17 +948,22 @@ func (gist *Gist) UpdateLanguages() {
 }
 
 func (gist *Gist) ToDTO() (*GistDTO, error) {
-	files, err := gist.Files("HEAD", false)
+	files, _, err := gist.Files("HEAD", false)
 	if err != nil {
 		return nil, err
 	}
 
 	fileDTOs := make([]FileDTO, 0, len(files))
 	for _, file := range files {
-		fileDTOs = append(fileDTOs, FileDTO{
+		f := FileDTO{
 			Filename: file.Filename,
-			Content:  file.Content,
-		})
+		}
+		if file.MimeType.CanBeEdited() {
+			f.Content = file.Content
+		} else {
+			f.Binary = true
+		}
+		fileDTOs = append(fileDTOs, f)
 	}
 
 	return &GistDTO{
@@ -707,13 +981,19 @@ func (gist *Gist) ToDTO() (*GistDTO, error) {
 // -- DTO -- //
 
 type GistDTO struct {
-	Title       string    `validate:"max=250" form:"title"`
-	Description string    `validate:"max=1000" form:"description"`
-	URL         string    `validate:"max=32,alphanumdashorempty" form:"url"`
-	Files       []FileDTO `validate:"min=1,dive"`
-	Name        []string  `form:"name"`
-	Content     []string  `form:"content"`
-	Topics      string    `validate:"gisttopics" form:"topics"`
+	Title              string         `validate:"max=250" form:"title"`
+	Description        string         `validate:"max=1000" form:"description"`
+	URL                string         `validate:"max=32,alphanumdashorempty" form:"url"`
+	Files              []FileDTO      `validate:"min=1,dive"`
+	Name               []string       `form:"name"`
+	Content            []string       `form:"content"`
+	Topics             string         `validate:"gisttopics" form:"topics"`
+	UploadedFilesUUID  []string       `validate:"omitempty,dive,required,uuid" form:"uploadedfile_uuid"`
+	UploadedFilesNames []string       `validate:"omitempty,dive,required" form:"uploadedfile_filename"`
+	BinaryFileOldName  []string       `form:"binary_old_name"`
+	BinaryFileNewName  []string       `form:"binary_new_name"`
+	Expire             ExpirationType `validate:"omitempty,oneof=never 1hour 12hours 1day 7days 15days custom" form:"expire"`
+	ExpireAt           string         `validate:"expirationdate" form:"expire_at"`
 	VisibilityDTO
 }
 
@@ -726,8 +1006,10 @@ type VisibilityDTO struct {
 }
 
 type FileDTO struct {
-	Filename string `validate:"excludes=\x2f,excludes=\x5c,max=255"`
-	Content  string `validate:"required"`
+	Filename   string `validate:"excludes=\x2f,excludes=\x5c,max=255"`
+	Content    string
+	Binary     bool
+	SourcePath string // Path to uploaded file, used instead of Content when present
 }
 
 func (dto *GistDTO) ToGist() *Gist {
@@ -760,7 +1042,7 @@ func (dto *GistDTO) TopicStrToSlice() []GistTopic {
 // -- Index -- //
 
 func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
-	files, err := gist.Files("HEAD", true)
+	files, _, err := gist.Files("HEAD", true)
 	if err != nil {
 		return nil, err
 	}
@@ -791,18 +1073,19 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 	}
 
 	indexedGist := &index.Gist{
-		GistID:     gist.ID,
-		UserID:     gist.UserID,
-		Visibility: gist.Private.Uint(),
-		Username:   gist.User.Username,
-		Title:      gist.Title,
-		Content:    wholeContent,
-		Filenames:  fileNames,
-		Extensions: exts,
-		Languages:  langs,
-		Topics:     topics,
-		CreatedAt:  gist.CreatedAt,
-		UpdatedAt:  gist.UpdatedAt,
+		GistID:      gist.ID,
+		UserID:      gist.UserID,
+		Visibility:  gist.Private.Uint(),
+		Username:    gist.User.Username,
+		Description: gist.Description,
+		Title:       gist.Title,
+		Content:     wholeContent,
+		Filenames:   fileNames,
+		Extensions:  exts,
+		Languages:   langs,
+		Topics:      topics,
+		CreatedAt:   gist.CreatedAt,
+		UpdatedAt:   gist.UpdatedAt,
 	}
 
 	return indexedGist, nil

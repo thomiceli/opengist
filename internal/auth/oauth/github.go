@@ -2,13 +2,15 @@ package oauth
 
 import (
 	gocontext "context"
+	"fmt"
+	"net/http"
+
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/github"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"net/http"
 )
 
 type GitHubProvider struct {
@@ -69,12 +71,20 @@ func (p *GitHubCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("GitHub API returned status code %d", resp.StatusCode)
+	}
+
 	return readKeys(resp)
 }
 
 func (p *GitHubCallbackProvider) UpdateUserDB(user *db.User) {
 	user.GithubID = p.User.UserID
 	user.AvatarURL = "https://avatars.githubusercontent.com/u/" + p.User.UserID + "?v=4"
+}
+
+func (p *GitHubCallbackProvider) IsAdmin() bool {
+	return false
 }
 
 func NewGitHubCallbackProvider(user *goth.User) CallbackProvider {

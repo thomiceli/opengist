@@ -1,3 +1,4 @@
+{{- if not .Values.statefulSet.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -62,10 +63,28 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if or .Values.deployment.env .Values.deployment.envFromSecrets }}
+          env:
+          {{- if .Values.deployment.env }}
+            {{- toYaml .Values.deployment.env | nindent 12 }}
+          {{- end }}
+          {{- range .Values.deployment.envFromSecrets }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+          {{- end }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.http.port }}
               protocol: TCP
+          {{- if index .Values.config "metrics.enabled" }}
+            - name: metrics
+              containerPort: {{ .Values.service.metrics.port }}
+              protocol: TCP
+          {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             {{- toYaml (omit .Values.livenessProbe "enabled") | nindent 12 }}
@@ -95,7 +114,11 @@ spec:
         - name: opengist-data
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
+            {{- if .Values.persistence.existingClaim }}
+            claimName: {{ .Values.persistence.existingClaim }}
+            {{- else }}
             claimName: {{ include "opengist.fullname" . }}-data
+            {{- end }}
           {{- else }}
           emptyDir: {}
           {{- end }}
@@ -120,3 +143,5 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
+{{- end }}

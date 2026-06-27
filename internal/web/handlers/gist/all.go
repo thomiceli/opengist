@@ -2,6 +2,9 @@ package gist
 
 import (
 	"errors"
+	"slices"
+	"strings"
+
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/index"
@@ -9,8 +12,6 @@ import (
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"gorm.io/gorm"
-	"slices"
-	"strings"
 )
 
 func AllGists(ctx *context.Context) error {
@@ -22,19 +23,33 @@ func AllGists(ctx *context.Context) error {
 	pageInt := handlers.GetPage(ctx)
 
 	sort := "created"
-	sortText := ctx.TrH("gist.list.sort-by-created")
 	order := "desc"
-	orderText := ctx.TrH("gist.list.order-by-desc")
+
+	if userLogged != nil {
+		if style := userLogged.GetStyle(); style != nil {
+			if style.DefaultSort == "updated" {
+				sort = "updated"
+			}
+			if style.DefaultOrder == "asc" {
+				order = "asc"
+			}
+		}
+	}
 
 	if ctx.QueryParam("sort") == "updated" {
 		sort = "updated"
-		sortText = ctx.TrH("gist.list.sort-by-updated")
+	} else if ctx.QueryParam("sort") == "created" {
+		sort = "created"
 	}
 
 	if ctx.QueryParam("order") == "asc" {
 		order = "asc"
-		orderText = ctx.TrH("gist.list.order-by-asc")
+	} else if ctx.QueryParam("order") == "desc" {
+		order = "desc"
 	}
+
+	sortText := ctx.TrH("gist.list.sort-by-" + sort)
+	orderText := ctx.TrH("gist.list.order-by-" + order)
 
 	pagination := &handlers.PaginationParams{
 		Sort:  sort,
@@ -54,21 +69,22 @@ func AllGists(ctx *context.Context) error {
 
 	mode := ctx.GetData("mode")
 	if fromUserStr == "" {
-		if mode == "search" {
+		switch mode {
+		case "search":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.search-results"))
 			ctx.SetData("searchQuery", ctx.QueryParam("q"))
 			pagination.Query = ctx.QueryParam("q")
 			urlPage = "search"
 			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order, "")
-		} else if mode == "topics" {
+		case "topics":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.topic-results-topic", ctx.Param("topic")))
 			ctx.SetData("topic", ctx.Param("topic"))
 			urlPage = "topics/" + ctx.Param("topic")
 			gists, err = db.GetAllGistsFromSearch(currentUserId, "", pageInt-1, sort, order, ctx.Param("topic"))
-		} else if mode == "all" {
+		case "all":
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all"))
 			urlPage = "all"
-			gists, err = db.GetAllGistsForCurrentUser(currentUserId, pageInt-1, sort, order)
+			gists, err = db.GetAllGistsForCurrentUser(currentUserId, nil, pageInt-1, sort, order, 11, 10)
 		}
 	} else {
 		var fromUser *db.User
@@ -101,15 +117,16 @@ func AllGists(ctx *context.Context) error {
 			ctx.SetData("countForked", countForked)
 		}
 
-		if mode == "liked" {
+		switch mode {
+		case "liked":
 			urlPage = fromUserStr + "/liked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-liked-by", fromUserStr))
-			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
-		} else if mode == "forked" {
+			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, nil, pageInt-1, sort, order, 11, 10)
+		case "forked":
 			urlPage = fromUserStr + "/forked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-forked-by", fromUserStr))
-			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, pageInt-1, sort, order)
-		} else if mode == "fromUser" {
+			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, nil, pageInt-1, sort, order, 11, 10)
+		case "fromUser":
 			urlPage = fromUserStr
 
 			if languages, err := db.GetGistLanguagesForUser(fromUser.ID, currentUserId); err != nil {
@@ -161,6 +178,18 @@ func AllGists(ctx *context.Context) error {
 	return ctx.Html("all.html")
 }
 
+// Search handles the search page for gists.
+//
+// It takes a query parameter "q" which is a search query in the format:
+// "user:username title:title description:description filename:filename language:language topic:topic"
+//
+// It also takes a page parameter "page" which is the page number to display.
+//
+// It returns an error if the search query is invalid or if the page number is invalid.
+//
+// It returns the search results as a list of rendered gists, along with the total number of results, the languages found, and the search query.
+//
+// The search results are paginated, with 10 results per page.
 func Search(ctx *context.Context) error {
 	var err error
 
@@ -168,7 +197,7 @@ func Search(ctx *context.Context) error {
 		Query: ctx.QueryParam("q"),
 	}
 
-	content, meta := handlers.ParseSearchQueryStr(ctx.QueryParam("q"))
+	metadata := handlers.ParseSearchQueryStr(ctx.QueryParam("q"))
 	pageInt := handlers.GetPage(ctx)
 
 	var currentUserId uint
@@ -179,13 +208,18 @@ func Search(ctx *context.Context) error {
 		currentUserId = 0
 	}
 
-	gistsIds, nbHits, langs, err := index.SearchGists(content, index.SearchGistMetadata{
-		Username:  meta["user"],
-		Title:     meta["title"],
-		Filename:  meta["filename"],
-		Extension: meta["extension"],
-		Language:  meta["language"],
-		Topic:     meta["topic"],
+	// Search gists in the index and fetch the gists IDs from the database
+	gistsIds, nbHits, langs, err := index.SearchGists(index.SearchGistMetadata{
+		Username:    metadata["user"],
+		Title:       metadata["title"],
+		Description: metadata["description"],
+		Filename:    metadata["filename"],
+		Extension:   metadata["extension"],
+		Language:    metadata["language"],
+		Topic:       metadata["topic"],
+		Content:     metadata["content"],
+		All:         metadata["all"],
+		Default:     metadata["default"],
 	}, currentUserId, pageInt)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error searching gists", err)

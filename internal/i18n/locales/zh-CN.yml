@@ -87,6 +87,11 @@ gist.revision.no-changes: 没有任何变更
 gist.revision.no-revisions: 无可供显示的修订
 
 settings: 设置
+settings.header.account: 账号
+settings.header.mfa: 多因素认证
+settings.header.ssh: SSH
+settings.header.tokens: 访问令牌
+settings.header.style: 样式
 settings.email: 电子邮箱
 settings.email-help: 用于提交和 Gravatar 头像
 settings.email-set: 设置邮箱地址
@@ -106,6 +111,30 @@ settings.delete-ssh-key-confirm: 确认删除 SSH 密钥
 settings.ssh-key-added-at: 添加于
 settings.ssh-key-never-used: 从未使用过
 settings.ssh-key-last-used: 最后使用于
+
+settings.create-token: 创建访问令牌
+settings.create-token-help: 访问令牌用于程序化调用 API
+settings.token-name: 名称
+settings.token-permissions: 权限
+settings.token-gist-permission: Gists
+settings.token-user-permission: 用户
+settings.token-permission-none: 无访问权限
+settings.token-permission-read: 只读
+settings.token-permission-read-write: 读写
+settings.delete-token: 删除
+settings.delete-token-confirm: 确认删除访问令牌
+settings.token-created-at: 创建于
+settings.token-never-used: 从未使用
+settings.token-last-used: 最后使用
+settings.token-expiration: 过期时间
+settings.token-expiration-help: 留空表示永不过期
+settings.token-expires-at: 过期于
+settings.token-no-expiration: 永不过期
+settings.token-expired: 已过期
+settings.token-created: 令牌已创建，请立即复制保存，离开本页后将无法再次查看！
+settings.token-deleted: 访问令牌已删除
+settings.api-disabled-warning: REST API 当前已禁用，在此处创建的令牌需要管理员启用 API 后才能使用。
+settings.api-disabled-go-admin: 前往管理后台启用
 
 auth.signup-disabled: 管理员已禁用注册
 auth.login: 登录
@@ -166,6 +195,8 @@ admin.disable-login: 禁用登录表单
 admin.disable-login_help: 禁止使用登录表单进行登录以强制通过 OAuth 提供方登录。
 admin.disable-gravatar: 禁用 Gravatar
 admin.disable-gravatar_help: 停止使用 Gravatar 作为头像提供方。
+admin.api-enabled: 启用 REST API（/api）
+admin.api-enabled_help: 允许通过 Personal Access Token 程序化访问 Gist 和用户信息。
 admin.allow-gists-without-login: 允许未登录状态下访问单个 Gists
 admin.allow-gists-without-login_help: 允许在不登录的情况下查看和下载 Gist，同时需要登录才能使用 Gists 的发现功能。
 admin.users.delete_confirm: 您想要删除此用户吗？
@@ -214,7 +245,7 @@ admin.invitations: '邀请'
 admin.invitations.create: '创建邀请'
 admin.actions.sync-previews: '同步所有 Gists 预览'
 admin.actions.reset-hooks: '重置所有存储库的 Git 服务 hooks'
-admin.actions.index-gists: '索引所有 Gists'
+admin.actions.index-gists: '重建搜索索引'
 admin.invitations.help: '即使在禁用注册功能的情况下，邀请功能也可用于创建帐户。'
 admin.invitations.max_uses: '最多使用次数'
 admin.invitations.expires_at: '过期时间'
@@ -231,7 +262,7 @@ flash.admin.sync-db: '正在从数据库同步存储库...'
 flash.admin.git-gc: '正在进行存储库垃圾回收...'
 flash.admin.sync-previews: '正在同步 Gist 预览...'
 flash.admin.reset-hooks: '正在重置所有存储库的 Git 服务挂钩...'
-flash.admin.index-gists: '正在索引所有 Gists...'
+flash.admin.index-gists: '正在重建搜索索引...'
 flash.auth.username-exists: '用户名已存在'
 flash.auth.invalid-credentials: '无效的凭证'
 flash.auth.account-linked-oauth: '帐户已关联到 %s'

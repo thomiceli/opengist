@@ -2,8 +2,9 @@ package db
 
 import (
 	"encoding/hex"
-	"github.com/go-webauthn/webauthn/webauthn"
 	"time"
+
+	"github.com/go-webauthn/webauthn/webauthn"
 )
 
 type WebAuthnCredential struct {
@@ -67,7 +68,7 @@ func GetUserByCredentialID(credID binaryData) (*User, error) {
 	var credential WebAuthnCredential
 	var err error
 
-	switch db.Dialector.Name() {
+	switch db.Name() {
 	case "postgres":
 		hexCredID := hex.EncodeToString(credID)
 		if err = db.Preload("User").Where("credential_id = decode(?, 'hex')", hexCredID).First(&credential).Error; err != nil {
@@ -93,7 +94,7 @@ func GetCredentialByID(id binaryData) (*WebAuthnCredential, error) {
 	var cred WebAuthnCredential
 	var err error
 
-	switch db.Dialector.Name() {
+	switch db.Name() {
 	case "postgres":
 		hexCredID := hex.EncodeToString(id)
 		if err = db.Where("credential_id = decode(?, 'hex')", hexCredID).First(&cred).Error; err != nil {

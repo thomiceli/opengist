@@ -30,3 +30,20 @@ git push -o visibility=public
 git push -o visibility=unlisted
 git push -o visibility=private
 ```
+
+## Change topics
+
+```shell
+git push -o topics="golang devops"
+```
+
+## Set expiration
+
+Only applies when creating a gist. The value is either a preset
+(`1hour`, `12hours`, `1day`, `7days`, `15days`) or a custom date
+(RFC3339, e.g. `2026-01-02T15:04:05Z`).
+
+```shell
+git push -o expire=1day 
+git push -o expire=2026-01-02T15:04:05Z
+```

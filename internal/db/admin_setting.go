@@ -20,7 +20,7 @@ const (
 func GetSetting(key string) (string, error) {
 	var setting AdminSetting
 	var err error
-	switch db.Dialector.Name() {
+	switch db.Name() {
 	case "mysql", "sqlite":
 		err = db.Where("`key` = ?", key).First(&setting).Error
 	case "postgres":

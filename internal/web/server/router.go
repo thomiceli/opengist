@@ -10,14 +10,17 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers/admin"
+	"github.com/thomiceli/opengist/internal/web/handlers/api"
+	apiv1 "github.com/thomiceli/opengist/internal/web/handlers/api/v1"
 	"github.com/thomiceli/opengist/internal/web/handlers/auth"
 	"github.com/thomiceli/opengist/internal/web/handlers/gist"
 	"github.com/thomiceli/opengist/internal/web/handlers/git"
 	"github.com/thomiceli/opengist/internal/web/handlers/health"
-	"github.com/thomiceli/opengist/internal/web/handlers/metrics"
+	"github.com/thomiceli/opengist/internal/web/handlers/ipc"
 	"github.com/thomiceli/opengist/internal/web/handlers/settings"
 	"github.com/thomiceli/opengist/public"
 )
@@ -29,18 +32,20 @@ func (s *Server) registerRoutes() {
 		r.GET("/", gist.Create, logged)
 		r.POST("/", gist.ProcessCreate, logged)
 		r.POST("/preview", gist.Preview, logged)
+		r.POST("/upload", gist.Upload, logged, checkFileUploadEnabled)
+		r.DELETE("/upload/:uuid", gist.DeleteUpload, logged, checkFileUploadEnabled)
 
 		r.GET("/healthcheck", health.Healthcheck)
 
-		if config.C.MetricsEnabled {
-			r.GET("/metrics", metrics.Metrics)
-		}
+		r.Static("/avatar", settings.AvatarsDir())
 
 		r.GET("/register", auth.Register)
 		r.POST("/register", auth.ProcessRegister)
 		r.GET("/login", auth.Login)
 		r.POST("/login", auth.ProcessLogin)
 		r.GET("/logout", auth.Logout)
+		r.GET("/oauth/register", auth.OauthRegister, inOAuthRegisterSession)
+		r.POST("/oauth/register", auth.ProcessOauthRegister, inOAuthRegisterSession)
 		r.GET("/oauth/:provider", auth.Oauth)
 		r.GET("/oauth/:provider/callback", auth.OauthCallback)
 		r.GET("/oauth/:provider/unlink", auth.OauthUnlink, logged)
@@ -62,9 +67,14 @@ func (s *Server) registerRoutes() {
 			sA.GET("/style", settings.UserStyle)
 			sA.POST("/style", settings.ProcessUserStyle)
 			sA.POST("/email", settings.EmailProcess)
+			sA.POST("/avatar", settings.AvatarProcess)
+			sA.DELETE("/avatar", settings.AvatarDelete)
 			sA.DELETE("/account", settings.AccountDeleteProcess)
 			sA.POST("/ssh-keys", settings.SshKeysProcess)
 			sA.DELETE("/ssh-keys/:id", settings.SshKeysDelete)
+			sA.GET("/access-tokens", settings.AccessTokens)
+			sA.POST("/access-tokens", settings.AccessTokensProcess)
+			sA.DELETE("/access-tokens/:id", settings.AccessTokensDelete)
 			sA.DELETE("/passkeys/:id", settings.PasskeyDelete)
 			sA.PUT("/password", settings.PasswordProcess)
 			sA.PUT("/username", settings.UsernameProcess)
@@ -92,6 +102,8 @@ func (s *Server) registerRoutes() {
 			sB.POST("/reset-hooks", admin.AdminResetHooks)
 			sB.POST("/index-gists", admin.AdminIndexGists)
 			sB.POST("/sync-languages", admin.AdminSyncGistLanguages)
+			sB.POST("/delete-expired-gists", admin.AdminDeleteExpiredGists)
+			sB.POST("/sync-ssh-keys", admin.AdminSyncSSHKeys)
 			sB.GET("/configuration", admin.AdminConfig)
 			sB.PUT("/set-config", admin.AdminSetConfig)
 		}
@@ -99,6 +111,63 @@ func (s *Server) registerRoutes() {
 		if config.C.HttpGit {
 			r.Any("/init/*", git.GitHttp, gistNewPushSoftInit)
 		}
+
+		apiV1 := r.SubGroup("/api")
+		{
+			apiV1.Use(apiBindAuth)
+
+			// Single-gist reads: blocked when RequireLogin is set, unless
+			// AllowGistsWithoutLogin lets anonymous callers view individual gists.
+			single := apiV1.SubGroup("", makeApiCheckRequireLogin(true))
+			{
+				single.GET("/gists/:uuid", apiv1.GetGist)
+				single.PATCH("/gists/:uuid", apiv1.UpdateGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				single.DELETE("/gists/:uuid", apiv1.DeleteGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				single.GET("/gists/:uuid/commits", apiv1.ListCommits)
+				single.GET("/gists/:uuid/:sha", apiv1.GetGistRevision)
+				single.GET("/gists/:uuid/forks", apiv1.ListForks)
+				single.POST("/gists/:uuid/forks", apiv1.ForkGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				single.GET("/gists/:uuid/like", apiv1.CheckLike, apiRequireAuth)
+				single.GET("/gists/:uuid/star", apiv1.CheckLike, apiRequireAuth)
+				single.PUT("/gists/:uuid/like", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+				single.PUT("/gists/:uuid/star", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+				single.GET("/gists/:uuid/files/:sha/:filename", apiv1.RawFile)
+			}
+
+			// List/aggregate reads: blocked entirely when RequireLogin is set.
+			multi := apiV1.SubGroup("", makeApiCheckRequireLogin(false))
+			{
+				multi.GET("/gists", apiv1.ListGists)
+				multi.POST("/gists", apiv1.CreateGist, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				multi.GET("/gists/public", apiv1.ListPublicGists)
+				multi.GET("/gists/liked", apiv1.ListLikedGists, apiRequireAuth)
+				// /starred and /star are GitHub-compat aliases of the canonical
+				// /liked and /like routes (same handlers); openapi.yaml mentions them
+				// in a note but gives them no path entries of their own.
+				multi.GET("/gists/starred", apiv1.ListLikedGists, apiRequireAuth)
+				multi.GET("/gists/forked", apiv1.ListForkedGists, apiRequireAuth)
+
+				multi.GET("/user", apiv1.GetUser, apiRequireAuth, apiScope(db.ScopeUser, db.ReadPermission))
+				multi.PATCH("/user", apiv1.UpdateUser, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
+				multi.GET("/user/:id", apiv1.GetUserByID)
+				multi.GET("/users/:username", apiv1.GetUserByUsername)
+				multi.GET("/users/:username/gists", apiv1.ListUserGists)
+				multi.GET("/users/:username/liked", apiv1.ListUserLikedGists)
+				multi.GET("/users/:username/starred", apiv1.ListUserLikedGists)
+				multi.GET("/users/:username/forked", apiv1.ListUserForkedGists)
+			}
+
+			apiV1.Any("", noRouteFoundApi)
+		}
+		r.GET("/api/openapi.yaml", api.OpenAPISpec)
+
+		ipcGroup := r.SubGroup("/api/ipc", ipcAuth)
+		ipcGroup.POST("/hook/pre-receive", ipc.PreReceive)
+		ipcGroup.POST("/hook/post-receive", ipc.PostReceive)
+		ipcGroup.POST("/ssh/keys", ipc.SSHKeys)
+		ipcGroup.POST("/ssh/command", ipc.SSHCommand)
+
+		r.Any("/api/*", noRouteFoundApi)
 
 		r.GET("/all", gist.AllGists, checkRequireLogin, setAllGistsMode("all"))
 
@@ -122,16 +191,17 @@ func (s *Server) registerRoutes() {
 			sC.GET("/revisions", gist.Revisions)
 			sC.GET("/archive/:revision", gist.DownloadZip)
 			sC.POST("/visibility", gist.EditVisibility, logged, writePermission)
+			sC.POST("/archive", gist.ToggleArchive, logged, writePermission)
 			sC.POST("/delete", gist.DeleteGist, logged, writePermission)
 			sC.GET("/raw/:revision/:file", gist.RawFile)
 			sC.GET("/download/:revision/:file", gist.DownloadFile)
-			sC.GET("/edit", gist.Edit, logged, writePermission)
-			sC.POST("/edit", gist.ProcessCreate, logged, writePermission)
+			sC.GET("/edit", gist.Edit, logged, writePermission, notArchived)
+			sC.POST("/edit", gist.ProcessCreate, logged, writePermission, notArchived)
 			sC.POST("/like", gist.Like, logged)
 			sC.GET("/likes", gist.Likes, checkRequireLogin)
 			sC.POST("/fork", gist.Fork, logged)
 			sC.GET("/forks", gist.Forks, checkRequireLogin)
-			sC.PUT("/checkbox", gist.Checkbox, logged, writePermission)
+			sC.PUT("/checkbox", gist.Checkbox, logged, writePermission, notArchived)
 		}
 	}
 

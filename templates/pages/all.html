@@ -5,7 +5,7 @@
             <div class="flex-auto">
                 {{if .fromUser}}
                 <div class="flex items-center">
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         {{ if not (shouldGenerateAvatar .fromUser .DisableGravatar) }}
                             <img class="h-12 w-12 rounded-md mr-2 border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .fromUser .DisableGravatar }}" alt="{{ .fromuser.Username }}'s Avatar">
                         {{ else }}
@@ -18,7 +18,7 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold leading-tight">{{.fromUser.Username}}</h1>
-                        <p class="text-sm text-slate-500">{{ .locale.Tr "gist.list.joined" }} <span class="moment-timestamp">{{.fromUser.CreatedAt}}</span></p>
+                        <p class="text-sm text-slate-500">{{ .locale.Tr "gist.list.joined" }} <span>{{.fromUser.CreatedAt | humanTimeDiff}}</span></p>
                     </div>
                 </div>
                 {{ else }}

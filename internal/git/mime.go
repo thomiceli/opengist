@@ -1,0 +1,105 @@
+package git
+
+import (
+	"fmt"
+	"mime"
+	"net/http"
+	"strings"
+
+	"github.com/gabriel-vasile/mimetype"
+)
+
+type MimeType struct {
+	ContentType       string
+	Charset           string
+	extension         string
+	golangContentType string // json, m3u, etc. still renderable as text
+}
+
+func (mt MimeType) IsText() bool {
+	return strings.HasPrefix(mt.ContentType, "text/") || strings.HasPrefix(mt.golangContentType, "text/")
+}
+
+func (mt MimeType) IsCSV() bool {
+	return strings.HasPrefix(mt.ContentType, "text/csv") &&
+		(strings.HasSuffix(mt.extension, ".csv"))
+}
+
+func (mt MimeType) IsImage() bool {
+	return strings.HasPrefix(mt.ContentType, "image/")
+}
+
+func (mt MimeType) IsSVG() bool {
+	return strings.HasPrefix(mt.ContentType, "image/svg+xml")
+}
+
+func (mt MimeType) IsPDF() bool {
+	return strings.HasPrefix(mt.ContentType, "application/pdf")
+}
+
+func (mt MimeType) IsAudio() bool {
+	return strings.HasPrefix(mt.ContentType, "audio/")
+}
+
+func (mt MimeType) IsVideo() bool {
+	return strings.HasPrefix(mt.ContentType, "video/")
+}
+
+func (mt MimeType) CanBeHighlighted() bool {
+	return mt.IsText() && !mt.IsCSV()
+}
+
+func (mt MimeType) CanBeEmbedded() bool {
+	return mt.IsImage() || mt.IsPDF() || mt.IsAudio() || mt.IsVideo()
+}
+
+func (mt MimeType) CanBeRendered() bool {
+	return mt.IsText() || mt.IsImage() || mt.IsSVG() || mt.IsPDF() || mt.IsAudio() || mt.IsVideo()
+}
+
+func (mt MimeType) CanBeEdited() bool {
+	return mt.IsText() || mt.IsSVG()
+}
+
+func (mt MimeType) RenderType() string {
+	t := strings.Split(mt.ContentType, "/")
+	str := ""
+	if len(t) == 2 {
+		str = fmt.Sprintf("(%s)", strings.ToUpper(t[1]))
+	}
+
+	// More user friendly description
+	if mt.IsImage() || mt.IsSVG() {
+		return fmt.Sprintf("Image %s", str)
+	}
+	if mt.IsAudio() {
+		return fmt.Sprintf("Audio %s", str)
+	}
+	if mt.IsVideo() {
+		return fmt.Sprintf("Video %s", str)
+	}
+	if mt.IsPDF() {
+		return "PDF"
+	}
+	if mt.IsCSV() {
+		return "CSV"
+	}
+	if mt.IsText() {
+		return "Text"
+	}
+	return "Binary"
+}
+
+// Header returns the value for a Content-Type HTTP header, re-attaching the
+// charset parameter that DetectMimeType split out of ContentType.
+func (mt MimeType) Header() string {
+	if mt.Charset == "" {
+		return mt.ContentType
+	}
+	return mime.FormatMediaType(mt.ContentType, map[string]string{"charset": mt.Charset})
+}
+
+func DetectMimeType(data []byte, extension string) MimeType {
+	mediaType, params, _ := mime.ParseMediaType(mimetype.Detect(data).String())
+	return MimeType{mediaType, params["charset"], extension, http.DetectContentType(data)}
+}

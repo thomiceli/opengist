@@ -7,42 +7,54 @@ import (
 
 func AdminSyncReposFromFS(ctx *context.Context) error {
 	ctx.AddFlash(ctx.Tr("flash.admin.sync-fs"), "success")
-	go actions.Run(actions.SyncReposFromFS)
+	go actions.RunOnce(actions.SyncReposFromFS)
 	return ctx.RedirectTo("/admin-panel")
 }
 
 func AdminSyncReposFromDB(ctx *context.Context) error {
 	ctx.AddFlash(ctx.Tr("flash.admin.sync-db"), "success")
-	go actions.Run(actions.SyncReposFromDB)
+	go actions.RunOnce(actions.SyncReposFromDB)
 	return ctx.RedirectTo("/admin-panel")
 }
 
 func AdminGcRepos(ctx *context.Context) error {
 	ctx.AddFlash(ctx.Tr("flash.admin.git-gc"), "success")
-	go actions.Run(actions.GitGcRepos)
+	go actions.RunOnce(actions.GitGcRepos)
 	return ctx.RedirectTo("/admin-panel")
 }
 
 func AdminSyncGistPreviews(ctx *context.Context) error {
 	ctx.AddFlash(ctx.Tr("flash.admin.sync-previews"), "success")
-	go actions.Run(actions.SyncGistPreviews)
+	go actions.RunOnce(actions.SyncGistPreviews)
 	return ctx.RedirectTo("/admin-panel")
 }
 
 func AdminResetHooks(ctx *context.Context) error {
 	ctx.AddFlash(ctx.Tr("flash.admin.reset-hooks"), "success")
-	go actions.Run(actions.ResetHooks)
+	go actions.RunOnce(actions.ResetHooks)
 	return ctx.RedirectTo("/admin-panel")
 }
 
 func AdminIndexGists(ctx *context.Context) error {
 	ctx.AddFlash(ctx.Tr("flash.admin.index-gists"), "success")
-	go actions.Run(actions.IndexGists)
+	go actions.RunOnce(actions.IndexGists)
 	return ctx.RedirectTo("/admin-panel")
 }
 
 func AdminSyncGistLanguages(ctx *context.Context) error {
 	ctx.AddFlash(ctx.Tr("flash.admin.sync-gist-languages"), "success")
-	go actions.Run(actions.SyncGistLanguages)
+	go actions.RunOnce(actions.SyncGistLanguages)
+	return ctx.RedirectTo("/admin-panel")
+}
+
+func AdminDeleteExpiredGists(ctx *context.Context) error {
+	ctx.AddFlash(ctx.Tr("flash.admin.delete-expired-gists"), "success")
+	go actions.RunOnce(actions.DeleteExpiredGists)
+	return ctx.RedirectTo("/admin-panel")
+}
+
+func AdminSyncSSHKeys(ctx *context.Context) error {
+	ctx.AddFlash(ctx.Tr("flash.admin.sync-ssh-keys"), "success")
+	go actions.RunOnce(actions.SyncSSHKeys)
 	return ctx.RedirectTo("/admin-panel")
 }

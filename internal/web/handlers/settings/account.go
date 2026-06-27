@@ -3,16 +3,18 @@ package settings
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/thomiceli/opengist/internal/config"
-	"github.com/thomiceli/opengist/internal/db"
-	"github.com/thomiceli/opengist/internal/git"
-	"github.com/thomiceli/opengist/internal/i18n"
-	"github.com/thomiceli/opengist/internal/validator"
-	"github.com/thomiceli/opengist/internal/web/context"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/i18n"
+	opengistssh "github.com/thomiceli/opengist/internal/ssh"
+	"github.com/thomiceli/opengist/internal/validator"
+	"github.com/thomiceli/opengist/internal/web/context"
 )
 
 func EmailProcess(ctx *context.Context) error {
@@ -44,6 +46,7 @@ func AccountDeleteProcess(ctx *context.Context) error {
 	if err := user.Delete(); err != nil {
 		return ctx.ErrorRes(500, "Cannot delete this user", err)
 	}
+	opengistssh.SyncAuthorizedKeysLogged()
 
 	return ctx.RedirectTo("/all")
 }
@@ -61,18 +64,22 @@ func UsernameProcess(ctx *context.Context) error {
 		return ctx.RedirectTo("/settings")
 	}
 
-	if exists, err := db.UserExists(dto.Username); err != nil || exists {
-		ctx.AddFlash(ctx.Tr("flash.auth.username-exists"), "error")
-		return ctx.RedirectTo("/settings")
+	if !strings.EqualFold(dto.Username, user.Username) {
+		if exists, err := db.UserExists(dto.Username); err != nil || exists {
+			ctx.AddFlash(ctx.Tr("flash.auth.username-exists"), "error")
+			return ctx.RedirectTo("/settings")
+		}
 	}
 
 	sourceDir := filepath.Join(config.GetHomeDir(), git.ReposDirectory, strings.ToLower(user.Username))
 	destinationDir := filepath.Join(config.GetHomeDir(), git.ReposDirectory, strings.ToLower(dto.Username))
 
-	if _, err := os.Stat(sourceDir); !os.IsNotExist(err) {
-		err := os.Rename(sourceDir, destinationDir)
-		if err != nil {
-			return ctx.ErrorRes(500, "Cannot rename user directory", err)
+	if sourceDir != destinationDir {
+		if _, err := os.Stat(sourceDir); !os.IsNotExist(err) {
+			err := os.Rename(sourceDir, destinationDir)
+			if err != nil {
+				return ctx.ErrorRes(500, "Cannot rename user directory", err)
+			}
 		}
 	}
 

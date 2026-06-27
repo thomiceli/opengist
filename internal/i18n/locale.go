@@ -50,10 +50,17 @@ func (store *LocaleStore) loadLocaleFromYAML(localeCode, path string) error {
 	}
 
 	name := display.Self.Name(tag)
-	if tag == language.AmericanEnglish {
+	switch tag {
+	case language.AmericanEnglish:
 		name = "English"
-	} else if tag == language.EuropeanSpanish {
+	case language.EuropeanSpanish:
 		name = "Español"
+	}
+	switch localeCode {
+	case "zh-CN":
+		name = "简体中文"
+	case "zh-TW":
+		name = "繁體中文"
 	}
 
 	locale := &Locale{

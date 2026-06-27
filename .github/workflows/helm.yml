@@ -2,16 +2,17 @@ name: Build / Deploy Helm Chart
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Helm
-        uses: azure/setup-helm@v4.3.0
+        uses: azure/setup-helm@v5.0.1
         with:
           version: 'latest'
 
@@ -34,20 +35,16 @@ jobs:
             helm repo index --url https://helm.opengist.io --merge index.yaml .
           fi
 
-      - name: Deploy to server
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "./helm/*.tgz,./helm/index.yaml"
-          target: ${{ secrets.HELM_SERVER_PATH }}
-
-      - name: Update remote helm repository
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            ${{ secrets.UPDATE_HELM_REPO }}
+      - name: Push to docs repository
+        run: |
+          git clone https://${{ secrets.STATIC_REPO_TOKEN }}@github.com/${{ secrets.STATIC_REPO }}.git target-repo
+          mkdir -p target-repo/helm
+          cp helm/*.tgz target-repo/srv/helm/
+          cp helm/index.yaml target-repo/srv/helm/
+          cd target-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Deploy helm chart from ${{ github.repository }}@${{ github.sha }}" || echo "No changes to commit"
+          git pull --rebase
+          git push

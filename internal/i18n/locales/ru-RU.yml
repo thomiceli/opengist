@@ -51,7 +51,7 @@ gist.edit.save: Сохранить
 
 gist.list.joined: Зарегистрирован
 gist.list.all: Все фрагменты
-gist.list.search-results: Результаты  поиска
+gist.list.search-results: Результаты поиска
 gist.list.sort: Сортировка
 gist.list.sort-by-created: по дате создания
 gist.list.sort-by-updated: по дате обновления
@@ -159,19 +159,19 @@ admin.created_at: Создан
 admin.config-link: Эти настройки могут быть %s файлом конфигурации YAML и/или переменными окружения.
 admin.config-link-overriden: перекрыты
 admin.disable-signup: Запретить регистрацию
-admin.disable-signup_help: Запретить создание новых доступов
+admin.disable-signup_help: Запретить создание новых доступов.
 admin.require-login: Требовать авторизацию
 admin.require-login_help: Запретить просмотр фрагментов без авторизации.
 admin.disable-login: Запретить авторизацию по паролю
 admin.disable-login_help: Запретить авторизацию с вводом пароля, форсировать внешнюю авторизацию через Gitea/GitHub.
 admin.disable-gravatar: Запретить Gravatar
 admin.disable-gravatar_help: Запретить использование Gravatar как провайдера изображений профиля.
-admin.allow-gists-without-login:
-admin.allow-gists-without-login_help:
+admin.allow-gists-without-login: Разрешить доступ к отдельным фрагментам без авторизации
+admin.allow-gists-without-login_help: Разрешает просматривать и скачивать отдельные фрагменты без входа, но требует авторизацию для поиска фрагментов.
 admin.users.delete_confirm: Вы уверены что хотите удалить этого пользователя?
 
 admin.gists.title: Название
-admin.gists.private: Приватный
+admin.gists.private: Приватный?
 admin.gists.nb-files: Файлов
 admin.gists.nb-likes: Понравилось
 admin.gists.delete_confirm: Вы уверены что хотите удалить этот фрагмент?
@@ -183,77 +183,175 @@ gist.list.all-liked-by: 'Все фрагменты, понравившиеся %
 gist.list.all-forked-by: 'Все фрагменты, ответвлённые %s'
 gist.list.all-from: 'Все фрагменты от %s'
 gist.search.found: 'фрагментов найдено'
-gist.search.no-results: 'Не найден ни один фрагмент'
+gist.search.no-results: 'Фрагменты не найдены'
 gist.search.help.user: 'фрагментов создано пользователем'
-gist.search.help.title: ''
-gist.search.help.filename: ''
-gist.search.help.extension: ''
-gist.search.help.language: ''
-gist.forks.for: ''
-gist.likes.for: ''
-gist.revision-of: ''
-settings.link-gitlab-account: ''
-settings.unlink-gitlab-account: ''
-settings.change-username: ''
-settings.create-password: ''
-settings.create-password-help: ''
-settings.change-password: ''
-settings.change-password-help: ''
-settings.password-label-title: ''
-error.page-not-found: ''
-error.bad-request: ''
-error.signup-disabled: ''
-error.signup-disabled-form: ''
-error.login-disabled-form: ''
-error.complete-oauth-login: ''
-error.oauth-unsupported: ''
-error.cannot-bind-data: ''
-error.invalid-number: ''
-error.invalid-character-unescaped: ''
-admin.invitations: ''
-admin.invitations.create: ''
-admin.actions.sync-previews: ''
-admin.actions.reset-hooks: ''
-admin.actions.index-gists: ''
-validation.should-not-be-empty: ''
-admin.invitations.help: ''
-admin.invitations.max_uses: ''
-admin.invitations.expires_at: ''
-admin.invitations.code: ''
-admin.invitations.copy_link: ''
-admin.invitations.uses: ''
-admin.invitations.expired: ''
-flash.admin.user-deleted: ''
-flash.admin.gist-deleted: ''
-flash.admin.invitation-created: ''
-flash.admin.invitation-deleted: ''
-flash.admin.sync-fs: ''
-flash.admin.sync-db: ''
-flash.admin.git-gc: ''
-flash.admin.sync-previews: ''
-flash.admin.reset-hooks: ''
-flash.admin.index-gists: ''
-flash.auth.username-exists: ''
-flash.auth.invalid-credentials: ''
-flash.auth.account-linked-oauth: ''
-flash.auth.account-unlinked-oauth: ''
-flash.auth.user-sshkeys-not-retrievable: ''
-flash.auth.user-sshkeys-not-created: ''
-flash.auth.must-be-logged-in: ''
-flash.gist.visibility-changed: ''
-flash.gist.deleted: ''
-flash.gist.fork-own-gist: ''
-flash.gist.forked: ''
-flash.user.email-updated: ''
-flash.user.invalid-ssh-key: ''
-flash.user.ssh-key-added: ''
-flash.user.ssh-key-deleted: ''
-flash.user.password-updated: ''
-flash.user.username-updated: ''
-validation.is-too-long: ''
-validation.should-not-include-sub-directory: ''
-validation.should-only-contain-alphanumeric-characters: ''
-validation.should-only-contain-alphanumeric-characters-and-dashes: ''
-validation.not-enough: ''
-validation.invalid: ''
-html.title.admin-panel: ''
+gist.search.help.title: 'фрагментов с указанным заголовком'
+gist.search.help.filename: 'фрагменты содержащие файлы с указанным именем'
+gist.search.help.extension: 'фрагменты, содержащие файлы с указанным расширением'
+gist.search.help.language: 'фрагменты, содержащие файлы с указанным языком'
+gist.forks.for: 'Форки фрагмента %s'
+gist.likes.for: 'Лайки фрагмента %s'
+gist.revision-of: 'Ревизия фрагмента %s'
+settings.link-gitlab-account: 'Привязать учётную запись Gitlab'
+settings.unlink-gitlab-account: 'Отвязать учётную запись GitHub'
+settings.change-username: 'Сменить имя пользователя'
+settings.create-password: 'Создать пароль'
+settings.create-password-help: 'Создайте пароль для входа в Opengist по HTTP'
+settings.change-password: 'Сменить пароль'
+settings.change-password-help: 'Смените пароль для входа в Opengist по HTTP'
+settings.password-label-title: 'Пароль'
+error.page-not-found: 'Страница не найдена'
+error.bad-request: 'Неверный запрос'
+error.signup-disabled: 'Регистрация недоступна'
+error.signup-disabled-form: 'Регистрация через форму недоступна'
+error.login-disabled-form: 'Авторизация через форму недоступна'
+error.complete-oauth-login: 'Не удалось завершить авторизацию пользователя: %s'
+error.oauth-unsupported: 'Провайдер OAuth не поддерживается'
+error.cannot-bind-data: 'Не удалось обработать данные'
+error.invalid-number: 'Некорректное числовое значение'
+error.invalid-character-unescaped: 'Обнаружен неверный неэкранированный символ'
+admin.invitations: 'Инвайты'
+admin.invitations.create: 'Создать инвайт'
+admin.actions.sync-previews: 'Обновить предпросмотры всех фрагментов'
+admin.actions.reset-hooks: 'Сбросить хуки Git-сервера для всех репозиториев'
+admin.actions.index-gists: 'Перестроить поисковый индекс'
+validation.should-not-be-empty: 'Поле %s не должно быть пустым'
+admin.invitations.help: 'Инвайты используются для создания аккаунта, даже когда регистрация запрещена.'
+admin.invitations.max_uses: 'Максимальное количество использований'
+admin.invitations.expires_at: 'Истекает'
+admin.invitations.code: 'Код'
+admin.invitations.copy_link: 'Скопировать ссылку'
+admin.invitations.uses: 'Количество использований'
+admin.invitations.expired: 'Истёк'
+flash.admin.user-deleted: 'Пользователь удалён'
+flash.admin.gist-deleted: 'Фрагмент удалён'
+flash.admin.invitation-created: 'Приглашение создано'
+flash.admin.invitation-deleted: 'Приглашение удалено'
+flash.admin.sync-fs: 'Выполняется синхронизация репозиториев с файловой системой…'
+flash.admin.sync-db: 'Выполняется синхронизация репозиториев с базой данных…'
+flash.admin.git-gc: 'Сборка мусора в репозиториях…'
+flash.admin.sync-previews: 'Обновление предпросмотров фрагментов…'
+flash.admin.reset-hooks: 'Пересоздание Git-хуков для всех репозиториев…'
+flash.admin.index-gists: 'Перестроение поискового индекса…'
+flash.auth.username-exists: 'Такое имя пользователя уже занято'
+flash.auth.invalid-credentials: 'Некорректные данные для входа'
+flash.auth.account-linked-oauth: 'Учётная запись связана с %s'
+flash.auth.account-unlinked-oauth: 'Учётная запись отключена от %s'
+flash.auth.user-sshkeys-not-retrievable: 'Не удалось получить SSH-ключи пользователя'
+flash.auth.user-sshkeys-not-created: 'Не удалось создать SSH-ключ'
+flash.auth.must-be-logged-in: 'Для доступа к фрагментам необходимо войти в аккаунт'
+flash.gist.visibility-changed: 'Видимость фрагмента изменена'
+flash.gist.deleted: 'Фрагмент удалён'
+flash.gist.fork-own-gist: 'Нельзя создать форк собственного фрагмента'
+flash.gist.forked: 'Фрагмент создан как форк'
+flash.user.email-updated: 'Адрес электронной почты обновлён'
+flash.user.invalid-ssh-key: 'Неверный SSH-ключ'
+flash.user.ssh-key-added: 'SSH-ключ добавлен'
+flash.user.ssh-key-deleted: 'SSH-ключ удалён'
+flash.user.password-updated: 'Пароль обновлён'
+flash.user.username-updated: 'Имя пользователя обновлено'
+validation.is-too-long: 'Поле %s слишком длинное'
+validation.should-not-include-sub-directory: 'Поле %s не должно содержать подкаталоги'
+validation.should-only-contain-alphanumeric-characters: 'Поле %s должно содержать только буквы и цифры'
+validation.should-only-contain-alphanumeric-characters-and-dashes: 'Поле %s должно содержать только буквы, цифры и дефисы'
+validation.not-enough: 'Недостаточно %s'
+validation.invalid: 'Неверный %s'
+html.title.admin-panel: 'Панель администратора'
+settings.ssh-key-exists: SSH-ключ уже существует
+gist.file-binary-edit: Этот файл является бинарным.
+gist.preview-non-available: Предпросмотр недоступен
+gist.file-raw: Не удалось отобразить файл.
+gist.new.topics: Темы (через пробел)
+gist.list.topic-results-topic: Все фрагменты с темой %s
+gist.search.help.topic: фрагменты с заданной темой
+gist.search.placeholder.title: Заголовок
+gist.search.placeholder.visibility: Видимость
+gist.search.placeholder.public: Публичный
+gist.search.placeholder.unlisted: Скрытый
+gist.search.placeholder.private: Приватный
+gist.search.placeholder.language: Язык
+gist.search.placeholder.all: Все
+gist.search.placeholder.topics: Темы
+gist.search.placeholder.search: Поиск
+gist.new.drop-files: Перетащите файлы сюда или нажмите для загрузки
+gist.new.any-file-type: Поддерживаются файлы любого типа
+gist.delete.confirm: Вы уверены, что хотите удалить этот gist?
+gist.list.topic-results: Все фрагменты с этой темой
+gist.revision.binary-file-changes: Изменения в бинарных файлах не отображаются
+admin.actions.sync-gist-languages: Обновить языки всех фрагментов
+admin.invitations.delete_confirm: Вы хотите удалить это приглашение?
+flash.auth.passkey-deleted: Ключ доступа удалён
+flash.auth.passkey-registred: Ключ доступа %s зарегистрирован
+validation.invalid-gist-topics: 'Некорректные темы фрагмента: они должны начинаться с буквы или цифры, быть не длиннее 50 символов и могут содержать дефисы'
+settings.header.tokens: Токены доступа
+settings.style.removed-lines-color: Цвет удалённых строк
+settings.style.added-lines-color: Цвет добавленных строк
+settings.style.git-lines-color: Цвет git-строк
+settings.style.save-style: Сохранить оформление
+settings.create-token: Создать токен доступа
+settings.create-token-help: Токены доступа используются для доступа к API
+settings.token-name: Название
+settings.delete-token-confirm: Подтвердите удаление токена доступа
+settings.token-permissions: Права доступа
+settings.token-gist-permission: Фрагменты
+settings.token-permission-none: Нет доступа
+settings.token-permission-read: Чтение
+settings.token-permission-read-write: Чтение и запись
+settings.delete-token: Удалить
+settings.token-created-at: Создан
+settings.token-never-used: Не использовался
+settings.token-expiration: Срок действия
+settings.token-expiration-help: Оставьте пустым, чтобы срок действия не ограничивался
+settings.token-expires-at: Истекает
+settings.token-expired: истёк
+settings.token-deleted: Токен доступа удалён
+auth.mfa.delete-passkey-confirm: Подтвердите удаление ключа доступа
+auth.mfa.use-passkey: Использовать ключ доступа
+auth.mfa.bind-passkey: Добавить ключ доступа
+auth.mfa.login-with-passkey: Войти с помощью ключа доступа
+auth.mfa.waiting-for-passkey-input: Ожидание подтверждения в браузере…
+auth.mfa.use-passkey-to-finish: Используйте ключ доступа для завершения аутентификации
+auth.mfa.passkeys-help: Добавьте ключ доступа для входа в аккаунт и использования в качестве MFA.
+auth.mfa.passkey-name: Название
+auth.mfa.delete-passkey: Удалить
+auth.mfa.passkey-added-at: Добавлен
+auth.mfa.passkey-never-used: Никогда не использовался
+auth.mfa.passkey-last-used: Последнее использование
+auth.totp.already-enabled: TOTP уже включён
+auth.totp.invalid-secret: Некорректный секретный ключ TOTP
+auth.totp.invalid-code: Некорректный одноразовый код
+auth.totp.code-used: Код восстановления %s уже был использован и больше недействителен. Вы можете отключить MFA или сгенерировать новые коды.
+auth.totp.disabled: Двухфакторная аутентификация TOTP отключена
+auth.totp.disable: Отключить TOTP
+auth.totp.enter-code: Введите код из приложения Authenticator
+auth.totp.submit: Подтвердить
+auth.totp.proceed: Продолжить
+auth.totp.scan-qr-code: Отсканируйте QR-код ниже в приложении-аутентификаторе для включения двухфакторной аутентификации или введите указанную строку и подтвердите кодом.
+error.not-in-mfa-session: Пользователь не находится в MFA-сессии
+error.no-file-uploaded: Файл не загружен
+error.cannot-open-file: Не удалось открыть загруженный файл
+auth.totp.help: TOTP — это метод двухфакторной аутентификации, использующий общий секрет для генерации одноразового пароля.
+auth.totp.use: Использовать TOTP
+auth.totp.regenerate-recovery-codes: Сгенерировать коды восстановления заново
+auth.totp: Одноразовый пароль по времени (TOTP)
+flash.admin.sync-gist-languages: Обновление языков фрагментов…
+settings.token-created: Токен создан, обязательно сохраните его, повторно он показан не будет!
+settings.token-last-used: Последнее использование
+settings.token-no-expiration: Бессрочно
+auth.totp.save-recovery-codes: Сохраните коды восстановления в безопасном месте. Они понадобятся для восстановления доступа к аккаунту при утере приложения-аутентификатора.
+auth.totp.enter-recovery-key: или код восстановления, если вы потеряли устройство
+settings.style.theme: Тема
+settings.style.theme-light: Светлая тема
+settings.style.theme-dark: Тёмная тема
+settings.style.theme-auto: Авто
+auth.mfa: Регистрация отключена администратором
+auth.mfa.passkey: Вход
+auth.mfa.passkeys: Ключи доступа
+auth.totp.code: Код
+settings.header.account: Аккаунт
+settings.header.mfa: Двухфакторная аутентификация (MFA)
+settings.header.ssh: SSH
+settings.header.style: Тема оформления
+settings.style.gist-code: Код фрагмента
+settings.style.no-soft-wrap: Без переносов строк
+settings.style.soft-wrap: Перенос строк

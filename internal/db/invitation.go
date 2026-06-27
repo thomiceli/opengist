@@ -16,7 +16,7 @@ type Invitation struct {
 
 func GetAllInvitations() ([]*Invitation, error) {
 	var invitations []*Invitation
-	dialect := db.Dialector.Name()
+	dialect := db.Name()
 	query := db.Model(&Invitation{})
 
 	switch dialect {

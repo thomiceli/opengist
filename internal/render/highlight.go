@@ -7,6 +7,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/fs"
+	"path/filepath"
+	"strings"
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
@@ -108,6 +110,9 @@ func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {
 	lexer := newLexer(gist.PreviewFilename)
 	if lexer.Config().Name == "markdown" {
 		return MarkdownGistPreview(gist)
+	}
+	if strings.EqualFold(filepath.Ext(gist.PreviewFilename), ".mmd") {
+		return MermaidGistPreview(gist)
 	}
 
 	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))

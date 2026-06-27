@@ -183,6 +183,10 @@ dl.dl-config dd {
     background: #f6f8fa !important;
 }
 
+.dark .mermaid {
+    background: #1f2937 !important;
+}
+
 .hidden-important {
     @apply hidden;
 }

@@ -67,6 +67,12 @@ func processFile(file *git.File) RenderedFile {
 			log.Error().Err(err).Msg("Error rendering markdown file for " + file.Filename)
 		}
 		return rendered
+	} else if mt.IsText() && filepath.Ext(file.Filename) == ".mmd" {
+		rendered, err := renderMermaidFile(file)
+		if err != nil {
+			log.Error().Err(err).Msg("Error rendering mermaid file for " + file.Filename)
+		}
+		return rendered
 	} else if mt.IsSVG() {
 		rendered := renderSvgFile(file)
 		return rendered

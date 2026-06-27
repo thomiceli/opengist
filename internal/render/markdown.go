@@ -38,6 +38,29 @@ func renderMarkdownFile(file *git.File) (HighlightedFile, error) {
 		Type: "Markdown",
 	}, err
 }
+
+func MermaidGistPreview(gist *db.Gist) (RenderedGist, error) {
+	var buf bytes.Buffer
+	wrapped := "```mermaid\n" + gist.Preview + "\n```"
+	err := newMarkdown().Convert([]byte(wrapped), &buf)
+
+	return RenderedGist{
+		Gist: gist,
+		HTML: buf.String(),
+	}, err
+}
+
+func renderMermaidFile(file *git.File) (HighlightedFile, error) {
+	var buf bytes.Buffer
+	wrapped := "```mermaid\n" + file.Content + "\n```"
+	err := newMarkdown().Convert([]byte(wrapped), &buf)
+
+	return HighlightedFile{
+		File: file,
+		HTML: buf.String(),
+		Type: "Mermaid",
+	}, err
+}
 func MarkdownString(content string) (string, error) {
 	var buf bytes.Buffer
 	err := newMarkdownWithSvgExtension().Convert([]byte(content), &buf)

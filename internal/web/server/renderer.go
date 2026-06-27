@@ -59,6 +59,9 @@ func (s *Server) setFuncMap() {
 		"isMarkdown": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".md"
 		},
+		"isMermaid": func(i string) bool {
+			return strings.ToLower(filepath.Ext(i)) == ".mmd"
+		},
 		"isJupyter": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".ipynb"
 		},

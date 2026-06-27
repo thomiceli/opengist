@@ -117,6 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let deleteBtns = dom.querySelector<HTMLButtonElement>("button.delete-file");
         if (deleteBtns !== null) {
             deleteBtns.onclick = () => {
+                if (!confirm("Are you sure you want to delete this file?")) return;
                 // For both text and binary files, just remove from DOM
                 if (!dom.hasAttribute('data-binary-original-name')) {
                     // Only remove from editors array for text files
@@ -209,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let deleteBtn = el.querySelector<HTMLButtonElement>("button.delete-file");
             if (deleteBtn) {
                 deleteBtn.onclick = () => {
+                    if (!confirm("Are you sure you want to delete this file?")) return;
                     el.remove();
                     checkForFirstDeleteButton();
                 };

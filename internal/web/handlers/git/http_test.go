@@ -182,6 +182,36 @@ func TestGitPush(t *testing.T) {
 	}
 }
 
+func TestGitPushArchived(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	baseUrl := s.StartHttpServer(t)
+
+	s.Register(t, "thomas")
+
+	_, _, user, gistId := s.CreateGist(t, "0")
+
+	dest := t.TempDir()
+	require.NoError(t, gitClone(baseUrl, "thomas:thomas", user, gistId, dest))
+
+	// Pushing works before the gist is archived.
+	require.NoError(t, gitPush(dest, "before.txt", "content"))
+
+	// Archive the gist.
+	s.Login(t, "thomas")
+	s.Request(t, "POST", "/"+user+"/"+gistId+"/archive", nil, 302)
+
+	// Pushing to an archived gist is rejected, even by the owner.
+	require.Error(t, gitPush(dest, "after.txt", "content"))
+
+	// Unarchive the gist.
+	s.Request(t, "POST", "/"+user+"/"+gistId+"/archive", nil, 302)
+
+	// Pushing works again once unarchived.
+	require.NoError(t, gitPush(dest, "afterunarchive.txt", "content"))
+}
+
 func TestGitCreatePush(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)

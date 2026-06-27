@@ -7,6 +7,10 @@ gist.header.unlike: Unlike
 gist.header.fork: Fork
 gist.header.edit: Edit
 gist.header.delete: Delete
+gist.header.archive: Archive
+gist.header.unarchive: Unarchive
+gist.header.archived: Archived
+gist.header.archived-help: This gist is archived and is now read-only.
 gist.header.forked-from: Forked from
 gist.header.last-active: Last active
 gist.header.expires: Expires
@@ -379,6 +383,8 @@ flash.auth.oauth-session-expired: OAuth2 session expired, please try again
 flash.auth.oauth-already-linked: This %s account is already linked to another user
 
 flash.gist.visibility-changed: Gist visibility has been changed
+flash.gist.archived: Gist has been archived
+flash.gist.unarchived: Gist has been unarchived
 flash.gist.deleted: Gist has been deleted
 flash.gist.fork-own-gist: Unable to fork own gists
 flash.gist.forked: Gist has been forked

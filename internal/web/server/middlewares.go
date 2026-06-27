@@ -181,6 +181,18 @@ func writePermission(next Handler) Handler {
 	}
 }
 
+// notArchived blocks write operations on an archived (read-only) gist. It must
+// run after gistInit so the gist is available in the context.
+func notArchived(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		gist := ctx.GetData("gist").(*db.Gist)
+		if gist.Archived {
+			return ctx.ErrorRes(403, "This gist is archived and is read-only", nil)
+		}
+		return next(ctx)
+	}
+}
+
 func adminPermission(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		user := ctx.User

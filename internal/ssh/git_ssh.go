@@ -78,6 +78,12 @@ func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string
 		_ = db.SSHKeyLastUsedNow(pubKey.Content)
 	}
 
+	// Refuse pushes to an archived gist only after the key has been validated
+	// against the owner above, so we don't disclose the gist's existence.
+	if verb == "receive-pack" && gist.Archived {
+		return nil, "", errors.New("this gist is archived and is read-only")
+	}
+
 	return gist, verb, nil
 }
 

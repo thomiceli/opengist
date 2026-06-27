@@ -1,5 +1,5 @@
 {{ define "gist_header" }}
-<div class="py-10" id="gist" data-own="{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}">
+<div class="py-10" id="gist" data-own="{{ if not .gist.Archived }}{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}{{ end }}">
     <header>
         <div class="flex flex-col lg:flex-row">
             <div>
@@ -67,6 +67,7 @@
                 </div>
                 {{ end }}
                 {{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}
+                {{ if not .gist.Archived }}
                 <div class="ml-2 flex items-center">
                     <a href="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/edit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -75,6 +76,16 @@
                         {{ .locale.Tr "gist.header.edit" }}
                     </a>
                 </div>
+                {{ end }}
+                <form id="archive" class="ml-2 flex items-center" method="post" action="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/archive">
+                    {{ .csrfHtml }}
+                    <button type="submit" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 leading-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                        </svg>
+                        {{ if .gist.Archived }}{{ .locale.Tr "gist.header.unarchive" }}{{ else }}{{ .locale.Tr "gist.header.archive" }}{{ end }}
+                    </button>
+                </form>
                 <form id="delete" class="ml-2 flex items-center" method="post" action="{{ $.c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/delete">
                     {{ .csrfHtml }}
                     <button type="submit" onclick="return confirm('{{ .locale.Tr "gist.delete.confirm" }}')" class="relative inline-flex items-center space-x-2 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 hover:border-rose-600 dark:hover:border-rose-700 dark:hover:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
@@ -93,6 +104,7 @@
         {{ end }}
         <p class="mt-1 max-w-2xl text-sm text-slate-500">{{ .locale.Tr "gist.header.last-active" }} <span> {{ .gist.UpdatedAt | humanTimeDiff }} </span>
             {{ if .gist.Private }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300"> {{ visibilityStr .gist.Private false }} </span>{{ end }}
+            {{ if .gist.Archived }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200"> {{ .locale.Tr "gist.header.archived" }} </span>{{ end }}
             {{ if .gist.ExpiresAt }} • <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200" title="{{ humanDate .gist.ExpiresAt }}"> {{ .locale.Tr "gist.header.expires" }} {{ .gist.ExpiresAt | humanTimeDiff }} </span>{{ end }}
         </p>
         <p class="mt-1 text-sm max-w-2xl text-slate-600 dark:text-slate-400">{{ .gist.Description }}</p>
@@ -105,6 +117,15 @@
         {{ end }}
     </header>
     <main class="mt-4">
+
+        {{ if .gist.Archived }}
+        <div class="rounded-md border border-1 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 px-4 py-2 text-sm text-amber-900 dark:text-amber-200 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            {{ .locale.Tr "gist.header.archived-help" }}
+        </div>
+        {{ end }}
 
         <div class="my-4">
             <div class="sm:hidden">

@@ -12,6 +12,8 @@
     "@codemirror/commands": "^6.10.3",
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/language": "^6.12.3",
+    "@codemirror/language-data": "^6.5.1",
+    "@lezer/highlight": "^1.2.1",
     "@codemirror/state": "^6.6.0",
     "@codemirror/text": "^0.19.6",
     "@codemirror/view": "^6.43.0",

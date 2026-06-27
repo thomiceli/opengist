@@ -305,6 +305,8 @@ type UserStyleDTO struct {
 	AddedLineColor   string `form:"addedlinecolor" json:"added_line_color" validate:"min=0,max=7"`
 	GitLineColor     string `form:"gitlinecolor" json:"git_line_color" validate:"min=0,max=7"`
 	Theme            string `form:"theme" json:"theme" validate:"oneof=light dark auto"`
+	DefaultSort      string `form:"defaultsort" json:"default_sort" validate:"omitempty,oneof=created updated"`
+	DefaultOrder     string `form:"defaultorder" json:"default_order" validate:"omitempty,oneof=asc desc"`
 }
 
 func (dto *UserStyleDTO) ToJson() string {

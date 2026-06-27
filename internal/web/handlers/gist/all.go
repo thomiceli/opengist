@@ -23,19 +23,33 @@ func AllGists(ctx *context.Context) error {
 	pageInt := handlers.GetPage(ctx)
 
 	sort := "created"
-	sortText := ctx.TrH("gist.list.sort-by-created")
 	order := "desc"
-	orderText := ctx.TrH("gist.list.order-by-desc")
+
+	if userLogged != nil {
+		if style := userLogged.GetStyle(); style != nil {
+			if style.DefaultSort == "updated" {
+				sort = "updated"
+			}
+			if style.DefaultOrder == "asc" {
+				order = "asc"
+			}
+		}
+	}
 
 	if ctx.QueryParam("sort") == "updated" {
 		sort = "updated"
-		sortText = ctx.TrH("gist.list.sort-by-updated")
+	} else if ctx.QueryParam("sort") == "created" {
+		sort = "created"
 	}
 
 	if ctx.QueryParam("order") == "asc" {
 		order = "asc"
-		orderText = ctx.TrH("gist.list.order-by-asc")
+	} else if ctx.QueryParam("order") == "desc" {
+		order = "desc"
 	}
+
+	sortText := ctx.TrH("gist.list.sort-by-" + sort)
+	orderText := ctx.TrH("gist.list.order-by-" + order)
 
 	pagination := &handlers.PaginationParams{
 		Sort:  sort,

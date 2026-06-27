@@ -200,15 +200,15 @@ func InitConfig(configPath string, out io.Writer) error {
 		c.OpengistHome = filepath.Join(homeDir, ".opengist")
 	}
 
-	if c.LogPath == "" {
-		c.LogPath = filepath.Join(GetHomeDir(), "log")
-	}
-
 	if err = checks(c); err != nil {
 		return err
 	}
 
 	C = c
+
+	if c.LogPath == "" {
+		c.LogPath = filepath.Join(GetHomeDir(), "log")
+	}
 
 	if err = migrateConfig(); err != nil {
 		return err

@@ -189,6 +189,12 @@ settings.style.theme: Theme
 settings.style.theme-light: Light
 settings.style.theme-dark: Dark
 settings.style.theme-auto: Auto
+settings.style.default-sort: Default sort order
+settings.style.default-sort-created: Created date
+settings.style.default-sort-updated: Updated date
+settings.style.default-order: Default order direction
+settings.style.default-order-desc: Newest first
+settings.style.default-order-asc: Oldest first
 settings.create-token: Create access token
 settings.create-token-help: Access tokens can be used to access the API
 settings.token-name: Name

@@ -10,6 +10,10 @@ document.querySelectorAll(".pdf").forEach((el) => {
     PDFObject.embed(el.dataset.src || "", el);
 })
 
+if (document.querySelector('.mermaid') && document.documentElement.classList.contains('dark')) {
+    (window as any).mermaid?.initialize({ theme: 'dark', startOnLoad: true });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('user-btn')?.addEventListener("click" , () => {
         document.getElementById('user-menu')!.classList.toggle('hidden');

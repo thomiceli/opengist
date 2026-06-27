@@ -8,8 +8,8 @@ log-level: warn
 # Set the log output to one or more of the following: `stdout`, `file`. Default: stdout,file
 log-output: stdout,file
 
-# Set the path to the log file.
-log-path: /tmp/logaaa
+# Set the directory where the log file (opengist.log) is written. Default: $OG_OPENGIST_HOME/log
+log-path:
 
 # Public URL to access to Opengist
 external-url:

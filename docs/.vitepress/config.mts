@@ -97,6 +97,11 @@ const docsSidebar = [
             ], collapsed: true},
             {text: 'Fail2ban', link: '/fail2ban-setup'},
             {text: 'Healthcheck', link: '/healthcheck'},
+            {text: 'Manage users & admins', items: [
+                {text: 'Seed a user (CLI)', link: '/create-user'},
+                {text: 'Reset a password', link: '/reset-password'},
+                {text: 'Manage admins', link: '/manage-admins'},
+            ], collapsed: true},
         ], collapsed: false
     },
     {

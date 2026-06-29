@@ -194,7 +194,9 @@ func (s *Server) registerRoutes() {
 			sC.POST("/archive", gist.ToggleArchive, logged, writePermission)
 			sC.POST("/delete", gist.DeleteGist, logged, writePermission)
 			sC.GET("/raw/:revision/:file", gist.RawFile)
+			sC.HEAD("/raw/:revision/:file", gist.RawFile)
 			sC.GET("/download/:revision/:file", gist.DownloadFile)
+			sC.HEAD("/download/:revision/:file", gist.DownloadFile)
 			sC.GET("/edit", gist.Edit, logged, writePermission, notArchived)
 			sC.POST("/edit", gist.ProcessCreate, logged, writePermission, notArchived)
 			sC.POST("/like", gist.Like, logged)
@@ -257,6 +259,10 @@ func (r *Router) SubGroup(prefix string, m ...Middleware) *Router {
 
 func (r *Router) GET(path string, h Handler, m ...Middleware) {
 	r.Group.GET(path, chain(h, m...).toEchoHandler())
+}
+
+func (r *Router) HEAD(path string, h Handler, m ...Middleware) {
+	r.Group.HEAD(path, chain(h, m...).toEchoHandler())
 }
 
 func (r *Router) POST(path string, h Handler, m ...Middleware) {

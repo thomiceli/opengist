@@ -14,7 +14,7 @@ type GistInitQueue struct {
 	Gist   Gist   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:GistID"`
 	UserID uint   `gorm:"primaryKey"`
 	User   User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
-	Token  string `gorm:"uniqueIndex"`
+	Token  string `gorm:"size:32;uniqueIndex"`
 }
 
 func AddInitGistToQueue(gistID uint, userID uint, token string) error {

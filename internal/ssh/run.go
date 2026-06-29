@@ -49,8 +49,9 @@ func Start() {
 }
 
 func listen(serverConfig *ssh.ServerConfig) {
-	log.Info().Msg("Starting SSH server on ssh://" + config.C.SshHost + ":" + config.C.SshPort)
-	listener, err := net.Listen("tcp", config.C.SshHost+":"+config.C.SshPort)
+	addr := net.JoinHostPort(config.C.SshHost, config.C.SshPort)
+	log.Info().Msg("Starting SSH server on ssh://" + addr)
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal().Err(err).Msg("SSH: Failed to start SSH server")
 	}

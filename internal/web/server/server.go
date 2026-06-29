@@ -62,7 +62,7 @@ func (s *Server) Start() {
 }
 
 func (s *Server) startHTTP() {
-	addr := config.C.HttpHost + ":" + config.C.HttpPort
+	addr := net.JoinHostPort(config.C.HttpHost, config.C.HttpPort)
 
 	log.Info().Msg("Starting HTTP server on http://" + addr)
 	if err := s.echo.Start(addr); err != nil && err != http.ErrServerClosed {

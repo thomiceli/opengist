@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/url"
 	"path/filepath"
 	"slices"
@@ -262,7 +263,7 @@ func setupMySQL(dbInfo databaseInfo) error {
 	if dbInfo.Socket != "" {
 		protocol = fmt.Sprintf("unix(%s)", dbInfo.Socket)
 	} else {
-		protocol = fmt.Sprintf("tcp(%s:%s)", dbInfo.Host, dbInfo.Port)
+		protocol = fmt.Sprintf("tcp(%s)", net.JoinHostPort(dbInfo.Host, dbInfo.Port))
 	}
 	dsn := fmt.Sprintf("%s:%s@%s/%s?charset=utf8mb4&parseTime=True&loc=Local", dbInfo.User, dbInfo.Password, protocol, dbInfo.Database)
 

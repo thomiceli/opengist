@@ -36,6 +36,7 @@ func RawFile(ctx *context.Context) error {
 	}
 
 	ctx.Response().Header().Set("Content-Disposition", "inline; filename=\""+url.PathEscape(file.Filename)+"\"")
+	ctx.Response().Header().Set("Content-Length", strconv.Itoa(int(file.Size)))
 	ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
 	return ctx.PlainText(200, file.Content)
 }
@@ -53,7 +54,7 @@ func DownloadFile(ctx *context.Context) error {
 
 	ctx.Response().Header().Set("Content-Type", file.MimeType.Header())
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename=\""+url.PathEscape(file.Filename)+"\"")
-	ctx.Response().Header().Set("Content-Length", strconv.Itoa(len(file.Content)))
+	ctx.Response().Header().Set("Content-Length", strconv.Itoa(int(file.Size)))
 	ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
 	_, err = ctx.Response().Write([]byte(file.Content))
 	if err != nil {

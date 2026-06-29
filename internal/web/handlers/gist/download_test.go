@@ -65,6 +65,7 @@ func TestRawFile(t *testing.T) {
 		resp := s.Request(t, "GET", "/"+username+"/"+identifier+"/raw/HEAD/file.txt", nil, 200)
 
 		require.Equal(t, `inline; filename="file.txt"`, resp.Header.Get("Content-Disposition"))
+		require.Equal(t, "11", resp.Header.Get("Content-Length"))
 		require.Equal(t, "nosniff", resp.Header.Get("X-Content-Type-Options"))
 		require.Contains(t, resp.Header.Get("Content-Type"), "text/plain")
 

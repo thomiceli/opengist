@@ -63,7 +63,7 @@ func client() (*http.Client, string) {
 	if host == "0.0.0.0" || host == "::" || host == "" {
 		host = "127.0.0.1"
 	}
-	return &http.Client{}, "http://" + host + ":" + port
+	return &http.Client{}, "http://" + net.JoinHostPort(host, port)
 }
 
 func post(path string, reqBody, respBody any) error {

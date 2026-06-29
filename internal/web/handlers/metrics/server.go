@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"net"
 	"net/http"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -31,7 +32,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) Start() {
-	addr := config.C.MetricsHost + ":" + config.C.MetricsPort
+	addr := net.JoinHostPort(config.C.MetricsHost, config.C.MetricsPort)
 	log.Info().Msg("Starting metrics server on http://" + addr)
 	if err := s.echo.Start(addr); err != nil && err != http.ErrServerClosed {
 		log.Error().Err(err).Msg("Failed to start metrics server")

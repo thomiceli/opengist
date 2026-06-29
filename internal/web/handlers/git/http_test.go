@@ -1,10 +1,12 @@
 package git_test
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -210,6 +212,104 @@ func TestGitPushArchived(t *testing.T) {
 
 	// Pushing works again once unarchived.
 	require.NoError(t, gitPush(dest, "afterunarchive.txt", "content"))
+}
+
+// gitInitAndPushTo initializes a fresh repo with a single file and pushes it to
+// remotePath (e.g. "/init") as creds. It returns whatever git push returns.
+func gitInitAndPushTo(baseUrl, creds, remotePath, filename, content string, destDir string) error {
+	if err := exec.Command("git", "init", "--initial-branch=master", destDir).Run(); err != nil {
+		return err
+	}
+	remote := "http://" + creds + "@" + baseUrl[len("http://"):] + remotePath
+	if err := exec.Command("git", "-C", destDir, "remote", "add", "origin", remote).Run(); err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(destDir, filename), []byte(content), 0644); err != nil {
+		return err
+	}
+	if err := exec.Command("git", "-C", destDir, "add", ".").Run(); err != nil {
+		return err
+	}
+	if err := exec.Command("git", "-C", destDir, "commit", "-m", "init").Run(); err != nil {
+		return err
+	}
+	return exec.Command("git", "-C", destDir, "push", "origin", "master").Run()
+}
+
+// TestGitInitPushParallel hammers the /init create-by-push flow concurrently.
+// Before the per-push correlation token, the two HTTP requests git makes
+// (info/refs then git-receive-pack) were matched via a per-user FIFO queue, so
+// interleaved pushes desynced it: pushes 500'd or content landed in the wrong
+// gist. This asserts every parallel push lands in its own gist with its own
+// content, and that the queue drains to empty.
+func TestGitInitPushParallel(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	baseUrl := s.StartHttpServer(t)
+	s.Register(t, "thomas")
+
+	const n = 10
+	creds := "thomas:thomas"
+
+	// Each push writes a distinct file/content so we can detect misrouting.
+	want := make(map[string]string, n)
+	for i := 0; i < n; i++ {
+		want[fmt.Sprintf("file-%d.txt", i)] = fmt.Sprintf("content-%d", i)
+	}
+
+	// Pre-create the temp dirs on the main goroutine, then push from all of them
+	// at once.
+	dirs := make([]string, n)
+	for i := 0; i < n; i++ {
+		dirs[i] = t.TempDir()
+	}
+
+	var wg sync.WaitGroup
+	errs := make([]error, n)
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			errs[i] = gitInitAndPushTo(baseUrl, creds, "/init",
+				fmt.Sprintf("file-%d.txt", i), fmt.Sprintf("content-%d", i), dirs[i])
+		}(i)
+	}
+	wg.Wait()
+
+	for i, err := range errs {
+		require.NoErrorf(t, err, "parallel /init push %d failed", i)
+	}
+
+	user, err := db.GetUserByUsername("thomas")
+	require.NoError(t, err)
+
+	// Exactly n gists were created, one per push.
+	count, err := db.CountAllGistsFromUser(user.ID, user.ID)
+	require.NoError(t, err)
+	require.EqualValues(t, n, count, "expected one gist per parallel push")
+
+	// Every pushed file/content is present exactly once across the gists, proving
+	// no push's content was routed into another push's gist.
+	gists, err := db.GetAllGistsOfUser(user.ID, nil, 0, "created", "desc", 100, 100)
+	require.NoError(t, err)
+
+	got := make(map[string]string, n)
+	for _, g := range gists {
+		files, _, err := g.Files("HEAD", false)
+		require.NoError(t, err)
+		require.Len(t, files, 1, "each init gist should contain exactly one file")
+		f := files[0]
+		_, dup := got[f.Filename]
+		require.Falsef(t, dup, "file %q appeared in more than one gist", f.Filename)
+		got[f.Filename] = f.Content
+	}
+	require.Equal(t, want, got, "pushed files/content did not map one-to-one onto gists")
+
+	// The init queue must drain completely, leaving no stale correlation entries.
+	queued, err := db.CountAll(&db.GistInitQueue{})
+	require.NoError(t, err)
+	require.EqualValues(t, 0, queued, "init queue should be empty after all pushes complete")
 }
 
 func TestGitCreatePush(t *testing.T) {

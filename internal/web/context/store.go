@@ -4,12 +4,15 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth/gothic"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/session"
 )
+
+var gothicStoreOnce sync.Once
 
 type Store struct {
 	sessionsPath string
@@ -27,7 +30,9 @@ func NewStore(sessionsPath string) *Store {
 	s.UserStore = sessions.NewFilesystemStore(s.sessionsPath, config.SecretKey, encryptKey)
 	s.UserStore.MaxLength(10 * 1024)
 	hardenCookie(s.UserStore.Options)
-	gothic.Store = s.UserStore
+	gothicStoreOnce.Do(func() {
+		gothic.Store = s.UserStore
+	})
 
 	return s
 }

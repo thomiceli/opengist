@@ -312,6 +312,61 @@ func TestGitInitPushParallel(t *testing.T) {
 	require.EqualValues(t, 0, queued, "init queue should be empty after all pushes complete")
 }
 
+func TestGitAuthWithAccessToken(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	baseUrl := s.StartHttpServer(t)
+
+	s.Register(t, "thomas")
+
+	_, _, user, privateId := s.CreateGist(t, "2")
+
+	// CreateGist logs out at the end; log back in to create tokens for thomas.
+	s.Login(t, "thomas")
+
+	rwToken := s.CreateAccessToken(t, "rw", db.ReadWritePermission, db.NoPermission)
+	roToken := s.CreateAccessToken(t, "ro", db.ReadPermission, db.NoPermission)
+	noToken := s.CreateAccessToken(t, "none", db.NoPermission, db.NoPermission)
+
+	tests := []struct {
+		name  string
+		token string
+		// clone (pull) requires gist read permission, push requires gist write permission
+		canClone bool
+		canPush  bool
+	}{
+		{"ReadWriteToken", rwToken, true, true},
+		{"ReadOnlyToken", roToken, true, false},
+		{"NoGistPermissionToken", noToken, false, false},
+		{"InvalidToken", "og_deadbeef", false, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			creds := "thomas:" + tt.token
+
+			// Clone (pull) the private gist using the token as the password.
+			dest := t.TempDir()
+			err := gitClone(baseUrl, creds, user, privateId, dest)
+			if tt.canClone {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+				return
+			}
+
+			// Push to the gist using the token as the password.
+			err = gitPush(dest, "token.txt", "from token")
+			if tt.canPush {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+			}
+		})
+	}
+}
+
 func TestGitCreatePush(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)

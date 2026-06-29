@@ -27,7 +27,7 @@ func handlePull(ctx *context.Context, route *gitRoute, gist *db.Gist, gistExists
 		log.Debug().Str("authUsername", username).Str("gistOwner", gist.User.Username).Msg("Pulling private gist")
 	}
 
-	if user, err := authOrFail(ctx, userToCheck, password, 404, "Check your credentials or make sure you have access to the Gist"); user == nil {
+	if user, err := authOrFail(ctx, userToCheck, password, db.ScopeGist, db.ReadPermission, 404, "Check your credentials or make sure you have access to the Gist"); user == nil {
 		return err
 	}
 
@@ -42,7 +42,7 @@ func handlePush(ctx *context.Context, route *gitRoute, gist *db.Gist, gistExists
 
 	if gistExists {
 		log.Debug().Str("authUsername", username).Str("gistOwner", gist.User.Username).Msg("Pushing to existing gist")
-		if user, err := authOrFail(ctx, gist.User.Username, password, 404, "Check your credentials or make sure you have access to the Gist"); user == nil {
+		if user, err := authOrFail(ctx, gist.User.Username, password, db.ScopeGist, db.ReadWritePermission, 404, "Check your credentials or make sure you have access to the Gist"); user == nil {
 			return err
 		}
 
@@ -57,7 +57,7 @@ func handlePush(ctx *context.Context, route *gitRoute, gist *db.Gist, gistExists
 
 	// The gist does not exist: the user creates it by pushing to /<user>/<name>.
 	log.Debug().Str("authUsername", username).Msg("Creating new gist by pushing")
-	user, err := authOrFail(ctx, username, password, 404, "Check your credentials or make sure you have access to the Gist")
+	user, err := authOrFail(ctx, username, password, db.ScopeGist, db.ReadWritePermission, 404, "Check your credentials or make sure you have access to the Gist")
 	if user == nil {
 		return err
 	}

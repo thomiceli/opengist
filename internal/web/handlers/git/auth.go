@@ -11,9 +11,11 @@ import (
 	"github.com/thomiceli/opengist/internal/web/context"
 )
 
-// authOrFail authenticates the given credentials. On success it returns the
-// user. On failure it writes the appropriate HTTP response and returns a nil
-// user, so callers stop with:
+// authOrFail authenticates the given credentials. The credential is tried as a
+// password (DB or LDAP) first, then as an access token with the required scope
+// and permission — this lets SSO/passwordless users authenticate over Git HTTP.
+// On success it returns the user. On failure it writes the appropriate HTTP
+// response and returns a nil user, so callers stop with:
 //
 //	user, err := authOrFail(...)
 //	if user == nil {
@@ -22,18 +24,26 @@ import (
 //
 // `err` is nil for an already-written invalid-credentials response and a
 // renderable error for an internal authentication failure.
-func authOrFail(ctx *context.Context, username, password string, invalidCode int, invalidMsg string) (*db.User, error) {
+func authOrFail(ctx *context.Context, username, password string, scope, permission uint, invalidCode int, invalidMsg string) (*db.User, error) {
 	user, err := auth.TryAuthentication(username, password)
 	if err == nil {
 		return user, nil
 	}
 
 	var authErr auth.AuthError
-	if errors.As(err, &authErr) {
+	if !errors.As(err, &authErr) {
+		return nil, ctx.ErrorRes(500, "Authentication system error", nil)
+	}
+
+	// Fall back to access token authentication.
+	user, token, tokenErr := auth.TryAuthenticationWithAccessToken(username, password, scope, permission)
+	if tokenErr != nil {
 		log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
 		return nil, ctx.PlainText(invalidCode, invalidMsg)
 	}
-	return nil, ctx.ErrorRes(500, "Authentication system error", nil)
+	_ = token.UpdateLastUsed()
+
+	return user, nil
 }
 
 func basicAuth(ctx *context.Context) error {

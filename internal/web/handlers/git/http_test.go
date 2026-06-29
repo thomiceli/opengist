@@ -319,9 +319,11 @@ func TestGitAuthWithAccessToken(t *testing.T) {
 	baseUrl := s.StartHttpServer(t)
 
 	s.Register(t, "thomas")
-	s.Login(t, "thomas")
 
 	_, _, user, privateId := s.CreateGist(t, "2")
+
+	// CreateGist logs out at the end; log back in to create tokens for thomas.
+	s.Login(t, "thomas")
 
 	rwToken := s.CreateAccessToken(t, "rw", db.ReadWritePermission, db.NoPermission)
 	roToken := s.CreateAccessToken(t, "ro", db.ReadPermission, db.NoPermission)

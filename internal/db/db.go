@@ -159,6 +159,12 @@ func Setup(dbUri string) error {
 		return err
 	}
 
+	if db.Migrator().HasTable(&GistInitQueue{}) {
+		if err = db.Where("1 = 1").Delete(&GistInitQueue{}).Error; err != nil {
+			return err
+		}
+	}
+
 	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{}, &ActionLock{}); err != nil {
 		return err
 	}
@@ -224,6 +230,7 @@ func setupSQLite(dbInfo databaseInfo) error {
 		u.Scheme = "file"
 		q := u.Query()
 		q.Set("_pragma", "foreign_keys(1)")
+		q.Add("_pragma", "busy_timeout(5000)")
 		q.Set("_journal_mode", journalMode)
 		u.RawQuery = q.Encode()
 		dsn = u.String()

@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/gorilla/schema"
@@ -34,7 +35,25 @@ func init() {
 type Server struct {
 	server        *server.Server
 	SessionCookie string
-	contextData   echo.Map
+
+	// contextData captures the last request's context data for assertion
+	// helpers. It is written by a middleware on every request, so concurrent
+	// requests (e.g. parallel pushes) must serialize access via mu.
+	mu          sync.Mutex
+	contextData echo.Map
+}
+
+func (s *Server) setContextData(data echo.Map) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.contextData = data
+}
+
+func (s *Server) ContextData(key string) (any, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	v, ok := s.contextData[key]
+	return v, ok
 }
 
 func (s *Server) Request(t *testing.T, method, uri string, data interface{}, expectedCode int) *http.Response {
@@ -118,15 +137,17 @@ func (s *Server) StartHttpServer(t *testing.T) string {
 
 func (s *Server) User() *db.User {
 	s.Request(nil, "GET", "/", nil, 0)
-	if user, ok := s.contextData["userLogged"].(*db.User); ok {
-		return user
+	if v, ok := s.ContextData("userLogged"); ok {
+		if user, ok := v.(*db.User); ok {
+			return user
+		}
 	}
 	return nil
 }
 
 func (s *Server) TestCtxData(t *testing.T, expected echo.Map) {
 	for key, expectedValue := range expected {
-		actualValue, exists := s.contextData[key]
+		actualValue, exists := s.ContextData(key)
 		require.True(t, exists, "Key %q not found in context data", key)
 		require.Equal(t, expectedValue, actualValue, "Context data mismatch for key %q", key)
 	}
@@ -277,7 +298,7 @@ func Setup(t *testing.T) *Server {
 		return func(c echo.Context) error {
 			err := next(c)
 			if data, ok := c.Request().Context().Value(context.DataKeyStr).(echo.Map); ok {
-				s.contextData = data
+				s.setContextData(data)
 			}
 			return err
 		}

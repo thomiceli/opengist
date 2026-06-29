@@ -49,7 +49,7 @@ func classifyInitRequest(urlPath string) (initKind, string) {
 // handleInit serves a request belonging to the "git push .../init" flow, after
 // the caller has been authenticated.
 func handleInit(ctx *context.Context, route *gitRoute, kind initKind, token, username, password string) error {
-	user, err := authOrFail(ctx, username, password, 401, "Invalid credentials")
+	user, err := authOrFail(ctx, username, password, db.ScopeGist, db.ReadWritePermission, 401, "Invalid credentials")
 	if user == nil {
 		return err
 	}

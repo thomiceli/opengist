@@ -165,6 +165,7 @@ func dataInit(next Handler) Handler {
 
 		ctx.SetData("baseHttpUrl", baseHttpUrl)
 		ctx.SetData("canonicalUrl", baseHttpUrl+ctx.Request().URL.Path)
+		ctx.SetData("opengistVersion", config.OpengistVersion)
 
 		return next(ctx)
 	}

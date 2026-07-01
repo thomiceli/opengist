@@ -3,7 +3,8 @@
 ## [Unreleased]
 
 ### Added
-- Seed a user/admin account at install time from the CLI (`admin create-user`), enabling automated provisioning with tools like Ansible (#1)
+- Seed a user/admin account at install time from the CLI (`admin create-user`), enabling automated provisioning with tools like Ansible (#750)
+- Open Graph and Twitter Card meta tags on gist pages for rich social sharing previews in Discord/Slack/IRC clients (#756)
 
 ## [1.13.1](https://github.com/thomiceli/opengist/compare/v1.13.0...v1.13.1) - 2026-06-10
 See here how to [update](https://opengist.io/docs/update) Opengist.

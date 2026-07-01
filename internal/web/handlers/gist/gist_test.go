@@ -100,6 +100,49 @@ func TestGistIndex(t *testing.T) {
 	})
 }
 
+func TestGistSocialMetaTags(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+
+	t.Run("RendersOpenGraphAndTwitterCards", func(t *testing.T) {
+		_, gist, username, identifier := s.CreateGist(t, "0")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		html := string(body)
+
+		// Open Graph tags
+		assert.Contains(t, html, `property="og:title"`)
+		assert.Contains(t, html, `property="og:description"`)
+		assert.Contains(t, html, `property="og:type" content="article"`)
+		assert.Contains(t, html, `property="og:url"`)
+		assert.Contains(t, html, `property="og:site_name" content="Opengist"`)
+		assert.Contains(t, html, `property="og:image"`)
+
+		// Twitter Card tags
+		assert.Contains(t, html, `name="twitter:card" content="summary"`)
+		assert.Contains(t, html, `name="twitter:title"`)
+		assert.Contains(t, html, `name="twitter:description"`)
+		assert.Contains(t, html, `name="twitter:image"`)
+
+		// The card reflects the gist owner/title and points at the gist URL
+		assert.Contains(t, html, gist.Title)
+		assert.Contains(t, html, username+"/"+identifier)
+	})
+
+	t.Run("UnlistedGistAlsoHasMetaTags", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "1")
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Contains(t, string(body), `property="og:title"`)
+	})
+}
+
 func TestPreview(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)

@@ -1,0 +1,32 @@
+{{/* Open Graph / Twitter Card meta tags for social sharing previews.
+     Rendered on any page that has a loaded gist (e.g. gist view, revisions) so
+     that pasting a gist URL into Discord / IRC / Slack shows a rich preview,
+     like gist.github.com does. */}}
+{{ define "seo_meta" }}
+{{ if .gist }}
+    {{ $siteName := "Opengist" }}{{ if $.c.CustomName }}{{ $siteName = $.c.CustomName }}{{ end }}
+    {{ $description := "" }}{{ if .gist.Description }}{{ $description = .gist.Description }}{{ else }}{{ $description = .gist.Preview }}{{ end }}
+    {{ $ogDescription := ogText $description 200 }}
+    {{ $ogTitle := ogText (printf "%s/%s" .gist.User.Username .gist.Title) 100 }}
+
+    <meta property="og:title" content="{{ $ogTitle }}" />
+    <meta property="og:description" content="{{ $ogDescription }}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="{{ .canonicalUrl }}" />
+    <meta property="og:site_name" content="{{ $siteName }}" />
+    {{ if shouldGenerateAvatar .gist.User .DisableGravatar }}
+        <meta property="og:image" content="{{ asset "img/favicon-32.png" }}" />
+    {{ else }}
+        <meta property="og:image" content="{{ avatarUrl .gist.User .DisableGravatar }}" />
+    {{ end }}
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="{{ $ogTitle }}" />
+    <meta name="twitter:description" content="{{ $ogDescription }}" />
+    {{ if shouldGenerateAvatar .gist.User .DisableGravatar }}
+        <meta name="twitter:image" content="{{ asset "img/favicon-32.png" }}" />
+    {{ else }}
+        <meta name="twitter:image" content="{{ avatarUrl .gist.User .DisableGravatar }}" />
+    {{ end }}
+{{ end }}
+{{ end }}

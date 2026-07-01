@@ -188,6 +188,18 @@ func (s *Server) setFuncMap() {
 			}
 			return str
 		},
+		// ogText collapses all whitespace (newlines, tabs, multiple spaces) into
+		// single spaces and truncates to maxRunes runes, appending an ellipsis when
+		// truncated. Used to build clean values for Open Graph / Twitter meta tags
+		// from multi-line gist descriptions or code previews.
+		"ogText": func(s string, maxRunes int) string {
+			collapsed := strings.Join(strings.Fields(s), " ")
+			runes := []rune(collapsed)
+			if len(runes) <= maxRunes {
+				return collapsed
+			}
+			return string(runes[:maxRunes]) + "\u2026"
+		},
 		"hexToRgb": func(hex string) string {
 			h, _ := strconv.ParseUint(strings.TrimPrefix(hex, "#"), 16, 32)
 			return fmt.Sprintf("%d, %d, %d,", (h>>16)&0xFF, (h>>8)&0xFF, h&0xFF)

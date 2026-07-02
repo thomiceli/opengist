@@ -19,6 +19,13 @@
         };
         checkTheme();
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkTheme);
+
+        // Restore the desktop sidebar collapsed state before paint (no flash).
+        // The class lives on <html>, which survives hx-boost body swaps, so it
+        // persists across navigation without re-applying on every swap.
+        if (localStorage.getItem('sidebar-collapsed') === '1') {
+            document.documentElement.classList.add('sidebar-collapsed');
+        }
     </script>
 
     {{ if .c.CustomFavicon }}
@@ -59,7 +66,7 @@
 </head>
 <body class="h-full bg-background text-foreground antialiased" hx-boost="true">
 
-<!-- CSS-only mobile sidebar toggle (no JS) -->
+<!-- CSS-only mobile sidebar drawer (no JS) -->
 <input type="checkbox" id="nav-toggle" class="peer sr-only" />
 
 {{ template "sidebar" . }}
@@ -67,7 +74,10 @@
 <!-- Backdrop closes the mobile sidebar (no JS) -->
 <label for="nav-toggle" class="fixed inset-0 z-40 hidden bg-black/50 peer-checked:block md:hidden" aria-hidden="true"></label>
 
-<div class="flex min-h-full flex-col md:ml-60">
+<!-- Desktop collapse is driven by the `sidebar-collapsed` class on <html> (see head
+     script + main.ts). <html> survives hx-boost body swaps, so it persists across
+     navigation. See globals.css for the collapsed layout rules. -->
+<div id="content-wrapper" class="flex min-h-full flex-col md:ml-60">
     <header class="bg-background/80 sticky top-0 z-30 flex h-14 items-center gap-3 border-b px-4 backdrop-blur">
         <label for="nav-toggle" class="btn-icon-ghost cursor-pointer md:hidden" aria-label="Toggle sidebar">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -114,6 +124,7 @@
                 </button>
                 <div id="user-menu" data-popover aria-hidden="true" data-side="bottom" data-align="end">
                     <div role="menu" aria-labelledby="user-menu-trigger">
+                        <a href="{{ .c.ExternalUrl }}/{{ .userLogged.Username }}" role="menuitem">{{ .locale.Tr "header.menu.my-gists" }}</a>
                         <a href="{{ .c.ExternalUrl }}/settings" role="menuitem">{{ .locale.Tr "header.menu.settings" }}</a>
                         <hr role="separator" />
                         <a href="{{ .c.ExternalUrl }}/logout" role="menuitem" class="text-destructive">{{ .locale.Tr "header.menu.logout" }}</a>

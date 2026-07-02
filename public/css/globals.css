@@ -119,6 +119,12 @@
     @apply cursor-pointer;
 }
 
+/* Gist header "more actions" dropdown: menu items are links/submit buttons,
+   so give them a pointer cursor instead of basecoat's default. */
+#more-menu [role='menuitem'] {
+    @apply cursor-pointer;
+}
+
 
 .code {
     font-family: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
@@ -367,4 +373,30 @@ table.csv-table thead th {
 
 #page-progress.is-loading {
     opacity: 1;
+}
+
+/* Desktop sidebar collapse into an icon-only rail. Toggled by the
+   `sidebar-collapsed` class on <html> (restored from localStorage in the head
+   script + toggled in main.ts). Only applies at md+ where the sidebar is docked;
+   the mobile drawer keeps its own behavior. The rail keeps icons visible so the
+   collapse button at the bottom of the sidebar stays reachable to expand again. */
+@media (min-width: 768px) {
+    /* Rail width (matches Tailwind's w-16 = 4rem). */
+    html.sidebar-collapsed #sidebar {
+        width: 4rem;
+    }
+
+    html.sidebar-collapsed #content-wrapper {
+        margin-left: 4rem;
+    }
+
+    /* Hide text: nav labels, badges, section headings, logo name. Icons stay. */
+    html.sidebar-collapsed #sidebar :is(span, p) {
+        display: none;
+    }
+
+    /* Center the remaining icons within the narrow rail. */
+    html.sidebar-collapsed #sidebar :is(a, button) {
+        justify-content: center;
+    }
 }

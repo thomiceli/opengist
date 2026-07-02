@@ -17,6 +17,7 @@ gist.header.last-active: Last active
 gist.header.expires: Expires
 gist.header.select-tab: Select a tab
 gist.header.code: Code
+gist.header.more-actions: More actions
 gist.header.revisions: Revisions
 gist.header.revision: Revision
 gist.header.clone-http: Clone via %s
@@ -328,6 +329,7 @@ header.menu.light: Light
 header.menu.dark: Dark
 header.menu.system: System
 footer.powered-by: Powered by %s
+sidebar.collapse: Collapse
 
 pagination.older: Older
 pagination.newer: Newer

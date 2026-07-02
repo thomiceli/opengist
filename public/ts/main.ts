@@ -8,6 +8,7 @@ import 'basecoat-css/basecoat';
 import 'basecoat-css/dropdown-menu';
 import { initGistFilters } from './gist-filter';
 import { initGistLines } from './gist-lines';
+import { initGistCheckboxes } from './gist-checkbox';
 import { initJdenticon } from './jdenticon';
 import { initIpynb } from './ipynb';
 import { initPdf } from './pdf';
@@ -15,6 +16,7 @@ import { initPdf } from './pdf';
 const init = () => {
     initGistFilters();
     initGistLines();
+    initGistCheckboxes();
     initIpynb();
     initPdf();
     initJdenticon();
@@ -23,6 +25,17 @@ const init = () => {
 document.addEventListener('DOMContentLoaded', init);
 // Re-init after hx-boost / htmx content swaps.
 document.body.addEventListener('htmx:afterSwap', init);
+
+// Desktop sidebar collapse toggle. The collapsed state is a class on <html>,
+// which survives hx-boost body swaps, so it persists across navigation (the head
+// script restores it from localStorage before paint). A delegated listener keeps
+// working after the #sidebar-toggle button is swapped in on each navigation.
+document.addEventListener('click', (e) => {
+    const toggle = (e.target as Element | null)?.closest('#sidebar-toggle');
+    if (!toggle) return;
+    const collapsed = document.documentElement.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+});
 
 // Top loading bar for boosted navigations. Large files can take a moment to
 // render server-side, and htmx gives no visual feedback in the meantime, so the

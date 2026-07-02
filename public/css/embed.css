@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
@@ -41,21 +43,15 @@
         --tw-border-width: 0;
         display: block;
     }
-}
 
-.opengist-embed {
-    @import "tailwindcss";
-    @layer base {
-        ul, ol {
-            list-style: revert;
-        }
-
-        button:not(:disabled),
-        [role="button"]:not(:disabled) {
-            cursor: pointer;
-        }
-
-        @import './ipynb.css';
-        @import "./style.css";
+    ul, ol {
+        list-style: revert;
     }
+
+    button:not(:disabled),
+    [role="button"]:not(:disabled) {
+        cursor: pointer;
+    }
+
+    @import "./style.css";
 }

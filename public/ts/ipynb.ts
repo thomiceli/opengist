@@ -9,6 +9,9 @@ import DOMPurify from 'dompurify';
 // security advisory describing the original markdown-cell / output sinks).
 const sanitize = (html: string): string => DOMPurify.sanitize(html);
 
+// nbformat allows `source`/`text` fields to be either a string or an array of strings.
+const joinSource = (source: string | string[]): string => Array.isArray(source) ? source.join('') : source || '';
+
 class IPynb {
   private element: HTMLElement;
   private cells: HTMLElement[] = [];
@@ -54,7 +57,7 @@ class IPynb {
       if (output.output_type === 'stream') {
         const textElement = document.createElement('pre');
         textElement.classList.add('stream-output');
-        textElement.textContent = output.text.join('');
+        textElement.textContent = joinSource(output.text);
         outputElement.appendChild(textElement);
       } else if (output.output_type === 'display_data' || output.output_type === 'execute_result') {
         if (output.data['text/plain']) {
@@ -82,7 +85,7 @@ class IPynb {
 
   private createCellElement(cell: any): HTMLElement {
     const cellElement = document.createElement('div');
-    const source = cell.source.join('');
+    const source = joinSource(cell.source);
     cellElement.classList.add('jupyter-cell');
 
     switch (cell.cell_type) {

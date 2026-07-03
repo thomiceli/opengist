@@ -85,7 +85,15 @@
                 {{ else if $file.MimeType.IsSVG }}
                     <div class="p-8 flex justify-center">{{ $file.HTML | safe }}</div>
                 {{ else if isJupyter $file.Filename }}
-                  <div class="p-8 jupyter notebook"><pre>{{ $file.Content }}</pre></div>
+                  <div class="p-8 jupyter notebook">
+                    <div class="jupyter-spinner flex justify-center p-8">
+                      <svg class="animate-spin h-6 w-6 text-gray-400 dark:text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                    </div>
+                    <pre class="hidden">{{ $file.Content }}</pre>
+                  </div>
                 {{ else }}
                     <div class="code">
                         {{ $fileslug := slug $file.Filename }}

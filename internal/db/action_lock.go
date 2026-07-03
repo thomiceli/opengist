@@ -11,7 +11,7 @@ import (
 // keyed by Action (the action's identifier); LockedUntil holds the Unix
 // timestamp the current lease expires at (0 = free).
 type ActionLock struct {
-	Action      int `gorm:"primaryKey"`
+	Action      int `gorm:"primaryKey;autoIncrement:false"`
 	LockedUntil int64
 }
 

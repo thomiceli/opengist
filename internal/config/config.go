@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net/url"
@@ -25,6 +26,25 @@ var OpengistVersion = ""
 var C *config
 
 var SecretKey []byte
+
+// startupMessages buffers informational messages produced during config loading
+// (before the logger is configured). Call FlushStartupLog after InitLog to
+// replay them through the configured logger.
+var startupMessages []string
+
+// AddStartupMsg records a message to be logged once the logger is configured.
+func AddStartupMsg(msg string) {
+	startupMessages = append(startupMessages, msg)
+}
+
+// FlushStartupLog replays all buffered startup messages through the configured
+// logger. It should be called after InitLog.
+func FlushStartupLog() {
+	for _, msg := range startupMessages {
+		log.Info().Msg(msg)
+	}
+	startupMessages = nil
+}
 
 // SSH server modes: the canonical values of ssh.git-enabled. The legacy
 // booleans are still accepted (true → builtin, false → disabled).
@@ -171,18 +191,24 @@ func configWithDefaults() (*config, error) {
 	return c, nil
 }
 
-func InitConfig(configPath string, out io.Writer) error {
+func InitConfig(configPath string) error {
 	// Default values
 	c, err := configWithDefaults()
 	if err != nil {
 		return err
 	}
 
-	if err = loadConfigFromYaml(c, configPath, out); err != nil {
+	if err = loadConfigFromYaml(c, configPath); err != nil {
 		return err
 	}
 
-	if err = loadConfigFromEnv(c, out); err != nil {
+	// Source Docker secrets (a dotenv-style file) into the environment before
+	// reading OG_* variables. Explicit environment variables take precedence.
+	if err = loadSecretsFile(); err != nil {
+		return err
+	}
+
+	if err = loadConfigFromEnv(c); err != nil {
 		return err
 	}
 
@@ -324,7 +350,91 @@ func SetupSecretKey() {
 	}
 }
 
-func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {
+// defaultSecretsFile is the path Docker Compose/Swarm mounts the secrets file
+// at (see docs/configuration/configure.md). It can be overridden via the
+// OG_SECRETS_FILE environment variable.
+const defaultSecretsFile = "/run/secrets/opengist_secrets"
+
+// loadSecretsFile sources a dotenv-style file (as mounted by Docker
+// Compose/Swarm secrets) into the process environment, so that its values can
+// be picked up by loadConfigFromEnv like any other OG_* variable. It is a
+// no-op when the file is absent, which keeps non-containerized deployments
+// unaffected.
+//
+// Variables already present in the environment are left untouched, so explicit
+// configuration always takes precedence over the secrets file.
+func loadSecretsFile() error {
+	path := os.Getenv("OG_SECRETS_FILE")
+	if path == "" {
+		path = defaultSecretsFile
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	defer file.Close()
+
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	if !info.Mode().IsRegular() {
+		return nil
+	}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		key, value, ok := parseSecretLine(scanner.Text())
+		if !ok {
+			continue
+		}
+		if _, isSet := os.LookupEnv(key); !isSet {
+			if err := os.Setenv(key, value); err != nil {
+				return err
+			}
+		}
+	}
+
+	return scanner.Err()
+}
+
+// parseSecretLine parses a single dotenv-style line into a key/value pair. It
+// supports an optional "export " prefix, blank lines and comments (#), and
+// strips a single layer of surrounding single or double quotes. ok is false
+// for lines that do not define a variable.
+func parseSecretLine(line string) (key, value string, ok bool) {
+	line = strings.TrimSpace(line)
+	if line == "" || strings.HasPrefix(line, "#") {
+		return "", "", false
+	}
+
+	line = strings.TrimPrefix(line, "export ")
+	key, value, found := strings.Cut(line, "=")
+	if !found {
+		return "", "", false
+	}
+
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return "", "", false
+	}
+
+	value = strings.TrimSpace(value)
+	if n := len(value); n >= 2 {
+		first, last := value[0], value[n-1]
+		if (first == '"' && last == '"') || (first == '\'' && last == '\'') {
+			value = value[1 : n-1]
+		}
+	}
+
+	return key, value, true
+}
+
+func loadConfigFromYaml(c *config, configPath string) error {
 	if configPath != "" {
 		absolutePath, _ := filepath.Abs(configPath)
 		absolutePath = filepath.Clean(absolutePath)
@@ -333,9 +443,9 @@ func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {
 			if !os.IsNotExist(err) {
 				return err
 			}
-			_, _ = fmt.Fprintln(out, "No YAML config file found at "+absolutePath)
+			AddStartupMsg("No YAML config file found at " + absolutePath)
 		} else {
-			_, _ = fmt.Fprintln(out, "Using YAML config file: "+absolutePath)
+			AddStartupMsg("Using YAML config file: " + absolutePath)
 
 			// Override default values with values from config.yml
 			d := yaml.NewDecoder(file)
@@ -345,13 +455,13 @@ func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {
 			defer file.Close()
 		}
 	} else {
-		_, _ = fmt.Fprintln(out, "No YAML config file specified.")
+		AddStartupMsg("No YAML config file specified.")
 	}
 
 	return nil
 }
 
-func loadConfigFromEnv(c *config, out io.Writer) error {
+func loadConfigFromEnv(c *config) error {
 	v := reflect.ValueOf(c).Elem()
 	var envVars []string
 
@@ -423,13 +533,14 @@ func loadConfigFromEnv(c *config, out io.Writer) error {
 	}
 
 	if len(envVars) > 0 {
-		_, _ = fmt.Fprintln(out, "Using environment variables config: "+strings.Join(envVars, ", "))
+		AddStartupMsg("Using environment variables config: " + strings.Join(envVars, ", "))
 	} else {
-		_, _ = fmt.Fprintln(out, "No environment variables config specified.")
+		AddStartupMsg("No environment variables config specified.")
 	}
 
 	return nil
 }
+
 
 // normalizeSshGitMode maps every accepted ssh.git-enabled value to a canonical
 // mode. The legacy booleans are preserved for backward compatibility (true →

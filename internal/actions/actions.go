@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -146,7 +145,7 @@ func syncGistPreviews() {
 		return
 	}
 	for _, gist := range gists {
-		fmt.Println("Syncing preview for gist", gist.ID)
+		log.Info().Msgf("Syncing preview for gist %d", gist.ID)
 		if err = gist.UpdatePreviewAndCount(false); err != nil {
 			log.Error().Err(err).Msgf("Cannot update preview and count for gist %d", gist.ID)
 		}

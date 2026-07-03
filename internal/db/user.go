@@ -20,7 +20,7 @@ type User struct {
 	CreatedAt          int64
 	Email              string
 	MD5Hash            string // for gravatar, if no Email is specified, the value is random
-	AvatarURL          string // an absolute URL (from an OAuth provider) or a bare filename for a manually uploaded avatar stored under {home}/avatars
+	AvatarURL          string // an absolute URL (from an OAuth provider) or a bare filename for a manually uploaded avatar stored under {home}/avatars/users
 	GithubID           string
 	GitlabID           string
 	GiteaID            string
@@ -101,7 +101,7 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 
 	// Delete uploaded avatar, if any
 	if user.HasUploadedAvatar() {
-		_ = os.Remove(filepath.Join(config.GetHomeDir(), "avatars", filepath.Base(user.AvatarURL)))
+		_ = os.Remove(filepath.Join(config.GetHomeDir(), "avatars", "users", filepath.Base(user.AvatarURL)))
 	}
 
 	return nil

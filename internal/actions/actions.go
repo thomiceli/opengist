@@ -51,7 +51,7 @@ var registry = map[int]action{
 	ResetHooks:         {run: resetHooks},
 	IndexGists:         {run: indexGists},
 	SyncGistLanguages:  {run: syncGistLanguages},
-	DeleteExpiredGists: {run: deleteExpiredGists, spec: "@every 1m"},
+	DeleteExpiredGists: {run: deleteExpiredGists, spec: "@every 12h"},
 	SyncSSHKeys:        {run: syncSSHKeys, spec: "@every 72h"},
 }
 

@@ -225,12 +225,6 @@ flash.admin.user-deleted: 'Пользователь удалён'
 flash.admin.gist-deleted: 'Фрагмент удалён'
 flash.admin.invitation-created: 'Приглашение создано'
 flash.admin.invitation-deleted: 'Приглашение удалено'
-flash.admin.sync-fs: 'Выполняется синхронизация репозиториев с файловой системой…'
-flash.admin.sync-db: 'Выполняется синхронизация репозиториев с базой данных…'
-flash.admin.git-gc: 'Сборка мусора в репозиториях…'
-flash.admin.sync-previews: 'Обновление предпросмотров фрагментов…'
-flash.admin.reset-hooks: 'Пересоздание Git-хуков для всех репозиториев…'
-flash.admin.index-gists: 'Перестроение поискового индекса…'
 flash.auth.username-exists: 'Такое имя пользователя уже занято'
 flash.auth.invalid-credentials: 'Некорректные данные для входа'
 flash.auth.account-linked-oauth: 'Учётная запись связана с %s'
@@ -332,7 +326,6 @@ auth.totp.help: TOTP — это метод двухфакторной аутен
 auth.totp.use: Использовать TOTP
 auth.totp.regenerate-recovery-codes: Сгенерировать коды восстановления заново
 auth.totp: Одноразовый пароль по времени (TOTP)
-flash.admin.sync-gist-languages: Обновление языков фрагментов…
 settings.token-created: Токен создан, обязательно сохраните его, повторно он показан не будет!
 settings.token-last-used: Последнее использование
 settings.token-no-expiration: Бессрочно

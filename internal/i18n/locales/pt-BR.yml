@@ -170,7 +170,6 @@ admin.gists.private: Privado
 admin.gists.nb-files: Núm. de arquivos
 admin.gists.nb-likes: Núm. de curtidas
 admin.gists.delete_confirm: Quer excluir este gist?
-flash.admin.index-gists: ''
 gist.header.embed: ''
 gist.header.embed-help: ''
 gist.new.url: ''
@@ -226,11 +225,6 @@ flash.admin.user-deleted: ''
 flash.admin.gist-deleted: ''
 flash.admin.invitation-created: ''
 flash.admin.invitation-deleted: ''
-flash.admin.sync-fs: ''
-flash.admin.sync-db: ''
-flash.admin.git-gc: ''
-flash.admin.sync-previews: ''
-flash.admin.reset-hooks: ''
 flash.auth.username-exists: ''
 flash.auth.invalid-credentials: ''
 flash.auth.account-linked-oauth: ''

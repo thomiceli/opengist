@@ -23,7 +23,7 @@ var allowedAvatarTypes = map[string]string{
 }
 
 func AvatarsDir() string {
-	return filepath.Join(config.GetHomeDir(), "avatars")
+	return filepath.Join(config.GetHomeDir(), "avatars", "users")
 }
 
 func AvatarProcess(ctx *context.Context) error {

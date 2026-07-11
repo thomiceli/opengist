@@ -284,6 +284,9 @@ error.not-in-mfa-session: User is not in a MFA session
 error.no-file-uploaded: No file uploaded
 error.file-upload-disabled: File upload is disabled
 error.cannot-open-file: Cannot open uploaded file
+error.gist_not_found: Gist not found
+error.file_not_found: File not found
+error.internal_server_error: Internal Server Error
 
 header.menu.all: All
 header.menu.new: New

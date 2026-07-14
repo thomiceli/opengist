@@ -26,12 +26,15 @@ jobs:
       - name: Cross compile build
         run: make all_crosscompile
 
+      - name: Package frontend assets
+        run: make package_webdist
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            build/*.tar.gz 
-            build/*.zip 
+            build/*.tar.gz
+            build/*.zip
             build/checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

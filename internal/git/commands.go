@@ -109,7 +109,7 @@ func GetFilesOfRepository(user string, gist string, revision string) ([]string, 
 		"git",
 		"ls-tree",
 		"--name-only",
-		"--",
+		"--end-of-options",
 		revision,
 	)
 	cmd.Dir = repositoryPath
@@ -136,7 +136,7 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 	repositoryPath := RepositoryPath(user, gist)
 	maxFiles := 50
 
-	lsTreeCmd := exec.Command("git", "ls-tree", "-l", revision)
+	lsTreeCmd := exec.Command("git", "ls-tree", "-l", "--end-of-options", revision)
 	lsTreeCmd.Dir = repositoryPath
 
 	var lsTreeStderr bytes.Buffer
@@ -291,6 +291,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 		"git",
 		"--no-pager",
 		"show",
+		"--end-of-options",
 		revision+":"+convertURLToOctal(filename),
 	)
 	cmd.Dir = repositoryPath
@@ -315,6 +316,7 @@ func GetFileSize(user string, gist string, revision string, filename string) (ui
 		"git",
 		"cat-file",
 		"-s",
+		"--end-of-options",
 		revision+":"+convertURLToOctal(filename),
 	)
 	cmd.Dir = repositoryPath
@@ -346,6 +348,7 @@ func GetLog(user string, gist string, revision string, skip int, limit int) ([]*
 		strconv.Itoa(skip),
 		"--format=format:c %H%na %aN%nm %ae%nt %at",
 		"--shortstat",
+		"--end-of-options",
 		revision,
 	)
 	cmd.Dir = repositoryPath

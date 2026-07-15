@@ -53,6 +53,13 @@ func GitHttp(ctx *context.Context) error {
 	isPush := ctx.QueryParam("service") == "git-receive-pack" ||
 		strings.HasSuffix(ctx.Request().URL.Path, "git-receive-pack") && !isInfoRefs
 
+	// Anything that is neither an init request, a smart pull, nor a push is a
+	// dumb-protocol read: GET .../info/refs (no service), .../HEAD,
+	// .../objects/*. These stream repository files straight off disk, so they
+	// are read operations equivalent to a pull and must be authorized as one —
+	// never served merely because an Authorization header is present.
+	isDumb := initKind == initNone && !isPull && !isPush
+
 	ctx.SetData("repositoryPath", git.RepositoryPath(gist.User.Username, gist.Uuid))
 
 	allow, err := auth.ShouldAllowUnauthenticatedGistAccess(handlers.ContextAuthInfo{Context: ctx}, true)
@@ -60,9 +67,10 @@ func GitHttp(ctx *context.Context) error {
 		log.Fatal().Err(err).Msg("Cannot check if unauthenticated access is allowed")
 	}
 
-	// No need to authenticate if the user wants to clone/pull ; a non-private
-	// gist ; that exists ; where unauthenticated access is allowed in the instance
-	if isPull && gist.Private != db.PrivateVisibility && gistExists && allow {
+	// No need to authenticate if the user wants to clone/pull (smart or dumb) ;
+	// a non-private gist ; that exists ; where unauthenticated access is allowed
+	// in the instance
+	if (isPull || isDumb) && gist.Private != db.PrivateVisibility && gistExists && allow {
 		return route.handler(ctx)
 	}
 
@@ -80,12 +88,12 @@ func GitHttp(ctx *context.Context) error {
 	switch {
 	case initKind != initNone:
 		return handleInit(ctx, route, initKind, initToken, authUsername, authPassword)
-	case isPull:
+	case isPull || isDumb:
 		return handlePull(ctx, route, gist, gistExists, authUsername, authPassword)
 	case isPush:
 		return handlePush(ctx, route, gist, gistExists, authUsername, authPassword)
 	default:
-		return route.handler(ctx)
+		return ctx.NotFound("Gist not found")
 	}
 }
 

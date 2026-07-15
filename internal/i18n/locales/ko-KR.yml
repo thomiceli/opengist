@@ -1,0 +1,420 @@
+gist.public: 공개
+gist.unlisted: 비공개 링크
+gist.private: 비공개
+
+gist.header.like: 좋아요
+gist.header.unlike: 좋아요 취소
+gist.header.fork: 포크
+gist.header.edit: 편집
+gist.header.delete: 삭제
+gist.header.archive: 보관
+gist.header.unarchive: 보관 취소
+gist.header.archived: 보관됨
+gist.header.archived-help: 이 gist는 보관되어 있으며 읽기 전용입니다.
+gist.header.forked-from: 포크한 원본
+gist.header.last-active: 마지막 활동
+gist.header.expires: 만료
+gist.header.select-tab: 탭 선택
+gist.header.code: 코드
+gist.header.revisions: 리비전
+gist.header.revision: 리비전
+gist.header.clone-http: "%s로 클론"
+gist.header.clone-http-help: HTTP 기본 인증을 사용하여 Git으로 클론합니다.
+gist.header.clone-ssh: SSH로 클론
+gist.header.clone-ssh-help: SSH 키를 사용하여 Git으로 클론합니다.
+gist.header.embed: 임베드
+gist.header.embed-help: 이 gist를 웹사이트에 임베드합니다.
+gist.header.download-zip: ZIP 다운로드
+
+gist.raw: Raw
+gist.file-truncated: 이 파일은 잘렸습니다.
+gist.files-truncated: 이 gist의 모든 파일이 표시되지는 않습니다. 모든 파일을 보려면 gist를 클론하거나 다운로드하세요.
+gist.file-raw: 이 파일은 렌더링할 수 없습니다.
+gist.file-binary-edit: 이 파일은 바이너리 파일입니다.
+gist.watch-full-file: 전체 파일 보기
+gist.file-not-valid: 이 파일은 올바른 CSV 파일이 아닙니다.
+gist.no-content: 파일을 찾을 수 없습니다
+gist.preview-non-available: 미리보기를 사용할 수 없습니다
+
+gist.new.new_gist: 새 gist
+gist.new.title: 제목
+gist.new.description: 설명
+gist.new.url: URL
+gist.new.filename-with-extension: 확장자를 포함한 파일 이름
+gist.new.indent-mode: 들여쓰기 모드
+gist.new.indent-mode-space: 스페이스
+gist.new.indent-mode-tab: 탭
+gist.new.indent-size: 들여쓰기 크기
+gist.new.wrap-mode: 줄바꿈 모드
+gist.new.wrap-mode-no: 줄바꿈 없음
+gist.new.wrap-mode-soft: 자동 줄바꿈
+gist.new.add-file: 파일 추가
+gist.new.create-public-button: 공개 gist 생성
+gist.new.create-unlisted-button: 비공개 링크 gist 생성
+gist.new.create-private-button: 비공개 gist 생성
+gist.new.preview: 미리보기
+gist.new.create-a-new-gist: 새 gist 만들기
+gist.new.topics: 토픽 (공백으로 구분)
+gist.new.drop-files: 파일을 여기에 끌어다 놓거나 클릭하여 업로드하세요
+gist.new.any-file-type: 모든 형식의 파일 업로드 가능
+gist.new.expire: 만료
+gist.new.expire-never: 만료 없음
+gist.new.expire-1hour: 1시간 후
+gist.new.expire-12hours: 12시간 후
+gist.new.expire-1day: 1일 후
+gist.new.expire-7days: 7일 후
+gist.new.expire-15days: 15일 후
+gist.new.expire-custom: 사용자 지정 날짜
+
+gist.edit.editing: 편집 중
+gist.edit.edit-gist: "%s 편집"
+gist.edit.change-visibility: 변경
+gist.edit.delete: 삭제
+gist.edit.cancel: 취소
+gist.edit.save: 저장
+gist.delete.confirm: 이 gist를 삭제하시겠습니까?
+
+gist.list.joined: 가입일
+gist.list.all: 모든 gist
+gist.list.search-results: 검색 결과
+gist.list.sort: 정렬
+gist.list.sort-by-created: 생성일
+gist.list.sort-by-updated: 수정일
+gist.list.order-by-asc: 오래된 순
+gist.list.order-by-desc: 최신 순
+gist.list.select-tab: 탭 선택
+gist.list.liked: 좋아요 표시함
+gist.list.likes: 좋아요
+gist.list.forked: 포크함
+gist.list.forked-from: 포크한 원본
+gist.list.forks: 포크
+gist.list.files: 파일
+gist.list.last-active: 마지막 활동
+gist.list.no-gists: gist가 없습니다
+gist.list.all-liked-by: "%s님이 좋아요한 모든 gist"
+gist.list.all-forked-by: "%s님이 포크한 모든 gist"
+gist.list.all-from: "%s의 모든 gist"
+gist.list.topic-results-topic: "%s 토픽과 일치하는 모든 gist"
+gist.list.topic-results: 토픽과 일치하는 모든 gist
+
+
+gist.search.found: 개의 gist를 찾았습니다
+gist.search.no-results: gist를 찾을 수 없습니다
+gist.search.help.user: 사용자가 만든 gist
+gist.search.help.title: 주어진 제목의 gist
+gist.search.help.description: 주어진 설명의 gist
+gist.search.help.filename: 주어진 파일 이름을 가진 gist
+gist.search.help.extension: 주어진 확장자를 가진 gist
+gist.search.help.language: 주어진 언어를 가진 gist
+gist.search.help.topic: 주어진 토픽의 gist
+gist.search.help.all: 모든 필드 검색
+gist.search.placeholder.title: 제목
+gist.search.placeholder.visibility: 공개 범위
+gist.search.placeholder.public: 공개
+gist.search.placeholder.unlisted: 비공개 링크
+gist.search.placeholder.private: 비공개
+gist.search.placeholder.language: 언어
+gist.search.placeholder.all: 전체
+gist.search.placeholder.topics: 토픽
+gist.search.placeholder.search: 검색
+
+gist.forks: 포크
+gist.forks.view: 포크 보기
+gist.forks.no: 공개 포크가 없습니다
+gist.forks.for: "%s의 포크"
+
+gist.likes: 좋아요
+gist.likes.no: 아직 좋아요가 없습니다
+gist.likes.for: "%s의 좋아요"
+
+gist.revisions: 리비전
+gist.revision.revised: 이 gist를 수정했습니다
+gist.revision.go-to-revision: 리비전으로 이동
+gist.revision.file-created: 파일 생성됨
+gist.revision.file-deleted: 파일 삭제됨
+gist.revision.file-renamed: 이름 변경됨
+gist.revision.diff-truncated: 변경 내용이 너무 커서 표시할 수 없습니다
+gist.revision.file-renamed-no-changes: 변경 없이 파일 이름만 변경됨
+gist.revision.empty-file: 빈 파일
+gist.revision.binary-file-changes: 바이너리 파일 변경 내용은 표시되지 않습니다
+gist.revision.no-changes: 변경 사항 없음
+gist.revision.no-revisions: 표시할 리비전이 없습니다
+gist.revision-of: "%s의 리비전"
+
+settings: 설정
+settings.avatar: 아바타
+settings.avatar-help: Gravatar 대신 사용할 사용자 지정 아바타를 업로드하세요
+settings.avatar-remove: 아바타 제거
+settings.email: 이메일
+settings.email-help: 커밋 및 Gravatar에 사용됩니다
+settings.email-set: 이메일 설정
+settings.link-accounts: 계정 연동
+settings.link-github-account: GitHub 계정 연동
+settings.link-gitlab-account: GitLab 계정 연동
+settings.link-gitea-account: Gitea 계정 연동
+settings.unlink-github-account: GitHub 계정 연동 해제
+settings.unlink-gitlab-account: GitLab 계정 연동 해제
+settings.unlink-gitea-account: Gitea 계정 연동 해제
+settings.delete-account: 계정 삭제
+settings.delete-account-confirm: 정말로 계정을 삭제하시겠습니까?
+settings.add-ssh-key: SSH 키 추가
+settings.add-ssh-key-help: Git을 SSH로 사용하여 gist를 pull/push할 때만 사용됩니다
+settings.add-ssh-key-title: 제목
+settings.add-ssh-key-content: 키
+settings.delete-ssh-key: 삭제
+settings.delete-ssh-key-confirm: SSH 키 삭제를 확인하세요
+settings.ssh-key-added-at: 추가일
+settings.ssh-key-never-used: 사용된 적 없음
+settings.ssh-key-last-used: 마지막 사용
+settings.ssh-key-exists: 이미 존재하는 SSH 키입니다
+settings.change-username: 사용자 이름 변경
+settings.create-password: 비밀번호 생성
+settings.create-password-help: HTTP로 Opengist에 로그인하기 위한 비밀번호를 생성하세요
+settings.change-password: 비밀번호 변경
+settings.change-password-help: HTTP로 Opengist에 로그인하기 위한 비밀번호를 변경하세요
+settings.password-label-title: 비밀번호
+settings.header.account: 계정
+settings.header.mfa: MFA
+settings.header.ssh: SSH
+settings.header.tokens: 액세스 토큰
+settings.header.style: 스타일
+settings.style.gist-code: Gist 코드
+settings.style.no-soft-wrap: 자동 줄바꿈 없음
+settings.style.soft-wrap: 자동 줄바꿈
+settings.style.removed-lines-color: 삭제된 줄 색상
+settings.style.added-lines-color: 추가된 줄 색상
+settings.style.git-lines-color: Git 변경 줄 색상
+settings.style.save-style: 스타일 저장
+settings.style.theme: 테마
+settings.style.theme-light: 라이트
+settings.style.theme-dark: 다크
+settings.style.theme-auto: 자동
+settings.style.default-sort: 기본 정렬 순서
+settings.style.default-sort-created: 생성일
+settings.style.default-sort-updated: 수정일
+settings.style.default-order: 기본 정렬 방향
+settings.style.default-order-desc: 최신순
+settings.style.default-order-asc: 오래된순
+settings.create-token: 액세스 토큰 생성
+settings.create-token-help: 액세스 토큰은 API에 접근하는 데 사용할 수 있습니다
+settings.token-name: 이름
+settings.token-permissions: 권한
+settings.token-gist-permission: Gist
+settings.token-user-permission: 사용자
+settings.token-permission-none: 접근 불가
+settings.token-permission-read: 읽기
+settings.token-permission-read-write: 읽기 및 쓰기
+settings.delete-token: 삭제
+settings.delete-token-confirm: 액세스 토큰 삭제를 확인하세요
+settings.token-created-at: 생성일
+settings.token-never-used: 사용된 적 없음
+settings.token-last-used: 마지막 사용
+settings.token-expiration: 만료
+settings.token-expiration-help: 만료되지 않도록 하려면 비워두세요
+settings.token-expires-at: 만료일
+settings.token-no-expiration: 만료 없음
+settings.token-expired: 만료됨
+settings.token-created: "토큰이 생성되었습니다. 다시 확인할 수 없으니 지금 바로 복사해두세요!"
+settings.token-deleted: 액세스 토큰이 삭제되었습니다
+settings.api-disabled-warning: REST API가 현재 비활성화되어 있습니다. 관리자가 활성화하기 전까지 여기서 생성한 토큰은 사용할 수 없습니다.
+settings.api-disabled-go-admin: 관리자 설정 열기
+
+auth.signup-disabled: 관리자가 회원가입을 비활성화했습니다
+auth.login: 로그인
+auth.signup: 회원가입
+auth.new-account: 새 계정
+auth.username: 사용자 이름
+auth.password: 비밀번호
+auth.register-instead: 대신 회원가입하기
+auth.login-instead: 대신 로그인하기
+auth.oauth: "%s 계정으로 계속하기"
+auth.oauth.no-provider: OAuth 제공자를 찾을 수 없습니다
+auth.oauth.complete-registration: 회원가입을 완료하세요
+auth.oauth.complete-registration-button: 계정 생성
+auth.oauth.signing-in-with: "%s(으)로 로그인하는 중"
+auth.oauth.cancel: 취소
+auth.oauth.existing-account: 기존 계정이 있으신가요?
+auth.oauth.already-have-account: "이미 Opengist 계정이 있다면, 먼저 로그인한 후 설정에서 %s 계정을 연동하세요."
+auth.mfa: 다단계 인증
+auth.mfa.passkey: 패스키
+auth.mfa.passkeys: 패스키
+auth.mfa.use-passkey: 패스키 사용
+auth.mfa.bind-passkey: 패스키 등록
+auth.mfa.login-with-passkey: 패스키로 로그인
+auth.mfa.waiting-for-passkey-input: 브라우저에서 입력을 기다리는 중...
+auth.mfa.use-passkey-to-finish: 인증을 완료하려면 패스키를 사용하세요
+auth.mfa.passkeys-help: 계정 로그인 및 MFA 방법으로 사용할 패스키를 추가하세요.
+auth.mfa.passkey-name: 이름
+auth.mfa.delete-passkey: 삭제
+auth.mfa.passkey-added-at: 추가일
+auth.mfa.passkey-never-used: 사용된 적 없음
+auth.mfa.passkey-last-used: 마지막 사용
+auth.mfa.delete-passkey-confirm: 패스키 삭제를 확인하세요
+auth.totp: 시간 기반 일회용 비밀번호 (TOTP)
+auth.totp.help: TOTP는 공유된 비밀 키를 사용하여 일회용 비밀번호를 생성하는 2단계 인증 방식입니다.
+auth.totp.use: TOTP 사용
+auth.totp.regenerate-recovery-codes: 복구 코드 재생성
+auth.totp.already-enabled: TOTP가 이미 활성화되어 있습니다
+auth.totp.invalid-secret: 잘못된 TOTP 비밀 키입니다
+auth.totp.invalid-code: 잘못된 TOTP 코드입니다
+auth.totp.code-used: "복구 코드 %s가 사용되어 이제 유효하지 않습니다. MFA를 잠시 비활성화하거나 코드를 재생성하는 것이 좋습니다."
+auth.totp.disabled: TOTP가 성공적으로 비활성화되었습니다
+auth.totp.disable: TOTP 비활성화
+auth.totp.enter-code: 인증 앱에서 코드를 입력하세요
+auth.totp.enter-recovery-key: 또는 기기를 분실한 경우 복구 키를 입력하세요
+auth.totp.code: 코드
+auth.totp.submit: 제출
+auth.totp.proceed: 계속
+auth.totp.save-recovery-codes: 복구 코드를 안전한 곳에 보관하세요. 인증 앱에 접근할 수 없게 된 경우 이 코드로 계정에 다시 접근할 수 있습니다.
+auth.totp.scan-qr-code: 아래 QR 코드를 인증 앱으로 스캔하여 2단계 인증을 활성화하거나, 다음 문자열을 입력한 후 생성된 코드로 확인하세요.
+
+
+error: 오류
+error.page-not-found: 페이지를 찾을 수 없습니다
+error.bad-request: 잘못된 요청입니다
+error.signup-disabled: 회원가입이 비활성화되어 있습니다
+error.signup-disabled-form: 등록 양식을 통한 회원가입이 비활성화되어 있습니다
+error.login-disabled-form: 로그인 양식을 통한 로그인이 비활성화되어 있습니다
+error.complete-oauth-login: "사용자 인증을 완료할 수 없습니다: %s"
+error.oauth-unsupported: 지원되지 않는 OAuth2 제공자입니다
+error.cannot-bind-data: 데이터를 바인딩할 수 없습니다
+error.invalid-number: 잘못된 숫자입니다
+error.invalid-character-unescaped: 이스케이프되지 않은 잘못된 문자입니다
+error.not-in-mfa-session: 사용자가 MFA 세션에 있지 않습니다
+error.no-file-uploaded: 업로드된 파일이 없습니다
+error.file-upload-disabled: 파일 업로드가 비활성화되어 있습니다
+error.cannot-open-file: 업로드된 파일을 열 수 없습니다
+
+header.menu.all: 전체
+header.menu.new: 새로 만들기
+header.menu.search: 검색
+header.menu.my-gists: 내 gist
+header.menu.liked: 좋아요한 gist
+header.menu.admin: 관리자
+header.menu.settings: 설정
+header.menu.logout: 로그아웃
+header.menu.register: 회원가입
+header.menu.login: 로그인
+header.menu.light: 라이트
+header.menu.dark: 다크
+header.menu.system: 시스템 설정
+footer.powered-by: "%s의 지원을 받고 있습니다"
+
+pagination.older: 이전 항목
+pagination.newer: 다음 항목
+pagination.previous: 이전
+pagination.next: 다음
+
+admin.admin_panel: 관리자 패널
+admin.general: 일반
+admin.users: 사용자
+admin.gists: Gist
+admin.configuration: 설정
+admin.invitations: 초대
+admin.invitations.create: 초대 생성
+admin.versions: 버전
+admin.ssh_keys: SSH 키
+admin.stats: 통계
+admin.actions: 작업
+admin.actions.sync-fs: 파일 시스템에서 gist 동기화
+admin.actions.sync-db: 데이터베이스에서 gist 동기화
+admin.actions.git-gc: 모든 git 리포지토리 가비지 컬렉션
+admin.actions.sync-previews: 모든 gist 미리보기 동기화
+admin.actions.reset-hooks: 모든 리포지토리의 Git 서버 훅 초기화
+admin.actions.index-gists: 검색 인덱스 재구성
+admin.actions.sync-gist-languages: 모든 gist 언어 동기화
+admin.actions.delete-expired-gists: 만료된 gist 삭제
+admin.actions.sync-ssh-keys: authorized_keys 파일 재생성
+admin.id: ID
+admin.user: 사용자
+admin.delete: 삭제
+admin.created_at: 생성일
+
+admin.config-link: "이 설정은 YAML 설정 파일 및/또는 환경 변수로 %s 수 있습니다."
+admin.config-link-overriden: 재정의될
+admin.disable-signup: 회원가입 비활성화
+admin.disable-signup_help: 새 계정 생성을 금지합니다.
+admin.require-login: 로그인 필요
+admin.require-login_help: gist를 보려면 로그인하도록 강제합니다.
+admin.allow-gists-without-login: 로그인 없이 개별 gist 허용
+admin.allow-gists-without-login_help: gist 목록 탐색에는 로그인을 요구하면서도, 개별 gist는 로그인 없이 보고 다운로드할 수 있도록 허용합니다.
+admin.disable-login: 로그인 양식 비활성화
+admin.disable-login_help: 로그인 양식을 통한 로그인을 금지하여 OAuth 제공자를 사용하도록 강제합니다.
+admin.disable-gravatar: Gravatar 비활성화
+admin.disable-gravatar_help: 아바타 제공자로 Gravatar 사용을 비활성화합니다.
+admin.api-enabled: /api에서 REST API 활성화
+admin.api-enabled_help: 개인 액세스 토큰을 통해 gist와 사용자 정보에 프로그래밍 방식으로 접근할 수 있도록 허용합니다.
+
+admin.users.delete_confirm: 이 사용자를 삭제하시겠습니까?
+
+admin.gists.title: 제목
+admin.gists.private: 비공개 여부
+admin.gists.nb-files: 파일 수
+admin.gists.nb-likes: 좋아요 수
+admin.gists.delete_confirm: 이 gist를 삭제하시겠습니까?
+
+admin.invitations.help: 초대 코드는 회원가입이 비활성화된 경우에도 계정을 생성하는 데 사용할 수 있습니다.
+admin.invitations.max_uses: 최대 사용 횟수
+admin.invitations.expires_at: 만료일
+admin.invitations.code: 코드
+admin.invitations.copy_link: 링크 복사
+admin.invitations.uses: 사용 횟수
+admin.invitations.expired: 만료됨
+admin.invitations.delete_confirm: 이 초대를 삭제하시겠습니까?
+
+flash.admin.user-deleted: 사용자가 삭제되었습니다
+flash.admin.gist-deleted: Gist가 삭제되었습니다
+flash.admin.invitation-created: 초대가 생성되었습니다
+flash.admin.invitation-deleted: 초대가 삭제되었습니다
+flash.admin.sync-fs: 파일 시스템에서 리포지토리를 동기화하는 중...
+flash.admin.sync-db: 데이터베이스에서 리포지토리를 동기화하는 중...
+flash.admin.git-gc: 리포지토리를 가비지 컬렉션하는 중...
+flash.admin.sync-previews: Gist 미리보기를 동기화하는 중...
+flash.admin.reset-hooks: 모든 리포지토리의 Git 서버 훅을 초기화하는 중...
+flash.admin.index-gists: 검색 인덱스를 재구성하는 중...
+flash.admin.sync-gist-languages: Gist 언어를 동기화하는 중...
+flash.admin.delete-expired-gists: 만료된 gist를 삭제하는 중...
+flash.admin.sync-ssh-keys: authorized_keys 파일을 재생성하는 중...
+
+flash.auth.username-exists: 이미 존재하는 사용자 이름입니다
+flash.auth.invalid-credentials: 잘못된 인증 정보입니다
+flash.auth.account-linked-oauth: "%s 계정과 연동되었습니다"
+flash.auth.account-unlinked-oauth: "%s 계정과의 연동이 해제되었습니다"
+flash.auth.user-sshkeys-not-retrievable: "제공자로부터 SSH 키를 가져올 수 없습니다. 계정은 생성되었지만, SSH 키를 직접 추가해야 할 수 있습니다."
+flash.auth.user-sshkeys-not-created: SSH 키를 생성할 수 없습니다
+flash.auth.must-be-logged-in: gist에 접근하려면 로그인해야 합니다
+flash.auth.passkey-registred: "패스키 %s가 등록되었습니다"
+flash.auth.passkey-deleted: 패스키가 삭제되었습니다
+flash.auth.oauth-session-expired: OAuth2 세션이 만료되었습니다. 다시 시도해주세요
+flash.auth.oauth-already-linked: "이 %s 계정은 이미 다른 사용자와 연동되어 있습니다"
+
+flash.gist.visibility-changed: Gist 공개 범위가 변경되었습니다
+flash.gist.archived: Gist가 보관되었습니다
+flash.gist.unarchived: Gist 보관이 취소되었습니다
+flash.gist.deleted: Gist가 삭제되었습니다
+flash.gist.fork-own-gist: 자신의 gist는 포크할 수 없습니다
+flash.gist.forked: Gist가 포크되었습니다
+
+flash.user.email-updated: 이메일이 업데이트되었습니다
+flash.user.avatar-updated: 아바타가 업데이트되었습니다
+flash.user.avatar-deleted: 아바타가 삭제되었습니다
+flash.user.avatar-invalid: "잘못된 이미지 파일입니다. PNG, JPEG, GIF, WebP 형식만 허용됩니다"
+flash.user.avatar-too-large: "이미지 파일이 너무 큽니다. 최대 크기는 5MB입니다"
+flash.user.invalid-ssh-key: 잘못된 SSH 키입니다
+flash.user.ssh-key-added: SSH 키가 추가되었습니다
+flash.user.ssh-key-deleted: SSH 키가 삭제되었습니다
+flash.user.password-updated: 비밀번호가 업데이트되었습니다
+flash.user.username-updated: 사용자 이름이 업데이트되었습니다
+
+validation.is-too-long: "%s 필드가 너무 깁니다"
+validation.should-not-be-empty: "%s 필드는 비워둘 수 없습니다"
+validation.should-not-include-sub-directory: "%s 필드는 하위 디렉터리를 포함할 수 없습니다"
+validation.should-only-contain-alphanumeric-characters: "%s 필드는 영숫자만 포함할 수 있습니다"
+validation.should-only-contain-alphanumeric-characters-and-dashes: "%s 필드는 영숫자와 대시만 포함할 수 있습니다"
+validation.should-only-contain-alphanumeric-characters-and-dashes-and-underscores: "%s 필드는 영숫자, 대시, 밑줄만 포함할 수 있습니다"
+validation.not-enough: "%s이(가) 충분하지 않습니다"
+validation.invalid: "잘못된 %s입니다"
+validation.invalid-gist-topics: 잘못된 gist 토픽입니다. 토픽은 문자나 숫자로 시작해야 하며, 50자 이하여야 하고, 하이픈을 포함할 수 있습니다
+validation.invalid-expiration-date: 잘못된 만료 날짜입니다. 미래의 유효한 날짜여야 합니다
+
+html.title.admin-panel: 관리자 패널

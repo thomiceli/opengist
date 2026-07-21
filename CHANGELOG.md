@@ -1,10 +1,50 @@
 # Changelog
 
-## [Unreleased]
+## [1.14.0](https://github.com/thomiceli/opengist/compare/v1.13.1...v1.14.0) - 2026-07-21
+See here how to [update](https://opengist.io/docs/update) Opengist.
 
 ### Added
-- Seed a user/admin account at install time from the CLI (`admin create-user`), enabling automated provisioning with tools like Ansible (#750)
-- Open Graph and Twitter Card meta tags on gist pages for rich social sharing previews in Discord/Slack/IRC clients (#756)
+- Gist expiration + scheduled actions (#726)
+- Archive gists (#739)
+- Avatar upload (#730)
+- Push to gists with access tokens (#752)
+- Seed user/admin account via CLI (#750)
+- Open Graph and Twitter Card meta tags on gist pages (#756)
+- OpenSSH support (#735)
+- PKCE for OAuth providers (#720)
+- GitHub alerts in Markdown (#721)
+- Mermaid (`.mmd`) file rendering support (#741)
+- Syntax highlighting for Salesforce Apex language (#725)
+- Codemirror highlighting and comment shortcut (#742)
+- Confirmation prompt before deleting a file in the editor (#740)
+- Default sort gists user preference (#744)
+- Embedding light, dark and auto themes (#718)
+- Allow copying embedded gists (#719)
+- Option to disable file upload (#737)
+- `HEAD` endpoint for raw and download file (#748)
+- Log path config (#745)
+- PostgreSQL & MySQL socket connections (#733)
+- IPv6 literals support (#749)
+- Allow underscores in usernames (#703)
+- `rel="canonical"` link tag (#732)
+- Rootless Docker image (#716)
+- Korean (ko-KR) translation (#767)
+
+### Fixed
+- Improve Git handler security (#769)
+- Improve git `/init` with correlation token (#751)
+- Fix fatal startup error on unparseable git version (#731)
+- Fix actions db (#761)
+- Move users avatar directory (#760)
+- Better handler for committed HTTP responses (#734)
+- Sanitize DOM for ipynb rendering (#736)
+- Add `no-store` header for embedded js (#724)
+- Make ssh import failure a warning (#705)
+
+### Other
+- Package prebuilt frontend assets as webdist tarball (#768)
+- Update deps (#762)
+- Update community page with Pi share extension + gistviewer links (#755)
 
 ## [1.13.1](https://github.com/thomiceli/opengist/compare/v1.13.0...v1.13.1) - 2026-06-10
 See here how to [update](https://opengist.io/docs/update) Opengist.

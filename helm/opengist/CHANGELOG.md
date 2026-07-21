@@ -1,5 +1,9 @@
 # Helm Chart Changelog
 
+# 0.10.0 - 2026-07-21
+
+- Bump Opengist image to 1.14.0
+
 # 0.9.0 - 2026-06-10
 
 - Bump Opengist image to 1.13.1

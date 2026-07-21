@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
-const version = 'v1.13'
-const dockerCommand = 'docker run -p 6157:6157 -v "$HOME/.opengist:/opengist" ghcr.io/thomiceli/opengist:1.13'
+const version = 'v1.14'
+const dockerCommand = 'docker run -p 6157:6157 -v "$HOME/.opengist:/opengist" ghcr.io/thomiceli/opengist:1.14'
 
 const stars = ref(null)
 const formattedStars = computed(() => {

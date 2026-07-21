@@ -1,8 +1,9 @@
-.PHONY: all all_crosscompile install build_frontend build_backend build build_crosscompile build_docker build_dev_docker run_dev_docker watch_frontend watch_backend watch clean clean_docker check_changes go_mod fmt test check-tr update_js_deps update_go_deps
+.PHONY: all all_crosscompile install build_frontend build_backend build build_crosscompile build_webdist package_webdist build_docker build_dev_docker run_dev_docker watch_frontend watch_backend watch clean clean_docker check_changes go_mod fmt test check-tr update_js_deps update_go_deps
 
 # Specify the name of your Go binary output
 BINARY_NAME := opengist
 GIT_TAG := $(shell git describe --tags)
+VERSION := $(patsubst v%,%,$(GIT_TAG))
 VERSION_PKG := github.com/thomiceli/opengist/internal/config.OpengistVersion
 TEST_DB_TYPE ?= sqlite
 
@@ -28,6 +29,22 @@ build: build_frontend build_backend
 
 build_crosscompile:
 	@bash ./scripts/build-all.sh
+
+# Package the built, platform-independent frontend assets (the files embedded
+# via //go:embed in public/fs_embed.go) into a tarball. Downstream packagers
+# (e.g. distro ports) can fetch this instead of running the npm/vite toolchain.
+# Use build_webdist to build assets first; package_webdist assumes they exist.
+build_webdist: build_frontend package_webdist
+
+package_webdist:
+	@test -f public/.vite/manifest.json || (echo "Error: frontend assets not found in public/. Run 'make build_frontend' first." && exit 1)
+	@echo "Packaging frontend assets into build/$(BINARY_NAME)$(VERSION)-webdist.tar.gz..."
+	@mkdir -p build
+	@tar -czf "build/$(BINARY_NAME)$(VERSION)-webdist.tar.gz" \
+		--transform 's,^,$(BINARY_NAME)-webdist/,' \
+		-C public .vite/manifest.json assets
+	@sha256sum "build/$(BINARY_NAME)$(VERSION)-webdist.tar.gz" | awk '{print $$1 " " substr($$2,7)}' >> build/checksums.txt
+	@echo "Done."
 
 build_docker:
 	@echo "Building Docker image..."

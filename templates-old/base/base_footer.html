@@ -12,6 +12,7 @@
                 </a>
             </span>⋅
             <span>Load: <span class="font-bold dark:text-slate-300">{{ loadedTime .loadStartTime }}</span></span>⋅
+            <span><a href="{{ .c.ExternalUrl }}/-/ui/new?redirect={{ .uiRedirectUrl | urlquery }}" class="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">{{ .locale.Tr "ui.switch-to-new" }}</a></span>⋅
         </p>
         <div class="ml-1.5 cursor-pointer relative inline-block">
             <span id="language-btn" class="text-slate-600 font-bold dark:text-slate-300"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mb-1 w-5 h-5 inline-flex">

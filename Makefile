@@ -19,7 +19,7 @@ install:
 
 build_frontend:
 	@echo "Building frontend assets..."
-	npx vite -c public/vite.config.js build
+	npm run build
 
 build_backend:
 	@echo "Building Opengist binary..."
@@ -71,7 +71,7 @@ watch:
 clean:
 	@echo "Cleaning up build artifacts..."
 	@rm -f $(BINARY_NAME)
-	@rm -rf public/assets public/.vite build
+	@rm -rf public/assets public/.vite public-old/assets build
 
 clean_docker:
 	@echo "Cleaning up Docker image..."

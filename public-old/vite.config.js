@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-    root: './public',
+    root: './public-old',
     plugins: [
         tailwindcss(),
     ],
@@ -18,16 +18,16 @@ export default defineConfig({
         manifest: true,
         rollupOptions: {
             input: [
-                './public/ts/admin.ts',
-                './public/ts/auto.ts',
-                './public/ts/dark.ts',
-                './public/ts/editor.ts',
-                './public/ts/embed.ts',
-                './public/ts/gist.ts',
-                './public/ts/light.ts',
-                './public/ts/main.ts',
-                './public/ts/style_preferences.ts',
-                './public/ts/webauthn.ts',
+                './public-old/ts/admin.ts',
+                './public-old/ts/auto.ts',
+                './public-old/ts/dark.ts',
+                './public-old/ts/editor.ts',
+                './public-old/ts/embed.ts',
+                './public-old/ts/gist.ts',
+                './public-old/ts/light.ts',
+                './public-old/ts/main.ts',
+                './public-old/ts/style_preferences.ts',
+                './public-old/ts/webauthn.ts',
             ]
         },
         assetsInlineLimit: 0,

@@ -23,6 +23,7 @@ import (
 	"github.com/thomiceli/opengist/internal/web/handlers/ipc"
 	"github.com/thomiceli/opengist/internal/web/handlers/settings"
 	"github.com/thomiceli/opengist/public"
+	publicold "github.com/thomiceli/opengist/public-old"
 )
 
 func (s *Server) registerRoutes() {
@@ -36,6 +37,7 @@ func (s *Server) registerRoutes() {
 		r.DELETE("/upload/:uuid", gist.DeleteUpload, logged, checkFileUploadEnabled)
 
 		r.GET("/healthcheck", health.Healthcheck)
+		r.GET("/-/ui/:ui", switchUI)
 
 		r.Static("/avatar", settings.AvatarsDir())
 
@@ -215,6 +217,22 @@ func (s *Server) registerRoutes() {
 	}
 
 	customFs := os.DirFS(filepath.Join(config.GetHomeDir(), "custom"))
+	r.GET("/assets-old/*", func(ctx *context.Context) error {
+		assetPath := path.Clean(ctx.Param("*"))
+		if !strings.HasPrefix(assetPath, "assets/") {
+			return ctx.NotFound("Asset not found")
+		}
+		if _, err := publicold.Files.Open(assetPath); err != nil {
+			return ctx.NotFound("Asset not found")
+		}
+		if !s.dev {
+			ctx.Response().Header().Set("Cache-Control", "public, max-age=31536000")
+			ctx.Response().Header().Set("Expires", time.Now().AddDate(1, 0, 0).Format(http.TimeFormat))
+		}
+
+		return echo.WrapHandler(http.StripPrefix("/assets-old/", http.FileServer(http.FS(publicold.Files))))(ctx)
+	})
+
 	r.GET("/assets/*", func(ctx *context.Context) error {
 		if _, err := public.Files.Open(path.Join("assets", ctx.Param("*"))); !s.dev && err == nil {
 			ctx.Response().Header().Set("Cache-Control", "public, max-age=31536000")

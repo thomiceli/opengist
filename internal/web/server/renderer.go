@@ -25,17 +25,36 @@ import (
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
 	"github.com/thomiceli/opengist/public"
+	publicold "github.com/thomiceli/opengist/public-old"
 	"github.com/thomiceli/opengist/templates"
+	templatesold "github.com/thomiceli/opengist/templates-old"
 )
 
 type Template struct {
 	templates *template.Template
 	// pages holds the new layout-based templates, keyed by file name (e.g. "all.html").
 	// Each entry is a clone of the base layout with that page's "content" block parsed in.
-	pages map[string]*template.Template
+	pages  map[string]*template.Template
+	legacy *template.Template
 }
 
-func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Context) error {
+func (t *Template) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
+	if values, ok := data.(echo.Map); ok {
+		values["uiRedirectUrl"] = ctx.Request().URL.RequestURI()
+	}
+
+	// Embeds are not part of the navigable web interface and use the new embed
+	// stylesheet, so keep rendering them with their matching new template.
+	if usesLegacyUI(ctx) && name != "gist_embed.html" && t.legacy != nil {
+		legacyName := name
+		if name == "settings_authentication.html" {
+			legacyName = "settings_mfa.html"
+		}
+		if t.legacy.Lookup(legacyName) != nil {
+			return t.legacy.ExecuteTemplate(w, legacyName, data)
+		}
+	}
+
 	if tmpl, ok := t.pages[name]; ok {
 		return tmpl.ExecuteTemplate(w, "base", data)
 	}
@@ -248,22 +267,71 @@ func (s *Server) setFuncMap() {
 		pages[filepath.Base(p)] = template.Must(cloned.ParseFS(templates.Files, p))
 	}
 
+	legacyFM := make(template.FuncMap, len(fm))
+	for name, fn := range fm {
+		legacyFM[name] = fn
+	}
+	legacyFM["asset"] = func(file string) string {
+		entry, ok := s.legacyManifestEntries[file]
+		if !ok {
+			return config.C.ExternalUrl + "/assets-old/" + file
+		}
+		return config.C.ExternalUrl + "/assets-old/" + entry.File
+	}
+	legacyFM["assetCss"] = func(file string) string {
+		entry, ok := s.legacyManifestEntries[file]
+		if !ok || len(entry.Css) == 0 {
+			return config.C.ExternalUrl + "/assets-old/" + file
+		}
+		return config.C.ExternalUrl + "/assets-old/" + entry.Css[0]
+	}
+	// The legacy bundle is built once and served by the backend in development;
+	// only the new UI is attached to the Vite development server.
+	legacyFM["dev"] = func() bool { return false }
+	legacy := template.Must(template.New("legacy").Funcs(legacyFM).ParseFS(templatesold.Files, "*/*.html"))
+
 	s.echo.Renderer = &Template{
 		templates: base,
 		pages:     pages,
+		legacy:    legacy,
 	}
 }
 
 func (s *Server) parseManifestEntries() {
-	file, err := public.Files.Open(".vite/manifest.json")
+	entries, err := parseManifest(public.Files)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to open manifest.json")
+		log.Fatal().Err(err).Msg("Failed to load manifest.json")
 	}
+	context.ManifestEntries = entries
+}
+
+func (s *Server) parseLegacyManifestEntries() {
+	entries, err := parseManifest(publicold.Files)
+	if err != nil {
+		if s.dev {
+			log.Warn().Err(err).Msg("Failed to load legacy UI manifest; run npm run build:old")
+			return
+		}
+		log.Fatal().Err(err).Msg("Failed to load legacy UI manifest.json")
+	}
+	s.legacyManifestEntries = entries
+}
+
+func parseManifest(files fs.FS) (map[string]context.Asset, error) {
+	file, err := files.Open(".vite/manifest.json")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
 	byteValue, err := io.ReadAll(file)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to read manifest.json")
+		return nil, err
 	}
-	if err = gojson.Unmarshal(byteValue, &context.ManifestEntries); err != nil {
-		log.Fatal().Err(err).Msg("Failed to unmarshal manifest.json")
+
+	entries := make(map[string]context.Asset)
+	if err = gojson.Unmarshal(byteValue, &entries); err != nil {
+		return nil, err
 	}
+	return entries, nil
 }

@@ -236,6 +236,18 @@
         {{ end }}
 
         <footer class="border-sidebar-border flex flex-col gap-1 border-t p-2">
+            <a hx-boost="false" href="https://github.com/thomiceli/opengist/issues/773" target="_blank" rel="noopener"
+               class="text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground flex items-center gap-2 rounded-md px-2 py-1.5 text-xs [&>svg]:size-4 [&>svg]:shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M8 9h8M8 13h5"/></svg>
+                <span>{{ .locale.Tr "ui.feedback-new" }}</span>
+            </a>
+
+            <a hx-boost="false" href="{{ .c.ExternalUrl }}/-/ui/old"
+               class="text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground flex items-center gap-2 rounded-md px-2 py-1.5 text-xs [&>svg]:size-4 [&>svg]:shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><path d="m15 9 3 3-3 3"/></svg>
+                <span>{{ .locale.Tr "ui.switch-to-old" }}</span>
+            </a>
+
             <a href="https://github.com/thomiceli/opengist" target="_blank" rel="noopener"
                class="text-sidebar-foreground/70 hover:text-sidebar-foreground flex items-center gap-1.5 px-2 py-1.5 text-xs">
                 <svg class="size-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.21 11.19.6.11.82-.26.82-.57v-2.01c-3.34.71-4.04-1.58-4.04-1.58-.55-1.36-1.34-1.73-1.34-1.73-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.21 1.84 1.21 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.58-2.67-.3-5.47-1.31-5.47-5.83 0-1.29.47-2.34 1.24-3.17-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.13 3 .4 2.29-1.53 3.3-1.21 3.3-1.21.65 1.66.24 2.88.12 3.18.77.83 1.23 1.88 1.23 3.17 0 4.53-2.81 5.53-5.49 5.82.43.36.82 1.09.82 2.2v3.26c0 .31.21.69.82.57A12.01 12.01 0 0 0 24 12.29C24 5.78 18.63.5 12 .5Z"/></svg>
@@ -245,7 +257,7 @@
             <!-- Desktop collapse toggle. Lives in the sidebar so it stays visible in
                  the collapsed icon rail. See main.ts + globals.css. -->
             <button type="button" id="sidebar-toggle" aria-label="Toggle sidebar"
-                    class="text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground hidden cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm md:flex [&>svg]:size-4 [&>svg]:shrink-0">
+                    class="text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground hidden cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs md:flex [&>svg]:size-4 [&>svg]:shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
                 <span>{{ .locale.Tr "sidebar.collapse" }}</span>
             </button>

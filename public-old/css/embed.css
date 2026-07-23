@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@source "../../templates/pages/gist_embed.html";
+@source "../../templates-old/pages/gist_embed.html";
 
 @theme {
     /* Custom gray palette */

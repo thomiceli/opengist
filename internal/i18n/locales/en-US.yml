@@ -329,6 +329,9 @@ header.menu.light: Light
 header.menu.dark: Dark
 header.menu.system: System
 footer.powered-by: Powered by %s
+ui.switch-to-old: Switch to old UI
+ui.switch-to-new: Switch to new UI
+ui.feedback-new: Give feedback on the new UI
 sidebar.collapse: Collapse
 
 pagination.older: Older

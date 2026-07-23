@@ -8,6 +8,12 @@
 
     <base href="{{ .c.ExternalUrl }}" />
 
+    {{ if .canonicalUrl }}
+        <link rel="canonical" href="{{ .canonicalUrl }}" />
+    {{ end }}
+
+    {{ template "seo_meta" . }}
+
     <script nonce="{{ .cspNonce }}">
         window.opengist_base_url = "{{ .c.ExternalUrl }}";
         const checkTheme = () => {

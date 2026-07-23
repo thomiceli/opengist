@@ -46,6 +46,9 @@ See here how to [update](https://opengist.io/docs/update) Opengist.
 - Update deps (#762)
 - Update community page with Pi share extension + gistviewer links (#755)
 
+### Changed
+- **Docker image cleanup (#1):** the image now runs as a non-root user (`opengist`, UID/GID 1000) via the `USER` directive, and the shell entrypoint has been removed. The `UID`/`GID` environment variables are no longer supported — run as a different user with `docker run --user` / Compose `user:` and chown the data volume on the host instead (see [docs](docs/installation/docker.md)). Docker Compose secrets are now read directly by the app (explicit environment variables take precedence); the secret path can be overridden with `OG_SECRETS_FILE`. The Dockerfile versions (Alpine, Go, Node) are now parametrized via `--build-arg`.
+
 ## [1.13.1](https://github.com/thomiceli/opengist/compare/v1.13.0...v1.13.1) - 2026-06-10
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net/url"
@@ -182,6 +183,12 @@ func InitConfig(configPath string, out io.Writer) error {
 		return err
 	}
 
+	// Source Docker secrets (a dotenv-style file) into the environment before
+	// reading OG_* variables. Explicit environment variables take precedence.
+	if err = loadSecretsFile(); err != nil {
+		return err
+	}
+
 	if err = loadConfigFromEnv(c, out); err != nil {
 		return err
 	}
@@ -322,6 +329,90 @@ func SetupSecretKey() {
 	} else {
 		SecretKey = []byte(C.SecretKey)
 	}
+}
+
+// defaultSecretsFile is the path Docker Compose/Swarm mounts the secrets file
+// at (see docs/configuration/configure.md). It can be overridden via the
+// OG_SECRETS_FILE environment variable.
+const defaultSecretsFile = "/run/secrets/opengist_secrets"
+
+// loadSecretsFile sources a dotenv-style file (as mounted by Docker
+// Compose/Swarm secrets) into the process environment, so that its values can
+// be picked up by loadConfigFromEnv like any other OG_* variable. It is a
+// no-op when the file is absent, which keeps non-containerized deployments
+// unaffected.
+//
+// Variables already present in the environment are left untouched, so explicit
+// configuration always takes precedence over the secrets file.
+func loadSecretsFile() error {
+	path := os.Getenv("OG_SECRETS_FILE")
+	if path == "" {
+		path = defaultSecretsFile
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	defer file.Close()
+
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	if !info.Mode().IsRegular() {
+		return nil
+	}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		key, value, ok := parseSecretLine(scanner.Text())
+		if !ok {
+			continue
+		}
+		if _, isSet := os.LookupEnv(key); !isSet {
+			if err := os.Setenv(key, value); err != nil {
+				return err
+			}
+		}
+	}
+
+	return scanner.Err()
+}
+
+// parseSecretLine parses a single dotenv-style line into a key/value pair. It
+// supports an optional "export " prefix, blank lines and comments (#), and
+// strips a single layer of surrounding single or double quotes. ok is false
+// for lines that do not define a variable.
+func parseSecretLine(line string) (key, value string, ok bool) {
+	line = strings.TrimSpace(line)
+	if line == "" || strings.HasPrefix(line, "#") {
+		return "", "", false
+	}
+
+	line = strings.TrimPrefix(line, "export ")
+	key, value, found := strings.Cut(line, "=")
+	if !found {
+		return "", "", false
+	}
+
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return "", "", false
+	}
+
+	value = strings.TrimSpace(value)
+	if n := len(value); n >= 2 {
+		first, last := value[0], value[n-1]
+		if (first == '"' && last == '"') || (first == '\'' && last == '\'') {
+			value = value[1 : n-1]
+		}
+	}
+
+	return key, value, true
 }
 
 func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {

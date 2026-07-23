@@ -70,3 +70,7 @@ secrets:
   opengist_secrets:
     file: ./secrets.env
 ```
+
+Opengist reads the secret automatically from `/run/secrets/opengist_secrets` at
+startup (override the path with the `OG_SECRETS_FILE` variable). Values defined
+explicitly in the environment take precedence over those in the secrets file.

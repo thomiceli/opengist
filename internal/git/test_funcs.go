@@ -3,7 +3,6 @@ package git
 import (
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
-	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -15,7 +14,7 @@ import (
 func SetupTest(t *testing.T) {
 	_ = os.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
 
-	err := config.InitConfig("", io.Discard)
+	err := config.InitConfig("")
 	require.NoError(t, err, "Could not init config")
 
 	err = os.MkdirAll(path.Join(config.GetHomeDir(), "tests"), 0755)

@@ -25,6 +25,7 @@ func TestAdminPages(t *testing.T) {
 		"/admin-panel/gists",
 		"/admin-panel/invitations",
 		"/admin-panel/configuration",
+		"/admin-panel/actions",
 	}
 
 	s.Register(t, "thomas")

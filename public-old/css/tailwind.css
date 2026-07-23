@@ -6,7 +6,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@source "../../templates/**/*.html";
+@source "../../templates-old/**/*.html";
 
 @theme {
     /* Custom gray palette */

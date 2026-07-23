@@ -111,7 +111,7 @@
         {{ if .gist.Topics }}
         <div class="mt-2">
             {{ range .gist.Topics }}
-            <a href="{{ $.c.ExternalUrl }}/topics/{{ .Topic }}" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-200 text-primary-900 hover:bg-primary-300 dark:bg-primary-950 dark:text-primary-200 dark:hover:bg-primary-900">{{ .Topic }}</a>
+            <a href="{{ $.c.ExternalUrl }}/-/topics/{{ .Topic }}" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-200 text-primary-900 hover:bg-primary-300 dark:bg-primary-950 dark:text-primary-200 dark:hover:bg-primary-900">{{ .Topic }}</a>
             {{ end }}
         </div>
         {{ end }}

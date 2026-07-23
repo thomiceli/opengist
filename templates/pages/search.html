@@ -1,40 +1,51 @@
-{{ template "header" .}}
-<div class="py-10">
-    <header class="pb-4 ">
-        <div class="flex">
-            <div class="flex-auto">
-                <h1 class="text-2xl font-bold leading-tight">{{ .nbHits }} {{ .locale.Tr "gist.search.found" }}</h1>
-            </div>
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="space-y-1">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "gist.list.search-results" }}</h1>
+            <span class="text-muted-foreground text-sm">{{ .nbHits }} {{ .locale.Tr "gist.search.found" }}</span>
         </div>
-    </header>
-    <main>
-        {{ if ne (len .gists) 0 }}
-            <div class="md:grid md:grid-cols-12 gap-x-4">
-                <div class="md:col-span-3 pb-4">
-                    <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto">
-                        {{ range $lang, $count := .langs }}
-                            <a href="{{ $.c.ExternalUrl }}/search?q={{ addMetadataToSearchQuery $.searchQuery "language" $lang }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
-                                {{ $lang }} ({{ $count }})
-                            </a>
-                        {{end}}
-                    </div>
-                </div>
-                <div class="md:col-span-9">
-                        {{ range $gist := .gists }}
-                            {{ $nest := dict "gist" $gist "c" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar }}
-                            {{ template "_gist_preview" $nest }}
-                        {{ end }}
-                </div>
-            </div>
-            {{ template "_pagination" . }}
-        {{ else }}
-            <div class="text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "gist.search.no-results" }}</h3>
-            </div>
+        {{ if .searchQuery }}
+        <p class="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
+            <span>{{ .locale.Tr "gist.list.search-for" }}</span>
+            <code class="bg-muted rounded px-1.5 py-0.5 font-mono text-xs">{{ .searchQuery }}</code>
+        </p>
         {{ end }}
-    </main>
+    </header>
+
+    {{ if ne (len .gists) 0 }}
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+            <div class="min-w-0 flex-1 space-y-4">
+                {{ range $gist := .gists }}
+                    {{ template "gist" (dict "gist" $gist "c" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar "currentStyle" $.currentStyle) }}
+                {{ end }}
+                {{ template "pagination" . }}
+            </div>
+
+            {{ if ne (len .langs) 0 }}
+            <aside class="lg:order-last lg:w-48 lg:shrink-0">
+                <div class="lg:sticky lg:top-20">
+                    <p class="text-muted-foreground px-2 pb-2 text-xs font-semibold uppercase tracking-wide">{{ .locale.Tr "gist.search.placeholder.language" }}</p>
+                    <ul class="flex flex-col gap-0.5">
+                        {{ range $lang, $count := .langs }}
+                        <li>
+                            <a href="{{ $.c.ExternalUrl }}/search?q={{ addMetadataToSearchQuery $.searchQuery "language" $lang }}"
+                               class="hover:bg-accent hover:text-accent-foreground flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm">
+                                <span class="truncate">{{ $lang }}</span>
+                                <span class="text-muted-foreground text-xs">{{ $count }}</span>
+                            </a>
+                        </li>
+                        {{ end }}
+                    </ul>
+                </div>
+            </aside>
+            {{ end }}
+        </div>
+    {{ else }}
+        <div class="text-muted-foreground flex flex-col items-center justify-center py-16 text-center">
+            <svg class="size-12" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <h3 class="text-foreground mt-3 text-sm font-medium">{{ .locale.Tr "gist.search.no-results" }}</h3>
+        </div>
+    {{ end }}
 </div>
-{{ template "footer" .}}
+{{ end }}

@@ -1,0 +1,402 @@
+/* Expose custom surfaces as Tailwind colors so their utilities exist. */
+@theme inline {
+    --color-content: var(--content);
+    --color-sidebar-hover: var(--sidebar-hover);
+}
+
+:root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.141 0.005 285.823);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.141 0.005 285.823);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.141 0.005 285.823);
+    --theme-color: var(--color-indigo-500);
+    /* Primary is a tuned derivation of the accent (darker + less saturated than
+       the raw Tailwind -500). The factors are variables so the theme-picker
+       swatches can preview the exact button color with the same formula and
+       adapt per light/dark. */
+    --primary-l: 0.82;
+    --primary-c: 0.5;
+    --primary: oklch(from var(--theme-color) calc(l * var(--primary-l)) calc(c * var(--primary-c)) h);
+    --primary-foreground: oklch(0.969 0.016 293.756);
+    --secondary: oklch(0.967 0.001 286.375);
+    --secondary-foreground: oklch(0.21 0.006 285.885);
+    --muted: oklch(0.967 0.001 286.375);
+    --muted-foreground: oklch(0.552 0.016 285.938);
+    --accent: oklch(0.967 0.001 286.375);
+    --accent-foreground: oklch(0.21 0.006 285.885);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.92 0.004 286.32);
+    --input: oklch(0.92 0.004 286.32);
+    --ring: oklch(0.705 0.015 286.067);
+    --chart-1: oklch(0.871 0.006 286.286);
+    --chart-2: oklch(0.552 0.016 285.938);
+    --chart-3: oklch(0.442 0.017 285.786);
+    --chart-4: oklch(0.37 0.013 285.805);
+    --chart-5: oklch(0.274 0.006 286.033);
+    --radius: 0.45rem;
+    /* Tints of the seed: keep its hue, scale chroma down, pin lightness.
+       <main> is a faint tint; the sidebar is a touch deeper. */
+    --content: oklch(from var(--theme-color) 0.985 calc(c * 0.04) h);
+    --sidebar: oklch(from var(--theme-color) 0.97 calc(c * 0.10) h);
+    --sidebar-foreground: oklch(0.141 0.005 285.823);
+    --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
+    /* Active/current item: same hue/chroma as the sidebar, a touch darker. */
+    --sidebar-accent: oklch(from var(--theme-color) 0.93 calc(c * 0.18) h);
+    /* Hover: same hue but mostly desaturated (grayer). */
+    --sidebar-hover: oklch(from var(--theme-color) 0.94 calc(c * 0.04) h);
+    --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+    --sidebar-border: oklch(0.92 0.004 286.32);
+    --sidebar-ring: oklch(0.705 0.015 286.067);
+}
+
+.dark {
+    --background: oklch(0.141 0.005 285.823);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.21 0.006 285.885);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.21 0.006 285.885);
+    --popover-foreground: oklch(0.985 0 0);
+    --theme-color: var(--color-indigo-500);
+    --primary-l: 0.62;
+    --primary-c: 0.5;
+    --primary: oklch(from var(--theme-color) calc(l * var(--primary-l)) calc(c * var(--primary-c)) h);
+    --primary-foreground: oklch(0.969 0.016 293.756);
+    --secondary: oklch(0.274 0.006 286.033);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.274 0.006 286.033);
+    --muted-foreground: oklch(0.705 0.015 286.067);
+    --accent: oklch(0.274 0.006 286.033);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.552 0.016 285.938);
+    --chart-1: oklch(0.871 0.006 286.286);
+    --chart-2: oklch(0.552 0.016 285.938);
+    --chart-3: oklch(0.442 0.017 285.786);
+    --chart-4: oklch(0.37 0.013 285.805);
+    --chart-5: oklch(0.274 0.006 286.033);
+    --content: oklch(from var(--theme-color) 0.17 calc(c * 0.04) h);
+    --sidebar: oklch(from var(--theme-color) 0.23 calc(c * 0.10) h);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
+    --sidebar-accent: oklch(from var(--theme-color) 0.30 calc(c * 0.18) h);
+    --sidebar-hover: oklch(from var(--theme-color) 0.30 calc(c * 0.04) h);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.552 0.016 285.938);
+}
+
+:root {
+    --red-diff:  rgba(239, 68, 68, 0.13);
+    --green-diff: rgba(34, 197, 94, 0.14);
+    --git-diff: rgba(143, 143, 143, 0.2);
+}
+
+.dark .text-primary,
+.dark .hover\:text-primary:hover {
+    color: oklch(from var(--theme-color) 0.8 calc(c * 0.5) h);
+}
+
+/* Navbar user-account dropdown: a wider menu with roomier, clickable items.
+   Scoped by #id so it outranks basecoat's .dropdown-menu [data-popover] rules
+   (which otherwise pin the width to the trigger and use px-2 py-1.5 / cursor-default). */
+#user-menu {
+    min-width: 13rem;
+}
+#user-menu [role='menuitem'] {
+    @apply cursor-pointer px-3 py-2 text-sm;
+}
+
+/* Gist visibility dropdown: its trigger is a narrow icon-only button, so
+   basecoat's anchor-size() min-width leaves the menu too cramped. */
+#vis-menu {
+    min-width: 12rem;
+}
+#vis-menu [role='menuitem'] {
+    @apply cursor-pointer;
+}
+
+/* Gist header "more actions" dropdown: menu items are links/submit buttons,
+   so give them a pointer cursor instead of basecoat's default. */
+#more-menu [role='menuitem'] {
+    @apply cursor-pointer;
+}
+
+
+.code {
+    font-family: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.8em;
+    @apply px-1 py-2.5;
+    overflow-x: auto;
+}
+
+.code td {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.code tbody {
+    line-height: 1.45;
+}
+
+.code .line-num {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+    vertical-align: top;
+    user-select: none;
+    color: var(--muted-foreground);
+}
+
+.code .line-code {
+    padding-left: 0.5rem;
+    background: none !important;
+}
+
+/* Line numbers in file views are clickable (permalink to the line). */
+.code .line-num[id] {
+    cursor: pointer;
+}
+
+/* Highlighted line (selected via its number / targeted by the URL hash). */
+.code .line-code.selected {
+    background-color: rgb(255, 247, 190) !important;
+    box-shadow: inset 4px 0 0 rgb(255, 213, 65) !important;
+}
+.dark .code .line-code.selected {
+    background-color: rgb(54, 49, 32) !important;
+    box-shadow: inset 4px 0 0 rgb(161, 128, 21) !important;
+}
+
+/* Copy buttons swap the copy icon for a check while [data-copied] is set. */
+.copy-btn .icon-check {
+    display: none;
+}
+.copy-btn[data-copied] .icon-copy {
+    display: none;
+}
+.copy-btn[data-copied] .icon-check {
+    display: block;
+}
+
+/* Diff tables: fixed-width line-number and +/- sign columns. */
+.code.diff td.line-num {
+    width: 2.75rem;
+    min-width: 2.75rem;
+}
+.code.diff td.diff-sign {
+    width: 1.25rem;
+    min-width: 1.25rem;
+    text-align: center;
+}
+
+.green-diff {
+    background-color: var(--green-diff);
+}
+.red-diff {
+    background-color: var(--red-diff);
+}
+.gray-diff {
+    background-color: var(--git-diff);
+}
+
+/* basecoat only styles <input> by type; mirror it for <textarea> so they match. */
+textarea.input {
+    @apply border-input dark:bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex w-full min-w-0 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+/* github-markdown-css paints .markdown-body with its own canvas background
+   (background-color: var(--bgColor-default)), and its stylesheet loads after
+   this one, so a plain override loses the cascade. Force transparent so the
+   rendered markdown blends into the surrounding card background with no flash. */
+.markdown-body {
+    background-color: transparent !important;
+}
+
+/* Toggled by the gist editor (editor.ts). */
+.hidden-important {
+    display: none !important;
+}
+
+/* PDF preview: pdf.ts embeds an <iframe> (via PDFObject) into .pdf-embed, which
+   PDFObject also tags with .pdfobject-container. Give it a fixed height so the
+   iframe has something to fill. */
+.pdf-embed,
+.pdfobject-container {
+    height: 700px;
+}
+.pdf-embed iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* When a gist has a single file, there's nothing to delete: hide its delete
+   button and round the filename input's right edge (it normally butts up against
+   the button). Pure CSS so it never flashes on load. */
+#editors > .editor:only-child .delete-file {
+    display: none;
+}
+#editors > .editor:only-child .form-filename {
+    border-top-right-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+}
+
+/* CodeMirror editor (gist create/edit). Mirror the gist view's code styling and
+   drive colors from theme variables so it adapts to dark mode automatically. */
+.editor .cm-editor {
+    font-family: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+    background: transparent;
+    color: var(--foreground);
+    /* Outer padding matches the gist viewer's .code (5px 10px). */
+    padding: 5px 10px;
+    /* Default height on load is 20rem; can be dragged down to 8rem or taller. */
+    height: 20rem;
+    min-height: 8rem;
+    resize: vertical;
+    overflow: hidden;
+}
+.editor .cm-editor.cm-focused {
+    outline: none;
+}
+/* The extra .cm-editor in these selectors is deliberate: CodeMirror's base
+   theme scopes its rules as `.cm-<genId> .cm-content` (same specificity as a
+   plain `.editor .cm-content`), so we add `.cm-editor` to reliably outrank it. */
+.editor .cm-editor .cm-scroller {
+    line-height: 1.45;
+    overflow: auto;
+}
+/* Outer padding lives on .cm-editor; here we only zero CodeMirror's defaults and
+   keep the 0.5rem gap after the line number (matches .line-code padding-left). */
+.editor .cm-editor .cm-content {
+    padding: 0;
+    caret-color: var(--foreground);
+}
+.editor .cm-editor .cm-line {
+    padding-left: 0.5rem;
+    padding-right: 0;
+}
+.editor .cm-editor .cm-cursor,
+.editor .cm-editor .cm-cursor-primary {
+    border-left-color: var(--foreground);
+}
+.editor .cm-editor .cm-gutters {
+    /* Opaque, matching the editor's card background, so horizontally-scrolled
+       code doesn't bleed through behind the sticky line-number gutter. */
+    background: var(--card);
+    border-right: none;
+    color: var(--muted-foreground);
+}
+.editor .cm-editor .cm-lineNumbers .cm-gutterElement {
+    @apply px-4;
+}
+.editor .cm-editor .cm-activeLine,
+.editor .cm-editor .cm-activeLineGutter {
+    background: transparent;
+}
+.editor .cm-editor .cm-focused .cm-selectionBackground,
+.editor .cm-editor .cm-selectionBackground {
+    background: var(--accent);
+}
+
+/* CSV files rendered as tables. */
+table.csv-table {
+    width: 100%;
+    font-size: 0.8em;
+    white-space: pre;
+}
+
+table.csv-table thead {
+    text-align: left;
+}
+
+table.csv-table th,
+table.csv-table td {
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.5rem;
+}
+
+table.csv-table thead th {
+    background: var(--muted);
+}
+
+/* Color helpers for badges, banners and alerts. The `& > section` rule is so
+   the color also wins inside a basecoat `.alert`, whose body lives in a
+   <section> that basecoat forces to text-muted-foreground. */
+.og-orange {
+    @apply bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300;
+    & > section { @apply text-amber-800 dark:text-amber-300; }
+}
+
+.og-green {
+    @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300;
+    & > section { @apply text-emerald-800 dark:text-emerald-300; }
+}
+
+.og-red {
+    @apply bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300;
+    & > section { @apply text-red-800 dark:text-red-300; }
+}
+
+.og-blue {
+    @apply bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300;
+    & > section { @apply text-sky-800 dark:text-sky-300; }
+}
+
+/* Success flash: neutral gray surface with a blue accent bar; text follows the
+   theme (dark in light mode, light in dark mode). */
+.og-success {
+    @apply bg-muted text-foreground border-l-4 border-l-sky-500;
+    & > section { @apply text-foreground; }
+}
+
+/* Top loading bar for boosted navigations. Hidden until JS adds .is-loading,
+   which drives its width via the --progress custom property. */
+#page-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    height: 3px;
+    width: 100%;
+    transform-origin: 0 50%;
+    transform: scaleX(var(--progress, 0));
+    background: var(--primary);
+    box-shadow: 0 0 8px var(--primary);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 200ms ease-out, opacity 200ms ease-out;
+}
+
+#page-progress.is-loading {
+    opacity: 1;
+}
+
+/* Desktop sidebar collapse into an icon-only rail. Toggled by the
+   `sidebar-collapsed` class on <html> (restored from localStorage in the head
+   script + toggled in main.ts). Only applies at md+ where the sidebar is docked;
+   the mobile drawer keeps its own behavior. The rail keeps icons visible so the
+   collapse button at the bottom of the sidebar stays reachable to expand again. */
+@media (min-width: 768px) {
+    /* Rail width (matches Tailwind's w-16 = 4rem). */
+    html.sidebar-collapsed #sidebar {
+        width: 4rem;
+    }
+
+    html.sidebar-collapsed #content-wrapper {
+        margin-left: 4rem;
+    }
+
+    /* Hide text: nav labels, badges, section headings, logo name. Icons stay. */
+    html.sidebar-collapsed #sidebar :is(span, p) {
+        display: none;
+    }
+
+    /* Center the remaining icons within the narrow rail. */
+    html.sidebar-collapsed #sidebar :is(a, button) {
+        justify-content: center;
+    }
+}

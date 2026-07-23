@@ -177,8 +177,6 @@ admin.versions: 版本
 admin.ssh_keys: SSH 密钥
 admin.stats: 状态
 admin.actions: 动作
-admin.actions.sync-fs: 从文件系统同步 Gist
-admin.actions.sync-db: 从数据库同步 Gist
 admin.actions.git-gc: 对 Git 仓库执行垃圾回收
 admin.id: ID
 admin.user: 用户
@@ -257,12 +255,6 @@ flash.admin.user-deleted: '用户已被删除'
 flash.admin.gist-deleted: 'Gist 已被删除'
 flash.admin.invitation-created: '邀请已被创建'
 flash.admin.invitation-deleted: '邀请已被删除'
-flash.admin.sync-fs: '正在从文件系统同步存储库...'
-flash.admin.sync-db: '正在从数据库同步存储库...'
-flash.admin.git-gc: '正在进行存储库垃圾回收...'
-flash.admin.sync-previews: '正在同步 Gist 预览...'
-flash.admin.reset-hooks: '正在重置所有存储库的 Git 服务挂钩...'
-flash.admin.index-gists: '正在重建搜索索引...'
 flash.auth.username-exists: '用户名已存在'
 flash.auth.invalid-credentials: '无效的凭证'
 flash.auth.account-linked-oauth: '帐户已关联到 %s'
@@ -330,7 +322,6 @@ gist.new.topics: 主题（用空格分隔）
 validation.invalid-gist-topics: 无效的 Gists 主题，它们必须以字母或数字开头，长度不超过50个字符，并且可以包含连字符
 gist.list.topic-results-topic: '%s 与主题匹配的所有 Gists'
 admin.actions.sync-gist-languages: 同步所有 gists 语言
-flash.admin.sync-gist-languages: 正在同步 Gist 语言...
 gist.list.topic-results: 所有匹配主题的 Gist
 gist.search.help.topic: 具有给定主题的 Gists
 gist.search.placeholder.title: 标题

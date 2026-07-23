@@ -1,0 +1,560 @@
+import {EditorView, gutter, keymap, lineNumbers} from "@codemirror/view";
+import {Compartment, EditorState, Facet, Line, Prec, SelectionRange} from "@codemirror/state";
+import {defaultKeymap, indentLess, toggleLineComment} from "@codemirror/commands";
+import {HighlightStyle, LanguageDescription, syntaxHighlighting} from "@codemirror/language";
+import {languages} from "@codemirror/language-data";
+import {tags} from "@lezer/highlight";
+
+document.addEventListener("DOMContentLoaded", () => {
+    EditorView.theme({}, {dark: true});
+
+    let editorsjs: EditorView[] = [];
+    let editorHighlightCompartments: {editor: EditorView, conf: Compartment}[] = [];
+    let editorsParentdom = document.getElementById("editors")!;
+    let allEditorsdom = document.querySelectorAll("#editors > .editor");
+    let firstEditordom = allEditorsdom[0];
+
+    const txtFacet = Facet.define<string>({
+        combine(values) {
+            return values;
+        },
+    });
+
+    let indentSize = new Compartment(),
+        wrapMode = new Compartment(),
+        indentType = new Compartment();
+
+    // Catppuccin Macchiato (dark)
+    const macchiatoHighlight = HighlightStyle.define([
+        {tag: tags.keyword, color: "#c6a0f6"},
+        {tag: [tags.definitionKeyword, tags.moduleKeyword], color: "#c6a0f6"},
+        {tag: tags.string, color: "#a6da95"},
+        {tag: [tags.number, tags.integer, tags.float], color: "#f5a97f"},
+        {tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "#6e738d", fontStyle: "italic"},
+        {tag: [tags.function(tags.variableName), tags.function(tags.propertyName)], color: "#8aadf4"},
+        {tag: [tags.typeName, tags.className], color: "#eed49f"},
+        {tag: tags.variableName, color: "#cad3f5"},
+        {tag: tags.definition(tags.variableName), color: "#8aadf4"},
+        {tag: tags.operator, color: "#91d7e3"},
+        {tag: tags.punctuation, color: "#cad3f5"},
+        {tag: tags.propertyName, color: "#8aadf4"},
+        {tag: [tags.bool, tags.null], color: "#f5a97f"},
+        {tag: tags.self, color: "#ed8796"},
+        {tag: tags.attributeName, color: "#8aadf4"},
+        {tag: tags.attributeValue, color: "#a6da95"},
+        {tag: tags.tagName, color: "#c6a0f6"},
+        {tag: tags.namespace, color: "#f5a97f"},
+        {tag: tags.regexp, color: "#8bd5ca"},
+        {tag: tags.escape, color: "#8aadf4"},
+    ]);
+
+    // Catppuccin Latte (light)
+    const latteHighlight = HighlightStyle.define([
+        {tag: tags.keyword, color: "#8839ef"},
+        {tag: [tags.definitionKeyword, tags.moduleKeyword], color: "#8839ef"},
+        {tag: tags.string, color: "#40a02b"},
+        {tag: [tags.number, tags.integer, tags.float], color: "#fe640b"},
+        {tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "#9ca0b0", fontStyle: "italic"},
+        {tag: [tags.function(tags.variableName), tags.function(tags.propertyName)], color: "#1e66f5"},
+        {tag: [tags.typeName, tags.className], color: "#df8e1d"},
+        {tag: tags.variableName, color: "#4c4f69"},
+        {tag: tags.definition(tags.variableName), color: "#1e66f5"},
+        {tag: tags.operator, color: "#179299"},
+        {tag: tags.punctuation, color: "#4c4f69"},
+        {tag: tags.propertyName, color: "#1e66f5"},
+        {tag: [tags.bool, tags.null], color: "#fe640b"},
+        {tag: tags.self, color: "#d20f39"},
+        {tag: tags.attributeName, color: "#1e66f5"},
+        {tag: tags.attributeValue, color: "#40a02b"},
+        {tag: tags.tagName, color: "#8839ef"},
+        {tag: tags.namespace, color: "#fe640b"},
+        {tag: tags.regexp, color: "#179299"},
+        {tag: tags.escape, color: "#1e66f5"},
+    ]);
+
+    const isDark = () => document.documentElement.classList.contains("dark");
+    const currentHighlight = () => syntaxHighlighting(isDark() ? macchiatoHighlight : latteHighlight);
+
+    const newEditor = (dom: HTMLElement, value: string = ""): EditorView => {
+        const languageConf = new Compartment();
+        const highlightConf = new Compartment();
+
+        let editor = new EditorView({
+            doc: value,
+            parent: dom,
+            extensions: [
+                lineNumbers(),
+                gutter({class: "cm-mygutter"}),
+                keymap.of([
+                    {key: "Tab", run: customIndentMore, shift: indentLess},
+                    {key: "Mod-/", run: toggleLineComment},
+                    ...defaultKeymap,
+                ]),
+                indentSize.of(EditorState.tabSize.of(2)),
+                wrapMode.of([]),
+                indentType.of(txtFacet.of("space")),
+                languageConf.of([]),
+                highlightConf.of(currentHighlight()),
+                // Fallback comment token (#) so Mod-/ works on plain text /
+                // config files; an actual language takes precedence over this.
+                Prec.lowest(EditorState.languageData.of(() => [{commentTokens: {line: "#"}}])),
+            ],
+        });
+
+        let mdpreview = dom.querySelector(".md-preview") as HTMLElement;
+
+        let formfilename = dom.querySelector<HTMLInputElement>(".form-filename");
+
+        const applyLanguage = (filename: string) => {
+            const desc = LanguageDescription.matchFilename(languages, filename);
+            if (desc) {
+                desc.load().then(lang => {
+                    editor.dispatch({effects: languageConf.reconfigure(lang)});
+                });
+            } else {
+                editor.dispatch({effects: languageConf.reconfigure([])});
+            }
+        };
+
+        // check if file ends with .md on pageload
+        if (formfilename!.value.endsWith(".md")) {
+            mdpreview!.classList.remove("hidden");
+        } else {
+            mdpreview!.classList.add("hidden");
+        }
+
+        // apply language highlight on pageload
+        applyLanguage(formfilename!.value);
+
+        // event if the filename ends with .md; trigger event
+        formfilename!.onkeyup = (e) => {
+            let filename = (e.target as HTMLInputElement).value;
+            if (filename.endsWith(".md")) {
+                mdpreview!.classList.remove("hidden");
+            } else {
+                mdpreview!.classList.add("hidden");
+            }
+            applyLanguage(filename);
+        };
+
+        // @ts-ignore
+        const baseUrl = window.opengist_base_url || '';
+        let previewShown = false;
+        mdpreview.onclick = () => {
+            previewShown = !previewShown;
+            let divpreview = dom.querySelector("div.preview") as HTMLElement;
+            let cmeditor = dom.querySelector(".cm-editor") as HTMLElement;
+
+            if (!previewShown) {
+                divpreview!.classList.add("hidden");
+                cmeditor!.classList.remove("hidden-important");
+                return;
+            } else {
+                const formData = new FormData();
+                formData.append('content', editor.state.doc.toString());
+                let csrf = document.querySelector<HTMLInputElement>('form#create input[name="_csrf"]').value
+                fetch(`${baseUrl}/preview`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-Token': csrf
+                    }
+                }).then(r => r.text()).then(r => {
+                    let divpreview = dom.querySelector("div.preview") as HTMLElement;
+                    divpreview!.innerHTML = r;
+                    divpreview!.classList.remove("hidden");
+                    cmeditor!.classList.add("hidden-important");
+                })
+            }
+        }
+
+        dom.querySelector<HTMLInputElement>(".editor-indent-type")!.onchange = (e) => {
+            let newTabType = (e.target as HTMLInputElement).value;
+            setIndentType(editor, !["tab", "space"].includes(newTabType) ? "space" : newTabType);
+        };
+
+        dom.querySelector<HTMLInputElement>(".editor-indent-size")!.onchange = (e) => {
+            let newTabSize = parseInt((e.target as HTMLInputElement).value);
+            setIndentSize(editor, ![2, 4, 8].includes(newTabSize) ? 2 : newTabSize);
+        };
+
+        dom.querySelector<HTMLInputElement>(".editor-wrap-mode")!.onchange = (e) => {
+            let newWrapMode = (e.target as HTMLInputElement).value;
+            setLineWrapping(editor, newWrapMode === "soft");
+        };
+
+        dom.addEventListener("drop", (e) => {
+            e.preventDefault(); // prevent the browser from opening the dropped file
+            (e.target as HTMLInputElement)
+                .closest(".editor")
+                .querySelector<HTMLInputElement>("input.form-filename")!.value =
+                e.dataTransfer.files[0].name;
+        });
+
+        // remove editor on delete
+        let deleteBtns = dom.querySelector<HTMLButtonElement>("button.delete-file");
+        if (deleteBtns !== null) {
+            deleteBtns.onclick = () => {
+                if (!confirm("Are you sure you want to delete this file?")) return;
+                // For both text and binary files, just remove from DOM
+                if (!dom.hasAttribute('data-binary-original-name')) {
+                    // Only remove from editors array for text files
+                    editorsjs.splice(editorsjs.indexOf(editor), 1);
+                    const hIdx = editorHighlightCompartments.findIndex(e => e.editor === editor);
+                    if (hIdx !== -1) editorHighlightCompartments.splice(hIdx, 1);
+                }
+                dom.remove();
+                checkForFirstDeleteButton();
+            };
+        }
+
+        editor.dom.addEventListener("input", function inputConfirmLeave() {
+            if (!editor.inView) return; // skip events outside the viewport
+
+            editor.dom.removeEventListener("input", inputConfirmLeave);
+            window.onbeforeunload = () => {
+                return "Are you sure you want to quit?";
+            };
+        });
+
+        editorHighlightCompartments.push({editor, conf: highlightConf});
+
+        return editor;
+    };
+
+    function getIndentation(state: EditorState): string {
+        // @ts-ignore
+        if (indentType.get(state).value === "tab") {
+            return "\t";
+        }
+        // @ts-ignore
+        return " ".repeat(indentSize.get(state).value);
+    }
+
+    function customIndentMore({state, dispatch,}: { state: EditorState; dispatch: (value: any) => void; }): boolean {
+        let indentation = getIndentation(state);
+        dispatch({
+            ...state.update(changeBySelectedLine(state, (line, changes) => {
+                changes.push({from: state.selection.ranges[0].from, insert: indentation,});
+            })),
+            selection: {
+                anchor: state.selection.ranges[0].from + indentation.length,
+                head: state.selection.ranges[0].from + indentation.length,
+            },
+        });
+        return true;
+    }
+
+    function changeBySelectedLine(state: EditorState, f: (line: Line, changes: any[]) => void): any {
+        let atLine = -1;
+        return state.changeByRange((range) => {
+            let changes: any[] = [];
+            for (let line = state.doc.lineAt(range.from); ;) {
+                if (line.number > atLine) {
+                    f(line, changes);
+                    atLine = line.number;
+                }
+                if (range.to <= line.to) break;
+                line = state.doc.lineAt(line.number + 1);
+            }
+            let changeSet = state.changes(changes);
+            return {
+                changes,
+                // @ts-ignore
+                range: new SelectionRange(changeSet.mapPos(range.anchor, 1), changeSet.mapPos(range.head, 1)),
+            };
+        });
+    }
+
+    function setIndentType(view: EditorView, type: string): void {
+        view.dispatch({effects: indentType.reconfigure(txtFacet.of(type))});
+    }
+
+    function setIndentSize(view: EditorView, size: number): void {
+        view.dispatch({effects: indentSize.reconfigure(EditorState.tabSize.of(size))});
+    }
+
+    function setLineWrapping(view: EditorView, enable: boolean): void {
+        view.dispatch({
+            effects: wrapMode.reconfigure(enable ? EditorView.lineWrapping : []),
+        });
+    }
+
+    let arr = Array.from(allEditorsdom);
+    arr.forEach((el: HTMLElement) => {
+        // in case we edit the gist contents
+        let formFileContent =el.querySelector<HTMLInputElement>(".form-filecontent")
+        if (formFileContent !== null) {
+            let currEditor = newEditor(el, el.querySelector<HTMLInputElement>(".form-filecontent")!.value);
+            editorsjs.push(currEditor);
+        } else if (el.hasAttribute('data-binary-original-name')) {
+            // For binary files, just set up the delete button
+            let deleteBtn = el.querySelector<HTMLButtonElement>("button.delete-file");
+            if (deleteBtn) {
+                deleteBtn.onclick = () => {
+                    if (!confirm("Are you sure you want to delete this file?")) return;
+                    el.remove();
+                    checkForFirstDeleteButton();
+                };
+            }
+        }
+    });
+
+    checkForFirstDeleteButton();
+
+    // Update syntax highlight theme when dark/light mode changes
+    new MutationObserver(() => {
+        const hl = currentHighlight();
+        editorHighlightCompartments.forEach(({editor, conf}) => {
+            editor.dispatch({effects: conf.reconfigure(hl)});
+        });
+    }).observe(document.documentElement, {attributes: true, attributeFilter: ["class"]});
+
+    document.getElementById("add-file")!.onclick = () => {
+        const template = document.getElementById("editor-template")!;
+        const newEditorDom = template.firstElementChild!.cloneNode(true) as HTMLElement;
+
+        // creating the new codemirror editor and append it in the editor div
+        editorsjs.push(newEditor(newEditorDom));
+        editorsParentdom.append(newEditorDom);
+        showDeleteButton(newEditorDom);
+    };
+
+    document.querySelector<HTMLFormElement>("form#create")!.onsubmit = () => {
+        let j = 0;
+        document.querySelectorAll<HTMLInputElement>(".form-filecontent").forEach((el) => {
+            if (j < editorsjs.length) {
+                el.value = encodeURIComponent(editorsjs[j++].state.doc.toString());
+            }
+        });
+
+        const fileInput = document.getElementById("file-upload") as HTMLInputElement;
+        if (fileInput) {
+            fileInput.remove();
+        }
+
+        const form = document.querySelector<HTMLFormElement>("form#create")!;
+
+        uploadedFileUUIDs.forEach((fileData) => {
+            const uuidInput = document.createElement('input');
+            uuidInput.type = 'hidden';
+            uuidInput.name = 'uploadedfile_uuid';
+            uuidInput.value = fileData.uuid;
+            form.appendChild(uuidInput);
+
+            const filenameInput = document.createElement('input');
+            filenameInput.type = 'hidden';
+            filenameInput.name = 'uploadedfile_filename';
+            filenameInput.value = fileData.filename;
+            form.appendChild(filenameInput);
+        });
+
+        const binaryFiles = document.querySelectorAll('[data-binary-original-name]');
+        binaryFiles.forEach((fileDiv) => {
+            const originalName = fileDiv.getAttribute('data-binary-original-name');
+            const fileNameInput = fileDiv.querySelector('.form-filename') as HTMLInputElement;
+
+            if (fileNameInput) {
+                fileNameInput.removeAttribute('name');
+            }
+
+            const oldNameInput = document.createElement('input');
+            oldNameInput.type = 'hidden';
+            oldNameInput.name = 'binary_old_name';
+            oldNameInput.value = originalName || '';
+            form.appendChild(oldNameInput);
+
+            const newNameInput = document.createElement('input');
+            newNameInput.type = 'hidden';
+            newNameInput.name = 'binary_new_name';
+            newNameInput.value = fileNameInput?.value || '';
+            form.appendChild(newNameInput);
+        });
+
+        window.onbeforeunload = null;
+    };
+
+    document.getElementById('gist-metadata-btn')!.onclick = (el) => {
+        let metadata = document.getElementById('gist-metadata')!;
+        metadata.classList.toggle('hidden');
+
+        let btn = el.target as HTMLButtonElement;
+        if (btn.innerText.endsWith('▼')) {
+            btn.innerText = btn.innerText.replace('▼', '▲');
+        } else {
+            btn.innerText = btn.innerText.replace('▲', '▼');
+        }
+
+    }
+
+    function checkForFirstDeleteButton() {
+        // Count total files (both text and binary)
+        const totalFiles = editorsParentdom.querySelectorAll('.editor').length;
+
+        // Hide/show all delete buttons based on total file count
+        const deleteButtons = editorsParentdom.querySelectorAll<HTMLButtonElement>("button.delete-file");
+        deleteButtons.forEach(deleteBtn => {
+            if (totalFiles <= 1) {
+                deleteBtn.classList.add("hidden");
+                deleteBtn.previousElementSibling?.classList.remove("rounded-l-md");
+                deleteBtn.previousElementSibling?.classList.add("rounded-md");
+            } else {
+                deleteBtn.classList.remove("hidden");
+                deleteBtn.previousElementSibling?.classList.add("rounded-l-md");
+                deleteBtn.previousElementSibling?.classList.remove("rounded-md");
+            }
+        });
+    }
+
+    function showDeleteButton(editorDom: HTMLElement) {
+        let deleteBtn = editorDom.querySelector<HTMLButtonElement>("button.delete-file")!;
+        deleteBtn.classList.remove("hidden");
+        deleteBtn.previousElementSibling.classList.add("rounded-l-md");
+        deleteBtn.previousElementSibling.classList.remove("rounded-md");
+        checkForFirstDeleteButton();
+    }
+
+    // File upload functionality
+    let uploadedFileUUIDs: {uuid: string, filename: string}[] = [];
+    const fileUploadInput = document.getElementById("file-upload") as HTMLInputElement | null;
+    const uploadedFilesContainer = document.getElementById("uploaded-files");
+    const fileUploadZoneEl = document.getElementById("file-upload-zone");
+
+    // File upload may be disabled instance-wide, in which case the upload zone is absent
+    if (!fileUploadInput || !uploadedFilesContainer || !fileUploadZoneEl) {
+        return;
+    }
+    const fileUploadZone = fileUploadZoneEl.querySelector('.border-dashed') as HTMLElement;
+
+    // Handle file selection
+    const handleFiles = (files: FileList) => {
+        Array.from(files).forEach(file => {
+            if (!uploadedFileUUIDs.find(f => f.filename === file.name)) {
+                uploadFile(file);
+            }
+        });
+    };
+
+    // Upload file to server
+    const uploadFile = async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // @ts-ignore
+        const baseUrl = window.opengist_base_url || '';
+        const csrf = document.querySelector<HTMLInputElement>('form#create input[name="_csrf"]')?.value;
+
+        try {
+            const response = await fetch(`${baseUrl}/upload`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData,
+                headers: {
+                    'X-CSRF-Token': csrf || ''
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                uploadedFileUUIDs.push({uuid: result.uuid, filename: result.filename});
+                addFileToUI(result.filename, result.uuid, file.size);
+            } else {
+                console.error('Upload failed:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+        }
+    };
+
+    // Add file to UI
+    const addFileToUI = (filename: string, uuid: string, fileSize: number) => {
+        const fileElement = document.createElement('div');
+        fileElement.className = 'flex items-stretch bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden';
+        fileElement.dataset.uuid = uuid;
+
+        fileElement.innerHTML = `
+            <div class="flex items-center space-x-3 px-3 py-1 flex-1">
+                <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"></path>
+                </svg>
+                <div>
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">${filename}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${formatFileSize(fileSize)}</p>
+                </div>
+            </div>
+            <button type="button" class="remove-file flex items-center justify-center px-4 border-l-1 dark:border-l-1 text-rose-600 dark:text-rose-400 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 hover:border-rose-600 dark:hover:border-rose-700 dark:hover:text-white focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        `;
+
+        // Remove file handler
+        fileElement.querySelector('.remove-file')!.addEventListener('click', async () => {
+            // Remove from server
+            try {
+                // @ts-ignore
+                const baseUrl = window.opengist_base_url || '';
+                const csrf = document.querySelector<HTMLInputElement>('form#create input[name="_csrf"]')?.value;
+
+                await fetch(`${baseUrl}/upload/${uuid}`, {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRF-Token': csrf || ''
+                    }
+                });
+            } catch (error) {
+                console.error('Error deleting file:', error);
+            }
+
+            // Remove from UI and local array
+            uploadedFileUUIDs = uploadedFileUUIDs.filter(f => f.uuid !== uuid);
+            fileElement.remove();
+        });
+
+        uploadedFilesContainer.appendChild(fileElement);
+    };
+
+    // Format file size
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    };
+
+    // File input change handler
+    fileUploadInput.addEventListener('change', (e) => {
+        const files = (e.target as HTMLInputElement).files;
+        if (files) {
+            handleFiles(files);
+            // Clear the input value immediately so it doesn't get submitted with the form
+            (e.target as HTMLInputElement).value = '';
+        }
+    });
+
+    // Drag and drop handlers
+    fileUploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadZone.classList.add('border-primary-400', 'dark:border-primary-500');
+    });
+
+    fileUploadZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        fileUploadZone.classList.remove('border-primary-400', 'dark:border-primary-500');
+    });
+
+    fileUploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadZone.classList.remove('border-primary-400', 'dark:border-primary-500');
+        
+        const files = e.dataTransfer?.files;
+        if (files) {
+            handleFiles(files);
+        }
+    });
+
+});

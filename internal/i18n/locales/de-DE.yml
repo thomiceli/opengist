@@ -187,8 +187,6 @@ admin.versions: 'Versionen'
 admin.ssh_keys: 'SSH Schlüssel'
 admin.stats: 'Statistiken'
 admin.actions: 'Aktionen'
-admin.actions.sync-fs: 'Gists auf dem Dateisystem sychronisieren'
-admin.actions.sync-db: 'Gists von der Datenbank synchronisieren'
 admin.actions.git-gc: '„garbage collection“ bei allen git Repositories ausführen'
 admin.actions.sync-previews: 'Alle Gist Vorschauen synchronisieren'
 admin.actions.reset-hooks: 'Alle Git server Hooks für alle Repositories synchronisieren'
@@ -231,12 +229,6 @@ flash.admin.user-deleted: 'Benutzer wurde gelöscht'
 flash.admin.gist-deleted: 'Gist wurde gelöscht'
 flash.admin.invitation-created: 'Einladung wurde erstellt'
 flash.admin.invitation-deleted: 'Einladung wurde gelöscht'
-flash.admin.sync-fs: 'Synchronisiere Repositories vom Dateisystem...'
-flash.admin.sync-db: 'Synchronisiere Repositories aus der Datenbank...'
-flash.admin.git-gc: 'Sammle Repositories...'
-flash.admin.sync-previews: 'Synchronisiere Gist-Vorschauen...'
-flash.admin.reset-hooks: 'Setze Git-Server-Hooks für alle Repositories zurück...'
-flash.admin.index-gists: 'Suchindex wird neu aufgebaut...'
 
 flash.auth.username-exists: 'Benutzername existiert bereits'
 flash.auth.invalid-credentials: 'Ungültige Anmeldeinformationen'
@@ -305,7 +297,6 @@ auth.totp.save-recovery-codes: Speichere deine Wiederherstellungscodes an einem 
 error.not-in-mfa-session: Nutzer ist nicht in einer Zwei-Faktor-Sitzung
 gist.revision.binary-file-changes: Änderungen an Binärdateien werden nicht angezeigt
 error.no-file-uploaded: Keine Datei hochgeladen
-flash.admin.sync-gist-languages: Gist-Sprachen werden synchronisiert …
 validation.invalid-gist-topics: Ungültige Gist-Themen. Sie müssen mit einem Buchstaben oder einer Zahl beginnen, dürfen maximal 50 Zeichen lang sein und dürfen Bindestriche enthalten
 gist.new.topics: Themen (durch Leerzeichen getrennt)
 gist.preview-non-available: Vorschau nicht verfügbar

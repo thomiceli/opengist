@@ -15,7 +15,7 @@ func BeginTotp(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Cannot check for user MFA", err)
 	} else if hasTotp {
 		ctx.AddFlash(ctx.Tr("auth.totp.already-enabled"), "error")
-		return ctx.RedirectTo("/settings/mfa")
+		return ctx.RedirectTo("/settings/authentication")
 	}
 
 	ogUrl, err := url.Parse(ctx.GetData("baseHttpUrl").(string))
@@ -36,6 +36,7 @@ func BeginTotp(ctx *context.Context) error {
 
 	ctx.SetData("totpSecret", totpSecret)
 	ctx.SetData("totpQrcode", qrcode)
+	ctx.SetData("settingsHeaderPage", "authentication")
 
 	return ctx.Html("totp.html")
 
@@ -48,7 +49,7 @@ func FinishTotp(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Cannot check for user MFA", err)
 	} else if hasTotp {
 		ctx.AddFlash(ctx.Tr("auth.totp.already-enabled"), "error")
-		return ctx.RedirectTo("/settings/mfa")
+		return ctx.RedirectTo("/settings/authentication")
 	}
 
 	dto := &db.TOTPDTO{}
@@ -95,6 +96,7 @@ func FinishTotp(ctx *context.Context) error {
 	ctx.SaveSession(sess)
 
 	ctx.SetData("recoveryCodes", codes)
+	ctx.SetData("settingsHeaderPage", "authentication")
 	return ctx.Html("totp.html")
 }
 
@@ -135,7 +137,7 @@ func AssertTotp(ctx *context.Context) error {
 		}
 
 		ctx.AddFlash(ctx.Tr("auth.totp.code-used", dto.Code), "warning")
-		redirectUrl = "/settings/mfa"
+		redirectUrl = "/settings/authentication"
 	}
 
 	sess.Values["user"] = userId
@@ -158,7 +160,7 @@ func DisableTotp(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("auth.totp.disabled"), "success")
-	return ctx.RedirectTo("/settings/mfa")
+	return ctx.RedirectTo("/settings/authentication")
 }
 
 func RegenerateTotpRecoveryCodes(ctx *context.Context) error {
@@ -174,5 +176,6 @@ func RegenerateTotpRecoveryCodes(ctx *context.Context) error {
 	}
 
 	ctx.SetData("recoveryCodes", codes)
+	ctx.SetData("settingsHeaderPage", "authentication")
 	return ctx.Html("totp.html")
 }

@@ -1,119 +1,109 @@
-{{ template "header" .}}
-{{ template "gist_header" .}}
-{{ if ne (len .commits) 0 }}
+{{ define "content" }}
+<div class="space-y-6">
+    {{ template "gist_header" . }}
 
-        <div>
+    {{ if ne (len .commits) 0 }}
+    <div class="divide-y">
         {{ range $commit := .commits }}
-        <div class="pb-8">
-            <div class="flex">
-            <h3 class="text-sm py-2 flex-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                </svg>
-                {{ $user := $commit.User }}
-                {{ if not (shouldGenerateAvatar $user $.DisableGravatar) }}
-                    <img class="h-5 w-5 rounded-full inline" src="{{ avatarUrl $user $.DisableGravatar }}" {{if $user }}alt="{{ $user.Username }}'s Avatar"{{end}} />
-                {{ else }}
-                    <svg class="h-5 w-5 rounded-full inline" data-jdenticon-value="{{ $commit.AuthorName }}" width="20" height="20"></svg>
-                {{ end }}
-                <span class="font-bold">{{if $user}}<a href="{{ $.c.ExternalUrl }}/{{$user.Username}}" class="text-slate-300 hover:text-slate-300 hover:underline">{{$user.Username}}</a>{{else}}{{ $commit.AuthorName }}{{end}}</span> {{ $.locale.Tr "gist.revision.revised" }} <span class="font-bold">{{ $commit.Timestamp | humanTimeDiffStr }}</span>. <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/rev/{{ $commit.Hash }}">{{ $.locale.Tr "gist.revision.go-to-revision" }}</a></h3>
+        <section class="space-y-3 py-8 first:pt-0 last:pb-0">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="flex flex-wrap items-center gap-1.5 text-sm">
+                    {{ $user := $commit.User }}
+                    {{ if not (shouldGenerateAvatar $user $.DisableGravatar) }}
+                        <img class="size-5 rounded-full" src="{{ avatarUrl $user $.DisableGravatar }}" alt="" />
+                    {{ else }}
+                        <svg class="size-5 rounded-full" data-jdenticon-value="{{ if $user }}{{ $user.Username }}{{ else }}{{ $commit.AuthorName }}{{ end }}" width="20" height="20"></svg>
+                    {{ end }}
+                    <span class="font-semibold">{{ if $user }}<a href="{{ $.c.ExternalUrl }}/{{ $user.Username }}" class="hover:underline">{{ $user.Username }}</a>{{ else }}{{ $commit.AuthorName }}{{ end }}</span>
+                    <span class="text-muted-foreground">{{ $.locale.Tr "gist.revision.revised" }} {{ $commit.Timestamp | humanTimeDiffStr }}</span>
+                    <span class="text-muted-foreground">·</span>
+                    <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/rev/{{ $commit.Hash }}" class="text-primary font-mono hover:underline">{{ slice $commit.Hash 0 7 }}</a>
+                </h3>
                 {{ if gt $commit.FilesChanged 0 }}
-                    <p class="text-sm float-right py-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-flex">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                    {{ $commit.FilesChanged }} {{ if eq $commit.FilesChanged 1 }}file{{ else }}files{{ end }} changed{{ if gt $commit.Additions 0 }}, {{ $commit.Additions }} {{ if eq $commit.Additions 1 }}insertion{{ else }}insertions{{ end }}{{ end }}{{ if gt $commit.Deletions 0 }}, {{ $commit.Deletions }} {{ if eq $commit.Deletions 1 }}deletion{{ else }}deletions{{ end }}{{ end }}
+                <p class="text-muted-foreground text-sm">
+                    {{ $commit.FilesChanged }} {{ if eq $commit.FilesChanged 1 }}file{{ else }}files{{ end }} changed{{ if gt $commit.Additions 0 }}, <span class="text-green-600 dark:text-green-400">{{ $commit.Additions }} {{ if eq $commit.Additions 1 }}insertion{{ else }}insertions{{ end }}</span>{{ end }}{{ if gt $commit.Deletions 0 }}, <span class="text-red-600 dark:text-red-400">{{ $commit.Deletions }} {{ if eq $commit.Deletions 1 }}deletion{{ else }}deletions{{ end }}</span>{{ end }}
+                </p>
                 {{ end }}
-            </p>
             </div>
-            <div class="grid gap-y-4">
-                {{ if ne (len $commit.Files) 0 }}
-                    {{ range $file := $commit.Files }}
-                    <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto">
-                        <div class="border-b-1 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 my-auto">
-                            <p class="ml-4 mt-2 inline-flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                                </svg>
-                                {{ if $file.IsCreated }}
-                                     <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }}<span class="italic text-gray-600 dark:text-gray-400 ml-1">({{ $.locale.Tr "gist.revision.file-created" }})</span></span>
-                                {{ else if $file.IsDeleted }}
-                                    <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }} <span class="italic text-gray-600 dark:text-gray-400 ml-1">({{ $.locale.Tr "gist.revision.file-deleted" }})</span></span>
-                                {{ else if ne $file.OldFilename $file.Filename }}
-                                    <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.OldFilename }} <span class="italic text-gray-600 dark:text-gray-400 mx-1">{{ $.locale.Tr "gist.revision.file-renamed" }}</span> {{ $file.Filename }}</span>
-                                {{ else }}
-                                    <span class="flex text-sm ml-2 text-slate-700 dark:text-slate-300">{{ $file.Filename }}</span>
-                                {{ end }}
-                            </p>
-                        </div>
-                        <div class="overflow-auto">
-                            {{ if $file.Truncated }}
-                                <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.diff-truncated" }}</p>
-                            {{ else if $file.IsBinary }}
-                                <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.binary-file-changes" }}</p>
-                            {{ else if and (eq $file.Content "") (ne $file.OldFilename "") }}
-                                <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.file-renamed-no-changes" }}</p>
-                            {{ else if eq $file.Content "" }}
-                                <p class="m-2 ml-4 text-sm">{{ $.locale.Tr "gist.revision.empty-file" }}</p>
-                            {{ else }}
-                            <table class="code chroma table-code w-full {{ if $.currentStyle }}{{ if $.currentStyle.SoftWrap }}whitespace-pre-wrap{{ else }}whitespace-pre{{ end }}{{ else }}whitespace-pre{{ end }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0">
-                                <tbody>
-                                {{ $left  := 0 }}
-                                {{ $right := 0 }}
-                                    {{ range $line := split $file.Content "\n" }}
-                                    {{ if ne $line "" }}{{ if ne (index $line 0) 92 }}
+
+            {{ if ne (len $commit.Files) 0 }}
+            <div class="space-y-4">
+                {{ range $file := $commit.Files }}
+                <article class="bg-card overflow-hidden rounded-lg border">
+                    <header class="bg-muted/40 flex items-center gap-2 border-b px-4 py-2 text-sm">
+                        <svg class="text-muted-foreground size-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                        {{ if $file.IsCreated }}
+                            <span class="font-medium">{{ $file.Filename }}</span> <span class="text-muted-foreground italic">({{ $.locale.Tr "gist.revision.file-created" }})</span>
+                        {{ else if $file.IsDeleted }}
+                            <span class="font-medium">{{ $file.Filename }}</span> <span class="text-muted-foreground italic">({{ $.locale.Tr "gist.revision.file-deleted" }})</span>
+                        {{ else if ne $file.OldFilename $file.Filename }}
+                            <span class="font-medium">{{ $file.OldFilename }}</span> <span class="text-muted-foreground italic">{{ $.locale.Tr "gist.revision.file-renamed" }}</span> <span class="font-medium">{{ $file.Filename }}</span>
+                        {{ else }}
+                            <span class="font-medium">{{ $file.Filename }}</span>
+                        {{ end }}
+                    </header>
+                    <div class="overflow-auto">
+                        {{ if $file.Truncated }}
+                            <p class="px-4 py-2 text-sm">{{ $.locale.Tr "gist.revision.diff-truncated" }}</p>
+                        {{ else if $file.IsBinary }}
+                            <p class="px-4 py-2 text-sm">{{ $.locale.Tr "gist.revision.binary-file-changes" }}</p>
+                        {{ else if and (eq $file.Content "") (ne $file.OldFilename "") }}
+                            <p class="px-4 py-2 text-sm">{{ $.locale.Tr "gist.revision.file-renamed-no-changes" }}</p>
+                        {{ else if eq $file.Content "" }}
+                            <p class="px-4 py-2 text-sm">{{ $.locale.Tr "gist.revision.empty-file" }}</p>
+                        {{ else }}
+                        <table class="code chroma table-code diff w-full {{ if $.currentStyle }}{{ if $.currentStyle.SoftWrap }}whitespace-pre-wrap{{ else }}whitespace-pre{{ end }}{{ else }}whitespace-pre{{ end }}" data-filename="{{ $file.Filename }}" style="border-spacing: 0">
+                            <tbody>
+                            {{ $left := 0 }}
+                            {{ $right := 0 }}
+                                {{ range $line := split $file.Content "\n" }}
+                                {{ if ne $line "" }}{{ if ne (index $line 0) 92 }}
+                                    {{ if eq (index $line 0) 64 }}
+                                        {{ $left  = toInt (index (splitGit (index (split $line "-") 1)) 0) }}
+                                        {{ $right = toInt (index (splitGit (index (split $line "+") 1)) 0) }}
+                                    {{ end }}
+                                    <tr class="{{ if eq (index $line 0) 64 }}gray-diff{{ end }}{{ if eq (index $line 0) 43 }}green-diff{{ end }}{{ if eq (index $line 0) 45 }}red-diff{{ end }}">
                                         {{ if eq (index $line 0) 64 }}
-                                            {{ $left  = toInt (index (splitGit (index (split $line "-") 1)) 0) }}
-                                            {{ $right = toInt (index (splitGit (index (split $line "+") 1)) 0) }}
-                                        {{ end }}
-                                        <tr class="{{ if eq (index $line 0) 64 }}gray-diff{{ end }}{{ if eq (index $line 0) 43 }}green-diff{{ end }}{{ if eq (index $line 0) 45 }}red-diff{{ end }}" >
-                                            {{ if eq (index $line 0) 64 }}
-                                                <td colspan="2" class="select-none py-3"></td>
-                                            {{ else }}
-                                                {{ if eq (index $line 0) 43 }}
-                                                    <td class="select-none line-num px-2"></td>
-                                                    <td class="select-none line-num px-2">{{ $right }}</td>
-                                                    {{ $right = inc $right }}
-                                                {{ else if eq (index $line 0) 45 }}
-                                                    <td class="select-none line-num px-2">{{ $left }}</td>
-                                                    <td class="select-none line-num px-2"></td>
-                                                    {{ $left = inc $left }}
-                                                {{ else if eq (index $line 0) 32 }}
-                                                    <td class="select-none line-num px-2">{{ $left }}</td>
-                                                    <td class="select-none line-num px-2">{{ $right }}</td>
-                                                    {{ $left = inc $left }}
-                                                    {{ $right = inc $right }}
-                                                {{ end }}
+                                            <td colspan="2" class="select-none py-2"></td>
+                                        {{ else }}
+                                            {{ if eq (index $line 0) 43 }}
+                                                <td class="line-num select-none px-2"></td>
+                                                <td class="line-num select-none px-2">{{ $right }}</td>
+                                                {{ $right = inc $right }}
+                                            {{ else if eq (index $line 0) 45 }}
+                                                <td class="line-num select-none px-2">{{ $left }}</td>
+                                                <td class="line-num select-none px-2"></td>
+                                                {{ $left = inc $left }}
+                                            {{ else if eq (index $line 0) 32 }}
+                                                <td class="line-num select-none px-2">{{ $left }}</td>
+                                                <td class="line-num select-none px-2">{{ $right }}</td>
+                                                {{ $left = inc $left }}
+                                                {{ $right = inc $right }}
                                             {{ end }}
-                                            <td class="select-none" style="width: 2%; vertical-align: top;">{{ if ne (index $line 0) 64 }}{{ slice $line 0 1 }}{{ end }}</td>
-                                            <td>{{ if ne (index $line 0) 64 }}{{ slice $line 1 }}{{ else }}{{ $line }}{{ end }}</td>
-                                        </tr>
-                                        {{end}}
-                                    {{end}}{{end}}
-                                </tbody>
-                            </table>
-                            {{ end }}
-                        </div>
+                                        {{ end }}
+                                        <td class="diff-sign select-none" style="vertical-align: top;">{{ if ne (index $line 0) 64 }}{{ slice $line 0 1 }}{{ end }}</td>
+                                        <td class="line-code break-all pr-4">{{ if ne (index $line 0) 64 }}{{ slice $line 1 }}{{ else }}{{ $line }}{{ end }}</td>
+                                    </tr>
+                                {{ end }}{{ end }}{{ end }}
+                            </tbody>
+                        </table>
+                        {{ end }}
                     </div>
-                    {{end}}
-                {{else}}
-                    <p class="text-left text-sm text-slate-700 dark:text-slate-300 italic">{{ $.locale.Tr "gist.revision.no-changes" }}</p>
-                {{end}}
+                </article>
+                {{ end }}
             </div>
-        </div>
-        {{end}}
-        </div>
-        <div class="flex justify-center space-x-2">
-            {{ template "_pagination" . }}
-        </div>
-{{ else }}
-<div class="text-center">
-    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-    </svg>
-    <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "gist.revision.no-revisions" }}</h3>
+            {{ else }}
+            <p class="text-muted-foreground text-sm italic">{{ $.locale.Tr "gist.revision.no-changes" }}</p>
+            {{ end }}
+        </section>
+        {{ end }}
+    </div>
+    {{ template "pagination" . }}
+    {{ else }}
+    <div class="text-muted-foreground flex flex-col items-center justify-center py-16 text-center">
+        <svg class="size-12" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+        <h3 class="text-foreground mt-3 text-sm font-medium">{{ .locale.Tr "gist.revision.no-revisions" }}</h3>
+    </div>
+    {{ end }}
 </div>
 {{ end }}
-
-{{ template "gist_footer" .}}
-{{ template "footer" .}}

@@ -1,0 +1,53 @@
+{
+  "admin.ts": {
+    "file": "assets/admin-f49fd6c0.js",
+    "isEntry": true,
+    "src": "admin.ts"
+  },
+  "default.png": {
+    "file": "assets/default-f34219fc.png",
+    "src": "default.png"
+  },
+  "editor.ts": {
+    "file": "assets/editor-09157bd1.js",
+    "isEntry": true,
+    "src": "editor.ts"
+  },
+  "embed.css": {
+    "file": "assets/embed-d053b884.css",
+    "src": "embed.css"
+  },
+  "embed.ts": {
+    "css": [
+      "assets/embed-d053b884.css"
+    ],
+    "file": "assets/embed-19f5edb9.js",
+    "isEntry": true,
+    "src": "embed.ts"
+  },
+  "favicon-32.png": {
+    "file": "assets/favicon-32-5d82ace6.png",
+    "src": "favicon-32.png"
+  },
+  "gist.ts": {
+    "file": "assets/gist-bdaf8125.js",
+    "isEntry": true,
+    "src": "gist.ts"
+  },
+  "main.css": {
+    "file": "assets/main-aa2c56e2.css",
+    "src": "main.css"
+  },
+  "main.ts": {
+    "css": [
+      "assets/main-aa2c56e2.css"
+    ],
+    "file": "assets/main-90a354d6.js",
+    "isEntry": true,
+    "src": "main.ts"
+  },
+  "opengist.svg": {
+    "file": "assets/opengist-85b89b9c.svg",
+    "src": "opengist.svg"
+  }
+}

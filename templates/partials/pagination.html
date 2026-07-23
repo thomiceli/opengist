@@ -1,0 +1,28 @@
+{{ define "pagination" }}
+{{ if or .pagination.HasPrevious .pagination.HasNext }}
+<nav class="mt-6 flex items-center justify-center gap-2" aria-label="Pagination">
+    {{ if .pagination.HasPrevious }}
+        <a href="{{ .c.ExternalUrl }}/{{ .urlPage }}{{ .pagination.PreviousURL }}" class="btn-outline">
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            {{ .prevLabel }}
+        </a>
+    {{ else }}
+        <span class="btn-outline pointer-events-none opacity-50">
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            {{ .prevLabel }}
+        </span>
+    {{ end }}
+    {{ if .pagination.HasNext }}
+        <a href="{{ .c.ExternalUrl }}/{{ .urlPage }}{{ .pagination.NextURL }}" class="btn-outline">
+            {{ .nextLabel }}
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+    {{ else }}
+        <span class="btn-outline pointer-events-none opacity-50">
+            {{ .nextLabel }}
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </span>
+    {{ end }}
+</nav>
+{{ end }}
+{{ end }}

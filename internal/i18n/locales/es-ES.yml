@@ -148,8 +148,6 @@ admin.versions: Versiones
 admin.ssh_keys: Claves SSH
 admin.stats: Estadísticas
 admin.actions: Acciones
-admin.actions.sync-fs: Sincronizar gists desde el sistema de archivos
-admin.actions.sync-db: Sincronizar gists desde la base de datos
 admin.actions.git-gc: Recolectar basura en los repositorios Git
 admin.id: ID
 admin.user: Usuario
@@ -226,12 +224,6 @@ flash.admin.user-deleted: 'El usuario ha sido eliminado'
 flash.admin.gist-deleted: 'El gist ha sido eliminado'
 flash.admin.invitation-created: 'La invitación ha sido creada'
 flash.admin.invitation-deleted: 'La invitación ha sido eliminada'
-flash.admin.sync-fs: 'Sincronizando repositorios desde el sistema de archivos...'
-flash.admin.sync-db: 'Sincronizando repositorios desde la base de datos...'
-flash.admin.git-gc: 'Recolectando basura en los repositorios...'
-flash.admin.sync-previews: 'Sincronizando vistas previas de gists...'
-flash.admin.reset-hooks: 'Reseteando hooks del servidor Git en todos los repositorios...'
-flash.admin.index-gists: 'Reconstruyendo índice de búsqueda...'
 flash.auth.username-exists: 'El nombre de usuario ya existe'
 flash.auth.invalid-credentials: 'Credenciales incorrectas'
 flash.auth.account-linked-oauth: 'Cuenta vinculada a %s'

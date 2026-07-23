@@ -1,112 +1,117 @@
-{{ template "header" .}}
-<div class="py-10">
-    <header>
+{{ define "content" }}
+<div class="space-y-5">
+    <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "gist.new.new_gist" }}</h1>
 
-        <h1 class="text-2xl font-bold leading-tight text-slate-700 dark:text-slate-300">
-            {{ .locale.Tr "gist.new.new_gist"}}
-        </h1>
+    <form id="create" hx-boost="false" method="post" action="{{ .c.ExternalUrl }}/">
+        {{ .csrfHtml }}
 
-    </header>
-    <main class="mt-4">
-        <form id="create" class="space-y-4" method="post" action="{{ $.c.ExternalUrl }}/">
-            <div>
-                <p class="cursor-pointer select-none" id="gist-metadata-btn">Metadata {{ if .dto.HasMetadata }}▲{{ else }}▼{{ end }}</p>
-                <div class="grid grid-cols-12 gap-x-4 mt-1 {{ if not .dto.HasMetadata }}hidden{{ end }}" id="gist-metadata">
-                    <div class="col-span-8 sm:col-span-4">
-                        <div class="mt-1">
-                            <input type="text" placeholder="{{ .locale.Tr "gist.new.title" }}" value="{{ .dto.Title }}" name="title" id="title" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md" maxlength="250">
-                        </div>
-                    </div>
-                    <div class="col-span-12 sm:col-span-8">
-                        <div class="mt-1">
-                            <input type="text" placeholder="{{ .locale.Tr "gist.new.description" }}" value="{{ .dto.Description }}" name="description" id="description" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md" maxlength="1000">
-                        </div>
-                    </div>
-                    <div class="col-span-6 sm:col-span-3 mt-2">
-                        <input type="text" placeholder="{{ .locale.Tr "gist.new.url" }}" value="{{ .dto.URL }}" name="url" id="url" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md" maxlength="32">
-                    </div>
+        <!-- Two columns: file editors on the left, settings panel on the right. -->
+        <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
 
-                    <div class="col-span-12 sm:col-span-9 mt-2">
-                        <input type="text" placeholder="{{ .locale.Tr "gist.new.topics" }}" value="{{ .dto.Topics }}" name="topics" id="topics" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
-                    </div>
-                </div>
-            </div>
-            <div id="editors" class="space-y-4">
-                {{ if .dto.Files }}
-                    {{ range .dto.Files }}
-                        {{ template "_editor" dict "Filename" .Filename "Content" .Content "locale" $.locale }}
+            <!-- Main column: file editors -->
+            <div class="min-w-0 space-y-4">
+                <div id="editors" class="space-y-4">
+                    {{ if .dto.Files }}
+                        {{ range .dto.Files }}
+                            {{ template "_editor" dict "Filename" .Filename "Content" .Content "Binary" .Binary "locale" $.locale }}
+                        {{ end }}
+                    {{ else }}
+                        {{ template "_editor" dict "Filename" "" "Content" "" "Binary" false "locale" .locale }}
                     {{ end }}
-                {{ else }}
-                    {{ template "_editor" . }}
+                </div>
+
+                <button type="button" id="add-file" class="btn-outline">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    {{ .locale.Tr "gist.new.add-file" }}
+                </button>
+
+                {{ if not .c.DisableFileUpload }}
+                <div id="file-upload-zone" class="space-y-3">
+                    <label for="file-upload" class="block cursor-pointer">
+                        <div class="border-border hover:border-primary flex flex-col items-center rounded-lg border-2 border-dashed p-6 text-center transition-colors">
+                            <svg class="text-muted-foreground size-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                            <span class="mt-3 text-sm font-medium">{{ .locale.Tr "gist.new.drop-files" }}</span>
+                            <span class="text-muted-foreground mt-1 text-xs">{{ .locale.Tr "gist.new.any-file-type" }}</span>
+                        </div>
+                        <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple accept="*/*">
+                    </label>
+                    <div id="uploaded-files" class="space-y-2"></div>
+                </div>
                 {{ end }}
             </div>
 
-            {{ if not .c.DisableFileUpload }}
-            <div id="file-upload-zone" class="space-y-4">
-                <label for="file-upload" class="cursor-pointer block">
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary-400 dark:hover:border-primary-500 transition-colors">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <div class="mt-4">
-                            <span class="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-300">
-                                {{ .locale.Tr "gist.new.drop-files" }}
-                            </span>
-                        </div>
-                        <p class="mt-2 text-xs text-gray-500">{{ .locale.Tr "gist.new.any-file-type" }}</p>
+            <!-- Settings column -->
+            <aside class="space-y-4 lg:sticky lg:top-16">
+                <div class="bg-card space-y-4 rounded-lg border p-4">
+                    <div class="space-y-1.5">
+                        <label for="title" class="text-xs font-medium">{{ .locale.Tr "gist.new.title" }}</label>
+                        <input type="text" name="title" id="title" maxlength="250" value="{{ .dto.Title }}" placeholder="{{ .locale.Tr "gist.new.title" }}" class="input h-9 w-full" />
                     </div>
-                    <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple accept="*/*">
-                </label>
-                <div id="uploaded-files" class="space-y-2"></div>
-            </div>
-            {{ end }}
+                    <div class="space-y-1.5">
+                        <label for="url" class="text-xs font-medium">{{ .locale.Tr "gist.new.url" }}</label>
+                        <div class="flex">
+                            <span class="border-input bg-muted text-muted-foreground inline-flex h-9 items-center whitespace-nowrap rounded-l-md border border-r-0 px-2 text-sm">{{ .userLogged.Username }}/</span>
+                            <input type="text" name="url" id="url" maxlength="32" value="{{ .dto.URL }}" placeholder="{{ .locale.Tr "gist.new.url" }}" class="input h-9 w-full rounded-l-none" />
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="description" class="text-xs font-medium">{{ .locale.Tr "gist.new.description" }}</label>
+                        <textarea name="description" id="description" maxlength="1000" rows="3" placeholder="{{ .locale.Tr "gist.new.description" }}" class="input w-full resize-y">{{ .dto.Description }}</textarea>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="topics" class="text-xs font-medium">{{ .locale.Tr "gist.new.topics" }}</label>
+                        <input type="text" name="topics" id="topics" value="{{ .dto.Topics }}" placeholder="{{ .locale.Tr "gist.new.topics" }}" class="input h-9 w-full" />
+                    </div>
 
-            <div class="flex items-center">
-                <button type="button" id="add-file" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">{{ .locale.Tr "gist.new.add-file" }}</button>
-
-                <div class="ml-4 inline-flex items-center">
-                    <label for="expire" class="text-sm text-gray-500 dark:text-gray-400 mr-2 whitespace-nowrap">{{ .locale.Tr "gist.new.expire" }}</label>
-                    <select name="expire" id="expire" class="bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 block sm:text-sm border-gray-200 dark:border-gray-700 rounded-md">
-                        <option value="never" {{ if or (not .dto.Expire) (eq (toStr .dto.Expire) "never") }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-never" }}</option>
-                        <option value="1hour" {{ if eq (toStr .dto.Expire) "1hour" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-1hour" }}</option>
-                        <option value="12hours" {{ if eq (toStr .dto.Expire) "12hours" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-12hours" }}</option>
-                        <option value="1day" {{ if eq (toStr .dto.Expire) "1day" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-1day" }}</option>
-                        <option value="7days" {{ if eq (toStr .dto.Expire) "7days" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-7days" }}</option>
-                        <option value="15days" {{ if eq (toStr .dto.Expire) "15days" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-15days" }}</option>
-                        <option value="custom" {{ if eq (toStr .dto.Expire) "custom" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-custom" }}</option>
-                    </select>
-                    <input type="datetime-local" name="expire_at" id="expire_at" value="{{ .dto.ExpireAt }}" class="ml-2 bg-white dark:bg-black shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm border-gray-200 dark:border-gray-700 rounded-md {{ if ne (toStr .dto.Expire) "custom" }}hidden{{ end }}">
+                    <div class="space-y-1.5">
+                        <label for="expire" class="text-muted-foreground inline-flex items-center gap-1.5 text-xs font-medium">
+                            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            {{ .locale.Tr "gist.new.expire" }}
+                        </label>
+                        <select name="expire" id="expire" class="border-input bg-background h-9 w-full rounded-md border px-2 text-sm"
+                                _="on change if my value is 'custom' remove .hidden from #expire_at else add .hidden to #expire_at end">
+                            <option value="never" {{ if or (not .dto.Expire) (eq (toStr .dto.Expire) "never") }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-never" }}</option>
+                            <option value="1hour" {{ if eq (toStr .dto.Expire) "1hour" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-1hour" }}</option>
+                            <option value="12hours" {{ if eq (toStr .dto.Expire) "12hours" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-12hours" }}</option>
+                            <option value="1day" {{ if eq (toStr .dto.Expire) "1day" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-1day" }}</option>
+                            <option value="7days" {{ if eq (toStr .dto.Expire) "7days" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-7days" }}</option>
+                            <option value="15days" {{ if eq (toStr .dto.Expire) "15days" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-15days" }}</option>
+                            <option value="custom" {{ if eq (toStr .dto.Expire) "custom" }}selected{{ end }}>{{ .locale.Tr "gist.new.expire-custom" }}</option>
+                        </select>
+                        <input type="datetime-local" name="expire_at" id="expire_at" value="{{ .dto.ExpireAt }}" class="border-input bg-background mt-2 h-9 w-full rounded-md border px-2 text-sm {{ if ne (toStr .dto.Expire) "custom" }}hidden{{ end }}">
+                    </div>
                 </div>
 
-                <div class="ml-auto inline-flex ">
-                    <button id="submit-gist" type="submit" name="private" value="0" class="ml-2 items-center px-4 py-2 border border-transparent border-primary-200 dark:border-primary-700 text-sm font-medium rounded-l-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 z-20">{{ .locale.Tr "gist.new.create-public-button" }}</button>
-                    <div class="relative -ml-px block">
-                        <button type="button" class="relative inline-flex items-center rounded-r-md bg-primary-500 hover:bg-primary-600 px-2 py-2 text-gray-400 border border-transparent border-primary-200 dark:border-primary-700 focus:z-10" id="gist-visibility-menu-button">
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="white" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                            </svg>
+                <!-- Submit + visibility selector -->
+                <input type="hidden" name="private" id="gist-visibility" value="0">
+                <div class="inline-flex w-full">
+                    <button type="submit" id="create-btn" class="btn flex-1 rounded-r-none">{{ .locale.Tr "gist.new.create-public-button" }}</button>
+                    <div class="dropdown-menu">
+                        <button type="button" id="vis-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="vis-menu" class="btn -ml-px rounded-l-none px-2">
+                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                         </button>
-                        <div id="gist-menu-visibility" class="hidden absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="gist-visibility-menu-button">
-                            <div class="rounded-md dark:bg-gray-800 bg-white shadow-lg ring-1 ring-gray-50 dark:ring-gray-700 focus:outline-none" role="none" style="word-break: keep-all">
-                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400 gist-visibility-option" data-btntext="{{ .locale.Tr "gist.new.create-public-button" }}" data-visibility="0" role="menuitem">{{ .locale.Tr "gist.public" }}</span>
-                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400 gist-visibility-option" data-btntext="{{ .locale.Tr "gist.new.create-unlisted-button" }}" data-visibility="1" role="menuitem">{{ .locale.Tr "gist.unlisted" }}</span>
-                                <span class="text-gray-700 block px-4 py-2 text-sm cursor-pointer dark:text-slate-300 hover:text-slate-500 dark:hover:text-slate-400 gist-visibility-option" data-btntext="{{ .locale.Tr "gist.new.create-private-button" }}" data-visibility="2" role="menuitem">{{ .locale.Tr "gist.private" }}</span>
+                        <div id="vis-menu" data-popover aria-hidden="true" data-side="bottom" data-align="end">
+                            <div role="menu" aria-labelledby="vis-trigger">
+                                <button type="button" role="menuitem" data-private="0" data-label="{{ .locale.Tr "gist.new.create-public-button" }}"
+                                        _="on click set #gist-visibility's value to my @data-private then set #create-btn's innerText to my @data-label">{{ .locale.Tr "gist.public" }}</button>
+                                <button type="button" role="menuitem" data-private="1" data-label="{{ .locale.Tr "gist.new.create-unlisted-button" }}"
+                                        _="on click set #gist-visibility's value to my @data-private then set #create-btn's innerText to my @data-label">{{ .locale.Tr "gist.unlisted" }}</button>
+                                <button type="button" role="menuitem" data-private="2" data-label="{{ .locale.Tr "gist.new.create-private-button" }}"
+                                        _="on click set #gist-visibility's value to my @data-private then set #create-btn's innerText to my @data-label">{{ .locale.Tr "gist.private" }}</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {{ .csrfHtml }}
-        </form>
+            </aside>
 
-        <!-- Hidden template for new text editors -->
-        <div id="editor-template" class="hidden">
-            {{ template "_editor" dict "Filename" "" "Content" "" "Binary" false "locale" .locale }}
         </div>
+    </form>
 
-    </main>
+    <!-- Hidden template cloned by the editor when adding a file -->
+    <div id="editor-template" class="hidden">
+        {{ template "_editor" dict "Filename" "" "Content" "" "Binary" false "locale" .locale }}
+    </div>
 </div>
 
 <script type="module" src="{{ asset "ts/editor.ts" }}"></script>
-
-{{ template "footer" .}}
+{{ end }}

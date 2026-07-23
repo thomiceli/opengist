@@ -50,7 +50,7 @@
                     {{ if len .gist.TopicsSlice }}
                     <div class="flex flex-wrap items-center gap-1">
                         {{ range .gist.TopicsSlice }}
-                        <a href="{{ $.c.ExternalUrl }}/topics/{{ . }}" class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary-200 text-primary-900 hover:bg-primary-300 dark:bg-primary-950 dark:text-primary-200 dark:hover:bg-primary-900">{{ . }}</a>
+                        <a href="{{ $.c.ExternalUrl }}/-/topics/{{ . }}" class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary-200 text-primary-900 hover:bg-primary-300 dark:bg-primary-950 dark:text-primary-200 dark:hover:bg-primary-900">{{ . }}</a>
                         {{ end }}
                     </div>
                     {{ end }}

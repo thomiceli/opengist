@@ -1,0 +1,50 @@
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="space-y-1">
+        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "admin.admin_panel" }}</h1>
+        <p class="text-muted-foreground text-sm">{{ .locale.Tr "admin.actions.subtitle" }}</p>
+    </header>
+
+    <section class="bg-card overflow-hidden rounded-lg border">
+        {{/* The list re-fetches itself while any action is running (and briefly
+             after a manual trigger via pollNow), then stops polling once idle. */}}
+        <div id="actions-list"
+             {{ if or .anyRunning .pollNow }}hx-get="{{ .c.ExternalUrl }}/admin-panel/actions" hx-trigger="every 3s" hx-select="#actions-list" hx-target="this" hx-swap="outerHTML"{{ end }}>
+            <ul class="divide-y">
+                {{ range .actions }}
+                <li class="flex items-center justify-between gap-4 p-4">
+                    <div class="min-w-0 space-y-1">
+                        <p class="text-sm font-medium">{{ $.locale.Tr .LabelKey }}</p>
+                        {{ if .Periodic }}
+                        <p class="text-muted-foreground flex items-center gap-1.5 text-xs">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            <code class="font-mono">{{ .Spec }}</code>
+                        </p>
+                        {{ end }}
+                    </div>
+                    <div class="flex shrink-0 items-center gap-3">
+                        {{ if .Running }}
+                        <span class="badge og-blue border-transparent">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="size-3.5 animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                            {{ $.locale.Tr "admin.actions.running" }}
+                        </span>
+                        {{ end }}
+                        {{/* Plain POST → the handler adds a flash and redirects back here
+                             with ?run=1. hx-boost (on <body>) turns this into a boosted
+                             navigation that re-renders the whole page, so the flash shows
+                             and polling picks up any still-running action. */}}
+                        <form method="POST" action="{{ $.c.ExternalUrl }}/admin-panel/{{ .Path }}">
+                            {{ $.csrfHtml }}
+                            <button type="submit" {{ if .Running }}disabled{{ end }}
+                                    class="btn-sm-outline disabled:pointer-events-none disabled:opacity-50">
+                                {{ $.locale.Tr "admin.actions.run" }}
+                            </button>
+                        </form>
+                    </div>
+                </li>
+                {{ end }}
+            </ul>
+        </div>
+    </section>
+</div>
+{{ end }}

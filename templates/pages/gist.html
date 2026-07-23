@@ -1,150 +1,122 @@
-{{ template "header" .}}
-{{ template "gist_header" .}}
-    {{ if .files }}
-        <div class="grid gap-y-4">
-        {{ if .hasMoreFiles }}
-        <div class="rounded-md border border-1 border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/30 px-4 py-2 text-sm text-yellow-900 dark:text-yellow-200">
-            {{ .locale.Tr "gist.files-truncated" }}
-        </div>
-        {{ end }}
-        {{ range $file := .files }}
-        <div class="rounded-md border border-1 border-gray-200 dark:border-gray-700 overflow-auto" data-file="{{ $file.Filename }}">
-            <div class="border-b-1 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 my-auto block">
-                <div class="ml-4 py-1.5 flex">
+{{ define "content" }}
+<div class="space-y-6" id="gist" data-own="{{ if not .gist.Archived }}{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}{{ end }}">
+    {{ template "gist_header" . }}
 
-                    <span class="flex-auto inline-flex items-center text-sm text-slate-700 dark:text-slate-300 filename" id="file-{{ slug $file.Filename }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                        <a href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}#file-{{ slug $file.Filename }}" class="hover:text-primary-600 ml-2 mr-1">{{ $file.Filename }}</a>
-                        <span class="hidden sm:block">
-                            <span class="text-gray-400"> · {{ $file.HumanSize }} · {{ $file.Type }}</span>
-                        </span>
-                    </span>
-
-                    <span class="isolate inline-flex rounded-md shadow-sm mr-2">
-                      <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" class="relative inline-flex items-center rounded-l-md bg-white text-gray-500 dark:text-slate-300 float-right px-2.5 py-1 leading-4 text-xs font-medium dark:bg-gray-600 border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-slate-700 dark:hover:text-slate-300 select-none">
-                        {{ $.locale.Tr "gist.raw" }}
-                      </a>
-                    {{ if $file.MimeType.IsText }}
-                      <button type="button" class="relative -ml-px inline-flex items-center bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700 copy-gist-btn">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-                          </svg>
-                      </button>
-                    {{ end }}
-                        <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/download/{{ $.commit }}/{{$file.Filename}}" class="relative -ml-px inline-flex items-center rounded-r-md bg-white text-gray-500 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10 px-1 py-1 dark:text-slate-300 dark:bg-gray-600 dark:hover:bg-gray-700">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                          </svg>
-                        </a>
-                    </span>
-
-                    <div class="hidden gist-content">{{ $file.Content }}</div>
-                </div>
-                {{ if and $file.Truncated $file.MimeType.IsText }}
-                <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
-                    {{ $.locale.Tr "gist.file-truncated" }} <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
-                </div>
-                {{ end }}
-                {{ if not $file.MimeType.CanBeRendered }}
-                <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
-                    {{ $.locale.Tr "gist.file-raw" }} <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}">{{ $.locale.Tr "gist.watch-full-file" }}</a>
-                </div>
-                {{ end }}
-                {{ if and (not $file.MimeType.IsText) ($file.MimeType.IsCSV) }}
-                <div class="text-sm px-4 py-1.5 border-t-1 border-gray-200 dark:border-gray-700">
-                    {{ $.locale.Tr "gist.file-not-valid" }}
-                </div>
-                {{ end }}
-            </div>
-            <div class="overflow-auto">
-                {{ if $file.MimeType.IsText }}
-                {{ if eq $file.InternalType "CSVFile" }}
-                    <table class="csv-table">
-                        <thead>
-                            <tr>
-                                {{ range $file.Header }}
-                                    <th>{{ . }}</th>
-                                {{ end }}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{ range $file.Rows }}
-                                <tr>
-                                    {{ range . }}
-                                        <td>{{ . }}</td>
-                                    {{ end }}
-                                </tr>
-                            {{ end }}
-                    </table>
-                {{ else if isMarkdown $file.Filename }}
-                    <div class="chroma markdown markdown-body p-8">{{ $file.HTML | safe }}</div>
-                {{ else if isMermaid $file.Filename }}
-                    <div class="chroma markdown markdown-body p-8">{{ $file.HTML | safe }}</div>
-                {{ else if $file.MimeType.IsSVG }}
-                    <div class="p-8 flex justify-center">{{ $file.HTML | safe }}</div>
-                {{ else if isJupyter $file.Filename }}
-                  <div class="p-8 jupyter notebook">
-                    <div class="jupyter-spinner flex justify-center p-8">
-                      <svg class="animate-spin h-6 w-6 text-gray-400 dark:text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                      </svg>
-                    </div>
-                    <pre class="hidden">{{ $file.Content }}</pre>
-                  </div>
-                {{ else }}
-                    <div class="code">
-                        {{ $fileslug := slug $file.Filename }}
-                        {{ if ne $file.Content "" }}
-                            <table class="chroma table-code w-full {{ if $.currentStyle }}{{ if $.currentStyle.SoftWrap }}whitespace-pre-wrap{{ else }}whitespace-pre{{ end }}{{ else }}whitespace-pre{{ end }}" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="font-size: 0.8em; border-spacing: 0; border-collapse: collapse;">
-                                <tbody>
-                                {{ $ii := "1" }}
-                                {{ $i := toInt $ii }}
-                                {{ range $line := $file.Lines }}<tr><td id="file-{{ $fileslug }}-{{$i}}" class="select-none line-num px-4">{{$i}}</td><td class="line-code break-all">{{ $line | safe }}</td></tr>{{ $i = inc $i }}{{ end }}
-                                </tbody>
-                            </table>
-                        {{ end }}
-                    </div>
-                {{ end }}
-                {{ else if $file.MimeType.IsImage }}
-                    <div class="p-8 flex justify-center">
-                        <img src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" alt="{{ $file.Filename }}" class="max-h-screen object-contain">
-                    </div>
-                {{ else if $file.MimeType.IsAudio }}
-                    <div class="p-8 flex justify-center">
-                        <audio controls class="w-full max-w-lg">
-                            <source src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" type="{{ $file.MimeType.ContentType }}">
-                        </audio>
-                    </div>
-                {{ else if $file.MimeType.IsVideo }}
-                    <div class="p-8 flex justify-center">
-                        <video controls class="w-full max-w-lg">
-                            <source src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}" type="{{ $file.MimeType.ContentType }}">
-                        </video>
-                    </div>
-                {{ else if $file.MimeType.IsPDF }}
-                    <div class="pdf" data-src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{$file.Filename}}"></div>
-                {{ end }}
-            </div>
-        </div>
-        {{ end }}
-        </div>
-    {{ else }}
-        <div class="text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ .locale.Tr "gist.no-content" }}</h3>
-        </div>
+    {{ if .gist.Archived }}
+    <div class="alert og-orange" role="status">
+        <svg class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4"/></svg>
+        <span>{{ .locale.Tr "gist.header.archived-help" }}</span>
+    </div>
     {{ end }}
 
-<!-- make sure tailwind knows those classes -->
-<button type="button" style="top: 1em !important; right: 1em !important;" class="hidden md-code-copy-btn absolute right-0 top-0 focus-within:z-auto rounded-md dark:border-gray-600 px-2 py-2 opacity-80 font-medium text-slate-700 bg-gray-100 dark:bg-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" /></svg></button>
-<div class="accent-gray-400"></div>
+    {{ if .revision }}{{ if ne .revision "HEAD" }}
+    <p class="text-muted-foreground text-xs italic">{{ .locale.Tr "gist.header.revision" }} <span class="revision-text font-mono">{{ .revision }}</span></p>
+    {{ end }}{{ end }}
 
-<script type="module" src="{{ asset "ts/gist.ts" }}"></script>
+    <!-- Files -->
+    {{ if .files }}
+    <div class="space-y-4">
+        {{ if .hasMoreFiles }}
+        <div class="alert" role="status"><span>{{ .locale.Tr "gist.files-truncated" }}</span></div>
+        {{ end }}
 
-{{ template "gist_footer" .}}
-{{ template "footer" .}}
+        {{ range $file := .files }}
+        {{ $fileslug := slug $file.Filename }}
+        <article class="bg-card overflow-hidden rounded-lg border" data-file="{{ $file.Filename }}">
+            <header class="bg-muted/40 flex items-center gap-2 border-b px-4 py-2">
+                <span class="flex min-w-0 flex-auto items-center gap-2 text-sm" id="file-{{ $fileslug }}">
+                    <svg class="text-muted-foreground size-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                    <a href="{{ $.baseHttpUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}#file-{{ $fileslug }}" class="hover:text-primary truncate font-medium">{{ $file.Filename }}</a>
+                    <span class="text-muted-foreground hidden whitespace-nowrap sm:inline">· {{ $file.HumanSize }} · {{ $file.Type }}</span>
+                </span>
+                <span class="inline-flex shrink-0">
+                    <a hx-boost="false" href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{ $file.Filename }}" class="btn-sm-outline rounded-r-none">{{ $.locale.Tr "gist.raw" }}</a>
+                    {{ if $file.MimeType.IsText }}
+                    <textarea class="hidden" aria-hidden="true" tabindex="-1">{{ $file.Content }}</textarea>
+                    <button type="button" class="btn-sm-outline copy-btn -ml-px rounded-none" aria-label="Copy"
+                            _="on click
+                                 call navigator.clipboard.writeText(the previous <textarea/>'s value)
+                                 set @data-copied to 'true'
+                                 wait 1.2s
+                                 remove @data-copied from me">
+                        <svg class="icon-copy size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <svg class="icon-check size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    </button>
+                    {{ end }}
+                    <a hx-boost="false" href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/download/{{ $.commit }}/{{ $file.Filename }}" class="btn-sm-outline -ml-px rounded-l-none">
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    </a>
+                </span>
+            </header>
+
+            {{ if and $file.Truncated $file.MimeType.IsText }}
+            <p class="px-4 py-2.5 text-sm">{{ $.locale.Tr "gist.file-truncated" }} <a hx-boost="false" href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{ $file.Filename }}" class="text-primary hover:underline">{{ $.locale.Tr "gist.watch-full-file" }}</a></p>
+            {{ end }}
+            {{ if not $file.MimeType.CanBeRendered }}
+            <p class="px-4 py-2.5 text-sm">{{ $.locale.Tr "gist.file-raw" }} <a hx-boost="false" href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{ $file.Filename }}" class="text-primary hover:underline">{{ $.locale.Tr "gist.watch-full-file" }}</a></p>
+            {{ end }}
+            {{ if and (not $file.MimeType.IsText) ($file.MimeType.IsCSV) }}
+            <p class="px-4 py-2.5 text-sm">{{ $.locale.Tr "gist.file-not-valid" }}</p>
+            {{ end }}
+
+            <div class="overflow-auto">
+                {{ if $file.MimeType.IsText }}
+                    {{ if eq $file.InternalType "CSVFile" }}
+                        <table class="csv-table">
+                            <thead><tr>{{ range $file.Header }}<th>{{ . }}</th>{{ end }}</tr></thead>
+                            <tbody>{{ range $file.Rows }}<tr>{{ range . }}<td>{{ . }}</td>{{ end }}</tr>{{ end }}</tbody>
+                        </table>
+                    {{ else if isMarkdown $file.Filename }}
+                        <div class="markdown markdown-body p-6">{{ $file.HTML | safe }}</div>
+                    {{ else if isMermaid $file.Filename }}
+                        <div class="markdown markdown-body p-6">{{ $file.HTML | safe }}</div>
+                    {{ else if $file.MimeType.IsSVG }}
+                        <div class="flex justify-center p-6">{{ $file.HTML | safe }}</div>
+                    {{ else if isJupyter $file.Filename }}
+                        <div class="jupyter notebook p-6">
+                            <div class="text-muted-foreground flex items-center justify-center p-8" role="status" aria-label="Loading notebook">
+                                <svg class="size-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                            </div>
+                            <pre hidden>{{ $file.Content }}</pre>
+                        </div>
+                    {{ else if ne $file.Content "" }}
+                        <div class="code">
+                            <table class="chroma table-code w-full {{ if $.currentStyle }}{{ if $.currentStyle.SoftWrap }}whitespace-pre-wrap{{ else }}whitespace-pre{{ end }}{{ else }}whitespace-pre{{ end }}" data-filename-slug="{{ $fileslug }}" data-filename="{{ $file.Filename }}" style="border-spacing: 0; border-collapse: collapse;">
+                                <tbody>
+                                {{ $i := 1 }}
+                                {{ range $line := $file.Lines }}<tr><td id="file-{{ $fileslug }}-{{ $i }}" class="line-num px-4">{{ $i }}</td><td class="line-code break-all pr-4">{{ $line | safe }}</td></tr>{{ $i = inc $i }}{{ end }}
+                                </tbody>
+                            </table>
+                        </div>
+                    {{ end }}
+                {{ else if $file.MimeType.IsImage }}
+                    <div class="flex justify-center p-6"><img src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{ $file.Filename }}" alt="{{ $file.Filename }}" class="max-h-screen object-contain" /></div>
+                {{ else if $file.MimeType.IsAudio }}
+                    <div class="flex justify-center p-6"><audio controls class="w-full max-w-lg"><source src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{ $file.Filename }}" type="{{ $file.MimeType.ContentType }}"></audio></div>
+                {{ else if $file.MimeType.IsVideo }}
+                    <div class="flex justify-center p-6"><video controls class="w-full max-w-lg"><source src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{ $file.Filename }}" type="{{ $file.MimeType.ContentType }}"></video></div>
+                {{ else if $file.MimeType.IsPDF }}
+                    <div class="pdf relative min-h-[700px]" data-src="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/raw/{{ $.commit }}/{{ $file.Filename }}">
+                        <div class="pdf-loading text-muted-foreground absolute inset-0 flex items-center justify-center" role="status" aria-label="Loading PDF">
+                            <svg class="size-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                {{ end }}
+            </div>
+        </article>
+        {{ end }}
+    </div>
+    {{ else }}
+    <div class="text-muted-foreground flex flex-col items-center justify-center py-16 text-center">
+        <svg class="size-12" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        <h3 class="text-foreground mt-3 text-sm font-medium">{{ .locale.Tr "gist.no-content" }}</h3>
+    </div>
+    {{ end }}
+</div>
+{{ end }}

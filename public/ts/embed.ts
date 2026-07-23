@@ -1,1 +1,1 @@
-import "../css/embed.css"
+import '../css/embed.css';

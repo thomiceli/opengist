@@ -5,8 +5,11 @@ gist.db
 .DS_Store
 /**/.DS_Store
 public/assets/*
+public-old/assets/*
 public/manifest.json
+public-old/manifest.json
 public/.vite/*
+public-old/.vite/*
 ./opengist
 opengist
 build/

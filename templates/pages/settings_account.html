@@ -1,200 +1,93 @@
-{{ template "header" .}}
-{{ template "settings_header" .}}
-<div class="relative mx-auto max-w-160 space-y-8">
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
-                {{ .locale.Tr "settings.avatar" }}
-            </h2>
-            <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
-                {{ .locale.Tr "settings.avatar-help" }}
-            </h3>
-            <div class="flex items-center gap-x-4">
-                <div class="shrink-0">
-                    {{ if not (shouldGenerateAvatar .userLogged .DisableGravatar) }}
-                        <img class="h-16 w-16 rounded-md border border-gray-200 dark:border-gray-700" src="{{ avatarUrl .userLogged .DisableGravatar }}" alt="{{ .userLogged.Username }}'s Avatar">
-                    {{ else }}
-                        <svg class="h-16 w-16 rounded-md border border-gray-200 dark:border-gray-700"
-                             data-jdenticon-value="{{ .userLogged.Username }}"
-                             width="64"
-                             height="64">
-                        </svg>
-                    {{ end }}
-                </div>
-                <div class="flex-auto">
-                    <form class="flex flex-wrap items-center gap-3" action="{{ $.c.ExternalUrl }}/settings/avatar" method="post" enctype="multipart/form-data">
-                        <input id="avatar" name="avatar" type="file" accept="image/png,image/jpeg,image/gif,image/webp" required onchange="this.form.submit()" class="block text-sm text-slate-700 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600 file:cursor-pointer">
-                        {{ .csrfHtml }}
-                    </form>
-                    {{ if .userLogged.HasUploadedAvatar }}
-                    <form class="mt-3" action="{{ $.c.ExternalUrl }}/settings/avatar" method="post">
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-slate-700 dark:text-slate-300 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                            {{ .locale.Tr "settings.avatar-remove" }}
-                        </button>
-                        {{ .csrfHtml }}
-                    </form>
-                    {{ end }}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="sm:grid {{ if not .disableForm }}grid-cols-2{{ else }}grid-cols-1{{ end }} gap-x-4 md:gap-x-8 space-y-8 md:space-y-0">
-        <div class="w-full">
-            <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10 h-full">
-                <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
-                    {{ .locale.Tr "settings.change-username" }}
-                </h2>
-                <form class="space-y-6" action="{{ $.c.ExternalUrl }}/settings/username" method="post">
-                    <div>
-                        <div class="mt-1">
-                            <input id="username-change" name="username" type="text" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                        </div>
-                    </div>
-                    <input type="hidden" name="_method" value="PUT">
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="space-y-1">
+        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "settings" }}</h1>
+        <p class="text-muted-foreground text-sm">{{ .locale.Tr "settings.header.account" }}</p>
+    </header>
 
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                        {{ .locale.Tr "settings.change-username" }}
-                    </button>
+    <!-- Avatar -->
+    <section class="bg-card rounded-lg border">
+        <div class="space-y-1 border-b px-4 py-3">
+            <h2 class="font-semibold">{{ .locale.Tr "settings.avatar" }}</h2>
+            <p class="text-muted-foreground text-sm">{{ .locale.Tr "settings.avatar-help" }}</p>
+        </div>
+        <div class="flex items-center gap-4 p-4">
+            <div class="shrink-0">
+                {{ if not (shouldGenerateAvatar .userLogged .DisableGravatar) }}
+                    <img class="size-16 rounded-md border" src="{{ avatarUrl .userLogged .DisableGravatar }}" alt="{{ .userLogged.Username }}" />
+                {{ else }}
+                    <svg class="size-16 rounded-md border" data-jdenticon-value="{{ .userLogged.Username }}" width="64" height="64"></svg>
+                {{ end }}
+            </div>
+            <div class="flex flex-auto flex-wrap items-center gap-3">
+                <form action="{{ .c.ExternalUrl }}/settings/avatar" method="post" enctype="multipart/form-data">
                     {{ .csrfHtml }}
+                    <input id="avatar" name="avatar" type="file" accept="image/png,image/jpeg,image/gif,image/webp" required onchange="this.form.submit()"
+                           class="text-muted-foreground file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 block text-sm file:mr-4 file:cursor-pointer file:rounded-md file:border-0 file:px-4 file:py-2 file:text-sm file:font-medium" />
                 </form>
+                {{ if .userLogged.HasUploadedAvatar }}
+                <form action="{{ .c.ExternalUrl }}/settings/avatar" method="post">
+                    {{ .csrfHtml }}
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <button type="submit" class="btn-sm-outline">{{ .locale.Tr "settings.avatar-remove" }}</button>
+                </form>
+                {{ end }}
             </div>
         </div>
-        {{ if not .disableForm }}
-        <div class="w-full">
-            <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
-                    {{if .hasPassword}}
-                    {{ .locale.Tr "settings.change-password" }}
-                    {{else}}
-                    {{ .locale.Tr "settings.create-password" }}
-                    {{end}}
-                </h2>
-                <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
-                    {{if .hasPassword}}
-                    {{ .locale.Tr "settings.change-password-help" }}
-                    {{else}}
-                    {{ .locale.Tr "settings.create-password-help" }}
-                    {{end}}
-                </h3>
-                <form class="space-y-6" action="{{ $.c.ExternalUrl }}/settings/password" method="post">
-                    <div>
-                        <label for="password-change" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> {{ .locale.Tr "settings.password-label-title" }} </label>
-                        <div class="mt-1">
-                            <input id="password-change" name="password" type="password" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                        </div>
-                    </div>
-                    <input type="hidden" name="_method" value="PUT">
+    </section>
 
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                        {{if .hasPassword}}
-                        {{ .locale.Tr "settings.change-password" }}
-                        {{else}}
-                        {{ .locale.Tr "settings.create-password" }}
-                        {{end}}
-                    </button>
-                    {{ .csrfHtml }}
-                </form>
-            </div>
+    <!-- Username -->
+    <section class="bg-card rounded-lg border">
+        <div class="border-b px-4 py-3">
+            <h2 class="font-semibold">{{ .locale.Tr "settings.change-username" }}</h2>
         </div>
-        {{ end }}
-    </div>
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
-                {{ .locale.Tr "settings.email" }}
-            </h2>
-            <h3 class="text-sm text-gray-600 dark:text-gray-400 italic mb-4">
-                {{ .locale.Tr "settings.email-help" }}
-            </h3>
-            <form class="space-y-6" action="{{ $.c.ExternalUrl }}/settings/email" method="post">
-                <div>
-                    <div class="mt-1">
-                        <input id="email" name="email" value="{{ .userLogged.Email }}" type="email" required autocomplete="off" class="dark:bg-gray-800 appearance-none block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                    </div>
-                </div>
-                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "settings.email-set" }}</button>
+        <form action="{{ .c.ExternalUrl }}/settings/username" method="post" class="space-y-4 p-4">
+            {{ .csrfHtml }}
+            <input type="hidden" name="_method" value="PUT" />
+            <div class="space-y-1.5">
+                <label for="username-change" class="text-sm font-medium">{{ .locale.Tr "auth.username" }}</label>
+                <input id="username-change" name="username" type="text" required autocomplete="off" value="{{ .userLogged.Username }}" class="input h-9 w-full max-w-sm" />
+            </div>
+            <div class="flex">
+                <button type="submit" class="btn-sm">{{ .locale.Tr "settings.change-username" }}</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Email -->
+    <section class="bg-card rounded-lg border">
+        <div class="space-y-1 border-b px-4 py-3">
+            <h2 class="font-semibold">{{ .locale.Tr "settings.email" }}</h2>
+            <p class="text-muted-foreground text-sm">{{ .locale.Tr "settings.email-help" }}</p>
+        </div>
+        <form action="{{ .c.ExternalUrl }}/settings/email" method="post" class="space-y-4 p-4">
+            {{ .csrfHtml }}
+            <div class="space-y-1.5">
+                <label for="email" class="text-sm font-medium">{{ .locale.Tr "settings.email" }}</label>
+                <input id="email" name="email" type="email" value="{{ .userLogged.Email }}" autocomplete="off" class="input h-9 w-full max-w-sm" />
+            </div>
+            <div class="flex">
+                <button type="submit" class="btn-sm">{{ .locale.Tr "settings.email-set" }}</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Danger zone -->
+    <section class="border-destructive/40 overflow-hidden rounded-lg border">
+        <div class="border-destructive/30 og-red border-b px-4 py-2">
+            <h2 class="text-sm font-semibold">{{ .locale.Tr "settings.delete-account" }}</h2>
+        </div>
+        <div class="bg-card flex flex-wrap items-center justify-between gap-4 p-4">
+            <p class="text-muted-foreground text-sm">{{ .locale.Tr "settings.delete-account" }}</p>
+            <form action="{{ .c.ExternalUrl }}/settings/account" method="post" class="shrink-0">
                 {{ .csrfHtml }}
+                <input type="hidden" name="_method" value="DELETE" />
+                <button type="submit" class="btn-sm bg-destructive text-white hover:bg-destructive/90"
+                        _="on click if not window.confirm('{{ .locale.Tr "settings.delete-account-confirm" }}') halt the event">
+                    {{ .locale.Tr "settings.delete-account" }}
+                </button>
             </form>
         </div>
-    </div>
-    {{ if or .githubOauth .gitlabOauth .giteaOauth .oidcOauth }}
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300 mb-2">
-                {{ .locale.Tr "settings.link-accounts" }}
-            </h2>
-            <div class="gap-y-2">
-
-                {{ if .githubOauth }}
-                {{ if .userLogged.GithubID }}
-                <a href="{{ $.c.ExternalUrl }}/oauth/github/unlink" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
-                   onclick="return confirm('Are you sure you want to unlink your GitHub account? You may lose access to Opengist if it\'s your only way to log in.')">
-                    {{ .locale.Tr "settings.unlink-github-account" }}
-                </a>
-                {{ else }}
-                <a href="{{ $.c.ExternalUrl }}/oauth/github" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                    {{ .locale.Tr "settings.link-github-account" }}
-                </a>
-                {{ end }}
-                {{ end }}
-
-                {{ if .gitlabOauth }}
-                {{ if .userLogged.GitlabID }}
-                <a href="{{ $.c.ExternalUrl }}/oauth/gitlab/unlink" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
-                   onclick="return confirm('Are you sure you want to unlink your GitLab account? You may lose access to Opengist if it\'s your only way to log in.')">
-                    {{ .locale.Tr "settings.unlink-gitlab-account" }}
-                </a>
-                {{ else }}
-                <a href="{{ $.c.ExternalUrl }}/oauth/gitlab" class="block w-full mb-2 text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                    {{ .locale.Tr "settings.link-gitlab-account" }}
-                </a>
-                {{ end }}
-                {{ end }}
-
-                {{ if .giteaOauth }}
-                {{ if .userLogged.GiteaID }}
-                <a href="{{ $.c.ExternalUrl }}/oauth/gitea/unlink" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
-                   onclick="return confirm('Are you sure you want to unlink your Gitea account? You may lose access to Opengist if it\'s your only way to log in.')">
-                    {{ .locale.Tr "settings.unlink-gitea-account" }}
-                </a>
-                {{ else }}
-                <a href="{{ $.c.ExternalUrl }}/oauth/gitea" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                    {{ .locale.Tr "settings.link-gitea-account" }}
-                </a>
-                {{ end }}
-                {{ end }}
-                {{ if .oidcOauth }}
-                {{ if .userLogged.OIDCID }}
-                <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect/unlink" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3"
-                   onclick="return confirm('Are you sure you want to unlink your OpenID account? You may lose access to Opengist if it\'s your only way to log in.')">
-                    Unlink OpenID account
-                </a>
-                {{ else }}
-                <a href="{{ $.c.ExternalUrl }}/oauth/openid-connect" class="block w-full text-center whitespace-nowrap text-slate-700 dark:text-slate-300{{ if .syncReposFromFS }} text-slate-500 cursor-not-allowed {{ end }}rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-1 focus:border-primary-500 focus:ring-primary-500 leading-3">
-                    Link OpenID account
-                </a>
-                {{ end }}
-                {{ end }}
-            </div>
-        </div>
-    </div>
-    {{ end }}
-
-
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-900 rounded-md border border-1 border-gray-200 dark:border-gray-700 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <h2 class="text-md font-bold text-slate-700 dark:text-slate-300">
-                {{ .locale.Tr "settings.delete-account" }}
-            </h2>
-            <form class="space-y-6" action="{{ $.c.ExternalUrl }}/settings/account" method="post">
-                <input type="hidden" name="_method" value="DELETE">
-                <button type="submit" onclick="return confirm('{{ .locale.Tr "settings.delete-account-confirm" }}')" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 mt-2">{{ .locale.Tr "settings.delete-account" }}</button>
-                {{ .csrfHtml }}
-            </form>
-        </div>
-    </div>
+    </section>
 </div>
-
-{{ template "settings_footer" .}}
-{{ template "footer" .}}
+{{ end }}

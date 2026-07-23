@@ -1,0 +1,162 @@
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="space-y-1">
+        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "settings" }}</h1>
+        <p class="text-muted-foreground text-sm">{{ .locale.Tr "settings.header.authentication" }}</p>
+    </header>
+
+    {{ if not .disableForm }}
+    <!-- Password -->
+    <section class="bg-card rounded-lg border">
+        <div class="space-y-1 border-b px-4 py-3">
+            <h2 class="font-semibold">{{ if .hasPassword }}{{ .locale.Tr "settings.change-password" }}{{ else }}{{ .locale.Tr "settings.create-password" }}{{ end }}</h2>
+            <p class="text-muted-foreground text-sm">{{ if .hasPassword }}{{ .locale.Tr "settings.change-password-help" }}{{ else }}{{ .locale.Tr "settings.create-password-help" }}{{ end }}</p>
+        </div>
+        <form action="{{ .c.ExternalUrl }}/settings/password" method="post" class="space-y-4 p-4">
+            {{ .csrfHtml }}
+            <input type="hidden" name="_method" value="PUT" />
+            <div class="space-y-1.5">
+                <label for="password-change" class="text-sm font-medium">{{ .locale.Tr "settings.password-label-title" }}</label>
+                <input id="password-change" name="password" type="password" required autocomplete="off" class="input h-9 w-full max-w-sm" />
+            </div>
+            <div class="flex">
+                <button type="submit" class="btn-sm">{{ if .hasPassword }}{{ .locale.Tr "settings.change-password" }}{{ else }}{{ .locale.Tr "settings.create-password" }}{{ end }}</button>
+            </div>
+        </form>
+    </section>
+    {{ end }}
+
+    <!-- TOTP -->
+    <section class="bg-card rounded-lg border">
+        <div class="flex flex-wrap items-start justify-between gap-4 p-4">
+            <div class="min-w-0 space-y-1">
+                <h2 class="flex items-center gap-2 font-semibold">
+                    {{ .locale.Tr "auth.totp" }}
+                    {{ if .hasTotp }}<span class="badge og-green border-transparent">{{ .locale.Tr "auth.totp.already-enabled" }}</span>{{ end }}
+                </h2>
+                <p class="text-muted-foreground text-sm">{{ .locale.Tr "auth.totp.help" }}</p>
+            </div>
+            <div class="flex shrink-0 items-center gap-2">
+                {{ if .hasTotp }}
+                <form method="post" action="{{ .c.ExternalUrl }}/settings/totp">
+                    {{ .csrfHtml }}
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <button type="submit" class="btn-sm bg-destructive text-white hover:bg-destructive/90">{{ .locale.Tr "auth.totp.disable" }}</button>
+                </form>
+                <form method="post" action="{{ .c.ExternalUrl }}/settings/totp/regenerate">
+                    {{ .csrfHtml }}
+                    <button type="submit" class="btn-sm-outline">{{ .locale.Tr "auth.totp.regenerate-recovery-codes" }}</button>
+                </form>
+                {{ else }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/settings/totp/generate" class="btn-sm">{{ .locale.Tr "auth.totp.use" }}</a>
+                {{ end }}
+            </div>
+        </div>
+    </section>
+
+    <!-- Passkeys -->
+    <section class="bg-card rounded-lg border">
+        <div class="space-y-1 border-b px-4 py-3">
+            <h2 class="font-semibold">{{ .locale.Tr "auth.mfa.passkeys" }}</h2>
+            <p class="text-muted-foreground text-sm">{{ .locale.Tr "auth.mfa.passkeys-help" }}</p>
+        </div>
+        <form id="webauthn" class="space-y-4 p-4">
+            {{ .csrfHtml }}
+            <div class="space-y-1.5">
+                <label for="passkeyname" class="text-sm font-medium">{{ .locale.Tr "auth.mfa.passkey-name" }}</label>
+                <input id="passkeyname" name="passkeyname" type="text" required autocomplete="off" class="input h-9 w-full max-w-sm" />
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="bind-passkey-button" type="button" class="btn-sm">{{ .locale.Tr "auth.mfa.bind-passkey" }}</button>
+                <p id="login-passkey-wait" class="text-muted-foreground hidden text-sm font-medium">{{ .locale.Tr "auth.mfa.waiting-for-passkey-input" }}</p>
+            </div>
+        </form>
+
+        {{ if .passkeys }}
+        <ul class="divide-y border-t">
+            {{ range $passkey := .passkeys }}
+            <li class="flex items-start gap-3 px-4 py-3">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted-foreground mt-0.5 size-8 shrink-0" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg>
+                <div class="min-w-0 flex-auto space-y-1">
+                    <h3 class="text-sm font-semibold">{{ .Name }}</h3>
+                    <p class="text-muted-foreground text-xs">{{ $.locale.Tr "auth.mfa.passkey-added-at" }} {{ .CreatedAt | humanDate }}</p>
+                    {{ if eq .LastUsedAt 0 }}
+                    <p class="text-muted-foreground text-xs">{{ $.locale.Tr "auth.mfa.passkey-never-used" }}</p>
+                    {{ else }}
+                    <p class="text-muted-foreground text-xs">{{ $.locale.Tr "auth.mfa.passkey-last-used" }} {{ .LastUsedAt | humanTimeDiff }}</p>
+                    {{ end }}
+                </div>
+                <form action="{{ $.c.ExternalUrl }}/settings/passkeys/{{ .ID }}" method="post" class="shrink-0">
+                    {{ $.csrfHtml }}
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <button type="submit" class="btn-sm bg-destructive text-white hover:bg-destructive/90"
+                            _="on click if not window.confirm('{{ $.locale.Tr "auth.mfa.delete-passkey-confirm" }}') halt the event">{{ $.locale.Tr "auth.mfa.delete-passkey" }}</button>
+                </form>
+            </li>
+            {{ end }}
+        </ul>
+        {{ end }}
+    </section>
+
+    {{ if or .githubOauth .gitlabOauth .giteaOauth .oidcOauth }}
+    <!-- Linked accounts -->
+    <section class="bg-card rounded-lg border">
+        <div class="border-b px-4 py-3">
+            <h2 class="font-semibold">{{ .locale.Tr "settings.link-accounts" }}</h2>
+        </div>
+        <ul class="divide-y px-4">
+            {{ if .githubOauth }}
+            <li class="flex items-center gap-3 py-3">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="size-6 shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                <span class="text-sm font-medium">GitHub</span>
+                {{ if .userLogged.GithubID }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/oauth/github/unlink" class="btn-sm-outline ml-auto{{ if .syncReposFromFS }} pointer-events-none opacity-50{{ end }}"
+                   _="on click if not window.confirm('Are you sure you want to unlink your GitHub account? You may lose access to Opengist if it is your only way to log in.') halt the event">{{ .locale.Tr "settings.unlink-github-account" }}</a>
+                {{ else }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/oauth/github" class="btn-sm-outline ml-auto{{ if .syncReposFromFS }} pointer-events-none opacity-50{{ end }}">{{ .locale.Tr "settings.link-github-account" }}</a>
+                {{ end }}
+            </li>
+            {{ end }}
+            {{ if .gitlabOauth }}
+            <li class="flex items-center gap-3 py-3">
+                <svg viewBox="0 0 24 24" fill="#FC6D26" class="size-6 shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="m23.6004 9.5927-.0337-.0862L20.3.9814a.851.851 0 0 0-.3362-.405.8748.8748 0 0 0-.9997.0539.8748.8748 0 0 0-.29.4399l-2.2055 6.748H7.5375l-2.2057-6.748a.8573.8573 0 0 0-.29-.4412.8748.8748 0 0 0-.9997-.0537.8585.8585 0 0 0-.3362.4049L.4332 9.5015l-.0325.0862a6.0657 6.0657 0 0 0 2.0119 7.0105l.0113.0087.03.0213 4.976 3.7264 2.462 1.8633 1.4995 1.1321a1.0085 1.0085 0 0 0 1.2197 0l1.4995-1.1321 2.4619-1.8633 5.006-3.7489.0125-.01a6.0682 6.0682 0 0 0 2.0094-7.003z"/></svg>
+                <span class="text-sm font-medium">{{ .c.GitlabName }}</span>
+                {{ if .userLogged.GitlabID }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/oauth/gitlab/unlink" class="btn-sm-outline ml-auto{{ if .syncReposFromFS }} pointer-events-none opacity-50{{ end }}"
+                   _="on click if not window.confirm('Are you sure you want to unlink your GitLab account? You may lose access to Opengist if it is your only way to log in.') halt the event">{{ .locale.Tr "settings.unlink-gitlab-account" }}</a>
+                {{ else }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/oauth/gitlab" class="btn-sm-outline ml-auto{{ if .syncReposFromFS }} pointer-events-none opacity-50{{ end }}">{{ .locale.Tr "settings.link-gitlab-account" }}</a>
+                {{ end }}
+            </li>
+            {{ end }}
+            {{ if .giteaOauth }}
+            <li class="flex items-center gap-3 py-3">
+                <svg viewBox="0 0 24 24" fill="#609926" class="size-6 shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4.209 4.603c-.247 0-.525.02-.84.088-.333.07-1.28.283-2.054 1.027C-.403 7.25.035 9.685.089 10.052c.065.446.263 1.687 1.21 2.768 1.749 2.141 5.513 2.092 5.513 2.092s.462 1.103 1.168 2.119c.955 1.263 1.936 2.248 2.89 2.367 2.406 0 7.212-.004 7.212-.004s.458.004 1.08-.394c.535-.324 1.013-.893 1.013-.893s.492-.527 1.18-1.73c.21-.37.385-.729.538-1.068 0 0 2.107-4.471 2.107-8.823-.042-1.318-.367-1.55-.443-1.627-.156-.156-.366-.153-.366-.153s-4.475.252-6.792.306c-.508.011-1.012.023-1.512.027v4.474l-.634-.301c0-1.39-.004-4.17-.004-4.17-1.107.016-3.405-.084-3.405-.084s-5.399-.27-5.987-.324c-.187-.011-.401-.032-.648-.032zm.354 1.832h.111s.271 2.269.6 3.597C5.549 11.147 6.22 13 6.22 13s-.996-.119-1.641-.348c-.99-.324-1.409-.714-1.409-.714s-.73-.511-1.096-1.52C1.444 8.73 2.021 7.7 2.021 7.7s.32-.859 1.47-1.145c.395-.106.863-.12 1.072-.12zm8.33 2.554c.26.003.509.127.509.127l.868.422-.529 1.075a.686.686 0 0 0-.614.359.685.685 0 0 0 .072.756l-.939 1.924a.69.69 0 0 0-.66.527.687.687 0 0 0 .347.763.686.686 0 0 0 .867-.206.688.688 0 0 0-.069-.882l.916-1.874a.667.667 0 0 0 .237-.02.657.657 0 0 0 .271-.137 8.826 8.826 0 0 1 1.016.512.761.761 0 0 1 .286.282c.073.21-.073.569-.073.569-.087.29-.702 1.55-.702 1.55a.692.692 0 0 0-.676.477.681.681 0 1 0 1.157-.252c.073-.141.141-.282.214-.431.19-.397.515-1.16.515-1.16.035-.066.218-.394.103-.814-.095-.435-.48-.638-.48-.638-.467-.301-1.116-.58-1.116-.58s0-.156-.042-.27a.688.688 0 0 0-.148-.241l.516-1.062 2.89 1.401s.48.218.583.619c.073.282-.019.534-.069.657-.24.587-2.1 4.317-2.1 4.317s-.232.554-.748.588a1.065 1.065 0 0 1-.393-.045l-.202-.08-4.31-2.1s-.417-.218-.49-.596c-.083-.31.104-.691.104-.691l2.073-4.272s.183-.37.466-.497a.855.855 0 0 1 .35-.077z"/></svg>
+                <span class="text-sm font-medium">{{ .c.GiteaName }}</span>
+                {{ if .userLogged.GiteaID }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/oauth/gitea/unlink" class="btn-sm-outline ml-auto{{ if .syncReposFromFS }} pointer-events-none opacity-50{{ end }}"
+                   _="on click if not window.confirm('Are you sure you want to unlink your Gitea account? You may lose access to Opengist if it is your only way to log in.') halt the event">{{ .locale.Tr "settings.unlink-gitea-account" }}</a>
+                {{ else }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/oauth/gitea" class="btn-sm-outline ml-auto{{ if .syncReposFromFS }} pointer-events-none opacity-50{{ end }}">{{ .locale.Tr "settings.link-gitea-account" }}</a>
+                {{ end }}
+            </li>
+            {{ end }}
+            {{ if .oidcOauth }}
+            <li class="flex items-center gap-3 py-3">
+                <svg viewBox="0 0 24 24" fill="#F78C40" class="size-6 shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14.54.889l-3.63 1.773v18.17c-4.15-.52-7.27-2.78-7.27-5.5 0-2.58 2.8-4.75 6.63-5.41v-2.31C4.42 8.322 0 11.502 0 15.332c0 3.96 4.74 7.24 10.91 7.78l3.63-1.71V.888m.64 6.724v2.31c1.43.25 2.71.7 3.76 1.31l-1.97 1.11 7.03 1.53-.5-5.21-1.87 1.06c-1.74-1.06-3.96-1.81-6.45-2.11z"/></svg>
+                <span class="text-sm font-medium">{{ if .c.OIDCProviderName }}{{ .c.OIDCProviderName }}{{ else }}OpenID Connect{{ end }}</span>
+                {{ if .userLogged.OIDCID }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/oauth/openid-connect/unlink" class="btn-sm-outline ml-auto{{ if .syncReposFromFS }} pointer-events-none opacity-50{{ end }}"
+                   _="on click if not window.confirm('Are you sure you want to unlink your OpenID account? You may lose access to Opengist if it is your only way to log in.') halt the event">Unlink OpenID account</a>
+                {{ else }}
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/oauth/openid-connect" class="btn-sm-outline ml-auto{{ if .syncReposFromFS }} pointer-events-none opacity-50{{ end }}">Link OpenID account</a>
+                {{ end }}
+            </li>
+            {{ end }}
+        </ul>
+    </section>
+    {{ end }}
+</div>
+
+<script type="module" src="{{ asset "ts/webauthn.ts" }}"></script>
+{{ end }}

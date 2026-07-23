@@ -17,6 +17,8 @@ import (
 )
 
 func Create(ctx *context.Context) error {
+	ctx.SetData("currentPage", "new")
+	ctx.SetData("dto", new(db.GistDTO))
 	ctx.SetData("htmlTitle", ctx.TrH("gist.new.create-a-new-gist"))
 	return ctx.Html("create.html")
 }
@@ -139,9 +141,10 @@ func ProcessCreate(ctx *context.Context) error {
 	if isCreate {
 		gist = dto.ToGist()
 		gist.ExpiresAt = dto.ExpiresAtTimestamp()
-	} else {
-		gist = dto.ToExistingGist(gist)
 	}
+	// In edit mode the metadata (title, description, URL, topics) is managed on
+	// the gist settings page, not the file editor, so the existing gist is left
+	// untouched here to avoid clobbering it with the empty form values.
 
 	user := ctx.User
 	gist.NbFiles = len(dto.Files)

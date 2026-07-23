@@ -165,8 +165,6 @@ admin.versions: Verziók
 admin.ssh_keys: SSH kulcsok
 admin.stats: Statisztikák
 admin.actions: Műveletek
-admin.actions.sync-fs: Gistek szinkronizálása a fájlrendszerrel
-admin.actions.sync-db: Gistek szinkronizálása az adatbázissal
 admin.actions.git-gc: Használatlan git repository-k eltávolítása
 admin.actions.sync-previews: Gist előnézetek szinkronizálása
 admin.actions.reset-hooks: Git server hook-ok alaphelyzetbe állítása minden repository-nál
@@ -227,12 +225,6 @@ flash.admin.user-deleted: ''
 flash.admin.gist-deleted: ''
 flash.admin.invitation-created: ''
 flash.admin.invitation-deleted: ''
-flash.admin.sync-fs: ''
-flash.admin.sync-db: ''
-flash.admin.git-gc: ''
-flash.admin.sync-previews: ''
-flash.admin.reset-hooks: ''
-flash.admin.index-gists: ''
 flash.auth.username-exists: ''
 flash.auth.invalid-credentials: ''
 flash.auth.account-linked-oauth: ''

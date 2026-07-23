@@ -23,7 +23,12 @@ func NewValidator() *OpengistValidator {
 	_ = v.RegisterValidation("alphanumdashunderorempty", validateAlphaNumDashUnderOrEmpty)
 	_ = v.RegisterValidation("gisttopics", validateGistTopics)
 	_ = v.RegisterValidation("expirationdate", validateExpirationDate)
+	_ = v.RegisterValidation("themecolor", validateThemeColor)
 	return &OpengistValidator{v}
+}
+
+var ThemeColors = []string{
+	"red", "amber", "emerald", "sky", "indigo", "purple", "neutral",
 }
 
 func (cv *OpengistValidator) Validate(i interface{}) error {
@@ -92,6 +97,19 @@ func validateAlphaNumDashUnder(fl validator.FieldLevel) bool {
 
 func validateAlphaNumDashUnderOrEmpty(fl validator.FieldLevel) bool {
 	return regexp.MustCompile(`^$|^[a-zA-Z0-9-_]+$`).MatchString(fl.Field().String())
+}
+
+func validateThemeColor(fl validator.FieldLevel) bool {
+	color := fl.Field().String()
+	if color == "" {
+		return true
+	}
+	for _, c := range ThemeColors {
+		if c == color {
+			return true
+		}
+	}
+	return false
 }
 
 func validateGistTopics(fl validator.FieldLevel) bool {

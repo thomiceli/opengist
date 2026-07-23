@@ -1,151 +1,132 @@
-{{ template "header" .}}
-{{ template "admin_header" .}}
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="space-y-1">
+        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "admin.admin_panel" }}</h1>
+        <p class="text-muted-foreground text-sm">{{ .locale.Tr "admin.configuration" }}</p>
+    </header>
 
-<div class="grid gap-4 grid-cols-1 md:grid-cols-2">
-    <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
-        <p class="italic text-xs text-gray-400 dark:text-gray-400 mb-4">{{ .locale.Tr "admin.config-link" (join "<a target=\"_blank\" href=\"https://github.com/thomiceli/opengist/blob/master/docs/configuration/configure.md#configuration\">" (toStr (.locale.Tr "admin.config-link-overriden")) "</a>") }}</p>
-        <dl class="dl-config">
-            <div class="relative col-span-3">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">General</span>
-                </div>
+    <div class="grid gap-4 lg:grid-cols-2">
+        <!-- Read-only configuration -->
+        <section class="bg-card h-fit rounded-lg border">
+            <div class="border-b px-4 py-3">
+                <p class="text-muted-foreground text-xs italic">{{ .locale.Tr "admin.config-link" (join "<a target=\"_blank\" class=\"text-primary hover:underline\" href=\"https://github.com/thomiceli/opengist/blob/master/docs/configuration/configure.md#configuration\">" (toStr (.locale.Tr "admin.config-link-overriden")) "</a>") }}</p>
             </div>
-            <dt>Log level</dt><dd>{{ .c.LogLevel }}</dd>
-            <dt>Log output</dt><dd>{{ .c.LogOutput }}</dd>
-            <dt>External URL</dt><dd>{{ .c.ExternalUrl }}</dd>
-            <dt>Opengist home</dt><dd>{{ .c.OpengistHome }}</dd>
-            <dt>Database type</dt><dd>{{ .dbtype }}{{ if eq .dbtype "SQLite" }} ({{ .c.SqliteJournalMode }}){{ end }}</dd>
-            <dt>Database name</dt><dd>{{ .dbname }}</dd>
-            <dt>Index</dt><dd>{{ .c.Index }}</dd>
-            <dt>MeiliSearch Host</dt><dd>{{ .c.MeiliHost }}</dd>
-            <dt>MeiliSearch API Key</dt><dd>{{ if .c.MeiliAPIKey }}&#60;defined&#62;{{ end }}</dd>
-            <dt>Git default branch</dt><dd>{{ .c.GitDefaultBranch }}</dd>
-            <div class="relative col-span-3 mt-4">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">HTTP</span>
-                </div>
+            <div class="space-y-4 p-4">
+                {{ template "admin_config_section" (dict "title" "General") }}
+                <dl class="divide-y text-sm">
+                    {{ template "admin_config_row" (dict "k" "Log level" "v" .c.LogLevel) }}
+                    {{ template "admin_config_row" (dict "k" "Log output" "v" .c.LogOutput) }}
+                    {{ template "admin_config_row" (dict "k" "External URL" "v" .c.ExternalUrl) }}
+                    {{ template "admin_config_row" (dict "k" "Opengist home" "v" .c.OpengistHome) }}
+                    <div class="flex items-center justify-between gap-4 py-1.5">
+                        <dt class="text-muted-foreground">Database type</dt>
+                        <dd class="text-right font-medium break-all">{{ .dbtype }}{{ if eq .dbtype "SQLite" }} ({{ .c.SqliteJournalMode }}){{ end }}</dd>
+                    </div>
+                    {{ template "admin_config_row" (dict "k" "Database name" "v" .dbname) }}
+                    {{ template "admin_config_row" (dict "k" "Index" "v" .c.Index) }}
+                    {{ template "admin_config_row" (dict "k" "MeiliSearch Host" "v" .c.MeiliHost) }}
+                    {{ template "admin_config_defined" (dict "k" "MeiliSearch API Key" "v" .c.MeiliAPIKey) }}
+                    {{ template "admin_config_row" (dict "k" "Git default branch" "v" .c.GitDefaultBranch) }}
+                </dl>
+
+                {{ template "admin_config_section" (dict "title" "HTTP") }}
+                <dl class="divide-y text-sm">
+                    {{ template "admin_config_row" (dict "k" "HTTP host" "v" .c.HttpHost) }}
+                    {{ template "admin_config_row" (dict "k" "HTTP port" "v" .c.HttpPort) }}
+                    {{ template "admin_config_row" (dict "k" "HTTP Git enabled" "v" .c.HttpGit) }}
+                </dl>
+
+                {{ template "admin_config_section" (dict "title" "SSH") }}
+                <dl class="divide-y text-sm">
+                    {{ template "admin_config_row" (dict "k" "SSH Git enabled" "v" .c.SshGit) }}
+                    {{ template "admin_config_row" (dict "k" "SSH host" "v" .c.SshHost) }}
+                    {{ template "admin_config_row" (dict "k" "SSH port" "v" .c.SshPort) }}
+                    {{ template "admin_config_row" (dict "k" "SSH external domain" "v" .c.SshExternalDomain) }}
+                </dl>
+
+                {{ template "admin_config_section" (dict "title" "OAuth") }}
+                <dl class="divide-y text-sm">
+                    {{ template "admin_config_defined" (dict "k" "Github Client key" "v" .c.GithubClientKey) }}
+                    {{ template "admin_config_defined" (dict "k" "Github Secret" "v" .c.GithubSecret) }}
+                    {{ template "admin_config_defined" (dict "k" "GitLab client Key" "v" .c.GitlabClientKey) }}
+                    {{ template "admin_config_defined" (dict "k" "GitLab Secret" "v" .c.GitlabSecret) }}
+                    {{ template "admin_config_row" (dict "k" "GitLab URL" "v" .c.GitlabUrl) }}
+                    {{ template "admin_config_row" (dict "k" "GitLab Name" "v" .c.GitlabName) }}
+                    {{ template "admin_config_defined" (dict "k" "Gitea client Key" "v" .c.GiteaClientKey) }}
+                    {{ template "admin_config_defined" (dict "k" "Gitea Secret" "v" .c.GiteaSecret) }}
+                    {{ template "admin_config_row" (dict "k" "Gitea URL" "v" .c.GiteaUrl) }}
+                    {{ template "admin_config_row" (dict "k" "Gitea Name" "v" .c.GiteaName) }}
+                    {{ template "admin_config_row" (dict "k" "OIDC Provider name" "v" .c.OIDCProviderName) }}
+                    {{ template "admin_config_defined" (dict "k" "OIDC client Key" "v" .c.OIDCClientKey) }}
+                    {{ template "admin_config_defined" (dict "k" "OIDC Secret" "v" .c.OIDCSecret) }}
+                    {{ template "admin_config_defined" (dict "k" "OIDC Discovery URL" "v" .c.OIDCDiscoveryUrl) }}
+                    {{ template "admin_config_row" (dict "k" "OIDC Group Claim Name" "v" .c.OIDCGroupClaimName) }}
+                    {{ template "admin_config_row" (dict "k" "OIDC Admin Group" "v" .c.OIDCAdminGroup) }}
+                </dl>
+
+                {{ template "admin_config_section" (dict "title" "LDAP") }}
+                <dl class="divide-y text-sm">
+                    {{ template "admin_config_row" (dict "k" "LDAP URL" "v" .c.LDAPUrl) }}
+                    {{ template "admin_config_row" (dict "k" "LDAP Bind DN" "v" .c.LDAPBindDn) }}
+                    {{ template "admin_config_defined" (dict "k" "LDAP Bind Credentials" "v" .c.LDAPBindCredentials) }}
+                    {{ template "admin_config_row" (dict "k" "LDAP Search Base" "v" .c.LDAPSearchBase) }}
+                    {{ template "admin_config_row" (dict "k" "LDAP Search Filter" "v" .c.LDAPSearchFilter) }}
+                </dl>
             </div>
-            <dt>HTTP host</dt><dd>{{ .c.HttpHost }}</dd>
-            <dt>HTTP port</dt><dd>{{ .c.HttpPort }}</dd>
-            <dt>HTTP Git enabled</dt><dd>{{ .c.HttpGit }}</dd>
-            <div class="relative col-span-3 mt-4">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">SSH</span>
-                </div>
-            </div>
-            <dt>SSH Git enabled</dt><dd>{{ .c.SshGit }}</dd>
-            <dt>SSH host</dt><dd>{{ .c.SshHost }}</dd>
-            <dt>SSH port</dt><dd>{{ .c.SshPort }}</dd>
-            <dt>SSH external domain</dt><dd>{{ .c.SshExternalDomain }}</dd>
-            <div class="relative col-span-3 mt-4">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">OAuth</span>
-                </div>
-            </div>
-            <dt>Github Client key</dt><dd>{{ if .c.GithubClientKey }}&#60;defined&#62;{{ end }}</dd>
-            <dt>Github Secret</dt><dd>{{ if .c.GithubSecret }}&#60;defined&#62;{{ end }}</dd>
-            <dt>GitLab client Key</dt><dd>{{ if .c.GitlabClientKey }}&#60;defined&#62;{{ end }}</dd>
-            <dt>GitLab Secret</dt><dd>{{ if .c.GitlabSecret }}&#60;defined&#62;{{ end }}</dd>
-            <dt>GitLab URL</dt><dd>{{ .c.GitlabUrl }}</dd>
-            <dt>GitLab Name</dt><dd>{{ .c.GitlabName }}</dd>
-            <dt>Gitea client Key</dt><dd>{{ if .c.GiteaClientKey }}&#60;defined&#62;{{ end }}</dd>
-            <dt>Gitea Secret</dt><dd>{{ if .c.GiteaSecret }}&#60;defined&#62;{{ end }}</dd>
-            <dt>Gitea URL</dt><dd>{{ .c.GiteaUrl }}</dd>
-            <dt>Gitea Name</dt><dd>{{ .c.GiteaName }}</dd>
-            <dt>OIDC Provider name</dt><dd>{{ .c.OIDCProviderName }}</dd>
-            <dt>OIDC client Key</dt><dd>{{ if .c.OIDCClientKey }}&#60;defined&#62;{{ end }}</dd>
-            <dt>OIDC Secret</dt><dd>{{ if .c.OIDCSecret }}&#60;defined&#62;{{ end }}</dd>
-            <dt>OIDC Discovery URL</dt><dd>{{ if .c.OIDCDiscoveryUrl }}&#60;defined&#62;{{ end }}</dd>
-            <dt>OIDC Group Claim Name</dt><dd>{{ .c.OIDCGroupClaimName }}</dd>
-            <dt>OIDC Admin Group</dt><dd>{{ .c.OIDCAdminGroup }}</dd>
-            <div class="relative col-span-3 mt-4">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="bg-gray-50 dark:bg-gray-800 px-2 text-sm text-slate-700 dark:text-slate-300 font-bold">LDAP</span>
-                </div>
-            </div>
-            <dt>LDAP URL</dt><dd>{{ .c.LDAPUrl }}</dd>
-            <dt>LDAP Bind DN</dt><dd>{{ .c.LDAPBindDn }}</dd>
-            <dt>LDAP Bind Credentials</dt><dd>{{ if .c.LDAPBindCredentials }}&#60;defined&#62;{{ end }}</dd>
-            <dt>LDAP Search Base</dt><dd>{{ .c.LDAPSearchBase }}</dd>
-            <dt>LDAP Search Filter</dt><dd>{{ .c.LDAPSearchFilter }}</dd>
-        </dl>
-    </div>
-    <div>
-        <ul role="list" class="divide-y divide-slate-300 dark:divide-gray-200 px-4 py-2 sm:px-6 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
-            <li class="list-none gap-x-4 py-5">
-                <div class="flex items-center justify-between">
-                    <span class="flex grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.disable-signup" }}</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.disable-signup_help" }}</span>
-                    </span>
-                    <button type="button" id="disable-signup" data-bool="{{ .DisableSignup }}" class="toggle-button {{ if .DisableSignup }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
-                        <span aria-hidden="true" class="{{ if .DisableSignup }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    </button>
-                </div>
-            </li>
-            <li class="list-none gap-x-4 py-5">
-                <div class="flex items-center justify-between">
-                    <span class="flex grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.require-login" }}</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.require-login_help" }}</span>
-                    </span>
-                    <button type="button" id="require-login" data-bool="{{ .RequireLogin }}" class="toggle-button {{ if .RequireLogin }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
-                        <span aria-hidden="true" class="{{ if .RequireLogin }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    </button>
-                </div>
-            </li>
-            <li class="list-none gap-x-4 py-5">
-                <div class="flex items-center justify-between">
-                    <span class="flex grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.allow-gists-without-login" }}</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.allow-gists-without-login_help" }}</span>
-                    </span>
-                    <button type="button" id="allow-gists-without-login" data-bool="{{ .AllowGistsWithoutLogin }}" class="toggle-button {{ if .AllowGistsWithoutLogin }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
-                        <span aria-hidden="true" class="{{ if .AllowGistsWithoutLogin }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    </button>
-                </div>
-            </li>
-            <li class="list-none gap-x-4 py-5">
-                <div class="flex items-center justify-between">
-                    <span class="flex grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.disable-login" }}</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.disable-login_help" }}</span>
-                    </span>
-                    <button type="button" id="disable-login-form" data-bool="{{ .DisableLoginForm }}" class="toggle-button {{ if .DisableLoginForm }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
-                        <span aria-hidden="true" class="{{ if .DisableLoginForm }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    </button>
-                </div>
-            </li>
-            <li class="list-none gap-x-4 py-5">
-                <div class="flex items-center justify-between">
-                    <span class="flex grow flex-col">
-                        <span class="text-sm font-medium leading-6 text-slate-700 dark:text-slate-300">{{ .locale.Tr "admin.disable-gravatar" }}</span>
-                        <span class="text-sm text-gray-400 dark:text-gray-400">{{ .locale.Tr "admin.disable-gravatar_help" }}</span>
-                    </span>
-                    <button type="button" id="disable-gravatar" data-bool="{{ .DisableGravatar }}" class="toggle-button {{ if .DisableGravatar }}bg-primary-600{{else}}bg-gray-300 dark:bg-gray-400{{end}} relative inline-flex h-6 w-11 ml-4 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2" role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
-                        <span aria-hidden="true" class="{{ if .DisableGravatar }}translate-x-5{{else}}translate-x-0{{end}} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                    </button>
-                </div>
-            </li>
-        </ul>
-        {{ .csrfHtml }}
+        </section>
+
+        <!-- Toggleable settings -->
+        <section class="bg-card h-fit rounded-lg border">
+            {{ .csrfHtml }}
+            <ul class="divide-y">
+                {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-signup" "title" (.locale.Tr "admin.disable-signup") "help" (.locale.Tr "admin.disable-signup_help") "on" .DisableSignup) }}
+                {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "require-login" "title" (.locale.Tr "admin.require-login") "help" (.locale.Tr "admin.require-login_help") "on" .RequireLogin) }}
+                {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "allow-gists-without-login" "title" (.locale.Tr "admin.allow-gists-without-login") "help" (.locale.Tr "admin.allow-gists-without-login_help") "on" .AllowGistsWithoutLogin) }}
+                {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-login-form" "title" (.locale.Tr "admin.disable-login") "help" (.locale.Tr "admin.disable-login_help") "on" .DisableLoginForm) }}
+                {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-gravatar" "title" (.locale.Tr "admin.disable-gravatar") "help" (.locale.Tr "admin.disable-gravatar_help") "on" .DisableGravatar) }}
+            </ul>
+        </section>
     </div>
 </div>
+{{ end }}
 
-{{ template "admin_footer" .}}
-{{ template "footer" .}}
+{{ define "admin_config_section" }}
+<div class="flex items-center gap-3">
+    <span class="text-sm font-bold">{{ .title }}</span>
+    <span class="border-border flex-1 border-t" aria-hidden="true"></span>
+</div>
+{{ end }}
+
+{{ define "admin_config_row" }}
+<div class="flex items-center justify-between gap-4 py-1.5">
+    <dt class="text-muted-foreground">{{ .k }}</dt>
+    <dd class="text-right font-medium break-all">{{ .v }}</dd>
+</div>
+{{ end }}
+
+{{ define "admin_config_defined" }}
+<div class="flex items-center justify-between gap-4 py-1.5">
+    <dt class="text-muted-foreground">{{ .k }}</dt>
+    <dd class="text-right font-medium">{{ if .v }}&#60;defined&#62;{{ end }}</dd>
+</div>
+{{ end }}
+
+{{ define "admin_config_toggle" }}
+<li class="flex items-center justify-between gap-4 p-4">
+    <div class="min-w-0 space-y-1">
+        <p class="text-sm font-medium">{{ .title }}</p>
+        <p class="text-muted-foreground text-sm">{{ .help }}</p>
+    </div>
+    <button type="button" id="{{ .id }}" role="switch" aria-checked="{{ .on }}"
+            hx-put="{{ .url }}/admin-panel/set-config"
+            hx-swap="none"
+            hx-include="[name='_csrf']"
+            hx-vals='js:{key: this.id, value: this.getAttribute("aria-checked") === "true" ? "0" : "1"}'
+            _="on htmx:afterRequest if event.detail.successful
+                 if @aria-checked is 'true' set @aria-checked to 'false' else set @aria-checked to 'true' end
+               end"
+            class="group bg-input aria-checked:bg-primary relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        <span class="pointer-events-none inline-block size-5 translate-x-0.5 rounded-full bg-white shadow transition-transform group-aria-checked:translate-x-[1.375rem]"></span>
+    </button>
+</li>
+{{ end }}

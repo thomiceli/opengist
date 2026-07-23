@@ -121,7 +121,7 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 	if acceptJson || data["err_render"] == "json" {
 		renderErr = ctx.JSON(httpErr.Code, httpErr)
 	} else {
-		renderErr = ctx.Render(httpErr.Code, "error", data)
+		renderErr = ctx.Render(httpErr.Code, "error.html", data)
 	}
 
 	if renderErr != nil && !isClientGone(renderErr) {
@@ -209,7 +209,7 @@ func logged(next Handler) Handler {
 		if user != nil {
 			return next(ctx)
 		}
-		return ctx.RedirectTo("/all")
+		return ctx.RedirectTo("/-/all")
 	}
 }
 
@@ -360,7 +360,7 @@ func sessionInit(next Handler) Handler {
 				ctx.SaveSession(sess)
 				ctx.User = nil
 				ctx.SetData("userLogged", nil)
-				return ctx.RedirectTo("/all")
+				return ctx.RedirectTo("/-/all")
 			}
 			if user != nil {
 				ctx.User = user

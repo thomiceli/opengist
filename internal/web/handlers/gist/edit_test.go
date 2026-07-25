@@ -139,3 +139,41 @@ func TestArchive(t *testing.T) {
 		}, 302)
 	})
 }
+
+func TestLegacyEditorUpdatesMetadata(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+	_, original, username, identifier := s.CreateGist(t, "0")
+
+	s.Login(t, "thomas")
+	s.Request(t, "POST", "/"+username+"/"+identifier+"/edit", url.Values{
+		"_edit_metadata": {"1"},
+		"title":          {"Updated from legacy UI"},
+		"description":    {"Updated description"},
+		"url":            {"legacy-url"},
+		"topics":         {"legacy compatibility"},
+		"name":           {"file.txt"},
+		"content":        {"updated content"},
+	}, 302)
+
+	updated, err := db.GetGist(username, "legacy-url")
+	require.NoError(t, err)
+	require.Equal(t, original.ID, updated.ID)
+	require.Equal(t, "Updated from legacy UI", updated.Title)
+	require.Equal(t, "Updated description", updated.Description)
+	require.ElementsMatch(t, []string{"legacy", "compatibility"}, updated.TopicsSlice())
+
+	// A file-only edit from the new UI must keep metadata unchanged.
+	s.Request(t, "POST", "/"+username+"/legacy-url/edit", url.Values{
+		"name":    {"file.txt"},
+		"content": {"new UI content"},
+	}, 302)
+
+	updated, err = db.GetGist(username, "legacy-url")
+	require.NoError(t, err)
+	require.Equal(t, "Updated from legacy UI", updated.Title)
+	require.Equal(t, "Updated description", updated.Description)
+	require.ElementsMatch(t, []string{"legacy", "compatibility"}, updated.TopicsSlice())
+}

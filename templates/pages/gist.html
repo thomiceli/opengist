@@ -1,5 +1,5 @@
 {{ define "content" }}
-<div class="space-y-6" id="gist" data-own="{{ if not .gist.Archived }}{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}{{ end }}">
+<div class="space-y-6" id="gist" data-own="{{ if and (eq .revision "HEAD") (not .gist.Archived) }}{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}{{ end }}">
     {{ template "gist_header" . }}
 
     {{ if .gist.Archived }}

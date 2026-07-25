@@ -70,46 +70,46 @@ func AdminActions(ctx *context.Context) error {
 }
 
 func AdminSyncReposFromFS(ctx *context.Context) error {
-	go actions.RunOnce(actions.SyncReposFromFS)
-	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
+	return runAdminAction(ctx, actions.SyncReposFromFS, "flash.admin.sync-fs")
 }
 
 func AdminSyncReposFromDB(ctx *context.Context) error {
-	go actions.RunOnce(actions.SyncReposFromDB)
-	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
+	return runAdminAction(ctx, actions.SyncReposFromDB, "flash.admin.sync-db")
 }
 
 func AdminGcRepos(ctx *context.Context) error {
-	go actions.RunOnce(actions.GitGcRepos)
-	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
+	return runAdminAction(ctx, actions.GitGcRepos, "flash.admin.git-gc")
 }
 
 func AdminSyncGistPreviews(ctx *context.Context) error {
-	go actions.RunOnce(actions.SyncGistPreviews)
-	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
+	return runAdminAction(ctx, actions.SyncGistPreviews, "flash.admin.sync-previews")
 }
 
 func AdminResetHooks(ctx *context.Context) error {
-	go actions.RunOnce(actions.ResetHooks)
-	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
+	return runAdminAction(ctx, actions.ResetHooks, "flash.admin.reset-hooks")
 }
 
 func AdminIndexGists(ctx *context.Context) error {
-	go actions.RunOnce(actions.IndexGists)
-	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
+	return runAdminAction(ctx, actions.IndexGists, "flash.admin.index-gists")
 }
 
 func AdminSyncGistLanguages(ctx *context.Context) error {
-	go actions.RunOnce(actions.SyncGistLanguages)
-	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
+	return runAdminAction(ctx, actions.SyncGistLanguages, "flash.admin.sync-gist-languages")
 }
 
 func AdminDeleteExpiredGists(ctx *context.Context) error {
-	go actions.RunOnce(actions.DeleteExpiredGists)
-	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
+	return runAdminAction(ctx, actions.DeleteExpiredGists, "flash.admin.delete-expired-gists")
 }
 
 func AdminSyncSSHKeys(ctx *context.Context) error {
-	go actions.RunOnce(actions.SyncSSHKeys)
+	return runAdminAction(ctx, actions.SyncSSHKeys, "flash.admin.sync-ssh-keys")
+}
+
+func runAdminAction(ctx *context.Context, actionType int, legacyFlashKey string) error {
+	go actions.RunOnce(actionType)
+	if ctx.QueryParam("legacy") == "1" {
+		ctx.AddFlash(ctx.Tr(legacyFlashKey), "success")
+		return ctx.RedirectTo("/-/admin-panel")
+	}
 	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }

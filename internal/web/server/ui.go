@@ -13,7 +13,9 @@ const uiCookieName = "opengist_ui"
 
 func usesLegacyUI(ctx echo.Context) bool {
 	cookie, err := ctx.Cookie(uiCookieName)
-	return err == nil && cookie.Value == "old"
+	// Keep the established UI as the default during the transition. The new UI
+	// is opt-in and is selected only by an explicit, valid cookie value.
+	return err != nil || cookie.Value != "new"
 }
 
 func switchUI(ctx *webcontext.Context) error {
@@ -33,9 +35,6 @@ func switchUI(ctx *webcontext.Context) error {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	if ui == "old" {
-		return ctx.RedirectTo("/")
-	}
 	return ctx.RedirectTo(safeUIRedirect(ctx.QueryParam("redirect")))
 }
 

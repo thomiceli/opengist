@@ -1,5 +1,5 @@
 {{ define "gist_header" }}
-<div class="py-10" id="gist" data-own="{{ if not .gist.Archived }}{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}{{ end }}">
+<div class="py-10" id="gist" data-own="{{ if and (eq .revision "HEAD") (not .gist.Archived) }}{{ if .userLogged }}{{ if eq .gist.User.Username .userLogged.Username }}true{{ end }}{{ end }}{{ end }}">
     <header>
         <div class="flex flex-col lg:flex-row">
             <div>
@@ -208,4 +208,3 @@
 {{/* prevent IDE errors */}}
 </main></div>
 {{ end }}
-

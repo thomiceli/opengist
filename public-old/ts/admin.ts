@@ -25,7 +25,7 @@ const setSetting = (key: string, value: string) => {
     if (document.getElementsByName('_csrf').length !== 0) {
         data.append('_csrf', ((document.getElementsByName('_csrf')[0] as HTMLInputElement).value));
     }
-    return fetch(`${baseUrl}/admin-panel/set-config`, {
+    return fetch(`${baseUrl}/-/admin-panel/set-config`, {
         method: 'PUT',
         credentials: 'same-origin',
         body: data,
@@ -33,14 +33,20 @@ const setSetting = (key: string, value: string) => {
 };
 
 const registerDomSetting = (el: HTMLElement) => {
-    // @ts-ignore
-    el.dataset["bool"] = !(el.dataset["bool"] === 'true');
-    setSetting(el.id, el.dataset["bool"] === 'true' ? '1' : '0')
-        .then(() => {
+    const enabled = el.dataset["bool"] !== 'true';
+    setSetting(el.id, enabled ? '1' : '0')
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`Could not update setting: HTTP ${response.status}`);
+            }
+            el.dataset["bool"] = String(enabled);
+            el.setAttribute("aria-checked", String(enabled));
             el.classList.toggle("bg-primary-600");
             el.classList.toggle("dark:bg-gray-400");
             el.classList.toggle("bg-gray-300");
             (el.childNodes.item(1) as HTMLElement).classList.toggle("translate-x-5");
+        })
+        .catch((err) => {
+            console.error(err);
         });
 };
-

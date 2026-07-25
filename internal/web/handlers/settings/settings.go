@@ -10,6 +10,11 @@ func UserAccount(ctx *context.Context) error {
 	user := ctx.User
 
 	ctx.SetData("email", user.Email)
+	// The legacy account page still contains the password form. The new UI
+	// moved it to Authentication, but keeping this data preserves old-UI
+	// behavior while both interfaces are available.
+	ctx.SetData("hasPassword", user.Password != "")
+	ctx.SetData("disableForm", ctx.GetData("DisableLoginForm"))
 	ctx.SetData("settingsHeaderPage", "account")
 	ctx.SetData("htmlTitle", ctx.TrH("settings"))
 	return ctx.Html("settings_account.html")

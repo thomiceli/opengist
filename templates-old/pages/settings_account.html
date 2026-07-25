@@ -78,6 +78,7 @@
                     {{end}}
                 </h3>
                 <form class="space-y-6" action="{{ $.c.ExternalUrl }}/-/settings/password" method="post">
+                    <input type="hidden" name="_legacy_account" value="1">
                     <div>
                         <label for="password-change" class="block text-sm font-medium text-slate-700 dark:text-slate-300"> {{ .locale.Tr "settings.password-label-title" }} </label>
                         <div class="mt-1">

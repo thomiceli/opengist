@@ -57,7 +57,7 @@ if (document.getElementById('gist').dataset.own) {
                 el.disabled = true;
                 el.classList.add('text-gray-400')
             });
-            fetch(window.location.href.split('#')[0] + '/checkbox', {
+            fetch(window.location.href.split('#')[0].split('?')[0] + '/checkbox', {
                 method: 'PUT',
                 credentials: 'same-origin',
                 body: data,

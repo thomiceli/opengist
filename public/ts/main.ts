@@ -10,8 +10,15 @@ import { initGistFilters } from './gist-filter';
 import { initGistLines } from './gist-lines';
 import { initGistCheckboxes } from './gist-checkbox';
 import { initJdenticon } from './jdenticon';
-import { initIpynb } from './ipynb';
 import { initPdf } from './pdf';
+
+let ipynbModule: Promise<typeof import('./ipynb')> | undefined;
+
+const initIpynb = () => {
+    if (!document.querySelector('.jupyter.notebook pre')) return;
+    ipynbModule ??= import('./ipynb');
+    void ipynbModule.then(({ initIpynb: renderNotebooks }) => renderNotebooks());
+};
 
 const init = () => {
     initGistFilters();

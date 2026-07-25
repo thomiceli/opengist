@@ -22,7 +22,7 @@ func Topics(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error fetching topics", err)
 	}
 
-	if err = handlers.Paginate(ctx, topics, pageInt, 20, "topics", "/-/topics", 1, nil); err != nil {
+	if err = handlers.Paginate(ctx, topics, pageInt, 20, "topics", "-/topics", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 

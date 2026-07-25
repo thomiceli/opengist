@@ -141,10 +141,11 @@ func ProcessCreate(ctx *context.Context) error {
 	if isCreate {
 		gist = dto.ToGist()
 		gist.ExpiresAt = dto.ExpiresAtTimestamp()
+	} else if ctx.FormValue("_edit_metadata") == "1" {
+		// The legacy editor still edits files and metadata in one form. The new
+		// editor omits this marker because metadata has its own settings page.
+		gist = dto.ToExistingGist(gist)
 	}
-	// In edit mode the metadata (title, description, URL, topics) is managed on
-	// the gist settings page, not the file editor, so the existing gist is left
-	// untouched here to avoid clobbering it with the empty form values.
 
 	user := ctx.User
 	gist.NbFiles = len(dto.Files)

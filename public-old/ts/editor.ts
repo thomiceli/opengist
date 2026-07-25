@@ -550,7 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fileUploadZone.addEventListener('drop', (e) => {
         e.preventDefault();
         fileUploadZone.classList.remove('border-primary-400', 'dark:border-primary-500');
-        
+
         const files = e.dataTransfer?.files;
         if (files) {
             handleFiles(files);

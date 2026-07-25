@@ -38,11 +38,13 @@ build_webdist: build_frontend package_webdist
 
 package_webdist:
 	@test -f public/.vite/manifest.json || (echo "Error: frontend assets not found in public/. Run 'make build_frontend' first." && exit 1)
+	@test -f public-old/.vite/manifest.json || (echo "Error: legacy frontend assets not found in public-old/. Run 'make build_frontend' first." && exit 1)
 	@echo "Packaging frontend assets into build/$(BINARY_NAME)$(VERSION)-webdist.tar.gz..."
 	@mkdir -p build
 	@tar -czf "build/$(BINARY_NAME)$(VERSION)-webdist.tar.gz" \
 		--transform 's,^,$(BINARY_NAME)-webdist/,' \
-		-C public .vite/manifest.json assets
+		-C public .vite/manifest.json assets \
+		-C .. public-old/.vite/manifest.json public-old/assets
 	@sha256sum "build/$(BINARY_NAME)$(VERSION)-webdist.tar.gz" | awk '{print $$1 " " substr($$2,7)}' >> build/checksums.txt
 	@echo "Done."
 

@@ -40,6 +40,9 @@ func PasswordProcess(ctx *context.Context) error {
 
 	if err := ctx.Validate(dto); err != nil {
 		ctx.AddFlash(validator.ValidationMessages(&err, ctx.GetData("locale").(*i18n.Locale)), "error")
+		if ctx.FormValue("_legacy_account") == "1" {
+			return ctx.RedirectTo("/-/settings")
+		}
 		return ctx.RedirectTo("/-/settings/authentication")
 	}
 

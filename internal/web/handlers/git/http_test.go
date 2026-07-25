@@ -100,7 +100,7 @@ func TestGitClonePull(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s.Login(t, "thomas")
 			for k, v := range tt.settings {
-				s.Request(t, "PUT", "/admin-panel/set-config", url.Values{"key": {k}, "value": {v}}, 200)
+				s.Request(t, "PUT", "/-/admin-panel/set-config", url.Values{"key": {k}, "value": {v}}, 200)
 			}
 
 			for _, ct := range tt.creds {
@@ -124,7 +124,7 @@ func TestGitClonePull(t *testing.T) {
 			// Reset settings
 			s.Login(t, "thomas")
 			for k := range tt.settings {
-				s.Request(t, "PUT", "/admin-panel/set-config", url.Values{"key": {k}, "value": {"0"}}, 200)
+				s.Request(t, "PUT", "/-/admin-panel/set-config", url.Values{"key": {k}, "value": {"0"}}, 200)
 			}
 		})
 	}

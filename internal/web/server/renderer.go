@@ -39,24 +39,39 @@ type Template struct {
 }
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
+	legacyName := name
+	if name == "settings_authentication.html" {
+		legacyName = "settings_mfa.html"
+	}
+	forceNewUI := false
+	if values, ok := data.(echo.Map); ok {
+		forceNewUI, _ = values["forceNewUI"].(bool)
+	}
+	legacyAvailable := !forceNewUI && name != "gist_embed.html" && t.legacy != nil && t.legacy.Lookup(legacyName) != nil
+	legacyPreferred := usesLegacyUI(ctx)
+
 	if values, ok := data.(echo.Map); ok {
 		values["uiRedirectUrl"] = ctx.Request().URL.RequestURI()
+		values["legacyUIAvailable"] = legacyAvailable
+		values["legacyUIPreferred"] = legacyPreferred
 	}
 
 	// Embeds are not part of the navigable web interface and use the new embed
 	// stylesheet, so keep rendering them with their matching new template.
-	if usesLegacyUI(ctx) && name != "gist_embed.html" && t.legacy != nil {
-		legacyName := name
-		if name == "settings_authentication.html" {
-			legacyName = "settings_mfa.html"
-		}
-		if t.legacy.Lookup(legacyName) != nil {
-			return t.legacy.ExecuteTemplate(w, legacyName, data)
-		}
+	if legacyPreferred && legacyAvailable {
+		return t.legacy.ExecuteTemplate(w, legacyName, data)
 	}
 
 	if tmpl, ok := t.pages[name]; ok {
 		return tmpl.ExecuteTemplate(w, "base", data)
+	}
+	if t.templates.Lookup(name) != nil {
+		return t.templates.ExecuteTemplate(w, name, data)
+	}
+	// Custom HTML pages use the documented legacy "header" and "footer"
+	// templates. Keep them available regardless of the selected UI.
+	if t.legacy != nil && t.legacy.Lookup(name) != nil {
+		return t.legacy.ExecuteTemplate(w, name, data)
 	}
 	return t.templates.ExecuteTemplate(w, name, data)
 }
@@ -289,6 +304,17 @@ func (s *Server) setFuncMap() {
 	// only the new UI is attached to the Vite development server.
 	legacyFM["dev"] = func() bool { return false }
 	legacy := template.Must(template.New("legacy").Funcs(legacyFM).ParseFS(templatesold.Files, "*/*.html"))
+	customPattern := filepath.Join(config.GetHomeDir(), "custom", "*.html")
+	matches, err := filepath.Glob(customPattern)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to check for custom templates")
+	}
+	if len(matches) > 0 {
+		legacy, err = legacy.ParseGlob(customPattern)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to parse custom templates")
+		}
+	}
 
 	s.echo.Renderer = &Template{
 		templates: base,

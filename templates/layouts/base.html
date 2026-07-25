@@ -1,4 +1,6 @@
-{{ define "base" }}
+{{ define "base" }}{{ template "header" . }}{{ block "content" . }}{{ end }}{{ template "footer" . }}{{ end }}
+
+{{ define "header" }}
 <!DOCTYPE html>
 <html lang="en" class="h-full {{ if eq (mainTheme .currentStyle) "dark" }}dark{{ end }}" data-theme="{{ mainTheme .currentStyle }}">
 <head>
@@ -153,8 +155,8 @@
                 {{ range .flashSuccess }}<div class="alert og-blue mb-4" role="status"><section>{{ . }}</section></div>{{ end }}
                 {{ range .flashWarnings }}<div class="alert og-orange mb-4" role="alert"><section>{{ . }}</section></div>{{ end }}
             {{ end }}
-
-            {{ block "content" . }}{{ end }}
+{{ end }}
+{{ define "footer" }}
         </div>
     </main>
 </div>

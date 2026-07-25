@@ -112,13 +112,11 @@ func AllGists(ctx *context.Context) error {
 			title, language, visibility, topics := readGistFilters(ctx, pagination)
 			gists, _, err = db.GetAllGistsForCurrentUserFiltered(currentUserId, title, language, visibility, topics, pageInt-1, sort, order)
 		case "all-liked":
-			ctx.SetData("forceNewUI", true)
 			ctx.SetData("currentPage", "recently-liked")
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.recently-liked"))
 			urlPage = "-/liked"
 			gists, err = db.GetAllGistsLiked(currentUserId, nil, pageInt-1, sort, order, 11, 10)
 		case "all-forked":
-			ctx.SetData("forceNewUI", true)
 			ctx.SetData("currentPage", "recently-forked")
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.recently-forked"))
 			urlPage = "-/forked"

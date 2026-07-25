@@ -15,13 +15,11 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/i18n"
-	webcontext "github.com/thomiceli/opengist/internal/web/context"
 )
 
 type Server struct {
-	echo                  *echo.Echo
-	dev                   bool
-	legacyManifestEntries map[string]webcontext.Asset
+	echo *echo.Echo
+	dev  bool
 }
 
 func NewServer(isDev bool) *Server {
@@ -44,7 +42,6 @@ func NewServer(isDev bool) *Server {
 	if !s.dev {
 		s.parseManifestEntries()
 	}
-	s.parseLegacyManifestEntries()
 	s.setFuncMap()
 
 	s.registerRoutes()

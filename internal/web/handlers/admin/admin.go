@@ -97,7 +97,7 @@ func AdminUserDelete(ctx *context.Context) error {
 	opengistssh.SyncAuthorizedKeysLogged()
 
 	ctx.AddFlash(ctx.Tr("flash.admin.user-deleted"), "success")
-	return ctx.RedirectTo("/admin-panel/users")
+	return ctx.RedirectTo("/-/admin-panel/users")
 }
 
 func AdminGistDelete(ctx *context.Context) error {
@@ -113,7 +113,7 @@ func AdminGistDelete(ctx *context.Context) error {
 	gist.RemoveFromIndex()
 
 	ctx.AddFlash(ctx.Tr("flash.admin.gist-deleted"), "success")
-	return ctx.RedirectTo("/admin-panel/gists")
+	return ctx.RedirectTo("/-/admin-panel/gists")
 }
 
 func AdminConfig(ctx *context.Context) error {
@@ -176,7 +176,7 @@ func AdminInvitationsCreate(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.admin.invitation-created"), "success")
-	return ctx.RedirectTo("/admin-panel/invitations")
+	return ctx.RedirectTo("/-/admin-panel/invitations")
 }
 
 func AdminInvitationsDelete(ctx *context.Context) error {
@@ -191,5 +191,5 @@ func AdminInvitationsDelete(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.admin.invitation-deleted"), "success")
-	return ctx.RedirectTo("/admin-panel/invitations")
+	return ctx.RedirectTo("/-/admin-panel/invitations")
 }

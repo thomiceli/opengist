@@ -11,18 +11,18 @@
             </h3>
             {{ if .hasTotp }}
             <div class="flex">
-                <form method="post" action="{{ $.c.ExternalUrl }}/settings/totp" onconfirm="" class="mr-2">
+                <form method="post" action="{{ $.c.ExternalUrl }}/-/settings/totp" onconfirm="" class="mr-2">
                     <input type="hidden" name="_method" value="DELETE" />
                     {{ .csrfHtml }}
                     <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ .locale.Tr "auth.totp.disable" }}</button>
                 </form>
-                <form method="post" action="{{ $.c.ExternalUrl }}/settings/totp/regenerate" onconfirm="">
+                <form method="post" action="{{ $.c.ExternalUrl }}/-/settings/totp/regenerate" onconfirm="">
                     {{ .csrfHtml }}
                     <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.totp.regenerate-recovery-codes" }}</button>
                 </form>
             </div>
             {{ else }}
-            <a href="{{ $.c.ExternalUrl }}/settings/totp/generate" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.totp.use" }}</a>
+            <a href="{{ $.c.ExternalUrl }}/-/settings/totp/generate" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.totp.use" }}</a>
             {{ end }}
         </div>
     </div>
@@ -70,7 +70,7 @@
                                 <p class="text-xs text-gray-500 line-clamp-2">{{ $.locale.Tr "auth.mfa.passkey-last-used" }} <span>{{ .LastUsedAt | humanTimeDiff }}</span></p>
                                 {{ end }}
                             </div>
-                            <form action="{{ $.c.ExternalUrl }}/settings/passkeys/{{.ID}}" method="post" class="inline-block">
+                            <form action="{{ $.c.ExternalUrl }}/-/settings/passkeys/{{.ID}}" method="post" class="inline-block">
                                 <input type="hidden" name="_method" value="DELETE">
                                 {{ $.csrfHtml }}
                                 <button type="submit" onclick="return confirm('{{ $.locale.Tr "auth.mfa.delete-passkey-confirm" }}');" class="align-middle items-center leading-2 ml-2 px-3 py-1 border border-transparent border-gray-200 dark:border-gray-700 text-xs font-medium rounded-md shadow-sm text-white dark:text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">{{ $.locale.Tr "auth.mfa.delete-passkey" }}</button>

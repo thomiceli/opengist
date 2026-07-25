@@ -13,12 +13,12 @@ func PasskeyDelete(ctx *context.Context) error {
 	user := ctx.User
 	keyId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
 	passkey, err := db.GetCredentialByIDDB(uint(keyId))
 	if err != nil || passkey.UserID != user.ID {
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
 	if err := passkey.Delete(); err != nil {
@@ -26,7 +26,7 @@ func PasskeyDelete(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.auth.passkey-deleted"), "success")
-	return ctx.RedirectTo("/settings")
+	return ctx.RedirectTo("/-/settings")
 }
 
 func PasswordProcess(ctx *context.Context) error {
@@ -40,7 +40,7 @@ func PasswordProcess(ctx *context.Context) error {
 
 	if err := ctx.Validate(dto); err != nil {
 		ctx.AddFlash(validator.ValidationMessages(&err, ctx.GetData("locale").(*i18n.Locale)), "error")
-		return ctx.RedirectTo("/settings/authentication")
+		return ctx.RedirectTo("/-/settings/authentication")
 	}
 
 	password, err := passwordpkg.HashPassword(dto.Password)
@@ -54,5 +54,5 @@ func PasswordProcess(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.user.password-updated"), "success")
-	return ctx.RedirectTo("/settings")
+	return ctx.RedirectTo("/-/settings")
 }

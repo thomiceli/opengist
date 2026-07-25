@@ -29,7 +29,7 @@
                     <ul class="flex flex-col gap-0.5">
                         {{ range $lang, $count := .langs }}
                         <li>
-                            <a href="{{ $.c.ExternalUrl }}/search?q={{ addMetadataToSearchQuery $.searchQuery "language" $lang }}"
+                            <a href="{{ $.c.ExternalUrl }}/-/search?q={{ addMetadataToSearchQuery $.searchQuery "language" $lang }}"
                                class="hover:bg-accent hover:text-accent-foreground flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm">
                                 <span class="truncate">{{ $lang }}</span>
                                 <span class="text-muted-foreground text-xs">{{ $count }}</span>

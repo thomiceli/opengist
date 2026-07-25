@@ -8,7 +8,7 @@ import (
 
 // actionView is the template model for a single row on the admin actions page.
 type actionView struct {
-	Path     string // POST endpoint suffix under /admin-panel, e.g. "sync-fs"
+	Path     string // POST endpoint suffix under /-/admin-panel, e.g. "sync-fs"
 	LabelKey string // i18n key for the action's label
 	Running  bool   // currently in progress in this instance
 	Periodic bool   // also runs automatically on a schedule
@@ -71,45 +71,45 @@ func AdminActions(ctx *context.Context) error {
 
 func AdminSyncReposFromFS(ctx *context.Context) error {
 	go actions.RunOnce(actions.SyncReposFromFS)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }
 
 func AdminSyncReposFromDB(ctx *context.Context) error {
 	go actions.RunOnce(actions.SyncReposFromDB)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }
 
 func AdminGcRepos(ctx *context.Context) error {
 	go actions.RunOnce(actions.GitGcRepos)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }
 
 func AdminSyncGistPreviews(ctx *context.Context) error {
 	go actions.RunOnce(actions.SyncGistPreviews)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }
 
 func AdminResetHooks(ctx *context.Context) error {
 	go actions.RunOnce(actions.ResetHooks)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }
 
 func AdminIndexGists(ctx *context.Context) error {
 	go actions.RunOnce(actions.IndexGists)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }
 
 func AdminSyncGistLanguages(ctx *context.Context) error {
 	go actions.RunOnce(actions.SyncGistLanguages)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }
 
 func AdminDeleteExpiredGists(ctx *context.Context) error {
 	go actions.RunOnce(actions.DeleteExpiredGists)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }
 
 func AdminSyncSSHKeys(ctx *context.Context) error {
 	go actions.RunOnce(actions.SyncSSHKeys)
-	return ctx.RedirectTo("/admin-panel/actions?run=1")
+	return ctx.RedirectTo("/-/admin-panel/actions?run=1")
 }

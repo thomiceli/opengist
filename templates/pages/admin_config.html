@@ -118,7 +118,7 @@
         <p class="text-muted-foreground text-sm">{{ .help }}</p>
     </div>
     <button type="button" id="{{ .id }}" role="switch" aria-checked="{{ .on }}"
-            hx-put="{{ .url }}/admin-panel/set-config"
+            hx-put="{{ .url }}/-/admin-panel/set-config"
             hx-swap="none"
             hx-include="[name='_csrf']"
             hx-vals='js:{key: this.id, value: this.getAttribute("aria-checked") === "true" ? "0" : "1"}'

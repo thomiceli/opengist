@@ -89,7 +89,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </label>
 
-        <form action="{{ .c.ExternalUrl }}/search" method="GET" class="group relative w-full max-w-md">
+        <form action="{{ .c.ExternalUrl }}/-/search" method="GET" class="group relative w-full max-w-md">
             <svg class="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input type="search" name="q" value="{{ .searchQuery }}" autocomplete="off"
                    placeholder="{{ if indexEnabled }}Code search{{ else }}Search{{ end }}"
@@ -131,16 +131,16 @@
                 <div id="user-menu" data-popover aria-hidden="true" data-side="bottom" data-align="end">
                     <div role="menu" aria-labelledby="user-menu-trigger">
                         <a href="{{ .c.ExternalUrl }}/{{ .userLogged.Username }}" role="menuitem">{{ .locale.Tr "header.menu.my-gists" }}</a>
-                        <a href="{{ .c.ExternalUrl }}/settings" role="menuitem">{{ .locale.Tr "header.menu.settings" }}</a>
+                        <a href="{{ .c.ExternalUrl }}/-/settings" role="menuitem">{{ .locale.Tr "header.menu.settings" }}</a>
                         <hr role="separator" />
-                        <a href="{{ .c.ExternalUrl }}/logout" role="menuitem" class="text-destructive">{{ .locale.Tr "header.menu.logout" }}</a>
+                        <a href="{{ .c.ExternalUrl }}/-/logout" role="menuitem" class="text-destructive">{{ .locale.Tr "header.menu.logout" }}</a>
                     </div>
                 </div>
             </div>
             {{ else }}
-            <a href="{{ .c.ExternalUrl }}/login" class="btn-sm">{{ .locale.Tr "header.menu.login" }}</a>
+            <a href="{{ .c.ExternalUrl }}/-/login" class="btn-sm">{{ .locale.Tr "header.menu.login" }}</a>
             {{ if not .DisableSignup }}
-            <a href="{{ .c.ExternalUrl }}/register" class="btn-sm-outline">{{ .locale.Tr "header.menu.register" }}</a>
+            <a href="{{ .c.ExternalUrl }}/-/register" class="btn-sm-outline">{{ .locale.Tr "header.menu.register" }}</a>
             {{ end }}
             {{ end }}
         </div>

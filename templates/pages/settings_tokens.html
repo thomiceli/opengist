@@ -11,7 +11,7 @@
         <section>
             {{ .locale.Tr "settings.api-disabled-warning" }}
             {{ if .userIsAdmin }}
-            <a href="{{ .c.ExternalUrl }}/admin-panel/configuration" class="font-medium underline">{{ .locale.Tr "settings.api-disabled-go-admin" }} →</a>
+            <a href="{{ .c.ExternalUrl }}/-/admin-panel/configuration" class="font-medium underline">{{ .locale.Tr "settings.api-disabled-go-admin" }} →</a>
             {{ end }}
         </section>
     </div>
@@ -24,7 +24,7 @@
                 <h2 class="font-semibold">{{ .locale.Tr "settings.create-token" }}</h2>
                 <p class="text-muted-foreground text-sm">{{ .locale.Tr "settings.create-token-help" }}</p>
             </div>
-            <form action="{{ .c.ExternalUrl }}/settings/access-tokens" method="post" class="space-y-4 p-4">
+            <form action="{{ .c.ExternalUrl }}/-/settings/access-tokens" method="post" class="space-y-4 p-4">
                 {{ .csrfHtml }}
                 <div class="space-y-1.5">
                     <label for="name" class="text-sm font-medium">{{ .locale.Tr "settings.token-name" }}</label>
@@ -82,7 +82,7 @@
                         <p class="text-muted-foreground text-xs">{{ $.locale.Tr "settings.token-last-used" }} {{ .LastUsedAt | humanTimeDiff }}</p>
                         {{ end }}
                     </div>
-                    <form action="{{ $.c.ExternalUrl }}/settings/access-tokens/{{ .ID }}" method="post" class="shrink-0">
+                    <form action="{{ $.c.ExternalUrl }}/-/settings/access-tokens/{{ .ID }}" method="post" class="shrink-0">
                         {{ $.csrfHtml }}
                         <input type="hidden" name="_method" value="DELETE" />
                         <button type="submit" class="btn-sm bg-destructive text-white hover:bg-destructive/90"

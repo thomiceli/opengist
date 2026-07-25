@@ -41,11 +41,11 @@ func (s *Server) registerRoutes() {
 
 		r.Static("/avatar", settings.AvatarsDir())
 
-		r.GET("/register", auth.Register)
-		r.POST("/register", auth.ProcessRegister)
-		r.GET("/login", auth.Login)
-		r.POST("/login", auth.ProcessLogin)
-		r.GET("/logout", auth.Logout)
+		r.GET("/-/register", auth.Register)
+		r.POST("/-/register", auth.ProcessRegister)
+		r.GET("/-/login", auth.Login)
+		r.POST("/-/login", auth.ProcessLogin)
+		r.GET("/-/logout", auth.Logout)
 		r.GET("/oauth/register", auth.OauthRegister, inOAuthRegisterSession)
 		r.POST("/oauth/register", auth.ProcessOauthRegister, inOAuthRegisterSession)
 		r.GET("/oauth/:provider", auth.Oauth)
@@ -60,7 +60,7 @@ func (s *Server) registerRoutes() {
 		r.GET("/mfa", auth.Mfa, inMFASession)
 		r.POST("/mfa/totp/assertion", auth.AssertTotp, inMFASession)
 
-		sA := r.SubGroup("/settings")
+		sA := r.SubGroup("/-/settings")
 		{
 			sA.Use(logged)
 			sA.GET("", settings.UserAccount)
@@ -86,7 +86,7 @@ func (s *Server) registerRoutes() {
 			sA.POST("/totp/regenerate", auth.RegenerateTotpRecoveryCodes)
 		}
 
-		sB := r.SubGroup("/admin-panel")
+		sB := r.SubGroup("/-/admin-panel")
 		{
 			sB.Use(adminPermission)
 			sB.GET("", admin.AdminIndex)
@@ -179,9 +179,9 @@ func (s *Server) registerRoutes() {
 		r.GET("/-/users", gist.Users, checkRequireLogin)
 
 		if index.IndexEnabled() {
-			r.GET("/search", gist.Search, checkRequireLogin)
+			r.GET("/-/search", gist.Search, checkRequireLogin)
 		} else {
-			r.GET("/search", gist.AllGists, checkRequireLogin, setAllGistsMode("search"))
+			r.GET("/-/search", gist.AllGists, checkRequireLogin, setAllGistsMode("search"))
 		}
 
 		r.GET("/:user", gist.AllGists, checkRequireLogin, setAllGistsMode("fromUser"))

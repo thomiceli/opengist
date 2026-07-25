@@ -129,10 +129,10 @@ func TestCmdAdminCreateUser_MissingPassword(t *testing.T) {
 
 func TestCmdAdminCreateUser_InvalidUsername(t *testing.T) {
 	// Reserved names must be rejected with the same rules as the web form.
-	err := runCreateUser(t, "--username", "login", "--password", "pw")
+	err := runCreateUser(t, "--username", "oauth", "--password", "pw")
 	require.Error(t, err)
 
-	_, fetchErr := db.GetUserByUsername("login")
+	_, fetchErr := db.GetUserByUsername("oauth")
 	require.Error(t, fetchErr, "reserved user must not be persisted")
 }
 

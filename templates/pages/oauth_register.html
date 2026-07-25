@@ -37,12 +37,12 @@
             <p class="text-muted-foreground text-sm">
                 {{ .locale.Tr "auth.oauth.already-have-account" .c.OIDCProviderName }}
             </p>
-            <a href="{{ .c.ExternalUrl }}/login" class="btn-outline w-full">{{ .locale.Tr "auth.login" }}</a>
+            <a href="{{ .c.ExternalUrl }}/-/login" class="btn-outline w-full">{{ .locale.Tr "auth.login" }}</a>
         </div>
     </div>
 
     <p class="text-muted-foreground mt-4 text-center text-sm">
-        <a href="{{ .c.ExternalUrl }}/login" class="text-primary font-medium hover:underline">{{ .locale.Tr "auth.oauth.cancel" }}</a>
+        <a href="{{ .c.ExternalUrl }}/-/login" class="text-primary font-medium hover:underline">{{ .locale.Tr "auth.oauth.cancel" }}</a>
     </p>
 </div>
 {{ end }}

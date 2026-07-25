@@ -23,7 +23,7 @@
                         <td class="px-4 py-2"><a href="{{ $.c.ExternalUrl }}/{{ $user.Username }}" class="text-primary hover:underline">{{ $user.Username }}</a></td>
                         <td class="text-muted-foreground px-4 py-2">{{ $user.CreatedAt | humanDate }}</td>
                         <td class="px-4 py-2 text-right">
-                            <form action="{{ $.c.ExternalUrl }}/admin-panel/users/{{ $user.ID }}/delete" method="POST">
+                            <form action="{{ $.c.ExternalUrl }}/-/admin-panel/users/{{ $user.ID }}/delete" method="POST">
                                 {{ $.csrfHtml }}
                                 <button type="submit" class="text-destructive text-sm font-medium hover:underline"
                                         _="on click if not window.confirm('{{ $.locale.Tr "admin.users.delete_confirm" }}') halt the event">{{ $.locale.Tr "admin.delete" }}</button>

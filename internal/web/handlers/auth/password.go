@@ -131,7 +131,7 @@ func ProcessLogin(ctx *context.Context) error {
 		if errors.As(err, &authErr) {
 			log.Warn().Msg("Invalid HTTP authentication attempt from " + ctx.RealIP())
 			ctx.AddFlash(ctx.Tr("flash.auth.invalid-credentials"), "error")
-			return ctx.RedirectTo("/login")
+			return ctx.RedirectTo("/-/login")
 		}
 		return ctx.ErrorRes(500, "Authentication system error", nil)
 	}

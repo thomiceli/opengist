@@ -103,6 +103,6 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		})
 		defer resp.Body.Close()
 
-		require.Equal(t, "/login", resp.Request.URL.Path)
+		require.Equal(t, "/-/login", resp.Request.URL.Path)
 	})
 }

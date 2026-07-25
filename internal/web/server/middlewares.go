@@ -229,7 +229,7 @@ func inOAuthRegisterSession(next Handler) Handler {
 		sess := ctx.GetSession()
 		_, ok := sess.Values["oauthProvider"].(string)
 		if !ok {
-			return ctx.RedirectTo("/login")
+			return ctx.RedirectTo("/-/login")
 		}
 		return next(ctx)
 	}
@@ -252,7 +252,7 @@ func makeCheckRequireLogin(isSingleGistAccess bool) Middleware {
 
 			if !allow {
 				ctx.AddFlash(ctx.Tr("flash.auth.must-be-logged-in"), "error")
-				return ctx.RedirectTo("/login")
+				return ctx.RedirectTo("/-/login")
 			}
 			return next(ctx)
 		}
@@ -275,7 +275,7 @@ func checkFileUploadEnabled(next Handler) Handler {
 // makeApiCheckRequireLogin is the /api/v1 counterpart of makeCheckRequireLogin:
 // it enforces the instance's RequireLogin / AllowGistsWithoutLogin settings on
 // anonymous gist reads, but responds with a JSON 401 instead of redirecting to
-// /login. ctx.User is already resolved from the Authorization header by
+// /-/login. ctx.User is already resolved from the Authorization header by
 // apiBindAuth, so there is no token fallback to do here.
 func makeApiCheckRequireLogin(isSingleGistAccess bool) Middleware {
 	return func(next Handler) Handler {

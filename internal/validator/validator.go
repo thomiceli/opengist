@@ -74,7 +74,7 @@ func validateReservedKeywords(fl validator.FieldLevel) bool {
 	name := fl.Field().String()
 
 	restrictedNames := map[string]struct{}{}
-	for _, restrictedName := range []string{"assets", "register", "login", "logout", "settings", "admin-panel", "all", "search", "init", "healthcheck", "preview", "metrics", "mfa", "webauthn", "oauth"} {
+	for _, restrictedName := range []string{"assets", "init", "healthcheck", "preview", "metrics", "mfa", "webauthn", "oauth"} {
 		restrictedNames[restrictedName] = struct{}{}
 	}
 
@@ -84,7 +84,9 @@ func validateReservedKeywords(fl validator.FieldLevel) bool {
 }
 
 func validateAlphaNumDash(fl validator.FieldLevel) bool {
-	return regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(fl.Field().String())
+	value := fl.Field().String()
+	return regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(value) &&
+		regexp.MustCompile(`[a-zA-Z0-9]`).MatchString(value)
 }
 
 func validateAlphaNumDashOrEmpty(fl validator.FieldLevel) bool {
@@ -92,7 +94,9 @@ func validateAlphaNumDashOrEmpty(fl validator.FieldLevel) bool {
 }
 
 func validateAlphaNumDashUnder(fl validator.FieldLevel) bool {
-	return regexp.MustCompile(`^[a-zA-Z0-9-_]+$`).MatchString(fl.Field().String())
+	value := fl.Field().String()
+	return regexp.MustCompile(`^[a-zA-Z0-9-_]+$`).MatchString(value) &&
+		regexp.MustCompile(`[a-zA-Z0-9]`).MatchString(value)
 }
 
 func validateAlphaNumDashUnderOrEmpty(fl validator.FieldLevel) bool {

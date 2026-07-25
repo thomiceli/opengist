@@ -154,11 +154,11 @@ func (s *Server) TestCtxData(t *testing.T, expected echo.Map) {
 }
 
 func (s *Server) Register(t *testing.T, user string) {
-	s.Request(t, "POST", "/register", db.UserDTO{Username: user, Password: user}, 302)
+	s.Request(t, "POST", "/-/register", db.UserDTO{Username: user, Password: user}, 302)
 }
 
 func (s *Server) Login(t *testing.T, user string) {
-	s.Request(t, "POST", "/login", db.UserDTO{Username: user, Password: user}, 302)
+	s.Request(t, "POST", "/-/login", db.UserDTO{Username: user, Password: user}, 302)
 }
 
 func (s *Server) Logout() {
@@ -166,7 +166,7 @@ func (s *Server) Logout() {
 }
 
 func (s *Server) CreateGist(t *testing.T, visibility string) (gistPath string, gist *db.Gist, username, identifier string) {
-	s.Request(t, "POST", "/register", db.UserDTO{Username: "thomas", Password: "thomas"}, 0)
+	s.Request(t, "POST", "/-/register", db.UserDTO{Username: "thomas", Password: "thomas"}, 0)
 	s.Login(t, "thomas")
 
 	resp := s.Request(t, "POST", "/", url.Values{

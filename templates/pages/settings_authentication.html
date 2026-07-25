@@ -12,7 +12,7 @@
             <h2 class="font-semibold">{{ if .hasPassword }}{{ .locale.Tr "settings.change-password" }}{{ else }}{{ .locale.Tr "settings.create-password" }}{{ end }}</h2>
             <p class="text-muted-foreground text-sm">{{ if .hasPassword }}{{ .locale.Tr "settings.change-password-help" }}{{ else }}{{ .locale.Tr "settings.create-password-help" }}{{ end }}</p>
         </div>
-        <form action="{{ .c.ExternalUrl }}/settings/password" method="post" class="space-y-4 p-4">
+        <form action="{{ .c.ExternalUrl }}/-/settings/password" method="post" class="space-y-4 p-4">
             {{ .csrfHtml }}
             <input type="hidden" name="_method" value="PUT" />
             <div class="space-y-1.5">
@@ -38,17 +38,17 @@
             </div>
             <div class="flex shrink-0 items-center gap-2">
                 {{ if .hasTotp }}
-                <form method="post" action="{{ .c.ExternalUrl }}/settings/totp">
+                <form method="post" action="{{ .c.ExternalUrl }}/-/settings/totp">
                     {{ .csrfHtml }}
                     <input type="hidden" name="_method" value="DELETE" />
                     <button type="submit" class="btn-sm bg-destructive text-white hover:bg-destructive/90">{{ .locale.Tr "auth.totp.disable" }}</button>
                 </form>
-                <form method="post" action="{{ .c.ExternalUrl }}/settings/totp/regenerate">
+                <form method="post" action="{{ .c.ExternalUrl }}/-/settings/totp/regenerate">
                     {{ .csrfHtml }}
                     <button type="submit" class="btn-sm-outline">{{ .locale.Tr "auth.totp.regenerate-recovery-codes" }}</button>
                 </form>
                 {{ else }}
-                <a hx-boost="false" href="{{ .c.ExternalUrl }}/settings/totp/generate" class="btn-sm">{{ .locale.Tr "auth.totp.use" }}</a>
+                <a hx-boost="false" href="{{ .c.ExternalUrl }}/-/settings/totp/generate" class="btn-sm">{{ .locale.Tr "auth.totp.use" }}</a>
                 {{ end }}
             </div>
         </div>
@@ -86,7 +86,7 @@
                     <p class="text-muted-foreground text-xs">{{ $.locale.Tr "auth.mfa.passkey-last-used" }} {{ .LastUsedAt | humanTimeDiff }}</p>
                     {{ end }}
                 </div>
-                <form action="{{ $.c.ExternalUrl }}/settings/passkeys/{{ .ID }}" method="post" class="shrink-0">
+                <form action="{{ $.c.ExternalUrl }}/-/settings/passkeys/{{ .ID }}" method="post" class="shrink-0">
                     {{ $.csrfHtml }}
                     <input type="hidden" name="_method" value="DELETE" />
                     <button type="submit" class="btn-sm bg-destructive text-white hover:bg-destructive/90"

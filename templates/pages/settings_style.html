@@ -9,7 +9,7 @@
          stylesheet, the `dark` class on <html>, and the :root color vars). A boosted
          submit only swaps the <body>, leaving those stale until a hard refresh, so we
          let this form do a full navigation — the redirect re-renders the whole head. */}}
-    <form method="post" action="{{ .c.ExternalUrl }}/settings/style" class="form space-y-6" hx-boost="false">
+    <form method="post" action="{{ .c.ExternalUrl }}/-/settings/style" class="form space-y-6" hx-boost="false">
         {{ .csrfHtml }}
 
         <!-- Theme -->

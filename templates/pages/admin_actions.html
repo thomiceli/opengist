@@ -9,7 +9,7 @@
         {{/* The list re-fetches itself while any action is running (and briefly
              after a manual trigger via pollNow), then stops polling once idle. */}}
         <div id="actions-list"
-             {{ if or .anyRunning .pollNow }}hx-get="{{ .c.ExternalUrl }}/admin-panel/actions" hx-trigger="every 3s" hx-select="#actions-list" hx-target="this" hx-swap="outerHTML"{{ end }}>
+             {{ if or .anyRunning .pollNow }}hx-get="{{ .c.ExternalUrl }}/-/admin-panel/actions" hx-trigger="every 3s" hx-select="#actions-list" hx-target="this" hx-swap="outerHTML"{{ end }}>
             <ul class="divide-y">
                 {{ range .actions }}
                 <li class="flex items-center justify-between gap-4 p-4">
@@ -33,7 +33,7 @@
                              with ?run=1. hx-boost (on <body>) turns this into a boosted
                              navigation that re-renders the whole page, so the flash shows
                              and polling picks up any still-running action. */}}
-                        <form method="POST" action="{{ $.c.ExternalUrl }}/admin-panel/{{ .Path }}">
+                        <form method="POST" action="{{ $.c.ExternalUrl }}/-/admin-panel/{{ .Path }}">
                             {{ $.csrfHtml }}
                             <button type="submit" {{ if .Running }}disabled{{ end }}
                                     class="btn-sm-outline disabled:pointer-events-none disabled:opacity-50">

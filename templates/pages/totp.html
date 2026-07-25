@@ -15,7 +15,7 @@
             <li class="select-all">{{ . }}</li>
             {{ end }}
         </ul>
-        <a href="{{ .c.ExternalUrl }}/settings/authentication" class="btn w-full">{{ .locale.Tr "auth.totp.proceed" }}</a>
+        <a href="{{ .c.ExternalUrl }}/-/settings/authentication" class="btn w-full">{{ .locale.Tr "auth.totp.proceed" }}</a>
     </div>
 
     {{ else }}
@@ -29,7 +29,7 @@
 
         <div class="border-border border-t" aria-hidden="true"></div>
 
-        <form method="post" action="{{ .c.ExternalUrl }}/settings/totp/generate" class="space-y-4">
+        <form method="post" action="{{ .c.ExternalUrl }}/-/settings/totp/generate" class="space-y-4">
             {{ .csrfHtml }}
             <div class="space-y-1.5">
                 <label for="code" class="text-sm font-medium">{{ .locale.Tr "auth.totp.code" }}</label>

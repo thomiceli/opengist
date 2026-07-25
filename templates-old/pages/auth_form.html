@@ -37,7 +37,7 @@
                                     <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.login" }}</button>
                                 </div>
                                 {{ if not .DisableSignup }}
-                                <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/register">{{ .locale.Tr "auth.register-instead" }} →</a></span>
+                                <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/-/register">{{ .locale.Tr "auth.register-instead" }} →</a></span>
                                 {{ end }}
                             </div>
                             {{ else }}
@@ -45,7 +45,7 @@
                                 <div class="flex-auto">
                                     <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent border-gray-200 dark:border-gray-700 text-sm font-medium rounded-md shadow-sm text-white dark:text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">{{ .locale.Tr "auth.signup" }}</button>
                                 </div>
-                                <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/login">{{ .locale.Tr "auth.login-instead" }} →</a></span>
+                                <span class="float-right text-sm py-2 underline"><a href="{{ $.c.ExternalUrl }}/-/login">{{ .locale.Tr "auth.login-instead" }} →</a></span>
 
                             </div>
                             {{ end }}

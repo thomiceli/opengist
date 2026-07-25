@@ -18,17 +18,17 @@ func TestAccessTokensCRUD(t *testing.T) {
 
 	t.Run("RequiresAuth", func(t *testing.T) {
 		s.Logout()
-		s.Request(t, "GET", "/settings/access-tokens", nil, 302)
+		s.Request(t, "GET", "/-/settings/access-tokens", nil, 302)
 	})
 
 	t.Run("AccessTokensPage", func(t *testing.T) {
 		s.Login(t, "thomas")
-		s.Request(t, "GET", "/settings/access-tokens", nil, 200)
+		s.Request(t, "GET", "/-/settings/access-tokens", nil, 200)
 	})
 
 	t.Run("CreateReadToken", func(t *testing.T) {
 		s.Login(t, "thomas")
-		s.Request(t, "POST", "/settings/access-tokens", db.AccessTokenDTO{
+		s.Request(t, "POST", "/-/settings/access-tokens", db.AccessTokenDTO{
 			Name:      "test-token",
 			ScopeGist: db.ReadPermission,
 		}, 302)
@@ -44,7 +44,7 @@ func TestAccessTokensCRUD(t *testing.T) {
 	t.Run("CreateExpiringToken", func(t *testing.T) {
 		s.Login(t, "thomas")
 		tomorrow := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
-		s.Request(t, "POST", "/settings/access-tokens", db.AccessTokenDTO{
+		s.Request(t, "POST", "/-/settings/access-tokens", db.AccessTokenDTO{
 			Name:      "expiring-token",
 			ScopeGist: db.ReadWritePermission,
 			ExpiresAt: tomorrow,
@@ -57,7 +57,7 @@ func TestAccessTokensCRUD(t *testing.T) {
 
 	t.Run("DeleteToken", func(t *testing.T) {
 		s.Login(t, "thomas")
-		s.Request(t, "DELETE", "/settings/access-tokens/1", nil, 302)
+		s.Request(t, "DELETE", "/-/settings/access-tokens/1", nil, 302)
 
 		tokens, err := db.GetAccessTokensByUserID(1)
 		require.NoError(t, err)
@@ -279,7 +279,7 @@ func TestCreateTokenWithUserScope(t *testing.T) {
 	s.Register(t, "thomas")
 	s.Login(t, "thomas")
 
-	s.Request(t, "POST", "/settings/access-tokens", db.AccessTokenDTO{
+	s.Request(t, "POST", "/-/settings/access-tokens", db.AccessTokenDTO{
 		Name:      "with-user",
 		ScopeGist: db.ReadPermission,
 		ScopeUser: db.ReadPermission,
@@ -311,7 +311,7 @@ func TestAccessTokenWithRequireLogin(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, token.Create())
 
-	s.Request(t, "PUT", "/admin-panel/set-config", url.Values{"key": {db.SettingRequireLogin}, "value": {"1"}}, 200)
+	s.Request(t, "PUT", "/-/admin-panel/set-config", url.Values{"key": {db.SettingRequireLogin}, "value": {"1"}}, 200)
 	s.Logout()
 
 	headers := map[string]string{"Authorization": "Token " + plainToken}

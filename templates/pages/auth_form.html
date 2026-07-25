@@ -79,10 +79,10 @@
         <p class="text-muted-foreground text-center text-sm">
             {{ if .isLoginPage }}
                 {{ if not .DisableSignup }}
-                <a href="{{ .c.ExternalUrl }}/register" class="text-primary font-medium hover:underline">{{ .locale.Tr "auth.register-instead" }} →</a>
+                <a href="{{ .c.ExternalUrl }}/-/register" class="text-primary font-medium hover:underline">{{ .locale.Tr "auth.register-instead" }} →</a>
                 {{ end }}
             {{ else }}
-                <a href="{{ .c.ExternalUrl }}/login" class="text-primary font-medium hover:underline">{{ .locale.Tr "auth.login-instead" }} →</a>
+                <a href="{{ .c.ExternalUrl }}/-/login" class="text-primary font-medium hover:underline">{{ .locale.Tr "auth.login-instead" }} →</a>
             {{ end }}
         </p>
         {{ end }}

@@ -35,7 +35,14 @@ func switchUI(ctx *webcontext.Context) error {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	return ctx.RedirectTo(safeUIRedirect(ctx.QueryParam("redirect")))
+	return ctx.RedirectTo(uiSwitchRedirect(ui, ctx.QueryParam("redirect")))
+}
+
+func uiSwitchRedirect(ui, redirect string) string {
+	if ui == "old" {
+		return "/"
+	}
+	return safeUIRedirect(redirect)
 }
 
 func safeUIRedirect(redirect string) string {

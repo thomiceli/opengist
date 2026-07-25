@@ -242,19 +242,11 @@
                 <span>{{ .locale.Tr "ui.feedback-new" }}</span>
             </a>
 
-            {{ if .legacyUIPreferred }}
-                <a hx-boost="false" href="{{ .c.ExternalUrl }}/-/ui/new?redirect={{ .uiRedirectUrl | urlquery }}"
-                   class="text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground flex items-center gap-2 rounded-md px-2 py-1.5 text-xs [&>svg]:size-4 [&>svg]:shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><path d="m9 9-3 3 3 3"/></svg>
-                    <span>{{ .locale.Tr "ui.switch-to-new" }}</span>
-                </a>
-            {{ else if .legacyUIAvailable }}
-                <a hx-boost="false" href="{{ .c.ExternalUrl }}/-/ui/old?redirect={{ .uiRedirectUrl | urlquery }}"
-                   class="text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground flex items-center gap-2 rounded-md px-2 py-1.5 text-xs [&>svg]:size-4 [&>svg]:shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><path d="m15 9 3 3-3 3"/></svg>
-                    <span>{{ .locale.Tr "ui.switch-to-old" }}</span>
-                </a>
-            {{ end }}
+            <a hx-boost="false" href="{{ .c.ExternalUrl }}/-/ui/old"
+               class="text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground flex items-center gap-2 rounded-md px-2 py-1.5 text-xs [&>svg]:size-4 [&>svg]:shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/><path d="m15 9 3 3-3 3"/></svg>
+                <span>{{ .locale.Tr "ui.switch-to-old" }}</span>
+            </a>
 
             <a href="https://github.com/thomiceli/opengist" target="_blank" rel="noopener"
                class="text-sidebar-foreground/70 hover:text-sidebar-foreground flex items-center gap-1.5 px-2 py-1.5 text-xs">

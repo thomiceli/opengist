@@ -19,7 +19,7 @@ install:
 
 build_frontend:
 	@echo "Building frontend assets..."
-	npm run build
+	npx vite -c public/vite.config.js build
 
 build_backend:
 	@echo "Building Opengist binary..."

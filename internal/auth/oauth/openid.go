@@ -20,15 +20,17 @@ type OIDCProvider struct {
 }
 
 func (p *OIDCProvider) RegisterProvider() error {
+	scopes := []string{"openid", "email", "profile"}
+	if config.C.OIDCGroupClaimName != "" {
+		scopes = append(scopes, config.C.OIDCGroupClaimName)
+	}
+
 	oidcProvider, err := openidConnect.New(
 		config.C.OIDCClientKey,
 		config.C.OIDCSecret,
 		urlJoin(p.URL, "/oauth/openid-connect/callback"),
 		config.C.OIDCDiscoveryUrl,
-		"openid",
-		"email",
-		"profile",
-		config.C.OIDCGroupClaimName,
+		scopes...,
 	)
 
 	if err != nil {

@@ -23,7 +23,12 @@ func NewValidator() *OpengistValidator {
 	_ = v.RegisterValidation("alphanumdashunderorempty", validateAlphaNumDashUnderOrEmpty)
 	_ = v.RegisterValidation("gisttopics", validateGistTopics)
 	_ = v.RegisterValidation("expirationdate", validateExpirationDate)
+	_ = v.RegisterValidation("themecolor", validateThemeColor)
 	return &OpengistValidator{v}
+}
+
+var ThemeColors = []string{
+	"red", "amber", "emerald", "sky", "indigo", "purple", "neutral",
 }
 
 func (cv *OpengistValidator) Validate(i interface{}) error {
@@ -69,7 +74,7 @@ func validateReservedKeywords(fl validator.FieldLevel) bool {
 	name := fl.Field().String()
 
 	restrictedNames := map[string]struct{}{}
-	for _, restrictedName := range []string{"assets", "register", "login", "logout", "settings", "admin-panel", "all", "search", "init", "healthcheck", "preview", "metrics", "mfa", "webauthn", "oauth"} {
+	for _, restrictedName := range []string{"api", "assets", "init", "healthcheck", "preview", "metrics", "mfa", "webauthn", "oauth"} {
 		restrictedNames[restrictedName] = struct{}{}
 	}
 
@@ -79,7 +84,9 @@ func validateReservedKeywords(fl validator.FieldLevel) bool {
 }
 
 func validateAlphaNumDash(fl validator.FieldLevel) bool {
-	return regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(fl.Field().String())
+	value := fl.Field().String()
+	return regexp.MustCompile(`^[a-zA-Z0-9-]+$`).MatchString(value) &&
+		regexp.MustCompile(`[a-zA-Z0-9]`).MatchString(value)
 }
 
 func validateAlphaNumDashOrEmpty(fl validator.FieldLevel) bool {
@@ -87,11 +94,26 @@ func validateAlphaNumDashOrEmpty(fl validator.FieldLevel) bool {
 }
 
 func validateAlphaNumDashUnder(fl validator.FieldLevel) bool {
-	return regexp.MustCompile(`^[a-zA-Z0-9-_]+$`).MatchString(fl.Field().String())
+	value := fl.Field().String()
+	return regexp.MustCompile(`^[a-zA-Z0-9-_]+$`).MatchString(value) &&
+		regexp.MustCompile(`[a-zA-Z0-9]`).MatchString(value)
 }
 
 func validateAlphaNumDashUnderOrEmpty(fl validator.FieldLevel) bool {
 	return regexp.MustCompile(`^$|^[a-zA-Z0-9-_]+$`).MatchString(fl.Field().String())
+}
+
+func validateThemeColor(fl validator.FieldLevel) bool {
+	color := fl.Field().String()
+	if color == "" {
+		return true
+	}
+	for _, c := range ThemeColors {
+		if c == color {
+			return true
+		}
+	}
+	return false
 }
 
 func validateGistTopics(fl validator.FieldLevel) bool {

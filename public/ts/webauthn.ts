@@ -165,18 +165,29 @@ async function loginWithPasskey() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const registerButton = document.getElementById('bind-passkey-button');
-    if (registerButton) {
+function initWebauthn() {
+    const registerButton = document.getElementById('bind-passkey-button') as HTMLElement | null;
+    if (registerButton && !registerButton.dataset.passkeyBound) {
+        registerButton.dataset.passkeyBound = 'true';
         registerButton.addEventListener('click', bindPasskey);
     }
 
-    if (document.documentURI.includes('/mfa')) {
-        loginMethod = "assertion"
-    }
+    loginMethod = document.documentURI.includes('/mfa') ? 'assertion' : 'login';
 
-    const loginButton = document.getElementById('login-passkey-button');
-    if (loginButton) {
+    const loginButton = document.getElementById('login-passkey-button') as HTMLElement | null;
+    if (loginButton && !loginButton.dataset.passkeyBound) {
+        loginButton.dataset.passkeyBound = 'true';
         loginButton.addEventListener('click', loginWithPasskey);
     }
-});
+}
+
+// The page can be reached either by a full load or via hx-boost, which swaps
+// the body content without firing DOMContentLoaded. Initialize for all paths,
+// matching how main.ts / editor.ts re-initialize their components.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWebauthn);
+} else {
+    initWebauthn();
+}
+document.body.addEventListener('htmx:afterSwap', initWebauthn);
+document.body.addEventListener('htmx:historyRestore', initWebauthn);

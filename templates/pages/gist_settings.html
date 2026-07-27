@@ -1,0 +1,101 @@
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="space-y-1">
+        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "settings" }}</h1>
+        <p class="text-muted-foreground text-sm">
+            <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" class="hover:underline">{{ .gist.User.Username }}<span class="text-muted-foreground">/</span>{{ .gist.Title }}</a>
+        </p>
+    </header>
+
+    {{ if not .gist.Archived }}
+    <!-- Metadata -->
+    <section class="bg-card rounded-lg border">
+        <form method="post" action="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/metadata" class="space-y-4 p-4">
+            {{ .csrfHtml }}
+            <div class="space-y-1.5">
+                <label for="m-title" class="text-sm font-medium">{{ .locale.Tr "gist.new.title" }}</label>
+                <input id="m-title" name="title" type="text" maxlength="250" value="{{ .gist.Title }}" class="input h-9 w-full" />
+            </div>
+            <div class="space-y-1.5">
+                <label for="m-url" class="text-sm font-medium">{{ .locale.Tr "gist.new.url" }}</label>
+                <div class="flex">
+                    <span class="border-input bg-muted text-muted-foreground inline-flex h-9 items-center rounded-l-md border border-r-0 px-2 text-sm">{{ .gist.User.Username }}/</span>
+                    <input id="m-url" name="url" type="text" maxlength="32" value="{{ .gist.URL }}" placeholder="{{ .gist.Uuid }}" class="input h-9 w-full rounded-l-none" />
+                </div>
+            </div>
+            <div class="space-y-1.5">
+                <label for="m-description" class="text-sm font-medium">{{ .locale.Tr "gist.new.description" }}</label>
+                <textarea id="m-description" name="description" rows="3" maxlength="1000" class="input">{{ .gist.Description }}</textarea>
+            </div>
+            <div class="space-y-1.5">
+                <label for="m-topics" class="text-sm font-medium">{{ .locale.Tr "gist.new.topics" }}</label>
+                <input id="m-topics" name="topics" type="text" value="{{ range $i, $t := .gist.Topics }}{{ if $i }} {{ end }}{{ $t.Topic }}{{ end }}" class="input h-9 w-full" />
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="btn-sm">{{ .locale.Tr "gist.edit.save" }}</button>
+            </div>
+        </form>
+    </section>
+    {{ end }}
+
+    <!-- Visibility -->
+    <section class="bg-card rounded-lg border">
+        <div class="flex flex-wrap items-start justify-between gap-4 p-4">
+            <div class="min-w-0 space-y-1">
+                <h2 class="font-semibold">{{ .locale.Tr "gist.search.placeholder.visibility" }}</h2>
+                <p class="text-muted-foreground text-sm">{{ .locale.Tr "gist.settings.visibility-help" }}</p>
+            </div>
+            <form method="post" action="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/visibility" class="flex shrink-0 items-center gap-2">
+                {{ .csrfHtml }}
+                <select name="private" class="border-input bg-background h-9 rounded-md border px-2 text-sm">
+                    <option value="0" {{ if eq .gist.Private.String "public" }}selected{{ end }}>{{ .locale.Tr "gist.search.placeholder.public" }}</option>
+                    <option value="1" {{ if eq .gist.Private.String "unlisted" }}selected{{ end }}>{{ .locale.Tr "gist.search.placeholder.unlisted" }}</option>
+                    <option value="2" {{ if eq .gist.Private.String "private" }}selected{{ end }}>{{ .locale.Tr "gist.search.placeholder.private" }}</option>
+                </select>
+                <button type="submit" class="btn-sm">{{ .locale.Tr "gist.edit.save" }}</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Archive -->
+    <section class="bg-card rounded-lg border">
+        <div class="flex flex-wrap items-start justify-between gap-4 p-4">
+            <div class="min-w-0 space-y-1">
+                <h2 class="flex items-center gap-2 font-semibold">
+                    {{ .locale.Tr "gist.header.archive" }}
+                    {{ if .gist.Archived }}<span class="badge og-orange border-transparent">{{ .locale.Tr "gist.header.archived" }}</span>{{ end }}
+                </h2>
+                <p class="text-muted-foreground text-sm">{{ .locale.Tr "gist.settings.archive-help" }}</p>
+            </div>
+            <form method="post" action="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/archive" class="shrink-0">
+                {{ .csrfHtml }}
+                <button type="submit" class="btn-sm-outline">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4"/></svg>
+                    {{ if .gist.Archived }}{{ .locale.Tr "gist.header.unarchive" }}{{ else }}{{ .locale.Tr "gist.header.archive" }}{{ end }}
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Danger zone -->
+    <section class="border-destructive/40 overflow-hidden rounded-lg border">
+        <div class="border-destructive/30 og-red border-b px-4 py-2">
+            <h2 class="text-sm font-semibold">{{ .locale.Tr "gist.settings.danger-zone" }}</h2>
+        </div>
+        <div class="bg-card flex flex-wrap items-center justify-between gap-4 p-4">
+            <div class="min-w-0 space-y-1">
+                <p class="font-medium">{{ .locale.Tr "gist.settings.delete-gist" }}</p>
+                <p class="text-muted-foreground text-sm">{{ .locale.Tr "gist.settings.delete-help" }}</p>
+            </div>
+            <form method="post" action="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/delete" class="shrink-0">
+                {{ .csrfHtml }}
+                <button type="submit" class="btn-sm bg-destructive text-white hover:bg-destructive/90"
+                        _="on click if not window.confirm('{{ .locale.Tr "gist.delete.confirm" }}') halt the event">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    {{ .locale.Tr "gist.header.delete" }}
+                </button>
+            </form>
+        </div>
+    </section>
+</div>
+{{ end }}

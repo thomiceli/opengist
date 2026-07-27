@@ -42,11 +42,11 @@ func (s *Server) registerRoutes() {
 
 		r.Static("/avatar", settings.AvatarsDir())
 
-		r.GET("/register", auth.Register)
-		r.POST("/register", auth.ProcessRegister)
-		r.GET("/login", auth.Login)
-		r.POST("/login", auth.ProcessLogin)
-		r.GET("/logout", auth.Logout)
+		r.GET("/-/register", auth.Register)
+		r.POST("/-/register", auth.ProcessRegister)
+		r.GET("/-/login", auth.Login)
+		r.POST("/-/login", auth.ProcessLogin)
+		r.GET("/-/logout", auth.Logout)
 		r.GET("/oauth/register", auth.OauthRegister, inOAuthRegisterSession)
 		r.POST("/oauth/register", auth.ProcessOauthRegister, inOAuthRegisterSession)
 		r.GET("/oauth/:provider", auth.Oauth)
@@ -61,11 +61,11 @@ func (s *Server) registerRoutes() {
 		r.GET("/mfa", auth.Mfa, inMFASession)
 		r.POST("/mfa/totp/assertion", auth.AssertTotp, inMFASession)
 
-		sA := r.SubGroup("/settings")
+		sA := r.SubGroup("/-/settings")
 		{
 			sA.Use(logged)
 			sA.GET("", settings.UserAccount)
-			sA.GET("/mfa", settings.UserMFA)
+			sA.GET("/authentication", settings.UserAuthentication)
 			sA.GET("/ssh", settings.UserSSHKeys)
 			sA.GET("/style", settings.UserStyle)
 			sA.POST("/style", settings.ProcessUserStyle)
@@ -87,7 +87,7 @@ func (s *Server) registerRoutes() {
 			sA.POST("/totp/regenerate", auth.RegenerateTotpRecoveryCodes)
 		}
 
-		sB := r.SubGroup("/admin-panel")
+		sB := r.SubGroup("/-/admin-panel")
 		{
 			sB.Use(adminPermission)
 			sB.GET("", admin.AdminIndex)
@@ -98,6 +98,7 @@ func (s *Server) registerRoutes() {
 			sB.GET("/invitations", admin.AdminInvitations)
 			sB.POST("/invitations", admin.AdminInvitationsCreate)
 			sB.POST("/invitations/:id/delete", admin.AdminInvitationsDelete)
+			sB.GET("/actions", admin.AdminActions)
 			sB.POST("/sync-fs", admin.AdminSyncReposFromFS)
 			sB.POST("/sync-db", admin.AdminSyncReposFromDB)
 			sB.POST("/gc-repos", admin.AdminGcRepos)
@@ -172,19 +173,23 @@ func (s *Server) registerRoutes() {
 
 		r.Any("/api/*", noRouteFoundApi)
 
-		r.GET("/all", gist.AllGists, checkRequireLogin, setAllGistsMode("all"))
+		r.GET("/-/all", gist.AllGists, checkRequireLogin, setAllGistsMode("all"))
+		r.GET("/-/liked", gist.AllGists, checkRequireLogin, setAllGistsMode("all-liked"))
+		r.GET("/-/forked", gist.AllGists, checkRequireLogin, setAllGistsMode("all-forked"))
+		r.GET("/-/topics", gist.Topics, checkRequireLogin)
+		r.GET("/-/users", gist.Users, checkRequireLogin)
 
 		if index.IndexEnabled() {
-			r.GET("/search", gist.Search, checkRequireLogin)
+			r.GET("/-/search", gist.Search, checkRequireLogin)
 		} else {
-			r.GET("/search", gist.AllGists, checkRequireLogin, setAllGistsMode("search"))
+			r.GET("/-/search", gist.AllGists, checkRequireLogin, setAllGistsMode("search"))
 		}
 
 		r.GET("/:user", gist.AllGists, checkRequireLogin, setAllGistsMode("fromUser"))
-		r.GET("/:user/liked", gist.AllGists, checkRequireLogin, setAllGistsMode("liked"))
-		r.GET("/:user/forked", gist.AllGists, checkRequireLogin, setAllGistsMode("forked"))
+		r.GET("/:user/-/liked", gist.AllGists, checkRequireLogin, setAllGistsMode("liked"))
+		r.GET("/:user/-/forked", gist.AllGists, checkRequireLogin, setAllGistsMode("forked"))
 
-		r.GET("/topics/:topic", gist.AllGists, checkRequireLogin, setAllGistsMode("topics"))
+		r.GET("/-/topics/:topic", gist.AllGists, checkRequireLogin, setAllGistsMode("topics"))
 
 		sC := r.SubGroup("/:user/:gistname")
 		{
@@ -200,6 +205,8 @@ func (s *Server) registerRoutes() {
 			sC.HEAD("/raw/:revision/:file", gist.RawFile)
 			sC.GET("/download/:revision/:file", gist.DownloadFile)
 			sC.HEAD("/download/:revision/:file", gist.DownloadFile)
+			sC.GET("/settings", gist.GistSettings, logged, writePermission)
+			sC.POST("/metadata", gist.EditMetadata, logged, writePermission, notArchived)
 			sC.GET("/edit", gist.Edit, logged, writePermission, notArchived)
 			sC.POST("/edit", gist.ProcessCreate, logged, writePermission, notArchived)
 			sC.POST("/like", gist.Like, logged)

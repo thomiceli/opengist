@@ -1,5 +1,5 @@
 <div class="opengist-embed" id="{{ .gist.Identifier }}">
-    <div class="html {{.dark}}">
+    <div class="html {{.dark}}{{ if .themeAuto }} theme-auto{{ end }}">
     {{ range $file := .files }}
         <div class="rounded-md border-1 border-gray-100 dark:border-gray-800 overflow-auto mb-4">
             <div class="border-b-1 border-gray-100 dark:border-gray-700 text-xs p-2 pl-4 bg-gray-50 dark:bg-gray-800 text-gray-400">

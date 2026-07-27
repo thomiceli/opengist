@@ -32,12 +32,12 @@ func AvatarProcess(ctx *context.Context) error {
 	header, err := ctx.FormFile("avatar")
 	if err != nil {
 		ctx.AddFlash(ctx.Tr("flash.user.avatar-invalid"), "error")
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
 	if header.Size > maxAvatarSize {
 		ctx.AddFlash(ctx.Tr("flash.user.avatar-too-large"), "error")
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
 	src, err := header.Open()
@@ -54,7 +54,7 @@ func AvatarProcess(ctx *context.Context) error {
 	ext, ok := allowedAvatarTypes[contentType]
 	if !ok {
 		ctx.AddFlash(ctx.Tr("flash.user.avatar-invalid"), "error")
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
 	if _, err = src.Seek(0, io.SeekStart); err != nil {
@@ -85,14 +85,14 @@ func AvatarProcess(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.user.avatar-updated"), "success")
-	return ctx.RedirectTo("/settings")
+	return ctx.RedirectTo("/-/settings")
 }
 
 func AvatarDelete(ctx *context.Context) error {
 	user := ctx.User
 
 	if !user.HasUploadedAvatar() {
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
 	removeAvatarFile(user)
@@ -103,7 +103,7 @@ func AvatarDelete(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.user.avatar-deleted"), "success")
-	return ctx.RedirectTo("/settings")
+	return ctx.RedirectTo("/-/settings")
 }
 
 func removeAvatarFile(user *db.User) {

@@ -131,7 +131,21 @@ class IPynb {
   }
 }
 
-// Process Jupyter notebooks
-document.querySelectorAll<HTMLElement>('.jupyter.notebook pre').forEach((el) => {
-  new IPynb(el).mount();
-});
+// Render every notebook on the page. Rendering replaces the source <pre> with
+// the rendered cells, so this is idempotent: once a notebook is mounted there is
+// no `.jupyter.notebook pre` left to match. That makes it safe to call again
+// after each hx-boost swap without double-processing already-rendered content.
+export function initIpynb() {
+  document.querySelectorAll<HTMLElement>('.jupyter.notebook pre').forEach((el) => {
+    // The template ships a spinner (see gist.html) that shows the moment the
+    // notebook is swapped in — including during an hx-boost navigation. Parsing
+    // and highlighting a large notebook is synchronous and can block the main
+    // thread, so defer past two frames: the browser paints the spinner first,
+    // then we do the heavy work and swap in the rendered cells.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        if (el.isConnected) new IPynb(el).mount();
+      })
+    );
+  });
+}

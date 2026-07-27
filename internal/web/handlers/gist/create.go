@@ -17,6 +17,8 @@ import (
 )
 
 func Create(ctx *context.Context) error {
+	ctx.SetData("currentPage", "new")
+	ctx.SetData("dto", new(db.GistDTO))
 	ctx.SetData("htmlTitle", ctx.TrH("gist.new.create-a-new-gist"))
 	return ctx.Html("create.html")
 }
@@ -139,7 +141,9 @@ func ProcessCreate(ctx *context.Context) error {
 	if isCreate {
 		gist = dto.ToGist()
 		gist.ExpiresAt = dto.ExpiresAtTimestamp()
-	} else {
+	} else if ctx.FormValue("_edit_metadata") == "1" {
+		// The legacy editor still edits files and metadata in one form. The new
+		// editor omits this marker because metadata has its own settings page.
 		gist = dto.ToExistingGist(gist)
 	}
 

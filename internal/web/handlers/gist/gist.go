@@ -144,6 +144,13 @@ func GistJs(ctx *context.Context) error {
 		autoMode = false
 	}
 
+	// In auto mode the card design follows the OS via a prefers-color-scheme
+	// media query (see .theme-auto in embed.css), so it no longer depends on the
+	// JS class-toggle alone.
+	if autoMode {
+		ctx.SetData("themeAuto", true)
+	}
+
 	gist := ctx.GetData("gist").(*db.Gist)
 
 	var files []*git.File
@@ -259,7 +266,7 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string, autoMode bool
                     <style>
                         @import url(${css1});
                         @import url(${css2});
-                        :host { display: block; all: initial; font-family: sans-serif; }
+                        :host { display: block; font-family: sans-serif; font-size: 16px; line-height: 1.5; text-align: left; }
                     </style>
                     <div class="container">${content}</div>
                 %s;
@@ -313,7 +320,10 @@ func setGistCSP(ctx *context.Context) {
 		"default-src 'self'; "+
 			"script-src 'self' 'nonce-"+nonce+"'; "+
 			"style-src 'self' 'unsafe-inline'; "+
-			"img-src 'self' data:; "+
+			// https: (not just 'self') so remote avatars — Gravatar, GitHub/GitLab/
+			// Gitea/OIDC OAuth avatars — and images embedded in rendered gist
+			// markdown are allowed.
+			"img-src 'self' data: https:; "+
 			"font-src 'self' data:; "+
 			"connect-src 'self'; "+
 			// 'self' (not 'none') so same-origin PDF previews keep working via

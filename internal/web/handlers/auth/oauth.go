@@ -48,7 +48,7 @@ func Oauth(ctx *context.Context) error {
 	provider, err := oauth.DefineProvider(providerStr, opengistUrl)
 	if err != nil {
 		ctx.AddFlash(ctx.Tr("error.oauth-unsupported"), "error")
-		return ctx.Redirect(302, "/login")
+		return ctx.Redirect(302, "/-/login")
 	}
 
 	if err = provider.RegisterProvider(); err != nil {
@@ -63,7 +63,7 @@ func OauthCallback(ctx *context.Context) error {
 	provider, err := oauth.CompleteUserAuth(ctx)
 	if err != nil {
 		ctx.AddFlash(fmt.Sprintf("%s: %s", ctx.Tr("auth.oauth.no-provider"), err.Error()), "error")
-		return ctx.Redirect(302, "/login")
+		return ctx.Redirect(302, "/-/login")
 	}
 
 	currUser := ctx.User
@@ -74,7 +74,7 @@ func OauthCallback(ctx *context.Context) error {
 		// check if this OAuth account is already linked to another user
 		if existingUser, err := db.GetUserByProvider(user.UserID, provider.GetProvider()); err == nil && existingUser != nil {
 			ctx.AddFlash(ctx.Tr("flash.auth.oauth-already-linked", config.C.OIDCProviderName), "error")
-			return ctx.RedirectTo("/settings")
+			return ctx.RedirectTo("/-/settings")
 		}
 
 		provider.UpdateUserDB(currUser)
@@ -84,7 +84,7 @@ func OauthCallback(ctx *context.Context) error {
 		}
 
 		ctx.AddFlash(ctx.Tr("flash.auth.account-linked-oauth", config.C.OIDCProviderName), "success")
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
 	userDB, err := db.GetUserByProvider(user.UserID, provider.GetProvider())
@@ -92,7 +92,7 @@ func OauthCallback(ctx *context.Context) error {
 	if err != nil {
 		if ctx.GetData("DisableSignup") == true {
 			ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
-			return ctx.Redirect(302, "/login")
+			return ctx.Redirect(302, "/-/login")
 		}
 
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -136,7 +136,7 @@ func OauthCallback(ctx *context.Context) error {
 func OauthRegister(ctx *context.Context) error {
 	if ctx.GetData("DisableSignup") == true {
 		ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
-		return ctx.Redirect(302, "/login")
+		return ctx.Redirect(302, "/-/login")
 	}
 
 	sess := ctx.GetSession()
@@ -154,7 +154,7 @@ func OauthRegister(ctx *context.Context) error {
 func ProcessOauthRegister(ctx *context.Context) error {
 	if ctx.GetData("DisableSignup") == true {
 		ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
-		return ctx.Redirect(302, "/login")
+		return ctx.Redirect(302, "/-/login")
 	}
 
 	sess := ctx.GetSession()
@@ -292,8 +292,8 @@ func OauthUnlink(ctx *context.Context) error {
 		}
 
 		ctx.AddFlash(ctx.Tr("flash.auth.account-unlinked-oauth", config.C.OIDCProviderName), "success")
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
-	return ctx.RedirectTo("/settings")
+	return ctx.RedirectTo("/-/settings")
 }

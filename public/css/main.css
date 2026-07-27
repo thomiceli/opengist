@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "basecoat-css";
+
+@import "globals.css";
+@import "ipynb.css";
+
+@source "../../templates/**/*.html";
+
+/* User-selectable accent colors (settings → style). Tailwind tree-shakes color
+   variables, so --color-<name>-500 only exists for colors referenced by a class.
+   The theme picker and --theme-color reference the whole -500 palette via var(),
+   which the scanner can't see, so force-generate the bg-*-500 utilities: that
+   emits the matching --color-<name>-500 variables we rely on.
+   Keep in sync with validator.ThemeColors. */
+@source inline("bg-{red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuchsia,pink,rose,slate,gray,zinc,neutral,stone}-500");
+

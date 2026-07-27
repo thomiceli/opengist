@@ -82,6 +82,7 @@ func Forks(ctx *context.Context) error {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 
+	ctx.SetData("page", "forks")
 	ctx.SetData("htmlTitle", ctx.TrH("gist.forks.for", gist.Title))
 	ctx.SetData("revision", "HEAD")
 	return ctx.Html("forks.html")

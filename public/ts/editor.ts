@@ -5,14 +5,21 @@ import {HighlightStyle, LanguageDescription, syntaxHighlighting} from "@codemirr
 import {languages} from "@codemirror/language-data";
 import {tags} from "@lezer/highlight";
 
-document.addEventListener("DOMContentLoaded", () => {
+function initEditorPage() {
+    let editorsParentdom = document.getElementById("editors");
+    // Not on an editor page, or already initialized for this DOM.
+    if (!editorsParentdom || editorsParentdom.dataset.editorReady) return;
+    editorsParentdom.dataset.editorReady = "1";
+
+    // Clear any editors rendered into a restored hx-boost history snapshot so we
+    // rebuild fresh CodeMirror instances instead of stacking on dead DOM.
+    editorsParentdom.querySelectorAll(".cm-editor").forEach((el) => el.remove());
+
     EditorView.theme({}, {dark: true});
 
     let editorsjs: EditorView[] = [];
     let editorHighlightCompartments: {editor: EditorView, conf: Compartment}[] = [];
-    let editorsParentdom = document.getElementById("editors")!;
-    let allEditorsdom = document.querySelectorAll("#editors > .editor");
-    let firstEditordom = allEditorsdom[0];
+    let allEditorsdom = editorsParentdom.querySelectorAll(":scope > .editor");
 
     const txtFacet = Facet.define<string>({
         combine(values) {
@@ -101,6 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
             ],
         });
 
+        // CodeMirror is mounted; drop the loading spinner.
+        dom.querySelector(".editor-loading")?.remove();
+
         let mdpreview = dom.querySelector(".md-preview") as HTMLElement;
 
         let formfilename = dom.querySelector<HTMLInputElement>(".form-filename");
@@ -184,13 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setLineWrapping(editor, newWrapMode === "soft");
         };
 
-        dom.addEventListener("drop", (e) => {
-            e.preventDefault(); // prevent the browser from opening the dropped file
-            (e.target as HTMLInputElement)
-                .closest(".editor")
-                .querySelector<HTMLInputElement>("input.form-filename")!.value =
-                e.dataTransfer.files[0].name;
-        });
+        // drop-to-set-filename is handled by hyperscript on the .editor element.
 
         // remove editor on delete
         let deleteBtns = dom.querySelector<HTMLButtonElement>("button.delete-file");
@@ -205,7 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (hIdx !== -1) editorHighlightCompartments.splice(hIdx, 1);
                 }
                 dom.remove();
-                checkForFirstDeleteButton();
             };
         }
 
@@ -295,13 +298,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 deleteBtn.onclick = () => {
                     if (!confirm("Are you sure you want to delete this file?")) return;
                     el.remove();
-                    checkForFirstDeleteButton();
                 };
             }
         }
     });
-
-    checkForFirstDeleteButton();
 
     // Update syntax highlight theme when dark/light mode changes
     new MutationObserver(() => {
@@ -318,7 +318,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // creating the new codemirror editor and append it in the editor div
         editorsjs.push(newEditor(newEditorDom));
         editorsParentdom.append(newEditorDom);
-        showDeleteButton(newEditorDom);
     };
 
     document.querySelector<HTMLFormElement>("form#create")!.onsubmit = () => {
@@ -375,45 +374,9 @@ document.addEventListener("DOMContentLoaded", () => {
         window.onbeforeunload = null;
     };
 
-    document.getElementById('gist-metadata-btn')!.onclick = (el) => {
-        let metadata = document.getElementById('gist-metadata')!;
-        metadata.classList.toggle('hidden');
-
-        let btn = el.target as HTMLButtonElement;
-        if (btn.innerText.endsWith('▼')) {
-            btn.innerText = btn.innerText.replace('▼', '▲');
-        } else {
-            btn.innerText = btn.innerText.replace('▲', '▼');
-        }
-
-    }
-
-    function checkForFirstDeleteButton() {
-        // Count total files (both text and binary)
-        const totalFiles = editorsParentdom.querySelectorAll('.editor').length;
-
-        // Hide/show all delete buttons based on total file count
-        const deleteButtons = editorsParentdom.querySelectorAll<HTMLButtonElement>("button.delete-file");
-        deleteButtons.forEach(deleteBtn => {
-            if (totalFiles <= 1) {
-                deleteBtn.classList.add("hidden");
-                deleteBtn.previousElementSibling?.classList.remove("rounded-l-md");
-                deleteBtn.previousElementSibling?.classList.add("rounded-md");
-            } else {
-                deleteBtn.classList.remove("hidden");
-                deleteBtn.previousElementSibling?.classList.add("rounded-l-md");
-                deleteBtn.previousElementSibling?.classList.remove("rounded-md");
-            }
-        });
-    }
-
-    function showDeleteButton(editorDom: HTMLElement) {
-        let deleteBtn = editorDom.querySelector<HTMLButtonElement>("button.delete-file")!;
-        deleteBtn.classList.remove("hidden");
-        deleteBtn.previousElementSibling.classList.add("rounded-l-md");
-        deleteBtn.previousElementSibling.classList.remove("rounded-md");
-        checkForFirstDeleteButton();
-    }
+    // metadata toggle is handled by hyperscript on the button in create.html.
+    // Single-file delete-button visibility / input rounding is handled in CSS
+    // via #editors > .editor:only-child (no flash on load).
 
     // File upload functionality
     let uploadedFileUUIDs: {uuid: string, filename: string}[] = [];
@@ -557,4 +520,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+}
+
+// The page can be reached either by a full load or via hx-boost, which swaps
+// the body content without firing DOMContentLoaded. Initialize for all paths,
+// matching how main.ts re-initializes its components.
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initEditorPage);
+} else {
+    initEditorPage();
+}
+document.body.addEventListener("htmx:afterSwap", initEditorPage);
+document.body.addEventListener("htmx:historyRestore", initEditorPage);
+
+// hx-boost saves a DOM snapshot for back/forward navigation. Drop the ready
+// marker so the editor rebuilds on restore instead of looking dead.
+document.body.addEventListener("htmx:beforeHistorySave", () => {
+    document.getElementById("editors")?.removeAttribute("data-editor-ready");
 });

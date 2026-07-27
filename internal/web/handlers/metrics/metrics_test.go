@@ -31,7 +31,7 @@ func TestMetrics(t *testing.T) {
 		Topics:  "",
 	}, 302)
 
-	s.Request(t, "POST", "/settings/ssh-keys", db.SSHKeyDTO{
+	s.Request(t, "POST", "/-/settings/ssh-keys", db.SSHKeyDTO{
 		Title:   "Test SSH Key",
 		Content: `ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSUGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3Pbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XAt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/EnmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbxNrRFi9wrf+M7Q== admin@admin.local`,
 	}, 302)

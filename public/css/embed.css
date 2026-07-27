@@ -1,9 +1,29 @@
+/* Self-contained stylesheet for the embeddable gist widget
+   (templates/partials/gist_embed.html). It is loaded inside the
+   <opengist-embed> web component's shadow DOM and deliberately does NOT depend
+   on the app's new token system — it ships its own scoped Tailwind + palette so
+   the embed renders identically wherever it is included. */
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* Dark styling fires on EITHER:
+   - the .dark class (explicit ?dark, or the auto-mode JS toggle), OR
+   - the OS preference, but only when .theme-auto is present (auto mode) so an
+     explicit ?light embed on a dark-OS page stays light.
+   The media path means the card background follows the OS even if the JS
+   class-toggle never runs — matching how the syntax highlighting already works. */
+@custom-variant dark {
+    &:where(.dark, .dark *) {
+        @slot;
+    }
+    @media (prefers-color-scheme: dark) {
+        &:where(.theme-auto, .theme-auto *) {
+            @slot;
+        }
+    }
+}
 
-@source "../../templates/pages/gist_embed.html";
+@source "../../templates/partials/gist_embed.html";
 
 @theme {
     /* Custom gray palette */
@@ -55,7 +75,7 @@
             cursor: pointer;
         }
 
-        @import './ipynb.css';
-        @import "./style.css";
+        @import './embed-ipynb.css';
+        @import "./embed-style.css";
     }
 }

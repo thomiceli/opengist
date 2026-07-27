@@ -11,6 +11,11 @@ import (
 // keyed by Action (the action's identifier); LockedUntil holds the Unix
 // timestamp the current lease expires at (0 = free).
 type ActionLock struct {
+	// autoIncrement:false is required: Action holds the action's own identifier,
+	// and the first action (SyncReposFromFS) is 0. Without this, GORM treats the
+	// int primary key as auto-increment and, on Create with the zero value, lets
+	// the DB assign an id instead — so the action=0 row never exists and its lock
+	// can never be acquired.
 	Action      int `gorm:"primaryKey;autoIncrement:false"`
 	LockedUntil int64
 }

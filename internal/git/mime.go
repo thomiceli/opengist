@@ -21,8 +21,7 @@ func (mt MimeType) IsText() bool {
 }
 
 func (mt MimeType) IsCSV() bool {
-	return strings.HasPrefix(mt.ContentType, "text/csv") &&
-		(strings.HasSuffix(mt.extension, ".csv"))
+	return strings.HasSuffix(mt.extension, ".csv") && mt.IsText()
 }
 
 func (mt MimeType) IsImage() bool {

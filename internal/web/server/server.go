@@ -37,12 +37,12 @@ func NewServer(isDev bool) *Server {
 	}
 
 	s.registerMiddlewares()
-	s.setFuncMap()
 	s.echo.HTTPErrorHandler = s.errorHandler
 
 	if !s.dev {
 		s.parseManifestEntries()
 	}
+	s.setFuncMap()
 
 	s.registerRoutes()
 

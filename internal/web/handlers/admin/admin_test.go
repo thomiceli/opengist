@@ -20,11 +20,12 @@ func TestAdminPages(t *testing.T) {
 	defer webtest.Teardown(t)
 
 	urls := []string{
-		"/admin-panel",
-		"/admin-panel/users",
-		"/admin-panel/gists",
-		"/admin-panel/invitations",
-		"/admin-panel/configuration",
+		"/-/admin-panel",
+		"/-/admin-panel/users",
+		"/-/admin-panel/gists",
+		"/-/admin-panel/invitations",
+		"/-/admin-panel/configuration",
+		"/-/admin-panel/actions",
 	}
 
 	s.Register(t, "thomas")
@@ -67,12 +68,12 @@ func TestAdminSetConfig(t *testing.T) {
 	s.Register(t, "nonadmin")
 
 	t.Run("NoUser", func(t *testing.T) {
-		s.Request(t, "PUT", "/admin-panel/set-config", url.Values{"key": {db.SettingDisableSignup}, "value": {"1"}}, 404)
+		s.Request(t, "PUT", "/-/admin-panel/set-config", url.Values{"key": {db.SettingDisableSignup}, "value": {"1"}}, 404)
 	})
 
 	t.Run("NonAdminUser", func(t *testing.T) {
 		s.Login(t, "nonadmin")
-		s.Request(t, "PUT", "/admin-panel/set-config", url.Values{"key": {db.SettingDisableSignup}, "value": {"1"}}, 404)
+		s.Request(t, "PUT", "/-/admin-panel/set-config", url.Values{"key": {db.SettingDisableSignup}, "value": {"1"}}, 404)
 	})
 
 	t.Run("AdminUser", func(t *testing.T) {
@@ -83,13 +84,13 @@ func TestAdminSetConfig(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, "0", val)
 
-			s.Request(t, "PUT", "/admin-panel/set-config", url.Values{"key": {setting}, "value": {"1"}}, 200)
+			s.Request(t, "PUT", "/-/admin-panel/set-config", url.Values{"key": {setting}, "value": {"1"}}, 200)
 
 			val, err = db.GetSetting(setting)
 			require.NoError(t, err)
 			require.Equal(t, "1", val)
 
-			s.Request(t, "PUT", "/admin-panel/set-config", url.Values{"key": {setting}, "value": {"0"}}, 200)
+			s.Request(t, "PUT", "/-/admin-panel/set-config", url.Values{"key": {setting}, "value": {"0"}}, 200)
 
 			val, err = db.GetSetting(setting)
 			require.NoError(t, err)
@@ -110,12 +111,12 @@ func TestAdminPagination(t *testing.T) {
 	t.Run("Pagination", func(t *testing.T) {
 		s.Login(t, "thomas")
 
-		s.Request(t, "GET", "/admin-panel/users", nil, 200)
-		s.Request(t, "GET", "/admin-panel/users?page=2", nil, 200)
-		s.Request(t, "GET", "/admin-panel/users?page=3", nil, 404)
-		s.Request(t, "GET", "/admin-panel/users?page=0", nil, 200)
-		s.Request(t, "GET", "/admin-panel/users?page=-1", nil, 200)
-		s.Request(t, "GET", "/admin-panel/users?page=a", nil, 200)
+		s.Request(t, "GET", "/-/admin-panel/users", nil, 200)
+		s.Request(t, "GET", "/-/admin-panel/users?page=2", nil, 200)
+		s.Request(t, "GET", "/-/admin-panel/users?page=3", nil, 404)
+		s.Request(t, "GET", "/-/admin-panel/users?page=0", nil, 200)
+		s.Request(t, "GET", "/-/admin-panel/users?page=-1", nil, 200)
+		s.Request(t, "GET", "/-/admin-panel/users?page=a", nil, 200)
 	})
 }
 
@@ -147,11 +148,11 @@ func TestAdminUserOperations(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, int64(2), count)
 
-		s.Request(t, "POST", "/admin-panel/users/2/delete", nil, 404)
+		s.Request(t, "POST", "/-/admin-panel/users/2/delete", nil, 404)
 
 		s.Login(t, "thomas")
 
-		s.Request(t, "POST", "/admin-panel/users/2/delete", nil, 302)
+		s.Request(t, "POST", "/-/admin-panel/users/2/delete", nil, 302)
 
 		count, err = db.CountAll(db.User{})
 		require.NoError(t, err)
@@ -192,11 +193,11 @@ func TestAdminGistOperations(t *testing.T) {
 		_, err = os.Stat(filepath.Join(config.GetHomeDir(), git.ReposDirectory, "nonadmin", gist1Db.Identifier()))
 		require.NoError(t, err)
 
-		s.Request(t, "POST", "/admin-panel/gists/1/delete", nil, 404)
+		s.Request(t, "POST", "/-/admin-panel/gists/1/delete", nil, 404)
 
 		s.Login(t, "thomas")
 
-		s.Request(t, "POST", "/admin-panel/gists/1/delete", nil, 302)
+		s.Request(t, "POST", "/-/admin-panel/gists/1/delete", nil, 302)
 
 		count, err = db.CountAll(db.Gist{})
 		require.NoError(t, err)
@@ -217,7 +218,7 @@ func TestAdminInvitationOperations(t *testing.T) {
 	t.Run("Invitation", func(t *testing.T) {
 		s.Login(t, "thomas")
 
-		s.Request(t, "POST", "/admin-panel/invitations", url.Values{
+		s.Request(t, "POST", "/-/admin-panel/invitations", url.Values{
 			"nbMax":         {""},
 			"expiredAtUnix": {""},
 		}, 302)
@@ -228,7 +229,7 @@ func TestAdminInvitationOperations(t *testing.T) {
 		require.Equal(t, uint(10), invitation1.NbMax)
 		require.InDelta(t, time.Now().Unix()+604800, invitation1.ExpiresAt, 10)
 
-		s.Request(t, "POST", "/admin-panel/invitations", url.Values{
+		s.Request(t, "POST", "/-/admin-panel/invitations", url.Values{
 			"nbMax":         {"aa"},
 			"expiredAtUnix": {"1735722000"},
 		}, 302)
@@ -242,7 +243,7 @@ func TestAdminInvitationOperations(t *testing.T) {
 			NbMax:     10,
 		})
 
-		s.Request(t, "POST", "/admin-panel/invitations", url.Values{
+		s.Request(t, "POST", "/-/admin-panel/invitations", url.Values{
 			"nbMax":         {"20"},
 			"expiredAtUnix": {"1735722000"},
 		}, 302)
@@ -260,7 +261,7 @@ func TestAdminInvitationOperations(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, int64(3), count)
 
-		s.Request(t, "POST", "/admin-panel/invitations/1/delete", nil, 302)
+		s.Request(t, "POST", "/-/admin-panel/invitations/1/delete", nil, 302)
 
 		count, err = db.CountAll(db.Invitation{})
 		require.NoError(t, err)

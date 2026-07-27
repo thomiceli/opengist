@@ -37,7 +37,7 @@ func EmailProcess(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.user.email-updated"), "success")
-	return ctx.RedirectTo("/settings")
+	return ctx.RedirectTo("/-/settings")
 }
 
 func AccountDeleteProcess(ctx *context.Context) error {
@@ -48,7 +48,7 @@ func AccountDeleteProcess(ctx *context.Context) error {
 	}
 	opengistssh.SyncAuthorizedKeysLogged()
 
-	return ctx.RedirectTo("/all")
+	return ctx.RedirectTo("/-/all")
 }
 
 func UsernameProcess(ctx *context.Context) error {
@@ -61,13 +61,13 @@ func UsernameProcess(ctx *context.Context) error {
 
 	if err := ctx.Validate(dto); err != nil {
 		ctx.AddFlash(validator.ValidationMessages(&err, ctx.GetData("locale").(*i18n.Locale)), "error")
-		return ctx.RedirectTo("/settings")
+		return ctx.RedirectTo("/-/settings")
 	}
 
 	if !strings.EqualFold(dto.Username, user.Username) {
 		if exists, err := db.UserExists(dto.Username); err != nil || exists {
 			ctx.AddFlash(ctx.Tr("flash.auth.username-exists"), "error")
-			return ctx.RedirectTo("/settings")
+			return ctx.RedirectTo("/-/settings")
 		}
 	}
 
@@ -90,5 +90,5 @@ func UsernameProcess(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.user.username-updated"), "success")
-	return ctx.RedirectTo("/settings")
+	return ctx.RedirectTo("/-/settings")
 }

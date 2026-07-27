@@ -167,6 +167,94 @@ func GetAllGistsForCurrentUser(currentUserId uint, since *time.Time, offset int,
 	return gists, err
 }
 
+// GetAllGistsForCurrentUserFiltered is the filterable variant of
+// GetAllGistsForCurrentUser used by the explore "All gists" page. It applies the
+// same visibility rule (public gists plus currentUserId's own) and optionally
+// narrows by title, language, visibility and topics, returning the total match
+// count alongside the page of results.
+func GetAllGistsForCurrentUserFiltered(currentUserId uint, title string, language string, visibility string, topics []string, offset int, sort string, order string) ([]*Gist, int64, error) {
+	var gists []*Gist
+	var count int64
+
+	baseQuery := db.Preload("User").Preload("Forked.User").Preload("Topics").
+		Where("gists.private = 0 or gists.user_id = ?", currentUserId).
+		Model(&Gist{})
+
+	if title != "" {
+		baseQuery = baseQuery.Where("gists.title like ?", "%"+title+"%")
+	}
+
+	if language != "" {
+		baseQuery = baseQuery.Joins("join gist_languages on gists.id = gist_languages.gist_id").
+			Where("gist_languages.language = ?", language)
+	}
+
+	if visibility != "" {
+		baseQuery = baseQuery.Where("gists.private = ?", ParseVisibility(visibility))
+	}
+
+	if len(topics) > 0 {
+		baseQuery = baseQuery.Joins("join gist_topics on gists.id = gist_topics.gist_id").
+			Where("gist_topics.topic in ?", topics)
+	}
+
+	err := baseQuery.Count(&count).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = baseQuery.Limit(11).
+		Offset(offset * 10).
+		Order("gists." + sort + "_at " + order).
+		Find(&gists).Error
+
+	return gists, count, err
+}
+
+// GetAllGistsByTopicFiltered returns gists carrying `topic` that are visible to
+// currentUserId, optionally narrowed further by the faceted filter params
+// (title, language, visibility and extra topics). The path topic is always
+// required; any extra topics from the filter are ANDed on top so the result
+// stays scoped to the topic page.
+func GetAllGistsByTopicFiltered(currentUserId uint, topic string, title string, language string, visibility string, topics []string, offset int, sort string, order string) ([]*Gist, int64, error) {
+	var gists []*Gist
+	var count int64
+
+	baseQuery := db.Preload("User").Preload("Forked.User").Preload("Topics").
+		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
+		Where("exists (select 1 from gist_topics where gist_topics.gist_id = gists.id and gist_topics.topic = ?)", topic).
+		Model(&Gist{})
+
+	if title != "" {
+		baseQuery = baseQuery.Where("gists.title like ?", "%"+title+"%")
+	}
+
+	if language != "" {
+		baseQuery = baseQuery.Joins("join gist_languages on gists.id = gist_languages.gist_id").
+			Where("gist_languages.language = ?", language)
+	}
+
+	if visibility != "" {
+		baseQuery = baseQuery.Where("gists.private = ?", ParseVisibility(visibility))
+	}
+
+	for _, t := range topics {
+		baseQuery = baseQuery.Where("exists (select 1 from gist_topics where gist_topics.gist_id = gists.id and gist_topics.topic = ?)", t)
+	}
+
+	err := baseQuery.Count(&count).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = baseQuery.Limit(11).
+		Offset(offset * 10).
+		Order("gists." + sort + "_at " + order).
+		Find(&gists).Error
+
+	return gists, count, err
+}
+
 // GetAllGistsFromUserVisibleTo returns gists owned by fromUserId, filtered
 // to what currentUserId is allowed to see (public always; private/unlisted
 // only when currentUserId == fromUserId). Same pagination/since shape as
@@ -344,6 +432,26 @@ func CountAllGistsLikedByUser(fromUserId uint, currentUserId uint) (int64, error
 	return count, err
 }
 
+func likedAllStatement(currentUserId uint) *gorm.DB {
+	return db.Preload("User").Preload("Forked.User").Preload("Topics").
+		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
+		Where("exists (select 1 from likes where likes.gist_id = gists.id)")
+}
+
+func GetAllGistsLiked(currentUserId uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
+	var gists []*Gist
+	query := likedAllStatement(currentUserId)
+	if since != nil {
+		query = query.Where("gists.updated_at >= ?", since.Unix())
+	}
+	err := query.
+		Limit(limit).
+		Offset(offset * perPage).
+		Order("gists." + sort + "_at " + order).
+		Find(&gists).Error
+	return gists, err
+}
+
 func forkedStatement(fromUserId uint, currentUserId uint) *gorm.DB {
 	return db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("gists.forked_id is not null and ((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
@@ -373,6 +481,29 @@ func CountAllGistsForkedByUser(fromUserId uint, currentUserId uint) (int64, erro
 	var count int64
 	err := forkedStatement(fromUserId, currentUserId).Model(&Gist{}).Count(&count).Error
 	return count, err
+}
+
+// forkedAllStatement scopes the explore "recently forked" feed to the source
+// gists that have been forked from - i.e. gists that at least one other gist
+// points to via forked_id - rather than the fork copies themselves.
+func forkedAllStatement(currentUserId uint) *gorm.DB {
+	return db.Preload("User").Preload("Forked.User").Preload("Topics").
+		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
+		Where("exists (select 1 from gists as forks where forks.forked_id = gists.id)")
+}
+
+func GetAllGistsForked(currentUserId uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
+	var gists []*Gist
+	query := forkedAllStatement(currentUserId)
+	if since != nil {
+		query = query.Where("gists.updated_at >= ?", since.Unix())
+	}
+	err := query.
+		Limit(limit).
+		Offset(offset * perPage).
+		Order("gists." + sort + "_at " + order).
+		Find(&gists).Error
+	return gists, err
 }
 
 // applySince narrows a gist query to rows updated at or after `since` when it
@@ -1003,6 +1134,29 @@ func (dto *GistDTO) HasMetadata() bool {
 
 type VisibilityDTO struct {
 	Private Visibility `validate:"number,min=0,max=2" form:"private"`
+}
+
+// GistMetadataDTO carries the editable gist metadata (title, URL path,
+// description, topics) without the files, so the settings page can update them
+// independently of the gist content.
+type GistMetadataDTO struct {
+	Title       string `validate:"max=250" form:"title"`
+	Description string `validate:"max=1000" form:"description"`
+	URL         string `validate:"max=32,alphanumdashorempty" form:"url"`
+	Topics      string `validate:"gisttopics" form:"topics"`
+}
+
+func (dto *GistMetadataDTO) ToExistingGist(gist *Gist) *Gist {
+	gist.Title = dto.Title
+	gist.Description = dto.Description
+	gist.URL = dto.URL
+	topics := strings.Fields(dto.Topics)
+	gistTopics := make([]GistTopic, 0, len(topics))
+	for _, topic := range topics {
+		gistTopics = append(gistTopics, GistTopic{Topic: topic})
+	}
+	gist.Topics = gistTopics
+	return gist
 }
 
 type FileDTO struct {

@@ -121,7 +121,7 @@ func (s *Server) errorHandler(err error, ctx echo.Context) {
 	if acceptJson || data["err_render"] == "json" {
 		renderErr = ctx.JSON(httpErr.Code, httpErr)
 	} else {
-		renderErr = ctx.Render(httpErr.Code, "error", data)
+		renderErr = ctx.Render(httpErr.Code, "error.html", data)
 	}
 
 	if renderErr != nil && !isClientGone(renderErr) {
@@ -209,7 +209,7 @@ func logged(next Handler) Handler {
 		if user != nil {
 			return next(ctx)
 		}
-		return ctx.RedirectTo("/all")
+		return ctx.RedirectTo("/-/all")
 	}
 }
 
@@ -229,7 +229,7 @@ func inOAuthRegisterSession(next Handler) Handler {
 		sess := ctx.GetSession()
 		_, ok := sess.Values["oauthProvider"].(string)
 		if !ok {
-			return ctx.RedirectTo("/login")
+			return ctx.RedirectTo("/-/login")
 		}
 		return next(ctx)
 	}
@@ -252,7 +252,7 @@ func makeCheckRequireLogin(isSingleGistAccess bool) Middleware {
 
 			if !allow {
 				ctx.AddFlash(ctx.Tr("flash.auth.must-be-logged-in"), "error")
-				return ctx.RedirectTo("/login")
+				return ctx.RedirectTo("/-/login")
 			}
 			return next(ctx)
 		}
@@ -275,7 +275,7 @@ func checkFileUploadEnabled(next Handler) Handler {
 // makeApiCheckRequireLogin is the /api/v1 counterpart of makeCheckRequireLogin:
 // it enforces the instance's RequireLogin / AllowGistsWithoutLogin settings on
 // anonymous gist reads, but responds with a JSON 401 instead of redirecting to
-// /login. ctx.User is already resolved from the Authorization header by
+// /-/login. ctx.User is already resolved from the Authorization header by
 // apiBindAuth, so there is no token fallback to do here.
 func makeApiCheckRequireLogin(isSingleGistAccess bool) Middleware {
 	return func(next Handler) Handler {
@@ -360,7 +360,7 @@ func sessionInit(next Handler) Handler {
 				ctx.SaveSession(sess)
 				ctx.User = nil
 				ctx.SetData("userLogged", nil)
-				return ctx.RedirectTo("/all")
+				return ctx.RedirectTo("/-/all")
 			}
 			if user != nil {
 				ctx.User = user

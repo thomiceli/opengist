@@ -35,6 +35,9 @@ func (s *Server) registerRoutes() {
 		r.POST("/upload", gist.Upload, logged, checkFileUploadEnabled)
 		r.DELETE("/upload/:uuid", gist.DeleteUpload, logged, checkFileUploadEnabled)
 
+		// HEAD "/healthcheck" returns the health status code without a body, for
+		// uptime monitors and load balancers probing the endpoint (e.g. `curl -I`).
+		r.HEAD("/healthcheck", health.Healthcheck)
 		r.GET("/healthcheck", health.Healthcheck)
 
 		r.Static("/avatar", settings.AvatarsDir())

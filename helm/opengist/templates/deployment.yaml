@@ -43,6 +43,10 @@ spec:
       serviceAccountName: {{ include "opengist.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.strategy }}
+      strategy:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: init-config
           image: busybox:1.37

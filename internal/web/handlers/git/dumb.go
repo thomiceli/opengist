@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -37,8 +37,13 @@ func idxFile(ctx *context.Context) error {
 }
 
 func sendFile(ctx *context.Context, contentType string) error {
-	gitFile := "/" + strings.Join(strings.Split(ctx.Request().URL.Path, "/")[3:], "/")
-	gitFile = path.Join(ctx.GetData("repositoryPath").(string), gitFile)
+	repoPath := ctx.GetData("repositoryPath").(string)
+	relPath := strings.Join(strings.Split(ctx.Request().URL.Path, "/")[3:], "/")
+	gitFile, err := containedPath(repoPath, relPath)
+	if err != nil {
+		return ctx.ErrorRes(404, "File not found", nil)
+	}
+
 	fi, err := os.Stat(gitFile)
 	if os.IsNotExist(err) {
 		return ctx.ErrorRes(404, "File not found", nil)
@@ -47,6 +52,19 @@ func sendFile(ctx *context.Context, contentType string) error {
 	ctx.Response().Header().Set("Content-Length", fmt.Sprintf("%d", fi.Size()))
 	ctx.Response().Header().Set("Last-Modified", fi.ModTime().Format(http.TimeFormat))
 	return ctx.File(gitFile)
+}
+
+func containedPath(baseDir, relPath string) (string, error) {
+	base := filepath.Clean(baseDir)
+	joined := filepath.Clean(filepath.Join(base, relPath))
+
+	if joined == base {
+		return "", fmt.Errorf("path %q resolves to the repository root", relPath)
+	}
+	if !strings.HasPrefix(joined, base+string(os.PathSeparator)) {
+		return "", fmt.Errorf("path %q escapes repository %q", relPath, base)
+	}
+	return joined, nil
 }
 
 func noCacheHeaders(ctx *context.Context) {

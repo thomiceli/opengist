@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.15.0](https://github.com/thomiceli/opengist/compare/v1.14.0...v1.15.0) - 2026-07-30
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- UI rework (#757)
+- Gist settings page, with metadata edition and danger zone (#757)
+- Explore users page, with search and sorting (#757)
+- Explore topics page (#757)
+
+### Changed
+- Move reserved routes under the `/-/` prefix: `/-/login`, `/-/register`, `/-/all`, `/-/search`, `/-/topics`, `/:user/-/liked`, ... (#757)
+
+### Fixed
+- Improve Git dumb HTTP security (#780)
+- OIDC scope includes trailing whitespace if groups not configured (#775)
+- Return 200 for `HEAD /` so uptime monitors don't fail (#773)
+- Bind strategy configuration to deployment in Helm chart (#777)
+- `OG_OPENGIST_HOME` env var in Dockerfile (#779)
+
+### Other
+- Update deps (#776)
+
 ## [1.14.0](https://github.com/thomiceli/opengist/compare/v1.13.1...v1.14.0) - 2026-07-21
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

@@ -1,5 +1,10 @@
 # Helm Chart Changelog
 
+# 0.11.0 - 2026-07-30
+
+- Bump Opengist image to 1.15.0
+- Bind strategy configuration to deployment
+
 # 0.10.0 - 2026-07-21
 
 - Bump Opengist image to 1.14.0

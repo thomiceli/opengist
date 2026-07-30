@@ -10,7 +10,7 @@ Requirements:
 git clone https://github.com/thomiceli/opengist
 cd opengist
 
-git checkout v1.14.0
+git checkout v1.15.0
 
 make
 ./opengist

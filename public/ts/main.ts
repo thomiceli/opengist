@@ -44,6 +44,16 @@ document.addEventListener('click', (e) => {
     localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
 });
 
+document.addEventListener('click', (e) => {
+    const toggle = (e.target as Element | null)?.closest<HTMLButtonElement>('.gist-file-toc-toggle');
+    if (!toggle) return;
+    const list = toggle.closest('.gist-file-toc')?.querySelector<HTMLElement>('#gist-file-list');
+    if (!list) return;
+    const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+    toggle.setAttribute('aria-expanded', String(expanded));
+    list.hidden = !expanded;
+});
+
 // Top loading bar for boosted navigations. Large files can take a moment to
 // render server-side, and htmx gives no visual feedback in the meantime, so the
 // page looks frozen after a click. This animates a slim bar at the top of the

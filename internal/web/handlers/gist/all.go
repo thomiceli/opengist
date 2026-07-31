@@ -161,11 +161,11 @@ func AllGists(ctx *context.Context) error {
 
 		switch mode {
 		case "liked":
-			urlPage = fromUserStr + "/liked"
+			urlPage = fromUserStr + "/-/liked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-liked-by", fromUserStr))
 			gists, err = db.GetAllGistsLikedByUser(fromUser.ID, currentUserId, nil, pageInt-1, sort, order, 11, 10)
 		case "forked":
-			urlPage = fromUserStr + "/forked"
+			urlPage = fromUserStr + "/-/forked"
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all-forked-by", fromUserStr))
 			gists, err = db.GetAllGistsForkedByUser(fromUser.ID, currentUserId, nil, pageInt-1, sort, order, 11, 10)
 		case "fromUser":
@@ -291,7 +291,7 @@ func Search(ctx *context.Context) error {
 		renderedGists = append(renderedGists, &rendered)
 	}
 
-	if err = handlers.Paginate(ctx, renderedGists, pageInt, 10, "gists", "search", 2, pagination); err != nil {
+	if err = handlers.Paginate(ctx, renderedGists, pageInt, 10, "gists", "-/search", 2, pagination); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 

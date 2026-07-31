@@ -189,7 +189,6 @@ func TestFork(t *testing.T) {
 	require.NoError(t, err, "Could not get files of repository")
 
 	require.Equal(t, files1, files2, "Files are not the same")
-
 }
 
 func TestTruncate(t *testing.T) {
@@ -227,6 +226,51 @@ func TestTruncate(t *testing.T) {
 	require.NoError(t, err, "Could not get content")
 	require.True(t, truncated, "Content should be truncated")
 	require.Equal(t, 2, len(content), "Content size is not correct")
+}
+
+func TestLogDiffTruncation(t *testing.T) {
+	SetupTest(t)
+	defer TeardownTest(t)
+
+	CommitToBare(t, "thomas", "gist1", map[string]string{
+		"my_file.txt": "A",
+	})
+
+	// Write enough lines to guarantee the diff content exceeds maxBytes
+	// (diffSize).
+	var builder strings.Builder
+	lineCount := diffSize/len("A\n") + 100 // comfortably past the threshold
+	for range lineCount {
+		builder.WriteString("A\n")
+	}
+	fullContent := builder.String()
+
+	CommitToBare(t, "thomas", "gist1", map[string]string{
+		"my_file.txt": fullContent,
+	})
+
+	// 11 is arbitrary but comfortably above the 2 commits we expect back;
+	// it just ensures GetLog isn't itself limiting the result set.
+	commits, err := GetLog("thomas", "gist1", "HEAD", 0, 11)
+	require.NoError(t, err, "Could not get log")
+	require.Len(t, commits, 2, "Commits count are not correct")
+
+	// Large-file commit: content must be truncated and bounded near
+	// maxBytes, not left to grow with the full file.
+	largeFile := commits[0].Files[0]
+	require.Len(t, commits[0].Files, 1, "Files count are not correct")
+	require.True(t, largeFile.Truncated, "Diff content should be truncated for a large file")
+	require.Less(t, len(largeFile.Content), len(fullContent),
+		"Truncated content must be smaller than the original — content should not grow indefinitely")
+	require.LessOrEqual(t, len(largeFile.Content), diffSize+len("A\n"),
+		"Truncated content should be bounded at approximately maxBytes, not just under some loose multiple of it")
+
+	// Small-file commit: sanity check that truncation doesn't kick in
+	// when it shouldn't.
+	smallFile := commits[1].Files[0]
+	require.False(t, smallFile.Truncated, "Small diff content should not be truncated")
+	require.Equal(t, "@@ -0,0 +1 @@\n+A\n\\ No newline at end of file\n",
+		smallFile.Content, "Small file content should be preserved as-is")
 }
 
 func TestGitInitBranchNames(t *testing.T) {

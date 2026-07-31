@@ -345,6 +345,7 @@ func parseDiffContent(currentFile *File, maxBytes int, input *bufio.Reader) (lin
 			line = line[:maxBytes]
 		}
 		currentFile.Content += line + "\n"
+		currFileLineCount += len(line) + 1
 	}
 }
 

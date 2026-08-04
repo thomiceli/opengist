@@ -1,6 +1,7 @@
 package git
 
 import (
+	"bufio"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
 	"os"
@@ -271,6 +272,56 @@ func TestLogDiffTruncation(t *testing.T) {
 	require.False(t, smallFile.Truncated, "Small diff content should not be truncated")
 	require.Equal(t, "@@ -0,0 +1 @@\n+A\n\\ No newline at end of file\n",
 		smallFile.Content, "Small file content should be preserved as-is")
+}
+
+// TestParseDiffContentBudget drives parseDiffContent directly, the way parseLog
+// does, with a reader sized exactly maxBytes. Going through GetLog cannot cover
+// this: a line longer than the buffer comes back from ReadLine as a fragment and
+// is drained without ever reaching the per-line clamp, so the clamp is only
+// reachable by a long line that still fits in the buffer.
+func TestParseDiffContentBudget(t *testing.T) {
+	const maxBytes = 64
+
+	// filler emits n bytes as 2-byte lines, leaving currFileLineCount just shy
+	// of the cap so the following line lands on the budget boundary.
+	filler := func(b *strings.Builder, n int) {
+		for range n / 2 {
+			b.WriteString("A\n")
+		}
+	}
+
+	tests := []struct {
+		name     string
+		longLine int
+	}{
+		// Below the buffer size, so ReadLine returns these whole rather than as
+		// fragments. Lengths straddle the point where the old code set
+		// Truncated, which is why the flag was silently missed just under it.
+		{"long line just under maxBytes", maxBytes - 2},
+		{"long line at maxBytes-1", maxBytes - 1},
+		{"long line exactly maxBytes", maxBytes},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var b strings.Builder
+			filler(&b, maxBytes-2)
+			b.WriteString(strings.Repeat("B", tt.longLine) + "\n")
+			b.WriteString("diff --git a/x b/x\n") // ends the file's diff content
+
+			currentFile := &File{}
+			input := bufio.NewReaderSize(strings.NewReader(b.String()), maxBytes)
+			_, _, err := parseDiffContent(currentFile, maxBytes, input)
+			require.NoError(t, err, "Could not parse diff content")
+
+			// The trailing newline of the final line is appended after the
+			// budget check, so one byte of overshoot is expected.
+			require.LessOrEqual(t, len(currentFile.Content), maxBytes+1,
+				"Content must stay within the byte budget, not grow to a multiple of it")
+			require.True(t, currentFile.Truncated,
+				"Truncated must be set whenever content is clipped, otherwise the UI renders a clipped diff as complete")
+		})
+	}
 }
 
 func TestGitInitBranchNames(t *testing.T) {

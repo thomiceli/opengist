@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.1](https://github.com/thomiceli/opengist/compare/v1.15.0...v1.15.1) - 2026-08-04
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Fixed
+- Admin pagination with new URLs (#782)
+- Stop unbounded diff content growth for large files (#787)
+
 ## [1.15.0](https://github.com/thomiceli/opengist/compare/v1.14.0...v1.15.0) - 2026-07-30
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

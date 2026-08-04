@@ -1,6 +1,6 @@
 # Opengist Helm Chart
 
-![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![AppVersion: 1.15.0](https://img.shields.io/badge/AppVersion-1.15.0-informational?style=flat-square)
+![Version: 0.12.0](https://img.shields.io/badge/Version-0.12.0-informational?style=flat-square) ![AppVersion: 1.15.1](https://img.shields.io/badge/AppVersion-1.15.1-informational?style=flat-square)
 
 Opengist Helm chart for Kubernetes. Check [CHANGELOG.md](CHANGELOG.md) for release notes.
 

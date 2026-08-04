@@ -1,23 +1,28 @@
 # Helm Chart Changelog
 
-# 0.11.0 - 2026-07-30
+
+## 0.12.0 - 2026-08-04
+
+- Bump Opengist image to 1.15.1
+
+## 0.11.0 - 2026-07-30
 
 - Bump Opengist image to 1.15.0
 - Bind strategy configuration to deployment
 
-# 0.10.0 - 2026-07-21
+## 0.10.0 - 2026-07-21
 
 - Bump Opengist image to 1.14.0
 
-# 0.9.0 - 2026-06-10
+## 0.9.0 - 2026-06-10
 
 - Bump Opengist image to 1.13.1
 
-# 0.8.0 - 2026-06-09
+## 0.8.0 - 2026-06-09
 
 - Bump Opengist image to 1.13.0
 
-# 0.7.0 - 2026-03-14
+## 0.7.0 - 2026-03-14
 
 - Bump Opengist image to 1.12.2
 - Add environment variables and secrets to statefulset

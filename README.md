@@ -60,16 +60,16 @@ services:
       - "$HOME/.opengist:/opengist"
 ```
 
-You can define which user/group should run the container and own the files by setting the `UID` and `GID` environment variables :
+You can define which user/group should run the container by setting the `user` key (the container is non-root by default, as UID/GID `1000`) :
 
 ```yml
 services:
   opengist:
     # ...
-    environment:
-      UID: 1001
-      GID: 1001
+    user: "1001:1001"
 ```
+
+See the [Docker installation docs](docs/installation/docker.md#running-as-a-non-root-user) for details on file ownership.
 
 ### Via binary
 

@@ -16,7 +16,13 @@ func Edit(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error getting gist data", err)
 	}
 
+	sidebarFiles := make([]string, 0, len(gistDto.Files))
+	for _, file := range gistDto.Files {
+		sidebarFiles = append(sidebarFiles, file.Filename)
+	}
 	ctx.SetData("dto", gistDto)
+	setSidebarFiles(ctx, sidebarFiles)
+	ctx.SetData("page", "edit")
 	ctx.SetData("htmlTitle", ctx.TrH("gist.edit.edit-gist", gist.Title))
 
 	return ctx.Html("edit.html")

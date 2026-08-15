@@ -467,5 +467,10 @@ func checks(c *config) error {
 		return err
 	}
 
+	if c.LDAPUrl != "" && c.LDAPBindDn != "" && c.LDAPBindCredentials == "" {
+		return fmt.Errorf("ldap.bind-dn is set but ldap.bind-credentials is empty; " +
+			"set the password, or leave ldap.bind-dn empty to query the LDAP server anonymously")
+	}
+
 	return nil
 }

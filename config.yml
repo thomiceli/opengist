@@ -145,8 +145,9 @@ oidc.admin-group:
 # URL of the LDAP instance e.g: ldap://ldap.example.com:389 ; if not set, LDAP authentication is disabled
 ldap.url:
 # Bind DN to authenticate against the LDAP e.g: cn=read-only-admin,dc=example,dc=com
+# Leave empty (along with ldap.bind-credentials) to query the LDAP server anonymously
 ldap.bind-dn:
-# The password for the Bind DN.
+# The password for the Bind DN. Required if ldap.bind-dn is set.
 ldap.bind-credentials:
 # The Base DN to start search from e.g: ou=People,dc=example,dc=com
 ldap.search-base:

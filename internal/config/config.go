@@ -68,6 +68,8 @@ type config struct {
 	DisableFileUpload bool   `yaml:"disable-file-upload" env:"OG_DISABLE_FILE_UPLOAD"`
 	UploadOrphanTTL   string `yaml:"upload-orphan-ttl" env:"OG_UPLOAD_ORPHAN_TTL"`
 
+	uploadOrphanTTLDuration time.Duration // parsed once in InitConfig; use UploadOrphanTTLDuration()
+
 	UnixSocketPermissions string `yaml:"unix-socket-permissions" env:"OG_UNIX_SOCKET_PERMISSIONS"`
 
 	SshGit                string `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"` // builtin | host | disabled (true → builtin, false → disabled)
@@ -135,18 +137,23 @@ func (c *config) SshManagesAuthorizedKeys() bool {
 }
 
 // UploadOrphanTTLDuration returns the configured max age for files sitting in
-// {opengist-home}/uploads/ before the orphan sweep removes them. Falls back to
-// 1h if the configured value is empty or unparseable.
+// {opengist-home}/uploads/ before the orphan sweep removes them.
+// The value is parsed once at startup by InitConfig; see parseUploadOrphanTTL.
 func (c *config) UploadOrphanTTLDuration() time.Duration {
-	if c.UploadOrphanTTL == "" {
-		return time.Hour
-	}
-	d, err := time.ParseDuration(c.UploadOrphanTTL)
-	if err != nil || d <= 0 {
+	return c.uploadOrphanTTLDuration
+}
+
+// parseUploadOrphanTTL parses UploadOrphanTTL and caches it. Called once from
+// InitConfig so that a misconfigured value is logged exactly once at startup.
+func (c *config) parseUploadOrphanTTL() {
+	if c.UploadOrphanTTL != "" {
+		if d, err := time.ParseDuration(c.UploadOrphanTTL); err == nil && d > 0 {
+			c.uploadOrphanTTLDuration = d
+			return
+		}
 		log.Warn().Msgf("Invalid upload-orphan-ttl %q, using default 1h", c.UploadOrphanTTL)
-		return time.Hour
 	}
-	return d
+	c.uploadOrphanTTLDuration = time.Hour
 }
 
 func configWithDefaults() (*config, error) {
@@ -208,6 +215,8 @@ func InitConfig(configPath string, out io.Writer) error {
 	// as the legacy booleans (true → builtin, false → disabled). Collapse whatever
 	// was provided into a canonical mode.
 	c.SshGit = normalizeSshGitMode(c.SshGit)
+
+	c.parseUploadOrphanTTL()
 
 	if c.OpengistHome == "" {
 		homeDir, err := os.UserHomeDir()

@@ -45,13 +45,13 @@ type action struct {
 }
 
 var registry = map[int]action{
-	SyncReposFromFS:    {run: syncReposFromFS},
-	SyncReposFromDB:    {run: syncReposFromDB},
-	GitGcRepos:         {run: gitGcRepos},
-	SyncGistPreviews:   {run: syncGistPreviews},
-	ResetHooks:         {run: resetHooks},
-	IndexGists:         {run: indexGists},
-	SyncGistLanguages:  {run: syncGistLanguages},
+	SyncReposFromFS:           {run: syncReposFromFS},
+	SyncReposFromDB:           {run: syncReposFromDB},
+	GitGcRepos:                {run: gitGcRepos},
+	SyncGistPreviews:          {run: syncGistPreviews},
+	ResetHooks:                {run: resetHooks},
+	IndexGists:                {run: indexGists},
+	SyncGistLanguages:         {run: syncGistLanguages},
 	DeleteExpiredGists:        {run: deleteExpiredGists, spec: "@every 12h"},
 	SyncSSHKeys:               {run: syncSSHKeys, spec: "@every 72h"},
 	DeleteOrphanedUploadFiles: {run: deleteOrphanedUploadFiles, spec: "@every 1h"},

@@ -17,7 +17,10 @@ func setupTestConfig(t *testing.T) string {
 		t.Fatal(err)
 	}
 	config.C.OpengistHome = tmp
-	config.C.UploadOrphanTTL = "1h"
+	// InitConfig already defaults UploadOrphanTTL to "1h" and parses it into
+	// the cached duration field. Mutating UploadOrphanTTL directly after init
+	// has no effect on UploadOrphanTTLDuration() — call InitConfig again with
+	// a custom config file if a different TTL is needed in a test.
 	return tmp
 }
 

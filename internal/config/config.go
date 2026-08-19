@@ -65,7 +65,8 @@ type config struct {
 
 	ApiEnabled bool `yaml:"api.enabled" env:"OG_API_ENABLED"`
 
-	DisableFileUpload bool `yaml:"disable-file-upload" env:"OG_DISABLE_FILE_UPLOAD"`
+	DisableFileUpload bool   `yaml:"disable-file-upload" env:"OG_DISABLE_FILE_UPLOAD"`
+	UploadOrphanTTL   string `yaml:"upload-orphan-ttl" env:"OG_UPLOAD_ORPHAN_TTL"`
 
 	UnixSocketPermissions string `yaml:"unix-socket-permissions" env:"OG_UNIX_SOCKET_PERMISSIONS"`
 
@@ -133,6 +134,21 @@ func (c *config) SshManagesAuthorizedKeys() bool {
 	return c.SshGit == SshServerHost && c.SshAuthorizedKeysFile != ""
 }
 
+// UploadOrphanTTLDuration returns the configured max age for files sitting in
+// {opengist-home}/uploads/ before the orphan sweep removes them. Falls back to
+// 1h if the configured value is empty or unparseable.
+func (c *config) UploadOrphanTTLDuration() time.Duration {
+	if c.UploadOrphanTTL == "" {
+		return time.Hour
+	}
+	d, err := time.ParseDuration(c.UploadOrphanTTL)
+	if err != nil || d <= 0 {
+		log.Warn().Msgf("Invalid upload-orphan-ttl %q, using default 1h", c.UploadOrphanTTL)
+		return time.Hour
+	}
+	return d
+}
+
 func configWithDefaults() (*config, error) {
 	c := &config{}
 
@@ -152,6 +168,8 @@ func configWithDefaults() (*config, error) {
 	c.HttpGit = true
 
 	c.ApiEnabled = true
+
+	c.UploadOrphanTTL = "1h"
 
 	c.UnixSocketPermissions = "0666"
 

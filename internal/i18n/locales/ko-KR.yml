@@ -325,6 +325,7 @@ admin.actions.index-gists: 검색 인덱스 재구성
 admin.actions.sync-gist-languages: 모든 gist 언어 동기화
 admin.actions.delete-expired-gists: 만료된 gist 삭제
 admin.actions.sync-ssh-keys: authorized_keys 파일 재생성
+admin.actions.delete-orphaned-uploads: 고아 업로드 파일 삭제
 admin.id: ID
 admin.user: 사용자
 admin.delete: 삭제

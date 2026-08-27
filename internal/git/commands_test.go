@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -163,6 +164,32 @@ like Opengist actually`,
 	commitsSkip1, err := GetLog("thomas", "gist1", "HEAD", 1, 11)
 	require.NoError(t, err, "Could not get log")
 	require.Equal(t, commitsSkip1[0], commits[1], "Commits skips are not correct")
+}
+
+func TestSetFileContentRejectsSymlinkChain(t *testing.T) {
+	SetupTest(t)
+	defer TeardownTest(t)
+
+	CommitToBare(t, "thomas", "gist1", map[string]string{"regular.md": "content"})
+	require.NoError(t, CloneTmp("thomas", "gist1", "gist1", "thomas@mail.com", false))
+
+	protectedPath := filepath.Join(config.GetHomeDir(), "protected-hook")
+	require.NoError(t, os.WriteFile(protectedPath, []byte("original hook"), 0644))
+	t.Cleanup(func() { _ = os.Remove(protectedPath) })
+
+	repositoryPath := TmpRepositoryPath("gist1")
+	payloadLink := filepath.Join(repositoryPath, "payload")
+	if err := os.Symlink(".git", payloadLink); err != nil {
+		t.Skipf("symbolic links are unavailable: %v", err)
+	}
+	require.NoError(t, os.Symlink("payload/../../../../protected-hook", filepath.Join(repositoryPath, "task.md")))
+
+	err := SetFileContent("gist1", "task.md", "malicious hook")
+	require.ErrorContains(t, err, "symbolic link")
+
+	content, err := os.ReadFile(protectedPath)
+	require.NoError(t, err)
+	require.Equal(t, "original hook", string(content))
 }
 
 func TestGitGc(t *testing.T) {

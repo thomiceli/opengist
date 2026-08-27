@@ -418,7 +418,42 @@ func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) e
 func SetFileContent(gistTmpId string, filename string, content string) error {
 	repositoryPath := TmpRepositoryPath(gistTmpId)
 
-	return os.WriteFile(filepath.Join(repositoryPath, filename), []byte(content), 0644)
+	root, err := os.OpenRoot(repositoryPath)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+
+	// Files in a gist can originate from an untrusted Git push. Refuse to
+	// follow any symlink in the path: otherwise a subsequent web edit (for
+	// example, toggling a Markdown checkbox) could write outside the temporary
+	// clone or into its .git directory.
+	cleanPath := filepath.Clean(filename)
+	if filepath.IsAbs(filename) || cleanPath == ".." || strings.HasPrefix(cleanPath, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("file path %q escapes the repository", filename)
+	}
+
+	currentPath := ""
+	for _, component := range strings.Split(cleanPath, string(filepath.Separator)) {
+		if currentPath == "" {
+			currentPath = component
+		} else {
+			currentPath = filepath.Join(currentPath, component)
+		}
+
+		info, err := root.Lstat(currentPath)
+		if os.IsNotExist(err) {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("refusing to write through symbolic link %q", currentPath)
+		}
+	}
+
+	return root.WriteFile(cleanPath, []byte(content), 0644)
 }
 
 func MoveFileToRepository(gistTmpId string, filename string, sourcePath string) error {

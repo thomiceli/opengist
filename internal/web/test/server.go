@@ -27,6 +27,8 @@ import (
 var databaseType string
 var formEncoder *schema.Encoder
 
+const testCSRFToken = "opengist-test-csrf-token"
+
 func init() {
 	formEncoder = schema.NewEncoder()
 	formEncoder.SetAliasTag("form")
@@ -80,6 +82,8 @@ func (s *Server) RequestWithHeaders(t *testing.T, method, uri string, data inter
 	}
 
 	req.Header.Set("Sec-Fetch-Site", "same-origin")
+	req.Header.Set("X-CSRF-Token", testCSRFToken)
+	req.AddCookie(&http.Cookie{Name: "_csrf", Value: testCSRFToken})
 
 	for key, value := range headers {
 		req.Header.Set(key, value)
@@ -90,33 +94,32 @@ func (s *Server) RequestWithHeaders(t *testing.T, method, uri string, data inter
 	}
 
 	s.server.ServeHTTP(w, req)
+	response := w.Result()
 	if expectedCode != 0 {
 		require.Equalf(t, expectedCode, w.Code, "Unexpected status code for %s %s: got %d, expected %d", method, uri, w.Code, expectedCode)
 	}
 	if method == http.MethodPost {
 		if strings.Contains(uri, "/login") {
-			cookie := ""
-			h := w.Header().Get("Set-Cookie")
-			parts := strings.Split(h, "; ")
-			for _, p := range parts {
-				if strings.HasPrefix(p, "session=") {
-					cookie = p
+			for _, cookie := range response.Cookies() {
+				if cookie.Name == "session" {
+					s.SessionCookie = cookie.Value
 					break
 				}
 			}
-			s.SessionCookie = strings.TrimPrefix(cookie, "session=")
 		} else if strings.Contains(uri, "/logout") {
 			s.SessionCookie = ""
 		}
 	}
 
-	return w.Result()
+	return response
 }
 
 func (s *Server) RawRequest(t *testing.T, req *http.Request, expectedCode int) *http.Response {
 	w := httptest.NewRecorder()
 
 	req.Header.Set("Sec-Fetch-Site", "same-origin")
+	req.Header.Set("X-CSRF-Token", testCSRFToken)
+	req.AddCookie(&http.Cookie{Name: "_csrf", Value: testCSRFToken})
 
 	if s.SessionCookie != "" {
 		req.AddCookie(&http.Cookie{Name: "session", Value: s.SessionCookie})

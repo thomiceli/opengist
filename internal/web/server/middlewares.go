@@ -67,7 +67,13 @@ func (s *Server) registerMiddlewares() {
 	s.echo.Use(middleware.Recover())
 	s.echo.Use(middleware.Secure())
 	s.echo.Use(Middleware(sessionInit).toEcho())
-	s.echo.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+	s.echo.Use(csrfMiddleware())
+	s.echo.Use(Middleware(csrfInit).toEcho())
+
+}
+
+func csrfMiddleware() echo.MiddlewareFunc {
+	return csrfWithTokenValidation(middleware.CSRFConfig{
 		TokenLookup:    "form:_csrf,header:X-CSRF-Token",
 		CookiePath:     "/",
 		CookieHTTPOnly: true,
@@ -89,9 +95,50 @@ func (s *Server) registerMiddlewares() {
 			log.Info().Err(err).Msg("CSRF error")
 			return err
 		},
-	}))
-	s.echo.Use(Middleware(csrfInit).toEcho())
+	})
+}
 
+// csrfWithTokenValidation prevents Echo from treating Sec-Fetch-Site as a
+// substitute for CSRF token validation. Browsers control this header, but
+// non-browser clients can set it to "same-origin" or "none" themselves.
+func csrfWithTokenValidation(config middleware.CSRFConfig) echo.MiddlewareFunc {
+	csrf := middleware.CSRFWithConfig(config)
+
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		protected := csrf(next)
+
+		return func(ctx echo.Context) error {
+			request := ctx.Request()
+			secFetchSiteValue := request.Header.Get(echo.HeaderSecFetchSite)
+			if secFetchSiteValue == "" {
+				return protected(ctx)
+			}
+
+			switch request.Method {
+			case http.MethodGet, http.MethodHead, http.MethodOptions, http.MethodTrace:
+			default:
+				if secFetchSiteValue != "same-origin" && secFetchSiteValue != "none" {
+					return protected(ctx)
+				}
+			}
+
+			secFetchSite := request.Header.Values(echo.HeaderSecFetchSite)
+			request.Header.Del(echo.HeaderSecFetchSite)
+
+			restoreHeader := func() {
+				request.Header.Del(echo.HeaderSecFetchSite)
+				for _, value := range secFetchSite {
+					request.Header.Add(echo.HeaderSecFetchSite, value)
+				}
+			}
+			defer restoreHeader()
+
+			return csrf(func(ctx echo.Context) error {
+				restoreHeader()
+				return next(ctx)
+			})(ctx)
+		}
+	}
 }
 
 func (s *Server) errorHandler(err error, ctx echo.Context) {

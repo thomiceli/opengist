@@ -30,6 +30,61 @@ func TestInitDeleteRepository(t *testing.T) {
 	require.NoDirExists(t, RepositoryPath("thomas", "gist1"), "Repository should not exist")
 }
 
+func TestSetFileContentRejectsSymlink(t *testing.T) {
+	SetupTest(t)
+	defer TeardownTest(t)
+
+	tmpPath := TmpRepositoryPath("symlink-test")
+	require.NoError(t, os.RemoveAll(tmpPath))
+	require.NoError(t, os.MkdirAll(tmpPath, 0755))
+	t.Cleanup(func() { require.NoError(t, DeleteTmpRepository("symlink-test")) })
+	target := filepath.Join(t.TempDir(), "target")
+	require.NoError(t, os.WriteFile(target, []byte("original"), 0644))
+	require.NoError(t, os.Symlink(target, filepath.Join(tmpPath, "link")))
+
+	err := SetFileContent("symlink-test", "link", "overwritten")
+	require.Error(t, err)
+	content, readErr := os.ReadFile(target)
+	require.NoError(t, readErr)
+	require.Equal(t, "original", string(content))
+}
+
+func TestSetFileContentRejectsSymlinkParent(t *testing.T) {
+	SetupTest(t)
+	defer TeardownTest(t)
+
+	tmpPath := TmpRepositoryPath("symlink-parent-test")
+	require.NoError(t, os.RemoveAll(tmpPath))
+	require.NoError(t, os.MkdirAll(tmpPath, 0755))
+	t.Cleanup(func() { require.NoError(t, DeleteTmpRepository("symlink-parent-test")) })
+	target := filepath.Join(t.TempDir(), "target")
+	require.NoError(t, os.WriteFile(target, []byte("original"), 0644))
+	require.NoError(t, os.Symlink(filepath.Dir(target), filepath.Join(tmpPath, "link")))
+
+	err := SetFileContent("symlink-parent-test", "link/target", "overwritten")
+	require.Error(t, err)
+	content, readErr := os.ReadFile(target)
+	require.NoError(t, readErr)
+	require.Equal(t, "original", string(content))
+}
+
+func TestCloneTmpUsesUniqueDirectories(t *testing.T) {
+	SetupTest(t)
+	defer TeardownTest(t)
+
+	first, err := CloneTmp("thomas", "gist1", "thomas@mail.com", false)
+	require.NoError(t, err)
+	defer func() { require.NoError(t, DeleteTmpRepository(first)) }()
+
+	second, err := CloneTmp("thomas", "gist1", "thomas@mail.com", false)
+	require.NoError(t, err)
+	defer func() { require.NoError(t, DeleteTmpRepository(second)) }()
+
+	require.NotEqual(t, first, second)
+	require.DirExists(t, TmpRepositoryPath(first))
+	require.DirExists(t, TmpRepositoryPath(second))
+}
+
 func TestCommits(t *testing.T) {
 	SetupTest(t)
 	defer TeardownTest(t)
@@ -171,20 +226,22 @@ func TestSetFileContentRejectsSymlinkChain(t *testing.T) {
 	defer TeardownTest(t)
 
 	CommitToBare(t, "thomas", "gist1", map[string]string{"regular.md": "content"})
-	require.NoError(t, CloneTmp("thomas", "gist1", "gist1", "thomas@mail.com", false))
+	gistTmpId, err := CloneTmp("thomas", "gist1", "thomas@mail.com", false)
+	require.NoError(t, err)
+	defer func() { require.NoError(t, DeleteTmpRepository(gistTmpId)) }()
 
 	protectedPath := filepath.Join(config.GetHomeDir(), "protected-hook")
 	require.NoError(t, os.WriteFile(protectedPath, []byte("original hook"), 0644))
 	t.Cleanup(func() { _ = os.Remove(protectedPath) })
 
-	repositoryPath := TmpRepositoryPath("gist1")
+	repositoryPath := TmpRepositoryPath(gistTmpId)
 	payloadLink := filepath.Join(repositoryPath, "payload")
 	if err := os.Symlink(".git", payloadLink); err != nil {
 		t.Skipf("symbolic links are unavailable: %v", err)
 	}
 	require.NoError(t, os.Symlink("payload/../../../../protected-hook", filepath.Join(repositoryPath, "task.md")))
 
-	err := SetFileContent("gist1", "task.md", "malicious hook")
+	err = SetFileContent(gistTmpId, "task.md", "malicious hook")
 	require.ErrorContains(t, err, "symbolic link")
 
 	content, err := os.ReadFile(protectedPath)

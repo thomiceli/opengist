@@ -124,7 +124,7 @@ func getChangedFiles(rev string) (string, error) {
 }
 
 func getSymlinkFiles(rev string) ([]string, error) {
-	cmd := exec.Command("git", "ls-tree", "-rz", "--full-tree", "--end-of-options", rev)
+	cmd := exec.Command("git", "ls-tree", "-rz", "-r", "--full-tree", "--end-of-options", rev)
 
 	out, err := cmd.Output()
 	if err != nil {

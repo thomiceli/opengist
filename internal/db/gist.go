@@ -843,51 +843,63 @@ func (gist *Gist) NbCommits() (string, error) {
 }
 
 func (gist *Gist) AddAndCommitFiles(files *[]FileDTO) error {
-	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email, true); err != nil {
+	gistTmpId, err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.User.Email, true)
+	if err != nil {
 		return err
 	}
+	defer func() {
+		if err := git.DeleteTmpRepository(gistTmpId); err != nil {
+			log.Warn().Err(err).Msgf("Could not delete temporary repository %s", gistTmpId)
+		}
+	}()
 
 	for _, file := range *files {
 		if file.SourcePath != "" { // if it's an uploaded file
-			if err := git.MoveFileToRepository(gist.Uuid, file.Filename, file.SourcePath); err != nil {
+			if err := git.MoveFileToRepository(gistTmpId, file.Filename, file.SourcePath); err != nil {
 				return err
 			}
 		} else { // else it's a text editor file
-			if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
+			if err := git.SetFileContent(gistTmpId, file.Filename, file.Content); err != nil {
 				return err
 			}
 		}
 	}
 
-	if err := git.AddAll(gist.Uuid); err != nil {
+	if err := git.AddAll(gistTmpId); err != nil {
 		return err
 	}
 
-	if err := git.CommitRepository(gist.Uuid, gist.User.Username, gist.User.Email); err != nil {
+	if err := git.CommitRepository(gistTmpId, gist.User.Username, gist.User.Email); err != nil {
 		return err
 	}
 
-	return git.Push(gist.Uuid)
+	return git.Push(gistTmpId)
 }
 
 func (gist *Gist) AddAndCommitFile(file *FileDTO) error {
-	if err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.Uuid, gist.User.Email, false); err != nil {
+	gistTmpId, err := git.CloneTmp(gist.User.Username, gist.Uuid, gist.User.Email, false)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := git.DeleteTmpRepository(gistTmpId); err != nil {
+			log.Warn().Err(err).Msgf("Could not delete temporary repository %s", gistTmpId)
+		}
+	}()
+
+	if err := git.SetFileContent(gistTmpId, file.Filename, file.Content); err != nil {
 		return err
 	}
 
-	if err := git.SetFileContent(gist.Uuid, file.Filename, file.Content); err != nil {
+	if err := git.AddAll(gistTmpId); err != nil {
 		return err
 	}
 
-	if err := git.AddAll(gist.Uuid); err != nil {
+	if err := git.CommitRepository(gistTmpId, gist.User.Username, gist.User.Email); err != nil {
 		return err
 	}
 
-	if err := git.CommitRepository(gist.Uuid, gist.User.Username, gist.User.Email); err != nil {
-		return err
-	}
-
-	return git.Push(gist.Uuid)
+	return git.Push(gistTmpId)
 }
 
 func (gist *Gist) ForkClone(username string, uuid string) error {

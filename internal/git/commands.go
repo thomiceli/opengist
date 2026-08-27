@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -367,40 +366,59 @@ func GetLog(user string, gist string, revision string, skip int, limit int) ([]*
 	return parseLog(stdout, maxFilesPerDiffCommit, diffSize)
 }
 
-func CloneTmp(user string, gist string, gistTmpId string, email string, remove bool) error {
+func CloneTmp(user string, gist string, email string, remove bool) (string, error) {
 	repositoryPath := RepositoryPath(user, gist)
-
 	tmpPath := TmpRepositoriesPath()
+	if err := os.MkdirAll(tmpPath, 0755); err != nil {
+		return "", err
+	}
 
-	tmpRepositoryPath := path.Join(tmpPath, gistTmpId)
-
-	err := os.RemoveAll(tmpRepositoryPath)
+	// Every write operation needs its own checkout. Reusing the gist ID here
+	// lets concurrent requests remove and replace path components between the
+	// symlink validation and the eventual write.
+	tmpRepositoryPath, err := os.MkdirTemp(tmpPath, gist+"-")
 	if err != nil {
-		return err
+		return "", err
+	}
+	gistTmpId := filepath.Base(tmpRepositoryPath)
+	cleanup := func() {
+		_ = os.RemoveAll(tmpRepositoryPath)
 	}
 
 	cmd := exec.Command("git", "clone", repositoryPath, gistTmpId)
 	cmd.Dir = tmpPath
 	if err = cmd.Run(); err != nil {
-		return err
+		cleanup()
+		return "", err
 	}
 
 	// remove every file (keep the .git directory)
 	// useful when user wants to edit multiple files from an existing gist
 	if remove {
 		if err = removeFilesExceptGit(tmpRepositoryPath); err != nil {
-			return err
+			cleanup()
+			return "", err
 		}
 	}
 	cmd = exec.Command("git", "config", "--local", "user.name", user)
 	cmd.Dir = tmpRepositoryPath
 	if err = cmd.Run(); err != nil {
-		return err
+		cleanup()
+		return "", err
 	}
 
 	cmd = exec.Command("git", "config", "--local", "user.email", email)
 	cmd.Dir = tmpRepositoryPath
-	return cmd.Run()
+	if err = cmd.Run(); err != nil {
+		cleanup()
+		return "", err
+	}
+
+	return gistTmpId, nil
+}
+
+func DeleteTmpRepository(gistTmpId string) error {
+	return os.RemoveAll(TmpRepositoryPath(gistTmpId))
 }
 
 func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) error {

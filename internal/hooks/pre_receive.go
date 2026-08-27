@@ -29,6 +29,21 @@ func PreReceive(in io.Reader, out, er io.Writer) error {
 		}
 
 		oldRev, newRev := parts[0], parts[1]
+		if newRev != BaseHash {
+			symlinkFiles, err := getSymlinkFiles(newRev)
+			if err != nil {
+				_, _ = fmt.Fprintln(er, "Failed to inspect pushed files")
+				return err
+			}
+			if len(symlinkFiles) > 0 {
+				_, _ = fmt.Fprintln(out, "\nPushing symbolic links is not allowed:")
+				for _, filename := range symlinkFiles {
+					_, _ = fmt.Fprintf(out, "  %q\n", filename)
+				}
+				_, _ = fmt.Fprintln(out)
+				return fmt.Errorf("push contains symbolic links")
+			}
+		}
 
 		var rev string
 		if oldRev == BaseHash {
@@ -106,4 +121,32 @@ func getChangedFiles(rev string) (string, error) {
 	}
 
 	return out.String(), nil
+}
+
+func getSymlinkFiles(rev string) ([]string, error) {
+	cmd := exec.Command("git", "ls-tree", "-rz", "--full-tree", "--end-of-options", rev)
+
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	return parseSymlinkFiles(out), nil
+}
+
+func parseSymlinkFiles(output []byte) []string {
+	var symlinkFiles []string
+	for _, record := range bytes.Split(output, []byte{0}) {
+		tab := bytes.IndexByte(record, '\t')
+		if tab < 0 {
+			continue
+		}
+
+		metadata := bytes.Fields(record[:tab])
+		if len(metadata) > 0 && bytes.Equal(metadata[0], []byte("120000")) {
+			symlinkFiles = append(symlinkFiles, string(record[tab+1:]))
+		}
+	}
+
+	return symlinkFiles
 }

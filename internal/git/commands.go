@@ -221,8 +221,8 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 		}
 
 		parts := strings.Fields(header)
-		if len(parts) > 3 {
-			continue // Not a valid header, skip this entry
+		if len(parts) < 3 {
+			continue // Not a valid header (e.g. "<hash> missing"), skip this entry
 		}
 
 		size, err := strconv.ParseUint(parts[2], 10, 64)

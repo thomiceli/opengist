@@ -12,6 +12,9 @@ import (
 // themselves POST to the existing /visibility, /archive and /delete routes.
 func GistSettings(ctx *context.Context) error {
 	gist := ctx.GetData("gist").(*db.Gist)
+	if err := loadSidebarFiles(ctx, gist); err != nil {
+		return err
+	}
 
 	ctx.SetData("page", "settings")
 	ctx.SetData("htmlTitle", gist.Title)

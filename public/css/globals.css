@@ -375,6 +375,10 @@ table.csv-table thead th {
     opacity: 1;
 }
 
+.gist-file-toc-toggle[aria-expanded="true"] > svg {
+    transform: rotate(90deg);
+}
+
 /* Desktop sidebar collapse into an icon-only rail. Toggled by the
    `sidebar-collapsed` class on <html> (restored from localStorage in the head
    script + toggled in main.ts). Only applies at md+ where the sidebar is docked;
@@ -392,6 +396,13 @@ table.csv-table thead th {
 
     /* Hide text: nav labels, badges, section headings, logo name. Icons stay. */
     html.sidebar-collapsed #sidebar :is(span, p) {
+        display: none;
+    }
+
+    /* Keep the gist/code link in the rail, but hide its file tree and
+       disclosure affordance while labels are unavailable. */
+    html.sidebar-collapsed #sidebar #gist-file-list,
+    html.sidebar-collapsed #sidebar .gist-file-toc-toggle {
         display: none;
     }
 

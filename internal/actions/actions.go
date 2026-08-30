@@ -26,6 +26,7 @@ const (
 	SyncGistLanguages
 	DeleteExpiredGists
 	SyncSSHKeys
+	DeleteOrphanedUploadFiles
 
 	numActions // keep last — sizes the `running` array
 )
@@ -44,15 +45,16 @@ type action struct {
 }
 
 var registry = map[int]action{
-	SyncReposFromFS:    {run: syncReposFromFS},
-	SyncReposFromDB:    {run: syncReposFromDB},
-	GitGcRepos:         {run: gitGcRepos},
-	SyncGistPreviews:   {run: syncGistPreviews},
-	ResetHooks:         {run: resetHooks},
-	IndexGists:         {run: indexGists},
-	SyncGistLanguages:  {run: syncGistLanguages},
-	DeleteExpiredGists: {run: deleteExpiredGists, spec: "@every 12h"},
-	SyncSSHKeys:        {run: syncSSHKeys, spec: "@every 72h"},
+	SyncReposFromFS:           {run: syncReposFromFS},
+	SyncReposFromDB:           {run: syncReposFromDB},
+	GitGcRepos:                {run: gitGcRepos},
+	SyncGistPreviews:          {run: syncGistPreviews},
+	ResetHooks:                {run: resetHooks},
+	IndexGists:                {run: indexGists},
+	SyncGistLanguages:         {run: syncGistLanguages},
+	DeleteExpiredGists:        {run: deleteExpiredGists, spec: "@every 12h"},
+	SyncSSHKeys:               {run: syncSSHKeys, spec: "@every 72h"},
+	DeleteOrphanedUploadFiles: {run: deleteOrphanedUploadFiles, spec: "@every 1h"},
 }
 
 func IsRunning(actionType int) bool {
@@ -229,5 +231,45 @@ func deleteExpiredGists() {
 
 	if len(gists) > 0 {
 		log.Info().Msgf("Deleted %d expired gist(s)", len(gists))
+	}
+}
+
+// deleteOrphanedUploadFiles removes files from {opengist-home}/uploads/ that
+// have been sitting untouched longer than the configured TTL. Successful gist
+// creation renames the file out of this directory via os.Rename, so anything
+// still here past the TTL is an abandoned upload (tab closed, validation
+// failed after upload, etc.).
+func deleteOrphanedUploadFiles() {
+	uploadsDir := filepath.Join(config.GetHomeDir(), "uploads")
+	entries, err := os.ReadDir(uploadsDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return
+		}
+		log.Error().Err(err).Msg("Cannot read uploads directory")
+		return
+	}
+
+	cutoff := time.Now().Add(-config.C.UploadOrphanTTLDuration())
+	var deleted int
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		if info.ModTime().Before(cutoff) {
+			if err := os.Remove(filepath.Join(uploadsDir, e.Name())); err != nil {
+				log.Error().Err(err).Msgf("Cannot delete orphaned upload %s", e.Name())
+				continue
+			}
+			deleted++
+		}
+	}
+
+	if deleted > 0 {
+		log.Info().Msgf("Deleted %d orphaned upload file(s)", deleted)
 	}
 }

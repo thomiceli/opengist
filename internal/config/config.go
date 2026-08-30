@@ -65,7 +65,10 @@ type config struct {
 
 	ApiEnabled bool `yaml:"api.enabled" env:"OG_API_ENABLED"`
 
-	DisableFileUpload bool `yaml:"disable-file-upload" env:"OG_DISABLE_FILE_UPLOAD"`
+	DisableFileUpload bool   `yaml:"disable-file-upload" env:"OG_DISABLE_FILE_UPLOAD"`
+	UploadOrphanTTL   string `yaml:"upload-orphan-ttl" env:"OG_UPLOAD_ORPHAN_TTL"`
+
+	uploadOrphanTTLDuration time.Duration // parsed once in InitConfig; use UploadOrphanTTLDuration()
 
 	UnixSocketPermissions string `yaml:"unix-socket-permissions" env:"OG_UNIX_SOCKET_PERMISSIONS"`
 
@@ -133,6 +136,26 @@ func (c *config) SshManagesAuthorizedKeys() bool {
 	return c.SshGit == SshServerHost && c.SshAuthorizedKeysFile != ""
 }
 
+// UploadOrphanTTLDuration returns the configured max age for files sitting in
+// {opengist-home}/uploads/ before the orphan sweep removes them.
+// The value is parsed once at startup by InitConfig; see parseUploadOrphanTTL.
+func (c *config) UploadOrphanTTLDuration() time.Duration {
+	return c.uploadOrphanTTLDuration
+}
+
+// parseUploadOrphanTTL parses UploadOrphanTTL and caches it. Called once from
+// InitConfig so that a misconfigured value is logged exactly once at startup.
+func (c *config) parseUploadOrphanTTL() {
+	if c.UploadOrphanTTL != "" {
+		if d, err := time.ParseDuration(c.UploadOrphanTTL); err == nil && d > 0 {
+			c.uploadOrphanTTLDuration = d
+			return
+		}
+		log.Warn().Msgf("Invalid upload-orphan-ttl %q, using default 1h", c.UploadOrphanTTL)
+	}
+	c.uploadOrphanTTLDuration = time.Hour
+}
+
 func configWithDefaults() (*config, error) {
 	c := &config{}
 
@@ -152,6 +175,8 @@ func configWithDefaults() (*config, error) {
 	c.HttpGit = true
 
 	c.ApiEnabled = true
+
+	c.UploadOrphanTTL = "1h"
 
 	c.UnixSocketPermissions = "0666"
 
@@ -190,6 +215,8 @@ func InitConfig(configPath string, out io.Writer) error {
 	// as the legacy booleans (true → builtin, false → disabled). Collapse whatever
 	// was provided into a canonical mode.
 	c.SshGit = normalizeSshGitMode(c.SshGit)
+
+	c.parseUploadOrphanTTL()
 
 	if c.OpengistHome == "" {
 		homeDir, err := os.UserHomeDir()

@@ -1,12 +1,11 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
 
-// auto migration for newer versions of Opengist
+// auto migration for newer versions of Opengist.
 func migrateConfig() error {
 	configMigrations := []struct {
 		Version string
@@ -37,6 +36,6 @@ func moveFile(oldPath, newPath string) {
 	}
 
 	if err := os.Rename(oldPath, newPath); err == nil {
-		fmt.Printf("Automatically moved %s to %s\n", oldPath, newPath)
+		AddStartupMsg("Automatically moved " + oldPath + " to " + newPath)
 	}
 }

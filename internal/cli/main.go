@@ -78,10 +78,11 @@ func App() error {
 }
 
 func Initialize(ctx *cli.Context) {
-	fmt.Println("Opengist " + config.OpengistVersion)
+	config.AddStartupMsg("Opengist " + config.OpengistVersion)
 
-	if err := config.InitConfig(ctx.String("config"), os.Stdout); err != nil {
-		panic(err)
+	if err := config.InitConfig(ctx.String("config")); err != nil {
+		fmt.Fprintf(os.Stderr, "Fatal: %s\n", err)
+		os.Exit(1)
 	}
 	if err := os.MkdirAll(filepath.Join(config.GetHomeDir()), 0755); err != nil {
 		panic(err)
@@ -90,6 +91,7 @@ func Initialize(ctx *cli.Context) {
 	config.SetupSecretKey()
 
 	config.InitLog()
+	config.FlushStartupLog()
 
 	gitVersion, err := git.GetGitVersion()
 	if err != nil {

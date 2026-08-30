@@ -216,6 +216,40 @@ textarea.input {
     background-color: transparent !important;
 }
 
+/* Wraps every fenced code block rendered from Markdown (internal/render/markdown.go)
+   so its copy button can sit pinned to the top-right corner instead of pushing
+   the block's own layout around. Hidden until the block is hovered or focused,
+   same reveal pattern as GitHub's Markdown code block copy button. */
+.code-block-wrapper {
+    position: relative;
+}
+.code-block-wrapper pre {
+    margin: 0;
+}
+.code-block-wrapper .copy-code-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    color: var(--muted-foreground);
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
+}
+.code-block-wrapper:hover .copy-code-btn,
+.code-block-wrapper .copy-code-btn:focus-visible,
+.code-block-wrapper .copy-code-btn[data-copied] {
+    opacity: 1;
+}
+.code-block-wrapper .copy-code-btn:hover {
+    color: var(--foreground);
+}
+
 /* Toggled by the gist editor (editor.ts). */
 .hidden-important {
     display: none !important;

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.15.2](https://github.com/thomiceli/opengist/compare/v1.15.1...v1.15.2) - 2026-08-30
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- Anonymous LDAP user search (#794)
+
+### Fixed
+- Prevent writes through symbolic links in gists (#799)
+- Prevent server crashes when rendering empty CSV files
+- Invalid header handling in Git `cat-file` batch reader (#802)
+- Overlapping headers in narrow embeds (#803)
+
 ## [1.15.1](https://github.com/thomiceli/opengist/compare/v1.15.0...v1.15.1) - 2026-08-04
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

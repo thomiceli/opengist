@@ -226,6 +226,7 @@ func TestGistJson(t *testing.T) {
 		require.Contains(t, embed["js_auto"], identifier+".js?auto")
 		require.NotEmpty(t, embed["css"])
 		require.NotEmpty(t, embed["html"])
+		require.Contains(t, embed["html"], `class="flow-root border-b-1`)
 	})
 
 	t.Run("Unlisted", func(t *testing.T) {

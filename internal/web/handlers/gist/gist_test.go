@@ -100,6 +100,27 @@ func TestGistIndex(t *testing.T) {
 	})
 }
 
+func TestTopicPageDecodesPercentEncodedTopic(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+	s.Login(t, "thomas")
+	s.Request(t, "POST", "/", url.Values{
+		"title":   {"Unicode topic gist"},
+		"name":    {"file.txt"},
+		"content": {"hello world"},
+		"topics":  {"数据库"},
+		"private": {"0"},
+	}, 302)
+	s.Logout()
+
+	resp := s.Request(t, "GET", "/-/topics/%e6%95%b0%e6%8d%ae%e5%ba%93", nil, 200)
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Contains(t, string(body), "Unicode topic gist")
+}
+
 func TestGistSocialMetaTags(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)

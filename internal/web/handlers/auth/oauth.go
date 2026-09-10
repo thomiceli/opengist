@@ -16,6 +16,27 @@ import (
 	"gorm.io/gorm"
 )
 
+const oauthInvitationSessionKey = "oauthInvitation"
+
+func allowOauthSignup(ctx *context.Context) (*db.Invitation, error) {
+	invitationID, ok := ctx.GetSession().Values[oauthInvitationSessionKey].(uint)
+	if ok {
+		invitation, err := db.GetInvitationByID(invitationID)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ctx.ErrorRes(500, "Cannot check for invitation code", err)
+		}
+		if err == nil && invitation.IsUsable() {
+			return invitation, nil
+		}
+	}
+
+	if ctx.GetData("DisableSignup") == true {
+		ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
+		return nil, ctx.Redirect(302, "/-/login")
+	}
+	return nil, nil
+}
+
 func Oauth(ctx *context.Context) error {
 	providerStr := ctx.Param("provider")
 
@@ -90,9 +111,8 @@ func OauthCallback(ctx *context.Context) error {
 	userDB, err := db.GetUserByProvider(user.UserID, provider.GetProvider())
 	// if user is not in database, redirect to OAuth registration page
 	if err != nil {
-		if ctx.GetData("DisableSignup") == true {
-			ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
-			return ctx.Redirect(302, "/-/login")
+		if _, err := allowOauthSignup(ctx); err != nil {
+			return err
 		}
 
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -134,9 +154,8 @@ func OauthCallback(ctx *context.Context) error {
 }
 
 func OauthRegister(ctx *context.Context) error {
-	if ctx.GetData("DisableSignup") == true {
-		ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
-		return ctx.Redirect(302, "/-/login")
+	if _, err := allowOauthSignup(ctx); err != nil {
+		return err
 	}
 
 	sess := ctx.GetSession()
@@ -152,9 +171,9 @@ func OauthRegister(ctx *context.Context) error {
 }
 
 func ProcessOauthRegister(ctx *context.Context) error {
-	if ctx.GetData("DisableSignup") == true {
-		ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
-		return ctx.Redirect(302, "/-/login")
+	invitation, err := allowOauthSignup(ctx)
+	if err != nil {
+		return err
 	}
 
 	sess := ctx.GetSession()
@@ -243,6 +262,11 @@ func ProcessOauthRegister(ctx *context.Context) error {
 		userDB.IsAdmin = true
 		_ = userDB.Update()
 	}
+	if invitation != nil {
+		if err := invitation.Use(); err != nil {
+			return ctx.ErrorRes(500, "Cannot use invitation", err)
+		}
+	}
 
 	keys, err := callbackProvider.GetProviderUserSSHKeys()
 	if err != nil {
@@ -268,6 +292,7 @@ func ProcessOauthRegister(ctx *context.Context) error {
 	delete(sess.Values, "oauthEmail")
 	delete(sess.Values, "oauthAvatarURL")
 	delete(sess.Values, "oauthIsAdmin")
+	delete(sess.Values, oauthInvitationSessionKey)
 
 	sess.Values["user"] = userDB.ID
 	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year

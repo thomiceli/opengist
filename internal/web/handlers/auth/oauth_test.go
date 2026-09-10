@@ -7,10 +7,12 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/oauth2-proxy/mockoidc"
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
+	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/test"
 )
 
@@ -47,7 +49,7 @@ func TestOIDCLoginPKCE(t *testing.T) {
 
 	base := s.StartHttpServer(t)
 
-	login := func(t *testing.T, tamper func(*url.URL)) (*http.Response, *url.URL) {
+	login := func(t *testing.T, invitationCode string, tamper func(*url.URL)) (*http.Response, *url.URL, *http.Client) {
 		t.Helper()
 
 		m.QueueUser(&oidcUser{MockUser: &mockoidc.MockUser{
@@ -78,13 +80,19 @@ func TestOIDCLoginPKCE(t *testing.T) {
 			},
 		}
 
+		if invitationCode != "" {
+			resp, err := client.Get(base + "/-/register?code=" + url.QueryEscape(invitationCode))
+			require.NoError(t, err)
+			_ = resp.Body.Close()
+		}
+
 		resp, err := client.Get(base + "/oauth/openid-connect")
 		require.NoError(t, err)
-		return resp, authorizeURL
+		return resp, authorizeURL, client
 	}
 
 	t.Run("valid challenge completes login", func(t *testing.T) {
-		resp, authorizeURL := login(t, nil)
+		resp, authorizeURL, _ := login(t, "", nil)
 		defer resp.Body.Close()
 
 		require.NotNil(t, authorizeURL, "no redirect to the OIDC authorization endpoint was observed")
@@ -96,7 +104,7 @@ func TestOIDCLoginPKCE(t *testing.T) {
 	})
 
 	t.Run("mismatched challenge fails the token exchange", func(t *testing.T) {
-		resp, _ := login(t, func(u *url.URL) {
+		resp, _, _ := login(t, "", func(u *url.URL) {
 			q := u.Query()
 			q.Set("code_challenge", "this-does-not-match-the-stored-verifier")
 			u.RawQuery = q.Encode()
@@ -104,5 +112,46 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		defer resp.Body.Close()
 
 		require.Equal(t, "/-/login", resp.Request.URL.Path)
+	})
+
+	t.Run("invitation permits registration when signup is disabled", func(t *testing.T) {
+		require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "1"))
+		blockedResp, _, _ := login(t, "", nil)
+		_ = blockedResp.Body.Close()
+		require.Equal(t, "/-/login", blockedResp.Request.URL.Path)
+
+		invitation := &db.Invitation{ExpiresAt: time.Now().Add(time.Hour).Unix(), NbMax: 1}
+		require.NoError(t, invitation.Create())
+
+		resp, _, client := login(t, invitation.Code, nil)
+		defer resp.Body.Close()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		require.Equal(t, "/oauth/register", resp.Request.URL.Path)
+
+		baseURL, err := url.Parse(base)
+		require.NoError(t, err)
+		var csrfToken string
+		for _, cookie := range client.Jar.Cookies(baseURL) {
+			if cookie.Name == "_csrf" {
+				csrfToken = cookie.Value
+			}
+		}
+		require.NotEmpty(t, csrfToken)
+
+		registrationResp, err := client.PostForm(base+"/oauth/register", url.Values{
+			"_csrf":    {csrfToken},
+			"username": {"invited"},
+			"email":    {"alice@example.com"},
+		})
+		require.NoError(t, err)
+		defer registrationResp.Body.Close()
+		require.Equal(t, "/", registrationResp.Request.URL.Path)
+
+		user, err := db.GetUserByUsername("invited")
+		require.NoError(t, err)
+		require.Equal(t, "alice-id", user.OIDCID)
+		updatedInvitation, err := db.GetInvitationByID(invitation.ID)
+		require.NoError(t, err)
+		require.Equal(t, uint(1), updatedInvitation.NbUsed)
 	})
 }

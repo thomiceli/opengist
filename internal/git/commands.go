@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -222,8 +221,8 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 		}
 
 		parts := strings.Fields(header)
-		if len(parts) > 3 {
-			continue // Not a valid header, skip this entry
+		if len(parts) < 3 {
+			continue // Not a valid header (e.g. "<hash> missing"), skip this entry
 		}
 
 		size, err := strconv.ParseUint(parts[2], 10, 64)
@@ -367,40 +366,59 @@ func GetLog(user string, gist string, revision string, skip int, limit int) ([]*
 	return parseLog(stdout, maxFilesPerDiffCommit, diffSize)
 }
 
-func CloneTmp(user string, gist string, gistTmpId string, email string, remove bool) error {
+func CloneTmp(user string, gist string, email string, remove bool) (string, error) {
 	repositoryPath := RepositoryPath(user, gist)
-
 	tmpPath := TmpRepositoriesPath()
+	if err := os.MkdirAll(tmpPath, 0755); err != nil {
+		return "", err
+	}
 
-	tmpRepositoryPath := path.Join(tmpPath, gistTmpId)
-
-	err := os.RemoveAll(tmpRepositoryPath)
+	// Every write operation needs its own checkout. Reusing the gist ID here
+	// lets concurrent requests remove and replace path components between the
+	// symlink validation and the eventual write.
+	tmpRepositoryPath, err := os.MkdirTemp(tmpPath, gist+"-")
 	if err != nil {
-		return err
+		return "", err
+	}
+	gistTmpId := filepath.Base(tmpRepositoryPath)
+	cleanup := func() {
+		_ = os.RemoveAll(tmpRepositoryPath)
 	}
 
 	cmd := exec.Command("git", "clone", repositoryPath, gistTmpId)
 	cmd.Dir = tmpPath
 	if err = cmd.Run(); err != nil {
-		return err
+		cleanup()
+		return "", err
 	}
 
 	// remove every file (keep the .git directory)
 	// useful when user wants to edit multiple files from an existing gist
 	if remove {
 		if err = removeFilesExceptGit(tmpRepositoryPath); err != nil {
-			return err
+			cleanup()
+			return "", err
 		}
 	}
 	cmd = exec.Command("git", "config", "--local", "user.name", user)
 	cmd.Dir = tmpRepositoryPath
 	if err = cmd.Run(); err != nil {
-		return err
+		cleanup()
+		return "", err
 	}
 
 	cmd = exec.Command("git", "config", "--local", "user.email", email)
 	cmd.Dir = tmpRepositoryPath
-	return cmd.Run()
+	if err = cmd.Run(); err != nil {
+		cleanup()
+		return "", err
+	}
+
+	return gistTmpId, nil
+}
+
+func DeleteTmpRepository(gistTmpId string) error {
+	return os.RemoveAll(TmpRepositoryPath(gistTmpId))
 }
 
 func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) error {
@@ -418,7 +436,42 @@ func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) e
 func SetFileContent(gistTmpId string, filename string, content string) error {
 	repositoryPath := TmpRepositoryPath(gistTmpId)
 
-	return os.WriteFile(filepath.Join(repositoryPath, filename), []byte(content), 0644)
+	root, err := os.OpenRoot(repositoryPath)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+
+	// Files in a gist can originate from an untrusted Git push. Refuse to
+	// follow any symlink in the path: otherwise a subsequent web edit (for
+	// example, toggling a Markdown checkbox) could write outside the temporary
+	// clone or into its .git directory.
+	cleanPath := filepath.Clean(filename)
+	if filepath.IsAbs(filename) || cleanPath == ".." || strings.HasPrefix(cleanPath, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("file path %q escapes the repository", filename)
+	}
+
+	currentPath := ""
+	for _, component := range strings.Split(cleanPath, string(filepath.Separator)) {
+		if currentPath == "" {
+			currentPath = component
+		} else {
+			currentPath = filepath.Join(currentPath, component)
+		}
+
+		info, err := root.Lstat(currentPath)
+		if os.IsNotExist(err) {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("refusing to write through symbolic link %q", currentPath)
+		}
+	}
+
+	return root.WriteFile(cleanPath, []byte(content), 0644)
 }
 
 func MoveFileToRepository(gistTmpId string, filename string, sourcePath string) error {

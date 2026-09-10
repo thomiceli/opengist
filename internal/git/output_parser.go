@@ -340,11 +340,12 @@ func parseDiffContent(currentFile *File, maxBytes int, input *bufio.Reader) (lin
 			}
 		}
 
-		if len(line) > maxBytes {
+		if remaining := maxBytes - currFileLineCount; len(line) > remaining {
 			currentFile.Truncated = true
-			line = line[:maxBytes]
+			line = line[:remaining]
 		}
 		currentFile.Content += line + "\n"
+		currFileLineCount += len(line) + 1
 	}
 }
 

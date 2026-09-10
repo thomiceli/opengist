@@ -25,6 +25,9 @@ func renderCsvFile(file *git.File) (*CSVFile, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(records) == 0 {
+		return nil, fmt.Errorf("CSV file is empty")
+	}
 
 	header := records[0]
 	numColumns := len(header)

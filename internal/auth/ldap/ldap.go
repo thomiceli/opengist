@@ -10,6 +10,15 @@ func Enabled() bool {
 	return config.C.LDAPUrl != ""
 }
 
+// bindService binds the connection as the configured service account, or anonymously
+// when no bind DN is configured, for LDAP servers allowing anonymous queries.
+func bindService(l *ldap.Conn) error {
+	if config.C.LDAPBindDn == "" {
+		return l.UnauthenticatedBind("")
+	}
+	return l.Bind(config.C.LDAPBindDn, config.C.LDAPBindCredentials)
+}
+
 // Authenticate attempts to authenticate a user against the configured LDAP instance.
 func Authenticate(username, password string) (bool, error) {
 	l, err := ldap.DialURL(config.C.LDAPUrl)
@@ -21,7 +30,7 @@ func Authenticate(username, password string) (bool, error) {
 	}(l)
 
 	// First bind with a read only user
-	err = l.Bind(config.C.LDAPBindDn, config.C.LDAPBindCredentials)
+	err = bindService(l)
 	if err != nil {
 		return false, err
 	}
@@ -55,7 +64,7 @@ func Authenticate(username, password string) (bool, error) {
 	}
 
 	// Rebind as the read only user for any further queries
-	err = l.Bind(config.C.LDAPBindDn, config.C.LDAPBindCredentials)
+	err = bindService(l)
 	if err != nil {
 		return false, err
 	}

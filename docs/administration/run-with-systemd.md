@@ -7,7 +7,7 @@ On Unix distributions with systemd, place the Opengist binary like:
 
 ```shell
 sudo cp opengist /usr/local/bin
-sudo mkdir -p /var/lib/opengist
+sudo mkdir -p /etc/openlist
 sudo cp config.yml /etc/opengist
 ```
 

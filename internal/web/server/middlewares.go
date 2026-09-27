@@ -57,6 +57,7 @@ func (s *Server) registerMiddlewares() {
 	}))
 	s.echo.Pre(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI: true, LogStatus: true, LogMethod: true,
+		HandleError: true, // log the real status of error responses, not the default 200
 		LogValuesFunc: func(ctx echo.Context, v middleware.RequestLoggerValues) error {
 			log.Info().Str("uri", v.URI).Int("status", v.Status).Str("method", v.Method).
 				Str("ip", ctx.RealIP()).TimeDiff("duration", time.Now(), v.StartTime).

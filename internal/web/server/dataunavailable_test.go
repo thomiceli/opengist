@@ -17,6 +17,8 @@ func TestErrorPageRendersWhenDatabaseIsUnavailable(t *testing.T) {
 	defer test.Teardown(t)
 
 	require.NoError(t, db.Close())
+	// deferred after Teardown, so it runs first and Teardown has a connection
+	defer test.ReopenDatabase(t)
 
 	resp := s.Request(t, "GET", "/", nil, 500)
 	body, err := io.ReadAll(resp.Body)

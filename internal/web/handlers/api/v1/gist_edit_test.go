@@ -553,3 +553,49 @@ func TestCreateGist(t *testing.T) {
 		})
 	}
 }
+
+func TestCreateGist_SlugURLAndTopics(t *testing.T) {
+	s, tok := setupCreateGist(t)
+
+	body := map[string]interface{}{
+		"title":      "URL and Topics",
+		"slug_url":   "my-test-gist",
+		"topics":     []string{"go", "api", "testing"},
+		"visibility": "public",
+		"files": fileMap{
+			"test.txt": {"content": "hello"},
+		},
+	}
+
+	_, raw := s.APIRequest(t, "POST", "/api/gists", tok, body, 201)
+
+	var got types.Gist
+	require.NoError(t, json.Unmarshal(raw, &got))
+
+	require.Equal(t, "my-test-gist", got.SlugUrl)
+	require.ElementsMatch(t, []string{"go", "api", "testing"}, got.Topics)
+}
+
+func TestUpdateGist_URLAndTopics(t *testing.T) {
+	s, tok := setupCreateGist(t)
+
+	id := createSeedGist(t, s, tok)
+
+	// Set URL and topics.
+	_, raw := s.APIRequest(t, "PATCH", "/api/gists/"+id, tok,
+		`{
+			"slug_url": "my-gist-url",
+			"topics": ["go", "api", "opengist"]
+		}`, 200)
+
+	var resp types.Gist
+	require.NoError(t, json.Unmarshal(raw, &resp), "response: %s", string(raw))
+
+	require.Equal(t, "my-gist-url", resp.SlugUrl)
+	require.Equal(t, []string{"go", "api", "opengist"}, resp.Topics)
+
+	// Existing fields remain unchanged.
+	require.Equal(t, "seed-title", resp.Title)
+	require.Equal(t, "seed-description", resp.Description)
+	require.Equal(t, "public", resp.Visibility)
+}

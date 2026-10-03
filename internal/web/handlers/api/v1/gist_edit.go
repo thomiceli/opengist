@@ -44,12 +44,20 @@ func CreateGist(ctx *context.Context) error {
 	}
 	sort.Strings(filenames)
 
+	var topicsStr string
+	if req.Topics != nil {
+		topicsStr = strings.Join(*req.Topics, " ")
+	}
+
 	dto := &db.GistDTO{
 		Title:         strOrEmpty(req.Title),
 		Description:   strOrEmpty(req.Description),
+		URL:           strOrEmpty(req.SlugUrl),
+		Topics:        topicsStr,
 		Expire:        db.ExpirationType(strOrEmpty(req.Expire)),
 		VisibilityDTO: db.VisibilityDTO{Private: db.ParseVisibility(strOrEmpty(req.Visibility))},
 	}
+
 	// An explicit custom date takes precedence over the preset.
 	if req.ExpiresAt != nil {
 		dto.Expire = db.ExpiryCustom
@@ -129,8 +137,7 @@ func CreateGist(ctx *context.Context) error {
 
 // UpdateGist handles PATCH /api/gists/:uuid.
 // Only fields present in the body are touched. Files not mentioned in `files`
-// stay unchanged. A file entry
-// can:
+// stay unchanged. A file entry can:
 //
 //   - Set `content` to replace the file body.
 //   - Set `filename` to rename the file.
@@ -165,8 +172,22 @@ func UpdateGist(ctx *context.Context) error {
 
 	// PATCH requires at least one actionable field - otherwise we'd just
 	// rewrite the gist's updated_at for no reason.
-	if req.Description == nil && req.Title == nil && req.Visibility == nil && len(req.Files) == 0 {
-		return ctx.ErrorJson(422, "at least one of description, title, visibility, or files must be set", nil)
+	if req.Description == nil && req.Title == nil && req.Visibility == nil && req.SlugUrl == nil && req.Topics == nil && len(req.Files) == 0 {
+		return ctx.ErrorJson(422, "at least one field must be set", nil)
+	}
+
+	// Apply incoming metadata updates to the model
+	if req.SlugUrl != nil {
+		g.URL = strings.TrimSpace(*req.SlugUrl)
+	}
+
+	if req.Topics != nil {
+		g.Topics = make([]db.GistTopic, 0, len(*req.Topics))
+		for _, topic := range *req.Topics {
+			g.Topics = append(g.Topics, db.GistTopic{
+				Topic: topic,
+			})
+		}
 	}
 
 	if req.Title != nil {
@@ -181,24 +202,46 @@ func UpdateGist(ctx *context.Context) error {
 
 	// File patch: only rebuild the working tree if `files` carried at least
 	// one entry. (`files: {}` is a no-op.)
+	var filesDTO []db.FileDTO
 	if len(req.Files) > 0 {
 		merged, err := mergePatchFiles(g, req.Files)
 		if err != nil {
 			return ctx.ErrorJson(422, err.Error(), nil)
 		}
-
-		dto := &db.GistDTO{
-			Title:         g.Title,
-			Description:   g.Description,
-			VisibilityDTO: db.VisibilityDTO{Private: g.Private},
-			Files:         merged,
+		filesDTO = merged
+	} else {
+		current, _, err := g.Files("HEAD", false)
+		if err != nil {
+			return ctx.ErrorJson(500, "failed to read current files", err)
 		}
-		if err := ctx.Validate(dto); err != nil {
-			return ctx.ErrorJson(422, err.Error(), nil)
+		filesDTO = make([]db.FileDTO, len(current))
+		for i, cf := range current {
+			filesDTO[i] = db.FileDTO{
+				Filename: cf.Filename,
+				Content:  cf.Content,
+			}
 		}
+	}
 
-		g.NbFiles = len(dto.Files)
-		if err := g.AddAndCommitFiles(&dto.Files); err != nil {
+	// Construct DTO and execute validation rules (slug, topics, caps, file rules)
+	dto := &db.GistDTO{
+		Title:         g.Title,
+		Description:   g.Description,
+		URL:           g.URL,
+		Topics:        strings.Join(g.TopicsSlice(), " "),
+		VisibilityDTO: db.VisibilityDTO{Private: g.Private},
+		Files:         filesDTO,
+	}
+
+	if err := ctx.Validate(dto); err != nil {
+		return ctx.ErrorJson(422, err.Error(), nil)
+	}
+
+	// File patch: only rebuild the working tree if `files` carried at least
+	// one entry.
+	if len(req.Files) > 0 {
+		g.NbFiles = len(filesDTO)
+		if err := g.AddAndCommitFiles(&filesDTO); err != nil {
 			return ctx.ErrorJson(500, "failed to commit files", err)
 		}
 	}

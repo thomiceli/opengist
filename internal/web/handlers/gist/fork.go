@@ -81,6 +81,9 @@ func Forks(ctx *context.Context) error {
 	if err = handlers.Paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Identifier()+"/forks", 2, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
+	if err = loadSidebarFiles(ctx, gist); err != nil {
+		return err
+	}
 
 	ctx.SetData("page", "forks")
 	ctx.SetData("htmlTitle", ctx.TrH("gist.forks.for", gist.Title))

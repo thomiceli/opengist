@@ -1,6 +1,7 @@
 package gist_test
 
 import (
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -71,6 +72,17 @@ func TestGistCreation(t *testing.T) {
 		count, err := db.CountAll(db.Gist{})
 		require.NoError(t, err)
 		require.Equal(t, int64(0), count)
+	})
+
+	t.Run("ContentTooLarge", func(t *testing.T) {
+		s.Login(t, "thomas")
+		resp := s.Request(t, "POST", "/", url.Values{
+			"name":    {"large.txt"},
+			"content": {strings.Repeat("a", 10<<20)},
+		}, http.StatusRequestEntityTooLarge)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		require.Contains(t, string(body), "Gist form exceeds the 10 MB request limit")
 	})
 
 	tests := []struct {

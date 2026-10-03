@@ -360,6 +360,7 @@ admin.actions.index-gists: Rebuild search index
 admin.actions.sync-gist-languages: Synchronize all gists languages
 admin.actions.delete-expired-gists: Delete expired gists
 admin.actions.sync-ssh-keys: Regenerate the authorized_keys file
+admin.actions.delete-orphaned-uploads: Delete orphaned upload files
 admin.id: ID
 admin.user: User
 admin.delete: Delete

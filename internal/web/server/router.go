@@ -108,6 +108,7 @@ func (s *Server) registerRoutes() {
 			sB.POST("/sync-languages", admin.AdminSyncGistLanguages)
 			sB.POST("/delete-expired-gists", admin.AdminDeleteExpiredGists)
 			sB.POST("/sync-ssh-keys", admin.AdminSyncSSHKeys)
+			sB.POST("/delete-orphaned-uploads", admin.AdminDeleteOrphanedUploads)
 			sB.GET("/configuration", admin.AdminConfig)
 			sB.PUT("/set-config", admin.AdminSetConfig)
 		}

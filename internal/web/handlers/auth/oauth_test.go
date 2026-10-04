@@ -2,9 +2,11 @@ package auth_test
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -104,5 +106,70 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		defer resp.Body.Close()
 
 		require.Equal(t, "/-/login", resp.Request.URL.Path)
+	})
+
+	// A user who is still logged in and signs in through the provider again
+	// reaches the callback with a session, which is the same path used to link a
+	// new account. The identity it finds is their own, and that must not be
+	// reported as belonging to somebody else.
+	//
+	// This lives here rather than in its own test function because the gothic
+	// session store is initialised once per process (gothicStoreOnce), against
+	// the first test's home directory. A second test.Setup in this package gets
+	// a new temp dir that the store never picks up, so its OIDC flow fails on a
+	// missing session file.
+	t.Run("re-authenticating an already linked account is not a conflict", func(t *testing.T) {
+		queueUser := func() {
+			m.QueueUser(&oidcUser{MockUser: &mockoidc.MockUser{
+				Subject:           "bob-id",
+				Email:             "bob@example.com",
+				PreferredUsername: "bob",
+				EmailVerified:     true,
+			}})
+		}
+
+		jar, err := cookiejar.New(nil)
+		require.NoError(t, err)
+
+		client := &http.Client{
+			Jar: jar,
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				if len(via) >= 15 {
+					return http.ErrUseLastResponse
+				}
+				return nil
+			},
+		}
+
+		// first sign-in: no account exists yet, so the registration form is shown
+		queueUser()
+		resp, err := client.Get(base + "/oauth/openid-connect")
+		require.NoError(t, err)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
+		require.Equal(t, "/oauth/register", resp.Request.URL.Path)
+
+		csrf := regexp.MustCompile(`name="_csrf" value="([^"]+)"`).FindStringSubmatch(string(body))
+		require.Len(t, csrf, 2, "could not find the CSRF token in the registration form")
+
+		// completing registration links the OIDC identity and logs the user in
+		resp, err = client.PostForm(base+"/oauth/register", url.Values{
+			"username": {"bob"},
+			"email":    {"bob@example.com"},
+			"_csrf":    {csrf[1]},
+		})
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
+		require.Equal(t, "/", resp.Request.URL.Path, "registration did not complete")
+
+		// sign in again through the provider while the session is still active
+		queueUser()
+		resp, err = client.Get(base + "/oauth/openid-connect")
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		require.Equal(t, "/", resp.Request.URL.Path,
+			"re-authenticating as the already-linked user must not be treated as a conflicting link attempt")
 	})
 }

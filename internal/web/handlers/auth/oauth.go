@@ -73,8 +73,14 @@ func OauthCallback(ctx *context.Context) error {
 	if currUser != nil {
 		// check if this OAuth account is already linked to another user
 		if existingUser, err := db.GetUserByProvider(user.UserID, provider.GetProvider()); err == nil && existingUser != nil {
-			ctx.AddFlash(ctx.Tr("flash.auth.oauth-already-linked", config.C.OIDCProviderName), "error")
-			return ctx.RedirectTo("/-/settings")
+			if existingUser.ID != currUser.ID {
+				ctx.AddFlash(ctx.Tr("flash.auth.oauth-already-linked", config.C.OIDCProviderName), "error")
+				return ctx.RedirectTo("/-/settings")
+			}
+
+			// the account is already linked to the user currently logged in:
+			// this is a re-authentication, not a link attempt
+			return ctx.RedirectTo("/")
 		}
 
 		provider.UpdateUserDB(currUser)

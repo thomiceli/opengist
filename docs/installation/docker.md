@@ -28,26 +28,19 @@ services:
       # other configuration options
 ```
 
-You can define which user/group should run the container and own the files by setting the `UID` and `GID` environment
-variables :
+## Running as a non-root user
 
-```yml
-services:
-  opengist:
-    # ...
-    environment:
-      UID: 1001
-      GID: 1001
+The container runs as a non-root user (`opengist`, UID/GID `1000`) — there is no
+root entrypoint. Opengist stores its data in `/opengist`, so make sure that
+directory is owned by `1000:1000` on the host:
+
+```shell
+mkdir -p ~/.opengist && sudo chown -R 1000:1000 ~/.opengist
 ```
 
-## Rootless
-
-By default the container starts as `root` and the entrypoint drops privileges to the
-user defined by `UID`/`GID` (see above). 
-
-If you'd rather have the container run as a
-non-root user from the start — for example with `user:` in Compose, or under rootless
-Docker/Podman — set the `user` key instead:
+If you would rather run as a different UID/GID (for example to match the owner of
+an existing volume), set the `user` key instead, and own the data directory
+accordingly:
 
 ```yml
 services:
@@ -58,9 +51,8 @@ services:
       - "./opengist-data:/opengist"
 ```
 
-In this mode the entrypoint runs Opengist directly as that user. 
-Create the Opengist data directory and own it on the host first:
 ```shell
 mkdir -p ./opengist-data && sudo chown -R 1001:1001 ./opengist-data
 ```
 
+This also makes the image suitable for rootless Docker/Podman.

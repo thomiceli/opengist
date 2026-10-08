@@ -138,11 +138,13 @@ func dataInit(next Handler) Handler {
 		ctx.SetData("loadStartTime", time.Now())
 		ctx.SetData("cspNonce", newCSPNonce())
 
+		// set before loadSettings can fail: the error page renders the same
+		// layout, which reads .c, so without it the error page itself fails
+		ctx.SetData("c", config.C)
+
 		if err := loadSettings(ctx); err != nil {
 			return ctx.ErrorRes(500, "Cannot load settings", err)
 		}
-
-		ctx.SetData("c", config.C)
 
 		ctx.SetData("githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
 		ctx.SetData("gitlabOauth", config.C.GitlabClientKey != "" && config.C.GitlabSecret != "")

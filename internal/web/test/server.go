@@ -25,6 +25,7 @@ import (
 )
 
 var databaseType string
+var databaseDsn string
 var formEncoder *schema.Encoder
 
 func init() {
@@ -256,7 +257,6 @@ func Setup(t *testing.T) *Server {
 	require.NoError(t, err)
 	homePath := config.GetHomeDir()
 
-	var databaseDsn string
 	databaseType = os.Getenv("OPENGIST_TEST_DB")
 	switch databaseType {
 	case "postgres":
@@ -313,6 +313,12 @@ func Teardown(t *testing.T) {
 		err := db.TruncateDatabase()
 		require.NoError(t, err, "Could not truncate database")
 	}
+}
+
+// ReopenDatabase reconnects after a test has closed the database on purpose,
+// so Teardown can still truncate it on postgres and mysql.
+func ReopenDatabase(t *testing.T) {
+	require.NoError(t, db.Setup(databaseDsn), "Could not reopen database")
 }
 
 func NewTestMetricsServer() *metrics.Server {

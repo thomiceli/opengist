@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,6 +27,15 @@ var oidcAvatarTypes = map[string]string{
 var oidcAvatarHTTPClient = http.DefaultClient
 var oidcAvatarsDir = func() string {
 	return filepath.Join(config.GetHomeDir(), "avatars", "users")
+}
+
+type oidcAvatarFetchError struct {
+	statusCode int
+	message    string
+}
+
+func (e *oidcAvatarFetchError) Error() string {
+	return e.message
 }
 
 func resolveOIDCAvatarURL(avatarURL string, accessToken string) string {
@@ -91,7 +101,16 @@ func isPublicRenderableAvatarURL(avatarURL string) bool {
 	}
 
 	_, err = fetchOIDCAvatar(avatarURL, "")
-	return err == nil
+	if err == nil {
+		return true
+	}
+
+	var statusErr *oidcAvatarFetchError
+	if errors.As(err, &statusErr) {
+		return statusErr.statusCode != http.StatusUnauthorized && statusErr.statusCode != http.StatusForbidden
+	}
+
+	return true
 }
 
 func fetchOIDCAvatar(avatarURL string, accessToken string) ([]byte, error) {
@@ -112,7 +131,10 @@ func fetchOIDCAvatar(avatarURL string, accessToken string) ([]byte, error) {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected avatar response status %d", response.StatusCode)
+		return nil, &oidcAvatarFetchError{
+			statusCode: response.StatusCode,
+			message:    fmt.Sprintf("unexpected avatar response status %d", response.StatusCode),
+		}
 	}
 
 	body, err := io.ReadAll(io.LimitReader(response.Body, maxOIDCAvatarSize+1))

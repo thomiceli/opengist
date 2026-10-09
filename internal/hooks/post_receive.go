@@ -87,10 +87,10 @@ func RunPostReceive(gist *db.Gist, repoDir, gistUrl string, refs []ipc.HookRefUp
 		fmt.Fprintf(&outputSb, "Gist visibility set to %s\n\n", opts["visibility"])
 	}
 
-	if opts["url"] != "" && validator.Var(opts["url"], "max=32,alphanumdashorempty") == nil {
-		gist.URL = opts["url"]
+	if urlOpt := opts["url"]; urlOpt != "" && validator.Var(urlOpt, "max=32,alphanumdashorempty") == nil {
+		gist.URL = &urlOpt
 		lastIndex := strings.LastIndex(gistUrl, "/")
-		gistUrl = gistUrl[:lastIndex+1] + gist.URL
+		gistUrl = gistUrl[:lastIndex+1] + urlOpt
 		if !newGist {
 			fmt.Fprintf(&outputSb, "Gist URL set to %s. Set the Git remote URL via:\n", gistUrl)
 			fmt.Fprintf(&outputSb, "git remote set-url origin %s\n\n", gistUrl)

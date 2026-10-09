@@ -71,14 +71,14 @@ type Gist struct {
 	ID              uint `gorm:"primaryKey"`
 	Uuid            string
 	Title           string
-	URL             string
+	URL             *string `gorm:"uniqueIndex:idx_gists_user_url;default:NULL"`
 	URLNormalized   string
 	Preview         string
 	PreviewFilename string
 	PreviewMimeType string
 	Description     string
 	Private         Visibility // 0: public, 1: unlisted, 2: private
-	UserID          uint
+	UserID          uint       `gorm:"uniqueIndex:idx_gists_user_url"`
 	User            User
 	NbFiles         int
 	NbLikes         int
@@ -103,7 +103,11 @@ type Like struct {
 }
 
 func (gist *Gist) BeforeSave(_ *gorm.DB) error {
-	gist.URLNormalized = strings.ToLower(gist.URL)
+	if gist.URL != nil {
+		gist.URLNormalized = strings.ToLower(*gist.URL)
+	} else {
+		gist.URLNormalized = ""
+	}
 	return nil
 }
 
@@ -971,8 +975,8 @@ func (gist *Gist) VisibilityStr() string {
 }
 
 func (gist *Gist) Identifier() string {
-	if gist.URL != "" {
-		return gist.URL
+	if gist.URL != nil && *gist.URL != "" {
+		return *gist.URL
 	}
 	return gist.Uuid
 }
@@ -1109,10 +1113,14 @@ func (gist *Gist) ToDTO() (*GistDTO, error) {
 		fileDTOs = append(fileDTOs, f)
 	}
 
+	var urlStr string
+	if gist.URL != nil {
+		urlStr = *gist.URL
+	}
 	return &GistDTO{
 		Title:       gist.Title,
 		Description: gist.Description,
-		URL:         gist.URL,
+		URL:         urlStr,
 		Files:       fileDTOs,
 		VisibilityDTO: VisibilityDTO{
 			Private: gist.Private,
@@ -1161,7 +1169,11 @@ type GistMetadataDTO struct {
 func (dto *GistMetadataDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Title = dto.Title
 	gist.Description = dto.Description
-	gist.URL = dto.URL
+	if dto.URL != "" {
+		gist.URL = &dto.URL
+	} else {
+		gist.URL = nil
+	}
 	topics := strings.Fields(dto.Topics)
 	gistTopics := make([]GistTopic, 0, len(topics))
 	for _, topic := range topics {
@@ -1179,11 +1191,15 @@ type FileDTO struct {
 }
 
 func (dto *GistDTO) ToGist() *Gist {
+	var urlPtr *string
+	if dto.URL != "" {
+		urlPtr = &dto.URL
+	}
 	return &Gist{
 		Title:       dto.Title,
 		Description: dto.Description,
 		Private:     dto.Private,
-		URL:         dto.URL,
+		URL:         urlPtr,
 		Topics:      dto.TopicStrToSlice(),
 	}
 }
@@ -1191,7 +1207,11 @@ func (dto *GistDTO) ToGist() *Gist {
 func (dto *GistDTO) ToExistingGist(gist *Gist) *Gist {
 	gist.Title = dto.Title
 	gist.Description = dto.Description
-	gist.URL = dto.URL
+	if dto.URL != "" {
+		gist.URL = &dto.URL
+	} else {
+		gist.URL = nil
+	}
 	gist.Topics = dto.TopicStrToSlice()
 	return gist
 }

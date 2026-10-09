@@ -142,8 +142,10 @@ func createGist(user *db.User, url string) (*db.Gist, error) {
 	gist.Title = "gist:" + gist.Uuid
 
 	if url != "" {
-		gist.URL = strings.TrimSuffix(url, ".git")
-		gist.Title = strings.TrimSuffix(url, ".git")
+		trimmed := strings.TrimSuffix(url, ".git")
+		// Store as pointer; nil represents no custom URL.
+		gist.URL = &trimmed
+		gist.Title = trimmed
 	}
 
 	if err := gist.InitRepository(); err != nil {

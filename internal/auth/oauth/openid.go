@@ -85,7 +85,7 @@ func (p *OIDCCallbackProvider) GetProviderUserSSHKeys() ([]string, error) {
 
 func (p *OIDCCallbackProvider) UpdateUserDB(user *db.User) {
 	user.OIDCID = p.User.UserID
-	user.AvatarURL = p.User.AvatarURL
+	user.AvatarURL = resolveOIDCAvatarURL(normalizeProviderAvatarURL(p.User.AvatarURL), p.User.AccessToken)
 }
 
 func (p *OIDCCallbackProvider) IsAdmin() bool {

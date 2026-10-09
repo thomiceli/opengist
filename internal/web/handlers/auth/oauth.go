@@ -117,6 +117,16 @@ func OauthCallback(ctx *context.Context) error {
 		return ctx.RedirectTo("/oauth/register")
 	}
 
+	if provider.GetProvider() == oauth.OpenIDConnectString && !userDB.HasUploadedAvatar() {
+		previousAvatarURL := userDB.AvatarURL
+		provider.UpdateUserDB(userDB)
+		if userDB.AvatarURL != previousAvatarURL {
+			if err = userDB.Update(); err != nil {
+				return ctx.ErrorRes(500, "Cannot update user "+config.C.OIDCProviderName+" avatar", err)
+			}
+		}
+	}
+
 	// promote user to admin from oidc group
 	if !userDB.IsAdmin && provider.IsAdmin() {
 		userDB.IsAdmin = true

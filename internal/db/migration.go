@@ -129,9 +129,9 @@ func v3_normalizedColumns(tx *gorm.DB) error {
 		Updates(map[string]interface{}{"url_normalized": gorm.Expr("LOWER(url)")}).Error
 }
 
-func v4_uniqueGistUserUrlIndex() error {
+func v4_uniqueGistUserUrlIndex(tx *gorm.DB) error {
 	var gists []Gist
-	if err := db.Order("id").Find(&gists).Error; err != nil {
+	if err := tx.Order("id").Find(&gists).Error; err != nil {
 		return err
 	}
 
@@ -157,7 +157,7 @@ func v4_uniqueGistUserUrlIndex() error {
 				continue
 			}
 
-			if err := db.Model(&Gist{}).
+			if err := tx.Model(&Gist{}).
 				Where("id = ?", gist.ID).
 				Updates(map[string]interface{}{
 					"url":            candidate,
@@ -171,10 +171,11 @@ func v4_uniqueGistUserUrlIndex() error {
 		}
 	}
 
-	if !db.Migrator().HasIndex(&Gist{}, "idx_gists_user_url") {
-		if err := db.Migrator().CreateIndex(&Gist{}, "idx_gists_user_url"); err != nil {
+	if !tx.Migrator().HasIndex(&Gist{}, "idx_gists_user_url") {
+		if err := tx.Migrator().CreateIndex(&Gist{}, "idx_gists_user_url"); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }

@@ -1,0 +1,54 @@
+{{ define "_editor" }}
+<div class="editor bg-card overflow-hidden rounded-lg border"{{ if .Binary }} data-binary-original-name="{{ .Filename }}"{{ end }}
+     _="on drop(dataTransfer) call event.preventDefault() then set the value of the first <input.form-filename/> in me to dataTransfer.files[0].name">
+    <div class="bg-muted/40 flex items-center gap-2 border-b p-2">
+        <div class="flex min-w-0 flex-auto">
+            <input type="text" name="name" value="{{ .Filename }}" placeholder="{{ $.locale.Tr "gist.new.filename-with-extension" }}"
+                   class="form-filename input h-9 w-full max-w-xs rounded-r-none"
+                   autocomplete="off" data-lpignore data-bwignore data-1p-ignore>
+            <button type="button" class="delete-file btn-icon-outline text-destructive hover:bg-destructive -ml-px rounded-l-none hover:text-white" aria-label="{{ $.locale.Tr "gist.edit.delete" }}">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+        </div>
+
+        <button type="button" class="md-preview btn-outline hidden">{{ $.locale.Tr "gist.new.preview" }}</button>
+
+        {{ if not .Binary }}
+        <div class="ml-auto hidden items-center gap-2 sm:flex">
+            <select class="editor-indent-type border-input bg-background h-9 rounded-md border px-2 text-xs">
+                <optgroup label="{{ $.locale.Tr "gist.new.indent-mode" }}">
+                    <option value="space">{{ $.locale.Tr "gist.new.indent-mode-space" }}</option>
+                    <option value="tab">{{ $.locale.Tr "gist.new.indent-mode-tab" }}</option>
+                </optgroup>
+            </select>
+            <select class="editor-indent-size border-input bg-background h-9 rounded-md border px-2 text-xs">
+                <optgroup label="{{ $.locale.Tr "gist.new.indent-size" }}">
+                    <option value="2">2</option>
+                    <option value="4">4</option>
+                    <option value="8">8</option>
+                </optgroup>
+            </select>
+            <select class="editor-wrap-mode border-input bg-background h-9 rounded-md border px-2 text-xs">
+                <optgroup label="{{ $.locale.Tr "gist.new.wrap-mode" }}">
+                    <option value="no">{{ $.locale.Tr "gist.new.wrap-mode-no" }}</option>
+                    <option value="soft">{{ $.locale.Tr "gist.new.wrap-mode-soft" }}</option>
+                </optgroup>
+            </select>
+        </div>
+        {{ end }}
+    </div>
+
+    {{ if not .Binary }}
+        <input type="hidden" value="{{ .Content }}" name="content" class="form-filecontent" autocomplete="off">
+        <div class="editor-loading text-muted-foreground flex items-center justify-center p-8">
+            <svg class="size-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+        </div>
+        <div class="preview markdown markdown-body hidden p-6"></div>
+    {{ else }}
+        <p class="text-muted-foreground px-4 py-2 text-sm">{{ $.locale.Tr "gist.file-binary-edit" }}</p>
+    {{ end }}
+</div>
+{{ end }}

@@ -1,14 +1,25 @@
 import {EditorView, gutter, keymap, lineNumbers} from "@codemirror/view";
-import {Compartment, EditorState, Facet, Line, SelectionRange} from "@codemirror/state";
-import {defaultKeymap, indentLess} from "@codemirror/commands";
+import {Compartment, EditorState, Facet, Line, Prec, SelectionRange} from "@codemirror/state";
+import {defaultKeymap, indentLess, toggleLineComment} from "@codemirror/commands";
+import {HighlightStyle, LanguageDescription, syntaxHighlighting} from "@codemirror/language";
+import {languages} from "@codemirror/language-data";
+import {tags} from "@lezer/highlight";
 
-document.addEventListener("DOMContentLoaded", () => {
+function initEditorPage() {
+    let editorsParentdom = document.getElementById("editors");
+    // Not on an editor page, or already initialized for this DOM.
+    if (!editorsParentdom || editorsParentdom.dataset.editorReady) return;
+    editorsParentdom.dataset.editorReady = "1";
+
+    // Clear any editors rendered into a restored hx-boost history snapshot so we
+    // rebuild fresh CodeMirror instances instead of stacking on dead DOM.
+    editorsParentdom.querySelectorAll(".cm-editor").forEach((el) => el.remove());
+
     EditorView.theme({}, {dark: true});
 
     let editorsjs: EditorView[] = [];
-    let editorsParentdom = document.getElementById("editors")!;
-    let allEditorsdom = document.querySelectorAll("#editors > .editor");
-    let firstEditordom = allEditorsdom[0];
+    let editorHighlightCompartments: {editor: EditorView, conf: Compartment}[] = [];
+    let allEditorsdom = editorsParentdom.querySelectorAll(":scope > .editor");
 
     const txtFacet = Facet.define<string>({
         combine(values) {
@@ -20,7 +31,61 @@ document.addEventListener("DOMContentLoaded", () => {
         wrapMode = new Compartment(),
         indentType = new Compartment();
 
+    // Catppuccin Macchiato (dark)
+    const macchiatoHighlight = HighlightStyle.define([
+        {tag: tags.keyword, color: "#c6a0f6"},
+        {tag: [tags.definitionKeyword, tags.moduleKeyword], color: "#c6a0f6"},
+        {tag: tags.string, color: "#a6da95"},
+        {tag: [tags.number, tags.integer, tags.float], color: "#f5a97f"},
+        {tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "#6e738d", fontStyle: "italic"},
+        {tag: [tags.function(tags.variableName), tags.function(tags.propertyName)], color: "#8aadf4"},
+        {tag: [tags.typeName, tags.className], color: "#eed49f"},
+        {tag: tags.variableName, color: "#cad3f5"},
+        {tag: tags.definition(tags.variableName), color: "#8aadf4"},
+        {tag: tags.operator, color: "#91d7e3"},
+        {tag: tags.punctuation, color: "#cad3f5"},
+        {tag: tags.propertyName, color: "#8aadf4"},
+        {tag: [tags.bool, tags.null], color: "#f5a97f"},
+        {tag: tags.self, color: "#ed8796"},
+        {tag: tags.attributeName, color: "#8aadf4"},
+        {tag: tags.attributeValue, color: "#a6da95"},
+        {tag: tags.tagName, color: "#c6a0f6"},
+        {tag: tags.namespace, color: "#f5a97f"},
+        {tag: tags.regexp, color: "#8bd5ca"},
+        {tag: tags.escape, color: "#8aadf4"},
+    ]);
+
+    // Catppuccin Latte (light)
+    const latteHighlight = HighlightStyle.define([
+        {tag: tags.keyword, color: "#8839ef"},
+        {tag: [tags.definitionKeyword, tags.moduleKeyword], color: "#8839ef"},
+        {tag: tags.string, color: "#40a02b"},
+        {tag: [tags.number, tags.integer, tags.float], color: "#fe640b"},
+        {tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "#9ca0b0", fontStyle: "italic"},
+        {tag: [tags.function(tags.variableName), tags.function(tags.propertyName)], color: "#1e66f5"},
+        {tag: [tags.typeName, tags.className], color: "#df8e1d"},
+        {tag: tags.variableName, color: "#4c4f69"},
+        {tag: tags.definition(tags.variableName), color: "#1e66f5"},
+        {tag: tags.operator, color: "#179299"},
+        {tag: tags.punctuation, color: "#4c4f69"},
+        {tag: tags.propertyName, color: "#1e66f5"},
+        {tag: [tags.bool, tags.null], color: "#fe640b"},
+        {tag: tags.self, color: "#d20f39"},
+        {tag: tags.attributeName, color: "#1e66f5"},
+        {tag: tags.attributeValue, color: "#40a02b"},
+        {tag: tags.tagName, color: "#8839ef"},
+        {tag: tags.namespace, color: "#fe640b"},
+        {tag: tags.regexp, color: "#179299"},
+        {tag: tags.escape, color: "#1e66f5"},
+    ]);
+
+    const isDark = () => document.documentElement.classList.contains("dark");
+    const currentHighlight = () => syntaxHighlighting(isDark() ? macchiatoHighlight : latteHighlight);
+
     const newEditor = (dom: HTMLElement, value: string = ""): EditorView => {
+        const languageConf = new Compartment();
+        const highlightConf = new Compartment();
+
         let editor = new EditorView({
             doc: value,
             parent: dom,
@@ -29,17 +94,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 gutter({class: "cm-mygutter"}),
                 keymap.of([
                     {key: "Tab", run: customIndentMore, shift: indentLess},
+                    {key: "Mod-/", run: toggleLineComment},
                     ...defaultKeymap,
                 ]),
                 indentSize.of(EditorState.tabSize.of(2)),
                 wrapMode.of([]),
                 indentType.of(txtFacet.of("space")),
+                languageConf.of([]),
+                highlightConf.of(currentHighlight()),
+                // Fallback comment token (#) so Mod-/ works on plain text /
+                // config files; an actual language takes precedence over this.
+                Prec.lowest(EditorState.languageData.of(() => [{commentTokens: {line: "#"}}])),
             ],
         });
+
+        // CodeMirror is mounted; drop the loading spinner.
+        dom.querySelector(".editor-loading")?.remove();
 
         let mdpreview = dom.querySelector(".md-preview") as HTMLElement;
 
         let formfilename = dom.querySelector<HTMLInputElement>(".form-filename");
+
+        const applyLanguage = (filename: string) => {
+            const desc = LanguageDescription.matchFilename(languages, filename);
+            if (desc) {
+                desc.load().then(lang => {
+                    editor.dispatch({effects: languageConf.reconfigure(lang)});
+                });
+            } else {
+                editor.dispatch({effects: languageConf.reconfigure([])});
+            }
+        };
 
         // check if file ends with .md on pageload
         if (formfilename!.value.endsWith(".md")) {
@@ -47,6 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             mdpreview!.classList.add("hidden");
         }
+
+        // apply language highlight on pageload
+        applyLanguage(formfilename!.value);
 
         // event if the filename ends with .md; trigger event
         formfilename!.onkeyup = (e) => {
@@ -56,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 mdpreview!.classList.add("hidden");
             }
+            applyLanguage(filename);
         };
 
         // @ts-ignore
@@ -105,25 +194,21 @@ document.addEventListener("DOMContentLoaded", () => {
             setLineWrapping(editor, newWrapMode === "soft");
         };
 
-        dom.addEventListener("drop", (e) => {
-            e.preventDefault(); // prevent the browser from opening the dropped file
-            (e.target as HTMLInputElement)
-                .closest(".editor")
-                .querySelector<HTMLInputElement>("input.form-filename")!.value =
-                e.dataTransfer.files[0].name;
-        });
+        // drop-to-set-filename is handled by hyperscript on the .editor element.
 
         // remove editor on delete
         let deleteBtns = dom.querySelector<HTMLButtonElement>("button.delete-file");
         if (deleteBtns !== null) {
             deleteBtns.onclick = () => {
+                if (!confirm("Are you sure you want to delete this file?")) return;
                 // For both text and binary files, just remove from DOM
                 if (!dom.hasAttribute('data-binary-original-name')) {
                     // Only remove from editors array for text files
                     editorsjs.splice(editorsjs.indexOf(editor), 1);
+                    const hIdx = editorHighlightCompartments.findIndex(e => e.editor === editor);
+                    if (hIdx !== -1) editorHighlightCompartments.splice(hIdx, 1);
                 }
                 dom.remove();
-                checkForFirstDeleteButton();
             };
         }
 
@@ -135,6 +220,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return "Are you sure you want to quit?";
             };
         });
+
+        editorHighlightCompartments.push({editor, conf: highlightConf});
 
         return editor;
     };
@@ -209,14 +296,20 @@ document.addEventListener("DOMContentLoaded", () => {
             let deleteBtn = el.querySelector<HTMLButtonElement>("button.delete-file");
             if (deleteBtn) {
                 deleteBtn.onclick = () => {
+                    if (!confirm("Are you sure you want to delete this file?")) return;
                     el.remove();
-                    checkForFirstDeleteButton();
                 };
             }
         }
     });
 
-    checkForFirstDeleteButton();
+    // Update syntax highlight theme when dark/light mode changes
+    new MutationObserver(() => {
+        const hl = currentHighlight();
+        editorHighlightCompartments.forEach(({editor, conf}) => {
+            editor.dispatch({effects: conf.reconfigure(hl)});
+        });
+    }).observe(document.documentElement, {attributes: true, attributeFilter: ["class"]});
 
     document.getElementById("add-file")!.onclick = () => {
         const template = document.getElementById("editor-template")!;
@@ -225,7 +318,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // creating the new codemirror editor and append it in the editor div
         editorsjs.push(newEditor(newEditorDom));
         editorsParentdom.append(newEditorDom);
-        showDeleteButton(newEditorDom);
     };
 
     document.querySelector<HTMLFormElement>("form#create")!.onsubmit = () => {
@@ -282,51 +374,21 @@ document.addEventListener("DOMContentLoaded", () => {
         window.onbeforeunload = null;
     };
 
-    document.getElementById('gist-metadata-btn')!.onclick = (el) => {
-        let metadata = document.getElementById('gist-metadata')!;
-        metadata.classList.toggle('hidden');
-
-        let btn = el.target as HTMLButtonElement;
-        if (btn.innerText.endsWith('▼')) {
-            btn.innerText = btn.innerText.replace('▼', '▲');
-        } else {
-            btn.innerText = btn.innerText.replace('▲', '▼');
-        }
-
-    }
-
-    function checkForFirstDeleteButton() {
-        // Count total files (both text and binary)
-        const totalFiles = editorsParentdom.querySelectorAll('.editor').length;
-
-        // Hide/show all delete buttons based on total file count
-        const deleteButtons = editorsParentdom.querySelectorAll<HTMLButtonElement>("button.delete-file");
-        deleteButtons.forEach(deleteBtn => {
-            if (totalFiles <= 1) {
-                deleteBtn.classList.add("hidden");
-                deleteBtn.previousElementSibling?.classList.remove("rounded-l-md");
-                deleteBtn.previousElementSibling?.classList.add("rounded-md");
-            } else {
-                deleteBtn.classList.remove("hidden");
-                deleteBtn.previousElementSibling?.classList.add("rounded-l-md");
-                deleteBtn.previousElementSibling?.classList.remove("rounded-md");
-            }
-        });
-    }
-
-    function showDeleteButton(editorDom: HTMLElement) {
-        let deleteBtn = editorDom.querySelector<HTMLButtonElement>("button.delete-file")!;
-        deleteBtn.classList.remove("hidden");
-        deleteBtn.previousElementSibling.classList.add("rounded-l-md");
-        deleteBtn.previousElementSibling.classList.remove("rounded-md");
-        checkForFirstDeleteButton();
-    }
+    // metadata toggle is handled by hyperscript on the button in create.html.
+    // Single-file delete-button visibility / input rounding is handled in CSS
+    // via #editors > .editor:only-child (no flash on load).
 
     // File upload functionality
     let uploadedFileUUIDs: {uuid: string, filename: string}[] = [];
-    const fileUploadInput = document.getElementById("file-upload") as HTMLInputElement;
-    const uploadedFilesContainer = document.getElementById("uploaded-files")!;
-    const fileUploadZone = document.getElementById("file-upload-zone")!.querySelector('.border-dashed') as HTMLElement;
+    const fileUploadInput = document.getElementById("file-upload") as HTMLInputElement | null;
+    const uploadedFilesContainer = document.getElementById("uploaded-files");
+    const fileUploadZoneEl = document.getElementById("file-upload-zone");
+
+    // File upload may be disabled instance-wide, in which case the upload zone is absent
+    if (!fileUploadInput || !uploadedFilesContainer || !fileUploadZoneEl) {
+        return;
+    }
+    const fileUploadZone = fileUploadZoneEl.querySelector('.border-dashed') as HTMLElement;
 
     // Handle file selection
     const handleFiles = (files: FileList) => {
@@ -458,4 +520,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+}
+
+// The page can be reached either by a full load or via hx-boost, which swaps
+// the body content without firing DOMContentLoaded. Initialize for all paths,
+// matching how main.ts re-initializes its components.
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initEditorPage);
+} else {
+    initEditorPage();
+}
+document.body.addEventListener("htmx:afterSwap", initEditorPage);
+document.body.addEventListener("htmx:historyRestore", initEditorPage);
+
+// hx-boost saves a DOM snapshot for back/forward navigation. Drop the ready
+// marker so the editor rebuilds on restore instead of looking dead.
+document.body.addEventListener("htmx:beforeHistorySave", () => {
+    document.getElementById("editors")?.removeAttribute("data-editor-ready");
 });

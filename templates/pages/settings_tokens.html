@@ -1,0 +1,102 @@
+{{ define "content" }}
+<div class="space-y-6">
+    <header class="space-y-1">
+        <h1 class="text-2xl font-bold leading-tight">{{ .locale.Tr "settings" }}</h1>
+        <p class="text-muted-foreground text-sm">{{ .locale.Tr "settings.header.tokens" }}</p>
+    </header>
+
+    {{ if not .apiEnabled }}
+    <div class="alert og-orange" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <section>
+            {{ .locale.Tr "settings.api-disabled-warning" }}
+            {{ if .userIsAdmin }}
+            <a href="{{ .c.ExternalUrl }}/-/admin-panel/configuration" class="font-medium underline">{{ .locale.Tr "settings.api-disabled-go-admin" }} →</a>
+            {{ end }}
+        </section>
+    </div>
+    {{ end }}
+
+    <div class="space-y-6">
+        <!-- Create token -->
+        <section class="bg-card h-fit rounded-lg border">
+            <div class="space-y-1 border-b px-4 py-3">
+                <h2 class="font-semibold">{{ .locale.Tr "settings.create-token" }}</h2>
+                <p class="text-muted-foreground text-sm">{{ .locale.Tr "settings.create-token-help" }}</p>
+            </div>
+            <form action="{{ .c.ExternalUrl }}/-/settings/access-tokens" method="post" class="space-y-4 p-4">
+                {{ .csrfHtml }}
+                <div class="space-y-1.5">
+                    <label for="name" class="text-sm font-medium">{{ .locale.Tr "settings.token-name" }}</label>
+                    <input id="name" name="name" type="text" required autocomplete="off" class="input h-9 w-full max-w-sm" />
+                </div>
+                <div class="space-y-1.5">
+                    <label for="scope_gist" class="text-sm font-medium">{{ .locale.Tr "settings.token-gist-permission" }}</label>
+                    <select id="scope_gist" name="scope_gist" class="border-input bg-background h-9 w-full max-w-sm rounded-md border px-2 text-sm">
+                        <option value="0">{{ .locale.Tr "settings.token-permission-none" }}</option>
+                        <option value="1">{{ .locale.Tr "settings.token-permission-read" }}</option>
+                        <option value="2">{{ .locale.Tr "settings.token-permission-read-write" }}</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label for="scope_user" class="text-sm font-medium">{{ .locale.Tr "settings.token-user-permission" }}</label>
+                    <select id="scope_user" name="scope_user" class="border-input bg-background h-9 w-full max-w-sm rounded-md border px-2 text-sm">
+                        <option value="0">{{ .locale.Tr "settings.token-permission-none" }}</option>
+                        <option value="1">{{ .locale.Tr "settings.token-permission-read" }}</option>
+                        <option value="2">{{ .locale.Tr "settings.token-permission-read-write" }}</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label for="expires_at" class="text-sm font-medium">{{ .locale.Tr "settings.token-expiration" }}</label>
+                    <p class="text-muted-foreground text-xs">{{ .locale.Tr "settings.token-expiration-help" }}</p>
+                    <input id="expires_at" name="expires_at" type="date" class="input h-9 w-full max-w-sm" />
+                </div>
+                <div class="flex">
+                    <button type="submit" class="btn-sm">{{ .locale.Tr "settings.create-token" }}</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Token list -->
+        <div class="space-y-3">
+            {{ if .accessTokens }}
+            {{ range $token := .accessTokens }}
+            <section class="bg-card rounded-lg border p-4">
+                <div class="flex items-start gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted-foreground mt-0.5 size-8 shrink-0" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg>
+                    <div class="min-w-0 flex-auto space-y-1">
+                        <h3 class="text-sm font-semibold">{{ .Name }}</h3>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="badge-secondary">{{ $.locale.Tr "settings.token-gist-permission" }}: {{ if eq .ScopeGist 0 }}{{ $.locale.Tr "settings.token-permission-none" }}{{ else if eq .ScopeGist 1 }}{{ $.locale.Tr "settings.token-permission-read" }}{{ else }}{{ $.locale.Tr "settings.token-permission-read-write" }}{{ end }}</span>
+                            <span class="badge-secondary">{{ $.locale.Tr "settings.token-user-permission" }}: {{ if eq .ScopeUser 0 }}{{ $.locale.Tr "settings.token-permission-none" }}{{ else if eq .ScopeUser 1 }}{{ $.locale.Tr "settings.token-permission-read" }}{{ else }}{{ $.locale.Tr "settings.token-permission-read-write" }}{{ end }}</span>
+                        </div>
+                        <p class="text-muted-foreground text-xs">{{ $.locale.Tr "settings.token-created-at" }} {{ .CreatedAt | humanDate }}</p>
+                        {{ if eq .ExpiresAt 0 }}
+                        <p class="text-muted-foreground text-xs">{{ $.locale.Tr "settings.token-no-expiration" }}</p>
+                        {{ else }}
+                        <p class="text-xs {{ if .IsExpired }}text-destructive{{ else }}text-muted-foreground{{ end }}">{{ $.locale.Tr "settings.token-expires-at" }} {{ .ExpiresAt | humanDateOnly }}{{ if .IsExpired }} ({{ $.locale.Tr "settings.token-expired" }}){{ end }}</p>
+                        {{ end }}
+                        {{ if eq .LastUsedAt 0 }}
+                        <p class="text-muted-foreground text-xs">{{ $.locale.Tr "settings.token-never-used" }}</p>
+                        {{ else }}
+                        <p class="text-muted-foreground text-xs">{{ $.locale.Tr "settings.token-last-used" }} {{ .LastUsedAt | humanTimeDiff }}</p>
+                        {{ end }}
+                    </div>
+                    <form action="{{ $.c.ExternalUrl }}/-/settings/access-tokens/{{ .ID }}" method="post" class="shrink-0">
+                        {{ $.csrfHtml }}
+                        <input type="hidden" name="_method" value="DELETE" />
+                        <button type="submit" class="btn-sm bg-destructive text-white hover:bg-destructive/90"
+                                _="on click if not window.confirm('{{ $.locale.Tr "settings.delete-token-confirm" }}') halt the event">{{ $.locale.Tr "settings.delete-token" }}</button>
+                    </form>
+                </div>
+            </section>
+            {{ end }}
+            {{ else }}
+            <div class="text-muted-foreground flex h-full min-h-32 items-center justify-center rounded-lg border border-dashed p-6 text-sm">
+                {{ .locale.Tr "settings.create-token-help" }}
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</div>
+{{ end }}

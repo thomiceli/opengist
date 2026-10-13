@@ -1,6 +1,16 @@
 import hljs from 'highlight.js';
 import latex from './latex';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+
+// Notebook content is attacker-controlled: any user can store a `.ipynb` gist
+// whose JSON ends up injected into the page. Every fragment that reaches an
+// `innerHTML` sink must therefore be sanitized to prevent stored XSS (see the
+// security advisory describing the original markdown-cell / output sinks).
+const sanitize = (html: string): string => DOMPurify.sanitize(html);
+
+// nbformat allows `source`/`text` fields to be either a string or an array of strings.
+const joinSource = (source: string | string[]): string => Array.isArray(source) ? source.join('') : source || '';
 
 class IPynb {
   private element: HTMLElement;
@@ -10,7 +20,9 @@ class IPynb {
 
   constructor(element: HTMLElement) {
     this.element = element;
-    let notebookContent = element.innerText;
+    // textContent yields the raw notebook JSON the server escaped into the
+    // <pre>; it is parsed as data, never injected as markup.
+    let notebookContent = element.textContent || '';
 
     try {
       this.notebook = JSON.parse(notebookContent);
@@ -45,14 +57,14 @@ class IPynb {
       if (output.output_type === 'stream') {
         const textElement = document.createElement('pre');
         textElement.classList.add('stream-output');
-        textElement.textContent = output.text.join('');
+        textElement.textContent = joinSource(output.text);
         outputElement.appendChild(textElement);
       } else if (output.output_type === 'display_data' || output.output_type === 'execute_result') {
         if (output.data['text/plain']) {
-          outputElement.innerHTML += `\n<pre>${output.data['text/plain']}</pre>`;
+          outputElement.innerHTML += sanitize(`\n<pre>${output.data['text/plain']}</pre>`);
         }
         if (output.data['text/html']) {
-          outputElement.innerHTML += '\n' + output.data['text/html'];
+          outputElement.innerHTML += '\n' + sanitize(output.data['text/html']);
         }
 
         const images = Object.keys(output.data).filter(key => key.startsWith('image/'));
@@ -60,19 +72,7 @@ class IPynb {
           const imgEl = document.createElement('img');
           const imgType = images[0]; // Use the first image type found
           imgEl.src = `data:${imgType};base64,${output.data[imgType]}`;
-          outputElement.innerHTML += imgEl.outerHTML;
-        }
-      } else if (output.output_type === 'execute_result') {
-        if (output.data['text/plain']) {
-          outputElement.innerHTML += `<pre>${output.data['text/plain']}</pre>`;
-        }
-        if (output.data['text/html']) {
-          outputElement.innerHTML += output.data['text/html'];
-        }
-        if (output.data['image/png']) {
-          const imgEl = document.createElement('img');
-          imgEl.src = `data:image/png;base64,${output.data['image/png']}`;
-          outputElement.appendChild(imgEl);
+          outputElement.innerHTML += sanitize(imgEl.outerHTML);
         }
       } else if (output.output_type === 'error') {
         outputElement.classList.add('error');
@@ -85,19 +85,30 @@ class IPynb {
 
   private createCellElement(cell: any): HTMLElement {
     const cellElement = document.createElement('div');
-    const source = cell.source.join('');
+    const source = joinSource(cell.source);
     cellElement.classList.add('jupyter-cell');
 
     switch (cell.cell_type) {
       case 'markdown':
         cellElement.classList.add('markdown-cell');
-        cellElement.innerHTML = `<div class="markdown-body">${marked.parse(latex.render(source))}</div>`;
+        cellElement.innerHTML = sanitize(
+          `<div class="markdown-body">${marked.parse(latex.render(source)) as string}</div>`
+        );
         break;
-      case 'code':
+      case 'code': {
         cellElement.classList.add('code-cell');
-        cellElement.innerHTML = `<pre class="hljs"><code class="language-${this.language}">${source}</code></pre>`;
-        hljs.highlightElement(cellElement.querySelector('code') as HTMLElement);
+        // Build the code block via DOM APIs so the source is treated as text,
+        // not markup, before highlight.js processes it.
+        const pre = document.createElement('pre');
+        pre.classList.add('hljs');
+        const code = document.createElement('code');
+        code.classList.add(`language-${this.language}`);
+        code.textContent = source;
+        pre.appendChild(code);
+        cellElement.appendChild(pre);
+        hljs.highlightElement(code);
         break;
+      }
       default:
         break;
     }
@@ -120,7 +131,21 @@ class IPynb {
   }
 }
 
-// Process Jupyter notebooks
-document.querySelectorAll<HTMLElement>('.jupyter.notebook pre').forEach((el) => {
-  new IPynb(el).mount();
-});
+// Render every notebook on the page. Rendering replaces the source <pre> with
+// the rendered cells, so this is idempotent: once a notebook is mounted there is
+// no `.jupyter.notebook pre` left to match. That makes it safe to call again
+// after each hx-boost swap without double-processing already-rendered content.
+export function initIpynb() {
+  document.querySelectorAll<HTMLElement>('.jupyter.notebook pre').forEach((el) => {
+    // The template ships a spinner (see gist.html) that shows the moment the
+    // notebook is swapped in — including during an hx-boost navigation. Parsing
+    // and highlighting a large notebook is synchronous and can block the main
+    // thread, so defer past two frames: the browser paints the spinner first,
+    // then we do the heavy work and swap in the rendered cells.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        if (el.isConnected) new IPynb(el).mount();
+      })
+    );
+  });
+}

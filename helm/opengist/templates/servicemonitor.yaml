@@ -1,0 +1,41 @@
+{{- if and (index .Values.config "metrics.enabled") .Values.service.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "opengist.fullname" . }}
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "opengist.labels" . | nindent 4 }}
+    {{- with .Values.service.metrics.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpoints:
+    - port: metrics
+      {{- with .Values.service.metrics.serviceMonitor.interval }}
+      interval: {{ . }}
+      {{- end }}
+      {{- with .Values.service.metrics.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ . }}
+      {{- end }}
+      path: /metrics
+      {{- with .Values.service.metrics.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.service.metrics.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.namespace | default .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "opengist.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: metrics
+{{- end }}

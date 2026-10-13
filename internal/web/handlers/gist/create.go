@@ -17,17 +17,14 @@ import (
 )
 
 func Create(ctx *context.Context) error {
+	ctx.SetData("currentPage", "new")
+	ctx.SetData("dto", new(db.GistDTO))
 	ctx.SetData("htmlTitle", ctx.TrH("gist.new.create-a-new-gist"))
 	return ctx.Html("create.html")
 }
 
 func ProcessCreate(ctx *context.Context) error {
 	isCreate := ctx.Request().URL.Path == "/"
-
-	err := ctx.Request().ParseForm()
-	if err != nil {
-		return ctx.ErrorRes(400, ctx.Tr("error.bad-request"), err)
-	}
 
 	dto := new(db.GistDTO)
 	var gist *db.Gist
@@ -39,25 +36,24 @@ func ProcessCreate(ctx *context.Context) error {
 		ctx.SetData("htmlTitle", ctx.TrH("gist.edit.edit-gist", gist.Title))
 	}
 
-	if err := ctx.Bind(dto); err != nil {
+	err := ctx.Bind(dto)
+	if err != nil {
 		return ctx.ErrorRes(400, ctx.Tr("error.cannot-bind-data"), err)
 	}
 
 	dto.Files = make([]db.FileDTO, 0)
-	fileCounter := 0
 
-	names := ctx.Request().PostForm["name"]
-	contents := ctx.Request().PostForm["content"]
+	names := dto.Name
+	contents := dto.Content
 
 	// Process files from text editors
 	for i, content := range contents {
 		if content == "" {
 			continue
 		}
-		name := names[i]
+		name := git.CleanTreePathName(names[i])
 		if name == "" {
-			fileCounter += 1
-			name = "gistfile" + strconv.Itoa(fileCounter) + ".txt"
+			name = "gistfile" + strconv.Itoa(len(dto.Files)+1) + ".txt"
 		}
 
 		escapedValue, err := url.PathUnescape(content)
@@ -71,19 +67,27 @@ func ProcessCreate(ctx *context.Context) error {
 		})
 	}
 
-	// Process uploaded files from UUID arrays
-	fileUUIDs := ctx.Request().PostForm["uploadedfile_uuid"]
-	fileFilenames := ctx.Request().PostForm["uploadedfile_filename"]
-	if len(fileUUIDs) == len(fileFilenames) {
+	// Process uploaded files from UUID arrays, unless file upload is disabled instance-wide
+	fileUUIDs := dto.UploadedFilesUUID
+	fileFilenames := dto.UploadedFilesNames
+	if !config.C.DisableFileUpload && len(fileUUIDs) == len(fileFilenames) {
 		for i, fileUUID := range fileUUIDs {
-			filePath := filepath.Join(filepath.Join(config.GetHomeDir(), "uploads"), fileUUID)
+			if !uuidRegex.MatchString(filepath.Base(fileUUID)) {
+				continue
+			}
+			filePath := filepath.Join(config.GetHomeDir(), "uploads", fileUUID)
 
 			if _, err := os.Stat(filePath); err != nil {
 				continue
 			}
 
+			name := git.CleanTreePathName(fileFilenames[i])
+			if name == "" {
+				name = "gistfile" + strconv.Itoa(len(dto.Files)+1) + ".txt"
+			}
+
 			dto.Files = append(dto.Files, db.FileDTO{
-				Filename:   fileFilenames[i],
+				Filename:   name,
 				SourcePath: filePath,
 				Content:    "", // Empty since we're using SourcePath
 			})
@@ -91,11 +95,11 @@ func ProcessCreate(ctx *context.Context) error {
 	}
 
 	// Process binary file operations (edit mode)
-	binaryOldNames := ctx.Request().PostForm["binary_old_name"]
-	binaryNewNames := ctx.Request().PostForm["binary_new_name"]
+	binaryOldNames := dto.BinaryFileOldName
+	binaryNewNames := dto.BinaryFileNewName
 	if len(binaryOldNames) == len(binaryNewNames) {
 		for i, oldName := range binaryOldNames {
-			newName := binaryNewNames[i]
+			newName := git.CleanTreePathName(binaryNewNames[i])
 
 			if newName == "" { // deletion
 				continue
@@ -125,7 +129,7 @@ func ProcessCreate(ctx *context.Context) error {
 		if isCreate {
 			return ctx.HtmlWithCode(400, "create.html")
 		} else {
-			files, err := gist.Files("HEAD", false)
+			files, _, err := gist.Files("HEAD", false)
 			if err != nil {
 				return ctx.ErrorRes(500, "Error fetching files", err)
 			}
@@ -136,7 +140,10 @@ func ProcessCreate(ctx *context.Context) error {
 
 	if isCreate {
 		gist = dto.ToGist()
-	} else {
+		gist.ExpiresAt = dto.ExpiresAtTimestamp()
+	} else if ctx.FormValue("_edit_metadata") == "1" {
+		// The legacy editor still edits files and metadata in one form. The new
+		// editor omits this marker because metadata has its own settings page.
 		gist = dto.ToExistingGist(gist)
 	}
 

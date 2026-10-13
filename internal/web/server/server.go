@@ -2,13 +2,14 @@ package server
 
 import (
 	"fmt"
-	"github.com/thomiceli/opengist/internal/validator"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/thomiceli/opengist/internal/validator"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
@@ -18,19 +19,16 @@ import (
 
 type Server struct {
 	echo *echo.Echo
-
-	dev          bool
-	sessionsPath string
-	ignoreCsrf   bool
+	dev  bool
 }
 
-func NewServer(isDev bool, sessionsPath string, ignoreCsrf bool) *Server {
+func NewServer(isDev bool) *Server {
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
 	e.Validator = validator.NewValidator()
 
-	s := &Server{echo: e, dev: isDev, sessionsPath: sessionsPath, ignoreCsrf: ignoreCsrf}
+	s := &Server{echo: e, dev: isDev}
 
 	s.useCustomContext()
 
@@ -39,12 +37,12 @@ func NewServer(isDev bool, sessionsPath string, ignoreCsrf bool) *Server {
 	}
 
 	s.registerMiddlewares()
-	s.setFuncMap()
 	s.echo.HTTPErrorHandler = s.errorHandler
 
 	if !s.dev {
 		s.parseManifestEntries()
 	}
+	s.setFuncMap()
 
 	s.registerRoutes()
 
@@ -64,7 +62,7 @@ func (s *Server) Start() {
 }
 
 func (s *Server) startHTTP() {
-	addr := config.C.HttpHost + ":" + config.C.HttpPort
+	addr := net.JoinHostPort(config.C.HttpHost, config.C.HttpPort)
 
 	log.Info().Msg("Starting HTTP server on http://" + addr)
 	if err := s.echo.Start(addr); err != nil && err != http.ErrServerClosed {
@@ -174,4 +172,8 @@ func (s *Server) createPidFile(pidPath string) error {
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.echo.ServeHTTP(w, r)
+}
+
+func (s *Server) Use(middleware echo.MiddlewareFunc) {
+	s.echo.Use(middleware)
 }

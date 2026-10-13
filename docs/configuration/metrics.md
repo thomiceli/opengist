@@ -4,10 +4,10 @@ Opengist offers built-in support for Prometheus metrics to help you monitor the 
 
 ## Enabling metrics
 
-By default, the metrics endpoint is disabled for security and performance reasons. To enable it, update your configuration as stated in the [configuration cheat sheet](cheat-sheet.md):
+By default, the metrics server is disabled for security and performance reasons. To enable it, update your configuration as stated in the [configuration cheat sheet](cheat-sheet.md):
 
 ```yaml
-metrics.enabled = true
+metrics.enabled: true
 ```
 
 Alternatively, you can use the environment variable:
@@ -16,7 +16,25 @@ Alternatively, you can use the environment variable:
 OG_METRICS_ENABLED=true
 ```
 
-Once enabled, metrics are available at the /metrics endpoint.
+Once enabled, metrics are available on a separate server at `http://0.0.0.0:6158/metrics` by default.
+
+## Configuration
+
+The metrics server runs on a separate port from the main application. By default, it binds to `0.0.0.0` (all interfaces) on port `6158`.
+
+| Config Key     | Environment Variable | Default     | Description                                    |
+|----------------|---------------------|-------------|------------------------------------------------|
+| metrics.enabled | OG_METRICS_ENABLED  | `false`     | Enable or disable the metrics server           |
+| metrics.host    | OG_METRICS_HOST     | `0.0.0.0`   | The host on which the metrics server binds     |
+| metrics.port    | OG_METRICS_PORT     | `6158`      | The port on which the metrics server listens   |
+
+Example configuration:
+
+```yaml
+metrics.enabled: true
+metrics.host: 0.0.0.0
+metrics.port: 6158
+```
 
 ## Available metrics
 
@@ -36,14 +54,6 @@ These standard metrics follow the Prometheus naming convention and include label
 
 ## Security Considerations
 
-The metrics endpoint exposes information about your Opengist instance that might be sensitive in some environments. Consider using a reverse proxy with authentication for the `/metrics` endpoint if your Opengist instance is publicly accessible.
+The metrics server binds to `0.0.0.0` by default, making it accessible on all network interfaces. This default works well for containerized deployments (Docker, Kubernetes) where network isolation is handled at the infrastructure level.
 
-Example with Nginx:
-
-```shell
-location /metrics {
-    auth_basic "Metrics";
-    auth_basic_user_file /etc/nginx/.htpasswd;
-    proxy_pass http://localhost:6157/metrics;
-}
-```
+For bare-metal or VM deployments where the metrics port may be exposed, consider restricting to localhost by setting `metrics.host: 127.0.0.1` to only allow local access.

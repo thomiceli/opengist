@@ -1,10 +1,11 @@
 package gist
 
 import (
+	"strconv"
+
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/render"
 	"github.com/thomiceli/opengist/internal/web/context"
-	"strconv"
 )
 
 func Edit(ctx *context.Context) error {
@@ -55,6 +56,21 @@ func Checkbox(ctx *context.Context) error {
 	}
 
 	return ctx.PlainText(200, "ok")
+}
+
+func ToggleArchive(ctx *context.Context) error {
+	gist := ctx.GetData("gist").(*db.Gist)
+
+	if err := gist.SetArchived(!gist.Archived); err != nil {
+		return ctx.ErrorRes(500, "Error updating this gist", err)
+	}
+
+	if gist.Archived {
+		ctx.AddFlash(ctx.Tr("flash.gist.archived"), "success")
+	} else {
+		ctx.AddFlash(ctx.Tr("flash.gist.unarchived"), "success")
+	}
+	return ctx.RedirectTo("/" + gist.User.Username + "/" + gist.Identifier())
 }
 
 func EditVisibility(ctx *context.Context) error {

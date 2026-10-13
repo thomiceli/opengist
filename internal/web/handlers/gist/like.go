@@ -46,6 +46,7 @@ func Likes(ctx *context.Context) error {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 
+	ctx.SetData("page", "likes")
 	ctx.SetData("htmlTitle", ctx.TrH("gist.likes.for", gist.Title))
 	ctx.SetData("revision", "HEAD")
 	return ctx.Html("likes.html")

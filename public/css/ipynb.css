@@ -1,17 +1,26 @@
 @import "katex/dist/katex.min.css";
 
 .jupyter.notebook {
-  padding: 0.5rem;
+    padding: 0.5rem;
 }
 
 .jupyter.notebook pre {
-  font-size: 0.8em !important;
+    font-size: 0.8em !important;
 }
 
 .jupyter.notebook .jupyter-cell {
-  padding: 0.5rem;
+    padding: 0.5rem;
 }
 
 .jupyter.notebook .jupyter-cell.code-cell {
-  filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 0 0.1rem rgba(0, 0, 0, 0.5));
+}
+
+/*
+ * A hack to ensure that Jupyter output images are always rendered with a
+ * neutral background color, even if the image itself does not have one, since
+ * Jupyter usually outputs images with transparent or light backgrounds.
+ */
+.dark .jupyter-output img {
+    background-color: #888;
 }

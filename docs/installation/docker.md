@@ -39,3 +39,28 @@ services:
       UID: 1001
       GID: 1001
 ```
+
+## Rootless
+
+By default the container starts as `root` and the entrypoint drops privileges to the
+user defined by `UID`/`GID` (see above). 
+
+If you'd rather have the container run as a
+non-root user from the start — for example with `user:` in Compose, or under rootless
+Docker/Podman — set the `user` key instead:
+
+```yml
+services:
+  opengist:
+    # ...
+    user: "1001:1001"
+    volumes:
+      - "./opengist-data:/opengist"
+```
+
+In this mode the entrypoint runs Opengist directly as that user. 
+Create the Opengist data directory and own it on the host first:
+```shell
+mkdir -p ./opengist-data && sudo chown -R 1001:1001 ./opengist-data
+```
+

@@ -1,0 +1,97 @@
+{{ define "gist" }}
+<article class="bg-card text-card-foreground rounded-lg border">
+    <header class="flex items-start gap-3 p-4">
+        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}" class="shrink-0">
+            {{ if not (shouldGenerateAvatar .gist.User .DisableGravatar) }}
+                <img class="size-9 rounded-md border object-cover" src="{{ avatarUrl .gist.User .DisableGravatar }}" alt="{{ .gist.User.Username }}" />
+            {{ else }}
+                <svg class="size-9 rounded-md border" data-jdenticon-value="{{ .gist.User.Username }}" width="36" height="36"></svg>
+            {{ end }}
+        </a>
+
+        <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h3 class="break-all text-base">
+                    <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}" class="hover:underline">{{ .gist.User.Username }}</a>
+                    <span class="text-muted-foreground">/</span>
+                    <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" class="font-semibold hover:underline">{{ .gist.Title }}</a>
+                </h3>
+                {{ if .gist.Archived }}<span class="badge border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">{{ .locale.Tr "gist.header.archived" }}</span>{{ end }}
+                {{ if .gist.Private }}<span class="badge text-primary border-transparent bg-primary/10 dark:bg-violet-400/15 dark:text-violet-300">{{ visibilityStr .gist.Private false }}</span>{{ end }}
+            </div>
+
+            <div class="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                <span>
+                    {{ .locale.Tr "gist.list.last-active" }} {{ .gist.UpdatedAt | humanTimeDiff }}
+                    {{ if .gist.Forked }} • {{ .locale.Tr "gist.list.forked-from" }}
+                        <a href="{{ .c.ExternalUrl }}/{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Identifier }}" class="hover:underline">{{ .gist.Forked.User.Username }}/{{ .gist.Forked.Title }}</a>
+                    {{ end }}
+                </span>
+                {{ range .gist.TopicsSlice }}
+                <a href="{{ $.c.ExternalUrl }}/-/topics/{{ . }}" class="badge-secondary hover:bg-secondary/80">{{ . }}</a>
+                {{ end }}
+            </div>
+
+            {{ if .gist.Description }}<p class="mt-2 text-sm break-words">{{ .gist.Description }}</p>{{ end }}
+        </div>
+
+        <div class="text-muted-foreground flex shrink-0 items-center gap-3 text-sm">
+            <span class="inline-flex items-center gap-1" title="{{ .locale.Tr "gist.list.likes" }}">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+                {{ .gist.NbLikes }}
+            </span>
+            <span class="inline-flex items-center gap-1" title="{{ .locale.Tr "gist.list.forks" }}">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="6" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M6 9v3a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9M12 15v3"/></svg>
+                {{ .gist.NbForks }}
+            </span>
+            <span class="inline-flex items-center gap-1" title="{{ .locale.Tr "gist.list.files" }}">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                {{ .gist.NbFiles }}
+            </span>
+        </div>
+    </header>
+
+    <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" class="block border-t">
+        <div class="max-h-72 overflow-auto rounded-b-lg">
+            {{ if .gist.PreviewFilename }}
+                {{ if .gist.PreviewMimeType }}
+                    {{ if or .gist.PreviewMimeType.IsSVG .gist.PreviewMimeType.IsImage }}
+                        <div class="flex justify-center p-6"><img src="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/raw/HEAD/{{ .gist.PreviewFilename }}" alt="{{ .gist.PreviewFilename }}" class="max-h-64 object-contain" /></div>
+                    {{ else if .gist.PreviewMimeType.IsAudio }}
+                        <div class="flex justify-center p-6"><audio controls class="w-full max-w-lg"><source src="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/raw/HEAD/{{ .gist.PreviewFilename }}" type="{{ .gist.PreviewMimeType.ContentType }}"></audio></div>
+                    {{ else if .gist.PreviewMimeType.IsVideo }}
+                        <div class="flex justify-center p-6"><video controls class="w-full max-w-lg"><source src="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/raw/HEAD/{{ .gist.PreviewFilename }}" type="{{ .gist.PreviewMimeType.ContentType }}"></video></div>
+                    {{ else if .gist.PreviewMimeType.IsPDF }}
+                        <div class="pdf" data-src="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/raw/HEAD/{{ .gist.PreviewFilename }}"></div>
+                    {{ else }}
+                        <p class="text-muted-foreground px-4 py-2">{{ .locale.Tr "gist.preview-non-available" }}</p>
+                    {{ end }}
+                {{ else if .gist.Preview }}
+                    {{ if or (isMarkdown .gist.PreviewFilename) (isMermaid .gist.PreviewFilename) }}
+                        <div class="markdown markdown-body px-6 py-2.5">{{ .gist.HTML | safe }}</div>
+                    {{ else }}
+                        <div class="code">
+                            <table class="chroma table-code w-full whitespace-pre" data-filename="{{ .gist.PreviewFilename }}" style="border-spacing: 0; border-collapse: collapse;">
+                                <tbody>
+                                {{ $i := 1 }}
+                                {{ range $line := .gist.Lines }}
+                                    <tr>
+                                        <td class="line-num px-4">{{ $i }}</td>
+                                        <td class="line-code break-all pr-4">{{ $line | safe }}</td>
+                                    </tr>
+                                    {{ $i = inc $i }}
+                                {{ end }}
+                                </tbody>
+                            </table>
+                        </div>
+                    {{ end }}
+                {{ else }}
+                    <p class="px-4 py-2.5 text-sm">{{ .locale.Tr "gist.preview-non-available" }}</p>
+                {{ end }}
+            {{ else }}
+                <p class="px-4 py-2.5 text-sm">{{ .locale.Tr "gist.no-content" }}</p>
+            {{ end }}
+        </div>
+    </a>
+</article>
+{{ end }}

@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/url"
 	"path/filepath"
 	"slices"
@@ -41,6 +42,7 @@ type databaseInfo struct {
 	Password string
 	Database string
 	SSLMode  string
+	Socket   string
 }
 
 var DatabaseInfo *databaseInfo
@@ -93,6 +95,9 @@ func parseDBURI(uri string) (*databaseInfo, error) {
 		q, _ := url.ParseQuery(u.RawQuery)
 		if sslmode := q.Get("sslmode"); sslmode != "" && info.Type == PostgreSQL {
 			info.SSLMode = sslmode
+		}
+		if socket := q.Get("socket"); socket != "" {
+			info.Socket = socket
 		}
 	}
 
@@ -155,7 +160,13 @@ func Setup(dbUri string) error {
 		return err
 	}
 
-	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}); err != nil {
+	if db.Migrator().HasTable(&GistInitQueue{}) {
+		if err = db.Where("1 = 1").Delete(&GistInitQueue{}).Error; err != nil {
+			return err
+		}
+	}
+
+	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{}, &ActionLock{}); err != nil {
 		return err
 	}
 
@@ -220,6 +231,7 @@ func setupSQLite(dbInfo databaseInfo) error {
 		u.Scheme = "file"
 		q := u.Query()
 		q.Set("_pragma", "foreign_keys(1)")
+		q.Add("_pragma", "busy_timeout(5000)")
 		q.Set("_journal_mode", journalMode)
 		u.RawQuery = q.Encode()
 		dsn = u.String()
@@ -233,7 +245,16 @@ func setupSQLite(dbInfo databaseInfo) error {
 
 func setupPostgres(dbInfo databaseInfo) error {
 	var err error
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbInfo.Host, dbInfo.Port, dbInfo.User, dbInfo.Password, dbInfo.Database, dbInfo.SSLMode)
+	var dsn string
+	if dbInfo.Socket != "" {
+		// Unix socket connection: the host parameter points to the socket directory.
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=%s", dbInfo.Socket, dbInfo.User, dbInfo.Password, dbInfo.Database, dbInfo.SSLMode)
+		if dbInfo.Port != "" {
+			dsn += fmt.Sprintf(" port=%s", dbInfo.Port)
+		}
+	} else {
+		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbInfo.Host, dbInfo.Port, dbInfo.User, dbInfo.Password, dbInfo.Database, dbInfo.SSLMode)
+	}
 
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger:         logger.Default.LogMode(logger.Silent),
@@ -245,7 +266,13 @@ func setupPostgres(dbInfo databaseInfo) error {
 
 func setupMySQL(dbInfo databaseInfo) error {
 	var err error
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbInfo.User, dbInfo.Password, dbInfo.Host, dbInfo.Port, dbInfo.Database)
+	var protocol string
+	if dbInfo.Socket != "" {
+		protocol = fmt.Sprintf("unix(%s)", dbInfo.Socket)
+	} else {
+		protocol = fmt.Sprintf("tcp(%s)", net.JoinHostPort(dbInfo.Host, dbInfo.Port))
+	}
+	dsn := fmt.Sprintf("%s:%s@%s/%s?charset=utf8mb4&parseTime=True&loc=Local", dbInfo.User, dbInfo.Password, protocol, dbInfo.Database)
 
 	db, err = gorm.Open(mysql.New(mysql.Config{
 		DSN:                    dsn,
@@ -269,5 +296,5 @@ func DeprecationDBFilename() {
 }
 
 func TruncateDatabase() error {
-	return db.Migrator().DropTable("likes", &User{}, "gists", &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{})
+	return db.Migrator().DropTable("likes", &User{}, "gists", &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{})
 }

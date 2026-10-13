@@ -48,6 +48,24 @@ func GetSSHKeyByID(sshKeyId uint) (*SSHKey, error) {
 	return sshKey, err
 }
 
+func GetAllSSHKeys() ([]*SSHKey, error) {
+	var sshKeys []*SSHKey
+	err := db.
+		Order("id asc").
+		Find(&sshKeys).Error
+
+	return sshKeys, err
+}
+
+func GetSSHKeyByContent(sshKeyContent string) (*SSHKey, error) {
+	sshKey := new(SSHKey)
+	err := db.
+		Where("content = ?", sshKeyContent).
+		First(&sshKey).Error
+
+	return sshKey, err
+}
+
 func SSHKeyDoesExists(sshKeyContent string) (bool, error) {
 	var count int64
 	err := db.Model(&SSHKey{}).

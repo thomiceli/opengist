@@ -1,23 +1,25 @@
 # 🚀 Opengist (BG Fork)
 
+<img height="108px" src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/img/opengist.svg" alt="Opengist" align="right" />
+
 Opengist е self-hosted Pastebin, базиран на Git, с български превод. Всички снипети се съхраняват в Git хранилище и могат да се четат и/или променят чрез стандартни Git команди или уеб интерфейса. Подобен е на **GitHub Gist**, но е с отворен код и може да бъде self-hosted.
 
 ---
 
 ## ✨ Функционалности
 
-* 📝 Създаване на публични, скрити (unlisted) или частни снипети
-* 🔄 **Init** / Clone / Pull / Push на снипети чрез Git по HTTP или SSH
-* 🎨 Syntax highlighting; поддръжка на markdown и CSV
-* 🔍 Търсене в кода на снипети; разглеждане на снипети на потребители, харесвания и fork-ове
-* 🏷️ Добавяне на теми (topics) към снипети
-* 🔗 Вграждане (embed) на снипети в други уебсайтове
-* 📜 История на ревизиите
-* ❤️ Харесване (Like) / Fork на снипети
-* 📥 Изтегляне на raw файлове или като ZIP архив
-* 🔐 OAuth2 вход с GitHub, GitLab, Gitea и OpenID Connect
-* 👥 Ограничаване или премахване на ограниченията за видимост на снипети за анонимни потребители
-* 🐳 Docker поддръжка / Helm Chart
+- 📝 Създаване на публични, скрити (unlisted) или частни снипети
+- 🔄 **Init** / Clone / Pull / Push на снипети чрез Git по HTTP или SSH
+- 🎨 Syntax highlighting; поддръжка на markdown и CSV
+- 🔍 Търсене в кода на снипети; разглеждане на снипети на потребители, харесвания и fork-ове
+- 🏷️ Добавяне на теми (topics) към снипети
+- 🔗 Вграждане (embed) на снипети в други уебсайтове
+- 📜 История на ревизиите
+- ❤️ Харесване (Like) / Fork на снипети
+- 📥 Изтегляне на raw файлове или като ZIP архив
+- 🔐 OAuth2 вход с GitHub, GitLab, Gitea и OpenID Connect
+- 👥 Ограничаване или премахване на ограниченията за видимост на снипети за анонимни потребители
+- 🐳 Docker поддръжка / Helm Chart
 
 ---
 
@@ -59,6 +61,22 @@ docker compose up -d
 - ☁️ Външно: **http://YOUR_PUBLIC_IP:6157** (например **http://20.20.20.10:6157**)
 
 > **💡 Съвет:** Заменете `YOUR_IP` с действителния IP адрес на вашия сървър
+
+---
+
+### 📦 Чрез бинарен файл (Via binary)
+
+Изтеглете архива за вашата система от страницата с версии (releases) на официалния проект и го разопаковайте:
+
+```shell
+# пример за linux amd64
+wget https://github.com/thomiceli/opengist/releases/download/v1.15.2/opengist1.15.2-linux-amd64.tar.gz
+
+tar xzvf opengist1.15.2-linux-amd64.tar.gz
+cd opengist
+chmod +x opengist
+./opengist # с или без `--config config.yml`
+```
 
 ---
 

@@ -1,54 +1,39 @@
 package hooks
 
 import (
-	"bytes"
-	"fmt"
-	"github.com/stretchr/testify/require"
-	"github.com/thomiceli/opengist/internal/git"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-func TestPreReceiveHook(t *testing.T) {
-	git.SetupTest(t)
-	defer git.TeardownTest(t)
-	var lastCommitHash string
-	err := os.Chdir(git.RepositoryPath("thomas", "gist1"))
-	require.NoError(t, err, "Could not change directory")
+func TestParseSymlinkFiles(t *testing.T) {
+	output := []byte("100644 blob aaaaaaa\tregular.md\x00" +
+		"120000 blob bbbbbbb\ttask.md\x00" +
+		"120000 blob ccccccc\tfilename with spaces\x00")
 
-	git.CommitToBare(t, "thomas", "gist1", map[string]string{
-		"my_file.txt":  "some allowed file",
-		"my_file2.txt": "some allowed file\nagain",
-	})
-	lastCommitHash = git.LastHashOfCommit(t, "thomas", "gist1")
-	err = PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
-	require.NoError(t, err, "Should not have an error on pre-receive hook for commit+push 1")
+	require.Equal(t, []string{"task.md", "filename with spaces"}, parseSymlinkFiles(output))
+}
 
-	git.CommitToBare(t, "thomas", "gist1", map[string]string{
-		"my_file.txt":     "some allowed file",
-		"dir/my_file.txt": "some disallowed file suddenly",
-	})
-	lastCommitHash = git.LastHashOfCommit(t, "thomas", "gist1")
-	err = PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
-	require.Error(t, err, "Should have an error on pre-receive hook for commit+push 2")
-	require.Equal(t, "pushing files in directories is not allowed: [dir/my_file.txt]", err.Error(), "Error message is not correct")
+func TestGetSymlinkFilesRecursive(t *testing.T) {
+	repositoryPath := t.TempDir()
+	t.Chdir(repositoryPath)
 
-	git.CommitToBare(t, "thomas", "gist1", map[string]string{
-		"my_file.txt":           "some allowed file",
-		"dir/ok/afileagain.txt": "some disallowed file\nagain",
-	})
-	lastCommitHash = git.LastHashOfCommit(t, "thomas", "gist1")
-	err = PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
-	require.Error(t, err, "Should have an error on pre-receive hook for commit+push 3")
-	require.Equal(t, "pushing files in directories is not allowed: [dir/ok/afileagain.txt dir/my_file.txt]", err.Error(), "Error message is not correct")
+	require.NoError(t, exec.Command("git", "init", "--quiet").Run())
+	require.NoError(t, os.WriteFile("regular.md", []byte("content"), 0644))
+	require.NoError(t, os.Mkdir("nested", 0755))
+	if err := os.Symlink("../regular.md", filepath.Join("nested", "link.md")); err != nil {
+		t.Skipf("symbolic links are unavailable: %v", err)
+	}
+	require.NoError(t, exec.Command("git", "add", "--all").Run())
+	require.NoError(t, exec.Command(
+		"git", "-c", "user.name=Opengist", "-c", "user.email=opengist@example.com",
+		"commit", "--quiet", "-m", "test",
+	).Run())
 
-	git.CommitToBare(t, "thomas", "gist1", map[string]string{
-		"allowedfile.txt": "some allowed file only",
-	})
-	lastCommitHash = git.LastHashOfCommit(t, "thomas", "gist1")
-	err = PreReceive(bytes.NewBufferString(fmt.Sprintf("%s %s %s", BaseHash, lastCommitHash, "refs/heads/master")), os.Stdout, os.Stderr)
-	require.Error(t, err, "Should have an error on pre-receive hook for commit+push 4")
-	require.Equal(t, "pushing files in directories is not allowed: [dir/ok/afileagain.txt dir/my_file.txt]", err.Error(), "Error message is not correct")
-
-	_ = os.Chdir(os.TempDir()) // Leave the current dir to avoid errors on teardown
+	files, err := getSymlinkFiles("HEAD")
+	require.NoError(t, err)
+	require.Equal(t, []string{"nested/link.md"}, files)
 }

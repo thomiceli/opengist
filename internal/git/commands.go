@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -109,7 +108,7 @@ func GetFilesOfRepository(user string, gist string, revision string) ([]string, 
 		"git",
 		"ls-tree",
 		"--name-only",
-		"--",
+		"--end-of-options",
 		revision,
 	)
 	cmd.Dir = repositoryPath
@@ -132,21 +131,36 @@ type catFileBatch struct {
 	Truncated           bool
 }
 
-func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*catFileBatch, error) {
+func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*catFileBatch, bool, error) {
 	repositoryPath := RepositoryPath(user, gist)
+	maxFiles := 50
 
-	lsTreeCmd := exec.Command("git", "ls-tree", "-l", revision)
+	lsTreeCmd := exec.Command("git", "ls-tree", "-l", "--end-of-options", revision)
 	lsTreeCmd.Dir = repositoryPath
-	lsTreeOutput, err := lsTreeCmd.Output()
+
+	var lsTreeStderr bytes.Buffer
+	lsTreeCmd.Stderr = &lsTreeStderr
+
+	lsTreeStdout, err := lsTreeCmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return nil, false, err
+	}
+	if err = lsTreeCmd.Start(); err != nil {
+		return nil, false, err
 	}
 
 	fileMap := make([]*catFileBatch, 0)
+	gistTruncated := false
 
-	lines := strings.Split(string(lsTreeOutput), "\n")
-	for _, line := range lines {
-		fields := strings.Fields(line)
+	scanner := bufio.NewScanner(lsTreeStdout)
+	scanner.Buffer(make([]byte, 64*1024), 1024*1024)
+	for scanner.Scan() {
+		if truncate && len(fileMap) >= maxFiles {
+			gistTruncated = true
+			break
+		}
+
+		fields := strings.Fields(scanner.Text())
 		if len(fields) < 4 {
 			continue // Skip lines that don't have enough fields
 		}
@@ -164,19 +178,33 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 			Name: convertOctalToUTF8(name),
 		})
 	}
+	scanErr := scanner.Err()
+
+	// Closing the read end before git is done writing causes git's next write
+	// to fail (SIGPIPE on Unix, broken-pipe error on Windows). That shows up as
+	// a non-zero exit from Wait, but it's expected when we stop early — so we
+	// only treat the Wait error as real if git actually printed something to stderr.
+	_ = lsTreeStdout.Close()
+	waitErr := lsTreeCmd.Wait()
+	if scanErr != nil {
+		return nil, false, scanErr
+	}
+	if waitErr != nil && lsTreeStderr.Len() > 0 {
+		return nil, false, waitErr
+	}
 
 	catFileCmd := exec.Command("git", "cat-file", "--batch")
 	catFileCmd.Dir = repositoryPath
 	stdin, err := catFileCmd.StdinPipe()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	stdout, err := catFileCmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	if err = catFileCmd.Start(); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	reader := bufio.NewReader(stdout)
@@ -184,22 +212,22 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 	for _, file := range fileMap {
 		_, err = stdin.Write([]byte(file.Hash + "\n"))
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		header, err := reader.ReadString('\n')
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		parts := strings.Fields(header)
-		if len(parts) > 3 {
-			continue // Not a valid header, skip this entry
+		if len(parts) < 3 {
+			continue // Not a valid header (e.g. "<hash> missing"), skip this entry
 		}
 
 		size, err := strconv.ParseUint(parts[2], 10, 64)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		// Don't truncate Jupyter notebooks
@@ -215,7 +243,7 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 		// Read exactly size bytes from header, or the max allowed if truncated
 		content := make([]byte, sizeToRead)
 		if _, err = io.ReadFull(reader, content); err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
 		file.Content = string(content)
@@ -223,26 +251,26 @@ func CatFileBatch(user string, gist string, revision string, truncate bool) ([]*
 		if truncate && size > truncateLimit {
 			// skip other bytes if truncated
 			if _, err = reader.Discard(int(size - truncateLimit)); err != nil {
-				return nil, err
+				return nil, false, err
 			}
 			file.Truncated = true
 		}
 
 		// Read the blank line following the content
 		if _, err := reader.ReadByte(); err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 
 	if err = stdin.Close(); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if err = catFileCmd.Wait(); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return fileMap, nil
+	return fileMap, gistTruncated, nil
 }
 
 func GetFileContent(user string, gist string, revision string, filename string, truncate bool) (string, bool, error) {
@@ -262,6 +290,7 @@ func GetFileContent(user string, gist string, revision string, filename string, 
 		"git",
 		"--no-pager",
 		"show",
+		"--end-of-options",
 		revision+":"+convertURLToOctal(filename),
 	)
 	cmd.Dir = repositoryPath
@@ -286,6 +315,7 @@ func GetFileSize(user string, gist string, revision string, filename string) (ui
 		"git",
 		"cat-file",
 		"-s",
+		"--end-of-options",
 		revision+":"+convertURLToOctal(filename),
 	)
 	cmd.Dir = repositoryPath
@@ -298,7 +328,11 @@ func GetFileSize(user string, gist string, revision string, filename string) (ui
 	return strconv.ParseUint(strings.TrimSuffix(string(stdout), "\n"), 10, 64)
 }
 
-func GetLog(user string, gist string, skip int) ([]*Commit, error) {
+// GetLog returns commits walked from `revision` (typically "HEAD" or a
+// specific SHA), skipping `skip` rows from the top of the walk and limited
+// to `limit` rows. Pass "HEAD" for the gist's full history; pass a SHA to
+// see the history ending at (and including) that commit.
+func GetLog(user string, gist string, revision string, skip int, limit int) ([]*Commit, error) {
 	repositoryPath := RepositoryPath(user, gist)
 
 	cmd := exec.Command(
@@ -306,14 +340,15 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 		"--no-pager",
 		"log",
 		"-n",
-		"11",
+		strconv.Itoa(limit),
 		"--no-color",
 		"-p",
 		"--skip",
 		strconv.Itoa(skip),
 		"--format=format:c %H%na %aN%nm %ae%nt %at",
 		"--shortstat",
-		"HEAD",
+		"--end-of-options",
+		revision,
 	)
 	cmd.Dir = repositoryPath
 	stdout, _ := cmd.StdoutPipe()
@@ -331,40 +366,59 @@ func GetLog(user string, gist string, skip int) ([]*Commit, error) {
 	return parseLog(stdout, maxFilesPerDiffCommit, diffSize)
 }
 
-func CloneTmp(user string, gist string, gistTmpId string, email string, remove bool) error {
+func CloneTmp(user string, gist string, email string, remove bool) (string, error) {
 	repositoryPath := RepositoryPath(user, gist)
-
 	tmpPath := TmpRepositoriesPath()
+	if err := os.MkdirAll(tmpPath, 0755); err != nil {
+		return "", err
+	}
 
-	tmpRepositoryPath := path.Join(tmpPath, gistTmpId)
-
-	err := os.RemoveAll(tmpRepositoryPath)
+	// Every write operation needs its own checkout. Reusing the gist ID here
+	// lets concurrent requests remove and replace path components between the
+	// symlink validation and the eventual write.
+	tmpRepositoryPath, err := os.MkdirTemp(tmpPath, gist+"-")
 	if err != nil {
-		return err
+		return "", err
+	}
+	gistTmpId := filepath.Base(tmpRepositoryPath)
+	cleanup := func() {
+		_ = os.RemoveAll(tmpRepositoryPath)
 	}
 
 	cmd := exec.Command("git", "clone", repositoryPath, gistTmpId)
 	cmd.Dir = tmpPath
 	if err = cmd.Run(); err != nil {
-		return err
+		cleanup()
+		return "", err
 	}
 
 	// remove every file (keep the .git directory)
 	// useful when user wants to edit multiple files from an existing gist
 	if remove {
 		if err = removeFilesExceptGit(tmpRepositoryPath); err != nil {
-			return err
+			cleanup()
+			return "", err
 		}
 	}
 	cmd = exec.Command("git", "config", "--local", "user.name", user)
 	cmd.Dir = tmpRepositoryPath
 	if err = cmd.Run(); err != nil {
-		return err
+		cleanup()
+		return "", err
 	}
 
 	cmd = exec.Command("git", "config", "--local", "user.email", email)
 	cmd.Dir = tmpRepositoryPath
-	return cmd.Run()
+	if err = cmd.Run(); err != nil {
+		cleanup()
+		return "", err
+	}
+
+	return gistTmpId, nil
+}
+
+func DeleteTmpRepository(gistTmpId string) error {
+	return os.RemoveAll(TmpRepositoryPath(gistTmpId))
 }
 
 func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) error {
@@ -382,7 +436,42 @@ func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) e
 func SetFileContent(gistTmpId string, filename string, content string) error {
 	repositoryPath := TmpRepositoryPath(gistTmpId)
 
-	return os.WriteFile(filepath.Join(repositoryPath, filename), []byte(content), 0644)
+	root, err := os.OpenRoot(repositoryPath)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+
+	// Files in a gist can originate from an untrusted Git push. Refuse to
+	// follow any symlink in the path: otherwise a subsequent web edit (for
+	// example, toggling a Markdown checkbox) could write outside the temporary
+	// clone or into its .git directory.
+	cleanPath := filepath.Clean(filename)
+	if filepath.IsAbs(filename) || cleanPath == ".." || strings.HasPrefix(cleanPath, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("file path %q escapes the repository", filename)
+	}
+
+	currentPath := ""
+	for _, component := range strings.Split(cleanPath, string(filepath.Separator)) {
+		if currentPath == "" {
+			currentPath = component
+		} else {
+			currentPath = filepath.Join(currentPath, component)
+		}
+
+		info, err := root.Lstat(currentPath)
+		if os.IsNotExist(err) {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("refusing to write through symbolic link %q", currentPath)
+		}
+	}
+
+	return root.WriteFile(cleanPath, []byte(content), 0644)
 }
 
 func MoveFileToRepository(gistTmpId string, filename string, sourcePath string) error {

@@ -2,43 +2,46 @@ package git
 
 import (
 	"fmt"
+	"mime"
+	"net/http"
 	"strings"
 
 	"github.com/gabriel-vasile/mimetype"
 )
 
 type MimeType struct {
-	ContentType string
-	extension   string
+	ContentType       string
+	Charset           string
+	extension         string
+	golangContentType string // json, m3u, etc. still renderable as text
 }
 
 func (mt MimeType) IsText() bool {
-	return strings.Contains(mt.ContentType, "text/")
+	return strings.HasPrefix(mt.ContentType, "text/") || strings.HasPrefix(mt.golangContentType, "text/")
 }
 
 func (mt MimeType) IsCSV() bool {
-	return strings.Contains(mt.ContentType, "text/csv") &&
-		(strings.HasSuffix(mt.extension, ".csv"))
+	return strings.HasSuffix(mt.extension, ".csv") && mt.IsText()
 }
 
 func (mt MimeType) IsImage() bool {
-	return strings.Contains(mt.ContentType, "image/")
+	return strings.HasPrefix(mt.ContentType, "image/")
 }
 
 func (mt MimeType) IsSVG() bool {
-	return strings.Contains(mt.ContentType, "image/svg+xml")
+	return strings.HasPrefix(mt.ContentType, "image/svg+xml")
 }
 
 func (mt MimeType) IsPDF() bool {
-	return strings.Contains(mt.ContentType, "application/pdf")
+	return strings.HasPrefix(mt.ContentType, "application/pdf")
 }
 
 func (mt MimeType) IsAudio() bool {
-	return strings.Contains(mt.ContentType, "audio/")
+	return strings.HasPrefix(mt.ContentType, "audio/")
 }
 
 func (mt MimeType) IsVideo() bool {
-	return strings.Contains(mt.ContentType, "video/")
+	return strings.HasPrefix(mt.ContentType, "video/")
 }
 
 func (mt MimeType) CanBeHighlighted() bool {
@@ -86,6 +89,16 @@ func (mt MimeType) RenderType() string {
 	return "Binary"
 }
 
+// Header returns the value for a Content-Type HTTP header, re-attaching the
+// charset parameter that DetectMimeType split out of ContentType.
+func (mt MimeType) Header() string {
+	if mt.Charset == "" {
+		return mt.ContentType
+	}
+	return mime.FormatMediaType(mt.ContentType, map[string]string{"charset": mt.Charset})
+}
+
 func DetectMimeType(data []byte, extension string) MimeType {
-	return MimeType{mimetype.Detect(data).String(), extension}
+	mediaType, params, _ := mime.ParseMediaType(mimetype.Detect(data).String())
+	return MimeType{mediaType, params["charset"], extension, http.DetectContentType(data)}
 }

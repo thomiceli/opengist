@@ -2,29 +2,41 @@ package db
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/git"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID               uint   `gorm:"primaryKey"`
-	Username         string `gorm:"uniqueIndex,size:191"`
-	Password         string
-	IsAdmin          bool
-	CreatedAt        int64
-	Email            string
-	MD5Hash          string // for gravatar, if no Email is specified, the value is random
-	AvatarURL        string
-	GithubID         string
-	GitlabID         string
-	GiteaID          string
-	OIDCID           string `gorm:"column:oidc_id"`
-	StylePreferences string
+	ID                 uint   `gorm:"primaryKey"`
+	Username           string `gorm:"uniqueIndex,size:191"`
+	UsernameNormalized string `gorm:"index"`
+	Password           string
+	IsAdmin            bool
+	CreatedAt          int64
+	Email              string
+	MD5Hash            string // for gravatar, if no Email is specified, the value is random
+	AvatarURL          string // an absolute URL (from an OAuth provider) or a bare filename for a manually uploaded avatar stored under {home}/avatars/users
+	GithubID           string
+	GitlabID           string
+	GiteaID            string
+	OIDCID             string `gorm:"column:oidc_id"`
+	StylePreferences   string
 
 	Gists               []Gist               `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	SSHKeys             []SSHKey             `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	Liked               []Gist               `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	WebAuthnCredentials []WebAuthnCredential `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
+	AccessTokens        []AccessToken        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
+}
+
+func (user *User) BeforeSave(_ *gorm.DB) error {
+	user.UsernameNormalized = strings.ToLower(user.Username)
+	return nil
 }
 
 func (user *User) BeforeDelete(tx *gorm.DB) error {
@@ -72,6 +84,11 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
+	err = tx.Where("user_id = ?", user.ID).Delete(&AccessToken{}).Error
+	if err != nil {
+		return err
+	}
+
 	err = tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 	if err != nil {
 		return err
@@ -82,12 +99,17 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
+	// Delete uploaded avatar, if any
+	if user.HasUploadedAvatar() {
+		_ = os.Remove(filepath.Join(config.GetHomeDir(), "avatars", "users", filepath.Base(user.AvatarURL)))
+	}
+
 	return nil
 }
 
 func UserExists(username string) (bool, error) {
 	var count int64
-	err := db.Model(&User{}).Where("username like ?", username).Count(&count).Error
+	err := db.Model(&User{}).Where("username_normalized = ?", strings.ToLower(username)).Count(&count).Error
 	return count > 0, err
 }
 
@@ -102,10 +124,74 @@ func GetAllUsers(offset int) ([]*User, error) {
 	return users, err
 }
 
+// UserWithNbGists is a user together with the number of gists they own that are
+// visible to the viewer (public gists, plus the viewer's own private ones).
+type UserWithNbGists struct {
+	*User
+	NbGists int64
+}
+
+// GetUsersWithGistCounts returns a paginated, sorted page of users for the
+// explore "Users" list, each annotated with how many gists they own that are
+// visible to currentUserId. When query is non-empty, users are filtered to those
+// whose username contains it (case-insensitive). sortColumn must be a
+// whitelisted column name ("username_normalized" or "created_at") and order
+// "asc" or "desc"; both are validated by the caller. limit is typically
+// perPage+1 so callers can detect a following page.
+func GetUsersWithGistCounts(currentUserId uint, query string, offset int, limit int, perPage int, sortColumn string, order string) ([]*UserWithNbGists, error) {
+	var users []*User
+	stmt := db.Model(&User{})
+	if query != "" {
+		stmt = stmt.Where("username_normalized LIKE ?", "%"+strings.ToLower(query)+"%")
+	}
+	if err := stmt.
+		Order(sortColumn + " " + order).
+		Limit(limit).
+		Offset(offset * perPage).
+		Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*UserWithNbGists, 0, len(users))
+	if len(users) == 0 {
+		return result, nil
+	}
+
+	ids := make([]uint, len(users))
+	for i, u := range users {
+		ids[i] = u.ID
+	}
+
+	type countRow struct {
+		UserID uint
+		Count  int64
+	}
+	var rows []countRow
+	if err := db.Model(&Gist{}).
+		Select("user_id, count(*) as count").
+		Where("user_id IN ?", ids).
+		Where("private = 0 or user_id = ?", currentUserId).
+		Group("user_id").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	counts := make(map[uint]int64, len(rows))
+	for _, r := range rows {
+		counts[r.UserID] = r.Count
+	}
+
+	for _, u := range users {
+		result = append(result, &UserWithNbGists{User: u, NbGists: counts[u.ID]})
+	}
+
+	return result, nil
+}
+
 func GetUserByUsername(username string) (*User, error) {
 	user := new(User)
 	err := db.
-		Where("username like ?", username).
+		Where("username_normalized = ?", strings.ToLower(username)).
 		First(&user).Error
 	return user, err
 }
@@ -214,10 +300,13 @@ func (user *User) DeleteProviderID(provider string) error {
 	}
 
 	if providerIDField, ok := providerIDFields[provider]; ok {
-		return db.Model(&user).
-			Update(providerIDField, nil).
-			Update("avatar_url", nil).
-			Error
+		query := db.Model(&user).Update(providerIDField, nil)
+		// Only clear the avatar when it came from the provider, not when the
+		// user has uploaded their own.
+		if !user.HasUploadedAvatar() {
+			query = query.Update("avatar_url", nil)
+		}
+		return query.Error
 	}
 
 	return nil
@@ -245,11 +334,22 @@ func (user *User) GetStyle() *UserStyleDTO {
 	return style
 }
 
+// HasUploadedAvatar reports whether the user's AvatarURL refers to a manually
+// uploaded avatar (a bare filename) rather than an absolute OAuth provider URL.
+func (user *User) HasUploadedAvatar() bool {
+	return user.AvatarURL != "" && !strings.Contains(user.AvatarURL, "://")
+}
+
 // -- DTO -- //
 
 type UserDTO struct {
 	Username string `form:"username" validate:"required,max=24,alphanumdash,notreserved"`
 	Password string `form:"password" validate:"required"`
+}
+
+type OAuthRegisterDTO struct {
+	Username string `form:"username" validate:"required,max=24,alphanumdashunder,notreserved"`
+	Email    string `form:"email" validate:"omitempty,email"`
 }
 
 func (dto *UserDTO) ToUser() *User {
@@ -265,10 +365,13 @@ type UserUsernameDTO struct {
 
 type UserStyleDTO struct {
 	SoftWrap         bool   `form:"softwrap" json:"soft_wrap"`
+	ThemeColor       string `form:"themecolor" json:"theme_color" validate:"omitempty,themecolor"`
 	RemovedLineColor string `form:"removedlinecolor" json:"removed_line_color" validate:"min=0,max=7"`
 	AddedLineColor   string `form:"addedlinecolor" json:"added_line_color" validate:"min=0,max=7"`
 	GitLineColor     string `form:"gitlinecolor" json:"git_line_color" validate:"min=0,max=7"`
 	Theme            string `form:"theme" json:"theme" validate:"oneof=light dark auto"`
+	DefaultSort      string `form:"defaultsort" json:"default_sort" validate:"omitempty,oneof=created updated"`
+	DefaultOrder     string `form:"defaultorder" json:"default_order" validate:"omitempty,oneof=asc desc"`
 }
 
 func (dto *UserStyleDTO) ToJson() string {

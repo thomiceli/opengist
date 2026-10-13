@@ -73,7 +73,7 @@ func Forks(ctx *context.Context) error {
 		fromUserID = currentUser.ID
 	}
 
-	forks, err := gist.GetForks(fromUserID, pageInt-1)
+	forks, err := gist.GetForks(fromUserID, pageInt-1, 11, 10)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error getting users who liked this gist", err)
 	}
@@ -82,6 +82,7 @@ func Forks(ctx *context.Context) error {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 
+	ctx.SetData("page", "forks")
 	ctx.SetData("htmlTitle", ctx.TrH("gist.forks.for", gist.Title))
 	ctx.SetData("revision", "HEAD")
 	return ctx.Html("forks.html")

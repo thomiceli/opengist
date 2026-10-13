@@ -1,6 +1,9 @@
 package ssh
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/pem"
 	"errors"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
@@ -10,14 +13,13 @@ import (
 	"io"
 	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
 )
 
 func Start() {
-	if !config.C.SshGit {
+	if !config.C.SshBuiltin() {
 		return
 	}
 
@@ -47,8 +49,9 @@ func Start() {
 }
 
 func listen(serverConfig *ssh.ServerConfig) {
-	log.Info().Msg("Starting SSH server on ssh://" + config.C.SshHost + ":" + config.C.SshPort)
-	listener, err := net.Listen("tcp", config.C.SshHost+":"+config.C.SshPort)
+	addr := net.JoinHostPort(config.C.SshHost, config.C.SshPort)
+	log.Info().Msg("Starting SSH server on ssh://" + addr)
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal().Err(err).Msg("SSH: Failed to start SSH server")
 	}
@@ -108,7 +111,7 @@ func handleConnexion(channels <-chan ssh.NewChannel, key string, ip string) {
 						payloadCmd = payloadCmd[i:]
 					}
 
-					if err = runGitCommand(ch, payloadCmd, key, ip); err != nil {
+					if err = RunGitCommand(ch, ch, ch, payloadCmd, key, ip); err != nil {
 						_, _ = ch.Stderr().Write([]byte("Opengist: " + err.Error() + "\r\n"))
 					}
 					_, _ = ch.SendRequest("exit-status", false, []byte{0, 0, 0, 0})
@@ -127,16 +130,12 @@ func setupHostKey() (ssh.Signer, error) {
 	}
 
 	keyPath := filepath.Join(dir, "opengist-ed25519")
-	if _, err := os.Stat(keyPath); err != nil && !os.IsExist(err) {
-		cmd := exec.Command(config.C.SshKeygen,
-			"-t", "ssh-ed25519",
-			"-f", keyPath,
-			"-m", "PEM",
-			"-N", "")
-		err = cmd.Run()
-		if err != nil {
+	if _, err := os.Stat(keyPath); errors.Is(err, os.ErrNotExist) {
+		if err = generateHostKey(keyPath); err != nil {
 			return nil, err
 		}
+	} else if err != nil {
+		return nil, err
 	}
 
 	keyData, err := os.ReadFile(keyPath)
@@ -150,6 +149,20 @@ func setupHostKey() (ssh.Signer, error) {
 	}
 
 	return signer, nil
+}
+
+func generateHostKey(keyPath string) error {
+	_, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		return err
+	}
+
+	block, err := ssh.MarshalPrivateKey(priv, "")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(keyPath, pem.EncodeToMemory(block), 0600)
 }
 
 func errorSsh(message string, err error) {

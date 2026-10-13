@@ -18,16 +18,13 @@ export default defineConfig({
         manifest: true,
         rollupOptions: {
             input: [
-                './public/ts/admin.ts',
-                './public/ts/auto.ts',
-                './public/ts/dark.ts',
-                './public/ts/editor.ts',
-                './public/ts/embed.ts',
-                './public/ts/gist.ts',
-                './public/ts/light.ts',
                 './public/ts/main.ts',
-                './public/ts/style_preferences.ts',
+                './public/ts/editor.ts',
                 './public/ts/webauthn.ts',
+                './public/ts/auto.ts',
+                './public/ts/light.ts',
+                './public/ts/dark.ts',
+                './public/ts/embed.ts',
             ]
         },
         assetsInlineLimit: 0,

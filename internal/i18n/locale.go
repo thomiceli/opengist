@@ -56,6 +56,12 @@ func (store *LocaleStore) loadLocaleFromYAML(localeCode, path string) error {
 	case language.EuropeanSpanish:
 		name = "Español"
 	}
+	switch localeCode {
+	case "zh-CN":
+		name = "简体中文"
+	case "zh-TW":
+		name = "繁體中文"
+	}
 
 	locale := &Locale{
 		Code:     localeCode,

@@ -1,15 +1,17 @@
 package admin
 
 import (
+	"runtime"
+	"strconv"
+	"time"
+
 	"github.com/thomiceli/opengist/internal/actions"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	opengistssh "github.com/thomiceli/opengist/internal/ssh"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
-	"runtime"
-	"strconv"
-	"time"
 )
 
 func AdminIndex(ctx *context.Context) error {
@@ -42,6 +44,8 @@ func AdminIndex(ctx *context.Context) error {
 	}
 	ctx.SetData("countKeys", countKeys)
 
+	// The legacy admin dashboard renders actions on this page. Keep supplying
+	// their state while the new UI uses the dedicated actions page.
 	ctx.SetData("syncReposFromFS", actions.IsRunning(actions.SyncReposFromFS))
 	ctx.SetData("syncReposFromDB", actions.IsRunning(actions.SyncReposFromDB))
 	ctx.SetData("gitGcRepos", actions.IsRunning(actions.GitGcRepos))
@@ -49,6 +53,9 @@ func AdminIndex(ctx *context.Context) error {
 	ctx.SetData("resetHooks", actions.IsRunning(actions.ResetHooks))
 	ctx.SetData("indexGists", actions.IsRunning(actions.IndexGists))
 	ctx.SetData("syncGistLanguages", actions.IsRunning(actions.SyncGistLanguages))
+	ctx.SetData("deleteExpiredGists", actions.IsRunning(actions.DeleteExpiredGists))
+	ctx.SetData("syncSSHKeys", actions.IsRunning(actions.SyncSSHKeys))
+	ctx.SetData("sshManagesAuthorizedKeys", config.C.SshManagesAuthorizedKeys())
 	return ctx.Html("admin_index.html")
 }
 
@@ -65,7 +72,7 @@ func AdminUsers(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Cannot get users", err)
 	}
 
-	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "admin-panel/users", 1, nil); err != nil {
+	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "-/admin-panel/users", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 
@@ -83,7 +90,7 @@ func AdminGists(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Cannot get gists", err)
 	}
 
-	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "admin-panel/gists", 1, nil); err != nil {
+	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "-/admin-panel/gists", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 
@@ -100,19 +107,16 @@ func AdminUserDelete(ctx *context.Context) error {
 	if err := user.Delete(); err != nil {
 		return ctx.ErrorRes(500, "Cannot delete this user", err)
 	}
+	opengistssh.SyncAuthorizedKeysLogged()
 
 	ctx.AddFlash(ctx.Tr("flash.admin.user-deleted"), "success")
-	return ctx.RedirectTo("/admin-panel/users")
+	return ctx.RedirectTo("/-/admin-panel/users")
 }
 
 func AdminGistDelete(ctx *context.Context) error {
 	gist, err := db.GetGistByID(ctx.Param("gist"))
 	if err != nil {
 		return ctx.ErrorRes(500, "Cannot retrieve gist", err)
-	}
-
-	if err = gist.DeleteRepository(); err != nil {
-		return ctx.ErrorRes(500, "Cannot delete the repository", err)
 	}
 
 	if err = gist.Delete(); err != nil {
@@ -122,7 +126,7 @@ func AdminGistDelete(ctx *context.Context) error {
 	gist.RemoveFromIndex()
 
 	ctx.AddFlash(ctx.Tr("flash.admin.gist-deleted"), "success")
-	return ctx.RedirectTo("/admin-panel/gists")
+	return ctx.RedirectTo("/-/admin-panel/gists")
 }
 
 func AdminConfig(ctx *context.Context) error {
@@ -185,7 +189,7 @@ func AdminInvitationsCreate(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.admin.invitation-created"), "success")
-	return ctx.RedirectTo("/admin-panel/invitations")
+	return ctx.RedirectTo("/-/admin-panel/invitations")
 }
 
 func AdminInvitationsDelete(ctx *context.Context) error {
@@ -200,5 +204,5 @@ func AdminInvitationsDelete(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash(ctx.Tr("flash.admin.invitation-deleted"), "success")
-	return ctx.RedirectTo("/admin-panel/invitations")
+	return ctx.RedirectTo("/-/admin-panel/invitations")
 }

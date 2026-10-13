@@ -1,0 +1,32 @@
+{{- if index .Values.config "metrics.enabled" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opengist.fullname" . }}-metrics
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "opengist.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+    {{- with .Values.service.metrics.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.metrics.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.metrics.type }}
+  {{- if .Values.service.metrics.clusterIP }}
+  clusterIP: {{ .Values.service.metrics.clusterIP }}
+  {{- end }}
+  ports:
+    - port: {{ .Values.service.metrics.port }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+      {{- if and (eq .Values.service.metrics.type "NodePort") .Values.service.metrics.nodePort }}
+      nodePort: {{ .Values.service.metrics.nodePort }}
+      {{- end }}
+  selector:
+    {{- include "opengist.selectorLabels" . | nindent 4 }}
+{{- end }}

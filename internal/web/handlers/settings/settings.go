@@ -2,6 +2,7 @@ package settings
 
 import (
 	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/validator"
 	"github.com/thomiceli/opengist/internal/web/context"
 )
 
@@ -9,6 +10,9 @@ func UserAccount(ctx *context.Context) error {
 	user := ctx.User
 
 	ctx.SetData("email", user.Email)
+	// The legacy account page still contains the password form. The new UI
+	// moved it to Authentication, but keeping this data preserves old-UI
+	// behavior while both interfaces are available.
 	ctx.SetData("hasPassword", user.Password != "")
 	ctx.SetData("disableForm", ctx.GetData("DisableLoginForm"))
 	ctx.SetData("settingsHeaderPage", "account")
@@ -16,7 +20,7 @@ func UserAccount(ctx *context.Context) error {
 	return ctx.Html("settings_account.html")
 }
 
-func UserMFA(ctx *context.Context) error {
+func UserAuthentication(ctx *context.Context) error {
 	user := ctx.User
 
 	passkeys, err := db.GetAllCredentialsForUser(user.ID)
@@ -31,9 +35,11 @@ func UserMFA(ctx *context.Context) error {
 
 	ctx.SetData("passkeys", passkeys)
 	ctx.SetData("hasTotp", hasTotp)
-	ctx.SetData("settingsHeaderPage", "mfa")
+	ctx.SetData("hasPassword", user.Password != "")
+	ctx.SetData("disableForm", ctx.GetData("DisableLoginForm"))
+	ctx.SetData("settingsHeaderPage", "authentication")
 	ctx.SetData("htmlTitle", ctx.TrH("settings"))
-	return ctx.Html("settings_mfa.html")
+	return ctx.Html("settings_authentication.html")
 }
 
 func UserSSHKeys(ctx *context.Context) error {
@@ -52,6 +58,7 @@ func UserSSHKeys(ctx *context.Context) error {
 
 func UserStyle(ctx *context.Context) error {
 	ctx.SetData("settingsHeaderPage", "style")
+	ctx.SetData("themeColors", validator.ThemeColors)
 	ctx.SetData("htmlTitle", ctx.TrH("settings"))
 	return ctx.Html("settings_style.html")
 }
@@ -72,5 +79,5 @@ func ProcessUserStyle(ctx *context.Context) error {
 	}
 
 	ctx.AddFlash("Updated style", "success")
-	return ctx.RedirectTo("/settings/style")
+	return ctx.RedirectTo("/-/settings/style")
 }

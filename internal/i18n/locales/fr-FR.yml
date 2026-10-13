@@ -148,8 +148,6 @@ admin.versions: Versions
 admin.ssh_keys: Clés SSH
 admin.stats: Statistiques
 admin.actions: Actions
-admin.actions.sync-fs: Synchroniser les gists depuis le système de fichiers
-admin.actions.sync-db: Synchroniser les gists depuis la base de données
 admin.actions.git-gc: Nettoyage des dépôts git
 admin.id: ID
 admin.user: Utilisateur
@@ -193,7 +191,7 @@ admin.actions.reset-hooks: Réinitialiser les hooks de Git pour tous les dépôt
 gist.new.url: URL
 gist.search.no-results: Aucun gist trouvé
 settings.unlink-gitlab-account: Détacher le compte GitLab
-admin.actions.index-gists: Indexer tous les gists
+admin.actions.index-gists: Reconstruire l'index de recherche
 gist.new.preview: 'Aperçu'
 gist.new.create-a-new-gist: 'Créer un nouveau gist'
 gist.edit.edit-gist: 'Modifier %s'
@@ -226,12 +224,6 @@ flash.admin.user-deleted: 'L''utilisateur a été supprimé'
 flash.admin.gist-deleted: 'Le gist a été supprimée'
 flash.admin.invitation-created: 'L''invitation a été créée'
 flash.admin.invitation-deleted: 'L''invitation a été supprimée'
-flash.admin.sync-fs: 'Synchronisation des dépôts à partir du système de fichiers...'
-flash.admin.sync-db: 'Synchronisation des dépôts à partir de la base de données...'
-flash.admin.git-gc: 'Nettoyage des dépôts...'
-flash.admin.sync-previews: 'Synchronisation des aperçus du Gist...'
-flash.admin.reset-hooks: 'Réinitialisation des hooks du serveur Git pour tous les dépôts...'
-flash.admin.index-gists: 'Indexation de tous les gists...'
 flash.auth.username-exists: 'Nom d''utilisateur déjà utilisé'
 flash.auth.invalid-credentials: 'Identifiants non valides'
 flash.auth.account-linked-oauth: 'Compte lié à %s'

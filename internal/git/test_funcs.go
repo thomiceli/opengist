@@ -35,29 +35,32 @@ func TeardownTest(t *testing.T) {
 }
 
 func CommitToBare(t *testing.T, user string, gist string, files map[string]string) {
-	err := CloneTmp(user, gist, gist, "thomas@mail.com", true)
+	gistTmpId, err := CloneTmp(user, gist, "thomas@mail.com", true)
 	require.NoError(t, err, "Could not clone repository")
+	defer func() {
+		require.NoError(t, DeleteTmpRepository(gistTmpId))
+	}()
 
 	if len(files) > 0 {
 		for filename, content := range files {
 			if strings.Contains(filename, "/") {
 				dir := filepath.Dir(filename)
-				err := os.MkdirAll(filepath.Join(TmpRepositoryPath(gist), dir), os.ModePerm)
+				err := os.MkdirAll(filepath.Join(TmpRepositoryPath(gistTmpId), dir), os.ModePerm)
 				require.NoError(t, err, "Could not create directory")
 			}
-			_ = os.WriteFile(filepath.Join(TmpRepositoryPath(gist), filename), []byte(content), 0644)
+			_ = os.WriteFile(filepath.Join(TmpRepositoryPath(gistTmpId), filename), []byte(content), 0644)
 
-			if err := AddAll(gist); err != nil {
+			if err := AddAll(gistTmpId); err != nil {
 				require.NoError(t, err, "Could not add all to repository")
 			}
 		}
 	}
 
-	if err := CommitRepository(gist, user, "thomas@mail.com"); err != nil {
+	if err := CommitRepository(gistTmpId, user, "thomas@mail.com"); err != nil {
 		require.NoError(t, err, "Could not commit to repository")
 	}
 
-	if err := Push(gist); err != nil {
+	if err := Push(gistTmpId); err != nil {
 		require.NoError(t, err, "Could not push to repository")
 	}
 }

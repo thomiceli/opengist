@@ -3,8 +3,12 @@ package render
 import (
 	"bufio"
 	"bytes"
+	"embed"
 	"encoding/base64"
 	"fmt"
+	"io/fs"
+	"path/filepath"
+	"strings"
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
@@ -13,6 +17,19 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 )
+
+//go:embed lexers/*.xml
+var customLexers embed.FS
+
+func init() {
+	paths, err := fs.Glob(customLexers, "lexers/*.xml")
+	if err != nil {
+		panic(err)
+	}
+	for _, path := range paths {
+		lexers.Register(chroma.MustNewXMLLexer(customLexers, path))
+	}
+}
 
 type HighlightedFile struct {
 	*git.File
@@ -27,8 +44,9 @@ func (r HighlightedFile) InternalType() string {
 
 type RenderedGist struct {
 	*db.Gist
-	Lines []string
-	HTML  string
+	Lines           []string
+	HTML            string
+	PreviewMimeType *git.MimeType
 }
 
 func highlightFile(file *git.File) (HighlightedFile, error) {
@@ -76,10 +94,25 @@ func HighlightGistPreview(gist *db.Gist) (RenderedGist, error) {
 		Gist: gist,
 	}
 
+	if gist.PreviewMimeType != "" {
+		mt := &git.MimeType{ContentType: gist.PreviewMimeType}
+		if mt.CanBeEmbedded() {
+			rendered.PreviewMimeType = mt
+			return rendered, nil
+		}
+	}
+
+	if gist.Preview == "" {
+		return rendered, nil
+	}
+
 	style := newStyle()
 	lexer := newLexer(gist.PreviewFilename)
 	if lexer.Config().Name == "markdown" {
 		return MarkdownGistPreview(gist)
+	}
+	if strings.EqualFold(filepath.Ext(gist.PreviewFilename), ".mmd") {
+		return MermaidGistPreview(gist)
 	}
 
 	formatter := html.New(html.WithClasses(true), html.PreventSurroundingPre(true))

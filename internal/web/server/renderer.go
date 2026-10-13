@@ -7,6 +7,7 @@ import (
 	htmlpkg "html"
 	"html/template"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -29,9 +30,15 @@ import (
 
 type Template struct {
 	templates *template.Template
+	// pages holds layout-based templates, keyed by file name (e.g. "all.html").
+	// Each entry is a clone of the base layout with that page's "content" block parsed in.
+	pages map[string]*template.Template
 }
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Context) error {
+	if tmpl, ok := t.pages[name]; ok {
+		return tmpl.ExecuteTemplate(w, "base", data)
+	}
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
@@ -59,6 +66,9 @@ func (s *Server) setFuncMap() {
 		"isMarkdown": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".md"
 		},
+		"isMermaid": func(i string) bool {
+			return strings.ToLower(filepath.Ext(i)) == ".mmd"
+		},
 		"isJupyter": func(i string) bool {
 			return strings.ToLower(filepath.Ext(i)) == ".ipynb"
 		},
@@ -70,6 +80,10 @@ func (s *Server) setFuncMap() {
 			return strings.Trim(re.ReplaceAllString(strings.ToLower(s), "-"), "-")
 		},
 		"avatarUrl": func(user *db.User, noGravatar bool) string {
+			if user.HasUploadedAvatar() {
+				return fmt.Sprintf("%s/avatar/%s", config.C.ExternalUrl, user.AvatarURL)
+			}
+
 			if user.AvatarURL != "" {
 				return user.AvatarURL
 			}
@@ -147,7 +161,10 @@ func (s *Server) setFuncMap() {
 			return dict, nil
 		},
 		"addMetadataToSearchQuery": func(input, key, value string) string {
-			content, metadata := handlers.ParseSearchQueryStr(input)
+			metadata := handlers.ParseSearchQueryStr(input)
+			// extract free-text content (stored under "all") and remove it from metadata
+			content := metadata["all"]
+			delete(metadata, "all")
 
 			metadata[key] = value
 
@@ -178,6 +195,18 @@ func (s *Server) setFuncMap() {
 			}
 			return str
 		},
+		// ogText collapses all whitespace (newlines, tabs, multiple spaces) into
+		// single spaces and truncates to maxRunes runes, appending an ellipsis when
+		// truncated. Used to build clean values for Open Graph / Twitter meta tags
+		// from multi-line gist descriptions or code previews.
+		"ogText": func(s string, maxRunes int) string {
+			collapsed := strings.Join(strings.Fields(s), " ")
+			runes := []rune(collapsed)
+			if len(runes) <= maxRunes {
+				return collapsed
+			}
+			return string(runes[:maxRunes]) + "\u2026"
+		},
 		"hexToRgb": func(hex string) string {
 			h, _ := strconv.ParseUint(strings.TrimPrefix(hex, "#"), 16, 32)
 			return fmt.Sprintf("%d, %d, %d,", (h>>16)&0xFF, (h>>8)&0xFF, h&0xFF)
@@ -192,6 +221,9 @@ func (s *Server) setFuncMap() {
 		"humanDate": func(t int64) string {
 			return time.Unix(t, 0).Format("02/01/2006 15:04")
 		},
+		"humanDateOnly": func(t int64) string {
+			return time.Unix(t, 0).Format("02/01/2006")
+		},
 		"mainTheme": func(theme *db.UserStyleDTO) string {
 			if theme == nil {
 				return "auto"
@@ -205,33 +237,59 @@ func (s *Server) setFuncMap() {
 		},
 	}
 
-	t := template.Must(template.New("t").Funcs(fm).ParseFS(templates.Files, "*/*.html"))
+	base := template.Must(template.New("base").Funcs(fm).ParseFS(templates.Files, "layouts/*.html", "partials/*.html"))
+	pagePaths, err := fs.Glob(templates.Files, "pages/*.html")
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to glob new page templates")
+	}
+	pages := make(map[string]*template.Template, len(pagePaths))
+	for _, p := range pagePaths {
+		cloned := template.Must(base.Clone())
+		pages[filepath.Base(p)] = template.Must(cloned.ParseFS(templates.Files, p))
+	}
+
+	customTemplates := template.Must(base.Clone())
 	customPattern := filepath.Join(config.GetHomeDir(), "custom", "*.html")
 	matches, err := filepath.Glob(customPattern)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to check for custom templates")
 	}
 	if len(matches) > 0 {
-		t, err = t.ParseGlob(customPattern)
+		customTemplates, err = customTemplates.ParseGlob(customPattern)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to parse custom templates")
 		}
 	}
+
 	s.echo.Renderer = &Template{
-		templates: t,
+		templates: customTemplates,
+		pages:     pages,
 	}
 }
 
 func (s *Server) parseManifestEntries() {
-	file, err := public.Files.Open(".vite/manifest.json")
+	entries, err := parseManifest(public.Files)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to open manifest.json")
+		log.Fatal().Err(err).Msg("Failed to load manifest.json")
 	}
+	context.ManifestEntries = entries
+}
+
+func parseManifest(files fs.FS) (map[string]context.Asset, error) {
+	file, err := files.Open(".vite/manifest.json")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
 	byteValue, err := io.ReadAll(file)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to read manifest.json")
+		return nil, err
 	}
-	if err = gojson.Unmarshal(byteValue, &context.ManifestEntries); err != nil {
-		log.Fatal().Err(err).Msg("Failed to unmarshal manifest.json")
+
+	entries := make(map[string]context.Asset)
+	if err = gojson.Unmarshal(byteValue, &entries); err != nil {
+		return nil, err
 	}
+	return entries, nil
 }

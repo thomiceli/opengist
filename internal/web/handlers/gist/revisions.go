@@ -4,7 +4,6 @@ import (
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
-	"strings"
 )
 
 func Revisions(ctx *context.Context) error {
@@ -14,7 +13,7 @@ func Revisions(ctx *context.Context) error {
 
 	pageInt := handlers.GetPage(ctx)
 
-	commits, err := gist.Log((pageInt - 1) * 10)
+	commits, err := gist.Log("HEAD", (pageInt-1)*10, 11)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error fetching commits log", err)
 	}
@@ -23,22 +22,8 @@ func Revisions(ctx *context.Context) error {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 
-	emailsSet := map[string]struct{}{}
-	for _, commit := range commits {
-		if commit.AuthorEmail == "" {
-			continue
-		}
-		emailsSet[strings.ToLower(commit.AuthorEmail)] = struct{}{}
-	}
-
-	emailsUsers, err := db.GetUsersFromEmails(emailsSet)
-	if err != nil {
-		return ctx.ErrorRes(500, "Error fetching users emails", err)
-	}
-
 	ctx.SetData("page", "revisions")
 	ctx.SetData("revision", "HEAD")
-	ctx.SetData("emails", emailsUsers)
 	ctx.SetData("htmlTitle", ctx.TrH("gist.revision-of", gist.Title))
 
 	return ctx.Html("revisions.html")

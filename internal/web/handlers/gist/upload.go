@@ -4,11 +4,14 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/google/uuid"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/web/context"
 )
+
+var uuidRegex = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 
 func Upload(ctx *context.Context) error {
 	err := ctx.Request().ParseMultipartForm(32 << 20) // 32 MB max
@@ -57,13 +60,13 @@ func Upload(ctx *context.Context) error {
 }
 
 func DeleteUpload(ctx *context.Context) error {
-	uuid := ctx.Param("uuid")
-	if uuid == "" {
+	fileUuid := filepath.Base(ctx.Param("uuid"))
+
+	if fileUuid == "" || !uuidRegex.MatchString(fileUuid) {
 		return ctx.ErrorRes(400, ctx.Tr("error.bad-request"), nil)
 	}
 
-	uploadsDir := filepath.Join(config.GetHomeDir(), "uploads")
-	filePath := filepath.Join(uploadsDir, uuid)
+	filePath := filepath.Join(config.GetHomeDir(), "uploads", fileUuid)
 
 	if _, err := os.Stat(filePath); err == nil {
 		if err := os.Remove(filePath); err != nil {

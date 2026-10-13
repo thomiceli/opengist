@@ -2,10 +2,10 @@ apiVersion: v2
 name: opengist
 description: Opengist Helm chart for Kubernetes
 type: application
-version: 0.4.0
-appVersion: 1.11.1
+version: 0.13.0
+appVersion: 1.15.2
 home: https://opengist.io
-icon: https://raw.githubusercontent.com/thomiceli/opengist/master/public/opengist.svg
+icon: https://raw.githubusercontent.com/thomiceli/opengist/master/public/img/opengist.svg
 sources:
   - https://github.com/thomiceli/opengist
 dependencies:
@@ -15,5 +15,5 @@ dependencies:
     condition: postgresql.enabled
   - name: meilisearch
     repository: https://meilisearch.github.io/meilisearch-kubernetes
-    version: 0.17.1
+    version: 0.26.0
     condition: meilisearch.enabled

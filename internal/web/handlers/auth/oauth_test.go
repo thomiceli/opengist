@@ -2,6 +2,7 @@ package auth_test
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -53,7 +54,7 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		t.Helper()
 
 		m.QueueUser(&oidcUser{MockUser: &mockoidc.MockUser{
-			Subject:           "alice-id",
+			Subject:           t.Name(),
 			Email:             "alice@example.com",
 			PreferredUsername: "alice",
 			EmailVerified:     true,
@@ -114,6 +115,82 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		require.Equal(t, "/-/login", resp.Request.URL.Path)
 	})
 
+	assertRegistrationDenied := func(t *testing.T, client *http.Client, username string) {
+		t.Helper()
+		baseURL, err := url.Parse(base)
+		require.NoError(t, err)
+		var csrfToken string
+		for _, cookie := range client.Jar.Cookies(baseURL) {
+			if cookie.Name == "_csrf" {
+				csrfToken = cookie.Value
+			}
+		}
+		require.NotEmpty(t, csrfToken)
+
+		// Inspect the initial response, including any body written after a redirect.
+		client.CheckRedirect = func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+		resp, err := client.PostForm(base+"/oauth/register", url.Values{
+			"_csrf":    {csrfToken},
+			"username": {username},
+			"email":    {"alice@example.com"},
+		})
+		require.NoError(t, err)
+		_ = resp.Body.Close()
+		require.Equal(t, http.StatusFound, resp.StatusCode)
+		require.Equal(t, "/-/login", resp.Header.Get("Location"))
+		exists, err := db.UserExists(username)
+		require.NoError(t, err)
+		require.False(t, exists, "denied registration must not create an account")
+
+		resp, err = client.Get(base + "/oauth/register")
+		require.NoError(t, err)
+		body, err := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		require.NoError(t, err)
+		require.Equal(t, http.StatusFound, resp.StatusCode)
+		require.Equal(t, "/-/login", resp.Header.Get("Location"))
+		require.Empty(t, body, "denied registration must not render the form")
+	}
+
+	t.Run("disabled signup rejects registration without an invitation", func(t *testing.T) {
+		require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "1"))
+		resp, _, client := login(t, "", nil)
+		_ = resp.Body.Close()
+		require.Equal(t, "/-/login", resp.Request.URL.Path)
+		assertRegistrationDenied(t, client, "uninvited")
+	})
+
+	t.Run("disabled signup rejects an invitation invalidated after OAuth", func(t *testing.T) {
+		for _, tc := range []struct {
+			name       string
+			invalidate func(*db.Invitation) error
+		}{
+			{"expired", func(invitation *db.Invitation) error {
+				invitation.ExpiresAt = time.Now().Add(-time.Hour).Unix()
+				return invitation.Update()
+			}},
+			{"exhausted", func(invitation *db.Invitation) error {
+				return invitation.Use()
+			}},
+			{"deleted", func(invitation *db.Invitation) error {
+				return invitation.Delete()
+			}},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "1"))
+				invitation := &db.Invitation{ExpiresAt: time.Now().Add(time.Hour).Unix(), NbMax: 1}
+				require.NoError(t, invitation.Create())
+				resp, _, client := login(t, invitation.Code, nil)
+				_ = resp.Body.Close()
+				require.Equal(t, "/oauth/register", resp.Request.URL.Path)
+				require.NoError(t, tc.invalidate(invitation))
+				assertRegistrationDenied(t, client, "blocked"+tc.name)
+			})
+		}
+	})
+
 	t.Run("invitation permits registration when signup is disabled", func(t *testing.T) {
 		require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "1"))
 		blockedResp, _, _ := login(t, "", nil)
@@ -149,7 +226,7 @@ func TestOIDCLoginPKCE(t *testing.T) {
 
 		user, err := db.GetUserByUsername("invited")
 		require.NoError(t, err)
-		require.Equal(t, "alice-id", user.OIDCID)
+		require.Equal(t, t.Name(), user.OIDCID)
 		updatedInvitation, err := db.GetInvitationByID(invitation.ID)
 		require.NoError(t, err)
 		require.Equal(t, uint(1), updatedInvitation.NbUsed)

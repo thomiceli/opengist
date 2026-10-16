@@ -18,23 +18,24 @@ import (
 
 const oauthInvitationSessionKey = "oauthInvitation"
 
-func allowOauthSignup(ctx *context.Context) (*db.Invitation, error) {
+// allowed is false after a rejection, even when writing the redirect succeeds.
+func allowOauthSignup(ctx *context.Context) (*db.Invitation, bool, error) {
 	invitationID, ok := ctx.GetSession().Values[oauthInvitationSessionKey].(uint)
 	if ok {
 		invitation, err := db.GetInvitationByID(invitationID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ctx.ErrorRes(500, "Cannot check for invitation code", err)
+			return nil, false, ctx.ErrorRes(500, "Cannot check for invitation code", err)
 		}
 		if err == nil && invitation.IsUsable() {
-			return invitation, nil
+			return invitation, true, nil
 		}
 	}
 
 	if ctx.GetData("DisableSignup") == true {
 		ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
-		return nil, ctx.Redirect(302, "/-/login")
+		return nil, false, ctx.Redirect(302, "/-/login")
 	}
-	return nil, nil
+	return nil, true, nil
 }
 
 func Oauth(ctx *context.Context) error {
@@ -111,7 +112,7 @@ func OauthCallback(ctx *context.Context) error {
 	userDB, err := db.GetUserByProvider(user.UserID, provider.GetProvider())
 	// if user is not in database, redirect to OAuth registration page
 	if err != nil {
-		if _, err := allowOauthSignup(ctx); err != nil {
+		if _, allowed, err := allowOauthSignup(ctx); err != nil || !allowed {
 			return err
 		}
 
@@ -154,7 +155,7 @@ func OauthCallback(ctx *context.Context) error {
 }
 
 func OauthRegister(ctx *context.Context) error {
-	if _, err := allowOauthSignup(ctx); err != nil {
+	if _, allowed, err := allowOauthSignup(ctx); err != nil || !allowed {
 		return err
 	}
 
@@ -171,8 +172,8 @@ func OauthRegister(ctx *context.Context) error {
 }
 
 func ProcessOauthRegister(ctx *context.Context) error {
-	invitation, err := allowOauthSignup(ctx)
-	if err != nil {
+	invitation, allowed, err := allowOauthSignup(ctx)
+	if err != nil || !allowed {
 		return err
 	}
 

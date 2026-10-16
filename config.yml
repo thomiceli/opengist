@@ -65,6 +65,13 @@ api.enabled: true
 # Disable file uploads when creating or editing gists (either `true` or `false`). Default: false
 disable-file-upload: false
 
+# How long an uploaded file can sit in {opengist-home}/uploads/ before the background
+# sweep removes it. Applies to files left behind when a user starts creating a gist,
+# uploads a file, and never submits (e.g. closes the tab). Successful gists move the
+# file out of uploads/ and are unaffected. Go duration format (e.g. "1h", "24h", "30m").
+# Default: 1h
+upload-orphan-ttl: 1h
+
 # File permissions for Unix socket (octal format). Default: 0666
 unix-socket-permissions: 0666
 

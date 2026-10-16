@@ -89,7 +89,7 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
-	err = tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
+	err = tx.Session(&gorm.Session{NewDB: true, SkipHooks: true}).Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 	if err != nil {
 		return err
 	}

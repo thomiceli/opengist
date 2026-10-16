@@ -69,11 +69,46 @@
             <div role="group">
                 <ul class="flex flex-col gap-1">
                     <li>
+                        {{ if .sidebarFiles }}{{ if gt (len .sidebarFiles) 1 }}
+                        <div class="gist-file-toc">
+                            <div class="hover:bg-sidebar-hover hover:text-sidebar-accent-foreground flex items-center rounded-md {{ if eq .page "code" }}bg-sidebar-accent{{ end }}">
+                                <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" {{ if eq .page "code" }}aria-current="page"{{ end }}
+                                   class="flex min-w-0 flex-1 items-center gap-2 px-2 py-1 text-sm font-medium">
+                                    <svg class="size-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+                                    <span class="truncate">{{ .gist.Title }}</span>
+                                </a>
+                                <span class="badge-secondary ml-auto">{{ len .sidebarFiles }}</span>
+                                <button type="button" class="gist-file-toc-toggle flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-sm" aria-expanded="false" aria-controls="gist-file-list" aria-label="{{ .locale.Tr "gist.list.files" }}">
+                                    <svg class="size-4 transition-transform" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                </button>
+                            </div>
+                            <div id="gist-file-list" class="mt-1" role="group" aria-label="{{ .locale.Tr "gist.list.files" }}" hidden>
+                                <ul class="flex flex-col gap-1">
+                                    {{ range $filename := .sidebarFiles }}
+                                    <li>
+                                        <a hx-boost="{{ if eq $.page "code" }}false{{ else }}true{{ end }}" href="{{ if ne $.page "code" }}{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}{{ end }}#file-{{ slug $filename }}"
+                                           class="hover:bg-sidebar-hover hover:text-sidebar-accent-foreground flex items-center gap-2 rounded-md py-1 pr-2 pl-6 text-sm">
+                                            <svg class="size-4 shrink-0 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                                            <span class="truncate" title="{{ $filename }}">{{ $filename }}</span>
+                                        </a>
+                                    </li>
+                                    {{ end }}
+                                </ul>
+                            </div>
+                        </div>
+                        {{ else }}
                         <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" {{ if eq .page "code" }}aria-current="page"{{ end }}
                            class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
                             <span class="truncate">{{ .gist.Title }}</span>
                         </a>
+                        {{ end }}{{ else }}
+                        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}" {{ if eq .page "code" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+                            <span class="truncate">{{ .gist.Title }}</span>
+                        </a>
+                        {{ end }}
                     </li>
                     <li>
                         <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/revisions" {{ if eq .page "revisions" }}aria-current="page"{{ end }}

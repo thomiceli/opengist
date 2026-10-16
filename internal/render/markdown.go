@@ -20,11 +20,7 @@ import (
 // Markdown (README previews, gist descriptions, .md files, comments) so users
 // can copy just that block's contents, the same way the file-level copy
 // button in gist.html works.
-const copyCodeBlockButton = `<button type="button" class="copy-btn copy-code-btn" aria-label="Copy code" _="on click
-	call navigator.clipboard.writeText(the previous <pre/>'s textContent)
-	set @data-copied to 'true'
-	wait 1.2s
-	remove @data-copied from me"><svg class="icon-copy size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><svg class="icon-check size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>`
+const copyCodeBlockButton = `<button type="button" class="copy-btn copy-code-btn" aria-label="Copy code"><svg class="icon-copy size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><svg class="icon-check size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>`
 
 // wrapCodeBlockWithCopyButton wraps every fenced code block that goldmark
 // renders with a container div and a copy button. When chroma successfully
@@ -40,7 +36,7 @@ func wrapCodeBlockWithCopyButton(w util.BufWriter, ctx highlighting.CodeBlockCon
 			_, _ = w.WriteString("<pre><code")
 			if language, ok := ctx.Language(); ok && language != nil {
 				_, _ = w.WriteString(` class="language-`)
-				_, _ = w.Write(language)
+				_, _ = w.Write(util.EscapeHTML(language))
 				_, _ = w.WriteString(`"`)
 			}
 			_, _ = w.WriteString(">")

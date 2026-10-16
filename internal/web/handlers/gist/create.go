@@ -1,7 +1,6 @@
 package gist
 
 import (
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -26,9 +25,6 @@ func Create(ctx *context.Context) error {
 
 func ProcessCreate(ctx *context.Context) error {
 	isCreate := ctx.Request().URL.Path == "/"
-	if ctx.Request().ContentLength > 10<<20 {
-		return ctx.ErrorRes(http.StatusRequestEntityTooLarge, "Gist form exceeds the 10 MB request limit", nil)
-	}
 
 	dto := new(db.GistDTO)
 	var gist *db.Gist

@@ -47,7 +47,7 @@ func (s *Server) registerMiddlewares() {
 	}
 
 	s.echo.Pre(middleware.MethodOverrideWithConfig(middleware.MethodOverrideConfig{
-		Getter: middleware.MethodFromForm("_method"),
+		Getter: methodFromForm,
 	}))
 	s.echo.Pre(middleware.RemoveTrailingSlash())
 	// Expose the API's pagination headers so cross-origin browser clients can
@@ -67,6 +67,7 @@ func (s *Server) registerMiddlewares() {
 	s.echo.Use(middleware.Recover())
 	s.echo.Use(middleware.Secure())
 	s.echo.Use(Middleware(sessionInit).toEcho())
+	s.echo.Use(Middleware(gistFormSize).toEcho())
 	s.echo.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		TokenLookup:    "form:_csrf,header:X-CSRF-Token",
 		CookiePath:     "/",

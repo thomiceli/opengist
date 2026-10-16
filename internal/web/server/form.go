@@ -33,7 +33,7 @@ func gistFormSize(next Handler) Handler {
 		// Wait until routing and error-page data are initialized, but report the
 		// size failure before CSRF attempts to extract a token from the form.
 		if ctx.Get("formTooLarge") == true && (ctx.Path() == "/" || ctx.Path() == "/:user/:gistname/edit") {
-			return ctx.ErrorRes(http.StatusRequestEntityTooLarge, "Gist form exceeds the 10 MB request limit", nil)
+			return ctx.ErrorRes(http.StatusRequestEntityTooLarge, ctx.Tr("error.gist-form-too-large"), nil)
 		}
 		return next(ctx)
 	}

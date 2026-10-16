@@ -89,7 +89,11 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 		return err
 	}
 
-	err = tx.Where("user_id = ?", user.ID).Delete(&Gist{}).Error
+	// Skip the Gist hooks: on this filtered delete GORM calls BeforeDelete on the
+	// empty &Gist{}, whose empty username and UUID resolve to the root repos
+	// directory and would wipe every user's repositories. Fork counters are
+	// decremented above and the user's repositories are removed below.
+	err = tx.Session(&gorm.Session{NewDB: true, SkipHooks: true}).Where("user_id = ?", user.ID).Delete(&Gist{}).Error
 	if err != nil {
 		return err
 	}

@@ -152,6 +152,17 @@ func TestAdminUserOperations(t *testing.T) {
 
 		s.Login(t, "thomas")
 
+		gist2 := db.GistDTO{
+			Title: "gist",
+			VisibilityDTO: db.VisibilityDTO{
+				Private: 0,
+			},
+			Name:    []string{"gist2.txt"},
+			Content: []string{"yeah"},
+			Topics:  "",
+		}
+		s.Request(t, "POST", "/", gist2, 302)
+
 		s.Request(t, "POST", "/-/admin-panel/users/2/delete", nil, 302)
 
 		count, err = db.CountAll(db.User{})
@@ -160,6 +171,10 @@ func TestAdminUserOperations(t *testing.T) {
 
 		_, err = os.Stat(filepath.Join(config.GetHomeDir(), git.ReposDirectory, "nonadmin"))
 		require.Error(t, err)
+
+		// Deleting a user must not touch the repositories of other users
+		_, err = os.Stat(filepath.Join(config.GetHomeDir(), git.ReposDirectory, "thomas"))
+		require.NoError(t, err)
 	})
 }
 

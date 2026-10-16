@@ -30,6 +30,18 @@ func TestInitDeleteRepository(t *testing.T) {
 	require.NoDirExists(t, RepositoryPath("thomas", "gist1"), "Repository should not exist")
 }
 
+func TestDeleteRepositoryRejectsEmptyNames(t *testing.T) {
+	SetupTest(t)
+	defer TeardownTest(t)
+
+	require.Error(t, DeleteRepository("", ""), "Empty user and gist should be rejected")
+	require.Error(t, DeleteRepository("thomas", ""), "Empty gist should be rejected")
+	require.Error(t, DeleteRepository("", "gist1"), "Empty user should be rejected")
+	require.Error(t, DeleteUserDirectory(""), "Empty user should be rejected")
+
+	require.DirExists(t, RepositoryPath("thomas", "gist1"), "Repository should still exist")
+}
+
 func TestSetFileContentRejectsSymlink(t *testing.T) {
 	SetupTest(t)
 	defer TeardownTest(t)

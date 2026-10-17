@@ -113,6 +113,22 @@ func (store *LocaleStore) MatchTag(langs []language.Tag) string {
 		if store.HasLocale(lang.String()) {
 			return lang.String()
 		}
+
+		// No exact match (e.g. "en-NZ", "fr"): fall back to a locale with the same base language
+		base, _ := lang.Base()
+		var match string
+		for code := range store.Locales {
+			tag, err := language.Parse(code)
+			if err != nil {
+				continue
+			}
+			if b, _ := tag.Base(); b == base && (match == "" || code < match) {
+				match = code
+			}
+		}
+		if match != "" {
+			return match
+		}
 	}
 
 	return "en-US"

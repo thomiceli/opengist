@@ -104,6 +104,11 @@ Opengist is now running on port 6157, you can browse http://localhost:6157
 
 To create and run a development environment, see [run-development.md](/docs/contributing/development.md).
 
+## One-click deploy
+
+<a href="https://repocloud.io/details/Opengist/"><img src="https://d16t0pc4846x52.cloudfront.net/deploylobe.svg" alt="Deploy on RepoCloud" height="42"></a>
+<a href="https://railway.com/deploy/opengist--zWSDEh"><img src="https://railway.com/button.svg" alt="Deploy on Railway" height="42"></a>
+
 ## Documentation
 
 The documentation is available at [https://opengist.io/](https://opengist.io/) or in the [/docs](/docs) directory.

@@ -4,6 +4,7 @@ import '../img/opengist.svg';
 
 import 'htmx.org';
 import 'hyperscript.org';
+import './code-copy';
 import 'basecoat-css/basecoat';
 import 'basecoat-css/dropdown-menu';
 import { initGistFilters } from './gist-filter';

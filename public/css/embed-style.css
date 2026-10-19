@@ -36,6 +36,14 @@ pre {
     vertical-align: top;
 }
 
+.code-block-wrapper .copy-code-btn {
+    @apply border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400;
+}
+
+.code-block-wrapper .copy-code-btn:hover {
+    @apply text-gray-700 dark:text-gray-200;
+}
+
 code.hljs {
     background: transparent !important;
 }

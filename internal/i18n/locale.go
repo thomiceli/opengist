@@ -10,7 +10,9 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"maps"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -109,25 +111,28 @@ func (store *LocaleStore) HasLocale(lang string) bool {
 }
 
 func (store *LocaleStore) MatchTag(langs []language.Tag) string {
-	for _, lang := range langs {
-		if store.HasLocale(lang.String()) {
-			return lang.String()
+	var codes []string
+	var tags []language.Tag
+	for _, code := range slices.Sorted(maps.Keys(store.Locales)) {
+		tag, err := language.Parse(code)
+		if err != nil {
+			continue
 		}
+		codes = append(codes, code)
+		tags = append(tags, tag)
+	}
+	if len(tags) == 0 {
+		return "en-US"
+	}
+	matcher := language.NewMatcher(tags)
 
-		// No exact match (e.g. "en-NZ", "fr"): fall back to a locale with the same base language
+	for _, lang := range langs {
+		// The matcher picks the closest region and script (e.g. "en-NZ" -> en-US, "zh-HK" -> zh-TW),
+		// but it can also pick a related language (e.g. "be" -> ru-RU), so only accept the same language
+		_, i, conf := matcher.Match(lang)
 		base, _ := lang.Base()
-		var match string
-		for code := range store.Locales {
-			tag, err := language.Parse(code)
-			if err != nil {
-				continue
-			}
-			if b, _ := tag.Base(); b == base && (match == "" || code < match) {
-				match = code
-			}
-		}
-		if match != "" {
-			return match
+		if b, _ := tags[i].Base(); conf != language.No && b == base {
+			return codes[i]
 		}
 	}
 

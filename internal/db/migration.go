@@ -20,7 +20,6 @@ func applyMigrations(dbInfo *databaseInfo) error {
 		return fmt.Errorf("unknown database type: %s", dbInfo.Type)
 	}
 }
-
 func applyAllMigrations(dbType databaseType) error {
 	if err := db.AutoMigrate(&MigrationVersion{}); err != nil {
 		log.Fatal().Err(err).Msg("Error creating migration version table")
@@ -29,11 +28,10 @@ func applyAllMigrations(dbType databaseType) error {
 
 	var currentVersion MigrationVersion
 	db.First(&currentVersion)
-
 	migrations := []struct {
 		Version uint
 		DBTypes []databaseType // nil = all types
-		Func    func() error
+		Func    func(*gorm.DB) error
 	}{
 		{1, []databaseType{SQLite}, v1_modifyConstraintToSSHKeys},
 		{2, []databaseType{SQLite}, v2_lowercaseEmails},
@@ -44,7 +42,6 @@ func applyAllMigrations(dbType databaseType) error {
 		if m.Version <= currentVersion.Version {
 			continue
 		}
-
 		// Skip migrations not intended for this DB type
 		if len(m.DBTypes) > 0 {
 			applicable := false
@@ -67,8 +64,7 @@ func applyAllMigrations(dbType databaseType) error {
 			log.Fatal().Err(err).Msg("Error starting transaction")
 			return err
 		}
-
-		if err := m.Func(); err != nil {
+		if err := m.Func(tx); err != nil {
 			tx.Rollback()
 			log.Fatal().Err(err).Msg(fmt.Sprintf("Error applying migration %d:", m.Version))
 			return err
@@ -88,7 +84,7 @@ func applyAllMigrations(dbType databaseType) error {
 }
 
 // Modify the constraint on the ssh_keys table to use ON DELETE CASCADE
-func v1_modifyConstraintToSSHKeys() error {
+func v1_modifyConstraintToSSHKeys(tx *gorm.DB) error {
 	createSQL := `
 	CREATE TABLE ssh_keys_temp (
 		id integer primary key,
@@ -102,38 +98,35 @@ func v1_modifyConstraintToSSHKeys() error {
 	);
 	`
 
-	if err := db.Exec(createSQL).Error; err != nil {
+	if err := tx.Exec(createSQL).Error; err != nil {
 		return err
 	}
-
 	// Copy data from the old table to the new table
 	copySQL := `INSERT INTO ssh_keys_temp SELECT * FROM ssh_keys;`
-	if err := db.Exec(copySQL).Error; err != nil {
+	if err := tx.Exec(copySQL).Error; err != nil {
 		return err
 	}
 
 	// Drop the old table
 	dropSQL := `DROP TABLE ssh_keys;`
-	if err := db.Exec(dropSQL).Error; err != nil {
+	if err := tx.Exec(dropSQL).Error; err != nil {
 		return err
 	}
 
 	// Rename the new table to the original table name
 	renameSQL := `ALTER TABLE ssh_keys_temp RENAME TO ssh_keys;`
-	return db.Exec(renameSQL).Error
+	return tx.Exec(renameSQL).Error
 }
-
-func v2_lowercaseEmails() error {
+func v2_lowercaseEmails(tx *gorm.DB) error {
 	// Copy the lowercase emails into the new column
 	copySQL := `UPDATE users SET email = lower(email);`
-	return db.Exec(copySQL).Error
+	return tx.Exec(copySQL).Error
 }
-
-func v3_normalizedColumns() error {
-	if err := db.Model(&User{}).Where("username_normalized = '' OR username_normalized IS NULL").
+func v3_normalizedColumns(tx *gorm.DB) error {
+	if err := tx.Model(&User{}).Where("username_normalized = '' OR username_normalized IS NULL").
 		Updates(map[string]interface{}{"username_normalized": gorm.Expr("LOWER(username)")}).Error; err != nil {
 		return err
 	}
-	return db.Model(&Gist{}).Where("url_normalized = '' OR url_normalized IS NULL").
+	return tx.Model(&Gist{}).Where("url_normalized = '' OR url_normalized IS NULL").
 		Updates(map[string]interface{}{"url_normalized": gorm.Expr("LOWER(url)")}).Error
 }

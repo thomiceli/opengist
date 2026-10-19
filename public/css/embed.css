@@ -75,6 +75,7 @@
             cursor: pointer;
         }
 
+        @import './code-copy.css';
         @import './embed-ipynb.css';
         @import "./embed-style.css";
     }

@@ -215,6 +215,10 @@ textarea.input {
 .markdown-body {
     background-color: transparent !important;
 }
+.markdown-body ul,
+.markdown-body ol {
+    list-style: revert;
+}
 
 /* Toggled by the gist editor (editor.ts). */
 .hidden-important {

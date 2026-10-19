@@ -533,6 +533,9 @@ func Push(gistTmpId string) error {
 }
 
 func DeleteRepository(user string, gist string) error {
+	if user == "" || gist == "" {
+		return fmt.Errorf("refusing to delete repository with empty user %q or gist %q", user, gist)
+	}
 	return os.RemoveAll(RepositoryPath(user, gist))
 }
 
@@ -666,6 +669,10 @@ func CreateDotGitFiles(user string, gist string) error {
 }
 
 func DeleteUserDirectory(user string) error {
+	// An empty user resolves to the repos directory holding every user's repositories
+	if user == "" {
+		return fmt.Errorf("refusing to delete user directory with empty user")
+	}
 	return os.RemoveAll(filepath.Join(config.GetHomeDir(), ReposDirectory, user))
 }
 

@@ -2,6 +2,7 @@
 @import "basecoat-css";
 
 @import "globals.css";
+@import "code-copy.css";
 @import "ipynb.css";
 
 @source "../../templates/**/*.html";

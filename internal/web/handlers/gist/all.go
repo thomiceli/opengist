@@ -2,6 +2,7 @@ package gist
 
 import (
 	"errors"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -86,18 +87,22 @@ func AllGists(ctx *context.Context) error {
 			urlPage = "-/search"
 			gists, err = db.GetAllGistsFromSearch(currentUserId, ctx.QueryParam("q"), pageInt-1, sort, order, "")
 		case "topics":
-			ctx.SetData("htmlTitle", ctx.TrH("gist.list.topic-results-topic", ctx.Param("topic")))
-			ctx.SetData("topic", ctx.Param("topic"))
-			urlPage = "-/topics/" + ctx.Param("topic")
+			topic := ctx.Param("topic")
+			if decoded, err := url.PathUnescape(topic); err == nil {
+				topic = decoded
+			}
+			ctx.SetData("htmlTitle", ctx.TrH("gist.list.topic-results-topic", topic))
+			ctx.SetData("topic", topic)
+			urlPage = "-/topics/" + topic
 
-			if languages, err := db.GetGistLanguagesByTopic(currentUserId, ctx.Param("topic")); err != nil {
+			if languages, err := db.GetGistLanguagesByTopic(currentUserId, topic); err != nil {
 				return ctx.ErrorRes(500, "Error fetching languages", err)
 			} else {
 				ctx.SetData("languages", languages)
 			}
 
 			title, language, visibility, topics := readGistFilters(ctx, pagination)
-			gists, _, err = db.GetAllGistsByTopicFiltered(currentUserId, ctx.Param("topic"), title, language, visibility, topics, pageInt-1, sort, order)
+			gists, _, err = db.GetAllGistsByTopicFiltered(currentUserId, topic, title, language, visibility, topics, pageInt-1, sort, order)
 		case "all":
 			ctx.SetData("currentPage", "all")
 			ctx.SetData("htmlTitle", ctx.TrH("gist.list.all"))

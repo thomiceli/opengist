@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"regexp"
 
+	katex "github.com/FurqanSoftware/goldmark-katex"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -77,6 +78,7 @@ func newMarkdown(extraExtensions ...goldmark.Extender) goldmark.Markdown {
 		),
 		emoji.Emoji,
 		&mermaid.Extender{},
+		&katex.Extender{},
 		&alertExtension{},
 	}
 

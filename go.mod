@@ -3,6 +3,7 @@ module github.com/thomiceli/opengist
 go 1.26.5
 
 require (
+	github.com/FurqanSoftware/goldmark-katex v0.0.0-20260813161535-d0f6370693c2
 	github.com/Kunde21/markdownfmt/v3 v3.1.0
 	github.com/alecthomas/chroma/v2 v2.27.0
 	github.com/blevesearch/bleve/v2 v2.6.0
@@ -65,6 +66,7 @@ require (
 	github.com/blevesearch/zapx/v15 v15.4.3 // indirect
 	github.com/blevesearch/zapx/v16 v16.3.4 // indirect
 	github.com/blevesearch/zapx/v17 v17.2.1 // indirect
+	github.com/bluele/gcache v0.0.2 // indirect
 	github.com/boombuler/barcode v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
@@ -122,8 +124,10 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	modernc.org/libc v1.74.3 // indirect
+	modernc.org/libquickjs v0.12.10 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
+	modernc.org/quickjs v0.22.0 // indirect
 	modernc.org/sqlite v1.54.0 // indirect
 )
 

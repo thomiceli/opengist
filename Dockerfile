@@ -8,7 +8,7 @@ RUN apk update && \
         musl-dev \
         libstdc++
 
-COPY --from=golang:1.26.5-alpine3.24 /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.27.2-alpine3.24 /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 ENV CGO_ENABLED=0
 

@@ -23,6 +23,9 @@ func Register(ctx *context.Context) error {
 			return ctx.ErrorRes(500, "Cannot check for invitation code", err)
 		} else if invitation != nil && invitation.IsUsable() {
 			disableSignup = false
+			sess := ctx.GetSession()
+			sess.Values[oauthInvitationSessionKey] = invitation.ID
+			ctx.SaveSession(sess)
 		}
 	}
 

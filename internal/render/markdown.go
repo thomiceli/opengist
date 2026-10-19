@@ -17,7 +17,7 @@ import (
 )
 
 // copyCodeBlockButton is injected into every fenced code block rendered from
-// Markdown (README previews, gist descriptions, .md files, comments) so users
+// Markdown (.md files, editor previews, embeds; not gist list previews) so users
 // can copy just that block's contents, the same way the file-level copy
 // button in gist.html works.
 const copyCodeBlockButton = `<button type="button" class="copy-btn copy-code-btn" aria-label="Copy code"><svg class="icon-copy size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><svg class="icon-check size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>`
@@ -53,7 +53,7 @@ func wrapCodeBlockWithCopyButton(w util.BufWriter, ctx highlighting.CodeBlockCon
 
 func MarkdownGistPreview(gist *db.Gist) (RenderedGist, error) {
 	var buf bytes.Buffer
-	err := newMarkdown().Convert([]byte(gist.Preview), &buf)
+	err := newMarkdownWithoutCopyButtons().Convert([]byte(gist.Preview), &buf)
 
 	// remove links in Markdown Preview, quick fix for now
 	re := regexp.MustCompile(`<a\b[^>]*>(.*?)</a>`)
@@ -104,12 +104,24 @@ func MarkdownString(content string) (string, error) {
 }
 
 func newMarkdown(extraExtensions ...goldmark.Extender) goldmark.Markdown {
+	return newMarkdownWithCodeBlockWrapper(wrapCodeBlockWithCopyButton, extraExtensions...)
+}
+
+// newMarkdownWithoutCopyButtons is used for gist list previews, which are
+// truncated and rendered inside a link to the gist.
+func newMarkdownWithoutCopyButtons() goldmark.Markdown {
+	return newMarkdownWithCodeBlockWrapper(nil)
+}
+
+// newMarkdownWithCodeBlockWrapper builds the Markdown renderer; a nil wrapper
+// keeps goldmark-highlighting's default <pre><code> output for fenced code blocks.
+func newMarkdownWithCodeBlockWrapper(wrapper highlighting.WrapperRenderer, extraExtensions ...goldmark.Extender) goldmark.Markdown {
 	extensions := []goldmark.Extender{
 		extension.GFM,
 		highlighting.NewHighlighting(
 			highlighting.WithStyle("catppuccin-latte"),
 			highlighting.WithFormatOptions(html.WithClasses(true)),
-			highlighting.WithWrapperRenderer(wrapCodeBlockWithCopyButton),
+			highlighting.WithWrapperRenderer(wrapper),
 		),
 		emoji.Emoji,
 		&mermaid.Extender{},

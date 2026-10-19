@@ -64,3 +64,17 @@ func TestMarkdownCodeBlockLanguageEscaping(t *testing.T) {
 		})
 	}
 }
+
+func TestMarkdownCodeBlockCopyButton(t *testing.T) {
+	source := "```go\nfmt.Println(1)\n```\n\n```\nplain\n```\n"
+
+	file, err := renderMarkdownFile(&git.File{Content: source})
+	require.NoError(t, err)
+	require.Equal(t, 2, strings.Count(file.HTML, `class="copy-btn copy-code-btn"`))
+
+	// List previews are truncated and rendered inside a link to the gist.
+	preview, err := MarkdownGistPreview(&db.Gist{Preview: source})
+	require.NoError(t, err)
+	require.NotContains(t, preview.HTML, "copy-code-btn")
+	require.NotContains(t, preview.HTML, "code-block-wrapper")
+}

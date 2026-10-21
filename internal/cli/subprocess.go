@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"io"
-
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/urfave/cli/v2"
 )
@@ -18,7 +16,7 @@ import (
 //   - it opens no database: subprocesses talk to the running daemon's internal
 //     API instead. Use subprocessInitClient when that API is needed.
 func subprocessInit(ctx *cli.Context) {
-	if err := config.InitConfig(ctx.String("config"), io.Discard); err != nil {
+	if err := config.InitConfig(ctx.String("config")); err != nil {
 		panic(err)
 	}
 }

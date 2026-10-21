@@ -992,6 +992,13 @@ components:
         title:
           type: string
           description: Optional; derived from the first filename when omitted.
+        slug_url:
+          type: string
+          description: Optional; a custom url suffix for the gist.
+        topics:
+          type: array
+          items:
+            type: sring
         description: { type: string }
         visibility:
           type: string

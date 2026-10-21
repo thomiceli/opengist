@@ -27,6 +27,8 @@ type GistFileInput struct {
 //     filename. PATCH: nil = no change.
 //   - Visibility  - Opengist extension. CREATE: nil = defaults to public.
 //     PATCH: nil = no change.
+//   - SlugUrl     - CREATE: nil treated as empty. PATCH: nil = no change.
+//   - Topics      - CREATE: nil treated as empty. PATCH: nil = no change, or replaces all.
 //   - Files       - CREATE: keys define filenames; entries with nil
 //     content are skipped. PATCH: keys must match existing filenames;
 //     null entry (or empty content+filename) deletes; unknown key with
@@ -41,6 +43,8 @@ type GistInput struct {
 	Files       map[string]*GistFileInput `json:"files,omitempty"`
 	Title       *string                   `json:"title,omitempty"`
 	Visibility  *string                   `json:"visibility,omitempty"`
+	SlugUrl     *string                   `json:"slug_url,omitempty"`
+	Topics      *[]string                 `json:"topics,omitempty"`
 	Expire      *string                   `json:"expire,omitempty"`
 	ExpiresAt   *string                   `json:"expires_at,omitempty"`
 }

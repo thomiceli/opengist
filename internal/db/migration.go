@@ -36,6 +36,7 @@ func applyAllMigrations(dbType databaseType) error {
 		{1, []databaseType{SQLite}, v1_modifyConstraintToSSHKeys},
 		{2, []databaseType{SQLite}, v2_lowercaseEmails},
 		{3, nil, v3_normalizedColumns},
+		{4, nil, v4_uniqueGistUserUrlIndex},
 	}
 
 	for _, m := range migrations {
@@ -52,7 +53,6 @@ func applyAllMigrations(dbType databaseType) error {
 				}
 			}
 			if !applicable {
-				// Advance version so we don't retry on next startup
 				currentVersion.Version = m.Version
 				db.Save(&currentVersion)
 				continue
@@ -107,13 +107,11 @@ func v1_modifyConstraintToSSHKeys(tx *gorm.DB) error {
 		return err
 	}
 
-	// Drop the old table
 	dropSQL := `DROP TABLE ssh_keys;`
 	if err := tx.Exec(dropSQL).Error; err != nil {
 		return err
 	}
 
-	// Rename the new table to the original table name
 	renameSQL := `ALTER TABLE ssh_keys_temp RENAME TO ssh_keys;`
 	return tx.Exec(renameSQL).Error
 }
@@ -129,4 +127,55 @@ func v3_normalizedColumns(tx *gorm.DB) error {
 	}
 	return tx.Model(&Gist{}).Where("url_normalized = '' OR url_normalized IS NULL").
 		Updates(map[string]interface{}{"url_normalized": gorm.Expr("LOWER(url)")}).Error
+}
+
+func v4_uniqueGistUserUrlIndex(tx *gorm.DB) error {
+	var gists []Gist
+	if err := tx.Order("id").Find(&gists).Error; err != nil {
+		return err
+	}
+
+	seen := make(map[uint]map[string]bool)
+
+	for _, gist := range gists {
+		if seen[gist.UserID] == nil {
+			seen[gist.UserID] = make(map[string]bool)
+		}
+
+		var url string
+		if gist.URL != nil {
+			url = *gist.URL
+		}
+		if !seen[gist.UserID][url] {
+			seen[gist.UserID][url] = true
+			continue
+		}
+
+		for suffix := 1; ; suffix++ {
+			candidate := fmt.Sprintf("%s-%d", url, suffix)
+			if seen[gist.UserID][candidate] {
+				continue
+			}
+
+			if err := tx.Model(&Gist{}).
+				Where("id = ?", gist.ID).
+				Updates(map[string]interface{}{
+					"url":            candidate,
+					"url_normalized": gorm.Expr("LOWER(?)", candidate),
+				}).Error; err != nil {
+				return err
+			}
+
+			seen[gist.UserID][candidate] = true
+			break
+		}
+	}
+
+	if !tx.Migrator().HasIndex(&Gist{}, "idx_gists_user_url") {
+		if err := tx.Migrator().CreateIndex(&Gist{}, "idx_gists_user_url"); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

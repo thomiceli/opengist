@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.15.3](https://github.com/thomiceli/opengist/compare/v1.15.2...v1.15.3) - 2026-10-21
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### Added
+- Copy button on fenced code blocks in rendered Markdown (#801) (#838)
+- OAuth signup through invitation links (#812)
+
+### Fixed
+- Return 413 for oversized gist forms (#805)
+- Percent-encoded Unicode topic paths (#810)
+- Missing list markers in rendered Markdown (#811)
+- Apply database migrations inside their transaction (#817)
+- Render the error page when settings fail to load (#823)
+- Don't report a user's own OAuth account as linked to another user (#826)
+- Render the uploaded file name as text on the create page (#830)
+- Missing flash messages on plain-HTTP deployments (#834)
+- User deletion (#836)
+
+### Docs
+- Add MASH playbook to community resources (#822)
+- Fix typo in configuration cheat sheet (#825)
+
+### Other
+- Update Go & JS deps (#841)
+
 ## [1.15.2](https://github.com/thomiceli/opengist/compare/v1.15.1...v1.15.2) - 2026-08-30
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

@@ -163,6 +163,15 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		assertRegistrationDenied(t, client, "uninvited")
 	})
 
+	t.Run("signup rejection redirect honors the external URL subpath", func(t *testing.T) {
+		require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "1"))
+		defer func() { config.C.ExternalUrl = "" }()
+		// only set once the authorization request is built, so the callback itself still resolves
+		resp, _, _ := login(t, "", func(*url.URL) { config.C.ExternalUrl = "/subpath" })
+		_ = resp.Body.Close()
+		require.Equal(t, "/subpath/-/login", resp.Request.URL.Path)
+	})
+
 	t.Run("disabled signup rejects an invitation invalidated after OAuth", func(t *testing.T) {
 		for _, tc := range []struct {
 			name       string

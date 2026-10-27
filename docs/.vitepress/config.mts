@@ -70,6 +70,7 @@ const docsSidebar = [
                 ], collapsed: true
             },
             {text: 'OAuth Providers', link: '/oauth-providers'},
+            {text: 'Proxy authentication', link: '/proxy-auth'},
             {text: 'Custom assets', link: '/custom-assets'},
             {text: 'Custom links', link: '/custom-links'},
             {text: 'Cheat Sheet', link: '/cheat-sheet'},

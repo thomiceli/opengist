@@ -72,6 +72,13 @@
                     {{ template "admin_config_row" (dict "k" "LDAP Search Base" "v" .c.LDAPSearchBase) }}
                     {{ template "admin_config_row" (dict "k" "LDAP Search Filter" "v" .c.LDAPSearchFilter) }}
                 </dl>
+
+                {{ template "admin_config_section" (dict "title" "Proxy authentication") }}
+                <dl class="divide-y text-sm">
+                    {{ template "admin_config_row" (dict "k" "User header" "v" .c.ProxyAuthUserHeader) }}
+                    {{ template "admin_config_row" (dict "k" "Email header" "v" .c.ProxyAuthEmailHeader) }}
+                    {{ template "admin_config_row" (dict "k" "Trusted CIDRs" "v" .c.ProxyAuthTrustedCIDRs) }}
+                </dl>
             </div>
         </section>
 

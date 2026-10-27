@@ -67,6 +67,7 @@ func (s *Server) registerMiddlewares() {
 	s.echo.Use(middleware.Recover())
 	s.echo.Use(middleware.Secure())
 	s.echo.Use(Middleware(sessionInit).toEcho())
+	s.echo.Use(Middleware(proxyAuth).toEcho())
 	s.echo.Use(Middleware(gistFormSize).toEcho())
 	s.echo.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		TokenLookup:    "form:_csrf,header:X-CSRF-Token",
@@ -375,6 +376,40 @@ func sessionInit(next Handler) Handler {
 
 		ctx.User = nil
 		ctx.SetData("userLogged", nil)
+		return next(ctx)
+	}
+}
+
+// proxyAuth logs in the user named by a trusted reverse proxy (see
+// auth.TryProxyAuthentication). The proxy header takes precedence over the
+// session, and is not stored in it, so that switching accounts at the proxy
+// switches them here too. /api keeps to its own token authentication, as it is
+// not protected against CSRF, and /assets is skipped so that a rejected user
+// still gets a styled error page.
+func proxyAuth(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		path := ctx.Request().URL.Path
+		if !auth.ProxyAuthEnabled() || strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/assets/") {
+			return next(ctx)
+		}
+
+		user, err := auth.TryProxyAuthentication(ctx.Request(), ctx.GetData("DisableSignup") != true)
+		if err != nil {
+			if errors.Is(err, auth.ErrProxyAuthSignupDisabled) {
+				return ctx.ErrorRes(403, ctx.Tr("error.signup-disabled"), nil)
+			}
+			var authErr auth.AuthError
+			if errors.As(err, &authErr) {
+				return ctx.ErrorRes(403, authErr.Error(), nil)
+			}
+			return ctx.ErrorRes(500, "Cannot authenticate user from proxy", err)
+		}
+
+		if user != nil {
+			ctx.User = user
+			ctx.SetData("userLogged", user)
+			ctx.SetData("currentStyle", user.GetStyle())
+		}
 		return next(ctx)
 	}
 }

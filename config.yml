@@ -154,6 +154,16 @@ ldap.search-base:
 # The filter to search against (the format string %s will be replaced with the username) e.g: (uid=%s)
 ldap.search-filter:
 
+# Reverse proxy authentication configuration
+# Header set by the authentication proxy with the username e.g: X-Auth-Request-Preferred-Username ;
+# if not set, proxy authentication is disabled
+proxy-auth.user-header:
+# Header set by the authentication proxy with the user email, used when creating the account e.g: X-Auth-Request-Email
+proxy-auth.email-header:
+# Comma-separated list of CIDRs or IP addresses of the proxies allowed to authenticate users e.g: 172.16.0.0/12,127.0.0.1
+# Required if proxy-auth.user-header is set
+proxy-auth.trusted-cidrs:
+
 # Instance name
 # Set your own custom name to be displayed instead of 'Opengist'
 custom.name:

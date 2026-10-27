@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"io"
+	"net/netip"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -106,6 +107,10 @@ type config struct {
 	LDAPSearchBase      string `yaml:"ldap.search-base" env:"OG_LDAP_SEARCH_BASE"`
 	LDAPSearchFilter    string `yaml:"ldap.search-filter" env:"OG_LDAP_SEARCH_FILTER"`
 
+	ProxyAuthUserHeader   string `yaml:"proxy-auth.user-header" env:"OG_PROXY_AUTH_USER_HEADER"`
+	ProxyAuthEmailHeader  string `yaml:"proxy-auth.email-header" env:"OG_PROXY_AUTH_EMAIL_HEADER"`
+	ProxyAuthTrustedCIDRs string `yaml:"proxy-auth.trusted-cidrs" env:"OG_PROXY_AUTH_TRUSTED_CIDRS"`
+
 	CustomName    string       `yaml:"custom.name" env:"OG_CUSTOM_NAME"`
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
@@ -131,6 +136,34 @@ func (c *config) SshBuiltin() bool {
 // file: host mode with a configured file path.
 func (c *config) SshManagesAuthorizedKeys() bool {
 	return c.SshGit == SshServerHost && c.SshAuthorizedKeysFile != ""
+}
+
+// ProxyAuthTrustedNetworks parses proxy-auth.trusted-cidrs, a comma-separated
+// list of CIDRs; a bare IP address is read as a single-host network.
+func (c *config) ProxyAuthTrustedNetworks() ([]netip.Prefix, error) {
+	var networks []netip.Prefix
+	for _, entry := range strings.Split(c.ProxyAuthTrustedCIDRs, ",") {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+
+		if !strings.Contains(entry, "/") {
+			addr, err := netip.ParseAddr(entry)
+			if err != nil {
+				return nil, fmt.Errorf("invalid proxy-auth.trusted-cidrs entry %q: %w", entry, err)
+			}
+			networks = append(networks, netip.PrefixFrom(addr.Unmap(), addr.Unmap().BitLen()))
+			continue
+		}
+
+		network, err := netip.ParsePrefix(entry)
+		if err != nil {
+			return nil, fmt.Errorf("invalid proxy-auth.trusted-cidrs entry %q: %w", entry, err)
+		}
+		networks = append(networks, network.Masked())
+	}
+	return networks, nil
 }
 
 func configWithDefaults() (*config, error) {
@@ -470,6 +503,17 @@ func checks(c *config) error {
 	if c.LDAPUrl != "" && c.LDAPBindDn != "" && c.LDAPBindCredentials == "" {
 		return fmt.Errorf("ldap.bind-dn is set but ldap.bind-credentials is empty; " +
 			"set the password, or leave ldap.bind-dn empty to query the LDAP server anonymously")
+	}
+
+	if c.ProxyAuthUserHeader != "" {
+		networks, err := c.ProxyAuthTrustedNetworks()
+		if err != nil {
+			return err
+		}
+		if len(networks) == 0 {
+			return fmt.Errorf("proxy-auth.user-header is set but proxy-auth.trusted-cidrs is empty; " +
+				"set the addresses of the reverse proxies allowed to authenticate users")
+		}
 	}
 
 	return nil

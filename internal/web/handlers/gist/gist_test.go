@@ -23,7 +23,13 @@ func TestGistIndex(t *testing.T) {
 	t.Run("Public", func(t *testing.T) {
 		_, _, username, identifier := s.CreateGist(t, "0")
 
-		s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		html := string(body)
+		assert.Contains(t, html, `class="gist-file-toc`)
+		assert.Contains(t, html, `href="#file-file-txt"`)
+		assert.Contains(t, html, `href="#file-otherfile-txt"`)
 	})
 
 	t.Run("NonExistentRevision", func(t *testing.T) {
@@ -97,6 +103,26 @@ func TestGistIndex(t *testing.T) {
 
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/rev/HEAD", nil, 200)
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/rev/"+commits[1].Hash, nil, 200)
+	})
+
+	t.Run("FileNavigationOnGistPages", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+		fileHref := `href="/` + username + `/` + identifier + `#file-file-txt"`
+
+		for _, page := range []string{"/revisions", "/likes", "/forks"} {
+			resp := s.Request(t, "GET", "/"+username+"/"+identifier+page, nil, 200)
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+			html := string(body)
+			assert.Contains(t, html, `class="gist-file-toc group"`)
+			assert.Contains(t, html, fileHref)
+		}
+
+		s.Login(t, username)
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+"/settings", nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Contains(t, string(body), fileHref)
 	})
 }
 

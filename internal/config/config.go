@@ -109,6 +109,7 @@ type config struct {
 	CustomName    string       `yaml:"custom.name" env:"OG_CUSTOM_NAME"`
 	CustomLogo    string       `yaml:"custom.logo" env:"OG_CUSTOM_LOGO"`
 	CustomFavicon string       `yaml:"custom.favicon" env:"OG_CUSTOM_FAVICON"`
+	CustomCSS     string       `yaml:"custom.css" env:"OG_CUSTOM_CSS"`
 	StaticLinks   []StaticLink `yaml:"custom.static-links" env:"OG_CUSTOM_STATIC_LINK"`
 }
 

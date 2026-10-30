@@ -50,6 +50,11 @@
         <link rel="stylesheet" href="{{ assetCss "ts/main.ts" }}" />
         <link rel="stylesheet" href="{{ assetCss (print "ts/" (mainTheme .currentStyle ) ".ts") }}" />
     {{ end }}
+
+    {{ if .c.CustomCSS }}
+        <link rel="stylesheet" href="{{ custom .c.CustomCSS }}" />
+    {{ end }}
+
     <script type="module" src="{{ asset "ts/main.ts" }}"></script>
 
     {{ if .currentStyle }}

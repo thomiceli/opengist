@@ -162,6 +162,7 @@ custom.name:
 # Add your own custom assets, that are files relatives to $opengist-home/custom/
 custom.logo:
 custom.favicon:
+custom.css:
 
 # Static pages in footer (like legal notices, privacy policy, etc.)
 # The path can be a URL or a relative path to a file in the $opengist-home/custom/ directory

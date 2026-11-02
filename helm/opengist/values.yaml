@@ -145,6 +145,18 @@ ingress:
     #   hosts:
     #     - opengist.example.com
 
+## Gateway API HTTPRoute for Opengist
+## ref: https://kubernetes.io/docs/concepts/services-networking/gateway/
+route:
+  enabled: false
+  parentRefs: []
+  annotations: {}
+  labels: {}
+  hostnames:
+    - opengist.example.com
+  filters: []
+  timeouts: {}
+
 ## Service Account for Opengist pods
 ## ref: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:

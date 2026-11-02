@@ -31,6 +31,7 @@ var adminActions = []struct {
 	{actions.SyncGistLanguages, "sync-languages", "admin.actions.sync-gist-languages"},
 	{actions.DeleteExpiredGists, "delete-expired-gists", "admin.actions.delete-expired-gists"},
 	{actions.SyncSSHKeys, "sync-ssh-keys", "admin.actions.sync-ssh-keys"},
+	{actions.DeleteOrphanedUploadFiles, "delete-orphaned-uploads", "admin.actions.delete-orphaned-uploads"},
 }
 
 func AdminActions(ctx *context.Context) error {
@@ -103,6 +104,10 @@ func AdminDeleteExpiredGists(ctx *context.Context) error {
 
 func AdminSyncSSHKeys(ctx *context.Context) error {
 	return runAdminAction(ctx, actions.SyncSSHKeys, "flash.admin.sync-ssh-keys")
+}
+
+func AdminDeleteOrphanedUploads(ctx *context.Context) error {
+	return runAdminAction(ctx, actions.DeleteOrphanedUploadFiles, "flash.admin.delete-orphaned-uploads")
 }
 
 func runAdminAction(ctx *context.Context, actionType int, legacyFlashKey string) error {

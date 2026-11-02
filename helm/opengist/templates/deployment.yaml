@@ -49,6 +49,8 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: init-config
+          securityContext:
+            {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
           image: busybox:1.37
           imagePullPolicy: IfNotPresent
           command: ['sh', '-c', 'cp /init/config/config.yml /config-volume/config.yml']

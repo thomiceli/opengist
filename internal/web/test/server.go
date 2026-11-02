@@ -227,7 +227,7 @@ func Setup(t *testing.T) *Server {
 	tmpDir := t.TempDir()
 	t.Setenv("OPENGIST_SKIP_GIT_HOOKS", "1")
 
-	err := config.InitConfig("", io.Discard)
+	err := config.InitConfig("")
 	require.NoError(t, err, "Could not init config")
 
 	config.C.LogLevel = "warn"
@@ -237,6 +237,7 @@ func Setup(t *testing.T) *Server {
 
 	config.SetupSecretKey()
 	config.InitLog()
+	config.FlushStartupLog()
 
 	context.ManifestEntries = map[string]context.Asset{
 		"embed.css":   {File: "assets/embed.css"},

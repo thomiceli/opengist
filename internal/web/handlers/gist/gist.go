@@ -277,11 +277,22 @@ func escapeJavaScriptContent(htmlContent, cssUrl, themeUrl string, autoMode bool
                     mq.addEventListener('change', applyTheme);
                     applyTheme();
                 }
-                this.shadowRoot.querySelectorAll('.copy-embed-btn').forEach(function(btn) {
+                this.shadowRoot.querySelectorAll('.copy-embed-btn, .copy-code-btn').forEach(function(btn) {
                     btn.addEventListener('click', function() {
-                        var block = btn.closest('.rounded-md');
-                        var el = block && block.querySelector('.gist-content');
-                        navigator.clipboard.writeText(el ? el.textContent : '').catch(function(err) {
+                        var codeBlock = btn.closest('.code-block-wrapper');
+                        var block = codeBlock || btn.closest('.rounded-md');
+                        var el = block && block.querySelector(codeBlock ? 'pre code' : '.gist-content');
+                        if (!el) return;
+                        var content = el.cloneNode(true);
+                        content.querySelectorAll('.ln, .lnt').forEach(function(lineNumber) {
+                            lineNumber.remove();
+                        });
+                        Promise.resolve().then(function() {
+                            return navigator.clipboard.writeText(content.textContent || '');
+                        }).then(function() {
+                            btn.setAttribute('data-copied', 'true');
+                            setTimeout(function() { btn.removeAttribute('data-copied'); }, 1200);
+                        }).catch(function(err) {
                             console.error('Could not copy text: ', err);
                         });
                     });

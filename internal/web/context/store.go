@@ -39,16 +39,16 @@ func NewStore(sessionsPath string) *Store {
 
 // hardenCookie applies secure defaults to a session cookie. HttpOnly keeps the
 // cookie out of reach of JavaScript (so an XSS cannot read the auth session),
-// and SameSite=Lax mitigates CSRF. Secure is only set when the configured
+// and SameSite=Lax mitigates CSRF. Secure is set only when the configured
 // external URL is HTTPS, otherwise the cookie would never be sent over a
-// plain-HTTP deployment and logins would silently break.
+// plain-HTTP deployment and logins would silently break. It is set both ways
+// because sessions.NewCookieStore defaults Secure to true: left alone, the flash
+// cookie is dropped by the browser on plain HTTP and no flash message is shown.
 func hardenCookie(opts *sessions.Options) {
 	if opts == nil {
 		return
 	}
 	opts.HttpOnly = true
 	opts.SameSite = http.SameSiteLaxMode
-	if strings.HasPrefix(strings.ToLower(config.C.ExternalUrl), "https://") {
-		opts.Secure = true
-	}
+	opts.Secure = strings.HasPrefix(strings.ToLower(config.C.ExternalUrl), "https://")
 }

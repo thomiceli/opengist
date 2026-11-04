@@ -50,7 +50,7 @@ func BeginBinding(dbUser *db.User) (credCreation *protocol.CredentialCreation, j
 			ResidentKey:      protocol.ResidentKeyRequirementRequired,
 			UserVerification: protocol.VerificationRequired,
 		},
-	), webauthn.WithAppIdExcludeExtension("Opengist"), webauthn.WithExclusions(waUser.Exclusions()))
+	), webauthn.WithExtensions(webauthn.WithExtensionAppIDExclude("Opengist")), webauthn.WithExclusions(waUser.Exclusions()))
 	if err != nil {
 		return nil, nil, err
 	}

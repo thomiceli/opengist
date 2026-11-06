@@ -1,6 +1,7 @@
 package gist
 
 import (
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
@@ -12,13 +13,14 @@ func Revisions(ctx *context.Context) error {
 	gistName := gist.Identifier()
 
 	pageInt := handlers.GetPage(ctx)
+	perPage := config.C.PaginationPerPage
 
-	commits, err := gist.Log("HEAD", (pageInt-1)*10, 11)
+	commits, err := gist.Log("HEAD", (pageInt-1)*perPage, perPage+1)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error fetching commits log", err)
 	}
 
-	if err := handlers.Paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions", 2, nil); err != nil {
+	if err := handlers.Paginate(ctx, commits, pageInt, perPage, "commits", userName+"/"+gistName+"/revisions", 2, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 

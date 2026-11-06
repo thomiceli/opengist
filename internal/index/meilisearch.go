@@ -122,10 +122,10 @@ func (i *MeiliIndexer) Remove(gistID uint) error {
 	return err
 }
 
-func (i *MeiliIndexer) Search(queryMetadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error) {
+func (i *MeiliIndexer) Search(queryMetadata SearchGistMetadata, userId uint, page int, perPage int) ([]uint, uint64, map[string]int, error) {
 	searchRequest := &meilisearch.SearchRequest{
-		Offset:               int64((page - 1) * 10),
-		Limit:                11,
+		Offset:               int64((page - 1) * perPage),
+		Limit:                int64(perPage + 1),
 		AttributesToRetrieve: []string{"GistID", "Languages"},
 		Facets:               []string{"Languages"},
 		AttributesToSearchOn: []string{"Content", "ContentSplit"},

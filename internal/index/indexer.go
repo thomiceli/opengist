@@ -17,7 +17,7 @@ type Indexer interface {
 	Reset() error
 	Add(gist *Gist) error
 	Remove(gistID uint) error
-	Search(metadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error)
+	Search(metadata SearchGistMetadata, userId uint, page int, perPage int) ([]uint, uint64, map[string]int, error)
 }
 
 type IndexerType string
@@ -129,7 +129,7 @@ func RemoveFromIndex(gistID uint) error {
 // If the indexer is not enabled, it returns nil, 0, nil, nil.
 // If the indexer is not initialized, it returns nil, 0, nil, fmt.Errorf("indexer is not initialized").
 // The function returns an error if any.
-func SearchGists(metadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error) {
+func SearchGists(metadata SearchGistMetadata, userId uint, page int, perPage int) ([]uint, uint64, map[string]int, error) {
 	if !IndexEnabled() {
 		return nil, 0, nil, nil
 	}
@@ -139,7 +139,7 @@ func SearchGists(metadata SearchGistMetadata, userId uint, page int) ([]uint, ui
 		return nil, 0, nil, fmt.Errorf("indexer is not initialized")
 	}
 
-	return (*idx).Search(metadata, userId, page)
+	return (*idx).Search(metadata, userId, page, perPage)
 }
 
 func DepreactionIndexDirname() {

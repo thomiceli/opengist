@@ -68,11 +68,11 @@ func AdminUsers(ctx *context.Context) error {
 
 	var data []*db.User
 	var err error
-	if data, err = db.GetAllUsers(pageInt - 1); err != nil {
+	if data, err = db.GetAllUsers(pageInt-1, config.C.PaginationPerPage); err != nil {
 		return ctx.ErrorRes(500, "Cannot get users", err)
 	}
 
-	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "-/admin-panel/users", 1, nil); err != nil {
+	if err = handlers.Paginate(ctx, data, pageInt, config.C.PaginationPerPage, "data", "-/admin-panel/users", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 
@@ -86,11 +86,11 @@ func AdminGists(ctx *context.Context) error {
 
 	var data []*db.Gist
 	var err error
-	if data, err = db.GetAllGists(pageInt - 1); err != nil {
+	if data, err = db.GetAllGists(pageInt-1, config.C.PaginationPerPage); err != nil {
 		return ctx.ErrorRes(500, "Cannot get gists", err)
 	}
 
-	if err = handlers.Paginate(ctx, data, pageInt, 10, "data", "-/admin-panel/gists", 1, nil); err != nil {
+	if err = handlers.Paginate(ctx, data, pageInt, config.C.PaginationPerPage, "data", "-/admin-panel/gists", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 

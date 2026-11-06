@@ -33,7 +33,7 @@ func testAddAndSearch(t *testing.T, setup func(t *testing.T) (Indexer, func())) 
 		g := newGist(1, 1, 0, "the quick brown fox jumps over the lazy dog")
 		require.NoError(t, indexer.Add(g))
 
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "fox"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "fox"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
@@ -53,13 +53,13 @@ func testAddAndSearch(t *testing.T, setup func(t *testing.T) (Indexer, func())) 
 		g := newGist(1, 1, 0, "removable content here")
 		require.NoError(t, indexer.Add(g))
 
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "removable"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "removable"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 
 		require.NoError(t, indexer.Remove(1))
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "removable"}, 1, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "removable"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total)
 	})
@@ -74,11 +74,11 @@ func testAddAndSearch(t *testing.T, setup func(t *testing.T) (Indexer, func())) 
 		g2 := newGist(1, 1, 0, "updated content beta")
 		require.NoError(t, indexer.Add(g2))
 
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "alpha"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "alpha"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total, "old content should not be found")
 
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "beta"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "beta"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
@@ -100,7 +100,7 @@ func testAddAndSearch(t *testing.T, setup func(t *testing.T) (Indexer, func())) 
 		}
 		require.NoError(t, indexer.Add(g))
 
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "searchable"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "searchable"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
@@ -114,15 +114,15 @@ func testAccessControl(t *testing.T, setup func(t *testing.T) (Indexer, func()))
 		g := newGist(1, 1, 0, "public content")
 		require.NoError(t, indexer.Add(g))
 
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "public"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "public"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total, "owner should see public gist")
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "public"}, 99, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "public"}, 99, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total, "other user should see public gist")
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "public"}, 0, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "public"}, 0, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total, "anonymous should see public gist")
 	})
@@ -134,15 +134,15 @@ func testAccessControl(t *testing.T, setup func(t *testing.T) (Indexer, func()))
 		g := newGist(1, 1, 1, "private secret")
 		require.NoError(t, indexer.Add(g))
 
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "secret"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "secret"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total, "owner should see private gist")
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "secret"}, 99, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "secret"}, 99, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total, "other user should not see private gist")
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "secret"}, 0, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "secret"}, 0, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total, "anonymous should not see private gist")
 	})
@@ -154,11 +154,11 @@ func testAccessControl(t *testing.T, setup func(t *testing.T) (Indexer, func()))
 		g := newGist(1, 1, 2, "unlisted hidden")
 		require.NoError(t, indexer.Add(g))
 
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "hidden"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "hidden"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total, "owner should see unlisted gist")
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "hidden"}, 99, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "hidden"}, 99, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total, "other user should not see unlisted gist")
 	})
@@ -176,15 +176,15 @@ func testAccessControl(t *testing.T, setup func(t *testing.T) (Indexer, func()))
 			require.NoError(t, indexer.Add(g))
 		}
 
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "alphaword"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "alphaword"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(3), total, "user1 sees 2 public + 1 own private")
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "alphaword"}, 2, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "alphaword"}, 2, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(3), total, "user2 sees 2 public + 1 own private")
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "alphaword"}, 0, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "alphaword"}, 0, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(2), total, "anonymous sees only public")
 	})
@@ -222,13 +222,13 @@ func testMetadataFilters(t *testing.T, setup func(t *testing.T) (Indexer, func()
 	}
 
 	t.Run("filter by Username", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Username: "alice"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Username: "alice"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("filter by Language", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Language: "Python"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Language: "Python"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
@@ -246,48 +246,48 @@ func testMetadataFilters(t *testing.T, setup func(t *testing.T) (Indexer, func()
 		}
 		require.NoError(t, indexer.Add(g3))
 
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "extension", Extension: "rs"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "extension", Extension: "rs"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("filter by Topic", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Topic: "tutorial"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Topic: "tutorial"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("filter by Filename", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Filename: "script.py"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Filename: "script.py"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("filter by Title", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Title: "Go Tutorial"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Title: "Go Tutorial"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("filter by Description", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Description: "parsing"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Description: "parsing"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("combined filters narrow results", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Language: "Go", Username: "alice"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Language: "Go", Username: "alice"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "learning", Language: "Python", Username: "alice"}, 1, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "learning", Language: "Python", Username: "alice"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total, "mismatched filters should return 0")
 	})
 
 	t.Run("filter matches no gists", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Username: "nonexistent"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "learning", Username: "nonexistent"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total)
 	})
@@ -314,55 +314,55 @@ func testAllFieldSearch(t *testing.T, setup func(t *testing.T) (Indexer, func())
 	require.NoError(t, indexer.Add(g2))
 
 	t.Run("All matches username", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{All: "alice"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{All: "alice"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("All matches title", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{All: "MyTitle"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{All: "MyTitle"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("All matches description", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{All: "migration"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{All: "migration"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("All matches language", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{All: "Markdown"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{All: "Markdown"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("All matches topic", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{All: "documentation"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{All: "documentation"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("All matches filename", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{All: "readme.md"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{All: "readme.md"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("All ignores specific filters", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{All: "alice", Username: "nonexistent"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{All: "alice", Username: "nonexistent"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total, "All should take precedence over specific filters")
 	})
 
 	t.Run("All combined with content query", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "somecontent", All: "alice"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "somecontent", All: "alice"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 
-		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "somecontent", All: "nonexistent"}, 1, 1)
+		_, total, _, err = indexer.Search(SearchGistMetadata{Content: "somecontent", All: "nonexistent"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total, "All not matching should yield 0")
 	})
@@ -376,43 +376,43 @@ func testFuzzySearch(t *testing.T, setup func(t *testing.T) (Indexer, func())) {
 	require.NoError(t, indexer.Add(g))
 
 	t.Run("exact match", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elephant"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elephant"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("1-char substitution", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elephent"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elephent"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("1-char deletion", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elepant"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elepant"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("1-char insertion", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elephantz"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elephantz"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("character transposition", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elehpant"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "elehpant"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("case insensitive", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "ELEPHANT"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "ELEPHANT"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("empty content query with metadata returns MatchAll", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
@@ -446,108 +446,108 @@ func getHTTPResponse(url string) {
 	require.NoError(t, indexer.Add(g))
 
 	t.Run("code content/calculate", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "calculate"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "calculate"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("code content/Println", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "Println"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "Println"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("code content/hello", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "hello"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "hello"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("multi-word/both present", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "fox lazy"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "fox lazy"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("multi-word/one missing", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "fox unicorn"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "fox unicorn"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total)
 	})
 
 	t.Run("prefix/content eleph", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "eleph"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "eleph"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("prefix/title Kube", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Title: "Kube"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Title: "Kube"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("unicode/café", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "café"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "café"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("unicode/résumé", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "résumé"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "résumé"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("unicode/normalization cafe", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "cafe"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "cafe"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 	})
 
 	t.Run("camelCase/function", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "function"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "function"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("camelCase/xml", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "xml"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "xml"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("camelCase/parser", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "parser"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "parser"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("camelCase/http", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "http"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "http"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("camelCase/response", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "response"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "response"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("camelCase/cpucard", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "cpucard"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "cpucard"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
@@ -564,25 +564,25 @@ func testPagination(t *testing.T, setup func(t *testing.T) (Indexer, func())) {
 	}
 
 	t.Run("page sizes", func(t *testing.T) {
-		ids1, total1, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 1)
+		ids1, total1, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(25), total1)
 		require.GreaterOrEqual(t, len(ids1), 10, "page 1 should have at least 10 results")
 
-		ids2, total2, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 2)
+		ids2, total2, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 2, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(25), total2)
 		require.GreaterOrEqual(t, len(ids2), 10, "page 2 should have at least 10 results")
 
-		ids3, _, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 3)
+		ids3, _, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 3, 10)
 		require.NoError(t, err)
 		require.GreaterOrEqual(t, len(ids3), 5, "page 3 should have at least 5 results")
 	})
 
 	t.Run("no duplicates between pages", func(t *testing.T) {
-		ids1, _, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 1)
+		ids1, _, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 1, 10)
 		require.NoError(t, err)
-		ids2, _, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 2)
+		ids2, _, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 2, 10)
 		require.NoError(t, err)
 
 		page1 := ids1
@@ -604,7 +604,7 @@ func testPagination(t *testing.T, setup func(t *testing.T) (Indexer, func())) {
 	})
 
 	t.Run("out of bounds page returns 0 results", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 100)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "pagination"}, 1, 100, 10)
 		require.NoError(t, err)
 		require.Empty(t, ids)
 		require.Equal(t, uint64(25), total, "total should still reflect actual count")
@@ -623,7 +623,7 @@ func testLanguageFacets(t *testing.T, setup func(t *testing.T) (Indexer, func())
 			require.NoError(t, indexer.Add(g))
 		}
 
-		_, _, facets, err := indexer.Search(SearchGistMetadata{Content: "facet"}, 1, 1)
+		_, _, facets, err := indexer.Search(SearchGistMetadata{Content: "facet"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, 2, facets["go"])
 		require.Equal(t, 1, facets["python"])
@@ -643,12 +643,12 @@ func testLanguageFacets(t *testing.T, setup func(t *testing.T) (Indexer, func())
 			require.NoError(t, indexer.Add(g))
 		}
 
-		_, _, facets, err := indexer.Search(SearchGistMetadata{Content: "facet"}, 99, 1)
+		_, _, facets, err := indexer.Search(SearchGistMetadata{Content: "facet"}, 99, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, 1, facets["go"])
 		require.Equal(t, 0, facets["rust"])
 
-		_, _, facets, err = indexer.Search(SearchGistMetadata{Content: "facet"}, 1, 1)
+		_, _, facets, err = indexer.Search(SearchGistMetadata{Content: "facet"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, 1, facets["go"])
 		require.Equal(t, 1, facets["rust"])
@@ -663,14 +663,14 @@ func testWildcardSearch(t *testing.T, setup func(t *testing.T) (Indexer, func())
 	require.NoError(t, indexer.Add(g))
 
 	t.Run("substring wildcard match on content", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "leph"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Content: "leph"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("substring wildcard no match", func(t *testing.T) {
-		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "zzzz"}, 1, 1)
+		_, total, _, err := indexer.Search(SearchGistMetadata{Content: "zzzz"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(0), total)
 	})
@@ -706,21 +706,21 @@ func testMetadataOnlySearch(t *testing.T, setup func(t *testing.T) (Indexer, fun
 	}
 
 	t.Run("Username only no content", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Username: "alice"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Username: "alice"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("Language only no content", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Language: "Python"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Language: "Python"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(2), ids[0])
 	})
 
 	t.Run("Title only no content", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Title: "Go Tutorial"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Title: "Go Tutorial"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
@@ -744,14 +744,14 @@ func testTitleFuzzySearch(t *testing.T, setup func(t *testing.T) (Indexer, func(
 	require.NoError(t, indexer.Add(g))
 
 	t.Run("title with typo still matches", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Title: "Kuberntes"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Title: "Kuberntes"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
 	})
 
 	t.Run("title prefix matches", func(t *testing.T) {
-		ids, total, _, err := indexer.Search(SearchGistMetadata{Title: "Kube"}, 1, 1)
+		ids, total, _, err := indexer.Search(SearchGistMetadata{Title: "Kube"}, 1, 1, 10)
 		require.NoError(t, err)
 		require.Equal(t, uint64(1), total)
 		require.Equal(t, uint(1), ids[0])
@@ -774,7 +774,7 @@ func testMultiLanguageFacets(t *testing.T, setup func(t *testing.T) (Indexer, fu
 	}
 	require.NoError(t, indexer.Add(g))
 
-	_, _, facets, err := indexer.Search(SearchGistMetadata{Content: "polyglot"}, 1, 1)
+	_, _, facets, err := indexer.Search(SearchGistMetadata{Content: "polyglot"}, 1, 1, 10)
 	require.NoError(t, err)
 	require.Equal(t, 1, facets["go"], "Go should appear in facets")
 	require.Equal(t, 1, facets["python"], "Python should appear in facets")

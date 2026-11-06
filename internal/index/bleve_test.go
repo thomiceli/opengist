@@ -80,7 +80,7 @@ func TestBlevePersistence(t *testing.T) {
 	atomicIndexer.Store(&idx)
 	defer atomicIndexer.Store(nil)
 
-	ids, total, _, err := indexer2.Search(SearchGistMetadata{Content: "persistent"}, 1, 1)
+	ids, total, _, err := indexer2.Search(SearchGistMetadata{Content: "persistent"}, 1, 1, 10)
 	require.NoError(t, err)
 	require.Equal(t, uint64(1), total, "data should survive close+reopen")
 	require.Equal(t, uint(1), ids[0])

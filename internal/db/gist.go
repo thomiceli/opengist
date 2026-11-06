@@ -146,7 +146,7 @@ func GetGistByID(gistId string) (*Gist, error) {
 
 // GetAllGistsForCurrentUser returns gists visible to currentUserId - all public
 // gists plus the user's own private/unlisted ones - ordered by sort/order and
-// paginated to one extra row (the 11th is the peek-next sentinel).
+// paginated to `limit` rows (pass perPage+1 for the peek-next sentinel).
 // `since`, when non-nil, restricts results to gists updated at or after that
 // instant (used by the API; the web handler passes nil).
 func GetAllGistsForCurrentUser(currentUserId uint, since *time.Time, offset int, sort string, order string, limit int, perPage int) ([]*Gist, error) {
@@ -172,7 +172,7 @@ func GetAllGistsForCurrentUser(currentUserId uint, since *time.Time, offset int,
 // same visibility rule (public gists plus currentUserId's own) and optionally
 // narrows by title, language, visibility and topics, returning the total match
 // count alongside the page of results.
-func GetAllGistsForCurrentUserFiltered(currentUserId uint, title string, language string, visibility string, topics []string, offset int, sort string, order string) ([]*Gist, int64, error) {
+func GetAllGistsForCurrentUserFiltered(currentUserId uint, title string, language string, visibility string, topics []string, offset int, sort string, order string, perPage int) ([]*Gist, int64, error) {
 	var gists []*Gist
 	var count int64
 
@@ -203,8 +203,8 @@ func GetAllGistsForCurrentUserFiltered(currentUserId uint, title string, languag
 		return nil, 0, err
 	}
 
-	err = baseQuery.Limit(11).
-		Offset(offset * 10).
+	err = baseQuery.Limit(perPage + 1).
+		Offset(offset * perPage).
 		Order("gists." + sort + "_at " + order).
 		Find(&gists).Error
 
@@ -216,7 +216,7 @@ func GetAllGistsForCurrentUserFiltered(currentUserId uint, title string, languag
 // (title, language, visibility and extra topics). The path topic is always
 // required; any extra topics from the filter are ANDed on top so the result
 // stays scoped to the topic page.
-func GetAllGistsByTopicFiltered(currentUserId uint, topic string, title string, language string, visibility string, topics []string, offset int, sort string, order string) ([]*Gist, int64, error) {
+func GetAllGistsByTopicFiltered(currentUserId uint, topic string, title string, language string, visibility string, topics []string, offset int, sort string, order string, perPage int) ([]*Gist, int64, error) {
 	var gists []*Gist
 	var count int64
 
@@ -247,8 +247,8 @@ func GetAllGistsByTopicFiltered(currentUserId uint, topic string, title string, 
 		return nil, 0, err
 	}
 
-	err = baseQuery.Limit(11).
-		Offset(offset * 10).
+	err = baseQuery.Limit(perPage + 1).
+		Offset(offset * perPage).
 		Order("gists." + sort + "_at " + order).
 		Find(&gists).Error
 
@@ -320,18 +320,18 @@ func GetAllPublicGistsOfUser(userID uint, since *time.Time, offset int, sort str
 	return gists, err
 }
 
-func GetAllGists(offset int) ([]*Gist, error) {
+func GetAllGists(offset int, perPage int) ([]*Gist, error) {
 	var gists []*Gist
 	err := db.Preload("User").
-		Limit(11).
-		Offset(offset * 10).
+		Limit(perPage + 1).
+		Offset(offset * perPage).
 		Order("id asc").
 		Find(&gists).Error
 
 	return gists, err
 }
 
-func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort string, order string, topic string) ([]*Gist, error) {
+func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort string, order string, topic string, perPage int) ([]*Gist, error) {
 	var gists []*Gist
 	tx := db.Preload("User").Preload("Forked.User").Preload("Topics").
 		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
@@ -342,8 +342,8 @@ func GetAllGistsFromSearch(currentUserId uint, query string, offset int, sort st
 			Where("gist_topics.topic = ?", topic)
 	}
 
-	err := tx.Limit(11).
-		Offset(offset * 10).
+	err := tx.Limit(perPage + 1).
+		Offset(offset * perPage).
 		Order("gists." + sort + "_at " + order).
 		Find(&gists).Error
 
@@ -357,7 +357,7 @@ func gistsFromUserStatement(fromUserId uint, currentUserId uint) *gorm.DB {
 		Joins("join users on gists.user_id = users.id")
 }
 
-func GetAllGistsFromUser(fromUserId uint, currentUserId uint, title string, language string, visibility string, topics []string, offset int, sort string, order string) ([]*Gist, int64, error) {
+func GetAllGistsFromUser(fromUserId uint, currentUserId uint, title string, language string, visibility string, topics []string, offset int, sort string, order string, perPage int) ([]*Gist, int64, error) {
 	var gists []*Gist
 	var count int64
 
@@ -386,8 +386,8 @@ func GetAllGistsFromUser(fromUserId uint, currentUserId uint, title string, lang
 		return nil, 0, err
 	}
 
-	err = baseQuery.Limit(11).
-		Offset(offset * 10).
+	err = baseQuery.Limit(perPage + 1).
+		Offset(offset * perPage).
 		Order("gists." + sort + "_at " + order).
 		Find(&gists).Error
 

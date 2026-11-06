@@ -34,6 +34,10 @@ const (
 	SshServerDisabled = "disabled" // no SSH git access
 )
 
+// MaxPaginationPerPage caps pagination.per-page so a misconfiguration can't
+// make list pages load an unbounded number of rows.
+const MaxPaginationPerPage = 100
+
 // Not using nested structs because the library
 // doesn't support dot notation in this case sadly
 type config struct {
@@ -66,6 +70,8 @@ type config struct {
 	ApiEnabled bool `yaml:"api.enabled" env:"OG_API_ENABLED"`
 
 	DisableFileUpload bool `yaml:"disable-file-upload" env:"OG_DISABLE_FILE_UPLOAD"`
+
+	PaginationPerPage int `yaml:"pagination.per-page" env:"OG_PAGINATION_PER_PAGE"`
 
 	UnixSocketPermissions string `yaml:"unix-socket-permissions" env:"OG_UNIX_SOCKET_PERMISSIONS"`
 
@@ -152,6 +158,8 @@ func configWithDefaults() (*config, error) {
 	c.HttpGit = true
 
 	c.ApiEnabled = true
+
+	c.PaginationPerPage = 10
 
 	c.UnixSocketPermissions = "0666"
 
@@ -378,6 +386,13 @@ func loadConfigFromEnv(c *config, out io.Writer) error {
 			}
 			v.Field(i).SetBool(boolVal)
 			envVars = append(envVars, tag)
+		case reflect.Int:
+			intVal, err := strconv.Atoi(envValue)
+			if err != nil {
+				return fmt.Errorf("invalid value for %s: %w", tag, err)
+			}
+			v.Field(i).SetInt(int64(intVal))
+			envVars = append(envVars, tag)
 		case reflect.Slice:
 			if v.Type().Field(i).Type.Elem().Kind() == reflect.Struct {
 				prefix := strings.ToUpper(tag) + "_"
@@ -453,6 +468,10 @@ func checks(c *config) error {
 	case SshServerBuiltin, SshServerHost, SshServerDisabled:
 	default:
 		return fmt.Errorf("invalid ssh.git-enabled %q (must be %q, %q or %q, or a boolean)", c.SshGit, SshServerBuiltin, SshServerHost, SshServerDisabled)
+	}
+
+	if c.PaginationPerPage < 1 || c.PaginationPerPage > MaxPaginationPerPage {
+		return fmt.Errorf("invalid pagination.per-page %d (must be between 1 and %d)", c.PaginationPerPage, MaxPaginationPerPage)
 	}
 
 	if _, err := url.Parse(c.ExternalUrl); err != nil {

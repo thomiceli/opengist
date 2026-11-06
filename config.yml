@@ -65,6 +65,10 @@ api.enabled: true
 # Disable file uploads when creating or editing gists (either `true` or `false`). Default: false
 disable-file-upload: false
 
+# Number of items shown per page on paginated lists (gists, search results, users, revisions, forks, admin panel).
+# Must be between 1 and 100. Default: 10
+pagination.per-page: 10
+
 # File permissions for Unix socket (octal format). Default: 0666
 unix-socket-permissions: 0666
 

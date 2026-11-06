@@ -113,11 +113,11 @@ func UserExists(username string) (bool, error) {
 	return count > 0, err
 }
 
-func GetAllUsers(offset int) ([]*User, error) {
+func GetAllUsers(offset int, perPage int) ([]*User, error) {
 	var users []*User
 	err := db.
-		Limit(11).
-		Offset(offset * 10).
+		Limit(perPage + 1).
+		Offset(offset * perPage).
 		Order("id asc").
 		Find(&users).Error
 

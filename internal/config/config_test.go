@@ -1,6 +1,10 @@
 package config
 
-import "testing"
+import (
+	"fmt"
+	"io"
+	"testing"
+)
 
 func TestCheckGitVersion(t *testing.T) {
 	tests := []struct {
@@ -27,6 +31,57 @@ func TestCheckGitVersion(t *testing.T) {
 			}
 			if ok != tt.wantOk {
 				t.Errorf("CheckGitVersion(%q) ok = %v, want %v", tt.version, ok, tt.wantOk)
+			}
+		})
+	}
+}
+
+func TestPaginationPerPage(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		c, err := configWithDefaults()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if c.PaginationPerPage != 10 {
+			t.Errorf("default PaginationPerPage = %d, want 10", c.PaginationPerPage)
+		}
+	})
+
+	t.Run("from env", func(t *testing.T) {
+		t.Setenv("OG_PAGINATION_PER_PAGE", "25")
+		c, _ := configWithDefaults()
+		if err := loadConfigFromEnv(c, io.Discard); err != nil {
+			t.Fatal(err)
+		}
+		if c.PaginationPerPage != 25 {
+			t.Errorf("PaginationPerPage = %d, want 25", c.PaginationPerPage)
+		}
+	})
+
+	t.Run("invalid env", func(t *testing.T) {
+		t.Setenv("OG_PAGINATION_PER_PAGE", "lots")
+		c, _ := configWithDefaults()
+		if err := loadConfigFromEnv(c, io.Discard); err == nil {
+			t.Error("expected an error for a non-integer OG_PAGINATION_PER_PAGE")
+		}
+	})
+
+	for _, v := range []int{0, -1, MaxPaginationPerPage + 1} {
+		t.Run(fmt.Sprintf("out of range %d", v), func(t *testing.T) {
+			c, _ := configWithDefaults()
+			c.PaginationPerPage = v
+			if err := checks(c); err == nil {
+				t.Errorf("checks() accepted pagination.per-page = %d", v)
+			}
+		})
+	}
+
+	for _, v := range []int{1, 50, MaxPaginationPerPage} {
+		t.Run(fmt.Sprintf("in range %d", v), func(t *testing.T) {
+			c, _ := configWithDefaults()
+			c.PaginationPerPage = v
+			if err := checks(c); err != nil {
+				t.Errorf("checks() rejected pagination.per-page = %d: %v", v, err)
 			}
 		})
 	}

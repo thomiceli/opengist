@@ -190,7 +190,7 @@ func (i *BleveIndexer) Remove(gistID uint) error {
 // The third return value is a map of language counts for the search results.
 // The language counts are computed by asking Bleve to return the top 10
 // facets for the "Languages" field.
-func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int) ([]uint, uint64, map[string]int, error) {
+func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int, perPage int) ([]uint, uint64, map[string]int, error) {
 	var err error
 	var indexerQuery query.Query = bleve.NewMatchAllQuery()
 
@@ -352,7 +352,6 @@ func (i *BleveIndexer) Search(metadata SearchGistMetadata, userId uint, page int
 
 	languageFacet := bleve.NewFacetRequest("Languages", 10)
 
-	perPage := 10
 	offset := (page - 1) * perPage
 
 	s := bleve.NewSearchRequestOptions(indexerQuery, perPage+1, offset, false)

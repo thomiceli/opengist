@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/context"
 	"github.com/thomiceli/opengist/internal/web/handlers"
@@ -73,12 +74,13 @@ func Forks(ctx *context.Context) error {
 		fromUserID = currentUser.ID
 	}
 
-	forks, err := gist.GetForks(fromUserID, pageInt-1, 11, 10)
+	perPage := config.C.PaginationPerPage
+	forks, err := gist.GetForks(fromUserID, pageInt-1, perPage+1, perPage)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error getting users who liked this gist", err)
 	}
 
-	if err = handlers.Paginate(ctx, forks, pageInt, 30, "forks", gist.User.Username+"/"+gist.Identifier()+"/forks", 2, nil); err != nil {
+	if err = handlers.Paginate(ctx, forks, pageInt, perPage, "forks", gist.User.Username+"/"+gist.Identifier()+"/forks", 2, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
 

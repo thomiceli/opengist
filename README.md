@@ -1,5 +1,23 @@
 # 🚀 Opengist (BG Fork)
 
+> [!IMPORTANT]
+> ## ⚠️ ВАЖНО: Този проект е наследен!
+>
+> **Имаме вече нова, по-лека и модерна програма – [Gistly](https://github.com/fedya-dev/gistly)**  
+>  
+> ✨ **Gistly** е пълна алтернатива на OpenGist / GitHub Gists  
+> 🌍 **Двуезичен интерфейс – Български + English**  
+> 🐳 Стартира се с **една Docker команда**  
+> 📦 Всичко в един SQLite файл  
+>
+> 👉 **Сваляй и използвай от тук:**  
+> **https://github.com/fedya-dev/gistly**
+>
+> Този fork (Opengist BG) вече **не се поддържа активно**.  
+> Препоръчваме всички нови инсталации да минават през Gistly.
+
+---
+
 <img height="108px" src="https://raw.githubusercontent.com/thomiceli/opengist/master/public/img/opengist.svg" alt="Opengist" align="right" />
 
 Opengist е self-hosted Pastebin, базиран на Git, с български превод. Всички снипети се съхраняват в Git хранилище и могат да се четат и/или променят чрез стандартни Git команди или уеб интерфейса. Подобен е на **GitHub Gist**, но е с отворен код и може да бъде self-hosted.

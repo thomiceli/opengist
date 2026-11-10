@@ -71,6 +71,15 @@ services:
       GID: 1001
 ```
 
+### With Easypanel
+
+[Easypanel](https://easypanel.io) is a self-hosted Docker deployment platform, and it has a one-click deployment template for Opengist:
+
+[![Deploy on Easypanel][easypanel-btn]][easypanel-deploy]
+
+[easypanel-btn]: https://easypanel.io/img/deploy-on-easypanel-40.svg
+[easypanel-deploy]: https://easypanel.io/templates/opengist
+
 ### Via binary
 
 Download the archive for your system from the release page [here](https://github.com/thomiceli/opengist/releases/latest), and extract it.

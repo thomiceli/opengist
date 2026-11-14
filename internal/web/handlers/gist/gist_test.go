@@ -691,3 +691,27 @@ func TestPrivateGistEmbedSameOrigin(t *testing.T) {
 		}
 	})
 }
+
+func TestIndexedGistSkipsBinaryFiles(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+	s.Login(t, "thomas")
+
+	png := "\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89"
+	resp := s.Request(t, "POST", "/", url.Values{
+		"title":   {"Notes"},
+		"name":    {"a.png", "setup.md"},
+		"content": {png, "nginx proxy_pass upstream"},
+		"private": {"0"},
+	}, 302)
+	parts := strings.Split(strings.TrimPrefix(resp.Header.Get("Location"), "/"), "/")
+	gist, err := db.GetGist(parts[0], parts[1])
+	require.NoError(t, err)
+
+	indexed, err := gist.ToIndexedGist()
+	require.NoError(t, err)
+	require.Equal(t, "nginx proxy_pass upstream\n", indexed.Content)
+	require.ElementsMatch(t, []string{".png", ".md"}, indexed.Extensions)
+}

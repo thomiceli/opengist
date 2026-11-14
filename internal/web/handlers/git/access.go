@@ -70,7 +70,7 @@ func handlePush(ctx *context.Context, route *gitRoute, gist *db.Gist, gistExists
 	}
 
 	log.Debug().Str("authUsername", username).Msg("Valid URL format for push operation")
-	gist, err = createGist(user, pathParts[1])
+	gist, err = db.CreateGistForPush(user, pathParts[1])
 	if err != nil {
 		return ctx.ErrorRes(500, "Cannot create gist", err)
 	}

@@ -34,10 +34,11 @@ func HookPreReceive(req *HookPreReceiveRequest) (*HookPreReceiveResponse, error)
 }
 
 // HookPostReceiveRequest is sent by the post-receive hook subprocess to the
-// daemon.
+// daemon. Protocol is "ssh" for a push over SSH, empty over HTTP.
 type HookPostReceiveRequest struct {
 	GistID      string            `json:"gist_id"`
 	GistURL     string            `json:"gist_url"`
+	Protocol    string            `json:"protocol"`
 	References  []HookRefUpdate   `json:"references"`
 	PushOptions map[string]string `json:"push_options"`
 }

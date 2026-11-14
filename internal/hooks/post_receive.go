@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"os/exec"
 	"slices"
@@ -25,8 +26,8 @@ import (
 func PostReceive(in io.Reader, out, er io.Writer) error {
 	gistID := os.Getenv("OPENGIST_REPOSITORY_ID")
 	if gistID == "" {
-		// No gist id is set on the SSH push path, which performs the gist update
-		// in-process instead. Nothing for this hook to forward.
+		// Every Opengist push path sets the gist id; without it the repository
+		// was pushed to some other way. Nothing for this hook to forward.
 		return nil
 	}
 
@@ -45,6 +46,7 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 	resp, err := ipc.HookPostReceive(&ipc.HookPostReceiveRequest{
 		GistID:      gistID,
 		GistURL:     os.Getenv("OPENGIST_REPOSITORY_URL_INTERNAL"),
+		Protocol:    os.Getenv("OPENGIST_PROTOCOL_INTERNAL"),
 		References:  refs,
 		PushOptions: pushOptions(),
 	})
@@ -62,8 +64,9 @@ func PostReceive(in io.Reader, out, er io.Writer) error {
 
 // RunPostReceive is the server side of the post-receive hook. It runs inside the
 // daemon (warm database connection and search index) on behalf of the hook
-// subprocess, and returns the message to show the user pushing.
-func RunPostReceive(gist *db.Gist, repoDir, gistUrl string, refs []ipc.HookRefUpdate, opts map[string]string) (string, error) {
+// subprocess, and returns the message to show the user pushing. gistUrl is the
+// URL pushed to over HTTP; protocol is "ssh" for a push over SSH.
+func RunPostReceive(gist *db.Gist, repoDir, gistUrl, protocol string, refs []ipc.HookRefUpdate, opts map[string]string) (string, error) {
 	var outputSb strings.Builder
 	newGist := false
 	validator := validatorpkg.NewValidator()
@@ -93,7 +96,7 @@ func RunPostReceive(gist *db.Gist, repoDir, gistUrl string, refs []ipc.HookRefUp
 		gistUrl = gistUrl[:lastIndex+1] + gist.URL
 		if !newGist {
 			fmt.Fprintf(&outputSb, "Gist URL set to %s. Set the Git remote URL via:\n", gistUrl)
-			fmt.Fprintf(&outputSb, "git remote set-url origin %s\n\n", gistUrl)
+			fmt.Fprintf(&outputSb, "git remote set-url origin %s\n\n", remoteUrl(gist, gistUrl, protocol))
 		}
 	}
 
@@ -155,10 +158,31 @@ func RunPostReceive(gist *db.Gist, repoDir, gistUrl string, refs []ipc.HookRefUp
 	if newGist {
 		fmt.Fprintf(&outputSb, "Your new gist has been created here: %s\n", gistUrl)
 		outputSb.WriteString("If you want to keep working with your gist, you could set the Git remote URL via:\n")
-		fmt.Fprintf(&outputSb, "git remote set-url origin %s\n\n", gistUrl)
+		fmt.Fprintf(&outputSb, "git remote set-url origin %s\n\n", remoteUrl(gist, gistUrl, protocol))
 	}
 
 	return outputSb.String(), nil
+}
+
+// remoteUrl returns the URL to suggest as the gist's Git remote: its SSH clone
+// URL for a push over SSH, when an SSH host is configured, else gistUrl.
+func remoteUrl(gist *db.Gist, gistUrl, protocol string) string {
+	if protocol != "ssh" {
+		return gistUrl
+	}
+
+	var externalHost string
+	if u, err := url.Parse(config.C.ExternalUrl); err == nil {
+		externalHost = u.Host
+	}
+	if config.C.SshExternalDomain == "" && externalHost == "" {
+		return gistUrl
+	}
+
+	if sshUrl := gist.SSHCloneURL(externalHost); sshUrl != "" {
+		return sshUrl
+	}
+	return gistUrl
 }
 
 func verifyHEAD(dir string) error {

@@ -44,7 +44,7 @@ func PostReceive(ctx *context.Context) error {
 
 	repoDir := git.RepositoryPath(gist.User.Username, gist.Uuid)
 
-	output, err := hooks.RunPostReceive(gist, repoDir, req.GistURL, req.References, req.PushOptions)
+	output, err := hooks.RunPostReceive(gist, repoDir, req.GistURL, req.Protocol, req.References, req.PushOptions)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}

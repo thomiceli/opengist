@@ -11,6 +11,7 @@ import (
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/dustin/go-humanize"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/git"
@@ -601,6 +602,37 @@ func GetAllGistsByIds(ids []uint) ([]*Gist, error) {
 func (gist *Gist) Create() error {
 	// avoids foreign key constraint error because the default value in the struct is 0
 	return db.Omit("forked_id").Create(&gist).Error
+}
+
+// CreateGistForPush creates an empty gist owned by user, ready to receive the
+// push that creates it over Git (HTTP or SSH). url, when set, becomes the gist
+// URL and title; otherwise the gist is identified by its random UUID.
+func CreateGistForPush(user *User, url string) (*Gist, error) {
+	gist := new(Gist)
+	gist.UserID = user.ID
+	gist.User = *user
+	uuidGist, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+	gist.Uuid = strings.ReplaceAll(uuidGist.String(), "-", "")
+	gist.Title = "gist:" + gist.Uuid
+
+	if url != "" {
+		gist.URL = strings.TrimSuffix(url, ".git")
+		gist.Title = strings.TrimSuffix(url, ".git")
+	}
+
+	if err := gist.InitRepository(); err != nil {
+		return nil, err
+	}
+
+	if err := gist.Create(); err != nil {
+		gist.DeleteRepository()
+		return nil, err
+	}
+
+	return gist, nil
 }
 
 func (gist *Gist) CreateForked() error {

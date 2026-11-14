@@ -170,6 +170,7 @@ func (s *Server) registerRoutes() {
 		ipcGroup.POST("/hook/post-receive", ipc.PostReceive)
 		ipcGroup.POST("/ssh/keys", ipc.SSHKeys)
 		ipcGroup.POST("/ssh/command", ipc.SSHCommand)
+		ipcGroup.POST("/ssh/discard-empty-gist", ipc.SSHDiscardEmptyGist)
 
 		r.Any("/api/*", noRouteFoundApi)
 

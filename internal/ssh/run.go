@@ -23,6 +23,17 @@ func Start() {
 		return
 	}
 
+	sshConfig, err := newServerConfig()
+	if err != nil {
+		log.Fatal().Err(err).Msg("SSH: Could not setup host key")
+	}
+
+	go listen(sshConfig)
+}
+
+// newServerConfig builds the embedded SSH server configuration: it accepts the
+// public keys known to Opengist and presents Opengist's host key.
+func newServerConfig() (*ssh.ServerConfig, error) {
 	sshConfig := &ssh.ServerConfig{
 		PublicKeyCallback: func(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
 			strKey := strings.TrimSpace(string(ssh.MarshalAuthorizedKey(key)))
@@ -41,11 +52,11 @@ func Start() {
 
 	key, err := setupHostKey()
 	if err != nil {
-		log.Fatal().Err(err).Msg("SSH: Could not setup host key")
+		return nil, err
 	}
 
 	sshConfig.AddHostKey(key)
-	go listen(sshConfig)
+	return sshConfig, nil
 }
 
 func listen(serverConfig *ssh.ServerConfig) {
@@ -57,9 +68,17 @@ func listen(serverConfig *ssh.ServerConfig) {
 	}
 	defer listener.Close()
 
+	serve(listener, serverConfig)
+}
+
+// serve accepts SSH connections on listener until it is closed.
+func serve(listener net.Listener, serverConfig *ssh.ServerConfig) {
 	for {
 		nConn, err := listener.Accept()
 		if err != nil {
+			if errors.Is(err, net.ErrClosed) {
+				return
+			}
 			errorSsh("Failed to accept incoming connection", err)
 			continue
 		}

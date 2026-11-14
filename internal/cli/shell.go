@@ -67,12 +67,22 @@ func runShell(ctx *cli.Context) (int, error) {
 	// gist over the IPC API, the same way the HTTP push path does.
 	cmd := exec.Command("git", resp.Verb, resp.RepoPath)
 	cmd.Dir = resp.RepoPath
-	cmd.Env = append(os.Environ(), "OPENGIST_REPOSITORY_ID="+resp.GistID)
+	cmd.Env = append(os.Environ(), "OPENGIST_REPOSITORY_ID="+resp.GistID, "OPENGIST_PROTOCOL_INTERNAL=ssh")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := cmd.Run(); err != nil {
+	err = cmd.Run()
+
+	// The gist was created for this push: don't leave it behind if the push
+	// stored nothing in it.
+	if resp.Created {
+		if discardErr := ipc.DiscardEmptyGist(resp.GistID); discardErr != nil {
+			fmt.Fprintln(os.Stderr, "Opengist: "+discardErr.Error())
+		}
+	}
+
+	if err != nil {
 		var exitErr *exec.ExitError
 		if errors.As(err, &exitErr) {
 			return exitErr.ExitCode(), nil

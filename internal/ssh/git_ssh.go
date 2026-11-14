@@ -3,13 +3,16 @@ package ssh
 import (
 	"errors"
 	"io"
+	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
+	"github.com/thomiceli/opengist/internal/validator"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +21,13 @@ import (
 // referenced gist, returning the gist and the bare verb. It is shared by the
 // embedded SSH server (which has the key string) and the IPC handler backing the
 // OpenSSH shim (which resolves the key id to its string).
-func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string, error) {
+//
+// As over HTTP, a push can create the gist it targets: pushing to "init"
+// creates a gist with a random identifier, and pushing to a gist of the key's
+// user that does not exist yet creates it under that URL. The returned bool
+// reports whether the gist was created for this push; the caller must then pass
+// it to DiscardEmptyGist once git exits.
+func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string, bool, error) {
 	verb, args := parseCommand(gitCmd)
 	if !strings.HasPrefix(verb, "git-") {
 		verb = ""
@@ -26,27 +35,43 @@ func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string
 	verb = strings.TrimPrefix(verb, "git-")
 
 	if verb != "upload-pack" && verb != "receive-pack" {
-		return nil, "", errors.New("invalid command")
+		return nil, "", false, errors.New("invalid command")
 	}
 
-	repoFullName := strings.ToLower(strings.Trim(args, "'"))
-	repoFields := strings.SplitN(repoFullName, "/", 2)
+	repoPath := strings.Trim(args, "'")
+
+	if verb == "receive-pack" && strings.TrimSuffix(strings.ToLower(repoPath), ".git") == "init" {
+		gist, err := createGist(key, ip, "", "")
+		if err != nil {
+			return nil, "", false, err
+		}
+		return gist, verb, true, nil
+	}
+
+	repoFields := strings.SplitN(repoPath, "/", 2)
 	if len(repoFields) != 2 {
-		return nil, "", errors.New("invalid gist path")
+		return nil, "", false, errors.New("invalid gist path")
 	}
 
 	userName := strings.ToLower(repoFields[0])
 	gistName := strings.TrimSuffix(strings.ToLower(repoFields[1]), ".git")
 
 	gist, err := db.GetGist(userName, gistName)
+	if verb == "receive-pack" && errors.Is(err, gorm.ErrRecordNotFound) {
+		gist, err = createGist(key, ip, userName, strings.TrimSuffix(repoFields[1], ".git"))
+		if err != nil {
+			return nil, "", false, err
+		}
+		return gist, verb, true, nil
+	}
 	if err != nil {
-		return nil, "", errors.New("gist not found")
+		return nil, "", false, errors.New("gist not found")
 	}
 
 	allowUnauthenticated, err := auth.ShouldAllowUnauthenticatedGistAccess(db.AuthInfo{}, true)
 	if err != nil {
 		errorSsh("Failed to get auth info", err)
-		return nil, "", errors.New("internal server error")
+		return nil, "", false, errors.New("internal server error")
 	}
 
 	// Check for the key if :
@@ -70,10 +95,10 @@ func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
-				return nil, "", errors.New("gist not found")
+				return nil, "", false, errors.New("gist not found")
 			}
 			errorSsh("Failed to get user by SSH key id", err)
-			return nil, "", errors.New("internal server error")
+			return nil, "", false, errors.New("internal server error")
 		}
 		_ = db.SSHKeyLastUsedNow(pubKey.Content)
 	}
@@ -81,10 +106,64 @@ func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string
 	// Refuse pushes to an archived gist only after the key has been validated
 	// against the owner above, so we don't disclose the gist's existence.
 	if verb == "receive-pack" && gist.Archived {
-		return nil, "", errors.New("this gist is archived and is read-only")
+		return nil, "", false, errors.New("this gist is archived and is read-only")
 	}
 
-	return gist, verb, nil
+	return gist, verb, false, nil
+}
+
+// createGist creates the gist a push is about to fill, owned by the user of the
+// SSH key. A push to "init" (empty userName) gets a random identifier; a push
+// to <userName>/<url> may only target the key user's own namespace, and url
+// becomes the gist URL.
+func createGist(key, ip, userName, url string) (*db.Gist, error) {
+	user, err := db.GetUserFromSSHKey(key)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn().Msg("Invalid SSH authentication attempt from " + ip)
+			return nil, errors.New("gist not found")
+		}
+		errorSsh("Failed to get user by SSH key", err)
+		return nil, errors.New("internal server error")
+	}
+
+	if userName != "" {
+		// Answer as for any missing gist, so as not to disclose anything about
+		// another user's gists.
+		if !strings.EqualFold(user.Username, userName) {
+			return nil, errors.New("gist not found")
+		}
+		if validator.NewValidator().Var(url, "max=32,alphanumdash") != nil {
+			return nil, errors.New("invalid gist URL: only alphanumeric characters and dashes are allowed, up to 32 characters")
+		}
+	}
+
+	gist, err := db.CreateGistForPush(user, url)
+	if err != nil {
+		errorSsh("Failed to create gist", err)
+		return nil, errors.New("internal server error")
+	}
+	_ = db.SSHKeyLastUsedNow(key)
+
+	return gist, nil
+}
+
+// DiscardEmptyGist deletes a gist created for a push (see AuthorizeGitCommand)
+// if the push stored nothing in it: the client had nothing to push, a hook
+// rejected it, or the connection dropped. It is called once git exits; errors
+// are logged, as there is nothing more the caller can do about them.
+func DiscardEmptyGist(gist *db.Gist) {
+	empty, err := git.HasNoCommits(gist.User.Username, gist.Uuid)
+	if err != nil {
+		errorSsh("Failed to check if the gist has commits", err)
+		return
+	}
+	if !empty {
+		return
+	}
+	if err = gist.Delete(); err != nil {
+		errorSsh("Failed to delete empty gist", err)
+	}
 }
 
 // RunGitCommand authorizes and runs a single git pack command (upload-pack /
@@ -93,15 +172,24 @@ func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string
 // in/out/errOut. (The OpenSSH shim authorizes over the IPC API and runs git
 // itself, so it does not use this.)
 func RunGitCommand(in io.Reader, out, errOut io.Writer, gitCmd string, key string, ip string) error {
-	gist, verb, err := AuthorizeGitCommand(gitCmd, key, ip)
+	gist, verb, created, err := AuthorizeGitCommand(gitCmd, key, ip)
 	if err != nil {
 		return err
+	}
+	if created {
+		defer DiscardEmptyGist(gist)
 	}
 
 	repositoryPath := git.RepositoryPath(gist.User.Username, gist.Uuid)
 
 	cmd := exec.Command("git", verb, repositoryPath)
 	cmd.Dir = repositoryPath
+	// As on the other push paths, the post-receive hook updates the gist over
+	// the IPC API: preview, search index, push options, new gist message.
+	cmd.Env = append(os.Environ(),
+		"OPENGIST_REPOSITORY_ID="+strconv.FormatUint(uint64(gist.ID), 10),
+		"OPENGIST_PROTOCOL_INTERNAL=ssh",
+	)
 
 	stdin, _ := cmd.StdinPipe()
 	stdout, _ := cmd.StdoutPipe()
@@ -123,13 +211,6 @@ func RunGitCommand(in io.Reader, out, errOut io.Writer, gitCmd string, key strin
 	if err != nil {
 		errorSsh("Failed to wait for git command", err)
 		return errors.New("internal server error")
-	}
-
-	// updatedAt is updated only if serviceType is receive-pack
-	if verb == "receive-pack" {
-		_ = gist.SetLastActiveNow()
-		_ = gist.UpdatePreviewAndCount(false)
-		gist.AddInIndex()
 	}
 
 	return nil

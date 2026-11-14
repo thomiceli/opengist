@@ -1,6 +1,6 @@
 # Init Gists via Git
 
-Opengist allows you to create new snippets via Git over HTTP. You can create gists with either auto-generated URLs or custom URLs of your choice.
+Opengist allows you to create new snippets via Git over HTTP or SSH. You can create gists with either auto-generated URLs or custom URLs of your choice.
 
 Simply init a new Git repository where your file(s) is/are located:
 
@@ -18,15 +18,18 @@ The gist must not exist yet if you want to create it, otherwise you will just pu
 
 ```shell
 git remote add origin http://opengist.url/thomas/my-custom-gist
+# or over SSH
+git remote add origin ssh://opengist.url:2222/thomas/my-custom-gist.git
 
 git push -u origin master
 ```
 
 **Requirements for custom URLs:**
 - The username must match your authenticated username
-- URL format: `http://opengist.url/username/custom-url`
+- URL format: `http://opengist.url/username/custom-url`, or `ssh://opengist.url:2222/username/custom-url` over SSH
 - The custom URL becomes your gist's identifier and title
 - `.git` suffix is automatically removed if present
+- Over SSH, the custom URL may only contain alphanumeric characters and dashes, up to 32 characters
 
 ### Option B: Init endpoint
 
@@ -34,13 +37,19 @@ Use the special `http://opengist.url/init` endpoint to create a gist with an aut
 
 ```shell
 git remote add origin http://opengist.url/init
+# or over SSH
+git remote add origin ssh://opengist.url:2222/init.git
 
 git push -u origin master
 ```
 
+::: tip
+Over SSH, use the same address as the SSH clone URLs of your gists. With the instance's [OpenSSH server](/docs/administration/openssh), that's usually `gist@opengist.url:init.git`.
+:::
+
 ## Authentication
 
-When you push, you'll be prompted to authenticate:
+Over HTTP, you'll be prompted for your username and password (or an [access token](./access-tokens) with read and write access to gists) when you push:
 
 ```shell
 Username for 'http://opengist.url': thomas
@@ -58,6 +67,19 @@ remote: If you want to keep working with your gist, you could set the remote URL
 remote: git remote set-url origin http://opengist.url/thomas/6051e930f140429f9a2f3bb1fa101066
 remote:
 To http://opengist.url/init
+ * [new branch]      master -> master
+```
+
+Over SSH, you are authenticated by your SSH key: add it to your account in **Settings → SSH keys** before pushing.
+
+```shell
+git push -u origin master
+remote:
+remote: Your new gist has been created here: http://opengist.url/thomas/3cf170a1c4264565af3f7b45aa383ae4
+remote: If you want to keep working with your gist, you could set the Git remote URL via:
+remote: git remote set-url origin ssh://opengist.url:2222/thomas/3cf170a1c4264565af3f7b45aa383ae4.git
+remote:
+To ssh://opengist.url:2222/init.git
  * [new branch]      master -> master
 ```
 

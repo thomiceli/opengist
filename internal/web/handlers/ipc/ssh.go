@@ -47,7 +47,7 @@ func SSHCommand(ctx *context.Context) error {
 		return ctx.JSON(http.StatusOK, ipc.SSHCommandResponse{Authorized: false, Message: "key not recognized"})
 	}
 
-	gist, verb, err := ssh.AuthorizeGitCommand(req.Command, sshKey.Content, req.IP)
+	gist, verb, created, err := ssh.AuthorizeGitCommand(req.Command, sshKey.Content, req.IP)
 	if err != nil {
 		return ctx.JSON(http.StatusOK, ipc.SSHCommandResponse{Authorized: false, Message: err.Error()})
 	}
@@ -57,5 +57,26 @@ func SSHCommand(ctx *context.Context) error {
 		Verb:       verb,
 		RepoPath:   git.RepositoryPath(gist.User.Username, gist.Uuid),
 		GistID:     strconv.FormatUint(uint64(gist.ID), 10),
+		Created:    created,
 	})
+}
+
+// SSHDiscardEmptyGist deletes a gist created for a push over SSH (see
+// SSHCommand) once the push is over, if nothing was pushed to it.
+func SSHDiscardEmptyGist(ctx *context.Context) error {
+	var req ipc.DiscardEmptyGistRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.String(http.StatusBadRequest, "invalid request")
+	}
+
+	gist, err := db.GetGistByID(req.GistID)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ctx.NoContent(http.StatusOK)
+	}
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, "failed to get gist")
+	}
+
+	ssh.DiscardEmptyGist(gist)
+	return ctx.NoContent(http.StatusOK)
 }

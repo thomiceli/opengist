@@ -79,7 +79,7 @@ func handleInit(ctx *context.Context, route *gitRoute, kind initKind, token, use
 // and uses the redirected URL as the base for the git-receive-pack POST, so that
 // POST is unambiguously tied to this gist.
 func initStartPush(ctx *context.Context, user *db.User) error {
-	gist, err := createGist(user, "")
+	gist, err := db.CreateGistForPush(user, "")
 	if err != nil {
 		return ctx.ErrorRes(500, "Cannot create gist", err)
 	}
@@ -128,31 +128,4 @@ func newInitToken() (string, error) {
 		return "", err
 	}
 	return strings.ReplaceAll(u.String(), "-", ""), nil
-}
-
-func createGist(user *db.User, url string) (*db.Gist, error) {
-	gist := new(db.Gist)
-	gist.UserID = user.ID
-	gist.User = *user
-	uuidGist, err := uuid.NewRandom()
-	if err != nil {
-		return nil, err
-	}
-	gist.Uuid = strings.ReplaceAll(uuidGist.String(), "-", "")
-	gist.Title = "gist:" + gist.Uuid
-
-	if url != "" {
-		gist.URL = strings.TrimSuffix(url, ".git")
-		gist.Title = strings.TrimSuffix(url, ".git")
-	}
-
-	if err := gist.InitRepository(); err != nil {
-		return nil, err
-	}
-
-	if err := gist.Create(); err != nil {
-		return nil, err
-	}
-
-	return gist, nil
 }

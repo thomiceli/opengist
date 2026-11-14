@@ -83,6 +83,7 @@ type Gist struct {
 	NbFiles         int
 	NbLikes         int
 	NbForks         int
+	NbComments      int
 	CreatedAt       int64
 	UpdatedAt       int64
 	ExpiresAt       int64 // 0: never expires
@@ -94,6 +95,7 @@ type Gist struct {
 
 	Topics    []GistTopic    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Languages []GistLanguage `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Comments  []GistComment  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type Like struct {

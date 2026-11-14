@@ -62,6 +62,7 @@ func TestAdminSetConfig(t *testing.T) {
 		db.SettingAllowGistsWithoutLogin,
 		db.SettingDisableLoginForm,
 		db.SettingDisableGravatar,
+		db.SettingDisableComments,
 	}
 
 	s.Register(t, "thomas")

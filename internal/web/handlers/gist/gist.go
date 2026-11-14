@@ -39,6 +39,14 @@ func GistIndex(ctx *context.Context) error {
 
 	renderedFiles := render.RenderFiles(files)
 
+	if disabled, _ := ctx.GetData("DisableComments").(bool); !disabled {
+		comments, err := gist.GetComments()
+		if err != nil {
+			return ctx.ErrorRes(500, "Error fetching comments", err)
+		}
+		ctx.SetData("comments", render.RenderComments(comments))
+	}
+
 	ctx.SetData("page", "code")
 	ctx.SetData("commit", revision)
 	ctx.SetData("files", renderedFiles)

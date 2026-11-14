@@ -196,6 +196,17 @@ func notArchived(next Handler) Handler {
 	}
 }
 
+// commentsEnabled blocks the gist comment routes when an admin has disabled
+// comments on the instance.
+func commentsEnabled(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		if disabled, _ := ctx.GetData("DisableComments").(bool); disabled {
+			return ctx.ErrorRes(403, ctx.Tr("error.comments-disabled"), nil)
+		}
+		return next(ctx)
+	}
+}
+
 func adminPermission(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		user := ctx.User
@@ -620,6 +631,17 @@ func apiBindAuth(next Handler) Handler {
 		// round-trip the caller already paid.
 		_ = tok.UpdateLastUsed()
 
+		return next(ctx)
+	}
+}
+
+// apiCommentsEnabled is the /api counterpart of commentsEnabled, responding
+// with a JSON 403 when an admin has disabled comments on the instance.
+func apiCommentsEnabled(next Handler) Handler {
+	return func(ctx *context.Context) error {
+		if disabled, _ := ctx.GetData("DisableComments").(bool); disabled {
+			return ctx.ErrorJson(403, "Comments are disabled", nil)
+		}
 		return next(ctx)
 	}
 }

@@ -118,5 +118,9 @@
         <h3 class="text-foreground mt-3 text-sm font-medium">{{ .locale.Tr "gist.no-content" }}</h3>
     </div>
     {{ end }}
+
+    {{ if not .DisableComments }}
+    {{ template "gist_comments" . }}
+    {{ end }}
 </div>
 {{ end }}

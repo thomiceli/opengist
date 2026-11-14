@@ -17,7 +17,7 @@
         <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <div class="min-w-0 flex-1 space-y-4">
                 {{ range $gist := .gists }}
-                    {{ template "gist" (dict "gist" $gist "c" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar "currentStyle" $.currentStyle) }}
+                    {{ template "gist" (dict "gist" $gist "c" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar "DisableComments" $.DisableComments "currentStyle" $.currentStyle) }}
                 {{ end }}
                 {{ template "pagination" . }}
             </div>

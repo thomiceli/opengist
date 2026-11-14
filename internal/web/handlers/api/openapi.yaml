@@ -33,6 +33,8 @@ security:
 tags:
   - name: Gists
     description: Create, read, update, delete and list gists.
+  - name: Comments
+    description: Read, post, edit and delete comments on gists.
   - name: Users
     description: User accounts and their gists.
 
@@ -553,6 +555,151 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /gists/{uuid}/comments:
+    parameters:
+      - { $ref: "#/components/parameters/GistUuidParam" }
+    get:
+      operationId: listGistComments
+      summary: List a gist's comments
+      tags: [Comments]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Lists the comments posted on a gist, oldest first.
+
+        Public and unlisted gists are readable by anyone; a private gist
+        resolves only for its owner with a `gist:read`-capable token, otherwise
+        `404`. Every comment endpoint returns `403` when an admin has disabled
+        comments on the instance.
+
+        Results are a JSON array; pagination is conveyed via the `Link` and
+        `X-*` response headers (see the response headers below).
+      parameters:
+        - { $ref: "#/components/parameters/PageParam" }
+        - { $ref: "#/components/parameters/PerPageParam" }
+      responses:
+        "200":
+          description: A list of comments.
+          headers:
+            Link: { $ref: "#/components/headers/Link" }
+            X-Page: { $ref: "#/components/headers/XPage" }
+            X-Per-Page: { $ref: "#/components/headers/XPerPage" }
+            X-Total: { $ref: "#/components/headers/XTotal" }
+            X-Total-Pages: { $ref: "#/components/headers/XTotalPages" }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GistComment" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      operationId: createGistComment
+      summary: Create a comment
+      tags: [Comments]
+      security:
+        - bearerAuth: ["gist:write"]
+      description: |
+        **Required scope:** `gist:write`
+
+        Posts a comment on the gist as the authenticated caller. Any gist the
+        caller can see can be commented on, except archived gists, which
+        return `403`.
+
+        `body` is Markdown, rendered on the gist page the same way as Markdown
+        files. It must not be blank and is limited to 65535 characters.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GistCommentRequest" }
+      responses:
+        "201":
+          description: The created comment.
+          headers:
+            Location:
+              description: API URL of the created comment.
+              schema: { type: string, format: uri }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GistComment" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+
+  /gists/{uuid}/comments/{id}:
+    parameters:
+      - { $ref: "#/components/parameters/GistUuidParam" }
+      - { $ref: "#/components/parameters/CommentIdParam" }
+    get:
+      operationId: getGistComment
+      summary: Get a comment
+      tags: [Comments]
+      security:
+        - bearerAuth: []
+        - {} # Authorization optional (anonymous allowed)
+      description: |
+        Returns a single comment of a gist. A comment that belongs to another
+        gist returns `404`.
+
+        Visibility rules match the gist endpoint: public and unlisted gists are
+        readable by anyone; a private gist resolves only for its owner with a
+        `gist:read`-capable token, otherwise `404`.
+      responses:
+        "200":
+          description: The comment.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GistComment" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      operationId: updateGistComment
+      summary: Update a comment
+      tags: [Comments]
+      security:
+        - bearerAuth: ["gist:write"]
+      description: |
+        **Required scope:** `gist:write`
+
+        Replaces the body of a comment. Only the author of the comment can
+        edit it, and not while the gist is archived; both cases return `403`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GistCommentRequest" }
+      responses:
+        "200":
+          description: The updated comment.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GistComment" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+    delete:
+      operationId: deleteGistComment
+      summary: Delete a comment
+      tags: [Comments]
+      security:
+        - bearerAuth: ["gist:write"]
+      description: |
+        **Required scope:** `gist:write`
+
+        Deletes a comment. The author of the comment, the owner of the gist and
+        admins can delete it, even on an archived gist; other callers get
+        `403`.
+      responses:
+        "204":
+          description: The comment was deleted.
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   /user:
     get:
       operationId: getAuthenticatedUser
@@ -789,7 +936,7 @@ components:
         no specific scope required. The available scopes are:
 
         - `gist:read` - read gists (including the caller's private/unlisted ones).
-        - `gist:write` - create, update, delete and fork gists.
+        - `gist:write` - create, update, delete and fork gists, and comment on them.
         - `user:read` - read the authenticated user's account.
         - `user:write` - update the authenticated user and toggle likes.
 
@@ -815,6 +962,12 @@ components:
       required: true
       description: The gist's UUID.
       schema: { type: string }
+    CommentIdParam:
+      name: id
+      in: path
+      required: true
+      description: The comment's ID.
+      schema: { type: integer }
     UsernameParam:
       name: username
       in: path
@@ -894,6 +1047,7 @@ components:
           enum: [public, unlisted, private]
         like_count: { type: integer }
         fork_count: { type: integer }
+        comment_count: { type: integer }
         clone_url: { type: string, format: uri }
         ssh_url: { type: string }
         topics:
@@ -976,6 +1130,35 @@ components:
               type: array
               items: { $ref: "#/components/schemas/GistCommit" }
             truncated: { type: boolean }
+
+    GistComment:
+      type: object
+      description: A comment posted on a gist.
+      properties:
+        id: { type: integer }
+        url:
+          type: string
+          format: uri
+          description: API URL of the comment.
+        html_url:
+          type: string
+          format: uri
+          description: URL of the comment on the gist page.
+        body:
+          type: string
+          description: Markdown content of the comment.
+        user: { $ref: "#/components/schemas/SimpleUser" }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    GistCommentRequest:
+      type: object
+      description: Request body for creating or updating a comment.
+      properties:
+        body:
+          type: string
+          description: Markdown content of the comment. Must not be blank; at most 65535 characters.
+      required: [body]
 
     GistCreateFileInput:
       type: object

@@ -19,23 +19,24 @@ type GistFile struct {
 // preserves the public/unlisted/private distinction that the `Public` bool
 // can't express.
 type GistSimple struct {
-	ID          string     `json:"id"`
-	SlugUrl     string     `json:"slug_url"`
-	Owner       SimpleUser `json:"owner"`
-	Title       string     `json:"title"`
-	HTMLUrl     string     `json:"html_url"`
-	Description string     `json:"description"`
-	Public      bool       `json:"public"`
-	Visibility  string     `json:"visibility"` // Opengist extension: public/unlisted/private
-	LikeCount   int        `json:"like_count"`
-	ForkCount   int        `json:"fork_count"`
-	CloneUrl    string     `json:"clone_url"`
-	SSHUrl      string     `json:"ssh_url"`
-	Topics      []string   `json:"topics"`
-	Archived    bool       `json:"archived"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	ExpiresAt   *time.Time `json:"expires_at"` // null when the gist never expires
+	ID           string     `json:"id"`
+	SlugUrl      string     `json:"slug_url"`
+	Owner        SimpleUser `json:"owner"`
+	Title        string     `json:"title"`
+	HTMLUrl      string     `json:"html_url"`
+	Description  string     `json:"description"`
+	Public       bool       `json:"public"`
+	Visibility   string     `json:"visibility"` // Opengist extension: public/unlisted/private
+	LikeCount    int        `json:"like_count"`
+	ForkCount    int        `json:"fork_count"`
+	CommentCount int        `json:"comment_count"`
+	CloneUrl     string     `json:"clone_url"`
+	SSHUrl       string     `json:"ssh_url"`
+	Topics       []string   `json:"topics"`
+	Archived     bool       `json:"archived"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
+	ExpiresAt    *time.Time `json:"expires_at"` // null when the gist never expires
 }
 
 type Gist struct {

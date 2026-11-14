@@ -84,6 +84,7 @@
                 {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "allow-gists-without-login" "title" (.locale.Tr "admin.allow-gists-without-login") "help" (.locale.Tr "admin.allow-gists-without-login_help") "on" .AllowGistsWithoutLogin) }}
                 {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-login-form" "title" (.locale.Tr "admin.disable-login") "help" (.locale.Tr "admin.disable-login_help") "on" .DisableLoginForm) }}
                 {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-gravatar" "title" (.locale.Tr "admin.disable-gravatar") "help" (.locale.Tr "admin.disable-gravatar_help") "on" .DisableGravatar) }}
+                {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-comments" "title" (.locale.Tr "admin.disable-comments") "help" (.locale.Tr "admin.disable-comments_help") "on" .DisableComments) }}
             </ul>
         </section>
     </div>

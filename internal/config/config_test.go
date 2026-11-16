@@ -1,6 +1,102 @@
 package config
 
-import "testing"
+import (
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestLoadConfigFromYamlNestedKeys(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yml")
+	err := os.WriteFile(path, []byte(`gitea:
+  name: My Gitea
+  url: https://gitea.example.com
+index:
+  meili:
+    host: http://localhost:7700
+custom:
+  static-links:
+    - name: Help
+      path: /help
+`), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := configWithDefaults()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := loadConfigFromYaml(c, path, io.Discard); err != nil {
+		t.Fatal(err)
+	}
+	if c.GiteaName != "My Gitea" || c.GiteaUrl != "https://gitea.example.com" || c.MeiliHost != "http://localhost:7700" {
+		t.Errorf("nested config values: name=%q url=%q host=%q", c.GiteaName, c.GiteaUrl, c.MeiliHost)
+	}
+	if c.Index != "bleve" {
+		t.Errorf("Index = %q, want default bleve", c.Index)
+	}
+	if len(c.StaticLinks) != 1 || c.StaticLinks[0] != (StaticLink{Name: "Help", Path: "/help"}) {
+		t.Errorf("StaticLinks = %v, want Help /help", c.StaticLinks)
+	}
+}
+
+func TestLoadConfigFromYamlDottedKeys(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yml")
+	err := os.WriteFile(path, []byte(`gitea.name: My Gitea
+index: meilisearch
+index.meili.host: http://localhost:7700
+custom.static-links:
+  - name: Help
+    path: /help
+`), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := &config{}
+	if err := loadConfigFromYaml(c, path, io.Discard); err != nil {
+		t.Fatal(err)
+	}
+	if c.GiteaName != "My Gitea" || c.Index != "meilisearch" || c.MeiliHost != "http://localhost:7700" {
+		t.Errorf("dotted config values: name=%q index=%q host=%q", c.GiteaName, c.Index, c.MeiliHost)
+	}
+	if len(c.StaticLinks) != 1 || c.StaticLinks[0] != (StaticLink{Name: "Help", Path: "/help"}) {
+		t.Errorf("StaticLinks = %v, want Help /help", c.StaticLinks)
+	}
+}
+
+func TestLoadConfigFromYamlNestedAndDottedConflict(t *testing.T) {
+	for name, contents := range map[string]string{
+		"dotted first": "gitea.name: First\ngitea:\n  name: Second\n",
+		"nested first": "gitea:\n  name: First\ngitea.name: Second\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "config.yml")
+			if err := os.WriteFile(path, []byte(contents), 0600); err != nil {
+				t.Fatal(err)
+			}
+			err := loadConfigFromYaml(&config{}, path, io.Discard)
+			if err == nil || !strings.Contains(err.Error(), "gitea.name") {
+				t.Fatalf("error = %v, want conflict naming gitea.name", err)
+			}
+		})
+	}
+}
+
+func TestLoadConfigFromYamlEmptyFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yml")
+	if err := os.WriteFile(path, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+	c := &config{GiteaName: "Gitea"}
+	if err := loadConfigFromYaml(c, path, io.Discard); err != nil {
+		t.Fatal(err)
+	}
+	if c.GiteaName != "Gitea" {
+		t.Errorf("GiteaName = %q, want unchanged default", c.GiteaName)
+	}
+}
 
 func TestCheckGitVersion(t *testing.T) {
 	tests := []struct {

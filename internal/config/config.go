@@ -335,19 +335,76 @@ func loadConfigFromYaml(c *config, configPath string, out io.Writer) error {
 			}
 			_, _ = fmt.Fprintln(out, "No YAML config file found at "+absolutePath)
 		} else {
+			defer file.Close()
 			_, _ = fmt.Fprintln(out, "Using YAML config file: "+absolutePath)
 
 			// Override default values with values from config.yml
+			var node yaml.Node
 			d := yaml.NewDecoder(file)
-			if err = d.Decode(&c); err != nil {
+			if err = d.Decode(&node); err == io.EOF {
+				return nil
+			} else if err != nil {
 				return err
 			}
-			defer file.Close()
+			if len(node.Content) > 0 {
+				if err = flattenConfigKeys(node.Content[0]); err != nil {
+					return err
+				}
+			}
+			return node.Decode(c)
 		}
 	} else {
 		_, _ = fmt.Fprintln(out, "No YAML config file specified.")
 	}
 
+	return nil
+}
+
+func flattenConfigKeys(node *yaml.Node) error {
+	if node.Kind != yaml.MappingNode {
+		return nil
+	}
+
+	var content []*yaml.Node
+	configType := reflect.TypeOf(config{})
+	for i := 0; i < len(node.Content); i += 2 {
+		key, value := node.Content[i], node.Content[i+1]
+		nested := false
+		if value.Kind == yaml.MappingNode {
+			for j := 0; j < configType.NumField(); j++ {
+				if strings.HasPrefix(configType.Field(j).Tag.Get("yaml"), key.Value+".") {
+					nested = true
+					break
+				}
+			}
+		}
+		if !nested {
+			content = append(content, key, value)
+			continue
+		}
+
+		expanded := *value
+		expanded.Content = nil
+		for j := 0; j < len(value.Content); j += 2 {
+			childKey := *value.Content[j]
+			childKey.Value = key.Value + "." + childKey.Value
+			expanded.Content = append(expanded.Content, &childKey, value.Content[j+1])
+		}
+		if err := flattenConfigKeys(&expanded); err != nil {
+			return err
+		}
+		content = append(content, expanded.Content...)
+	}
+
+	seen := make(map[string]bool)
+	for i := 0; i < len(content); i += 2 {
+		key := content[i].Value
+		if seen[key] {
+			return fmt.Errorf("duplicate YAML config key %q", key)
+		}
+		seen[key] = true
+	}
+	node.Content = content
 	return nil
 }
 

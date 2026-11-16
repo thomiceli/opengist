@@ -103,15 +103,18 @@ func TryProxyAuthentication(r *http.Request, allowSignup bool) (*db.User, error)
 	return user, nil
 }
 
-// getUserByProxyUsername returns the account named username, ignoring ASCII case
-// only: depending on its collation, the database lookup may also ignore accents
-// and match "elodie" with an "élodie" account.
+// getUserByProxyUsername returns the account named username, an ASCII string,
+// ignoring ASCII case only. The database lookup alone is looser: its collation
+// may ignore accents ("élodie" for "elodie"), and the normalized username it
+// compares lowercases a Kelvin sign to "k", so an account created by LDAP with a
+// non-ASCII name could match.
 func getUserByProxyUsername(username string) (*db.User, error) {
 	user, err := db.GetUserByUsername(username)
 	if err != nil {
 		return nil, err
 	}
-	if strings.ToLower(user.Username) != strings.ToLower(username) {
+	// with both names ASCII, EqualFold only folds ASCII case
+	if !isPrintableASCII(user.Username) || !strings.EqualFold(user.Username, username) {
 		return nil, gorm.ErrRecordNotFound
 	}
 	return user, nil

@@ -113,8 +113,23 @@ func TestProxyAuth(t *testing.T) {
 
 	t.Run("unicode lookalikes do not match an existing user", func(t *testing.T) {
 		// "alİce" lowercases to "alice" in Go, "álice" equals it in MySQL collations
-		for _, username := range []string{"alİce", "álice", "alice​"} {
+		for _, username := range []string{"al\u0130ce", "\u00e1lice", "alice\u200b"} {
 			s.RequestWithHeaders(t, "GET", "/", nil, 403, asUser(username))
+		}
+	})
+
+	t.Run("accounts with a lookalike name are not matched", func(t *testing.T) {
+		// as LDAP may create it: "Kate" with a Kelvin sign, whose normalized
+		// username is "kate"
+		kelvinKate := &db.User{Username: "\u212Aate"}
+		require.NoError(t, kelvinKate.Create())
+
+		resp := s.RequestWithHeaders(t, "GET", "/", nil, 0, asUser("kate"))
+		if resp.StatusCode == 200 {
+			require.Equal(t, "kate", loggedUser().Username)
+		} else {
+			// MySQL collations consider both names equal, refusing to create "kate"
+			require.Equal(t, 403, resp.StatusCode)
 		}
 	})
 

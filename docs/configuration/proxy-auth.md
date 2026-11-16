@@ -87,5 +87,6 @@ server {
 - Usernames belong to the proxy: users cannot change their username, and accounts cannot be created with the registration form or OAuth. Otherwise, a user could take the username of someone who has not used Opengist yet, and keep access to their account.
 - The header takes precedence over the Opengist session. It is not stored in the session, so changing account at the proxy changes it in Opengist too. Logging out must be done at the proxy.
 - Multi-factor authentication configured in Opengist is not asked for; it is up to the proxy.
+- Removing a user at the proxy does not remove their Opengist account: the access tokens, SSH keys and password they set keep working for the API and Git. Delete the account from the admin panel as well.
 - The [API](/docs/api.md) and Git over HTTP do not use the proxy header, they keep authenticating with access tokens and passwords. You may have to exclude them from the proxy authentication (e.g. with the oauth2-proxy `--skip-auth-route` option).
 - Proxy authentication is not available when Opengist listens on a Unix socket.

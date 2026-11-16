@@ -29,6 +29,11 @@ func Register(ctx *context.Context) error {
 		}
 	}
 
+	// usernames belong to the authentication proxy, see allowOauthSignup
+	if auth.ProxyAuthEnabled() {
+		disableSignup = true
+	}
+
 	ctx.SetData("title", ctx.TrH("auth.new-account"))
 	ctx.SetData("htmlTitle", ctx.TrH("auth.new-account"))
 	ctx.SetData("disableForm", disableForm)
@@ -38,6 +43,11 @@ func Register(ctx *context.Context) error {
 }
 
 func ProcessRegister(ctx *context.Context) error {
+	// usernames belong to the authentication proxy, see allowOauthSignup
+	if auth.ProxyAuthEnabled() {
+		return ctx.ErrorRes(403, ctx.Tr("error.signup-disabled"), nil)
+	}
+
 	disableSignup := ctx.GetData("DisableSignup")
 
 	code := ctx.QueryParam("code")

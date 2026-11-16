@@ -160,7 +160,8 @@ ldap.search-filter:
 proxy-auth.user-header:
 # Header set by the authentication proxy with the user email, used when creating the account e.g: X-Auth-Request-Email
 proxy-auth.email-header:
-# Comma-separated list of CIDRs or IP addresses of the proxies allowed to authenticate users e.g: 172.16.0.0/12,127.0.0.1
+# Comma-separated list of CIDRs or IP addresses of the proxies allowed to authenticate users e.g: 127.0.0.1,::1
+# Keep it to the addresses of the proxies: any host in these ranges can log in as any user
 # Required if proxy-auth.user-header is set
 proxy-auth.trusted-cidrs:
 

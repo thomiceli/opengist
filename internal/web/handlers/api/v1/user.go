@@ -12,6 +12,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -42,6 +43,11 @@ func UpdateUser(ctx *context.Context) error {
 	user := ctx.User
 
 	if req.Username != nil && !strings.EqualFold(*req.Username, user.Username) {
+		// See settings.UsernameProcess.
+		if auth.ProxyAuthEnabled() {
+			return ctx.ErrorJson(403, "username is managed by the authentication proxy", nil)
+		}
+
 		// Same validator the web settings page uses (max=24, alphanumdash,
 		// notreserved).
 		dto := &db.UserUsernameDTO{Username: *req.Username}

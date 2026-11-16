@@ -141,7 +141,7 @@
             </div>
             {{ else }}
             <a href="{{ .c.ExternalUrl }}/-/login" class="btn-sm">{{ .locale.Tr "header.menu.login" }}</a>
-            {{ if not .DisableSignup }}
+            {{ if not (or .DisableSignup .c.ProxyAuthUserHeader) }}
             <a href="{{ .c.ExternalUrl }}/-/register" class="btn-sm-outline">{{ .locale.Tr "header.menu.register" }}</a>
             {{ end }}
             {{ end }}

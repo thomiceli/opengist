@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
+	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/auth/oauth"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
@@ -20,6 +21,13 @@ const oauthInvitationSessionKey = "oauthInvitation"
 
 // allowed is false after a rejection, even when writing the redirect succeeds.
 func allowOauthSignup(ctx *context.Context) (*db.Invitation, bool, error) {
+	// with proxy authentication, usernames belong to the proxy: picking one here
+	// would take over the account of a proxy user who has not logged in yet
+	if auth.ProxyAuthEnabled() {
+		ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
+		return nil, false, ctx.Redirect(302, "/-/login")
+	}
+
 	invitationID, ok := ctx.GetSession().Values[oauthInvitationSessionKey].(uint)
 	if ok {
 		invitation, err := db.GetInvitationByID(invitationID)

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/thomiceli/opengist/internal/auth"
 	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
@@ -52,6 +53,14 @@ func AccountDeleteProcess(ctx *context.Context) error {
 }
 
 func UsernameProcess(ctx *context.Context) error {
+	// with proxy authentication, the username ties the account to a proxy user:
+	// renaming would hand it, with its tokens and SSH keys, to whoever has the
+	// new name at the proxy
+	if auth.ProxyAuthEnabled() {
+		ctx.AddFlash(ctx.Tr("error.username-change-disabled"), "error")
+		return ctx.RedirectTo("/-/settings")
+	}
+
 	user := ctx.User
 
 	dto := new(db.UserUsernameDTO)

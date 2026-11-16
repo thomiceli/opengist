@@ -44,7 +44,15 @@ func TryProxyAuthentication(r *http.Request, allowSignup bool) (*db.User, error)
 		return nil, nil
 	}
 
-	user, err := db.GetUserByUsername(username)
+	// Opengist usernames are ASCII; checking it before the case-insensitive
+	// lookup keeps another name from matching an account through Unicode case
+	// folding, e.g. "admİn" for "admin"
+	if !isPrintableASCII(username) {
+		log.Warn().Msgf("Refusing proxy authentication: invalid username %q", username)
+		return nil, ErrProxyAuthInvalidUsername
+	}
+
+	user, err := getUserByProxyUsername(username)
 	if err == nil {
 		return user, nil
 	}
@@ -77,7 +85,10 @@ func TryProxyAuthentication(r *http.Request, allowSignup bool) (*db.User, error)
 	if err = user.Create(); err != nil {
 		// a concurrent request for the same new user may have created it first
 		if db.IsUniqueConstraintViolation(err) {
-			return db.GetUserByUsername(username)
+			if user, err = getUserByProxyUsername(username); errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, ErrProxyAuthInvalidUsername
+			}
+			return user, err
 		}
 		log.Warn().Err(err).Msg("Cannot create user after proxy authentication")
 		return nil, err
@@ -90,6 +101,29 @@ func TryProxyAuthentication(r *http.Request, allowSignup bool) (*db.User, error)
 	}
 
 	return user, nil
+}
+
+// getUserByProxyUsername returns the account named username, ignoring ASCII case
+// only: depending on its collation, the database lookup may also ignore accents
+// and match "elodie" with an "élodie" account.
+func getUserByProxyUsername(username string) (*db.User, error) {
+	user, err := db.GetUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+	if strings.ToLower(user.Username) != strings.ToLower(username) {
+		return nil, gorm.ErrRecordNotFound
+	}
+	return user, nil
+}
+
+func isPrintableASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] < '!' || s[i] > '~' {
+			return false
+		}
+	}
+	return true
 }
 
 func isTrustedProxy(remoteAddr string) bool {

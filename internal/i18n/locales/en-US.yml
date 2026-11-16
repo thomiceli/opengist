@@ -300,6 +300,7 @@ error.page-not-found: Page not found
 error.bad-request: Bad request
 error.signup-disabled: Signing up is disabled
 error.signup-disabled-form: Signing up via registration form is disabled
+error.username-change-disabled: Usernames are managed by the authentication proxy
 error.login-disabled-form: Logging in via login form is disabled
 error.complete-oauth-login: "Cannot complete user auth: %s"
 error.oauth-unsupported: Unsupported OAuth2 provider

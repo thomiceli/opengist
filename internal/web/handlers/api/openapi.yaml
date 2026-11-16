@@ -588,7 +588,8 @@ paths:
         body are changed.
 
         The username goes through the same rules as the web settings page
-        (max 24 characters, alphanumeric and dashes, not a reserved word). The
+        (max 24 characters, alphanumeric and dashes, not a reserved word), and
+        cannot be changed when proxy authentication is enabled (403). The
         email is lowercased server-side and the gravatar hash recomputed.
       requestBody:
         required: true

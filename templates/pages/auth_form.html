@@ -78,7 +78,7 @@
         {{ if not .disableForm }}
         <p class="text-muted-foreground text-center text-sm">
             {{ if .isLoginPage }}
-                {{ if not .DisableSignup }}
+                {{ if not (or .DisableSignup .c.ProxyAuthUserHeader) }}
                 <a href="{{ .c.ExternalUrl }}/-/register" class="text-primary font-medium hover:underline">{{ .locale.Tr "auth.register-instead" }} →</a>
                 {{ end }}
             {{ else }}

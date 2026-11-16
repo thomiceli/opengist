@@ -298,4 +298,24 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		require.Equal(t, "/", resp.Request.URL.Path,
 			"re-authenticating as the already-linked user must not be treated as a conflicting link attempt")
 	})
+
+	t.Run("proxy authentication disables registration", func(t *testing.T) {
+		require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "0"))
+		invitation := &db.Invitation{ExpiresAt: time.Now().Add(time.Hour).Unix(), NbMax: 1}
+		require.NoError(t, invitation.Create())
+
+		resp, _, client := login(t, invitation.Code, nil)
+		_ = resp.Body.Close()
+		require.Equal(t, "/oauth/register", resp.Request.URL.Path)
+
+		config.C.ProxyAuthUserHeader = "X-Auth-Request-User"
+		defer func() { config.C.ProxyAuthUserHeader = "" }()
+
+		assertRegistrationDenied(t, client, "proxied")
+
+		// an invitation does not allow it either
+		resp, _, _ = login(t, invitation.Code, nil)
+		_ = resp.Body.Close()
+		require.Equal(t, "/-/login", resp.Request.URL.Path)
+	})
 }

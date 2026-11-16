@@ -41,6 +41,9 @@
         <div class="border-b px-4 py-3">
             <h2 class="font-semibold">{{ .locale.Tr "settings.change-username" }}</h2>
         </div>
+        {{ if .c.ProxyAuthUserHeader }}
+        <p class="text-muted-foreground p-4 text-sm">{{ .locale.Tr "error.username-change-disabled" }}</p>
+        {{ else }}
         <form action="{{ .c.ExternalUrl }}/-/settings/username" method="post" class="space-y-4 p-4">
             {{ .csrfHtml }}
             <input type="hidden" name="_method" value="PUT" />
@@ -52,6 +55,7 @@
                 <button type="submit" class="btn-sm">{{ .locale.Tr "settings.change-username" }}</button>
             </div>
         </form>
+        {{ end }}
     </section>
 
     <!-- Email -->

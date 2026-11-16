@@ -29,9 +29,10 @@ The header names depend on your proxy:
 | Authentik                                    | `X-authentik-username`              | `X-authentik-email`    |
 
 ::: warning
-The header is only trusted when the request comes directly from an address in `proxy-auth.trusted-cidrs`. This is the address of the TCP connection, not the `X-Forwarded-For` header. Still, make sure:
-- Opengist is not reachable without going through the proxy from any trusted address,
-- the proxy always overwrites or removes the user header sent by the client.
+The header is only trusted when the request comes directly from an address in `proxy-auth.trusted-cidrs`. This is the address of the TCP connection, not the `X-Forwarded-For` header. Any host in these ranges can log in as any user, so:
+- keep `proxy-auth.trusted-cidrs` to the addresses of the proxies themselves, not a whole network such as `172.16.0.0/12` for Docker,
+- make sure Opengist is not reachable without going through the proxy from any trusted address. Some container setups (e.g. rootless Docker or Podman) make every client appear to come from the same internal address: check which address Opengist sees, it is logged when the header is sent from an untrusted address,
+- make sure the proxy always overwrites or removes the user header sent by the client, including on the routes it does not authenticate.
 :::
 
 ## Example with Nginx and oauth2-proxy
@@ -80,10 +81,11 @@ server {
 
 ## Behavior
 
-- The header value is the Opengist username (case-insensitive). If an account with this username already exists, including one created with a password or OAuth, the user is logged in as that account.
+- The header value is the Opengist username (case-insensitive). If an account with this username already exists, including one created with a password or OAuth, the user is logged in as that account: when enabling proxy authentication on an existing instance, make sure existing usernames belong to the same people at the proxy.
+- The header value must be printable ASCII; other values are refused, so that a lookalike name such as `admİn` cannot log in as `admin`.
 - Unknown users get an account created, unless signing up is disabled in the [admin panel](admin-panel.md). As with other sign-up methods, the first account created is an admin. The username must be a valid Opengist username (at most 24 letters, digits or dashes); prefer a "preferred username" header over a user ID or an email.
+- Usernames belong to the proxy: users cannot change their username, and accounts cannot be created with the registration form or OAuth. Otherwise, a user could take the username of someone who has not used Opengist yet, and keep access to their account.
 - The header takes precedence over the Opengist session. It is not stored in the session, so changing account at the proxy changes it in Opengist too. Logging out must be done at the proxy.
 - Multi-factor authentication configured in Opengist is not asked for; it is up to the proxy.
-- Renaming an account from the Opengist settings does not rename it at the proxy: the next request would log in, or create, the account with the old username.
 - The [API](/docs/api.md) and Git over HTTP do not use the proxy header, they keep authenticating with access tokens and passwords. You may have to exclude them from the proxy authentication (e.g. with the oauth2-proxy `--skip-auth-route` option).
 - Proxy authentication is not available when Opengist listens on a Unix socket.

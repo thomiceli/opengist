@@ -1143,7 +1143,7 @@ components:
         html_url:
           type: string
           format: uri
-          description: URL of the comment on the gist page.
+          description: Web permalink of the comment, redirecting to the gist page or the comments page, wherever it is shown.
         body:
           type: string
           description: Markdown content of the comment.

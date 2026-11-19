@@ -4,7 +4,7 @@ import "time"
 
 // GistComment is the shape returned by the gist comments endpoints. `body` is
 // the raw Markdown content of the comment; `url` is its API URL and
-// `html_url` the comment anchor on the gist page.
+// `html_url` its web permalink, which redirects to wherever it is shown.
 type GistComment struct {
 	ID        uint       `json:"id"`
 	URL       string     `json:"url"`

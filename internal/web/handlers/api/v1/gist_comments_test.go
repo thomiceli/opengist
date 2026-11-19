@@ -75,7 +75,7 @@ func TestCreateComment_API(t *testing.T) {
 		require.Equal(t, "Nice *gist*", c.Body)
 		require.Equal(t, "other", c.User.Username)
 		require.True(t, strings.HasSuffix(c.URL, commentURI(g.Uuid, c.ID)), c.URL)
-		require.True(t, strings.HasSuffix(c.HTMLUrl, "/owner/"+ident+"#comment-"+strconv.FormatUint(uint64(c.ID), 10)), c.HTMLUrl)
+		require.True(t, strings.HasSuffix(c.HTMLUrl, "/owner/"+ident+"/comments/"+strconv.FormatUint(uint64(c.ID), 10)), c.HTMLUrl)
 		require.Equal(t, c.CreatedAt, c.UpdatedAt)
 		require.Equal(t, c.URL, w.Header().Get("Location"))
 

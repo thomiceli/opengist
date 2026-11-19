@@ -219,7 +219,9 @@ func (s *Server) registerRoutes() {
 			sC.POST("/fork", gist.Fork, logged)
 			sC.GET("/forks", gist.Forks, checkRequireLogin)
 			sC.PUT("/checkbox", gist.Checkbox, logged, writePermission, notArchived)
+			sC.GET("/comments", gist.Comments, commentsEnabled)
 			sC.POST("/comments", gist.CreateComment, logged, commentsEnabled, notArchived)
+			sC.GET("/comments/:id", gist.CommentPermalink, commentsEnabled)
 			sC.POST("/comments/:id/edit", gist.EditComment, logged, commentsEnabled, notArchived)
 			sC.POST("/comments/:id/delete", gist.DeleteComment, logged, commentsEnabled)
 		}

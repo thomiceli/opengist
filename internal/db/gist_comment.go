@@ -1,6 +1,7 @@
 package db
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -47,9 +48,33 @@ func (gist *Gist) GetCommentsPage(offset int, limit int, perPage int) ([]*GistCo
 	return comments, err
 }
 
+// GetLastComments returns the last n comments posted on the gist, oldest
+// first, with their author preloaded.
+func (gist *Gist) GetLastComments(n int) ([]*GistComment, error) {
+	var comments []*GistComment
+	err := db.Preload("User").
+		Where("gist_id = ?", gist.ID).
+		Order("created_at desc, id desc").
+		Limit(n).
+		Find(&comments).Error
+	slices.Reverse(comments)
+	return comments, err
+}
+
 func (gist *Gist) CountComments() (int64, error) {
 	var count int64
 	err := db.Model(&GistComment{}).Where("gist_id = ?", gist.ID).Count(&count).Error
+	return count, err
+}
+
+// Position returns how many comments were posted on the gist before this one,
+// in the same oldest first order as GetCommentsPage.
+func (comment *GistComment) Position() (int64, error) {
+	var count int64
+	err := db.Model(&GistComment{}).
+		Where("gist_id = ? AND (created_at < ? OR (created_at = ? AND id < ?))",
+			comment.GistID, comment.CreatedAt, comment.CreatedAt, comment.ID).
+		Count(&count).Error
 	return count, err
 }
 

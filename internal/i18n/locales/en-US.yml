@@ -95,6 +95,9 @@ gist.comments.placeholder: Leave a comment
 gist.comments.markdown-help: Markdown is supported.
 gist.comments.login: Log in to leave a comment
 gist.comments.archived: This gist is archived, new comments cannot be added.
+gist.comments.view-more: View more comments
+gist.comments.no: No comments yet
+gist.comments.for: Comments for %s
 
 gist.list.joined: Joined
 gist.list.all: All gists

@@ -137,7 +137,7 @@ func (comment *GistComment) ToAPI(baseURL string, gist *Gist) types.GistComment 
 	return types.GistComment{
 		ID:        comment.ID,
 		URL:       baseURL + "/api/gists/" + gist.Uuid + "/comments/" + id,
-		HTMLUrl:   baseURL + "/" + gist.User.Username + "/" + gist.Identifier() + "#comment-" + id,
+		HTMLUrl:   baseURL + "/" + gist.User.Username + "/" + gist.Identifier() + "/comments/" + id,
 		Body:      comment.Content,
 		User:      comment.User.ToSimpleAPI(),
 		CreatedAt: time.Unix(comment.CreatedAt, 0).UTC(),

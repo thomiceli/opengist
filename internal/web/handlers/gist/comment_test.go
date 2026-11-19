@@ -1,6 +1,7 @@
 package gist_test
 
 import (
+	"fmt"
 	"io"
 	"net/url"
 	"strconv"
@@ -154,7 +155,7 @@ func TestCreateComment(t *testing.T) {
 		_, _, username, identifier := s.CreateGist(t, "0")
 
 		s.Login(t, "alice")
-		postComment(t, s, username, identifier, "visible before disabling", 302)
+		comment := postComment(t, s, username, identifier, "visible before disabling", 302)
 
 		require.NoError(t, db.UpdateSetting(db.SettingDisableComments, "1"))
 		defer func() {
@@ -163,12 +164,16 @@ func TestCreateComment(t *testing.T) {
 
 		s.Request(t, "POST", "/"+username+"/"+identifier+"/comments", url.Values{"content": {"hello"}}, 403)
 		requireNbComments(t, username, identifier, 1)
+		s.Request(t, "GET", "/"+username+"/"+identifier+"/comments", nil, 403)
+		s.Request(t, "GET", commentPath(username, identifier, comment), nil, 403)
 
 		resp := s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
 		body, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.NotContains(t, string(body), "visible before disabling")
 		require.NotContains(t, string(body), `id="comments"`)
+		// Nor the link to the comments page in the sidebar
+		require.NotContains(t, string(body), "/"+username+"/"+identifier+"/comments")
 	})
 
 	t.Run("CommentsDisabledByConfig", func(t *testing.T) {
@@ -185,6 +190,7 @@ func TestCreateComment(t *testing.T) {
 
 		s.Request(t, "POST", "/"+username+"/"+identifier+"/comments", url.Values{"content": {"hello"}}, 403)
 		requireNbComments(t, username, identifier, 1)
+		s.Request(t, "GET", "/"+username+"/"+identifier+"/comments", nil, 403)
 
 		resp := s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
 		body, err := io.ReadAll(resp.Body)
@@ -383,5 +389,100 @@ func TestCommentsCleanup(t *testing.T) {
 
 		_, err := db.GetGistComment(gist.ID, comment.ID)
 		require.Error(t, err)
+	})
+}
+
+func TestCommentsPagination(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+	s.Register(t, "alice")
+
+	s.Login(t, "thomas")
+	_, gist, username, identifier := s.CreateGist(t, "0")
+	gistPath := "/" + username + "/" + identifier
+
+	alice, err := db.GetUserByUsername("alice")
+	require.NoError(t, err)
+
+	// 36 comments: the gist page shows the last 5, the comments page lists the
+	// first 30 on page 1 and the last 6 on page 2
+	comments := make([]*db.GistComment, 36)
+	for i := range comments {
+		comments[i] = &db.GistComment{GistID: gist.ID, UserID: alice.ID, Content: fmt.Sprintf("Comment %02d.", i+1)}
+		require.NoError(t, comments[i].Create())
+	}
+	commentId := func(nb int) string {
+		return strconv.FormatUint(uint64(comments[nb-1].ID), 10)
+	}
+	getBody := func(uri string) string {
+		resp := s.Request(t, "GET", uri, nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		return string(body)
+	}
+
+	t.Run("GistPageShowsLastComments", func(t *testing.T) {
+		body := getBody(gistPath)
+		require.NotContains(t, body, "Comment 31.")
+		for nb := 32; nb <= 36; nb++ {
+			require.Contains(t, body, fmt.Sprintf("Comment %02d.", nb))
+		}
+		require.Contains(t, body, "View more comments")
+	})
+
+	t.Run("NoViewMoreWithFewComments", func(t *testing.T) {
+		_, other, otherUsername, otherIdentifier := s.CreateGist(t, "0")
+		for nb := 1; nb <= 5; nb++ {
+			require.NoError(t, (&db.GistComment{GistID: other.ID, UserID: alice.ID, Content: fmt.Sprintf("Other %d.", nb)}).Create())
+		}
+
+		body := getBody("/" + otherUsername + "/" + otherIdentifier)
+		for nb := 1; nb <= 5; nb++ {
+			require.Contains(t, body, fmt.Sprintf("Other %d.", nb))
+		}
+		require.NotContains(t, body, "View more comments")
+	})
+
+	t.Run("CommentsPage", func(t *testing.T) {
+		body := getBody(gistPath + "/comments")
+		require.Contains(t, body, "Comment 01.")
+		require.Contains(t, body, "Comment 30.")
+		require.NotContains(t, body, "Comment 31.")
+
+		body = getBody(gistPath + "/comments?page=2")
+		require.NotContains(t, body, "Comment 30.")
+		require.Contains(t, body, "Comment 31.")
+		require.Contains(t, body, "Comment 36.")
+
+		s.Request(t, "GET", gistPath+"/comments?page=3", nil, 404)
+	})
+
+	t.Run("Permalink", func(t *testing.T) {
+		for nb, location := range map[int]string{
+			1:  gistPath + "/comments?page=1#comment-" + commentId(1),
+			31: gistPath + "/comments?page=2#comment-" + commentId(31),
+			32: gistPath + "#comment-" + commentId(32),
+			36: gistPath + "#comment-" + commentId(36),
+		} {
+			resp := s.Request(t, "GET", gistPath+"/comments/"+commentId(nb), nil, 302)
+			require.Equal(t, location, resp.Header.Get("Location"))
+		}
+
+		s.Request(t, "GET", gistPath+"/comments/999999", nil, 404)
+	})
+
+	t.Run("EditOldComment", func(t *testing.T) {
+		s.Login(t, "alice")
+		resp := s.Request(t, "POST", gistPath+"/comments/"+commentId(1)+"/edit", url.Values{"content": {"Comment 01, edited."}}, 302)
+		require.Equal(t, gistPath+"/comments?page=1#comment-"+commentId(1), resp.Header.Get("Location"))
+	})
+
+	t.Run("DeleteOldComment", func(t *testing.T) {
+		s.Login(t, "alice")
+		resp := s.Request(t, "POST", gistPath+"/comments/"+commentId(31)+"/delete", nil, 302)
+		require.Equal(t, gistPath+"/comments?page=2", resp.Header.Get("Location"))
+		requireNbComments(t, username, identifier, 35)
 	})
 }

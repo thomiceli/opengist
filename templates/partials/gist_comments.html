@@ -87,6 +87,6 @@
      post the enclosing form to /preview and render the result in .comment-preview,
      which stays hidden while empty. */}}
 {{ define "gist_comment_editor" }}
-<textarea name="content" rows="5" required maxlength="65535" aria-label="{{ .locale.Tr "gist.comments.placeholder" }}" placeholder="{{ .locale.Tr "gist.comments.placeholder" }}" class="input font-mono">{{ .content }}</textarea>
+<textarea name="content" rows="5" required maxlength="3000" aria-label="{{ .locale.Tr "gist.comments.placeholder" }}" placeholder="{{ .locale.Tr "gist.comments.placeholder" }}" class="input font-mono">{{ .content }}</textarea>
 <div class="comment-preview markdown markdown-body rounded-md border px-4 py-3 empty:hidden"></div>
 {{ end }}

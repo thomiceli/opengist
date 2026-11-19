@@ -608,7 +608,7 @@ paths:
         return `403`.
 
         `body` is Markdown, rendered on the gist page the same way as Markdown
-        files. It must not be blank and is limited to 65535 characters.
+        files. It must not be blank and is limited to 3000 characters.
       requestBody:
         required: true
         content:
@@ -1157,7 +1157,7 @@ components:
       properties:
         body:
           type: string
-          description: Markdown content of the comment. Must not be blank; at most 65535 characters.
+          description: Markdown content of the comment. Must not be blank; at most 3000 characters.
       required: [body]
 
     GistCreateFileInput:

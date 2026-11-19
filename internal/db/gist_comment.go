@@ -121,7 +121,7 @@ func (comment *GistComment) CanDelete(user *User, gist *Gist) bool {
 // -- DTO -- //
 
 type GistCommentDTO struct {
-	Content string `validate:"required,max=65535" form:"content"`
+	Content string `validate:"required,max=3000" form:"content"`
 }
 
 // Normalize converts CRLF line endings (sent by browser textareas) to LF and

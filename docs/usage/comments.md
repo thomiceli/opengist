@@ -1,7 +1,8 @@
 # Comments
 
 Logged-in users can comment on any gist they can see. Comments are written in Markdown, rendered
-like Markdown files, and listed under the files of the gist, oldest first.
+like Markdown files, and listed under the files of the gist, oldest first. A comment is limited to
+3000 characters.
 
 Comments are stored in the database, not in the Git repository of the gist, so they are not part of
 its revisions and are not cloned along with it.

@@ -97,7 +97,7 @@ func TestCreateComment_API(t *testing.T) {
 			"missing":    map[string]string{},
 			"empty":      map[string]string{"body": ""},
 			"whitespace": map[string]string{"body": " \n\t "},
-			"too long":   map[string]string{"body": strings.Repeat("a", 65536)},
+			"too long":   map[string]string{"body": strings.Repeat("a", 3001)},
 			"not json":   "{",
 		} {
 			t.Run(name, func(t *testing.T) {

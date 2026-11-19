@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/url"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -95,12 +96,18 @@ func TestCreateComment(t *testing.T) {
 		_, _, username, identifier := s.CreateGist(t, "0")
 
 		s.Login(t, "alice")
-		long := make([]byte, 65536)
-		for i := range long {
-			long[i] = 'a'
-		}
-		s.Request(t, "POST", "/"+username+"/"+identifier+"/comments", url.Values{"content": {string(long)}}, 302)
+		s.Request(t, "POST", "/"+username+"/"+identifier+"/comments", url.Values{"content": {strings.Repeat("a", 3001)}}, 302)
 		requireNbComments(t, username, identifier, 0)
+	})
+
+	t.Run("MaxLength", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		s.Login(t, "alice")
+		postComment(t, s, username, identifier, strings.Repeat("a", 3000), 302)
+		// The limit counts characters, not bytes
+		postComment(t, s, username, identifier, strings.Repeat("é", 3000), 302)
+		requireNbComments(t, username, identifier, 2)
 	})
 
 	t.Run("NoAuth", func(t *testing.T) {

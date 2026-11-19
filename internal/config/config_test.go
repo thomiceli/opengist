@@ -75,13 +75,16 @@ func TestChecksProxyAuth(t *testing.T) {
 		name      string
 		header    string
 		cidrs     string
+		host      string
 		wantError bool
 	}{
-		{"disabled", "", "", false},
-		{"disabled ignores cidrs", "", "not-an-ip", false},
-		{"enabled with cidrs", "X-Auth-Request-User", "10.0.0.0/8", false},
-		{"enabled without cidrs", "X-Auth-Request-User", "", true},
-		{"enabled with invalid cidrs", "X-Auth-Request-User", "10.0.0.0/33", true},
+		{"disabled", "", "", "", false},
+		{"disabled ignores cidrs", "", "not-an-ip", "", false},
+		{"disabled on a Unix socket", "", "", "/run/opengist.sock", false},
+		{"enabled with cidrs", "X-Auth-Request-User", "10.0.0.0/8", "", false},
+		{"enabled without cidrs", "X-Auth-Request-User", "", "", true},
+		{"enabled with invalid cidrs", "X-Auth-Request-User", "10.0.0.0/33", "", true},
+		{"enabled on a Unix socket", "X-Auth-Request-User", "10.0.0.0/8", "/run/opengist.sock", true},
 	}
 
 	for _, tt := range tests {
@@ -89,6 +92,9 @@ func TestChecksProxyAuth(t *testing.T) {
 			c, _ := configWithDefaults()
 			c.ProxyAuthUserHeader = tt.header
 			c.ProxyAuthTrustedCIDRs = tt.cidrs
+			if tt.host != "" {
+				c.HttpHost = tt.host
+			}
 			if err := checks(c); (err != nil) != tt.wantError {
 				t.Fatalf("checks() error = %v, wantError %v", err, tt.wantError)
 			}

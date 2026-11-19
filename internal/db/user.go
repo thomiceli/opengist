@@ -196,6 +196,19 @@ func GetUserByUsername(username string) (*User, error) {
 	return user, err
 }
 
+// GetUsersByUsername returns every user whose normalized username matches
+// username, oldest first. Several users can match: the database collation may
+// ignore accents, lowercasing turns a Kelvin sign into "k", and not every
+// database has a unique index on usernames.
+func GetUsersByUsername(username string) ([]*User, error) {
+	var users []*User
+	err := db.
+		Where("username_normalized = ?", strings.ToLower(username)).
+		Order("id asc").
+		Find(&users).Error
+	return users, err
+}
+
 func GetUserById(userId uint) (*User, error) {
 	user := new(User)
 	err := db.

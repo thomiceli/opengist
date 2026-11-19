@@ -1,7 +1,9 @@
 package auth_test
 
 import (
+	"net/http/httptest"
 	"net/url"
+	"sync"
 	"testing"
 	"time"
 
@@ -36,10 +38,24 @@ func TestProxyAuth(t *testing.T) {
 		return exists
 	}
 
+	// accountsNamed counts the accounts named exactly username, which the
+	// database does not keep unique
+	accountsNamed := func(username string) int {
+		users, err := db.GetUsersByUsername(username)
+		require.NoError(t, err)
+		n := 0
+		for _, user := range users {
+			if user.Username == username {
+				n++
+			}
+		}
+		return n
+	}
+
 	t.Run("creates and logs in a new user", func(t *testing.T) {
 		s.RequestWithHeaders(t, "GET", "/", nil, 200, map[string]string{
 			"X-Auth-Request-User":  "alice",
-			"X-Auth-Request-Email": "alice@example.com",
+			"X-Auth-Request-Email": "Alice@Example.com",
 		})
 		require.NotNil(t, loggedUser())
 		require.Equal(t, "alice", loggedUser().Username)
@@ -119,18 +135,64 @@ func TestProxyAuth(t *testing.T) {
 	})
 
 	t.Run("accounts with a lookalike name are not matched", func(t *testing.T) {
-		// as LDAP may create it: "Kate" with a Kelvin sign, whose normalized
-		// username is "kate"
-		kelvinKate := &db.User{Username: "\u212Aate"}
-		require.NoError(t, kelvinKate.Create())
+		// as LDAP may create them: "Kate" with a Kelvin sign, whose normalized
+		// username is "kate", and "\u00E9lodie", equal to "elodie" in MySQL collations
+		for lookalike, username := range map[string]string{"\u212Aate": "kate", "\u00E9lodie": "elodie"} {
+			require.NoError(t, (&db.User{Username: lookalike}).Create())
 
-		resp := s.RequestWithHeaders(t, "GET", "/", nil, 0, asUser("kate"))
-		if resp.StatusCode == 200 {
-			require.Equal(t, "kate", loggedUser().Username)
-		} else {
-			// MySQL collations consider both names equal, refusing to create "kate"
-			require.Equal(t, 403, resp.StatusCode)
+			// the lookalike must not keep the account created by the first login
+			// from being found by the next ones
+			var id uint
+			for i := 0; i < 3; i++ {
+				s.RequestWithHeaders(t, "GET", "/", nil, 200, asUser(username))
+				require.Equal(t, username, loggedUser().Username)
+				if id == 0 {
+					id = loggedUser().ID
+				}
+				require.Equal(t, id, loggedUser().ID)
+			}
+			require.Equal(t, 1, accountsNamed(username))
 		}
+	})
+
+	t.Run("concurrent first logins create a single account", func(t *testing.T) {
+		start := make(chan struct{})
+		codes := make(chan int, 20)
+		var wg sync.WaitGroup
+		for i := 0; i < 20; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				<-start
+				codes <- s.RequestWithHeaders(t, "GET", "/", nil, 0, asUser("grace")).StatusCode
+			}()
+		}
+		close(start)
+		wg.Wait()
+		close(codes)
+
+		for code := range codes {
+			require.Equal(t, 200, code)
+		}
+		require.Equal(t, 1, accountsNamed("grace"))
+	})
+
+	t.Run("repeated headers are not trusted", func(t *testing.T) {
+		// a proxy adding its header after the one of the client
+		req := httptest.NewRequest("GET", "/", nil)
+		req.Header.Add("X-Auth-Request-User", "mallory")
+		req.Header.Add("X-Auth-Request-User", "alice")
+		s.RawRequest(t, req, 403)
+		require.False(t, userExists("mallory"))
+
+		req = httptest.NewRequest("GET", "/", nil)
+		req.Header.Set("X-Auth-Request-User", "heidi")
+		req.Header.Add("X-Auth-Request-Email", "alice@example.com")
+		req.Header.Add("X-Auth-Request-Email", "heidi@example.com")
+		s.RawRequest(t, req, 200)
+		heidi, err := db.GetUserByUsername("heidi")
+		require.NoError(t, err)
+		require.Empty(t, heidi.Email)
 	})
 
 	t.Run("local registration is disabled", func(t *testing.T) {
@@ -170,8 +232,47 @@ func TestProxyAuth(t *testing.T) {
 		s.APIRequest(t, "PATCH", "/api/user", plainToken, map[string]string{"email": "alice@corp.example"}, 200)
 	})
 
+	t.Run("requests from other sites are only authenticated as navigations", func(t *testing.T) {
+		resp := s.RequestWithHeaders(t, "POST", "/", url.Values{
+			"title":   {"secret"},
+			"name":    {"file.txt"},
+			"content": {"hello"},
+			"private": {"2"},
+		}, 302, asUser("alice"))
+		gist := resp.Header.Get("Location")
+
+		fromOtherSite := func(mode, dest string) map[string]string {
+			return map[string]string{
+				"X-Auth-Request-User": "alice",
+				"Sec-Fetch-Site":      "cross-site",
+				"Sec-Fetch-Mode":      mode,
+				"Sec-Fetch-Dest":      dest,
+			}
+		}
+
+		// a <script> tag or an iframe on another site, which must not see the
+		// private gist even if the proxy cookie is SameSite=None
+		s.RequestWithHeaders(t, "GET", gist+".js", nil, 404, fromOtherSite("no-cors", "script"))
+		s.RequestWithHeaders(t, "GET", gist, nil, 404, fromOtherSite("navigate", "iframe"))
+
+		// following a link from another site
+		s.RequestWithHeaders(t, "GET", gist, nil, 200, fromOtherSite("navigate", "document"))
+		require.Equal(t, "alice", loggedUser().Username)
+
+		s.RequestWithHeaders(t, "GET", gist+".js", nil, 200, asUser("alice"))
+	})
+
 	t.Run("not used by the API", func(t *testing.T) {
 		s.RequestWithHeaders(t, "GET", "/api/gists/liked", nil, 401, asUser("alice"))
+	})
+
+	t.Run("LDAP does not create accounts", func(t *testing.T) {
+		// nothing listens there: LDAP must not even be asked
+		config.C.LDAPUrl = "ldap://127.0.0.1:1"
+		defer func() { config.C.LDAPUrl = "" }()
+
+		s.Request(t, "POST", "/-/login", db.UserDTO{Username: "ivan", Password: "ivan"}, 302)
+		require.False(t, userExists("ivan"))
 	})
 
 	t.Run("disabled", func(t *testing.T) {

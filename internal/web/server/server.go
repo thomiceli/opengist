@@ -49,12 +49,8 @@ func NewServer(isDev bool) *Server {
 	return s
 }
 
-func isSocketPath(host string) bool {
-	return strings.Contains(host, "/") || strings.Contains(host, "\\")
-}
-
 func (s *Server) Start() {
-	if isSocketPath(config.C.HttpHost) {
+	if config.C.HttpListensOnSocket() {
 		s.startUnixSocket()
 	} else {
 		s.startHTTP()
@@ -115,7 +111,7 @@ func (s *Server) startUnixSocket() {
 }
 
 func (s *Server) Stop() {
-	if isSocketPath(config.C.HttpHost) {
+	if config.C.HttpListensOnSocket() {
 		s.stopUnixSocket()
 	} else {
 		s.stopHTTP()

@@ -157,6 +157,7 @@ ldap.search-filter:
 # Reverse proxy authentication configuration
 # Header set by the authentication proxy with the username e.g: X-Auth-Request-Preferred-Username ;
 # if not set, proxy authentication is disabled
+# Users must not be able to change this username at the proxy, as it is matched with existing accounts
 proxy-auth.user-header:
 # Header set by the authentication proxy with the user email, used when creating the account e.g: X-Auth-Request-Email
 proxy-auth.email-header:

@@ -386,10 +386,16 @@ func sessionInit(next Handler) Handler {
 // switches them here too. /api keeps to its own token authentication, as it is
 // not protected against CSRF, and /assets is skipped so that a rejected user
 // still gets a styled error page.
+//
+// The header vouches for the proxy cookie, which browsers send according to the
+// SameSite attribute the proxy chose, so requests from other sites get what the
+// SameSite=Lax session cookie would: following a link to Opengist is
+// authenticated, but not e.g. a <script> tag loading the embed of a private gist.
 func proxyAuth(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		path := ctx.Request().URL.Path
-		if !auth.ProxyAuthEnabled() || strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/assets/") {
+		if !auth.ProxyAuthEnabled() || strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/assets/") ||
+			isCrossSiteSubrequest(ctx.Request()) {
 			return next(ctx)
 		}
 
@@ -412,6 +418,20 @@ func proxyAuth(next Handler) Handler {
 		}
 		return next(ctx)
 	}
+}
+
+// isCrossSiteSubrequest reports whether a browser sent the request for another
+// site, other than to load a whole page from Opengist with a safe method: the
+// requests a SameSite=Lax cookie is left out of. Browsers too old to send Fetch
+// Metadata headers are not detected.
+func isCrossSiteSubrequest(r *http.Request) bool {
+	if r.Header.Get("Sec-Fetch-Site") != "cross-site" {
+		return false
+	}
+	topLevelNavigation := r.Header.Get("Sec-Fetch-Mode") == "navigate" &&
+		r.Header.Get("Sec-Fetch-Dest") == "document" &&
+		(r.Method == http.MethodGet || r.Method == http.MethodHead)
+	return !topLevelNavigation
 }
 
 // newCSPNonce returns a fresh random nonce for the Content-Security-Policy of

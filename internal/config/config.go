@@ -138,6 +138,12 @@ func (c *config) SshManagesAuthorizedKeys() bool {
 	return c.SshGit == SshServerHost && c.SshAuthorizedKeysFile != ""
 }
 
+// HttpListensOnSocket reports whether http.host is the path of a Unix socket
+// rather than an address.
+func (c *config) HttpListensOnSocket() bool {
+	return strings.Contains(c.HttpHost, "/") || strings.Contains(c.HttpHost, "\\")
+}
+
 // ProxyAuthTrustedNetworks parses proxy-auth.trusted-cidrs, a comma-separated
 // list of CIDRs; a bare IP address is read as a single-host network.
 func (c *config) ProxyAuthTrustedNetworks() ([]netip.Prefix, error) {
@@ -513,6 +519,10 @@ func checks(c *config) error {
 		if len(networks) == 0 {
 			return fmt.Errorf("proxy-auth.user-header is set but proxy-auth.trusted-cidrs is empty; " +
 				"set the addresses of the reverse proxies allowed to authenticate users")
+		}
+		if c.HttpListensOnSocket() {
+			return fmt.Errorf("proxy-auth.user-header is set but http.host is a Unix socket, which does not give " +
+				"the address of the reverse proxy; listen on a TCP address to use proxy authentication")
 		}
 	}
 

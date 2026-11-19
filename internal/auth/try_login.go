@@ -32,6 +32,12 @@ func TryAuthentication(username, password string) (*db.User, error) {
 		return tryDbLogin(user, password)
 	} else {
 		if ldap.Enabled() {
+			// with proxy authentication, usernames belong to the proxy: creating
+			// the account here would take over the account of a proxy user who has
+			// not logged in yet, if LDAP names someone else
+			if errors.Is(err, gorm.ErrRecordNotFound) && ProxyAuthEnabled() {
+				return nil, ErrProxyAuthSignupDisabled
+			}
 			return tryLdapLogin(username, password)
 		}
 		return nil, AuthError{"no authentication method available"}

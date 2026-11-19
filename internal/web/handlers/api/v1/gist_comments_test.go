@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/web/handlers/api/v1/types"
 	webtest "github.com/thomiceli/opengist/internal/web/test"
@@ -265,6 +266,24 @@ func TestComments_API_Disabled(t *testing.T) {
 
 	require.NoError(t, db.UpdateSetting(db.SettingDisableComments, "1"))
 	defer func() { require.NoError(t, db.UpdateSetting(db.SettingDisableComments, "0")) }()
+
+	s.APIRequest(t, "GET", "/api/gists/"+g.Uuid+"/comments", "", nil, 403)
+	s.APIRequest(t, "POST", "/api/gists/"+g.Uuid+"/comments", otherWrite, map[string]string{"body": "hi"}, 403)
+	s.APIRequest(t, "GET", commentURI(g.Uuid, c.ID), "", nil, 403)
+	s.APIRequest(t, "PATCH", commentURI(g.Uuid, c.ID), otherWrite, map[string]string{"body": "hi"}, 403)
+	s.APIRequest(t, "DELETE", commentURI(g.Uuid, c.ID), otherWrite, nil, 403)
+}
+
+func TestComments_API_DisabledByConfig(t *testing.T) {
+	s := setupGetGist(t)
+
+	_, g, _, _ := s.CreateGistAs(t, "owner", "0")
+	otherWrite := apiTokenFor(t, s, "other", db.ReadWritePermission)
+	c := postCommentAPI(t, s, otherWrite, g.Uuid, "hello")
+
+	// The admin setting stays enabled, the config option alone disables comments
+	config.C.DisableComments = true
+	defer func() { config.C.DisableComments = false }()
 
 	s.APIRequest(t, "GET", "/api/gists/"+g.Uuid+"/comments", "", nil, 403)
 	s.APIRequest(t, "POST", "/api/gists/"+g.Uuid+"/comments", otherWrite, map[string]string{"body": "hi"}, 403)

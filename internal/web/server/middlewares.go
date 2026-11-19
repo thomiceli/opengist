@@ -147,6 +147,11 @@ func dataInit(next Handler) Handler {
 			return ctx.ErrorRes(500, "Cannot load settings", err)
 		}
 
+		// the disable-comments config option takes precedence over the admin setting
+		if config.C.DisableComments {
+			ctx.SetData("DisableComments", true)
+		}
+
 		ctx.SetData("githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
 		ctx.SetData("gitlabOauth", config.C.GitlabClientKey != "" && config.C.GitlabSecret != "")
 		ctx.SetData("giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")

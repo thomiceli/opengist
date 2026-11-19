@@ -67,6 +67,8 @@ type config struct {
 
 	DisableFileUpload bool `yaml:"disable-file-upload" env:"OG_DISABLE_FILE_UPLOAD"`
 
+	DisableComments bool `yaml:"disable-comments" env:"OG_DISABLE_COMMENTS"`
+
 	UnixSocketPermissions string `yaml:"unix-socket-permissions" env:"OG_UNIX_SOCKET_PERMISSIONS"`
 
 	SshGit                string `yaml:"ssh.git-enabled" env:"OG_SSH_GIT_ENABLED"` // builtin | host | disabled (true → builtin, false → disabled)

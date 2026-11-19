@@ -19,9 +19,13 @@ Comments are deleted along with their gist, or with their author's account.
 
 ## Disable comments
 
-Admins can disable comments on the whole instance from the [Admin panel](/docs/configuration/admin-panel),
-with the `Disable comments` setting. Existing comments are then hidden, not deleted, and appear again
-if comments are enabled back.
+Comments are enabled by default. Admins can disable them on the whole instance from the
+[Admin panel](/docs/configuration/admin-panel), with the `Disable comments` setting. Existing comments
+are then hidden, not deleted, and appear again if comments are enabled back.
+
+They can also be disabled in the [configuration](/docs/configuration/cheat-sheet), with
+`disable-comments: true` or `OG_DISABLE_COMMENTS=true`. This takes precedence over the admin panel
+setting, which can't enable them back while it is set.
 
 ## API
 

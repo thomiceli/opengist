@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	webtest "github.com/thomiceli/opengist/internal/web/test"
 )
@@ -160,6 +161,28 @@ func TestCreateComment(t *testing.T) {
 		body, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		require.NotContains(t, string(body), "visible before disabling")
+		require.NotContains(t, string(body), `id="comments"`)
+	})
+
+	t.Run("CommentsDisabledByConfig", func(t *testing.T) {
+		_, _, username, identifier := s.CreateGist(t, "0")
+
+		s.Login(t, "alice")
+		postComment(t, s, username, identifier, "visible before the config disables it", 302)
+
+		// The admin setting stays enabled, the config option alone disables comments
+		config.C.DisableComments = true
+		defer func() {
+			config.C.DisableComments = false
+		}()
+
+		s.Request(t, "POST", "/"+username+"/"+identifier+"/comments", url.Values{"content": {"hello"}}, 403)
+		requireNbComments(t, username, identifier, 1)
+
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		require.NotContains(t, string(body), "visible before the config disables it")
 		require.NotContains(t, string(body), `id="comments"`)
 	})
 }

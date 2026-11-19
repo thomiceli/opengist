@@ -99,6 +99,16 @@
                             <span class="badge-secondary ml-auto">{{ .gist.NbForks }}</span>
                         </a>
                     </li>
+                    {{ if not .c.DisableComments }}
+                    <li>
+                        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/comments" {{ if eq .page "comments" }}aria-current="page"{{ end }}
+                           class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <span>{{ .locale.Tr "gist.comments" }}</span>
+                            <span class="badge-secondary ml-auto">{{ .gist.NbComments }}</span>
+                        </a>
+                    </li>
+                    {{ end }}
 
                     {{ if and .userLogged (eq .gist.User.Username .userLogged.Username) }}
                     {{ if not .gist.Archived }}

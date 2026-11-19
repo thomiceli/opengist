@@ -1,0 +1,107 @@
+{{/* Comments section of the gist page: the last comments, a link to the comments
+     page when there are older ones, and the new comment form. */}}
+{{ define "gist_comments" }}
+<section id="comments" class="space-y-4">
+    <h2 class="flex items-center gap-2 text-lg font-semibold">
+        <svg class="text-muted-foreground size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        {{ .locale.Tr "gist.comments" }}
+        <span class="badge-secondary">{{ .gist.NbComments }}</span>
+    </h2>
+
+    {{ if .moreComments }}
+    <div class="flex justify-center">
+        <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/comments" class="btn-sm-outline">{{ .locale.Tr "gist.comments.view-more" }}</a>
+    </div>
+    {{ end }}
+
+    {{ template "gist_comment_list" . }}
+
+    {{ if .userLogged }}
+        {{ if .gist.Archived }}
+        <p class="text-muted-foreground text-sm">{{ .locale.Tr "gist.comments.archived" }}</p>
+        {{ else }}
+        <form method="post" action="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/comments" hx-boost="false" class="bg-card space-y-3 rounded-lg border p-4">
+            {{ .csrfHtml }}
+            {{ template "gist_comment_editor" (dict "content" "" "locale" .locale) }}
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="text-muted-foreground text-xs">{{ .locale.Tr "gist.comments.markdown-help" }}</p>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="btn-sm-outline" hx-post="{{ .c.ExternalUrl }}/preview" hx-target="previous .comment-preview">{{ .locale.Tr "gist.new.preview" }}</button>
+                    <button type="submit" class="btn-sm">{{ .locale.Tr "gist.comments.comment" }}</button>
+                </div>
+            </div>
+        </form>
+        {{ end }}
+    {{ else }}
+        <p class="text-sm"><a href="{{ .c.ExternalUrl }}/-/login" class="text-primary hover:underline">{{ .locale.Tr "gist.comments.login" }}</a></p>
+    {{ end }}
+</section>
+{{ end }}
+
+{{/* The comments in .comments, with the controls to edit and delete them. Used by
+     the gist page and the comments page. The date links to the comment permalink,
+     which redirects to wherever the comment is shown. */}}
+{{ define "gist_comment_list" }}
+{{ range $comment := .comments }}
+<article id="comment-{{ $comment.ID }}" class="bg-card overflow-hidden rounded-lg border">
+    <header class="bg-muted/40 flex items-center gap-2 border-b px-4 py-2 text-sm">
+        <div class="flex min-w-0 flex-auto flex-wrap items-center gap-x-2 gap-y-1">
+            <a href="{{ $.c.ExternalUrl }}/{{ $comment.User.Username }}" class="shrink-0">
+                {{ if not (shouldGenerateAvatar $comment.User $.DisableGravatar) }}
+                    <img class="size-6 rounded-md border object-cover" src="{{ avatarUrl $comment.User $.DisableGravatar }}" alt="{{ $comment.User.Username }}" />
+                {{ else }}
+                    <svg class="size-6 rounded-md border" data-jdenticon-value="{{ $comment.User.Username }}" width="24" height="24"></svg>
+                {{ end }}
+            </a>
+            <a href="{{ $.c.ExternalUrl }}/{{ $comment.User.Username }}" class="font-semibold hover:underline">{{ $comment.User.Username }}</a>
+            {{ if eq $comment.UserID $.gist.UserID }}<span class="badge-outline">{{ $.locale.Tr "gist.comments.owner" }}</span>{{ end }}
+            <a href="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/comments/{{ $comment.ID }}" hx-boost="false" class="text-muted-foreground hover:underline" title="{{ humanDate $comment.CreatedAt }}">{{ $.locale.Tr "gist.comments.commented" }} {{ $comment.CreatedAt | humanTimeDiff }}</a>
+            {{ if $comment.IsEdited }}<span class="text-muted-foreground" title="{{ humanDate $comment.UpdatedAt }}">· {{ $.locale.Tr "gist.comments.edited" }}</span>{{ end }}
+        </div>
+
+        {{ if $.userLogged }}
+        <div class="flex shrink-0 items-center gap-1">
+            {{ if and (not $.gist.Archived) ($comment.CanEdit $.userLogged) }}
+            <button type="button" class="btn-sm-icon-ghost" aria-label="{{ $.locale.Tr "gist.comments.edit" }}" title="{{ $.locale.Tr "gist.comments.edit" }}"
+                    _="on click toggle .hidden on #comment-body-{{ $comment.ID }} then toggle .hidden on #comment-edit-{{ $comment.ID }}">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+            </button>
+            {{ end }}
+            {{ if $comment.CanDelete $.userLogged $.gist }}
+            <form method="post" action="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/comments/{{ $comment.ID }}/delete" hx-boost="false" class="inline-flex">
+                {{ $.csrfHtml }}
+                <button type="submit" class="btn-sm-icon-ghost text-destructive" aria-label="{{ $.locale.Tr "gist.comments.delete" }}" title="{{ $.locale.Tr "gist.comments.delete" }}"
+                        _="on click if not window.confirm('{{ $.locale.Tr "gist.comments.delete-confirm" }}') halt the event">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+            </form>
+            {{ end }}
+        </div>
+        {{ end }}
+    </header>
+
+    <div id="comment-body-{{ $comment.ID }}" class="markdown markdown-body px-4 py-3">{{ $comment.HTML | safe }}</div>
+
+    {{ if and $.userLogged (not $.gist.Archived) ($comment.CanEdit $.userLogged) }}
+    <form id="comment-edit-{{ $comment.ID }}" method="post" action="{{ $.c.ExternalUrl }}/{{ $.gist.User.Username }}/{{ $.gist.Identifier }}/comments/{{ $comment.ID }}/edit" hx-boost="false" class="hidden space-y-3 p-4">
+        {{ $.csrfHtml }}
+        {{ template "gist_comment_editor" (dict "content" $comment.Content "locale" $.locale) }}
+        <div class="flex flex-wrap items-center justify-end gap-2">
+            <button type="button" class="btn-sm-outline" hx-post="{{ $.c.ExternalUrl }}/preview" hx-target="previous .comment-preview">{{ $.locale.Tr "gist.new.preview" }}</button>
+            <button type="button" class="btn-sm-outline"
+                    _="on click toggle .hidden on #comment-body-{{ $comment.ID }} then toggle .hidden on #comment-edit-{{ $comment.ID }}">{{ $.locale.Tr "gist.edit.cancel" }}</button>
+            <button type="submit" class="btn-sm">{{ $.locale.Tr "gist.edit.save" }}</button>
+        </div>
+    </form>
+    {{ end }}
+</article>
+{{ end }}
+{{ end }}
+
+{{/* Textarea of the new comment and edit comment forms. The preview buttons
+     post the enclosing form to /preview and render the result in .comment-preview,
+     which stays hidden while empty. */}}
+{{ define "gist_comment_editor" }}
+<textarea name="content" rows="5" required maxlength="3000" aria-label="{{ .locale.Tr "gist.comments.placeholder" }}" placeholder="{{ .locale.Tr "gist.comments.placeholder" }}" class="input font-mono">{{ .content }}</textarea>
+<div class="comment-preview markdown markdown-body rounded-md border px-4 py-3 empty:hidden"></div>
+{{ end }}

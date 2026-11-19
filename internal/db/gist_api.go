@@ -24,23 +24,24 @@ func (gist *Gist) ToAPISimple(baseURL string) types.GistSimple {
 		expiresAt = &t
 	}
 	return types.GistSimple{
-		ID:          gist.Uuid,
-		Owner:       gist.User.ToSimpleAPI(),
-		Title:       gist.Title,
-		HTMLUrl:     baseURL + "/" + gist.User.Username + "/" + gist.Identifier(),
-		SlugUrl:     gist.Identifier(),
-		Description: gist.Description,
-		Public:      gist.Private == PublicVisibility,
-		Visibility:  gist.Private.String(),
-		LikeCount:   gist.NbLikes,
-		ForkCount:   gist.NbForks,
-		CloneUrl:    gist.HTTPCloneURL(baseURL),
-		SSHUrl:      gist.SSHCloneURL(sshHost),
-		Topics:      gist.TopicsSlice(),
-		Archived:    gist.Archived,
-		CreatedAt:   time.Unix(gist.CreatedAt, 0).UTC(),
-		UpdatedAt:   time.Unix(gist.UpdatedAt, 0).UTC(),
-		ExpiresAt:   expiresAt,
+		ID:           gist.Uuid,
+		Owner:        gist.User.ToSimpleAPI(),
+		Title:        gist.Title,
+		HTMLUrl:      baseURL + "/" + gist.User.Username + "/" + gist.Identifier(),
+		SlugUrl:      gist.Identifier(),
+		Description:  gist.Description,
+		Public:       gist.Private == PublicVisibility,
+		Visibility:   gist.Private.String(),
+		LikeCount:    gist.NbLikes,
+		ForkCount:    gist.NbForks,
+		CommentCount: gist.NbComments,
+		CloneUrl:     gist.HTTPCloneURL(baseURL),
+		SSHUrl:       gist.SSHCloneURL(sshHost),
+		Topics:       gist.TopicsSlice(),
+		Archived:     gist.Archived,
+		CreatedAt:    time.Unix(gist.CreatedAt, 0).UTC(),
+		UpdatedAt:    time.Unix(gist.UpdatedAt, 0).UTC(),
+		ExpiresAt:    expiresAt,
 	}
 }
 
@@ -127,4 +128,19 @@ func (c *GistCommit) ToAPI() types.GistCommit {
 		entry.User = &s
 	}
 	return entry
+}
+
+// ToAPI returns the v1 API representation of a comment posted on gist. The
+// comment's User must be preloaded.
+func (comment *GistComment) ToAPI(baseURL string, gist *Gist) types.GistComment {
+	id := strconv.FormatUint(uint64(comment.ID), 10)
+	return types.GistComment{
+		ID:        comment.ID,
+		URL:       baseURL + "/api/gists/" + gist.Uuid + "/comments/" + id,
+		HTMLUrl:   baseURL + "/" + gist.User.Username + "/" + gist.Identifier() + "/comments/" + id,
+		Body:      comment.Content,
+		User:      comment.User.ToSimpleAPI(),
+		CreatedAt: time.Unix(comment.CreatedAt, 0).UTC(),
+		UpdatedAt: time.Unix(comment.UpdatedAt, 0).UTC(),
+	}
 }

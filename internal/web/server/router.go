@@ -136,6 +136,11 @@ func (s *Server) registerRoutes() {
 				single.PUT("/gists/:uuid/like", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
 				single.PUT("/gists/:uuid/star", apiv1.ToggleLike, apiRequireAuth, apiScope(db.ScopeUser, db.ReadWritePermission))
 				single.GET("/gists/:uuid/files/:sha/:filename", apiv1.RawFile)
+				single.GET("/gists/:uuid/comments", apiv1.ListComments, apiCommentsEnabled)
+				single.POST("/gists/:uuid/comments", apiv1.CreateComment, apiCommentsEnabled, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				single.GET("/gists/:uuid/comments/:id", apiv1.GetComment, apiCommentsEnabled)
+				single.PATCH("/gists/:uuid/comments/:id", apiv1.UpdateComment, apiCommentsEnabled, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
+				single.DELETE("/gists/:uuid/comments/:id", apiv1.DeleteComment, apiCommentsEnabled, apiRequireAuth, apiScope(db.ScopeGist, db.ReadWritePermission))
 			}
 
 			// List/aggregate reads: blocked entirely when RequireLogin is set.
@@ -214,6 +219,11 @@ func (s *Server) registerRoutes() {
 			sC.POST("/fork", gist.Fork, logged)
 			sC.GET("/forks", gist.Forks, checkRequireLogin)
 			sC.PUT("/checkbox", gist.Checkbox, logged, writePermission, notArchived)
+			sC.GET("/comments", gist.Comments, commentsEnabled)
+			sC.POST("/comments", gist.CreateComment, logged, commentsEnabled, notArchived)
+			sC.GET("/comments/:id", gist.CommentPermalink, commentsEnabled)
+			sC.POST("/comments/:id/edit", gist.EditComment, logged, commentsEnabled, notArchived)
+			sC.POST("/comments/:id/delete", gist.DeleteComment, logged, commentsEnabled)
 		}
 	}
 

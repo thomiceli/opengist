@@ -32,7 +32,7 @@ Tokens carry per-resource scopes, each at read or read/write level:
 | Scope | Grants |
 |-------|--------|
 | `gist:read` | Read gists, including the caller's private and unlisted ones |
-| `gist:write` | Create, update, delete and fork gists |
+| `gist:write` | Create, update, delete and fork gists, and comment on them |
 | `user:read` | Read the authenticated user's account |
 | `user:write` | Update the authenticated user and toggle likes |
 

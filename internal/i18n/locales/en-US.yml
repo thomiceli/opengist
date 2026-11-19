@@ -83,6 +83,22 @@ gist.settings.danger-zone: Danger zone
 gist.settings.delete-gist: Delete this gist
 gist.settings.delete-help: Once deleted, this gist and all its revisions are gone for good.
 
+gist.comments: Comments
+gist.comments.comment: Comment
+gist.comments.commented: commented
+gist.comments.edited: edited
+gist.comments.owner: Owner
+gist.comments.edit: Edit comment
+gist.comments.delete: Delete comment
+gist.comments.delete-confirm: Are you sure you want to delete this comment?
+gist.comments.placeholder: Leave a comment
+gist.comments.markdown-help: Markdown is supported.
+gist.comments.login: Log in to leave a comment
+gist.comments.archived: This gist is archived, new comments cannot be added.
+gist.comments.view-more: View more comments
+gist.comments.no: No comments yet
+gist.comments.for: Comments for %s
+
 gist.list.joined: Joined
 gist.list.all: All gists
 gist.list.recently-liked: Recently liked
@@ -100,6 +116,7 @@ gist.list.likes: Likes
 gist.list.forked: Forked
 gist.list.forked-from: Forked from
 gist.list.forks: Forks
+gist.list.comments: Comments
 gist.list.files: files
 gist.list.last-active: Last active
 gist.list.no-gists: No gists
@@ -311,6 +328,7 @@ error.no-file-uploaded: No file uploaded
 error.file-upload-disabled: File upload is disabled
 error.cannot-open-file: Cannot open uploaded file
 error.gist-form-too-large: Gist form exceeds the 10 MB request limit
+error.comments-disabled: Comments are disabled
 
 header.menu.all: All
 header.menu.new: New
@@ -422,6 +440,7 @@ flash.gist.deleted: Gist has been deleted
 flash.gist.updated: Gist has been updated
 flash.gist.fork-own-gist: Unable to fork own gists
 flash.gist.forked: Gist has been forked
+flash.gist.comment-deleted: Comment has been deleted
 
 flash.user.email-updated: Email updated
 flash.user.avatar-updated: Avatar updated

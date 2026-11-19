@@ -166,7 +166,7 @@ func Setup(dbUri string) error {
 		}
 	}
 
-	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{}, &ActionLock{}); err != nil {
+	if err = db.AutoMigrate(&User{}, &Gist{}, &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{}, &ActionLock{}, &GistComment{}); err != nil {
 		return err
 	}
 
@@ -296,5 +296,5 @@ func DeprecationDBFilename() {
 }
 
 func TruncateDatabase() error {
-	return db.Migrator().DropTable("likes", &User{}, "gists", &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{})
+	return db.Migrator().DropTable("likes", &User{}, "gists", &SSHKey{}, &AdminSetting{}, &Invitation{}, &WebAuthnCredential{}, &TOTP{}, &GistTopic{}, &GistLanguage{}, &GistInitQueue{}, &AccessToken{}, &GistComment{})
 }

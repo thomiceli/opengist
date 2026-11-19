@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import tailwindcss from "@tailwindcss/vite";
+import { resolve } from 'node:path'
 
 export default defineConfig({
     root: './public',
@@ -17,15 +18,18 @@ export default defineConfig({
         assetsDir: 'assets',
         manifest: true,
         rollupOptions: {
+            // absolute paths, so the dev dependency scanner (which resolves
+            // inputs from root) and the build (which resolves from the cwd)
+            // both find them
             input: [
-                './public/ts/main.ts',
-                './public/ts/editor.ts',
-                './public/ts/webauthn.ts',
-                './public/ts/auto.ts',
-                './public/ts/light.ts',
-                './public/ts/dark.ts',
-                './public/ts/embed.ts',
-            ]
+                'ts/main.ts',
+                'ts/editor.ts',
+                'ts/webauthn.ts',
+                'ts/auto.ts',
+                'ts/light.ts',
+                'ts/dark.ts',
+                'ts/embed.ts',
+            ].map((file) => resolve(import.meta.dirname, file))
         },
         assetsInlineLimit: 0,
     }

@@ -36,6 +36,7 @@ func applyAllMigrations(dbType databaseType) error {
 		{1, []databaseType{SQLite}, v1_modifyConstraintToSSHKeys},
 		{2, []databaseType{SQLite}, v2_lowercaseEmails},
 		{3, nil, v3_normalizedColumns},
+		{4, nil, v4_gistCommentsCount},
 	}
 
 	for _, m := range migrations {
@@ -129,4 +130,11 @@ func v3_normalizedColumns(tx *gorm.DB) error {
 	}
 	return tx.Model(&Gist{}).Where("url_normalized = '' OR url_normalized IS NULL").
 		Updates(map[string]interface{}{"url_normalized": gorm.Expr("LOWER(url)")}).Error
+}
+
+// Set the comments counter of the gists created before comments, which
+// AutoMigrate added as NULL, so that it can be incremented
+func v4_gistCommentsCount(tx *gorm.DB) error {
+	return tx.Model(&Gist{}).Where("nb_comments IS NULL").
+		UpdateColumn("nb_comments", 0).Error
 }

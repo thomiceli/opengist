@@ -32,6 +32,7 @@ type User struct {
 	Liked               []Gist               `gorm:"many2many:likes;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	WebAuthnCredentials []WebAuthnCredential `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 	AccessTokens        []AccessToken        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
+	GistComments        []GistComment        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID"`
 }
 
 func (user *User) BeforeSave(_ *gorm.DB) error {
@@ -70,6 +71,32 @@ func (user *User) BeforeDelete(tx *gorm.DB) error {
 			) AS derived_forks
 		)
 	`, user.ID).Error
+	if err != nil {
+		return err
+	}
+
+	// Decrement comments counter of the gists the user commented on
+	err = tx.Exec(`
+		UPDATE gists
+		SET nb_comments = nb_comments - (
+			SELECT count(*)
+			FROM gist_comments
+			WHERE gist_comments.gist_id = gists.id AND gist_comments.user_id = ?
+		)
+		WHERE id IN (
+			SELECT gist_id
+			FROM (
+				SELECT gist_id
+				FROM gist_comments
+				WHERE user_id = ?
+			) AS derived_comments
+		)
+	`, user.ID, user.ID).Error
+	if err != nil {
+		return err
+	}
+
+	err = tx.Where("user_id = ?", user.ID).Delete(&GistComment{}).Error
 	if err != nil {
 		return err
 	}

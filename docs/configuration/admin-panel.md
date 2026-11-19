@@ -51,5 +51,3 @@ Here you can change a limited number of settings without restarting the instance
     - Forbid logging in via the login form to force using OAuth providers instead.
 - Disable Gravatar
     - Disable the usage of Gravatar as an avatar provider.
-- Disable comments
-    - Forbid commenting on gists and hide existing comments. Locked when the `disable-comments` configuration option is set.

@@ -119,7 +119,7 @@
     </div>
     {{ end }}
 
-    {{ if not .DisableComments }}
+    {{ if not .c.DisableComments }}
     {{ template "gist_comments" . }}
     {{ end }}
 </div>

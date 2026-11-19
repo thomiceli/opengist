@@ -100,7 +100,7 @@
     {{ if ne (len .gists) 0 }}
         <div class="space-y-4">
             {{ range $gist := .gists }}
-                {{ template "gist" (dict "gist" $gist "c" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar "DisableComments" $.DisableComments "currentStyle" $.currentStyle) }}
+                {{ template "gist" (dict "gist" $gist "c" $.c "locale" $.locale "DisableGravatar" $.DisableGravatar "currentStyle" $.currentStyle) }}
             {{ end }}
         </div>
         {{ template "pagination" . }}

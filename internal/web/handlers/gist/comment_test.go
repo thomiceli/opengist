@@ -157,32 +157,15 @@ func TestCreateComment(t *testing.T) {
 		s.Login(t, "alice")
 		comment := postComment(t, s, username, identifier, "visible before disabling", 302)
 
-		require.NoError(t, db.UpdateSetting(db.SettingDisableComments, "1"))
-		defer func() {
-			require.NoError(t, db.UpdateSetting(db.SettingDisableComments, "0"))
-		}()
+		getBody := func(uri string) string {
+			resp := s.Request(t, "GET", uri, nil, 200)
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+			return string(body)
+		}
+		// The comment count shown in gist lists
+		require.Contains(t, getBody("/-/all"), `title="Comments"`)
 
-		s.Request(t, "POST", "/"+username+"/"+identifier+"/comments", url.Values{"content": {"hello"}}, 403)
-		requireNbComments(t, username, identifier, 1)
-		s.Request(t, "GET", "/"+username+"/"+identifier+"/comments", nil, 403)
-		s.Request(t, "GET", commentPath(username, identifier, comment), nil, 403)
-
-		resp := s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
-		body, err := io.ReadAll(resp.Body)
-		require.NoError(t, err)
-		require.NotContains(t, string(body), "visible before disabling")
-		require.NotContains(t, string(body), `id="comments"`)
-		// Nor the link to the comments page in the sidebar
-		require.NotContains(t, string(body), "/"+username+"/"+identifier+"/comments")
-	})
-
-	t.Run("CommentsDisabledByConfig", func(t *testing.T) {
-		_, _, username, identifier := s.CreateGist(t, "0")
-
-		s.Login(t, "alice")
-		postComment(t, s, username, identifier, "visible before the config disables it", 302)
-
-		// The admin setting stays enabled, the config option alone disables comments
 		config.C.DisableComments = true
 		defer func() {
 			config.C.DisableComments = false
@@ -191,12 +174,14 @@ func TestCreateComment(t *testing.T) {
 		s.Request(t, "POST", "/"+username+"/"+identifier+"/comments", url.Values{"content": {"hello"}}, 403)
 		requireNbComments(t, username, identifier, 1)
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/comments", nil, 403)
+		s.Request(t, "GET", commentPath(username, identifier, comment), nil, 403)
 
-		resp := s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
-		body, err := io.ReadAll(resp.Body)
-		require.NoError(t, err)
-		require.NotContains(t, string(body), "visible before the config disables it")
-		require.NotContains(t, string(body), `id="comments"`)
+		body := getBody("/" + username + "/" + identifier)
+		require.NotContains(t, body, "visible before disabling")
+		require.NotContains(t, body, `id="comments"`)
+		// Nor the link to the comments page in the sidebar
+		require.NotContains(t, body, "/"+username+"/"+identifier+"/comments")
+		require.NotContains(t, getBody("/-/all"), `title="Comments"`)
 	})
 }
 

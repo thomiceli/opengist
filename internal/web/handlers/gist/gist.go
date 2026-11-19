@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/thomiceli/opengist/internal/config"
 	"github.com/thomiceli/opengist/internal/db"
 	"github.com/thomiceli/opengist/internal/git"
 	"github.com/thomiceli/opengist/internal/render"
@@ -39,7 +40,7 @@ func GistIndex(ctx *context.Context) error {
 
 	renderedFiles := render.RenderFiles(files)
 
-	if disabled, _ := ctx.GetData("DisableComments").(bool); !disabled {
+	if !config.C.DisableComments {
 		// One more than shown, to know if there are older ones on the comments page
 		comments, err := gist.GetLastComments(lastCommentsCount + 1)
 		if err != nil {

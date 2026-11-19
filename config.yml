@@ -66,7 +66,6 @@ api.enabled: true
 disable-file-upload: false
 
 # Disable comments on gists and hide existing ones (either `true` or `false`). Default: false
-# When `true`, the admin panel setting can't enable them back.
 disable-comments: false
 
 # File permissions for Unix socket (octal format). Default: 0666

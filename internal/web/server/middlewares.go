@@ -147,11 +147,6 @@ func dataInit(next Handler) Handler {
 			return ctx.ErrorRes(500, "Cannot load settings", err)
 		}
 
-		// the disable-comments config option takes precedence over the admin setting
-		if config.C.DisableComments {
-			ctx.SetData("DisableComments", true)
-		}
-
 		ctx.SetData("githubOauth", config.C.GithubClientKey != "" && config.C.GithubSecret != "")
 		ctx.SetData("gitlabOauth", config.C.GitlabClientKey != "" && config.C.GitlabSecret != "")
 		ctx.SetData("giteaOauth", config.C.GiteaClientKey != "" && config.C.GiteaSecret != "")
@@ -201,11 +196,11 @@ func notArchived(next Handler) Handler {
 	}
 }
 
-// commentsEnabled blocks the gist comment routes when an admin has disabled
-// comments on the instance.
+// commentsEnabled blocks the gist comment routes when comments are disabled in
+// the config.
 func commentsEnabled(next Handler) Handler {
 	return func(ctx *context.Context) error {
-		if disabled, _ := ctx.GetData("DisableComments").(bool); disabled {
+		if config.C.DisableComments {
 			return ctx.ErrorRes(403, ctx.Tr("error.comments-disabled"), nil)
 		}
 		return next(ctx)
@@ -641,10 +636,10 @@ func apiBindAuth(next Handler) Handler {
 }
 
 // apiCommentsEnabled is the /api counterpart of commentsEnabled, responding
-// with a JSON 403 when an admin has disabled comments on the instance.
+// with a JSON 403 when comments are disabled in the config.
 func apiCommentsEnabled(next Handler) Handler {
 	return func(ctx *context.Context) error {
-		if disabled, _ := ctx.GetData("DisableComments").(bool); disabled {
+		if config.C.DisableComments {
 			return ctx.ErrorJson(403, "Comments are disabled", nil)
 		}
 		return next(ctx)

@@ -570,8 +570,8 @@ paths:
 
         Public and unlisted gists are readable by anyone; a private gist
         resolves only for its owner with a `gist:read`-capable token, otherwise
-        `404`. Every comment endpoint returns `403` when an admin has disabled
-        comments on the instance.
+        `404`. Every comment endpoint returns `403` when comments are disabled
+        on the instance (`disable-comments` configuration option).
 
         Results are a JSON array; pagination is conveyed via the `Link` and
         `X-*` response headers (see the response headers below).

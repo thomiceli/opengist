@@ -84,7 +84,6 @@
                 {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "allow-gists-without-login" "title" (.locale.Tr "admin.allow-gists-without-login") "help" (.locale.Tr "admin.allow-gists-without-login_help") "on" .AllowGistsWithoutLogin) }}
                 {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-login-form" "title" (.locale.Tr "admin.disable-login") "help" (.locale.Tr "admin.disable-login_help") "on" .DisableLoginForm) }}
                 {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-gravatar" "title" (.locale.Tr "admin.disable-gravatar") "help" (.locale.Tr "admin.disable-gravatar_help") "on" .DisableGravatar) }}
-                {{ template "admin_config_toggle" (dict "url" .c.ExternalUrl "id" "disable-comments" "title" (.locale.Tr "admin.disable-comments") "help" (.locale.Tr "admin.disable-comments_help") "on" .DisableComments "locked" .c.DisableComments "lockedHelp" (.locale.Tr "admin.disable-comments_config")) }}
             </ul>
         </section>
     </div>
@@ -117,9 +116,8 @@
     <div class="min-w-0 space-y-1">
         <p class="text-sm font-medium">{{ .title }}</p>
         <p class="text-muted-foreground text-sm">{{ .help }}</p>
-        {{ if .locked }}<p class="text-muted-foreground text-xs">{{ .lockedHelp }}</p>{{ end }}
     </div>
-    <button type="button" id="{{ .id }}" role="switch" aria-checked="{{ .on }}"{{ if .locked }} disabled{{ end }}
+    <button type="button" id="{{ .id }}" role="switch" aria-checked="{{ .on }}"
             hx-put="{{ .url }}/-/admin-panel/set-config"
             hx-swap="none"
             hx-include="[name='_csrf']"
@@ -127,7 +125,7 @@
             _="on htmx:afterRequest if event.detail.successful
                  if @aria-checked is 'true' set @aria-checked to 'false' else set @aria-checked to 'true' end
                end"
-            class="group bg-input aria-checked:bg-primary relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            class="group bg-input aria-checked:bg-primary relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
         <span class="pointer-events-none inline-block size-5 translate-x-0.5 rounded-full bg-white shadow transition-transform group-aria-checked:translate-x-[1.375rem]"></span>
     </button>
 </li>

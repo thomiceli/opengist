@@ -15,7 +15,6 @@ const (
 	SettingAllowGistsWithoutLogin = "allow-gists-without-login"
 	SettingDisableLoginForm       = "disable-login-form"
 	SettingDisableGravatar        = "disable-gravatar"
-	SettingDisableComments        = "disable-comments"
 )
 
 func GetSetting(key string) (string, error) {

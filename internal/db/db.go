@@ -181,7 +181,6 @@ func Setup(dbUri string) error {
 		SettingAllowGistsWithoutLogin: "0",
 		SettingDisableLoginForm:       "0",
 		SettingDisableGravatar:        "0",
-		SettingDisableComments:        "0",
 	})
 }
 

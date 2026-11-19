@@ -99,7 +99,7 @@
                             <span class="badge-secondary ml-auto">{{ .gist.NbForks }}</span>
                         </a>
                     </li>
-                    {{ if not .DisableComments }}
+                    {{ if not .c.DisableComments }}
                     <li>
                         <a href="{{ .c.ExternalUrl }}/{{ .gist.User.Username }}/{{ .gist.Identifier }}/comments" {{ if eq .page "comments" }}aria-current="page"{{ end }}
                            class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-sidebar-hover hover:text-sidebar-accent-foreground font-medium aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium [&>svg]:size-4">

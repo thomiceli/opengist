@@ -1,7 +1,6 @@
 package admin_test
 
 import (
-	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -63,7 +62,6 @@ func TestAdminSetConfig(t *testing.T) {
 		db.SettingAllowGistsWithoutLogin,
 		db.SettingDisableLoginForm,
 		db.SettingDisableGravatar,
-		db.SettingDisableComments,
 	}
 
 	s.Register(t, "thomas")
@@ -99,34 +97,6 @@ func TestAdminSetConfig(t *testing.T) {
 			require.Equal(t, "0", val)
 		}
 	})
-}
-
-func TestAdminConfigDisableCommentsLocked(t *testing.T) {
-	s := webtest.Setup(t)
-	defer webtest.Teardown(t)
-
-	s.Register(t, "thomas")
-	s.Login(t, "thomas")
-
-	configPage := func() string {
-		resp := s.Request(t, "GET", "/-/admin-panel/configuration", nil, 200)
-		body, err := io.ReadAll(resp.Body)
-		require.NoError(t, err)
-		return string(body)
-	}
-
-	body := configPage()
-	require.Contains(t, body, `id="disable-comments" role="switch" aria-checked="false"`)
-	require.NotContains(t, body, `id="disable-comments" role="switch" aria-checked="false" disabled`)
-	require.NotContains(t, body, "disable-comments configuration option")
-
-	config.C.DisableComments = true
-	defer func() { config.C.DisableComments = false }()
-
-	// Shown as disabled and locked, although the admin setting is still "0"
-	body = configPage()
-	require.Contains(t, body, `id="disable-comments" role="switch" aria-checked="true" disabled`)
-	require.Contains(t, body, "disable-comments configuration option")
 }
 
 func TestAdminPagination(t *testing.T) {

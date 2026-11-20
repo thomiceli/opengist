@@ -101,6 +101,7 @@ func ProcessRegister(ctx *context.Context) error {
 	}
 
 	sess.Values["user"] = user.ID
+	sess.Values["sessionVersion"] = user.SessionVersion
 	ctx.SaveSession(sess)
 
 	return ctx.RedirectTo("/")
@@ -152,6 +153,7 @@ func ProcessLogin(ctx *context.Context) error {
 	}
 
 	sess.Values["user"] = user.ID
+	sess.Values["sessionVersion"] = user.SessionVersion
 	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year
 	ctx.SaveSession(sess)
 	ctx.DeleteCsrfCookie()

@@ -140,7 +140,13 @@ func AssertTotp(ctx *context.Context) error {
 		redirectUrl = "/-/settings/authentication"
 	}
 
+	var user *db.User
+	if user, err = db.GetUserById(userId); err != nil {
+		return ctx.ErrorRes(500, "Cannot get user", err)
+	}
+
 	sess.Values["user"] = userId
+	sess.Values["sessionVersion"] = user.SessionVersion
 	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year
 	delete(sess.Values, "mfaID")
 	ctx.SaveSession(sess)

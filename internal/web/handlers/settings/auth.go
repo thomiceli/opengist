@@ -51,10 +51,19 @@ func PasswordProcess(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Cannot hash password", err)
 	}
 	user.Password = password
+	// log out the sessions opened before the password change
+	user.SessionVersion++
 
 	if err = user.Update(); err != nil {
 		return ctx.ErrorRes(500, "Cannot update password", err)
 	}
+
+	// keep the current session logged in, under a new session ID so that a copy
+	// of its previous cookie is logged out too
+	sess := ctx.GetSession()
+	sess.ID = ""
+	sess.Values["sessionVersion"] = user.SessionVersion
+	ctx.SaveSession(sess)
 
 	ctx.AddFlash(ctx.Tr("flash.user.password-updated"), "success")
 	return ctx.RedirectTo("/-/settings")

@@ -368,7 +368,11 @@ func sessionInit(next Handler) Handler {
 			var err error
 			var user *db.User
 
-			if user, err = db.GetUserById(sess.Values["user"].(uint)); err != nil {
+			// log out the session if its user no longer exists, or if it was opened
+			// before the user's credentials changed (older sessions without a
+			// version count as version 0)
+			sessionVersion, _ := sess.Values["sessionVersion"].(uint)
+			if user, err = db.GetUserById(sess.Values["user"].(uint)); err != nil || user.SessionVersion != sessionVersion {
 				sess.Values["user"] = nil
 				ctx.SaveSession(sess)
 				ctx.User = nil

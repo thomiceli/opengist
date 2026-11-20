@@ -212,6 +212,8 @@ var CmdAdminResetPassword = cli.Command{
 			return err
 		}
 		user.Password = password
+		// log out the user's sessions opened before the reset
+		user.SessionVersion++
 
 		if err = user.Update(); err != nil {
 			fmt.Printf("Cannot update password for user %s: %s\n", username, err)

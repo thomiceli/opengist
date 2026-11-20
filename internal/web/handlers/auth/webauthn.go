@@ -88,12 +88,13 @@ func FinishWebAuthnLogin(ctx *context.Context) error {
 		return ctx.ErrorRes(401, "Cannot get WebAuthn login session", nil)
 	}
 
-	userID, err := webauthn.FinishDiscoverableLogin(sessionData, ctx.Request())
+	user, err := webauthn.FinishDiscoverableLogin(sessionData, ctx.Request())
 	if err != nil {
 		return ctx.ErrorRes(403, "Failed authentication attempt for passkey", err)
 	}
 
-	sess.Values["user"] = userID
+	sess.Values["user"] = user.ID
+	sess.Values["sessionVersion"] = user.SessionVersion
 	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year
 
 	delete(sess.Values, "webauthn_login_session")
@@ -141,6 +142,7 @@ func FinishWebAuthnAssertion(ctx *context.Context) error {
 	}
 
 	sess.Values["user"] = userId
+	sess.Values["sessionVersion"] = ogUser.SessionVersion
 	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year
 
 	delete(sess.Values, "webauthn_assertion_session")

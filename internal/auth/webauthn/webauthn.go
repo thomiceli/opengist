@@ -77,32 +77,32 @@ func BeginDiscoverableLogin() (credCreation *protocol.CredentialAssertion, jsonS
 	return
 }
 
-func FinishDiscoverableLogin(jsonSession []byte, response *http.Request) (uint, error) {
+func FinishDiscoverableLogin(jsonSession []byte, response *http.Request) (*db.User, error) {
 	var session webauthn.SessionData
 	_ = json.Unmarshal(jsonSession, &session)
 
 	parsedResponse, err := protocol.ParseCredentialRequestResponse(response)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	waUser, cred, err := webAuthn.ValidatePasskeyLogin(discoverUser, session, parsedResponse)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	dbCredential, err := db.GetCredentialByID(cred.ID)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	if err = dbCredential.UpdateSignCount(); err != nil {
-		return 0, err
+		return nil, err
 	}
 	if err = dbCredential.UpdateLastUsedAt(); err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return waUser.(*user).ID, nil
+	return waUser.(*user).User, nil
 }
 
 func BeginLogin(dbUser *db.User) (credCreation *protocol.CredentialAssertion, jsonSession []byte, err error) {

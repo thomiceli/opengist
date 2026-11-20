@@ -154,6 +154,7 @@ func OauthCallback(ctx *context.Context) error {
 
 	sess := ctx.GetSession()
 	sess.Values["user"] = userDB.ID
+	sess.Values["sessionVersion"] = userDB.SessionVersion
 	ctx.SaveSession(sess)
 	ctx.DeleteCsrfCookie()
 
@@ -302,6 +303,7 @@ func ProcessOauthRegister(ctx *context.Context) error {
 	delete(sess.Values, oauthInvitationSessionKey)
 
 	sess.Values["user"] = userDB.ID
+	sess.Values["sessionVersion"] = userDB.SessionVersion
 	sess.Options.MaxAge = 60 * 60 * 24 * 365 // 1 year
 	ctx.SaveSession(sess)
 	ctx.DeleteCsrfCookie()

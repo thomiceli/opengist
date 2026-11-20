@@ -298,4 +298,74 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		require.Equal(t, "/", resp.Request.URL.Path,
 			"re-authenticating as the already-linked user must not be treated as a conflicting link attempt")
 	})
+
+	// Setting a password logs out the user's other sessions; a later login
+	// through the provider must still be kept.
+	t.Run("login after a password change is kept", func(t *testing.T) {
+		require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "0"))
+		queueUser := func() {
+			m.QueueUser(&oidcUser{MockUser: &mockoidc.MockUser{
+				Subject:           "carol-id",
+				Email:             "carol@example.com",
+				PreferredUsername: "carol",
+				EmailVerified:     true,
+			}})
+		}
+		newClient := func() *http.Client {
+			jar, err := cookiejar.New(nil)
+			require.NoError(t, err)
+			return &http.Client{Jar: jar}
+		}
+		getCsrf := func(client *http.Client, path string) (*http.Response, string) {
+			resp, err := client.Get(base + path)
+			require.NoError(t, err)
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+			require.NoError(t, resp.Body.Close())
+			csrf := regexp.MustCompile(`name="_csrf" value="([^"]+)"`).FindStringSubmatch(string(body))
+			require.Len(t, csrf, 2, "could not find the CSRF token on %s", path)
+			return resp, csrf[1]
+		}
+
+		client := newClient()
+		queueUser()
+		resp, csrf := getCsrf(client, "/oauth/openid-connect")
+		require.Equal(t, "/oauth/register", resp.Request.URL.Path)
+		resp, err := client.PostForm(base+"/oauth/register", url.Values{
+			"username": {"carol"},
+			"email":    {"carol@example.com"},
+			"_csrf":    {csrf},
+		})
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
+		require.Equal(t, "/", resp.Request.URL.Path, "registration did not complete")
+
+		_, csrf = getCsrf(client, "/-/settings/authentication")
+		resp, err = client.PostForm(base+"/-/settings/password", url.Values{
+			"_method":  {"PUT"},
+			"password": {"carolpassword"},
+			"_csrf":    {csrf},
+		})
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
+		require.Equal(t, "/-/settings", resp.Request.URL.Path, "the session that set the password must stay logged in")
+
+		user, err := db.GetUserByUsername("carol")
+		require.NoError(t, err)
+		require.Equal(t, uint(1), user.SessionVersion)
+
+		// log in through the provider from another browser
+		client = newClient()
+		queueUser()
+		resp, err = client.Get(base + "/oauth/openid-connect")
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
+		require.Equal(t, "/", resp.Request.URL.Path)
+
+		resp, err = client.Get(base + "/-/settings")
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		require.Equal(t, "/-/settings", resp.Request.URL.Path, "the login through the provider must be kept")
+	})
 }

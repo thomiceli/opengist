@@ -16,6 +16,7 @@ type User struct {
 	Username           string `gorm:"uniqueIndex,size:191"`
 	UsernameNormalized string `gorm:"index"`
 	Password           string
+	SessionVersion     uint // incremented when the user's credentials change, to log out the web sessions opened before
 	IsAdmin            bool
 	CreatedAt          int64
 	Email              string

@@ -171,6 +171,27 @@ func TestCmdAdminCreateUser_PasswordStdinAndFlagMutuallyExclusive(t *testing.T) 
 	require.Error(t, err)
 }
 
+func TestCmdAdminResetPassword(t *testing.T) {
+	require.NoError(t, runCreateUser(t, "--username", "bob", "--password", "oldpass"))
+
+	app := &cli.App{
+		Name: "opengist",
+		Commands: []*cli.Command{
+			{Name: "start", Action: func(*cli.Context) error { return nil }},
+			{Name: "admin", Subcommands: []*cli.Command{&CmdAdminResetPassword}},
+		},
+		DefaultCommand: "start",
+	}
+	require.NoError(t, app.Run([]string{"opengist", "admin", "reset-password", "bob", "newpass"}))
+
+	user, err := db.GetUserByUsername("bob")
+	require.NoError(t, err)
+	match, err := password.VerifyPassword("newpass", user.Password)
+	require.NoError(t, err)
+	require.True(t, match, "new password should verify")
+	require.Equal(t, uint(1), user.SessionVersion, "the user's existing sessions should be logged out")
+}
+
 func TestGravatarHash(t *testing.T) {
 	require.Empty(t, gravatarHash(""))
 	require.Equal(t, fmt.Sprintf("%x", md5.Sum([]byte("User@Example.com"))), gravatarHash("User@Example.com"))

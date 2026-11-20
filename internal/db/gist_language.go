@@ -18,6 +18,7 @@ func GetGistLanguagesForUser(fromUserId, currentUserId uint) ([]struct {
 		Select("language, count(*) as count").
 		Joins("JOIN gists ON gists.id = gist_languages.gist_id").
 		Joins("JOIN users ON gists.user_id = users.id").
+		Scopes(notExpired).
 		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("users.id = ?", fromUserId).
 		Group("language").
@@ -43,6 +44,7 @@ func GetGistLanguages(currentUserId uint) ([]struct {
 	err := db.Model(&GistLanguage{}).
 		Select("language, count(*) as count").
 		Joins("JOIN gists ON gists.id = gist_languages.gist_id").
+		Scopes(notExpired).
 		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Group("language").
 		Order("count DESC").
@@ -68,6 +70,7 @@ func GetGistLanguagesByTopic(currentUserId uint, topic string) ([]struct {
 	err := db.Model(&GistLanguage{}).
 		Select("language, count(*) as count").
 		Joins("JOIN gists ON gists.id = gist_languages.gist_id").
+		Scopes(notExpired).
 		Where("((gists.private = 0) or (gists.private > 0 and gists.user_id = ?))", currentUserId).
 		Where("exists (select 1 from gist_topics where gist_topics.gist_id = gists.id and gist_topics.topic = ?)", topic).
 		Group("language").

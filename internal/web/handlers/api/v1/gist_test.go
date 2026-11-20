@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/config"
@@ -70,6 +71,13 @@ func createGistViaAPI(t *testing.T, s *webtest.Server, tok string, body interfac
 	return resp.ID
 }
 
+// expireGist moves the gist's expiration date into the past, leaving it in
+// the database as if the background job hadn't deleted it yet.
+func expireGist(t *testing.T, g *db.Gist) {
+	g.ExpiresAt = time.Now().Add(-time.Minute).Unix()
+	require.NoError(t, g.UpdateNoTimestamps())
+}
+
 // --- Visibility / access matrix ---
 
 func TestGetGist_VisibilityAccess(t *testing.T) {
@@ -118,6 +126,62 @@ func TestGetGist_VisibilityAccess(t *testing.T) {
 func TestGetGist_NotFound(t *testing.T) {
 	s := setupGetGist(t)
 	s.APIRequest(t, "GET", "/api/gists/does-not-exist", "", nil, 404)
+}
+
+// TestGetGist_Expired - an expired gist not yet deleted by the background job
+// is answered as not found on every per-gist route, to its owner too, and
+// can't be forked.
+func TestGetGist_Expired(t *testing.T) {
+	s := setupGetGist(t)
+
+	ownerTok := apiTokenFor(t, s, "owner", db.ReadWritePermission)
+	otherTok := apiTokenFor(t, s, "other", db.ReadWritePermission)
+	callers := []struct{ name, tok string }{
+		{"anonymous", ""},
+		{"owner", ownerTok},
+		{"other", otherTok},
+	}
+
+	for _, vis := range []struct{ name, value string }{
+		{"public", "0"},
+		{"unlisted", "1"},
+		{"private", "2"},
+	} {
+		t.Run(vis.name, func(t *testing.T) {
+			_, g, _, _ := s.CreateGistAs(t, "owner", vis.value)
+			s.Logout()
+			commits, err := g.Log("HEAD", 0, 1)
+			require.NoError(t, err)
+			sha := commits[0].Hash
+
+			base := "/api/gists/" + g.Uuid
+			s.APIRequest(t, "GET", base, ownerTok, nil, 200)
+
+			expireGist(t, g)
+
+			for _, c := range callers {
+				t.Run(c.name, func(t *testing.T) {
+					for _, uri := range []string{
+						base,
+						base + "/" + sha,
+						base + "/files/" + sha + "/file.txt",
+						base + "/commits",
+						base + "/forks",
+						base + "/comments",
+					} {
+						s.APIRequest(t, "GET", uri, c.tok, nil, 404)
+					}
+				})
+			}
+
+			nbGists, err := db.CountAll(&db.Gist{})
+			require.NoError(t, err)
+			s.APIRequest(t, "POST", base+"/forks", otherTok, nil, 404)
+			nbGistsAfter, err := db.CountAll(&db.Gist{})
+			require.NoError(t, err)
+			require.Equal(t, nbGists, nbGistsAfter, "forking an expired gist must not create a copy")
+		})
+	}
 }
 
 // --- Response structure ---

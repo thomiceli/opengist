@@ -46,6 +46,13 @@ func GitHttp(ctx *context.Context) error {
 	gist := ctx.Get("gist").(*db.Gist)
 	gistExists := gist.ID != 0
 
+	// Expired gists are removed by a background job, but it may not have run
+	// yet: handle them as gists that don't exist, except that handlePush won't
+	// create a new gist in place of one.
+	if gist.IsExpired() {
+		gistExists = false
+	}
+
 	initKind, initToken := classifyInitRequest(ctx.Request().URL.Path)
 
 	// The matched route decides whether the request is a pull or a push, so it

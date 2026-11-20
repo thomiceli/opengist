@@ -19,12 +19,16 @@ var reCommitSHA = regexp.MustCompile(`^[0-9a-fA-F]{4,40}$`)
 // lookupGistByUUID fetches a gist by UUID and enforces visibility. The caller
 // is treated as "able to see private gists" only when they're the owner AND
 // their token holds gist:read (or there's no token at all, in which case the
-// gist isn't private to start with). Returns gorm.ErrRecordNotFound for the
-// hidden case so the handler can map it to a 404 without leaking existence.
+// gist isn't private to start with). An expired gist is hidden from everyone,
+// its owner included, as on the web UI. Returns gorm.ErrRecordNotFound for the
+// hidden cases so the handler can map them to a 404 without leaking existence.
 func lookupGistByUUID(ctx *context.Context, uuid string) (*db.Gist, error) {
 	g, err := db.GetGistByUUID(uuid)
 	if err != nil {
 		return nil, err
+	}
+	if g.IsExpired() {
+		return nil, gorm.ErrRecordNotFound
 	}
 	if g.Private == db.PrivateVisibility {
 		tok, _ := ctx.GetData("accessToken").(*db.AccessToken)

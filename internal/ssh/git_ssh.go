@@ -39,7 +39,7 @@ func AuthorizeGitCommand(gitCmd string, key string, ip string) (*db.Gist, string
 	gistName := strings.TrimSuffix(strings.ToLower(repoFields[1]), ".git")
 
 	gist, err := db.GetGist(userName, gistName)
-	if err != nil {
+	if err != nil || gist.IsExpired() {
 		return nil, "", errors.New("gist not found")
 	}
 

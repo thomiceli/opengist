@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/thomiceli/opengist/internal/validator"
+	"gorm.io/gorm"
 )
 
 // ExpirationType is the expiration choice a user can pick when creating a
@@ -71,8 +72,18 @@ func (dto *GistDTO) ExpiresAtTimestamp() int64 {
 	return t.Unix()
 }
 
+// IsExpired reports whether the gist is past its expiration date. Expired gists
+// are deleted by a background job, but it may not have run yet, so until then
+// they must be treated as if they no longer existed.
 func (gist *Gist) IsExpired() bool {
 	return gist.ExpiresAt > 0 && gist.ExpiresAt <= time.Now().Unix()
+}
+
+// notExpired is the query counterpart of IsExpired: it leaves the expired gists
+// out of a gist query. expires_at is NULL for the gists created before
+// expiration existed.
+func notExpired(tx *gorm.DB) *gorm.DB {
+	return tx.Where("gists.expires_at IS NULL OR gists.expires_at <= 0 OR gists.expires_at > ?", time.Now().Unix())
 }
 
 func DeleteExpiredGists() ([]*Gist, error) {

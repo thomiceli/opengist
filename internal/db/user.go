@@ -197,6 +197,7 @@ func GetUsersWithGistCounts(currentUserId uint, query string, offset int, limit 
 	if err := db.Model(&Gist{}).
 		Select("user_id, count(*) as count").
 		Where("user_id IN ?", ids).
+		Scopes(notExpired).
 		Where("private = 0 or user_id = ?", currentUserId).
 		Group("user_id").
 		Find(&rows).Error; err != nil {

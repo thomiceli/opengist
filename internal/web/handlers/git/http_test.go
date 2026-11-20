@@ -2,12 +2,17 @@ package git_test
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
@@ -233,6 +238,140 @@ func TestGitPushArchived(t *testing.T) {
 
 	// Pushing works again once unarchived.
 	require.NoError(t, gitPush(dest, "afterunarchive.txt", "content"))
+}
+
+// TestGitExpiredGist - an expired gist not yet deleted by the background job
+// can't be read or pushed to by anyone, its owner included, and pushing to it
+// doesn't create another gist in its place.
+func TestGitExpiredGist(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	baseUrl := s.StartHttpServer(t)
+
+	s.Register(t, "thomas")
+
+	_, publicGist, user, publicId := s.CreateGist(t, "0")
+	_, unlistedGist, _, unlistedId := s.CreateGist(t, "1")
+	_, privateGist, _, privateId := s.CreateGist(t, "2")
+
+	gists := [3]*db.Gist{publicGist, unlistedGist, privateGist}
+	ids := [3]string{publicId, unlistedId, privateId}
+	labels := [3]string{"Public", "Unlisted", "Private"}
+
+	var clones [3]string
+	for i, id := range ids {
+		clones[i] = t.TempDir()
+		require.NoError(t, gitClone(baseUrl, "thomas:thomas", user, id, clones[i]))
+
+		gists[i].ExpiresAt = time.Now().Add(-time.Minute).Unix()
+		require.NoError(t, gists[i].UpdateNoTimestamps())
+	}
+
+	nbGists, err := db.CountAll(&db.Gist{})
+	require.NoError(t, err)
+
+	gitRequest := func(t *testing.T, uri string, withOwnerAuth bool, expectedCode int) {
+		req := httptest.NewRequest("GET", uri, nil)
+		req.Header.Set("User-Agent", "git/2.47.0")
+		if withOwnerAuth {
+			req.SetBasicAuth("thomas", "thomas")
+		}
+		s.RawRequest(t, req, expectedCode)
+	}
+
+	for i, id := range ids {
+		t.Run(labels[i], func(t *testing.T) {
+			repoPath := "/" + user + "/" + id + ".git"
+
+			// Anonymous clients are asked for credentials, as for an unknown gist.
+			gitRequest(t, repoPath+"/info/refs?service=git-upload-pack", false, 401)
+			gitRequest(t, repoPath+"/info/refs", false, 401)
+			gitRequest(t, repoPath+"/HEAD", false, 401)
+
+			gitRequest(t, repoPath+"/info/refs?service=git-upload-pack", true, 404)
+			gitRequest(t, repoPath+"/info/refs?service=git-receive-pack", true, 404)
+
+			require.Error(t, gitClone(baseUrl, "", user, id, t.TempDir()))
+			require.Error(t, gitClone(baseUrl, "thomas:thomas", user, id, t.TempDir()))
+			require.Error(t, gitPush(clones[i], "after.txt", "content"))
+		})
+	}
+
+	nbGistsAfter, err := db.CountAll(&db.Gist{})
+	require.NoError(t, err)
+	require.Equal(t, nbGists, nbGistsAfter, "pushing to an expired gist must not create a new gist")
+}
+
+// TestGitExpiredGistAnswersAsUnknown - whatever the credentials, an expired gist
+// gets the same answers as a gist that doesn't exist, so the two can't be told
+// apart. The only exception is its owner pushing to it, which would create the
+// gist if it didn't exist: that is refused instead.
+func TestGitExpiredGistAnswersAsUnknown(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	baseUrl := s.StartHttpServer(t)
+
+	s.Register(t, "thomas")
+	s.Register(t, "alice")
+
+	answer := func(t *testing.T, method, uri, creds string) string {
+		req, err := http.NewRequest(method, baseUrl+uri, nil)
+		require.NoError(t, err)
+		req.Header.Set("User-Agent", "git/2.47.0")
+		if username, password, ok := strings.Cut(creds, ":"); ok {
+			req.SetBasicAuth(username, password)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		return fmt.Sprintf("%d %q %s", resp.StatusCode, resp.Header.Get("WWW-Authenticate"), body)
+	}
+
+	for _, vis := range []struct{ name, value string }{
+		{"Public", "0"},
+		{"Unlisted", "1"},
+		{"Private", "2"},
+	} {
+		t.Run(vis.name, func(t *testing.T) {
+			_, gist, user, id := s.CreateGist(t, vis.value)
+			gist.ExpiresAt = time.Now().Add(-time.Minute).Unix()
+			require.NoError(t, gist.UpdateNoTimestamps())
+
+			expiredRepo := "/" + user + "/" + id + ".git"
+			unknownRepo := "/" + user + "/" + strings.Repeat("0", 32) + ".git"
+
+			for _, creds := range []string{"", "thomas:wrong", "nobody:nobody", "thomas:thomas", "alice:alice"} {
+				for _, r := range []struct{ method, path string }{
+					{"GET", "/info/refs?service=git-upload-pack"},
+					{"GET", "/info/refs"},
+					{"GET", "/HEAD"},
+					{"POST", "/git-upload-pack"},
+					{"GET", "/info/refs?service=git-receive-pack"},
+					{"POST", "/git-receive-pack"},
+				} {
+					if creds == "thomas:thomas" && r.path == "/info/refs?service=git-receive-pack" {
+						continue
+					}
+					require.Equal(t,
+						answer(t, r.method, unknownRepo+r.path, creds),
+						answer(t, r.method, expiredRepo+r.path, creds),
+						"%s %s with credentials %q", r.method, r.path, creds)
+				}
+			}
+
+			nbGists, err := db.CountAll(&db.Gist{})
+			require.NoError(t, err)
+			require.Equal(t, `404 "" Check your credentials or make sure you have access to the Gist`,
+				answer(t, "GET", expiredRepo+"/info/refs?service=git-receive-pack", "thomas:thomas"))
+			nbGistsAfter, err := db.CountAll(&db.Gist{})
+			require.NoError(t, err)
+			require.Equal(t, nbGists, nbGistsAfter)
+		})
+	}
 }
 
 // gitInitAndPushTo initializes a fresh repo with a single file and pushes it to

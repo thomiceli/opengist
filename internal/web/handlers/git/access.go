@@ -69,6 +69,12 @@ func handlePush(ctx *context.Context, route *gitRoute, gist *db.Gist, gistExists
 		return ctx.PlainText(401, "Invalid URL format for push operation")
 	}
 
+	// An expired gist keeps its name until the background job deletes it.
+	if gist.IsExpired() {
+		log.Debug().Str("authUsername", username).Msg("Pushing to expired gist")
+		return ctx.PlainText(404, "Check your credentials or make sure you have access to the Gist")
+	}
+
 	log.Debug().Str("authUsername", username).Msg("Valid URL format for push operation")
 	gist, err = createGist(user, pathParts[1])
 	if err != nil {

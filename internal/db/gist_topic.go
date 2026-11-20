@@ -21,6 +21,7 @@ func GetTopicsWithCount(currentUserId uint, offset int, limit int, perPage int) 
 	err := db.Model(&GistTopic{}).
 		Select("gist_topics.topic as topic, count(*) as count").
 		Joins("join gists on gists.id = gist_topics.gist_id").
+		Scopes(notExpired).
 		Where("gists.private = 0 or gists.user_id = ?", currentUserId).
 		Group("gist_topics.topic").
 		Order("count desc, gist_topics.topic asc").

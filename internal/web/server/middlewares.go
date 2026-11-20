@@ -554,7 +554,9 @@ func gistInit(next Handler) Handler {
 }
 
 // gistSoftInit try to load a gist (same as gistInit) but does not return a 404 if the gist is not found
-// useful for git clients using HTTP to obfuscate the existence of a private gist
+// useful for git clients using HTTP to obfuscate the existence of a private gist.
+// Access to the gist is checked later by the Git handler, so the gist is stored in the echo context
+// instead of the template data, where an error page rendered for this request would display it.
 func gistSoftInit(next Handler) Handler {
 	return func(ctx *context.Context) error {
 		userName := ctx.Param("user")
@@ -563,7 +565,7 @@ func gistSoftInit(next Handler) Handler {
 		gistName = strings.TrimSuffix(gistName, ".git")
 
 		gist, _ := db.GetGist(userName, gistName)
-		ctx.SetData("gist", gist)
+		ctx.Set("gist", gist)
 
 		return next(ctx)
 	}
@@ -572,7 +574,7 @@ func gistSoftInit(next Handler) Handler {
 // gistNewPushSoftInit has the same behavior as gistSoftInit but create a new gist empty instead
 func gistNewPushSoftInit(next Handler) Handler {
 	return func(ctx *context.Context) error {
-		ctx.SetData("gist", new(db.Gist))
+		ctx.Set("gist", new(db.Gist))
 		return next(ctx)
 	}
 }

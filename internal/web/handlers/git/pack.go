@@ -41,7 +41,7 @@ func pack(ctx *context.Context, serviceType string) error {
 	}
 
 	repositoryPath := ctx.GetData("repositoryPath").(string)
-	gist := ctx.GetData("gist").(*db.Gist)
+	gist := ctx.Get("gist").(*db.Gist)
 
 	// Guard against a stale/desynced reference pointing at a repository that no
 	// longer exists on disk (e.g. an init gist whose empty repo was cleaned up).
@@ -72,7 +72,7 @@ func infoRefs(ctx *context.Context) error {
 	noCacheHeaders(ctx)
 	var service string
 
-	gist := ctx.GetData("gist").(*db.Gist)
+	gist := ctx.Get("gist").(*db.Gist)
 
 	serviceType := ctx.QueryParam("service")
 	if strings.HasPrefix(serviceType, "git-") {

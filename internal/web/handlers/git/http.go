@@ -43,7 +43,7 @@ func GitHttp(ctx *context.Context) error {
 		return ctx.NotFound("Gist not found") // regular 404 for non-git routes
 	}
 
-	gist := ctx.GetData("gist").(*db.Gist)
+	gist := ctx.Get("gist").(*db.Gist)
 	gistExists := gist.ID != 0
 
 	initKind, initToken := classifyInitRequest(ctx.Request().URL.Path)
@@ -107,7 +107,7 @@ func GitHttp(ctx *context.Context) error {
 // setGistContext points the request at a specific gist and its repository path,
 // overriding whatever the soft-init middleware put in place.
 func setGistContext(ctx *context.Context, gist *db.Gist) {
-	ctx.SetData("gist", gist)
+	ctx.Set("gist", gist)
 	ctx.SetData("repositoryPath", git.RepositoryPath(gist.User.Username, gist.Uuid))
 }
 

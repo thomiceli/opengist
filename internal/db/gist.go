@@ -1250,11 +1250,15 @@ func (gist *Gist) ToIndexedGist() (*index.Gist, error) {
 	exts := make([]string, 0, len(files))
 	wholeContent := ""
 	for _, file := range files {
+		exts = append(exts, filepath.Ext(file.Filename))
+		// Binary bytes break tokenizing of the files indexed after them
+		if !file.MimeType.CanBeEdited() {
+			continue
+		}
 		wholeContent += file.Content
 		if !strings.HasSuffix(wholeContent, "\n") {
 			wholeContent += "\n"
 		}
-		exts = append(exts, filepath.Ext(file.Filename))
 	}
 
 	fileNames, err := gist.FileNames("HEAD")

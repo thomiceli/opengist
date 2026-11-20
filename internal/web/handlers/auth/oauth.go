@@ -321,6 +321,15 @@ func OauthUnlink(ctx *context.Context) error {
 	currUser := ctx.User
 
 	if provider.UserHasProvider(currUser) {
+		canLogin, err := hasOtherLoginMethod(ctx, currUser, providerStr)
+		if err != nil {
+			return ctx.ErrorRes(500, "Cannot check for user login methods", err)
+		}
+		if !canLogin {
+			ctx.AddFlash(ctx.Tr("flash.auth.oauth-unlink-only-login-method"), "error")
+			return ctx.RedirectTo("/-/settings/authentication")
+		}
+
 		if err := currUser.DeleteProviderID(providerStr); err != nil {
 			return ctx.ErrorRes(500, "Cannot unlink account from "+config.C.OIDCProviderName, err)
 		}
@@ -330,4 +339,32 @@ func OauthUnlink(ctx *context.Context) error {
 	}
 
 	return ctx.RedirectTo("/-/settings")
+}
+
+// hasOtherLoginMethod reports whether the user can still log in once the given
+// provider is unlinked: through another linked provider configured on this
+// instance, or through the login form with a password or a passkey. LDAP is not
+// counted, as a user without a password may have no directory entry.
+func hasOtherLoginMethod(ctx *context.Context, user *db.User, provider string) (bool, error) {
+	linked := map[string]bool{
+		oauth.GitHubProviderString: user.GithubID != "" && ctx.GetData("githubOauth") == true,
+		oauth.GitLabProviderString: user.GitlabID != "" && ctx.GetData("gitlabOauth") == true,
+		oauth.GiteaProviderString:  user.GiteaID != "" && ctx.GetData("giteaOauth") == true,
+		oauth.OpenIDConnectString:  user.OIDCID != "" && ctx.GetData("oidcOauth") == true,
+	}
+	for other, usable := range linked {
+		if usable && other != provider {
+			return true, nil
+		}
+	}
+
+	if ctx.GetData("DisableLoginForm") == true {
+		return false, nil
+	}
+	if user.Password != "" {
+		return true, nil
+	}
+
+	hasPasskey, _, err := user.HasMFA()
+	return hasPasskey, err
 }

@@ -1,6 +1,7 @@
 package auth_test
 
 import (
+	"net/http"
 	"net/url"
 	"testing"
 
@@ -213,14 +214,36 @@ func TestLogout(t *testing.T) {
 	defer webtest.Teardown(t)
 
 	s.Register(t, "thomas")
+	base := s.StartHttpServer(t)
 
 	t.Run("LogoutRedirects", func(t *testing.T) {
-		s.Login(t, "thomas")
-		require.Equal(t, "thomas", s.User().Username)
+		client := loginClient(t, base, "thomas")
+		require.True(t, isLoggedIn(t, client, base))
 
-		resp := s.Request(t, "GET", "/-/logout", nil, 302)
+		resp, _ := send(t, client, http.MethodPost, base+"/-/logout", url.Values{
+			"_csrf": {csrfToken(t, client, base+"/")},
+		}, nil)
+		require.Equal(t, http.StatusFound, resp.StatusCode)
 		require.Equal(t, "/-/all", resp.Header.Get("Location"))
-		require.Nil(t, s.User())
-		s.Request(t, "GET", "/", nil, 302)
+		require.False(t, isLoggedIn(t, client, base))
+	})
+
+	t.Run("GetDoesNotLogout", func(t *testing.T) {
+		client := loginClient(t, base, "thomas")
+
+		resp, _ := send(t, client, http.MethodGet, base+"/-/logout", nil, crossSiteNavigation)
+		require.Equal(t, http.StatusNotFound, resp.StatusCode)
+		require.True(t, isLoggedIn(t, client, base))
+	})
+
+	t.Run("PostWithoutTokenIsRejected", func(t *testing.T) {
+		client := loginClient(t, base, "thomas")
+		csrfToken(t, client, base+"/") // sets the CSRF cookie
+
+		for _, headers := range []map[string]string{nil, crossSiteNavigation} {
+			resp, _ := send(t, client, http.MethodPost, base+"/-/logout", url.Values{}, headers)
+			require.GreaterOrEqual(t, resp.StatusCode, http.StatusBadRequest)
+			require.True(t, isLoggedIn(t, client, base))
+		}
 	})
 }

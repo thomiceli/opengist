@@ -135,7 +135,10 @@
                         <a href="{{ .c.ExternalUrl }}/{{ .userLogged.Username }}" role="menuitem">{{ .locale.Tr "header.menu.my-gists" }}</a>
                         <a href="{{ .c.ExternalUrl }}/-/settings" role="menuitem">{{ .locale.Tr "header.menu.settings" }}</a>
                         <hr role="separator" />
-                        <a href="{{ .c.ExternalUrl }}/-/logout" role="menuitem" class="text-destructive">{{ .locale.Tr "header.menu.logout" }}</a>
+                        <form method="post" action="{{ .c.ExternalUrl }}/-/logout">
+                            {{ .csrfHtml }}
+                            <button type="submit" role="menuitem" class="text-destructive">{{ .locale.Tr "header.menu.logout" }}</button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -47,11 +47,18 @@ func GitHttp(ctx *context.Context) error {
 	gistExists := gist.ID != 0
 
 	initKind, initToken := classifyInitRequest(ctx.Request().URL.Path)
+
+	// The matched route decides whether the request is a pull or a push, so it
+	// is always authorized for the handler that will serve it. Only info/refs
+	// names the service in the query string; git never sends that parameter
+	// elsewhere, so it is refused rather than allowed to disagree with the route.
+	service := ctx.QueryParam("service")
 	isInfoRefs := strings.HasSuffix(route.gitUrl, "/info/refs$")
-	isPull := ctx.QueryParam("service") == "git-upload-pack" ||
-		strings.HasSuffix(ctx.Request().URL.Path, "git-upload-pack") && !isInfoRefs
-	isPush := ctx.QueryParam("service") == "git-receive-pack" ||
-		strings.HasSuffix(ctx.Request().URL.Path, "git-receive-pack") && !isInfoRefs
+	if service != "" && !isInfoRefs {
+		return ctx.PlainText(400, "Invalid service parameter")
+	}
+	isPull := strings.HasSuffix(route.gitUrl, "/git-upload-pack$") || isInfoRefs && service == "git-upload-pack"
+	isPush := strings.HasSuffix(route.gitUrl, "/git-receive-pack$") || isInfoRefs && service == "git-receive-pack"
 
 	// Anything that is neither an init request, a smart pull, nor a push is a
 	// dumb-protocol read: GET .../info/refs (no service), .../HEAD,

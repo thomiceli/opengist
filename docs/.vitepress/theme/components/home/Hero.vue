@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
-const version = 'v1.15'
-const dockerCommand = 'docker run -p 6157:6157 -v "$HOME/.opengist:/opengist" ghcr.io/thomiceli/opengist:1.15'
+const version = 'v1.16'
+const dockerCommand = 'docker run -p 6157:6157 -v "$HOME/.opengist:/opengist" ghcr.io/thomiceli/opengist:1.16'
 
 const stars = ref(null)
 const formattedStars = computed(() => {
@@ -61,7 +61,7 @@ onBeforeUnmount(() => clearTimeout(timer))
       rel="noopener noreferrer"
     >
       <span class="og-badge__dot" />
-      {{ version }} released: Major UI rework
+      {{ version }} released: Gist comments + security fixes
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="og-badge__arrow">
         <path stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6" />
       </svg>

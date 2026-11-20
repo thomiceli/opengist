@@ -20,7 +20,7 @@ require (
 	github.com/labstack/echo/v4 v4.16.6
 	github.com/markbates/goth v1.82.0
 	github.com/meilisearch/meilisearch-go v0.37.0
-	github.com/oauth2-proxy/mockoidc v0.0.0-20240214162133-caebfff84d25
+	github.com/oauth2-proxy/mockoidc v0.0.0-20261103160011-e06ed0b7cb7f
 	github.com/pquerna/otp v1.5.0
 	github.com/prometheus/client_golang v1.25.0
 	github.com/robfig/cron/v3 v3.0.1
@@ -75,7 +75,7 @@ require (
 	github.com/glebarez/go-sqlite v1.23.0 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.8 // indirect
 	github.com/go-chi/chi/v5 v5.5.0 // indirect
-	github.com/go-jose/go-jose/v3 v3.0.5 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.8 // indirect
 	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
 	github.com/go-sql-driver/mysql v1.10.2 // indirect

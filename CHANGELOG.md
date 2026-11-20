@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.16.0](https://github.com/thomiceli/opengist/compare/v1.15.3...v1.16.0) - 2026-11-21
+See here how to [update](https://opengist.io/docs/update) Opengist.
+
+### ⚠️ Security release ⚠️
+This release fixes 13 security vulnerabilities, please update as soon as possible. Check the breaking changes and the steps after updating below.
+
+### Added
+- Gist comments (#855)
+
+### Security
+- Unauthenticated writes to gists over Git HTTP ([GHSA-9mjv-vm4v-484w](https://github.com/thomiceli/opengist/security/advisories/GHSA-9mjv-vm4v-484w))
+- LDAP filter injection, and LDAP usernames used unchecked as directory names ([GHSA-883q-jwxx-r7hv](https://github.com/thomiceli/opengist/security/advisories/GHSA-883q-jwxx-r7hv))
+- Stored XSS through data attributes in Jupyter notebooks ([GHSA-72x9-42q6-qv57](https://github.com/thomiceli/opengist/security/advisories/GHSA-72x9-42q6-qv57))
+- CPU exhaustion through the `Accept-Language` header ([GHSA-q3qv-c8qq-94mj](https://github.com/thomiceli/opengist/security/advisories/GHSA-q3qv-c8qq-94mj))
+- MFA bypass for Git over HTTP ([GHSA-cxgj-pv47-623m](https://github.com/thomiceli/opengist/security/advisories/GHSA-cxgj-pv47-623m))
+- Unlisted gists found through SQL `LIKE` wildcards and short UUIDs ([GHSA-cj4r-8jph-fj2r](https://github.com/thomiceli/opengist/security/advisories/GHSA-cj4r-8jph-fj2r))
+- Private gist content in 404 page metadata ([GHSA-v3mc-8qrc-4783](https://github.com/thomiceli/opengist/security/advisories/GHSA-v3mc-8qrc-4783))
+- Admin configuration page rendered without login through `/assets` ([GHSA-mvf3-jgxj-234c](https://github.com/thomiceli/opengist/security/advisories/GHSA-mvf3-jgxj-234c))
+- Expired gists still readable through the API, Git and SSH ([GHSA-vwph-vv8j-r7c2](https://github.com/thomiceli/opengist/security/advisories/GHSA-vwph-vv8j-r7c2))
+- Sessions kept after a password change ([GHSA-gpv4-fhpg-j56g](https://github.com/thomiceli/opengist/security/advisories/GHSA-gpv4-fhpg-j56g))
+- Private gist content exposed through same-site JavaScript embeds ([GHSA-q5gv-w47x-g49j](https://github.com/thomiceli/opengist/security/advisories/GHSA-q5gv-w47x-g49j))
+- Search index not updated after API edits, exposing gists made private or unlisted ([GHSA-r2m8-gcqg-5xvm](https://github.com/thomiceli/opengist/security/advisories/GHSA-r2m8-gcqg-5xvm))
+- OAuth unlink and logout through cross-site GET requests ([GHSA-r94p-cgwr-fq9w](https://github.com/thomiceli/opengist/security/advisories/GHSA-r94p-cgwr-fq9w))
+
+### Breaking changes
+- Users with MFA (TOTP or passkey) must use an access token or SSH for Git over HTTP, their password is refused
+- Short UUIDs only work for public gists, unlisted and private gists need their full UUID or custom URL
+- `GET /-/logout` and `GET /oauth/:provider/unlink` are removed, logging out and unlinking an OAuth account require a POST request with the CSRF token (check reverse proxy or SSO logout redirects)
+- LDAP: first logins are refused when the username contains whitespace or `/ \ : ? # %`, ends with a dot, or is a reserved name. For example, a `cn` like "John Smith" can't create an account anymore
+
+### Changed
+- Changing the password logs out the other sessions
+- An OAuth account can't be unlinked when it's the only way to log in
+- Private gists can't be embedded (`.js`) or fetched (`.json`) from another origin
+- Expired gists are hidden everywhere as soon as they expire, and the cleanup also runs at startup
+
+### Other
+- Update Go & JS deps (#856)
+- Update docs deps (#857)
+
+> Admins of Opengist instances may want to run "Rebuild search index" in the admin panel.
+> 
+> If you use LDAP, look for usernames containing `/`, `\`, `(`, `)` or `*`, which can come from GHSA-883q-jwxx-r7hv. Accounts with `/` or `\` in their username can't be deleted from Opengist anymore and need a manual cleanup
+
 ## [1.15.3](https://github.com/thomiceli/opengist/compare/v1.15.2...v1.15.3) - 2026-10-21
 See here how to [update](https://opengist.io/docs/update) Opengist.
 

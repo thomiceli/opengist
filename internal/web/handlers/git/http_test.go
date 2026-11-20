@@ -130,6 +130,27 @@ func TestGitClonePull(t *testing.T) {
 	}
 }
 
+func TestGitCloneIdentifier(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	baseUrl := s.StartHttpServer(t)
+
+	s.Register(t, "thomas")
+
+	// Created first so it's the gist a wildcard or an empty identifier would
+	// resolve to
+	_, unlisted, user, _ := s.CreateGist(t, "1")
+	_, public, _, _ := s.CreateGist(t, "0")
+
+	for _, id := range []string{"", "_", "%25", unlisted.Uuid[:8]} {
+		require.Error(t, gitClone(baseUrl, "", user, id, t.TempDir()), "clone of %q", id)
+	}
+
+	require.NoError(t, gitClone(baseUrl, "", user, unlisted.Uuid, t.TempDir()))
+	require.NoError(t, gitClone(baseUrl, "", user, public.Uuid[:8], t.TempDir()))
+}
+
 func TestGitPush(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)

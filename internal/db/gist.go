@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -120,11 +121,28 @@ func (gist *Gist) BeforeDelete(tx *gorm.DB) error {
 	return err
 }
 
+var uuidPrefixRegex = regexp.MustCompile(`^[0-9a-f]+$`)
+
+// GetGist finds a gist by its full UUID or custom URL. Public gists can also be
+// found by a UUID prefix; unlisted and private gists can't, as an unguessable
+// UUID is what keeps them hidden.
 func GetGist(user string, gistUuid string) (*Gist, error) {
 	gist := new(Gist)
+	gistUuid = strings.ToLower(gistUuid)
+
+	// url_normalized is empty when a gist has no custom URL, and must not match
+	// an empty identifier (or a blank one, as MySQL can ignore trailing spaces)
+	query := "gists.uuid = ? OR (gists.url_normalized <> '' AND gists.url_normalized = ?)"
+	args := []interface{}{gistUuid, gistUuid}
+	// Only hex input reaches LIKE, so it can't carry the % or _ wildcards
+	if uuidPrefixRegex.MatchString(gistUuid) {
+		query += " OR (gists.private = 0 AND gists.uuid LIKE ?)"
+		args = append(args, gistUuid+"%")
+	}
+	args = append(args, strings.ToLower(user))
+
 	err := db.Preload("User").Preload("Forked.User").Preload("Topics").
-		Where("(gists.uuid LIKE ? OR gists.url_normalized = ?) AND users.username_normalized = ?",
-			strings.ToLower(gistUuid)+"%", strings.ToLower(gistUuid), strings.ToLower(user)).
+		Where("("+query+") AND users.username_normalized = ?", args...).
 		Joins("join users on gists.user_id = users.id").
 		First(&gist).Error
 

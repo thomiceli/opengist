@@ -100,6 +100,76 @@ func TestGistIndex(t *testing.T) {
 	})
 }
 
+func TestGistIdentifierLookup(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+
+	// Created first so it's the gist a wildcard or an empty identifier would
+	// resolve to
+	_, unlisted, username, identifier := s.CreateGist(t, "1")
+	_, private, _, _ := s.CreateGist(t, "2")
+	_, public, _, _ := s.CreateGist(t, "0")
+
+	t.Run("UnlistedNeedsFullUuid", func(t *testing.T) {
+		s.Request(t, "GET", "/"+username+"/"+identifier, nil, 200)
+		s.Request(t, "GET", "/"+username+"/"+unlisted.Uuid[:8], nil, 404)
+		s.Request(t, "GET", "/"+username+"/"+unlisted.Uuid[:31], nil, 404)
+	})
+
+	t.Run("WildcardsDoNotMatch", func(t *testing.T) {
+		for _, name := range []string{"_", "%25", "%25" + unlisted.Uuid[10:16], unlisted.Uuid[:4] + "%25", "________________________________"} {
+			s.Request(t, "GET", "/"+username+"/"+name, nil, 404)
+			s.Request(t, "GET", "/"+username+"/"+name+"/raw/HEAD/file.txt", nil, 404)
+			s.Request(t, "GET", "/"+username+"/"+name+".js", nil, 404)
+			s.Request(t, "GET", "/"+username+"/"+name+".json", nil, 404)
+		}
+	})
+
+	t.Run("EmptyIdentifier", func(t *testing.T) {
+		// Nothing is left once the extension is stripped
+		for _, name := range []string{".js", ".json", ".git"} {
+			s.Request(t, "GET", "/"+username+"/"+name, nil, 404)
+			s.Request(t, "GET", "/"+username+"/"+name+"/raw/HEAD/file.txt", nil, 404)
+			s.Request(t, "GET", "/"+username+"/"+name+"/archive/HEAD", nil, 404)
+		}
+		s.Request(t, "GET", "/"+username+"//raw/HEAD/file.txt", nil, 404)
+		s.Request(t, "GET", "/"+username+"/%20", nil, 404)
+	})
+
+	t.Run("PrivateNeedsFullUuid", func(t *testing.T) {
+		s.Login(t, "thomas")
+		defer s.Logout()
+
+		s.Request(t, "GET", "/"+username+"/"+private.Uuid, nil, 200)
+		s.Request(t, "GET", "/"+username+"/"+private.Uuid[:8], nil, 404)
+	})
+
+	t.Run("PublicPrefix", func(t *testing.T) {
+		s.Request(t, "GET", "/"+username+"/"+public.Uuid[:8], nil, 200)
+		s.Request(t, "GET", "/"+username+"/"+strings.ToUpper(public.Uuid[:8]), nil, 200)
+		s.Request(t, "GET", "/"+username+"/"+public.Uuid[:8]+"/raw/HEAD/file.txt", nil, 200)
+	})
+
+	t.Run("CustomURL", func(t *testing.T) {
+		s.Login(t, "thomas")
+		s.Request(t, "POST", "/", url.Values{
+			"title":   {"Test"},
+			"name":    {"file.txt"},
+			"content": {"hello world"},
+			"url":     {"my-gist"},
+			"private": {"1"},
+		}, 302)
+		s.Logout()
+
+		s.Request(t, "GET", "/"+username+"/my-gist", nil, 200)
+		s.Request(t, "GET", "/"+username+"/my-gist.js", nil, 200)
+		s.Request(t, "GET", "/"+username+"/my-gist.json", nil, 200)
+		s.Request(t, "GET", "/"+username+"/my-gist/raw/HEAD/file.txt", nil, 200)
+	})
+}
+
 func TestTopicPageDecodesPercentEncodedTopic(t *testing.T) {
 	s := webtest.Setup(t)
 	defer webtest.Teardown(t)

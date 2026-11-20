@@ -282,10 +282,29 @@ func Search(ctx *context.Context) error {
 		return ctx.ErrorRes(500, "Error searching gists", err)
 	}
 
+	// The index returns a page of 10 IDs, plus the first ID of the next page if
+	// there is one. Page existence and navigation are based on these IDs, since
+	// some of their gists may not be shown below.
+	const perPage = 10
+	hasNext := len(gistsIds) > perPage
+	if hasNext {
+		gistsIds = gistsIds[:perPage]
+	}
+	if len(gistsIds) == 0 && pageInt != 1 {
+		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
+	}
+
 	gists, err := db.GetAllGistsByIds(gistsIds)
 	if err != nil {
 		return ctx.ErrorRes(500, "Error fetching gists", err)
 	}
+
+	// The index is updated asynchronously and can be out of date, so only keep
+	// the gists the current user is allowed to see (public or their own). The
+	// hit count and language facets from the index still count the others.
+	gists = slices.DeleteFunc(gists, func(gist *db.Gist) bool {
+		return gist.Private != db.PublicVisibility && gist.UserID != currentUserId
+	})
 
 	renderedGists := make([]*render.RenderedGist, 0, len(gists))
 	for _, gist := range gists {
@@ -296,10 +315,8 @@ func Search(ctx *context.Context) error {
 		renderedGists = append(renderedGists, &rendered)
 	}
 
-	if err = handlers.Paginate(ctx, renderedGists, pageInt, 10, "gists", "-/search", 2, pagination); err != nil {
-		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
-	}
-
+	handlers.SetPagination(ctx, pageInt, hasNext, "-/search", 2, pagination)
+	ctx.SetData("gists", renderedGists)
 	ctx.SetData("htmlTitle", ctx.TrH("gist.list.search-results"))
 	ctx.SetData("nbHits", nbHits)
 	ctx.SetData("langs", langs)

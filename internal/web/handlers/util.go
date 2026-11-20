@@ -81,27 +81,32 @@ func (p PaginationParams) WithParams(pairs ...string) template.URL {
 }
 
 func Paginate[T any](ctx *context.Context, data []*T, pageInt int, perPage int, templateDataName string, urlPage string, labels int, params *PaginationParams) error {
-	var paginationParams PaginationParams
-	if params == nil {
-		paginationParams = PaginationParams{}
-	} else {
-		paginationParams = *params
-	}
-	paginationParams.Page = pageInt
 	lenData := len(data)
 	if lenData == 0 && pageInt != 1 {
 		return errors.New("page not found")
 	}
 
-	if lenData > perPage {
-		if lenData > 1 {
-			data = data[:lenData-1]
-		}
-		paginationParams.HasNext = true
+	hasNext := lenData > perPage
+	if hasNext && lenData > 1 {
+		data = data[:lenData-1]
 	}
-	if pageInt > 1 {
-		paginationParams.HasPrevious = true
+
+	SetPagination(ctx, pageInt, hasNext, urlPage, labels, params)
+	ctx.SetData(templateDataName, data)
+	return nil
+}
+
+// SetPagination sets the template data for the pagination links of a page.
+// Paginate calls it once it knows from the data whether there is a next page;
+// handlers that know it some other way can call it directly.
+func SetPagination(ctx *context.Context, pageInt int, hasNext bool, urlPage string, labels int, params *PaginationParams) {
+	var paginationParams PaginationParams
+	if params != nil {
+		paginationParams = *params
 	}
+	paginationParams.Page = pageInt
+	paginationParams.HasNext = hasNext
+	paginationParams.HasPrevious = pageInt > 1
 
 	ctx.SetData("pagination", paginationParams)
 
@@ -115,8 +120,6 @@ func Paginate[T any](ctx *context.Context, data []*T, pageInt int, perPage int, 
 	}
 
 	ctx.SetData("urlPage", urlPage)
-	ctx.SetData(templateDataName, data)
-	return nil
 }
 
 // ParseSearchQueryStr parses a search query string and returns a map of metadata.

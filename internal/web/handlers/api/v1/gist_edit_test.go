@@ -2,11 +2,16 @@ package v1_test
 
 import (
 	"encoding/json"
+	"io"
+	"net/url"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/thomiceli/opengist/internal/db"
+	"github.com/thomiceli/opengist/internal/index"
 	"github.com/thomiceli/opengist/internal/web/handlers/api/v1/types"
 	webtest "github.com/thomiceli/opengist/internal/web/test"
 )
@@ -110,6 +115,47 @@ func TestUpdateGist_VisibilityChange(t *testing.T) {
 	// Untouched fields.
 	require.Equal(t, "seed-title", resp.Title)
 	require.Equal(t, "seed-description", resp.Description)
+}
+
+// TestUpdateGist_VisibilityChangeUpdatesSearch - once a public gist is made
+// unlisted or private through PATCH, anonymous search must stop listing it,
+// and its search index entry must carry the new visibility.
+func TestUpdateGist_VisibilityChangeUpdatesSearch(t *testing.T) {
+	s, tok := setupCreateGist(t)
+
+	for _, visibility := range []string{"unlisted", "private"} {
+		t.Run(visibility, func(t *testing.T) {
+			id := createSeedGist(t, s, tok)
+			g, err := db.GetGistByUUID(id)
+			require.NoError(t, err)
+
+			// Indexing runs in the background.
+			require.Eventually(t, func() bool { return anonymousIndexHasGist(g) }, 10*time.Second, 50*time.Millisecond)
+			require.True(t, searchListsGist(t, s, g), "public gist must be listed before the change")
+
+			s.APIRequest(t, "PATCH", "/api/gists/"+id, tok, `{"visibility": "`+visibility+`"}`, 200)
+
+			require.False(t, searchListsGist(t, s, g), "%s gist must not be listed to anonymous users", visibility)
+			require.Eventually(t, func() bool { return !anonymousIndexHasGist(g) }, 10*time.Second, 50*time.Millisecond,
+				"index entry must be updated with the new visibility")
+		})
+	}
+}
+
+// searchListsGist reports whether the search page, requested with the
+// server's current session, lists g.
+func searchListsGist(t *testing.T, s *webtest.Server, g *db.Gist) bool {
+	resp := s.Request(t, "GET", "/-/search?q="+url.QueryEscape("user:"+g.User.Username), nil, 200)
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	return strings.Contains(string(body), g.Uuid)
+}
+
+// anonymousIndexHasGist reports whether an anonymous query on the search index
+// returns g.
+func anonymousIndexHasGist(g *db.Gist) bool {
+	ids, _, _, err := index.SearchGists(index.SearchGistMetadata{Username: g.User.Username}, 0, 1)
+	return err == nil && slices.Contains(ids, g.ID)
 }
 
 // TestUpdateGist_TitleChange - PATCHing only `title` changes the title and

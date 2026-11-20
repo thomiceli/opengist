@@ -208,6 +208,9 @@ func UpdateGist(ctx *context.Context) error {
 	}
 	g.UpdateLanguages()
 	_ = g.UpdatePreviewAndCount(true)
+	// Index last: AddInIndex reads g from a goroutine, so g must not be
+	// written to afterwards.
+	g.AddInIndex()
 
 	resp, err := g.ToAPI(apiBaseURL(ctx), "HEAD")
 	if err != nil {

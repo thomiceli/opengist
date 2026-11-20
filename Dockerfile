@@ -8,11 +8,11 @@ RUN apk update && \
         musl-dev \
         libstdc++
 
-COPY --from=golang:1.27.2-alpine3.24 /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.27.4-alpine3.24 /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 ENV CGO_ENABLED=0
 
-COPY --from=node:26.5.0-alpine3.24 /usr/local/ /usr/local/
+COPY --from=node:26.13.1-alpine3.24 /usr/local/ /usr/local/
 ENV NODE_PATH="/usr/local/lib/node_modules"
 ENV PATH="/usr/local/bin:${PATH}"
 

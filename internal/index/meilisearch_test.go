@@ -1,6 +1,7 @@
 package index
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
@@ -24,20 +25,20 @@ func (s *syncMeiliIndexer) Add(gist *Gist) error {
 		ContentSplit: splitCamelCase(gist.Content),
 	}
 	primaryKey := "GistID"
-	taskInfo, err := s.index.AddDocuments(doc, &meilisearch.DocumentOptions{PrimaryKey: &primaryKey})
+	taskInfo, err := s.index.AddDocuments(context.Background(), doc, &meilisearch.DocumentOptions{PrimaryKey: &primaryKey})
 	if err != nil {
 		return err
 	}
-	_, err = s.client.WaitForTask(taskInfo.TaskUID, 0)
+	_, err = s.client.WaitForTask(context.Background(), taskInfo.TaskUID, 0)
 	return err
 }
 
 func (s *syncMeiliIndexer) Remove(gistID uint) error {
-	taskInfo, err := s.index.DeleteDocument(strconv.Itoa(int(gistID)), nil)
+	taskInfo, err := s.index.DeleteDocument(context.Background(), strconv.Itoa(int(gistID)), nil)
 	if err != nil {
 		return err
 	}
-	_, err = s.client.WaitForTask(taskInfo.TaskUID, 0)
+	_, err = s.client.WaitForTask(context.Background(), taskInfo.TaskUID, 0)
 	return err
 }
 

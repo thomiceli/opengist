@@ -12,6 +12,12 @@ The [configuration cheat sheet](cheat-sheet.md) lists all available configuratio
 The configuration file must be specified when launching the application, using the `--config` flag followed by the path 
 to your YAML file.
 
+Dotted keys can also be written as nested YAML mappings, for example `gitea.name: My Gitea` as:
+```yml
+gitea:
+  name: My Gitea
+```
+
 Usage with Docker Compose :
 ```yml
 services:

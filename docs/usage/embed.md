@@ -26,3 +26,6 @@ If you have a Gist that holds several different files, you can also explicitely 
 <!-- Light mode: -->
 <script src="http://opengist.url/user/gist-url.js?file=filename&light"></script>
 ```
+
+> [!Note]
+> Private Gists can't be embedded in other websites, as only their owner can see them.

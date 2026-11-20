@@ -52,6 +52,12 @@ func DownloadFile(ctx *context.Context) error {
 		return ctx.NotFound("File not found")
 	}
 
+	// The detected type can be JavaScript: keep another origin from loading a
+	// private file as a script with the owner's session cookie.
+	if gist.Private == db.PrivateVisibility {
+		ctx.Response().Header().Set("Cross-Origin-Resource-Policy", "same-origin")
+	}
+
 	ctx.Response().Header().Set("Content-Type", file.MimeType.Header())
 	ctx.Response().Header().Set("Content-Disposition", "attachment; filename=\""+url.PathEscape(file.Filename)+"\"")
 	ctx.Response().Header().Set("Content-Length", strconv.Itoa(int(file.Size)))

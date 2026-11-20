@@ -65,6 +65,9 @@ func GistIndex(ctx *context.Context) error {
 
 func GistJson(ctx *context.Context) error {
 	gist := ctx.GetData("gist").(*db.Gist)
+	if err := guardPrivateEmbed(ctx, gist); err != nil {
+		return err
+	}
 
 	var files []*git.File
 	hasMoreFiles := false
@@ -166,6 +169,9 @@ func GistJs(ctx *context.Context) error {
 	}
 
 	gist := ctx.GetData("gist").(*db.Gist)
+	if err := guardPrivateEmbed(ctx, gist); err != nil {
+		return err
+	}
 
 	var files []*git.File
 	hasMoreFiles := false
@@ -217,6 +223,35 @@ func GistJs(ctx *context.Context) error {
 	ctx.Response().Header().Set("Cache-Control", "no-store")
 	ctx.Response().Header().Set("Content-Type", "text/javascript")
 	return ctx.PlainText(200, js)
+}
+
+// guardPrivateEmbed keeps another origin from reading a private gist through
+// its embed. Browsers send the SameSite=Lax session cookie with a script loaded
+// by another origin of the same site, so the response is marked same-origin
+// only and, when the owner's session grants access, such requests are refused.
+// Requests without Sec-Fetch-Site (non-browser clients, or plain HTTP where
+// browsers omit it) rely on the response header alone.
+func guardPrivateEmbed(ctx *context.Context, gist *db.Gist) error {
+	if gist.Private != db.PrivateVisibility {
+		return nil
+	}
+	ctx.Response().Header().Set("Cross-Origin-Resource-Policy", "same-origin")
+
+	// Without the owner's session, access was granted by an access token, which
+	// browsers never attach on their own.
+	if ctx.User == nil || ctx.User.ID != gist.UserID {
+		return nil
+	}
+
+	switch ctx.Request().Header.Get("Sec-Fetch-Site") {
+	case "", "same-origin", "none":
+		return nil
+	}
+	// Following a link from another site doesn't expose the response to it.
+	if ctx.Request().Header.Get("Sec-Fetch-Dest") == "document" {
+		return nil
+	}
+	return ctx.NotFound("Gist not found")
 }
 
 func Preview(ctx *context.Context) error {

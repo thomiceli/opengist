@@ -106,6 +106,7 @@ func TestDownloadFile(t *testing.T) {
 		require.Equal(t, `attachment; filename="file.txt"`, resp.Header.Get("Content-Disposition"))
 		require.Equal(t, "11", resp.Header.Get("Content-Length"))
 		require.Equal(t, "nosniff", resp.Header.Get("X-Content-Type-Options"))
+		require.Empty(t, resp.Header.Get("Cross-Origin-Resource-Policy"))
 
 		body, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
@@ -138,5 +139,10 @@ func TestDownloadFile(t *testing.T) {
 		_, _, username, identifier := s.CreateGist(t, "2")
 
 		s.Request(t, "GET", "/"+username+"/"+identifier+"/download/HEAD/file.txt", nil, 404)
+
+		s.Login(t, "thomas")
+		resp := s.Request(t, "GET", "/"+username+"/"+identifier+"/download/HEAD/file.txt", nil, 200)
+		require.Equal(t, "same-origin", resp.Header.Get("Cross-Origin-Resource-Policy"))
+		s.Logout()
 	})
 }

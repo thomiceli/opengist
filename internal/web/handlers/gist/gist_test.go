@@ -3,6 +3,7 @@ package gist_test
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 	"testing"
@@ -615,5 +616,78 @@ func TestGistJsonSingleFile(t *testing.T) {
 		files, ok := result["files"].([]interface{})
 		require.True(t, ok)
 		require.Len(t, files, 1)
+	})
+}
+
+func TestPrivateGistEmbedSameOrigin(t *testing.T) {
+	s := webtest.Setup(t)
+	defer webtest.Teardown(t)
+
+	s.Register(t, "thomas")
+
+	_, _, username, publicId := s.CreateGist(t, "0")
+	_, _, _, unlistedId := s.CreateGist(t, "1")
+	_, _, _, privateId := s.CreateGist(t, "2")
+
+	get := func(t *testing.T, uri string, expectedCode int, headers map[string]string) (*http.Response, string) {
+		resp := s.RequestWithHeaders(t, "GET", uri, nil, expectedCode, headers)
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		return resp, string(body)
+	}
+
+	for _, ext := range []string{".js", ".json"} {
+		t.Run("Private"+ext, func(t *testing.T) {
+			uri := "/" + username + "/" + privateId + ext
+			s.Login(t, "thomas")
+			defer s.Logout()
+
+			// Loaded by a page on another origin, with the owner's session cookie
+			for _, site := range []string{"same-site", "cross-site"} {
+				_, body := get(t, uri, 404, map[string]string{"Sec-Fetch-Site": site})
+				require.NotContains(t, body, "hello world")
+			}
+
+			// Same origin, typed in the address bar, or no fetch metadata
+			for _, site := range []string{"same-origin", "none", ""} {
+				resp, body := get(t, uri, 200, map[string]string{"Sec-Fetch-Site": site})
+				require.Equal(t, "same-origin", resp.Header.Get("Cross-Origin-Resource-Policy"))
+				require.Contains(t, body, "hello world")
+			}
+
+			// Opened from a link on another site
+			get(t, uri, 200, map[string]string{
+				"Sec-Fetch-Site": "cross-site",
+				"Sec-Fetch-Mode": "navigate",
+				"Sec-Fetch-Dest": "document",
+			})
+
+			// Owner's access token, which the browser never sends on its own
+			token := s.CreateAccessToken(t, "token"+ext, db.ReadPermission, db.NoPermission)
+			s.Logout()
+			resp, body := get(t, uri, 200, map[string]string{
+				"Sec-Fetch-Site": "cross-site",
+				"Authorization":  "Token " + token,
+			})
+			require.Equal(t, "same-origin", resp.Header.Get("Cross-Origin-Resource-Policy"))
+			require.Contains(t, body, "hello world")
+		})
+	}
+
+	t.Run("PublicAndUnlisted", func(t *testing.T) {
+		for _, logged := range []bool{true, false} {
+			if logged {
+				s.Login(t, "thomas")
+			} else {
+				s.Logout()
+			}
+			for _, id := range []string{publicId, unlistedId} {
+				for _, site := range []string{"same-site", "cross-site"} {
+					resp, body := get(t, "/"+username+"/"+id+".js", 200, map[string]string{"Sec-Fetch-Site": site})
+					require.Empty(t, resp.Header.Get("Cross-Origin-Resource-Policy"))
+					require.Contains(t, body, "hello world")
+				}
+			}
+		}
 	})
 }

@@ -19,20 +19,20 @@
     "@lezer/highlight": "^1.2.5",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.20",
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.5",
     "basecoat-css": "^0.3.11",
     "codemirror": "^6.0.2",
-    "dompurify": "^3.4.17",
+    "dompurify": "^3.4.18",
     "github-markdown-css": "^5.9.0",
     "highlight.js": "^11.12.0",
     "htmx.org": "^2.0.11",
-    "hyperscript.org": "^0.9.93",
+    "hyperscript.org": "^0.9.94",
     "jdenticon": "^3.3.0",
-    "katex": "^0.19.0",
-    "marked": "^18.1.1",
+    "katex": "^0.19.1",
+    "marked": "^18.2.1",
     "nodemon": "^3.1.14",
     "pdfobject": "^2.3.1",
-    "tailwindcss": "^4.3.3",
-    "vite": "^8.3.4"
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8"
   }
 }

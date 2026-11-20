@@ -1,6 +1,7 @@
 package index
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -50,10 +51,10 @@ func (i *MeiliIndexer) Init() error {
 
 func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
 	i.client = meilisearch.New(i.host, meilisearch.WithAPIKey(i.apikey))
-	indexResult, err := i.client.GetIndex(i.indexName)
+	indexResult, err := i.client.GetIndex(context.Background(), i.indexName)
 
 	if indexResult == nil || err != nil {
-		_, err = i.client.CreateIndex(&meilisearch.IndexConfig{
+		_, err = i.client.CreateIndex(context.Background(), &meilisearch.IndexConfig{
 			Uid:        i.indexName,
 			PrimaryKey: "GistID",
 		})
@@ -62,7 +63,7 @@ func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
 		}
 	}
 
-	_, _ = i.client.Index(i.indexName).UpdateSettings(&meilisearch.Settings{
+	_, _ = i.client.Index(i.indexName).UpdateSettings(context.Background(), &meilisearch.Settings{
 		FilterableAttributes: []string{"GistID", "UserID", "Visibility", "Username", "Extensions", "Languages", "Topics"},
 		SearchableAttributes: []string{"Content", "ContentSplit", "Username", "Title", "Description", "Filenames", "Extensions", "Languages", "Topics"},
 		RankingRules:         []string{"words", "typo", "proximity", "attribute", "sort", "exactness"},
@@ -78,11 +79,11 @@ func (i *MeiliIndexer) open() (meilisearch.IndexManager, error) {
 
 func (i *MeiliIndexer) Reset() error {
 	if i.client != nil {
-		taskInfo, err := i.client.DeleteIndex(i.indexName)
+		taskInfo, err := i.client.DeleteIndex(context.Background(), i.indexName)
 		if err != nil {
 			return fmt.Errorf("failed to delete Meilisearch index: %w", err)
 		}
-		_, err = i.client.WaitForTask(taskInfo.TaskUID, 0)
+		_, err = i.client.WaitForTask(context.Background(), taskInfo.TaskUID, 0)
 		if err != nil {
 			return fmt.Errorf("failed to wait for Meilisearch index deletion: %w", err)
 		}
@@ -113,12 +114,12 @@ func (i *MeiliIndexer) Add(gist *Gist) error {
 		ContentSplit: splitCamelCase(gist.Content),
 	}
 	primaryKey := "GistID"
-	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.AddDocuments(doc, &meilisearch.DocumentOptions{PrimaryKey: &primaryKey})
+	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.AddDocuments(context.Background(), doc, &meilisearch.DocumentOptions{PrimaryKey: &primaryKey})
 	return err
 }
 
 func (i *MeiliIndexer) Remove(gistID uint) error {
-	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.DeleteDocument(strconv.Itoa(int(gistID)), nil)
+	_, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.DeleteDocument(context.Background(), strconv.Itoa(int(gistID)), nil)
 	return err
 }
 
@@ -212,7 +213,7 @@ func (i *MeiliIndexer) Search(queryMetadata SearchGistMetadata, userId uint, pag
 		searchRequest.Filter = strings.Join(filters, " AND ")
 	}
 
-	response, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.Search(query, searchRequest)
+	response, err := (*atomicIndexer.Load()).(*MeiliIndexer).index.Search(context.Background(), query, searchRequest)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to search Meilisearch index")
 		return nil, 0, nil, err

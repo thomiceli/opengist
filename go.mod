@@ -1,25 +1,25 @@
 module github.com/thomiceli/opengist
 
-go 1.27.2
+go 1.27.4
 
 require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0
 	github.com/alecthomas/chroma/v2 v2.27.0
-	github.com/blevesearch/bleve/v2 v2.6.1
+	github.com/blevesearch/bleve/v2 v2.6.3
 	github.com/dustin/go-humanize v1.1.0
 	github.com/gabriel-vasile/mimetype v1.4.16
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-ldap/ldap/v3 v3.4.15
-	github.com/go-playground/validator/v10 v10.30.5
+	github.com/go-playground/validator/v10 v10.30.6
 	github.com/go-webauthn/webauthn v0.18.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/schema v1.4.1
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
 	github.com/labstack/echo-contrib v0.50.1
-	github.com/labstack/echo/v4 v4.16.0
+	github.com/labstack/echo/v4 v4.16.6
 	github.com/markbates/goth v1.82.0
-	github.com/meilisearch/meilisearch-go v0.36.3
+	github.com/meilisearch/meilisearch-go v0.37.0
 	github.com/oauth2-proxy/mockoidc v0.0.0-20240214162133-caebfff84d25
 	github.com/pquerna/otp v1.5.0
 	github.com/prometheus/client_golang v1.25.0
@@ -27,13 +27,13 @@ require (
 	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
 	github.com/urfave/cli/v2 v2.27.7
-	github.com/yuin/goldmark v1.8.6
+	github.com/yuin/goldmark v1.8.7
 	github.com/yuin/goldmark-emoji v1.0.6
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	go.abhg.dev/goldmark/mermaid v0.6.0
-	golang.org/x/crypto v0.58.0
-	golang.org/x/net v0.61.0
-	golang.org/x/oauth2 v0.37.0
+	golang.org/x/crypto v0.59.0
+	golang.org/x/net v0.63.0
+	golang.org/x/oauth2 v0.38.0
 	golang.org/x/text v0.44.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.6.0
@@ -45,50 +45,50 @@ require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ntlmssp v0.1.1 // indirect
 	github.com/RoaringBitmap/roaring/v2 v2.30.0 // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
+	github.com/andybalholm/brotli v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bits-and-blooms/bitset v1.26.0 // indirect
+	github.com/bits-and-blooms/bitset v1.30.0 // indirect
 	github.com/blevesearch/bleve_index_api v1.4.1 // indirect
-	github.com/blevesearch/geo v0.2.6 // indirect
+	github.com/blevesearch/geo v0.2.8 // indirect
 	github.com/blevesearch/go-faiss v1.1.5 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
 	github.com/blevesearch/gtreap v0.1.1 // indirect
 	github.com/blevesearch/mmap-go v1.2.0 // indirect
-	github.com/blevesearch/scorch_segment_api/v2 v2.4.10 // indirect
+	github.com/blevesearch/scorch_segment_api/v2 v2.4.11 // indirect
 	github.com/blevesearch/segment v0.9.1 // indirect
 	github.com/blevesearch/snowballstem v0.9.0 // indirect
 	github.com/blevesearch/upsidedown_store_api v1.0.2 // indirect
-	github.com/blevesearch/vellum v1.2.0 // indirect
+	github.com/blevesearch/vellum v1.2.1 // indirect
 	github.com/blevesearch/zapx/v11 v11.4.3 // indirect
 	github.com/blevesearch/zapx/v12 v12.4.3 // indirect
 	github.com/blevesearch/zapx/v13 v13.4.3 // indirect
 	github.com/blevesearch/zapx/v14 v14.4.3 // indirect
 	github.com/blevesearch/zapx/v15 v15.4.3 // indirect
 	github.com/blevesearch/zapx/v16 v16.3.4 // indirect
-	github.com/blevesearch/zapx/v17 v17.2.3 // indirect
+	github.com/blevesearch/zapx/v17 v17.2.5 // indirect
 	github.com/boombuler/barcode v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
-	github.com/dlclark/regexp2/v2 v2.9.1 // indirect
-	github.com/fxamacker/cbor/v2 v2.9.6 // indirect
+	github.com/dlclark/regexp2/v2 v2.13.1 // indirect
+	github.com/fxamacker/cbor/v2 v2.10.0 // indirect
 	github.com/glebarez/go-sqlite v1.23.0 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.8 // indirect
 	github.com/go-chi/chi/v5 v5.5.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.5 // indirect
 	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
-	github.com/go-sql-driver/mysql v1.10.1 // indirect
+	github.com/go-sql-driver/mysql v1.10.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
-	github.com/go-webauthn/x v0.3.1 // indirect
+	github.com/go-webauthn/x v0.4.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/go-tpm v0.9.8 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.11.0 // indirect
-	github.com/jackc/puddle/v2 v2.2.3 // indirect
+	github.com/jackc/pgx/v5 v5.13.0 // indirect
+	github.com/jackc/puddle/v2 v2.2.4 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -103,10 +103,11 @@ require (
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/ncruces/go-strftime v1.1.0 // indirect
+	github.com/pandatix/go-abnf v0.5.5 // indirect
 	github.com/philhofer/fwd v1.2.1 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.72.1 // indirect
-	github.com/prometheus/procfs v0.22.0 // indirect
+	github.com/prometheus/common v0.74.0 // indirect
+	github.com/prometheus/procfs v0.23.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/tinylib/msgp v1.6.5 // indirect
@@ -115,15 +116,15 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xrash/smetrics v0.0.0-20261013231157-39c47d93efba // indirect
 	go.etcd.io/bbolt v1.5.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/sync v0.25.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/time v0.16.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
-	modernc.org/libc v1.79.0 // indirect
+	modernc.org/libc v1.82.6 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.12.1 // indirect
-	modernc.org/sqlite v1.60.1 // indirect
+	modernc.org/memory v1.13.0 // indirect
+	modernc.org/sqlite v1.62.0 // indirect
 )
 
 replace github.com/blevesearch/bleve_index_api v1.4.0 => github.com/blevesearch/bleve_index_api v1.3.12

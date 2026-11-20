@@ -7,7 +7,16 @@ import DOMPurify from 'dompurify';
 // whose JSON ends up injected into the page. Every fragment that reaches an
 // `innerHTML` sink must therefore be sanitized to prevent stored XSS (see the
 // security advisory describing the original markdown-cell / output sinks).
-const sanitize = (html: string): string => DOMPurify.sanitize(html);
+//
+// The page also runs htmx and _hyperscript, which act on attributes of the
+// markup they process (hx-*, data-hx-*, _, script, data-script). DOMPurify's
+// default config keeps data-* attributes, so drop them, and forbid the
+// _hyperscript ones explicitly. hx-* are not in DOMPurify's allowlist.
+const sanitize = (html: string): string =>
+  DOMPurify.sanitize(html, {
+    ALLOW_DATA_ATTR: false,
+    FORBID_ATTR: ['_', 'script', 'data-script'],
+  });
 
 // nbformat allows `source`/`text` fields to be either a string or an array of strings.
 const joinSource = (source: string | string[]): string => Array.isArray(source) ? source.join('') : source || '';
@@ -43,6 +52,10 @@ class IPynb {
   mount() {
     const parent = this.element.parentElement as HTMLElement;
     parent.removeChild(this.element);
+    // Keep the page out of htmx's history cache. On back/forward, htmx would
+    // otherwise swap this rendered markup back in and process it like server
+    // markup, instead of the notebook being rendered again from its JSON.
+    parent.setAttribute('hx-history', 'false');
     parent.innerHTML = this.cells
       .filter((cell: HTMLElement) => !!cell?.outerHTML)
       .map((cell: HTMLElement) => cell.outerHTML)

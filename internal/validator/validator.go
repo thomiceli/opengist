@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/thomiceli/opengist/internal/i18n"
@@ -21,6 +23,7 @@ func NewValidator() *OpengistValidator {
 	_ = v.RegisterValidation("alphanumdashorempty", validateAlphaNumDashOrEmpty)
 	_ = v.RegisterValidation("alphanumdashunder", validateAlphaNumDashUnder)
 	_ = v.RegisterValidation("alphanumdashunderorempty", validateAlphaNumDashUnderOrEmpty)
+	_ = v.RegisterValidation("ldapusername", validateLdapUsername)
 	_ = v.RegisterValidation("gisttopics", validateGistTopics)
 	_ = v.RegisterValidation("expirationdate", validateExpirationDate)
 	_ = v.RegisterValidation("themecolor", validateThemeColor)
@@ -101,6 +104,29 @@ func validateAlphaNumDashUnder(fl validator.FieldLevel) bool {
 
 func validateAlphaNumDashUnderOrEmpty(fl validator.FieldLevel) bool {
 	return regexp.MustCompile(`^$|^[a-zA-Z0-9-_]+$`).MatchString(fl.Field().String())
+}
+
+// validateLdapUsername accepts usernames coming from a directory, which can be e-mail
+// addresses or contain accents, and only refuses what is unsafe in a directory name or a URL.
+func validateLdapUsername(fl validator.FieldLevel) bool {
+	name := fl.Field().String()
+	// Path separators, a trailing dot as in "..", and colons (drives and streams on Windows)
+	// could refer to another directory, while "?", "#" and "%" would break URLs
+	if !utf8.ValidString(name) || strings.HasSuffix(name, ".") || strings.ContainsAny(name, `/\:?#%`) {
+		return false
+	}
+
+	// Whitespace, control and invisible characters are refused, and a letter or digit is required
+	hasLetterOrDigit := false
+	for _, r := range name {
+		if !unicode.IsGraphic(r) || unicode.IsSpace(r) {
+			return false
+		}
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			hasLetterOrDigit = true
+		}
+	}
+	return hasLetterOrDigit
 }
 
 func validateThemeColor(fl validator.FieldLevel) bool {

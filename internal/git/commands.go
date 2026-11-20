@@ -41,6 +41,12 @@ func UserRepositoriesPath(user string) string {
 	return filepath.Join(config.GetHomeDir(), ReposDirectory, strings.ToLower(user))
 }
 
+// IsValidDirectoryName reports whether name can be used as a single directory name:
+// it is not empty, not "." or ".." and contains no slash or backslash.
+func IsValidDirectoryName(name string) bool {
+	return name != "" && name != "." && name != ".." && !strings.ContainsAny(name, `/\`)
+}
+
 func RepositoryUrl(ctx echo.Context, user string, gist string) string {
 	httpProtocol := "http"
 	if ctx.Request().TLS != nil || ctx.Request().Header.Get("X-Forwarded-Proto") == "https" {
@@ -68,6 +74,9 @@ func TmpRepositoriesPath() string {
 }
 
 func InitRepository(user string, gist string) error {
+	if !IsValidDirectoryName(user) || !IsValidDirectoryName(gist) {
+		return fmt.Errorf("refusing to init repository with invalid user %q or gist %q", user, gist)
+	}
 	repositoryPath := RepositoryPath(user, gist)
 
 	var args []string
@@ -422,6 +431,9 @@ func DeleteTmpRepository(gistTmpId string) error {
 }
 
 func ForkClone(userSrc string, gistSrc string, userDst string, gistDst string) error {
+	if !IsValidDirectoryName(userDst) || !IsValidDirectoryName(gistDst) {
+		return fmt.Errorf("refusing to fork repository to invalid user %q or gist %q", userDst, gistDst)
+	}
 	repositoryPathSrc := RepositoryPath(userSrc, gistSrc)
 	repositoryPathDst := RepositoryPath(userDst, gistDst)
 
@@ -533,8 +545,8 @@ func Push(gistTmpId string) error {
 }
 
 func DeleteRepository(user string, gist string) error {
-	if user == "" || gist == "" {
-		return fmt.Errorf("refusing to delete repository with empty user %q or gist %q", user, gist)
+	if !IsValidDirectoryName(user) || !IsValidDirectoryName(gist) {
+		return fmt.Errorf("refusing to delete repository with invalid user %q or gist %q", user, gist)
 	}
 	return os.RemoveAll(RepositoryPath(user, gist))
 }
@@ -669,11 +681,28 @@ func CreateDotGitFiles(user string, gist string) error {
 }
 
 func DeleteUserDirectory(user string) error {
-	// An empty user resolves to the repos directory holding every user's repositories
-	if user == "" {
-		return fmt.Errorf("refusing to delete user directory with empty user")
+	// An empty user resolves to the repos directory holding every user's repositories,
+	// and a user that is not a single directory name to another directory
+	if !IsValidDirectoryName(user) {
+		return fmt.Errorf("refusing to delete user directory with invalid user %q", user)
 	}
-	return os.RemoveAll(filepath.Join(config.GetHomeDir(), ReposDirectory, user))
+	return os.RemoveAll(UserRepositoriesPath(user))
+}
+
+// RenameUserDirectory moves the repositories directory of a user to the one of their new username.
+func RenameUserDirectory(user string, newUser string) error {
+	if !IsValidDirectoryName(user) || !IsValidDirectoryName(newUser) {
+		return fmt.Errorf("refusing to rename user directory with invalid user %q or %q", user, newUser)
+	}
+
+	sourceDir := UserRepositoriesPath(user)
+	destinationDir := UserRepositoriesPath(newUser)
+	if sourceDir != destinationDir {
+		if _, err := os.Stat(sourceDir); !os.IsNotExist(err) {
+			return os.Rename(sourceDir, destinationDir)
+		}
+	}
+	return nil
 }
 
 func createDotGitHookFile(repositoryPath string, hook string, content string) error {

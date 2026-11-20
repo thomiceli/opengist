@@ -19,8 +19,19 @@ func bindService(l *ldap.Conn) error {
 	return l.Bind(config.C.LDAPBindDn, config.C.LDAPBindCredentials)
 }
 
+// searchFilter returns the configured search filter for the username, escaped so
+// that it is matched as a literal value.
+func searchFilter(username string) string {
+	return fmt.Sprintf(config.C.LDAPSearchFilter, ldap.EscapeFilter(username))
+}
+
 // Authenticate attempts to authenticate a user against the configured LDAP instance.
 func Authenticate(username, password string) (bool, error) {
+	// A bind with an empty password is an unauthenticated bind, which some servers accept
+	if password == "" {
+		return false, nil
+	}
+
 	l, err := ldap.DialURL(config.C.LDAPUrl)
 	if err != nil {
 		return false, fmt.Errorf("unable to connect to URI: %v", config.C.LDAPUrl)
@@ -35,7 +46,6 @@ func Authenticate(username, password string) (bool, error) {
 		return false, err
 	}
 
-	searchFilter := fmt.Sprintf(config.C.LDAPSearchFilter, username)
 	searchRequest := ldap.NewSearchRequest(
 		config.C.LDAPSearchBase,
 		ldap.ScopeWholeSubtree,
@@ -43,7 +53,7 @@ func Authenticate(username, password string) (bool, error) {
 		0,
 		0,
 		false,
-		searchFilter,
+		searchFilter(username),
 		[]string{"dn"},
 		nil,
 	)

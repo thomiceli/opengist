@@ -341,8 +341,7 @@ func locale(next Handler) Handler {
 
 		// 3.Then check from 'Accept-Language' header.
 		if len(lang) == 0 {
-			tags, _, _ := language.ParseAcceptLanguage(ctx.Request().Header.Get("Accept-Language"))
-			lang = i18n.Locales.MatchTag(tags)
+			lang = i18n.Locales.MatchTag(i18n.ParseAcceptLanguage(ctx.Request().Header.Get("Accept-Language")))
 		}
 
 		if changeLang {

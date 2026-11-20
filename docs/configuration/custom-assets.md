@@ -30,6 +30,23 @@ custom.favicon: favicon.png
 export OG_CUSTOM_FAVICON=favicon.png
 ```
 
+### Stylesheet
+
+To add a custom stylesheet providing CSS overrides, you can add your `.css` file to the `$opengist-home/custom` directory, then define the relative path in the config.
+The custom stylesheet is loaded last and is not preprocessed.
+
+For example, if you have a stylesheet `overrides.css` in the `$opengist-home/custom` directory, you can set the stylesheet path in the config as follows:
+
+#### YAML
+```yaml
+custom.css: overrides.css
+```
+
+#### Environment variable
+```sh
+export OG_CUSTOM_CSS=overrides.css
+```
+
 ### Instance Name
 
 It is also possible to set a name for your instance, that would be displayed in the title bar instead of 'Opengist'.

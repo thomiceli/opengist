@@ -14,6 +14,8 @@ import (
 // authOrFail authenticates the given credentials. The credential is tried as a
 // password (DB or LDAP) first, then as an access token with the required scope
 // and permission — this lets SSO/passwordless users authenticate over Git HTTP.
+// A password alone is refused for users with MFA enabled (TOTP or passkey), as
+// it is only one factor: they must use an access token instead.
 // On success it returns the user. On failure it writes the appropriate HTTP
 // response and returns a nil user, so callers stop with:
 //
@@ -27,6 +29,14 @@ import (
 func authOrFail(ctx *context.Context, username, password string, scope, permission uint, invalidCode int, invalidMsg string) (*db.User, error) {
 	user, err := auth.TryAuthentication(username, password)
 	if err == nil {
+		var hasWebauthn, hasTotp bool
+		if hasWebauthn, hasTotp, err = user.HasMFA(); err != nil {
+			return nil, ctx.ErrorRes(500, "Cannot check for user MFA", err)
+		}
+		if hasWebauthn || hasTotp {
+			log.Warn().Str("user", user.Username).Msg("Password authentication refused for a user with MFA from " + ctx.RealIP())
+			return nil, ctx.PlainText(401, ctx.Tr("error.git-mfa-use-token"))
+		}
 		return user, nil
 	}
 

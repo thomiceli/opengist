@@ -4,7 +4,7 @@ After running Opengist at least once, you can import your Gists from GitHub usin
 
 ```shell
 github_user=user # replace with your GitHub username
-opengist_url="http://user:password@opengist.url/init" # replace user, password and Opengist url
+opengist_url="http://user:password@opengist.url/init" # replace user, password (an access token if MFA is enabled) and Opengist url
 
 curl -s https://api.github.com/users/"$github_user"/gists?per_page=100 | jq '.[] | .git_pull_url' -r | while read url; do 
     git clone "$url"

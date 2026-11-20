@@ -324,6 +324,7 @@ error.cannot-bind-data: Cannot bind data
 error.invalid-number: Invalid number
 error.invalid-character-unescaped: Invalid character unescaped
 error.not-in-mfa-session: User is not in a MFA session
+error.git-mfa-use-token: Multi-factor authentication is enabled for this account. Use an access token instead of your password.
 error.no-file-uploaded: No file uploaded
 error.file-upload-disabled: File upload is disabled
 error.cannot-open-file: Cannot open uploaded file

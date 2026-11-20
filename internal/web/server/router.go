@@ -238,7 +238,7 @@ func (s *Server) registerRoutes() {
 
 		// if the custom file is an .html template, render it
 		if strings.HasSuffix(ctx.Param("*"), ".html") {
-			if err := ctx.Html(ctx.Param("*")); err != nil {
+			if err := ctx.Html(customPagePrefix + ctx.Param("*")); err != nil {
 				return ctx.NotFound("Page not found")
 			}
 			return nil

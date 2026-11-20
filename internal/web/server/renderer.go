@@ -33,9 +33,22 @@ type Template struct {
 	// pages holds layout-based templates, keyed by file name (e.g. "all.html").
 	// Each entry is a clone of the base layout with that page's "content" block parsed in.
 	pages map[string]*template.Template
+	// customPages holds the file names of the templates parsed from $OPENGIST_HOME/custom.
+	customPages map[string]bool
 }
 
+// customPagePrefix marks a template name passed to Render as a file from
+// $OPENGIST_HOME/custom (e.g. "custom/legal.html"). Such a name only resolves to
+// that file, never to a built-in page, layout or partial.
+const customPagePrefix = "custom/"
+
 func (t *Template) Render(w io.Writer, name string, data interface{}, _ echo.Context) error {
+	if customName, ok := strings.CutPrefix(name, customPagePrefix); ok {
+		if !t.customPages[customName] {
+			return fmt.Errorf("custom template %q not found", customName)
+		}
+		return t.templates.ExecuteTemplate(w, customName, data)
+	}
 	if tmpl, ok := t.pages[name]; ok {
 		return tmpl.ExecuteTemplate(w, "base", data)
 	}
@@ -254,16 +267,21 @@ func (s *Server) setFuncMap() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to check for custom templates")
 	}
+	customPages := make(map[string]bool, len(matches))
 	if len(matches) > 0 {
-		customTemplates, err = customTemplates.ParseGlob(customPattern)
+		customTemplates, err = customTemplates.ParseFiles(matches...)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to parse custom templates")
+		}
+		for _, m := range matches {
+			customPages[filepath.Base(m)] = true
 		}
 	}
 
 	s.echo.Renderer = &Template{
-		templates: customTemplates,
-		pages:     pages,
+		templates:   customTemplates,
+		pages:       pages,
+		customPages: customPages,
 	}
 }
 

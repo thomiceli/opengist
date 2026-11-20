@@ -25,6 +25,9 @@ OG_CUSTOM_STATIC_LINK_1_PATH=https://gitea.com \
 ./opengist
 ```
 
+> [!Note]
+> Like the other files in the `$opengist-home/custom` directory, custom pages can be viewed without logging in, even when the "Require login" setting is enabled.
+
 ## Templating custom HTML pages
 
 In the start and end of the custom HTML files, you can use the syntax to include the header and footer of the Opengist instance:

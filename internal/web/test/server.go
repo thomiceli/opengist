@@ -293,18 +293,26 @@ func Setup(t *testing.T) *Server {
 	s := &Server{
 		server: server.NewServer(true),
 	}
-
-	s.server.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			err := next(c)
-			if data, ok := c.Request().Context().Value(context.DataKeyStr).(echo.Map); ok {
-				s.setContextData(data)
-			}
-			return err
-		}
-	})
+	s.server.Use(s.captureContextData)
 
 	return s
+}
+
+// Restart recreates the server, as restarting Opengist does. Templates added to
+// $OPENGIST_HOME/custom after Setup are only parsed then.
+func (s *Server) Restart() {
+	s.server = server.NewServer(true)
+	s.server.Use(s.captureContextData)
+}
+
+func (s *Server) captureContextData(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		err := next(c)
+		if data, ok := c.Request().Context().Value(context.DataKeyStr).(echo.Map); ok {
+			s.setContextData(data)
+		}
+		return err
+	}
 }
 
 func Teardown(t *testing.T) {

@@ -71,6 +71,12 @@ securityContext: {}
   # runAsNonRoot: true
   # allowPrivilegeEscalation: false
   # readOnlyRootFilesystem: true
+initContainerSecurityContext: {}
+  # runAsUser: 1000
+  # runAsGroup: 1000
+  # runAsNonRoot: true
+  # allowPrivilegeEscalation: false
+  # readOnlyRootFilesystem: true
 
 ## Pod Disruption Budget settings
 ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/

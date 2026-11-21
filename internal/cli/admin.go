@@ -26,10 +26,11 @@ func cliError(format string, a ...any) error {
 }
 
 func initialize(ctx *cli.Context) {
-	if err := config.InitConfig(ctx.String("config"), io.Discard); err != nil {
+	if err := config.InitConfig(ctx.String("config")); err != nil {
 		panic(err)
 	}
 	config.InitLog()
+	config.FlushStartupLog()
 
 	db.DeprecationDBFilename()
 	if err := db.Setup(config.C.DBUri); err != nil {

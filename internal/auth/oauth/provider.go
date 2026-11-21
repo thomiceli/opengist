@@ -105,6 +105,33 @@ func urlJoin(base string, elem ...string) string {
 	return joined
 }
 
+func normalizeProviderAvatarURL(avatarURL string) string {
+	avatarURL = strings.TrimSpace(avatarURL)
+	if avatarURL == "" {
+		return ""
+	}
+
+	if strings.HasPrefix(avatarURL, "//") {
+		return "https:" + avatarURL
+	}
+
+	parsed, err := url.Parse(avatarURL)
+	if err != nil || parsed.Scheme != "" {
+		return avatarURL
+	}
+
+	if strings.HasPrefix(avatarURL, "/") {
+		return avatarURL
+	}
+
+	host, _, found := strings.Cut(avatarURL, "/")
+	if found && strings.Contains(host, ".") {
+		return "https://" + avatarURL
+	}
+
+	return avatarURL
+}
+
 func readKeys(response *http.Response) ([]string, error) {
 	body, err := io.ReadAll(response.Body)
 	if err != nil {

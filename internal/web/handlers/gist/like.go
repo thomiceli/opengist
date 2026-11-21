@@ -45,6 +45,9 @@ func Likes(ctx *context.Context) error {
 	if err = handlers.Paginate(ctx, likers, pageInt, 30, "likers", gist.User.Username+"/"+gist.Identifier()+"/likes", 1, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
+	if err = loadSidebarFiles(ctx, gist); err != nil {
+		return err
+	}
 
 	ctx.SetData("page", "likes")
 	ctx.SetData("htmlTitle", ctx.TrH("gist.likes.for", gist.Title))

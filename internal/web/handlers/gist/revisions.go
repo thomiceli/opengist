@@ -21,6 +21,9 @@ func Revisions(ctx *context.Context) error {
 	if err := handlers.Paginate(ctx, commits, pageInt, 10, "commits", userName+"/"+gistName+"/revisions", 2, nil); err != nil {
 		return ctx.ErrorRes(404, ctx.Tr("error.page-not-found"), nil)
 	}
+	if err := loadSidebarFiles(ctx, gist); err != nil {
+		return err
+	}
 
 	ctx.SetData("page", "revisions")
 	ctx.SetData("revision", "HEAD")

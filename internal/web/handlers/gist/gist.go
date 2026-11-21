@@ -39,6 +39,10 @@ func GistIndex(ctx *context.Context) error {
 	}
 
 	renderedFiles := render.RenderFiles(files)
+	sidebarFiles := make([]string, 0, len(files))
+	for _, file := range files {
+		sidebarFiles = append(sidebarFiles, file.Filename)
+	}
 
 	if !config.C.DisableComments {
 		// One more than shown, to know if there are older ones on the comments page
@@ -56,6 +60,7 @@ func GistIndex(ctx *context.Context) error {
 	ctx.SetData("page", "code")
 	ctx.SetData("commit", revision)
 	ctx.SetData("files", renderedFiles)
+	setSidebarFiles(ctx, sidebarFiles)
 	ctx.SetData("hasMoreFiles", hasMoreFiles)
 	ctx.SetData("revision", revision)
 	ctx.SetData("htmlTitle", gist.Title)

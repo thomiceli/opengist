@@ -234,6 +234,126 @@ func TestOIDCLoginPKCE(t *testing.T) {
 		require.Equal(t, uint(1), updatedInvitation.NbUsed)
 	})
 
+	t.Run("error redirects keep ExternalUrl subpath", func(t *testing.T) {
+		prevExternalURL := config.C.ExternalUrl
+		config.C.ExternalUrl = base + "/subpath"
+		t.Cleanup(func() { config.C.ExternalUrl = prevExternalURL })
+
+		client := &http.Client{
+			CheckRedirect: func(*http.Request, []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
+
+		// Unsupported provider redirect from Oauth handler.
+		resp, err := client.Get(base + "/oauth/nonexistent")
+		require.NoError(t, err)
+		_ = resp.Body.Close()
+		require.Equal(t, http.StatusFound, resp.StatusCode)
+		require.Equal(t, config.C.ExternalUrl+"/-/login", resp.Header.Get("Location"))
+
+		// Callback error redirect from OauthCallback handler.
+		resp, err = client.Get(base + "/oauth/openid-connect/callback")
+		require.NoError(t, err)
+		_ = resp.Body.Close()
+		require.Equal(t, http.StatusFound, resp.StatusCode)
+		require.Equal(t, config.C.ExternalUrl+"/-/login", resp.Header.Get("Location"))
+
+		// Disabled signup rejection from allowOauthSignup during callback.
+		require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "1"))
+		t.Cleanup(func() { _ = db.UpdateSetting(db.SettingDisableSignup, "0") })
+
+		m.QueueUser(&oidcUser{MockUser: &mockoidc.MockUser{
+			Subject:           t.Name() + "-subpath",
+			Email:             "subpath@example.com",
+			PreferredUsername: "subpath",
+			EmailVerified:     true,
+		}})
+		jar, err := cookiejar.New(nil)
+		require.NoError(t, err)
+
+		var lastRedirect string
+		proxyClient := &http.Client{
+			Jar: jar,
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				if strings.HasPrefix(req.URL.String(), config.C.ExternalUrl) {
+					lastRedirect = req.URL.String()
+					// Strip /subpath like a reverse proxy when routing back to the test server.
+					req.URL.Path = strings.TrimPrefix(req.URL.Path, "/subpath")
+					if req.URL.Path == "" {
+						req.URL.Path = "/"
+					}
+				}
+				if len(via) >= 15 {
+					return http.ErrUseLastResponse
+				}
+				return nil
+			},
+		}
+		resp, err = proxyClient.Get(base + "/oauth/openid-connect")
+		require.NoError(t, err)
+		_ = resp.Body.Close()
+		require.Equal(t, config.C.ExternalUrl+"/-/login", lastRedirect)
+		require.Equal(t, "/-/login", resp.Request.URL.Path)
+
+		// Full OAuth registration under ExternalUrl subpath must redirect to /subpath/ and keep the session.
+		require.NoError(t, db.UpdateSetting(db.SettingDisableSignup, "0"))
+		m.QueueUser(&oidcUser{MockUser: &mockoidc.MockUser{
+			Subject:           t.Name() + "-subpath-reg",
+			Email:             "subreg@example.com",
+			PreferredUsername: "subreg",
+			EmailVerified:     true,
+		}})
+		regJar, err := cookiejar.New(nil)
+		require.NoError(t, err)
+		var redirects []string
+		regClient := &http.Client{
+			Jar: regJar,
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				if !strings.HasPrefix(req.URL.String(), m.AuthorizationEndpoint()) {
+					redirects = append(redirects, req.URL.String())
+					require.True(t, strings.HasPrefix(req.URL.String(), config.C.ExternalUrl), "redirect %q lost ExternalUrl subpath", req.URL.String())
+					req.URL.Path = strings.TrimPrefix(req.URL.Path, "/subpath")
+					if req.URL.Path == "" {
+						req.URL.Path = "/"
+					}
+				}
+				if len(via) >= 15 {
+					return http.ErrUseLastResponse
+				}
+				return nil
+			},
+		}
+		resp, err = regClient.Get(base + "/oauth/openid-connect")
+		require.NoError(t, err)
+		_ = resp.Body.Close()
+		require.Equal(t, "/oauth/register", resp.Request.URL.Path)
+
+		baseURL, err := url.Parse(base)
+		require.NoError(t, err)
+		var csrfToken string
+		for _, cookie := range regClient.Jar.Cookies(baseURL) {
+			if cookie.Name == "_csrf" {
+				csrfToken = cookie.Value
+			}
+		}
+		require.NotEmpty(t, csrfToken)
+
+		regResp, err := regClient.PostForm(base+"/oauth/register", url.Values{
+			"_csrf":    {csrfToken},
+			"username": {"subreg"},
+			"email":    {"subreg@example.com"},
+		})
+		require.NoError(t, err)
+		_ = regResp.Body.Close()
+		require.Equal(t, http.StatusOK, regResp.StatusCode)
+		require.Equal(t, "/", regResp.Request.URL.Path)
+		require.Contains(t, redirects, config.C.ExternalUrl+"/")
+		createdUser, err := db.GetUserByUsername("subreg")
+		require.NoError(t, err)
+		require.Equal(t, t.Name()+"-subpath-reg", createdUser.OIDCID)
+	})
+
 	// A user who is still logged in and signs in through the provider again
 	// reaches the callback with a session, which is the same path used to link a
 	// new account. The identity it finds is their own, and that must not be

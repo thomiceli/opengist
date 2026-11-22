@@ -33,7 +33,7 @@ func allowOauthSignup(ctx *context.Context) (*db.Invitation, bool, error) {
 
 	if ctx.GetData("DisableSignup") == true {
 		ctx.AddFlash(ctx.Tr("error.signup-disabled"), "error")
-		return nil, false, ctx.Redirect(302, "/-/login")
+		return nil, false, ctx.RedirectTo("/-/login")
 	}
 	return nil, true, nil
 }
@@ -70,7 +70,7 @@ func Oauth(ctx *context.Context) error {
 	provider, err := oauth.DefineProvider(providerStr, opengistUrl)
 	if err != nil {
 		ctx.AddFlash(ctx.Tr("error.oauth-unsupported"), "error")
-		return ctx.Redirect(302, "/-/login")
+		return ctx.RedirectTo("/-/login")
 	}
 
 	if err = provider.RegisterProvider(); err != nil {
@@ -85,7 +85,7 @@ func OauthCallback(ctx *context.Context) error {
 	provider, err := oauth.CompleteUserAuth(ctx)
 	if err != nil {
 		ctx.AddFlash(fmt.Sprintf("%s: %s", ctx.Tr("auth.oauth.no-provider"), err.Error()), "error")
-		return ctx.Redirect(302, "/-/login")
+		return ctx.RedirectTo("/-/login")
 	}
 
 	currUser := ctx.User
